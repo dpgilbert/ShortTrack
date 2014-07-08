@@ -50,6 +50,7 @@ class babyMaker {
   Int_t           nVert;
   Int_t           nTrueInt;
   Float_t         rho;
+  Float_t         rho25;
 
   Int_t           nJet40;
   Int_t           nBJet40;
@@ -187,6 +188,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("nVert", &nVert );
   BabyTree_->Branch("nTrueInt", &nTrueInt );
   BabyTree_->Branch("rho", &rho );
+  BabyTree_->Branch("rho25", &rho25 );
   BabyTree_->Branch("nJet40", &nJet40 );
   BabyTree_->Branch("nBJet40", &nBJet40 );
   BabyTree_->Branch("nMuons10", &nMuons10 );
@@ -296,6 +298,7 @@ void babyMaker::InitBabyNtuple () {
   nVert = -999;
   nTrueInt = -999;
   rho = -999.0;
+  rho25 = -999.0;
   nJet40 = -999;
   nBJet40 = -999;
   nMuons10 = -999;

@@ -64,11 +64,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       isData = cms2.evt_isRealData();
 
       //crossSection = ;
-      //puWeight = ;
+      puWeight = 1.;
       nVert = cms2.evt_nvtxs();
-      //nTrueInt = ;
-      //rho = ;
-
+      nTrueInt = cms2.puInfo_trueNumInteractions().at(0);
+      rho = cms2.evt_fixgrid_all_rho(); // evt_fixgrid_all_rho() comes from miniAOD, while evt_fixgrid_rho_all() is calculated by the PFCandidateMaker. They are be identical.
+      //rho25 = ;
+      
       met_pt  = cms2.evt_pfmet();
       met_phi = cms2.evt_pfmetPhi();
 
@@ -88,11 +89,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         lep_pdgId[nlep] = (-11)*cms2.els_charge().at(iEl);
         lep_dxy[nlep] = cms2.els_dxyPV().at(iEl);
         lep_dz[nlep] = cms2.els_dzPV().at(iEl);
-        //lep_tightId[nlep] = ;
-        //lep_relIso03[nlep] = ;
+        lep_tightId[nlep] = eleTightID(iEl);
+        lep_relIso03[nlep] =  eleRelIso03(iEl);
         //lep_relIso04[nlep] = ;
         //lep_mcMatchId[nlep] = ;
-        //lep_lostHits[nlep] = cms2.els_lostHits().at(iEl);
+        lep_lostHits[nlep] = cms2.els_lost_pixelhits().at(iEl);
         lep_convVeto[nlep] = cms2.els_conv_vtx_flag().at(iEl);
         lep_tightCharge[nlep] = threeChargeAgree(iEl);
 
@@ -111,9 +112,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         lep_mass[nlep] = cms2.mus_p4().at(iMu).mass();
         lep_charge[nlep] = cms2.mus_charge().at(iMu);
         lep_pdgId[nlep] = (-13)*cms2.mus_charge().at(iMu);
-        lep_dxy[nlep] = cms2.mus_dxyPV().at(iMu);
-        lep_dz[nlep] = cms2.mus_dzPV().at(iMu);
-        //lep_tightId[nlep] = ;
+        lep_dxy[nlep] = cms2.mus_dxyPV().at(iMu); // this uses the silicon track. should we use best track instead?
+        lep_dz[nlep] = cms2.mus_dzPV().at(iMu); // this uses the silicon track. should we use best track instead?
+        lep_tightId[nlep] = muTightID(iMu);
         lep_relIso03[nlep] = muRelIso03(iMu);
         lep_relIso04[nlep] = muRelIso04(iMu);
         //lep_mcMatchId[nlep] = ;
@@ -153,12 +154,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         Jet_phi[nJet]  = cms2.pfjets_p4().at(iJet).phi();
         Jet_mass[nJet] = cms2.pfjets_p4().at(iJet).mass();
         Jet_btagCSV[nJet] = cms2.pfjets_combinedSecondaryVertexBJetTag().at(iJet); 
-        //Jet_mcPt
-        //Jet_mcFlavour
+        //Jet_mcPt: // need to add jet->genJet() to CMS3
+        Jet_mcFlavour[nJet] = cms2.pfjets_partonFlavour().at(iJet); //partonFlavour() is the "new" definition starting from 7_0_5_patch1, according to: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#New_jet_flavour_in_PAT
         //Jet_quarkGluonID
         Jet_area[nJet] = cms2.pfjets_area().at(iJet);
-        //Jet_id
-        //Jet_puId[nJet] = cms2.pfjets_pileupJetId().at(iJet); //need to use puId for CHS Jets in NtupleMaker
+        //Jet_id // need to add jet->jetID() to CMS3 and just use that
+        Jet_puId[nJet] = cms2.pfjets_pileupJetId().at(iJet); //need to use puId for CHS Jets in NtupleMaker //GZ: this is the puID associated to the miniAOD jets. why don't you like it?
 
         if( (Jet_pt[nJet] > 40.0) && (fabs(Jet_eta[nJet]) < 2.5) ){ 
           goodJets.push_back(cms2.pfjets_p4().at(iJet));
@@ -250,6 +251,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         genPart_pdgId[ngenPart] = cms2.genps_id().at(iGen);
         //genPart_charge[ngenPart] = ;
         genPart_motherId[ngenPart] = cms2.genps_id_mother().at(iGen);
+        //genPart_grandmaId[ngenPart] = ;
 
         ngenPart++;
       }

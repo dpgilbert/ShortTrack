@@ -37,7 +37,7 @@ bool isVetoElectron(unsigned int elIdx){
     if(cms2.els_hOverE().at(elIdx) >= 0.15) return false; 
     if(fabs(cms2.els_dxyPV().at(elIdx)) >= 0.04) return false; //is this wrt the correct PV?
     if(fabs(cms2.els_dzPV().at(elIdx)) >= 0.2) return false; //is this wrt the correct PV?
-    // if(reliso >= 0.15) return false; //still need to implement this
+    if(eleRelIso03(elIdx) >= 0.15) return false; 
     return true;
 
   } else if((fabs(cms2.els_etaSC().at(elIdx)) > 1.479) && (fabs(cms2.els_etaSC().at(elIdx)) < 2.5)){
@@ -46,7 +46,7 @@ bool isVetoElectron(unsigned int elIdx){
     if(cms2.els_sigmaIEtaIEta().at(elIdx) >= 0.03) return false; 
     if(fabs(cms2.els_dxyPV().at(elIdx)) >= 0.04) return false; //is this wrt the correct PV?
     if(fabs(cms2.els_dzPV().at(elIdx)) >= 0.2) return false; //is this wrt the correct PV?
-    // if(reliso >= 0.15) return false; //still need to implement this
+    if( eleRelIso03(elIdx) >= 0.15) return false; 
     return true;
 
   } else return false;
@@ -63,9 +63,9 @@ bool isLooseElectron(unsigned int elIdx){
     if(fabs(cms2.els_dxyPV().at(elIdx)) >= 0.02) return false; //is this wrt the correct PV?
     if(fabs(cms2.els_dzPV().at(elIdx)) >= 0.2) return false; //is this wrt the correct PV?
     if( fabs( (1.0/cms2.els_ecalEnergy().at(elIdx)) - (cms2.els_eOverPIn().at(elIdx)/cms2.els_ecalEnergy().at(elIdx)) ) >= 0.05) return false; // |1/E - 1/p|
-    // if(reliso >= 0.15) return false; //still need to implement this
-    //Conversion rejection: vertex fit probability 1e-6 //need to add
-    //Conversion rejection: missing hits 1 //need to add
+    if( eleRelIso03(elIdx) >= 0.15) return false; 
+    if( cms2.els_conv_vtx_flag().at(elIdx)) return false;
+    if( cms2.els_lost_pixelhits().at(elIdx) > 1) return false;
     return true;
 
   } else if((fabs(cms2.els_etaSC().at(elIdx)) > 1.479) && (fabs(cms2.els_etaSC().at(elIdx)) < 2.5)){
@@ -76,9 +76,9 @@ bool isLooseElectron(unsigned int elIdx){
     if(fabs(cms2.els_dxyPV().at(elIdx)) >= 0.02) return false; //is this wrt the correct PV?
     if(fabs(cms2.els_dzPV().at(elIdx)) >= 0.2) return false; //is this wrt the correct PV?
     if( fabs( (1.0/cms2.els_ecalEnergy().at(elIdx)) - (cms2.els_eOverPIn().at(elIdx)/cms2.els_ecalEnergy().at(elIdx)) ) >= 0.05) return false; // |1/E - 1/p|
-    // if(reliso >= 0.15) return false; //still need to implement this
-    //Conversion rejection: vertex fit probability 1e-6 //need to add
-    //Conversion rejection: missing hits 1 //need to add
+    if( eleRelIso03(elIdx) >= 0.15 || (eleRelIso03(elIdx) >= 0.1 && cms2.els_p4().at(elIdx).pt() < 20) ) return false; 
+    if( cms2.els_conv_vtx_flag().at(elIdx)) return false;
+    if( cms2.els_lost_pixelhits().at(elIdx) > 1) return false;
     return true;
 
   } else return false;
@@ -95,9 +95,9 @@ bool isMediumElectron(unsigned int elIdx){
     if(fabs(cms2.els_dxyPV().at(elIdx)) >= 0.02) return false; //is this wrt the correct PV?
     if(fabs(cms2.els_dzPV().at(elIdx)) >= 0.1) return false; //is this wrt the correct PV?
     if( fabs( (1.0/cms2.els_ecalEnergy().at(elIdx)) - (cms2.els_eOverPIn().at(elIdx)/cms2.els_ecalEnergy().at(elIdx)) ) >= 0.05) return false; // |1/E - 1/p|
-    // if(reliso >= 0.15) return false; //still need to implement this
-    //Conversion rejection: vertex fit probability 1e-6 //need to add
-    //Conversion rejection: missing hits 1 //need to add
+    if( eleRelIso03(elIdx) >= 0.15) return false; 
+    if( cms2.els_conv_vtx_flag().at(elIdx)) return false;
+    if( cms2.els_lost_pixelhits().at(elIdx) > 1) return false;
     return true;
 
   } else if((fabs(cms2.els_etaSC().at(elIdx)) > 1.479) && (fabs(cms2.els_etaSC().at(elIdx)) < 2.5)){
@@ -108,9 +108,9 @@ bool isMediumElectron(unsigned int elIdx){
     if(fabs(cms2.els_dxyPV().at(elIdx)) >= 0.02) return false; //is this wrt the correct PV?
     if(fabs(cms2.els_dzPV().at(elIdx)) >= 0.1) return false; //is this wrt the correct PV?
     if( fabs( (1.0/cms2.els_ecalEnergy().at(elIdx)) - (cms2.els_eOverPIn().at(elIdx)/cms2.els_ecalEnergy().at(elIdx)) ) >= 0.05) return false; // |1/E - 1/p|
-    // if(reliso >= 0.15) return false; //still need to implement this
-    //Conversion rejection: vertex fit probability 1e-6 //need to add
-    //Conversion rejection: missing hits 1 //need to add
+    if( eleRelIso03(elIdx) >= 0.15 || (eleRelIso03(elIdx) >= 0.1 && cms2.els_p4().at(elIdx).pt() < 20) ) return false; 
+    if( cms2.els_conv_vtx_flag().at(elIdx)) return false;
+    if( cms2.els_lost_pixelhits().at(elIdx) > 1) return false;
     return true;
 
   } else return false;
@@ -127,9 +127,9 @@ bool isTightElectron(unsigned int elIdx){
     if(fabs(cms2.els_dxyPV().at(elIdx)) >= 0.02) return false; //is this wrt the correct PV?
     if(fabs(cms2.els_dzPV().at(elIdx)) >= 0.1) return false; //is this wrt the correct PV?
     if( fabs( (1.0/cms2.els_ecalEnergy().at(elIdx)) - (cms2.els_eOverPIn().at(elIdx)/cms2.els_ecalEnergy().at(elIdx)) ) >= 0.05) return false; // |1/E - 1/p|
-    // if(reliso >= 0.10) return false; //still need to implement this
-    //Conversion rejection: vertex fit probability 1e-6 //need to add
-    //Conversion rejection: missing hits 0 //need to add
+    if( eleRelIso03(elIdx) >= 0.1) return false; 
+    if( cms2.els_conv_vtx_flag().at(elIdx)) return false;
+    if( cms2.els_lost_pixelhits().at(elIdx) > 0) return false;
     return true;
 
   } else if((fabs(cms2.els_etaSC().at(elIdx)) > 1.479) && (fabs(cms2.els_etaSC().at(elIdx)) < 2.5)){
@@ -140,9 +140,9 @@ bool isTightElectron(unsigned int elIdx){
     if(fabs(cms2.els_dxyPV().at(elIdx)) >= 0.02) return false; //is this wrt the correct PV?
     if(fabs(cms2.els_dzPV().at(elIdx)) >= 0.1) return false; //is this wrt the correct PV?
     if( fabs( (1.0/cms2.els_ecalEnergy().at(elIdx)) - (cms2.els_eOverPIn().at(elIdx)/cms2.els_ecalEnergy().at(elIdx)) ) >= 0.05) return false; // |1/E - 1/p|
-    // if(reliso >= 0.10) return false; //still need to implement this
-    //Conversion rejection: vertex fit probability 1e-6 //need to add
-    //Conversion rejection: missing hits 0 //need to add
+    if( eleRelIso03(elIdx) >= 0.1 || (eleRelIso03(elIdx) >= 0.07 && cms2.els_p4().at(elIdx).pt() < 20) ) return false; 
+    if( cms2.els_conv_vtx_flag().at(elIdx)) return false;
+    if( cms2.els_lost_pixelhits().at(elIdx) > 0) return false;
     return true;
 
   } else return false;
@@ -161,6 +161,19 @@ bool isLooseMuon(unsigned int muIdx){
 
   if(!(isGlobal || isTracker)) return false;
   
+  return true;
+
+}
+
+bool isTightMuon(unsigned int muIdx){
+  if (!isLooseMuon(muIdx)) return false;
+  if (cms2.mus_gfit_chi2().at(muIdx)/cms2.mus_gfit_ndof().at(muIdx) >= 10) return false; 
+  if (cms2.mus_gfit_validSTAHits().at(muIdx) == 0)                         return false; 
+  if (cms2.mus_numberOfMatchedStations().at(muIdx) < 2)                    return false;
+  if (cms2.mus_dxyPV().at(muIdx) > 0.2)                                    return false;
+  if (cms2.mus_dzPV().at(muIdx) > 0.5)                                     return false;
+  if (cms2.mus_validPixelHits().at(muIdx) == 0)                            return false;
+  if (cms2.mus_nlayers().at(muIdx) < 6)                                    return false;
   return true;
 
 }
@@ -194,4 +207,25 @@ float muRelIso04(unsigned int muIdx){
   float absiso = chiso + std::max(0.0, nhiso + emiso - 0.5 * deltaBeta);
   return absiso/(cms2.mus_p4().at(muIdx).pt());
 
+}
+float eleRelIso03(unsigned int elIdx){
+
+  float chiso     = cms2.els_pfChargedHadronIso().at(elIdx);
+  float nhiso     = cms2.els_pfNeutralHadronIso().at(elIdx);
+  float emiso     = cms2.els_pfPhotonIso().at(elIdx);
+  float deltaBeta = cms2.els_pfPUIso().at(elIdx);
+  float absiso = chiso + std::max(0.0, nhiso + emiso - 0.5 * deltaBeta);
+  return absiso/(cms2.els_p4().at(elIdx).pt());
+}
+int eleTightID(unsigned int elIdx){
+  if (isTightElectron(elIdx))  return 3;
+  if (isMediumElectron(elIdx)) return 2;
+  if (isLooseElectron(elIdx))  return 1;
+  if (isVetoElectron(elIdx))   return 0;
+  return -1;
+}
+int muTightID(unsigned int muIdx){
+  if (isTightMuon(muIdx))  return 1;
+  if (isLooseMuon(muIdx))   return 0;
+  return -1;
 }
