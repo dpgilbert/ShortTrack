@@ -1,0 +1,275 @@
+// C++
+#include <iostream>
+#include <vector>
+#include <set>
+
+// ROOT
+#include "TDirectory.h"
+#include "TTreeCache.h"
+#include "Math/VectorUtil.h"
+
+// CMS2
+#include "../MT2CORE/CMS2.h"
+#include "../MT2CORE/tools.h"
+#include "../MT2CORE/selections.h"
+#include "../MT2CORE/hemJet.h"
+#include "../MT2CORE/MT2/MT2.h"
+
+// header
+#include "ScanChain.h"
+
+using namespace std;
+using namespace tas;
+
+
+void babyMaker::ScanChain(TChain* chain, std::string baby_name){
+
+  MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
+
+  // File Loop
+  int nDuplicates = 0;
+  int nEvents = chain->GetEntries();
+  unsigned int nEventsChain = nEvents;
+  unsigned int nEventsTotal = 0;
+  TObjArray *listOfFiles = chain->GetListOfFiles();
+  TIter fileIter(listOfFiles);
+  TFile *currentFile = 0;
+  while ( (currentFile = (TFile*)fileIter.Next()) ) {
+
+    // Get File Content
+    TFile f( currentFile->GetTitle() );
+    TTree *tree = (TTree*)f.Get("Events");
+    TTreeCache::SetLearnEntries(10);
+    tree->SetCacheSize(128*1024*1024);
+    cms2.Init(tree);
+    
+    // Event Loop
+    unsigned int nEventsTree = tree->GetEntriesFast();
+    for( unsigned int event = 0; event < nEventsTree; ++event) {
+    
+
+      // Get Event Content
+      tree->LoadTree(event);
+      cms2.GetEntry(event);
+      ++nEventsTotal;
+    
+      // Progress
+      CMS2::progress( nEventsTotal, nEventsChain );
+
+      InitBabyNtuple();
+
+      run  = cms2.evt_run();
+      lumi = cms2.evt_lumiBlock();
+      evt  = cms2.evt_event();
+      isData = cms2.evt_isRealData();
+
+      //crossSection = ;
+      //puWeight = ;
+      nVert = cms2.evt_nvtxs();
+      //nTrueInt = ;
+      //rho = ;
+
+      met_pt  = cms2.evt_pfmet();
+      met_phi = cms2.evt_pfmetPhi();
+
+
+      //ELECTRONS
+      nlep = 0;
+      nElectrons10 = 0;
+      for(unsigned int iEl = 0; iEl < cms2.els_p4().size(); iEl++){
+        if(cms2.els_p4().at(iEl).pt() < 10.0) continue;
+        if(!isVetoElectron(iEl)) continue;
+        nElectrons10++;
+        lep_pt[nlep]   = cms2.els_p4().at(iEl).pt();
+        lep_eta[nlep]  = cms2.els_etaSC().at(iEl); //use SC eta
+        lep_phi[nlep]  = cms2.els_p4().at(iEl).phi();
+        lep_mass[nlep] = cms2.els_p4().at(iEl).mass();
+        lep_charge[nlep] = cms2.els_charge().at(iEl);
+        lep_pdgId[nlep] = (-11)*cms2.els_charge().at(iEl);
+        lep_dxy[nlep] = cms2.els_dxyPV().at(iEl);
+        lep_dz[nlep] = cms2.els_dzPV().at(iEl);
+        //lep_tightId[nlep] = ;
+        //lep_relIso03[nlep] = ;
+        //lep_relIso04[nlep] = ;
+        //lep_mcMatchId[nlep] = ;
+        //lep_lostHits[nlep] = cms2.els_lostHits().at(iEl);
+        lep_convVeto[nlep] = cms2.els_conv_vtx_flag().at(iEl);
+        lep_tightCharge[nlep] = threeChargeAgree(iEl);
+
+        nlep++;
+      }
+
+      //MUONS
+      nMuons10 = 0;
+      for(unsigned int iMu = 0; iMu < cms2.mus_p4().size(); iMu++){
+        if(cms2.mus_p4().at(iMu).pt() < 10.0) continue;
+        if(!isLooseMuon(iMu)) continue;
+        nMuons10++;
+        lep_pt[nlep]   = cms2.mus_p4().at(iMu).pt();
+        lep_eta[nlep]  = cms2.mus_p4().at(iMu).eta();
+        lep_phi[nlep]  = cms2.mus_p4().at(iMu).phi();
+        lep_mass[nlep] = cms2.mus_p4().at(iMu).mass();
+        lep_charge[nlep] = cms2.mus_charge().at(iMu);
+        lep_pdgId[nlep] = (-13)*cms2.mus_charge().at(iMu);
+        lep_dxy[nlep] = cms2.mus_dxyPV().at(iMu);
+        lep_dz[nlep] = cms2.mus_dzPV().at(iMu);
+        //lep_tightId[nlep] = ;
+        lep_relIso03[nlep] = muRelIso03(iMu);
+        lep_relIso04[nlep] = muRelIso04(iMu);
+        //lep_mcMatchId[nlep] = ;
+        lep_lostHits[nlep] = -1;
+        lep_convVeto[nlep] = -1;
+        lep_tightCharge[nlep] = -1;
+
+        nlep++;
+      }
+    
+
+      //JETS
+      nJet = 0;
+      nJet40 = 0;
+      nBJet40 = 0;
+      ht = 0;
+      LorentzVector sumJetp4 = LorentzVector(0,0,0,0);
+      vector<LorentzVector> goodJets;
+      vector<LorentzVector> hemJets;
+      deltaPhiMin = 999.9;
+      for(unsigned int iJet = 0; iJet < cms2.pfjets_p4().size(); iJet++){
+        if(cms2.pfjets_p4().at(iJet).pt() < 10.0) continue;
+        if(fabs(cms2.pfjets_p4().at(iJet).eta()) > 5.2) continue;
+        if(!passesLoosePFJetID(iJet)) continue;
+        
+        bool lepOverlap = false;
+        for(int iLep = 0; iLep < nlep; iLep++){
+          if(DeltaR(pfjets_p4().at(iJet).eta(), lep_eta[iLep], pfjets_p4().at(iJet).phi(), lep_phi[iLep]) < 0.5) {
+            lepOverlap = true; 
+            break;
+          }
+        }
+        if(lepOverlap) continue;
+
+        Jet_pt[nJet]   = cms2.pfjets_p4().at(iJet).pt();
+        Jet_eta[nJet]  = cms2.pfjets_p4().at(iJet).eta();
+        Jet_phi[nJet]  = cms2.pfjets_p4().at(iJet).phi();
+        Jet_mass[nJet] = cms2.pfjets_p4().at(iJet).mass();
+        Jet_btagCSV[nJet] = cms2.pfjets_combinedSecondaryVertexBJetTag().at(iJet); 
+        //Jet_mcPt
+        //Jet_mcFlavour
+        //Jet_quarkGluonID
+        Jet_area[nJet] = cms2.pfjets_area().at(iJet);
+        //Jet_id
+        //Jet_puId[nJet] = cms2.pfjets_pileupJetId().at(iJet); //need to use puId for CHS Jets in NtupleMaker
+
+        if( (Jet_pt[nJet] > 40.0) && (fabs(Jet_eta[nJet]) < 2.5) ){ 
+          goodJets.push_back(cms2.pfjets_p4().at(iJet));
+          nJet40++;
+          ht+= Jet_pt[nJet];
+          if(Jet_btagCSV[nJet] >= 0.679) nBJet40++; //CSVM
+
+          sumJetp4 += cms2.pfjets_p4().at(iJet); 
+
+          if(nJet40 <= 4){
+            deltaPhiMin = min(deltaPhiMin, DeltaPhi(met_phi, Jet_phi[nJet]));
+          }
+
+        }
+
+        nJet++;
+      }
+
+      if(goodJets.size() > 1){
+
+        //Hemispheres used in MT2 calculation
+        hemJets = getHemJets(goodJets);  
+
+        mt2 = MT2(met_pt, met_phi, hemJets.at(0), hemJets.at(1));
+      
+        pseudojet1_pt   = hemJets.at(0).pt();
+        pseudojet1_eta  = hemJets.at(0).eta();
+        pseudojet1_phi  = hemJets.at(0).phi();
+        pseudojet1_mass = hemJets.at(0).mass();
+        pseudojet2_pt   = hemJets.at(1).pt();
+        pseudojet2_eta  = hemJets.at(1).eta();
+        pseudojet2_phi  = hemJets.at(1).phi();
+        pseudojet2_mass = hemJets.at(1).mass();
+
+      }
+
+      mht_pt  = sumJetp4.pt();
+      mht_phi = -sumJetp4.phi();
+
+      //TAUS
+      ntau = 0;
+      for(unsigned int iTau = 0; iTau < cms2.taus_pf_p4().size(); iTau++){
+        if(cms2.taus_pf_p4().at(iTau).pt() < 20.0) continue; 
+        if(fabs(cms2.taus_pf_p4().at(iTau).eta()) > 2.3) continue; 
+        
+
+        tau_pt[ntau]   = cms2.taus_pf_p4().at(iTau).pt();
+        tau_eta[ntau]  = cms2.taus_pf_p4().at(iTau).eta();
+        tau_phi[ntau]  = cms2.taus_pf_p4().at(iTau).phi();
+        tau_mass[ntau] = cms2.taus_pf_p4().at(iTau).mass();
+        tau_charge[ntau] = cms2.taus_pf_charge().at(iTau);
+        //tau_dxy[ntau] = ;
+        //tau_dz[ntau] = ;
+        //tau_isoMVA2[ntau] = ;
+        //tau_idCI3hit[ntau] = ;
+        //tau_idMVA2[ntau] = ;
+        //tau_mcMatchId[ntau] = ;
+
+        ntau++;
+      }
+
+      //PHOTONS
+      ngamma = 0;
+      for(unsigned int iGamma = 0; iGamma < cms2.photons_p4().size(); iGamma++){
+        if(cms2.photons_p4().at(iGamma).pt() < 20.0) continue;
+        if(fabs(cms2.photons_p4().at(iGamma).pt()) > 2.5) continue;
+        gamma_pt[ngamma]   = cms2.photons_p4().at(iGamma).pt();
+        gamma_eta[ngamma]  = cms2.photons_p4().at(iGamma).eta();
+        gamma_phi[ngamma]  = cms2.photons_p4().at(iGamma).phi();
+        gamma_mass[ngamma] = cms2.photons_p4().at(iGamma).mass();
+
+        //gamma_mcMatchId[ngamma] = ;
+        //gamma_chadiso[ngamma] = ;
+        //gamma_nhadiso[ngamma] = ;
+        //gamma_photiso[ngamma] = ;
+        gamma_sigmaietaieta[ngamma] = cms2.photons_sigmaIEtaIEta().at(iGamma);
+        //gamma_id[ngamma] = ;
+        
+        ngamma++;
+      }
+
+      //GEN PARTICLES
+      ngenPart = 0;
+      for(unsigned int iGen = 0; iGen < cms2.genps_p4().size(); iGen++){
+        genPart_pt[ngenPart] = cms2.genps_p4().at(iGen).pt();
+        genPart_eta[ngenPart] = cms2.genps_p4().at(iGen).eta();
+        genPart_phi[ngenPart] = cms2.genps_p4().at(iGen).phi();
+        genPart_mass[ngenPart] = cms2.genps_p4().at(iGen).mass();
+        genPart_pdgId[ngenPart] = cms2.genps_id().at(iGen);
+        //genPart_charge[ngenPart] = ;
+        genPart_motherId[ngenPart] = cms2.genps_id_mother().at(iGen);
+
+        ngenPart++;
+      }
+
+
+      FillBabyNtuple();
+
+   }//end loop on events in a file
+  
+    delete tree;
+    f.Close();
+  }//end loop on files
+  
+  if ( nEventsChain != nEventsTotal ) {
+    std::cout << "ERROR: number of events from files is not equal to total number of events" << std::endl;
+  }
+
+  cout << nDuplicates << " duplicate events were skipped." << endl;
+
+  CloseBabyNtuple();
+
+  return;
+}
