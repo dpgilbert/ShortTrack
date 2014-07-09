@@ -1,5 +1,6 @@
 #ifndef SELECTIONS_H
 #define SELECTIONS_H
+#include "TString.h"
 
 bool isLoosePFJet(unsigned int pfJetIdx);
 bool isMediumPFJet(unsigned int pfJetIdx);
@@ -16,5 +17,8 @@ float muRelIso04(unsigned int);
 float eleRelIso03(unsigned int);
 int eleTightID(unsigned int);
 int muTightID(unsigned int);
+TString triggerName(TString);
+bool passHLTTriggerPattern(const char*);
+
 
 #endif

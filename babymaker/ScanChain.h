@@ -84,9 +84,9 @@ class babyMaker {
   Float_t         genmet_phi;
 
 //----- TRIGGER (to be better defined)
-  Int_t           hlt_HT650;   
-  Int_t           hlt_MET150;
-  Int_t           hlt_ht350met100;   
+  Int_t           HLT_HT650;   
+  Int_t           HLT_MET150;
+  Int_t           HLT_ht350met100;   
 
 //----- LEPTONS
   Int_t           nlep;
@@ -215,9 +215,9 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("calomet_phi", &calomet_phi );
   BabyTree_->Branch("genmet_pt", &genmet_pt );
   BabyTree_->Branch("genmet_phi", &genmet_phi );
-  BabyTree_->Branch("hlt_HT650", &hlt_HT650 );
-  BabyTree_->Branch("hlt_MET150", &hlt_MET150 );
-  BabyTree_->Branch("hlt_ht350met100", &hlt_ht350met100 );
+  BabyTree_->Branch("HLT_HT650", &HLT_HT650 );
+  BabyTree_->Branch("HLT_MET150", &HLT_MET150 );
+  BabyTree_->Branch("HLT_ht350met100", &HLT_ht350met100 );
   BabyTree_->Branch("nlep", &nlep, "nlep/I" );
   BabyTree_->Branch("lep_pt", lep_pt, "lep_pt[nlep]/F");
   BabyTree_->Branch("lep_eta", lep_eta, "lep_eta[nlep]/F" );
@@ -325,9 +325,9 @@ void babyMaker::InitBabyNtuple () {
   calomet_phi = -999.0;
   genmet_pt = -999.0;
   genmet_phi = -999.0;
-  hlt_HT650 = -999;
-  hlt_MET150 = -999;
-  hlt_ht350met100 = -999;
+  HLT_HT650 = -999;
+  HLT_MET150 = -999;
+  HLT_ht350met100 = -999;
   nlep = -999;
   IsoTrack_pt = -999.0;
   IsoTrack_relIso = -999.0;

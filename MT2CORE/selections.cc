@@ -1,6 +1,7 @@
 #include "selections.h"
 #include "CMS2.h"
 
+using namespace tas;
 
 bool isLoosePFJet(unsigned int pfJetIdx){
 
@@ -265,4 +266,38 @@ int muTightID(unsigned int muIdx){
   if (isTightMuon(muIdx))  return 1;
   if (isLooseMuon(muIdx))   return 0;
   return -1;
+}
+//-------------------------------------------------------
+// get exact trigger name corresponding to given pattern
+//-------------------------------------------------------
+TString triggerName(TString triggerPattern){
+
+  bool    foundTrigger  = false;
+  TString exact_hltname = "";
+
+  for( unsigned int itrig = 0 ; itrig < hlt_trigNames().size() ; ++itrig ){
+    if( TString( hlt_trigNames().at(itrig) ).Contains( triggerPattern ) ){
+      foundTrigger  = true;
+      exact_hltname = hlt_trigNames().at(itrig);
+      break;
+    }
+  }
+
+  if( !foundTrigger) return "TRIGGER_NOT_FOUND";
+
+  return exact_hltname;
+
+}
+//---------------------------------------------
+// Check if trigger passes
+//---------------------------------------------
+bool passHLTTriggerPattern(const char* arg){
+
+  TString HLTTriggerPattern(arg);
+  TString HLTTrigger = triggerName( HLTTriggerPattern );
+
+  if( HLTTrigger.Contains("TRIGGER_NOT_FOUND")){
+    return false;
+  }
+  return passHLTTrigger( HLTTrigger );
 }

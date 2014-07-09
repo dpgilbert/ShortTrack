@@ -47,6 +47,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
+      //    for( unsigned int event = 0; event < 100; ++event) {
     
 
       // Get Event Content
@@ -74,7 +75,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       met_pt  = cms2.evt_pfmet();
       met_phi = cms2.evt_pfmetPhi();
 
-
+      //TRIGGER
+      HLT_HT650        = passHLTTriggerPattern("HLT_HT650_v");
+      HLT_MET150       = passHLTTriggerPattern("HLT_MET150_v"); // This trigger doesn't appear to be in the miniAOD. Maybe it is not in the CSA14 menu?
+      HLT_ht350met100  = passHLTTriggerPattern("HLT_HT350_MET100_v"); // This trigger doesn't appear to be in the miniAOD. Maybe it is not in the CSA14 menu?]
+      
       //ELECTRONS
       nlep = 0;
       nElectrons10 = 0;
@@ -160,7 +165,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         //Jet_quarkGluonID
         Jet_area[nJet] = cms2.pfjets_area().at(iJet);
 
-        //Jet_id // need to add jet->jetID() to CMS3 and just use that. //JG: implement selections ourselves for now
         if(isTightPFJet(iJet))  Jet_id[nJet] = 2;
         else if(isMediumPFJet(iJet)) Jet_id[nJet] = 1;
         else Jet_id[nJet] = 0;
