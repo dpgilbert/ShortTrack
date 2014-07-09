@@ -124,6 +124,7 @@ class babyMaker {
   Float_t         tau_dz[50];   //[ntau]
   Float_t         tau_isoMVA2[50];   //[ntau]
   Int_t           tau_idCI3hit[50];   //[ntau]
+  Int_t           tau_isoCI3hit[50];   //[ntau]
   Int_t           tau_idMVA2[50];   //[ntau]
   Int_t           tau_mcMatchId[50];   //[ntau]
 
@@ -249,6 +250,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("tau_dz", tau_dz, "tau_dz[ntau]/F" );
   BabyTree_->Branch("tau_isoMVA2", tau_isoMVA2, "tau_isoMVA2[ntau]/F" );
   BabyTree_->Branch("tau_idCI3hit", tau_idCI3hit, "tau_idCI3hit[ntau]/I" );
+  BabyTree_->Branch("tau_isoCI3hit", tau_isoCI3hit, "tau_isoCI3hit[ntau]/I" );
   BabyTree_->Branch("tau_idMVA2", tau_idMVA2, "tau_idMVA2[ntau]/I" );
   BabyTree_->Branch("tau_mcMatchId", tau_mcMatchId, "tau_mcMatchId[ntau]/I" );
   BabyTree_->Branch("ngamma", &ngamma, "ngamma/I" );

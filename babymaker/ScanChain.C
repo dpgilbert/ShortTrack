@@ -76,9 +76,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       met_phi = cms2.evt_pfmetPhi();
 
       //TRIGGER
-      HLT_HT650        = passHLTTriggerPattern("HLT_HT650_v");
-      HLT_MET150       = passHLTTriggerPattern("HLT_MET150_v"); // This trigger doesn't appear to be in the miniAOD. Maybe it is not in the CSA14 menu?
-      HLT_ht350met100  = passHLTTriggerPattern("HLT_HT350_MET100_v"); // This trigger doesn't appear to be in the miniAOD. Maybe it is not in the CSA14 menu?]
+      HLT_HT650        = passHLTTriggerPattern("HLT_PFHT650_v") ||  passHLTTriggerPattern("HLT_PFNoPUHT650_v");
+      HLT_MET150       = passHLTTriggerPattern("HLT_PFMET150_v"); 
+      HLT_ht350met100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_v") || passHLTTriggerPattern("HLT_PFNoPUHT350_PFMET100_v"); 
       
       //ELECTRONS
       nlep = 0;
@@ -214,6 +214,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       for(unsigned int iTau = 0; iTau < cms2.taus_pf_p4().size(); iTau++){
         if(cms2.taus_pf_p4().at(iTau).pt() < 20.0) continue; 
         if(fabs(cms2.taus_pf_p4().at(iTau).eta()) > 2.3) continue; 
+	if (!cms2.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) continue; // HPS3 hits taus
+	if (!cms2.taus_pf_againstElectronTight().at(iTau)) continue; // loose electron rejection 
+	if (!cms2.taus_pf_againstMuonTight().at(iTau)) continue; // loose muon rejection 
         
 
         tau_pt[ntau]   = cms2.taus_pf_p4().at(iTau).pt();
@@ -223,9 +226,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         tau_charge[ntau] = cms2.taus_pf_charge().at(iTau);
         //tau_dxy[ntau] = ;
         //tau_dz[ntau] = ;
-        //tau_isoMVA2[ntau] = ;
-        //tau_idCI3hit[ntau] = ;
-        //tau_idMVA2[ntau] = ;
+        //tau_isoMVA2[ntau] = ; // not in the twiki any more!!
+        tau_isoCI3hit[ntau] = cms2.taus_pf_byCombinedIsolationDeltaBetaCorrRaw3Hits().at(iTau);
+	int temp = 0;
+	if (cms2.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 1;
+	if (cms2.taus_pf_byMediumCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 2;
+	if (cms2.taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 3;
+	tau_idCI3hit[ntau] = temp;
+        //tau_idMVA2[ntau] = ; // not in the twiki any more!!
         //tau_mcMatchId[ntau] = ;
 
         ntau++;
