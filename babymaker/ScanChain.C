@@ -47,7 +47,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
-      //    for( unsigned int event = 0; event < 100; ++event) {
+    //for( unsigned int event = 0; event < 100; ++event) {
     
 
       // Get Event Content
@@ -275,35 +275,54 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       }
 
 
-/*
-      //will add once list of isotrack variables is finalized
       //ISOTRACK
-      bool foundIsoTrack = false;
- 
+      std::map<float, int> pt_ordering;
+      vector<float>vec_isotrack_pt;
+      vector<float>vec_isotrack_eta;
+      vector<float>vec_isotrack_phi;
+      vector<float>vec_isotrack_mass;
+      vector<float>vec_isotrack_relIso;
+      vector<float>vec_isotrack_dz;
+      vector<int>  vec_isotrack_pdgId;
+
+      nisoTrack = 0;
       for (unsigned int ipf = 0; ipf < pfcands_p4().size(); ipf++) {
  
         if(cms2.pfcands_charge().at(ipf) == 0) continue;
- 
-        bool isLepton = (abs(cms2.pfcands_particleId().at(ipf))==11) || (abs(cms2.pfcands_particleId().at(ipf))==13);
-        float cand_pt = cms2.pfcands_p4().at(ipf).pt();
-
-        if(cand_pt < 5) continue;
-        if(!isLepton && (cand_pt < 10)) continue;
         if(fabs(cms2.pfcands_dz().at(ipf)) > 0.1) continue;
+
+        float cand_pt = cms2.pfcands_p4().at(ipf).pt();
+        if(cand_pt < 5) continue;
  
-        float reliso  = TrackIso(ipf) / cand_pt;
- 
-        if(isLepton && (reliso < 0.2)){
-          foundIsoTrack = true;
-          break;
-        }
-        if(!isLepton && (reliso < 0.1)){
-          foundIsoTrack = true;
-          break;
-        }
- 
+        float absiso  = TrackIso(ipf);
+        if(absiso >= min(0.2*cand_pt, 8.0)) continue;
+
+        pt_ordering[cand_pt] = nisoTrack;
+
+        vec_isotrack_pt.push_back    ( cand_pt                          );
+        vec_isotrack_eta.push_back   ( cms2.pfcands_p4().at(ipf).eta()  );
+        vec_isotrack_phi.push_back   ( cms2.pfcands_p4().at(ipf).phi()  );
+        vec_isotrack_mass.push_back  ( cms2.pfcands_p4().at(ipf).mass() );
+        vec_isotrack_relIso.push_back( absiso/cand_pt                   );
+        vec_isotrack_dz.push_back    ( cms2.pfcands_dz().at(ipf)        );
+        vec_isotrack_pdgId.push_back ( cms2.pfcands_particleId().at(ipf));
+
+        nisoTrack++;
       }  
-*/
+
+      //now fill arrays from vectors, isotracks with largest pt first
+      int i = 0;
+      for(std::map<float, int>::reverse_iterator it = pt_ordering.rbegin(); it!= pt_ordering.rend(); ++it){
+        isotrack_pt[i]     = vec_isotrack_pt.at(it->second);
+        isotrack_eta[i]    = vec_isotrack_eta.at(it->second);
+        isotrack_phi[i]    = vec_isotrack_phi.at(it->second);
+        isotrack_mass[i]   = vec_isotrack_mass.at(it->second);
+        isotrack_relIso[i] = vec_isotrack_relIso.at(it->second);
+        isotrack_dz[i]     = vec_isotrack_dz.at(it->second);
+        isotrack_pdgId[i]  = vec_isotrack_pdgId.at(it->second);
+        i++;
+      }
+        
 
 
       FillBabyNtuple();

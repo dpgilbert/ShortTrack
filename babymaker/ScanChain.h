@@ -107,11 +107,14 @@ class babyMaker {
   Int_t           lep_tightCharge[50];   //[nlep]
 
 //----- ISOLATED TRACK
-  Float_t           IsoTrack_pt;
-  Float_t           IsoTrack_relIso;
-  Float_t           IsoTrack_dz;
-  Int_t             IsoTrack_pdgId;
-  Int_t             IsoTrack_mtw;
+  Int_t             nisoTrack;
+  Float_t           isotrack_pt[50];
+  Float_t           isotrack_eta[50];
+  Float_t           isotrack_phi[50];
+  Float_t           isotrack_mass[50];
+  Float_t           isotrack_relIso[50];
+  Float_t           isotrack_dz[50];
+  Int_t             isotrack_pdgId[50];
 
 //----- TAUS
   Int_t           ntau;
@@ -235,11 +238,14 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lep_lostHits", lep_lostHits, "lep_lostHits[nlep]/I" );
   BabyTree_->Branch("lep_convVeto", lep_convVeto, "lep_convVeto[nlep]/I" );
   BabyTree_->Branch("lep_tightCharge", lep_tightCharge, "lep_tightCharge[nlep]/I" );
-  BabyTree_->Branch("IsoTrack_pt", &IsoTrack_pt );
-  BabyTree_->Branch("IsoTrack_relIso", &IsoTrack_relIso );
-  BabyTree_->Branch("IsoTrack_dz", &IsoTrack_dz );
-  BabyTree_->Branch("IsoTrack_pdgId", &IsoTrack_pdgId );
-  BabyTree_->Branch("IsoTrack_mtw", &IsoTrack_mtw );
+  BabyTree_->Branch("nisoTrack", &nisoTrack, "nisoTrack/I" );
+  BabyTree_->Branch("isotrack_pt", isotrack_pt, "isotrack_pt[nisoTrack]/F" );
+  BabyTree_->Branch("isotrack_eta", isotrack_eta, "isotrack_eta[nisoTrack]/F" );
+  BabyTree_->Branch("isotrack_phi", isotrack_phi, "isotrack_phi[nisoTrack]/F" );
+  BabyTree_->Branch("isotrack_mass", isotrack_mass, "isotrack_mass[nisoTrack]/F" );
+  BabyTree_->Branch("isotrack_relIso", isotrack_relIso, "isotrack_relIso[nisoTrack]/F" );
+  BabyTree_->Branch("isotrack_dz", isotrack_dz, "isotrack_dz[nisoTrack]/F" );
+  BabyTree_->Branch("isotrack_pdgId", isotrack_pdgId, "isotrack_pdgId[nisoTrack]/I" );
   BabyTree_->Branch("ntau", &ntau, "ntau/I" );
   BabyTree_->Branch("tau_pt", tau_pt, "tau_pt[ntau]/F" );
   BabyTree_->Branch("tau_eta", tau_eta, "tau_eta[ntau]/F" );
@@ -331,11 +337,7 @@ void babyMaker::InitBabyNtuple () {
   HLT_MET150 = -999;
   HLT_ht350met100 = -999;
   nlep = -999;
-  IsoTrack_pt = -999.0;
-  IsoTrack_relIso = -999.0;
-  IsoTrack_dz = -999.0;
-  IsoTrack_pdgId = -999;
-  IsoTrack_mtw = -999;
+  nisoTrack = -999;
   ntau = -999;
   ngamma = -999;
   ngenPart = -999;
