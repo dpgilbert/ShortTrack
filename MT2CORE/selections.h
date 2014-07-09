@@ -1,7 +1,9 @@
 #ifndef SELECTIONS_H
 #define SELECTIONS_H
 
-bool passesLoosePFJetID(unsigned int pfJetIdx);
+bool isLoosePFJet(unsigned int pfJetIdx);
+bool isMediumPFJet(unsigned int pfJetIdx);
+bool isTightPFJet(unsigned int pfJetIdx);
 bool isVetoElectron(unsigned int);
 bool isLooseElectron(unsigned int);
 bool isMediumElectron(unsigned int);

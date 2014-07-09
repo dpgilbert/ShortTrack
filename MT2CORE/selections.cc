@@ -2,13 +2,14 @@
 #include "CMS2.h"
 
 
-bool passesLoosePFJetID(unsigned int pfJetIdx){
+bool isLoosePFJet(unsigned int pfJetIdx){
 
     float pfjet_chf_  = cms2.pfjets_chargedHadronE()[pfJetIdx] / cms2.pfjets_p4()[pfJetIdx].energy();
     float pfjet_nhf_  = cms2.pfjets_neutralHadronE()[pfJetIdx] / cms2.pfjets_p4()[pfJetIdx].energy();
     float pfjet_cef_  = cms2.pfjets_chargedEmE()[pfJetIdx] / cms2.pfjets_p4()[pfJetIdx].energy();
     float pfjet_nef_  = cms2.pfjets_neutralEmE()[pfJetIdx] / cms2.pfjets_p4()[pfJetIdx].energy();
     int   pfjet_cm_   = cms2.pfjets_chargedMultiplicity()[pfJetIdx];
+    float pfjet_eta   = fabs(cms2.pfjets_p4()[pfJetIdx].eta());
 
     if (cms2.pfjets_pfcandIndicies().size() < 2)
         return false;
@@ -16,15 +17,51 @@ bool passesLoosePFJetID(unsigned int pfJetIdx){
         return false;
     if (pfjet_nhf_ >= 0.99)
         return false;
-    if (pfjet_cm_ < 1)
-        return false;
-    if (pfjet_chf_ < 1e-6)
-        return false;
-    if (pfjet_cef_ >= 0.99)
-        return false;
+
+    if (pfjet_eta < 2.4){
+      if (pfjet_cm_ < 1)
+          return false;
+      if (pfjet_chf_ < 1e-6)
+          return false;
+      if (pfjet_cef_ >= 0.99)
+          return false;
+    }
 
     return true;
 }
+
+bool isMediumPFJet(unsigned int pfJetIdx){
+
+
+    float pfjet_nhf_  = cms2.pfjets_neutralHadronE()[pfJetIdx] / cms2.pfjets_p4()[pfJetIdx].energy();
+    float pfjet_nef_  = cms2.pfjets_neutralEmE()[pfJetIdx] / cms2.pfjets_p4()[pfJetIdx].energy();
+
+    if (pfjet_nef_ >= 0.95)
+        return false;
+    if (pfjet_nhf_ >= 0.95)
+        return false;
+
+    if (!isLoosePFJet(pfJetIdx)) return false;
+
+    return true;
+}
+
+bool isTightPFJet(unsigned int pfJetIdx){
+
+
+    float pfjet_nhf_  = cms2.pfjets_neutralHadronE()[pfJetIdx] / cms2.pfjets_p4()[pfJetIdx].energy();
+    float pfjet_nef_  = cms2.pfjets_neutralEmE()[pfJetIdx] / cms2.pfjets_p4()[pfJetIdx].energy();
+
+    if (pfjet_nef_ >= 0.90)
+        return false;
+    if (pfjet_nhf_ >= 0.90)
+        return false;
+
+    if (!isLoosePFJet(pfJetIdx)) return false;
+
+    return true;
+}
+
 
 //2012 Electron IDs
 //https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammaCutBasedIdentification#Electron_ID_Working_Points

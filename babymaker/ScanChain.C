@@ -138,7 +138,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       for(unsigned int iJet = 0; iJet < cms2.pfjets_p4().size(); iJet++){
         if(cms2.pfjets_p4().at(iJet).pt() < 10.0) continue;
         if(fabs(cms2.pfjets_p4().at(iJet).eta()) > 5.2) continue;
-        if(!passesLoosePFJetID(iJet)) continue;
+        if(!isLoosePFJet(iJet)) continue;
         
         bool lepOverlap = false;
         for(int iLep = 0; iLep < nlep; iLep++){
@@ -158,8 +158,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         Jet_mcFlavour[nJet] = cms2.pfjets_partonFlavour().at(iJet); //partonFlavour() is the "new" definition starting from 7_0_5_patch1, according to: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#New_jet_flavour_in_PAT
         //Jet_quarkGluonID
         Jet_area[nJet] = cms2.pfjets_area().at(iJet);
-        //Jet_id // need to add jet->jetID() to CMS3 and just use that
-        Jet_puId[nJet] = cms2.pfjets_pileupJetId().at(iJet); //need to use puId for CHS Jets in NtupleMaker //GZ: this is the puID associated to the miniAOD jets. why don't you like it?
+
+        //Jet_id // need to add jet->jetID() to CMS3 and just use that. //JG: implement selections ourselves for now
+        if(isTightPFJet(iJet))  Jet_id[nJet] = 2;
+        else if(isMediumPFJet(iJet)) Jet_id[nJet] = 1;
+        else Jet_id[nJet] = 0;
+
+        Jet_puId[nJet] = cms2.pfjets_pileupJetId().at(iJet);
 
         if( (Jet_pt[nJet] > 40.0) && (fabs(Jet_eta[nJet]) < 2.5) ){ 
           goodJets.push_back(cms2.pfjets_p4().at(iJet));
