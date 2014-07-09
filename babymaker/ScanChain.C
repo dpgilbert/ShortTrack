@@ -124,9 +124,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         lep_relIso03[nlep] = muRelIso03(iMu);
         lep_relIso04[nlep] = muRelIso04(iMu);
         //lep_mcMatchId[nlep] = ;
-        lep_lostHits[nlep] = -1;
-        lep_convVeto[nlep] = -1;
-        lep_tightCharge[nlep] = -1;
+        lep_lostHits[nlep] = 1;
+        lep_convVeto[nlep] = 1;
+        lep_tightCharge[nlep] = 1;
 
         nlep++;
       }
