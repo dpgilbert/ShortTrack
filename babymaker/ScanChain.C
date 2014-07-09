@@ -14,6 +14,7 @@
 #include "../MT2CORE/selections.h"
 #include "../MT2CORE/hemJet.h"
 #include "../MT2CORE/MT2/MT2.h"
+#include "../MT2CORE/IsoTrackVeto.h"
 
 // header
 #include "ScanChain.h"
@@ -260,6 +261,37 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
         ngenPart++;
       }
+
+
+/*
+      //will add once list of isotrack variables is finalized
+      //ISOTRACK
+      bool foundIsoTrack = false;
+ 
+      for (unsigned int ipf = 0; ipf < pfcands_p4().size(); ipf++) {
+ 
+        if(cms2.pfcands_charge().at(ipf) == 0) continue;
+ 
+        bool isLepton = (abs(cms2.pfcands_particleId().at(ipf))==11) || (abs(cms2.pfcands_particleId().at(ipf))==13);
+        float cand_pt = cms2.pfcands_p4().at(ipf).pt();
+
+        if(cand_pt < 5) continue;
+        if(!isLepton && (cand_pt < 10)) continue;
+        if(fabs(cms2.pfcands_dz().at(ipf)) > 0.1) continue;
+ 
+        float reliso  = TrackIso(ipf) / cand_pt;
+ 
+        if(isLepton && (reliso < 0.2)){
+          foundIsoTrack = true;
+          break;
+        }
+        if(!isLepton && (reliso < 0.1)){
+          foundIsoTrack = true;
+          break;
+        }
+ 
+      }  
+*/
 
 
       FillBabyNtuple();
