@@ -199,8 +199,8 @@ bool isLooseMuon(unsigned int muIdx){
 
   if(!(isGlobal || isTracker)) return false;
   // The following cuts are not in the official definition, but they are used by ETH to suppress b->mu
-  if (cms2.mus_dxyPV().at(muIdx) > 0.5)                                    return false;
-  if (cms2.mus_dzPV().at(muIdx) > 1.0)                                     return false;
+  if (fabs(cms2.mus_dxyPV().at(muIdx)) > 0.5)                                    return false;
+  if (fabs(cms2.mus_dzPV().at(muIdx)) > 1.0)                                     return false;
   return true;
 
 }
@@ -213,8 +213,8 @@ bool isTightMuon(unsigned int muIdx){
   if (cms2.mus_gfit_chi2().at(muIdx)/cms2.mus_gfit_ndof().at(muIdx) >= 10) return false; 
   if (cms2.mus_gfit_validSTAHits().at(muIdx) == 0)                         return false; 
   if (cms2.mus_numberOfMatchedStations().at(muIdx) < 2)                    return false;
-  if (cms2.mus_dxyPV().at(muIdx) > 0.2)                                    return false;
-  if (cms2.mus_dzPV().at(muIdx) > 0.5)                                     return false;
+  if (fabs(cms2.mus_dxyPV().at(muIdx)) > 0.2)                              return false;
+  if (fabs(cms2.mus_dzPV().at(muIdx)) > 0.5)                               return false;
   if (cms2.mus_validPixelHits().at(muIdx) == 0)                            return false;
   if (cms2.mus_nlayers().at(muIdx) < 6)                                    return false;
   return true;
