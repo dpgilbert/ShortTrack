@@ -275,13 +275,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       //ISOTRACK
       std::map<float, int> pt_ordering;
-      vector<float>vec_isotrack_pt;
-      vector<float>vec_isotrack_eta;
-      vector<float>vec_isotrack_phi;
-      vector<float>vec_isotrack_mass;
-      vector<float>vec_isotrack_relIso;
-      vector<float>vec_isotrack_dz;
-      vector<int>  vec_isotrack_pdgId;
+      vector<float>vec_isoTrack_pt;
+      vector<float>vec_isoTrack_eta;
+      vector<float>vec_isoTrack_phi;
+      vector<float>vec_isoTrack_mass;
+      vector<float>vec_isoTrack_absIso;
+      vector<float>vec_isoTrack_dz;
+      vector<int>  vec_isoTrack_pdgId;
 
       nisoTrack = 0;
       for (unsigned int ipf = 0; ipf < pfcands_p4().size(); ipf++) {
@@ -297,13 +297,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
         pt_ordering[cand_pt] = nisoTrack;
 
-        vec_isotrack_pt.push_back    ( cand_pt                          );
-        vec_isotrack_eta.push_back   ( cms2.pfcands_p4().at(ipf).eta()  );
-        vec_isotrack_phi.push_back   ( cms2.pfcands_p4().at(ipf).phi()  );
-        vec_isotrack_mass.push_back  ( cms2.pfcands_p4().at(ipf).mass() );
-        vec_isotrack_relIso.push_back( absiso/cand_pt                   );
-        vec_isotrack_dz.push_back    ( cms2.pfcands_dz().at(ipf)        );
-        vec_isotrack_pdgId.push_back ( cms2.pfcands_particleId().at(ipf));
+        vec_isoTrack_pt.push_back    ( cand_pt                          );
+        vec_isoTrack_eta.push_back   ( cms2.pfcands_p4().at(ipf).eta()  );
+        vec_isoTrack_phi.push_back   ( cms2.pfcands_p4().at(ipf).phi()  );
+        vec_isoTrack_mass.push_back  ( cms2.pfcands_p4().at(ipf).mass() );
+        vec_isoTrack_absIso.push_back( absiso                           );
+        vec_isoTrack_dz.push_back    ( cms2.pfcands_dz().at(ipf)        );
+        vec_isoTrack_pdgId.push_back ( cms2.pfcands_particleId().at(ipf));
 
         nisoTrack++;
       }  
@@ -311,13 +311,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       //now fill arrays from vectors, isotracks with largest pt first
       int i = 0;
       for(std::map<float, int>::reverse_iterator it = pt_ordering.rbegin(); it!= pt_ordering.rend(); ++it){
-        isotrack_pt[i]     = vec_isotrack_pt.at(it->second);
-        isotrack_eta[i]    = vec_isotrack_eta.at(it->second);
-        isotrack_phi[i]    = vec_isotrack_phi.at(it->second);
-        isotrack_mass[i]   = vec_isotrack_mass.at(it->second);
-        isotrack_relIso[i] = vec_isotrack_relIso.at(it->second);
-        isotrack_dz[i]     = vec_isotrack_dz.at(it->second);
-        isotrack_pdgId[i]  = vec_isotrack_pdgId.at(it->second);
+        isoTrack_pt[i]     = vec_isoTrack_pt.at(it->second);
+        isoTrack_eta[i]    = vec_isoTrack_eta.at(it->second);
+        isoTrack_phi[i]    = vec_isoTrack_phi.at(it->second);
+        isoTrack_mass[i]   = vec_isoTrack_mass.at(it->second);
+        isoTrack_absIso[i] = vec_isoTrack_absIso.at(it->second);
+        isoTrack_dz[i]     = vec_isoTrack_dz.at(it->second);
+        isoTrack_pdgId[i]  = vec_isoTrack_pdgId.at(it->second);
         i++;
       }
         

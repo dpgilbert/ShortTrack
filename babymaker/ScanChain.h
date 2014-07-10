@@ -108,13 +108,13 @@ class babyMaker {
 
 //----- ISOLATED TRACK
   Int_t             nisoTrack;
-  Float_t           isotrack_pt[50];
-  Float_t           isotrack_eta[50];
-  Float_t           isotrack_phi[50];
-  Float_t           isotrack_mass[50];
-  Float_t           isotrack_relIso[50];
-  Float_t           isotrack_dz[50];
-  Int_t             isotrack_pdgId[50];
+  Float_t           isoTrack_pt[50];
+  Float_t           isoTrack_eta[50];
+  Float_t           isoTrack_phi[50];
+  Float_t           isoTrack_mass[50];
+  Float_t           isoTrack_absIso[50];
+  Float_t           isoTrack_dz[50];
+  Int_t             isoTrack_pdgId[50];
 
 //----- TAUS
   Int_t           ntau;
@@ -239,13 +239,13 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lep_convVeto", lep_convVeto, "lep_convVeto[nlep]/I" );
   BabyTree_->Branch("lep_tightCharge", lep_tightCharge, "lep_tightCharge[nlep]/I" );
   BabyTree_->Branch("nisoTrack", &nisoTrack, "nisoTrack/I" );
-  BabyTree_->Branch("isotrack_pt", isotrack_pt, "isotrack_pt[nisoTrack]/F" );
-  BabyTree_->Branch("isotrack_eta", isotrack_eta, "isotrack_eta[nisoTrack]/F" );
-  BabyTree_->Branch("isotrack_phi", isotrack_phi, "isotrack_phi[nisoTrack]/F" );
-  BabyTree_->Branch("isotrack_mass", isotrack_mass, "isotrack_mass[nisoTrack]/F" );
-  BabyTree_->Branch("isotrack_relIso", isotrack_relIso, "isotrack_relIso[nisoTrack]/F" );
-  BabyTree_->Branch("isotrack_dz", isotrack_dz, "isotrack_dz[nisoTrack]/F" );
-  BabyTree_->Branch("isotrack_pdgId", isotrack_pdgId, "isotrack_pdgId[nisoTrack]/I" );
+  BabyTree_->Branch("isoTrack_pt", isoTrack_pt, "isoTrack_pt[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_eta", isoTrack_eta, "isoTrack_eta[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_phi", isoTrack_phi, "isoTrack_phi[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_mass", isoTrack_mass, "isoTrack_mass[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrackabssIso", isoTrack_absIso, "isoTrack_absIso[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_dz", isoTrack_dz, "isoTrack_dz[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_pdgId", isoTrack_pdgId, "isoTrack_pdgId[nisoTrack]/I" );
   BabyTree_->Branch("ntau", &ntau, "ntau/I" );
   BabyTree_->Branch("tau_pt", tau_pt, "tau_pt[ntau]/F" );
   BabyTree_->Branch("tau_eta", tau_eta, "tau_eta[ntau]/F" );
