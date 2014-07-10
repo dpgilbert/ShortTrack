@@ -103,7 +103,7 @@ bool isLooseElectron(unsigned int elIdx){
     if( fabs( (1.0/cms2.els_ecalEnergy().at(elIdx)) - (cms2.els_eOverPIn().at(elIdx)/cms2.els_ecalEnergy().at(elIdx)) ) >= 0.05) return false; // |1/E - 1/p|
     if( eleRelIso03(elIdx) >= 0.15) return false; 
     if( cms2.els_conv_vtx_flag().at(elIdx)) return false;
-    if( cms2.els_lost_pixelhits().at(elIdx) > 1) return false;
+    if( cms2.els_exp_innerlayers().at(elIdx) > 1) return false;
     return true;
 
   } else if((fabs(cms2.els_etaSC().at(elIdx)) > 1.479) && (fabs(cms2.els_etaSC().at(elIdx)) < 2.5)){
@@ -116,7 +116,7 @@ bool isLooseElectron(unsigned int elIdx){
     if( fabs( (1.0/cms2.els_ecalEnergy().at(elIdx)) - (cms2.els_eOverPIn().at(elIdx)/cms2.els_ecalEnergy().at(elIdx)) ) >= 0.05) return false; // |1/E - 1/p|
     if( eleRelIso03(elIdx) >= 0.15 || (eleRelIso03(elIdx) >= 0.1 && cms2.els_p4().at(elIdx).pt() < 20) ) return false; 
     if( cms2.els_conv_vtx_flag().at(elIdx)) return false;
-    if( cms2.els_lost_pixelhits().at(elIdx) > 1) return false;
+    if( cms2.els_exp_innerlayers().at(elIdx) > 1) return false;
     return true;
 
   } else return false;
@@ -135,7 +135,7 @@ bool isMediumElectron(unsigned int elIdx){
     if( fabs( (1.0/cms2.els_ecalEnergy().at(elIdx)) - (cms2.els_eOverPIn().at(elIdx)/cms2.els_ecalEnergy().at(elIdx)) ) >= 0.05) return false; // |1/E - 1/p|
     if( eleRelIso03(elIdx) >= 0.15) return false; 
     if( cms2.els_conv_vtx_flag().at(elIdx)) return false;
-    if( cms2.els_lost_pixelhits().at(elIdx) > 1) return false;
+    if( cms2.els_exp_innerlayers().at(elIdx) > 1) return false;
     return true;
 
   } else if((fabs(cms2.els_etaSC().at(elIdx)) > 1.479) && (fabs(cms2.els_etaSC().at(elIdx)) < 2.5)){
@@ -148,7 +148,7 @@ bool isMediumElectron(unsigned int elIdx){
     if( fabs( (1.0/cms2.els_ecalEnergy().at(elIdx)) - (cms2.els_eOverPIn().at(elIdx)/cms2.els_ecalEnergy().at(elIdx)) ) >= 0.05) return false; // |1/E - 1/p|
     if( eleRelIso03(elIdx) >= 0.15 || (eleRelIso03(elIdx) >= 0.1 && cms2.els_p4().at(elIdx).pt() < 20) ) return false; 
     if( cms2.els_conv_vtx_flag().at(elIdx)) return false;
-    if( cms2.els_lost_pixelhits().at(elIdx) > 1) return false;
+    if( cms2.els_exp_innerlayers().at(elIdx) > 1) return false;
     return true;
 
   } else return false;
@@ -167,7 +167,7 @@ bool isTightElectron(unsigned int elIdx){
     if( fabs( (1.0/cms2.els_ecalEnergy().at(elIdx)) - (cms2.els_eOverPIn().at(elIdx)/cms2.els_ecalEnergy().at(elIdx)) ) >= 0.05) return false; // |1/E - 1/p|
     if( eleRelIso03(elIdx) >= 0.1) return false; 
     if( cms2.els_conv_vtx_flag().at(elIdx)) return false;
-    if( cms2.els_lost_pixelhits().at(elIdx) > 0) return false;
+    if( cms2.els_exp_innerlayers().at(elIdx) > 0) return false;
     return true;
 
   } else if((fabs(cms2.els_etaSC().at(elIdx)) > 1.479) && (fabs(cms2.els_etaSC().at(elIdx)) < 2.5)){
@@ -180,7 +180,7 @@ bool isTightElectron(unsigned int elIdx){
     if( fabs( (1.0/cms2.els_ecalEnergy().at(elIdx)) - (cms2.els_eOverPIn().at(elIdx)/cms2.els_ecalEnergy().at(elIdx)) ) >= 0.05) return false; // |1/E - 1/p|
     if( eleRelIso03(elIdx) >= 0.1 || (eleRelIso03(elIdx) >= 0.07 && cms2.els_p4().at(elIdx).pt() < 20) ) return false; 
     if( cms2.els_conv_vtx_flag().at(elIdx)) return false;
-    if( cms2.els_lost_pixelhits().at(elIdx) > 0) return false;
+    if( cms2.els_exp_innerlayers().at(elIdx) > 0) return false;
     return true;
 
   } else return false;
@@ -198,13 +198,18 @@ bool isLooseMuon(unsigned int muIdx){
   if (((cms2.mus_type().at(muIdx)) & (1<<2)) == 0) isTracker = false;
 
   if(!(isGlobal || isTracker)) return false;
-  
+  // The following cuts are not in the official definition, but they are used by ETH to suppress b->mu
+  if (cms2.mus_dxyPV().at(muIdx) > 0.5)                                    return false;
+  if (cms2.mus_dzPV().at(muIdx) > 1.0)                                     return false;
   return true;
 
 }
 
 bool isTightMuon(unsigned int muIdx){
-  if (!isLooseMuon(muIdx)) return false;
+  if (!isLooseMuon(muIdx))                                                 return false;
+  bool isGlobal  = true;
+  if (((cms2.mus_type().at(muIdx)) & (1<<1)) == 0) isGlobal  = false;
+  if (!isGlobal)                                                           return false;
   if (cms2.mus_gfit_chi2().at(muIdx)/cms2.mus_gfit_ndof().at(muIdx) >= 10) return false; 
   if (cms2.mus_gfit_validSTAHits().at(muIdx) == 0)                         return false; 
   if (cms2.mus_numberOfMatchedStations().at(muIdx) < 2)                    return false;
@@ -217,13 +222,13 @@ bool isTightMuon(unsigned int muIdx){
 }
 
 
-bool threeChargeAgree(unsigned int elIdx){
-
-  if(cms2.els_charge().at(elIdx) != cms2.els_trk_charge().at(elIdx)) return false;
-  if(cms2.els_charge().at(elIdx) != cms2.els_sccharge().at(elIdx))   return false;
-  return true;
-
-}
+//bool threeChargeAgree(unsigned int elIdx){
+//
+//  if(cms2.els_charge().at(elIdx) != cms2.els_trk_charge().at(elIdx)) return false;
+//  if(cms2.els_charge().at(elIdx) != cms2.els_sccharge().at(elIdx))   return false;
+//  return true;
+//
+//}
 
 float muRelIso03(unsigned int muIdx){
 

@@ -46,8 +46,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
-    for( unsigned int event = 0; event < nEventsTree; ++event) {
-    //for( unsigned int event = 0; event < 100; ++event) {
+    //for( unsigned int event = 0; event < nEventsTree; ++event) {
+    for( unsigned int event = 0; event < 10000; ++event) {
     
 
       // Get Event Content
@@ -88,7 +88,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         if(!isVetoElectron(iEl)) continue;
         nElectrons10++;
         lep_pt[nlep]   = cms2.els_p4().at(iEl).pt();
-        lep_eta[nlep]  = cms2.els_etaSC().at(iEl); //use SC eta
+        lep_eta[nlep]  = cms2.els_p4().at(iEl).eta(); //save eta, even though we use SCeta for ID
         lep_phi[nlep]  = cms2.els_p4().at(iEl).phi();
         lep_mass[nlep] = cms2.els_p4().at(iEl).mass();
         lep_charge[nlep] = cms2.els_charge().at(iEl);
@@ -99,9 +99,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         lep_relIso03[nlep] =  eleRelIso03(iEl);
         //lep_relIso04[nlep] = ;
         //lep_mcMatchId[nlep] = ;
-        lep_lostHits[nlep] = cms2.els_lost_pixelhits().at(iEl);
+        lep_lostHits[nlep] = cms2.els_exp_innerlayers().at(iEl); //cms2.els_lost_pixelhits().at(iEl);
         lep_convVeto[nlep] = cms2.els_conv_vtx_flag().at(iEl);
-        lep_tightCharge[nlep] = threeChargeAgree(iEl);
+        lep_tightCharge[nlep] = cms2.els_isGsfCtfScPixChargeConsistent().at(iEl); //threeChargeAgree(iEl);
 
         nlep++;
       }
@@ -115,7 +115,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         lep_pt[nlep]   = cms2.mus_p4().at(iMu).pt();
         lep_eta[nlep]  = cms2.mus_p4().at(iMu).eta();
         lep_phi[nlep]  = cms2.mus_p4().at(iMu).phi();
-        lep_mass[nlep] = cms2.mus_p4().at(iMu).mass();
+        lep_mass[nlep] = 0.1395699;//cms2.mus_p4().at(iMu).mass();
         lep_charge[nlep] = cms2.mus_charge().at(iMu);
         lep_pdgId[nlep] = (-13)*cms2.mus_charge().at(iMu);
         lep_dxy[nlep] = cms2.mus_dxyPV().at(iMu); // this uses the silicon track. should we use best track instead?
@@ -124,9 +124,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         lep_relIso03[nlep] = muRelIso03(iMu);
         lep_relIso04[nlep] = muRelIso04(iMu);
         //lep_mcMatchId[nlep] = ;
-        lep_lostHits[nlep] = 1;
-        lep_convVeto[nlep] = 1;
-        lep_tightCharge[nlep] = 1;
+        lep_lostHits[nlep] = 0; // use defaults as if "good electron"
+        lep_convVeto[nlep] = 1;// use defaults as if "good electron"
+        lep_tightCharge[nlep] = 1; // use defaults as if "good electron"
 
         nlep++;
       }
@@ -215,8 +215,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         if(cms2.taus_pf_p4().at(iTau).pt() < 20.0) continue; 
         if(fabs(cms2.taus_pf_p4().at(iTau).eta()) > 2.3) continue; 
 	if (!cms2.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) continue; // HPS3 hits taus
-	if (!cms2.taus_pf_againstElectronTight().at(iTau)) continue; // loose electron rejection 
-	if (!cms2.taus_pf_againstMuonTight().at(iTau)) continue; // loose muon rejection 
+	//if (!cms2.taus_pf_againstElectronLoose().at(iTau)) continue; // loose electron rejection 
+	//if (!cms2.taus_pf_againstMuonTight().at(iTau)) continue; // loose muon rejection 
         
 
         tau_pt[ntau]   = cms2.taus_pf_p4().at(iTau).pt();
@@ -224,16 +224,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         tau_phi[ntau]  = cms2.taus_pf_p4().at(iTau).phi();
         tau_mass[ntau] = cms2.taus_pf_p4().at(iTau).mass();
         tau_charge[ntau] = cms2.taus_pf_charge().at(iTau);
-        //tau_dxy[ntau] = ;
-        //tau_dz[ntau] = ;
-        //tau_isoMVA2[ntau] = ; // not in the twiki any more!!
+        tau_dxy[ntau] = 0; // could use the tau->dxy() function instead, but not sure what it does
+        tau_dz[ntau] = 0; // not sure how to get this. 
         tau_isoCI3hit[ntau] = cms2.taus_pf_byCombinedIsolationDeltaBetaCorrRaw3Hits().at(iTau);
 	int temp = 0;
 	if (cms2.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 1;
 	if (cms2.taus_pf_byMediumCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 2;
 	if (cms2.taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 3;
 	tau_idCI3hit[ntau] = temp;
-        //tau_idMVA2[ntau] = ; // not in the twiki any more!!
         //tau_mcMatchId[ntau] = ;
 
         ntau++;

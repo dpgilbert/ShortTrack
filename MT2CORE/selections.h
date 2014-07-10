@@ -11,7 +11,7 @@ bool isMediumElectron(unsigned int);
 bool isTightElectron(unsigned int);
 bool isLooseMuon(unsigned int);
 bool isTightMuon(unsigned int);
-bool threeChargeAgree(unsigned int);
+//bool threeChargeAgree(unsigned int);
 float muRelIso03(unsigned int);
 float muRelIso04(unsigned int);
 float eleRelIso03(unsigned int);
