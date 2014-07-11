@@ -1409,6 +1409,9 @@ protected:
 	vector<float> taus_pf_mass_;
 	TBranch *taus_pf_mass_branch;
 	bool taus_pf_mass_isLoaded;
+	vector<float> photons_chargedHadronIso_;
+	TBranch *photons_chargedHadronIso_branch;
+	bool photons_chargedHadronIso_isLoaded;
 	vector<float> photons_e1x5_;
 	TBranch *photons_e1x5_branch;
 	bool photons_e1x5_isLoaded;
@@ -1442,6 +1445,12 @@ protected:
 	vector<float> photons_full5x5_hOverE_;
 	TBranch *photons_full5x5_hOverE_branch;
 	bool photons_full5x5_hOverE_isLoaded;
+	vector<float> photons_full5x5_hOverEtowBC_;
+	TBranch *photons_full5x5_hOverEtowBC_branch;
+	bool photons_full5x5_hOverEtowBC_isLoaded;
+	vector<float> photons_full5x5_r9_;
+	TBranch *photons_full5x5_r9_branch;
+	bool photons_full5x5_r9_isLoaded;
 	vector<float> photons_full5x5_sigmaEtaEta_;
 	TBranch *photons_full5x5_sigmaEtaEta_branch;
 	bool photons_full5x5_sigmaEtaEta_isLoaded;
@@ -1478,6 +1487,9 @@ protected:
 	vector<float> photons_mass_;
 	TBranch *photons_mass_branch;
 	bool photons_mass_isLoaded;
+	vector<float> photons_neutralHadronIso_;
+	TBranch *photons_neutralHadronIso_branch;
+	bool photons_neutralHadronIso_isLoaded;
 	vector<float> photons_ntkIsoHollow03_;
 	TBranch *photons_ntkIsoHollow03_branch;
 	bool photons_ntkIsoHollow03_isLoaded;
@@ -1490,6 +1502,9 @@ protected:
 	vector<float> photons_ntkIsoSolid04_;
 	TBranch *photons_ntkIsoSolid04_branch;
 	bool photons_ntkIsoSolid04_isLoaded;
+	vector<float> photons_photonIso_;
+	TBranch *photons_photonIso_branch;
+	bool photons_photonIso_isLoaded;
 	vector<float> photons_sigmaEtaEta_;
 	TBranch *photons_sigmaEtaEta_branch;
 	bool photons_sigmaEtaEta_isLoaded;
@@ -2084,6 +2099,12 @@ protected:
 	vector<int> photons_fiduciality_;
 	TBranch *photons_fiduciality_branch;
 	bool photons_fiduciality_isLoaded;
+	vector<int> photons_photonID_loose_;
+	TBranch *photons_photonID_loose_branch;
+	bool photons_photonID_loose_isLoaded;
+	vector<int> photons_photonID_tight_;
+	TBranch *photons_photonID_tight_branch;
+	bool photons_photonID_tight_isLoaded;
 	vector<int> puInfo_bunchCrossing_;
 	TBranch *puInfo_bunchCrossing_branch;
 	bool puInfo_bunchCrossing_isLoaded;
@@ -4701,6 +4722,11 @@ void Init(TTree *tree) {
 		taus_pf_mass_branch = tree->GetBranch(tree->GetAlias("taus_pf_mass"));
 		taus_pf_mass_branch->SetAddress(&taus_pf_mass_);
 	}
+	photons_chargedHadronIso_branch = 0;
+	if (tree->GetAlias("photons_chargedHadronIso") != 0) {
+		photons_chargedHadronIso_branch = tree->GetBranch(tree->GetAlias("photons_chargedHadronIso"));
+		photons_chargedHadronIso_branch->SetAddress(&photons_chargedHadronIso_);
+	}
 	photons_e1x5_branch = 0;
 	if (tree->GetAlias("photons_e1x5") != 0) {
 		photons_e1x5_branch = tree->GetBranch(tree->GetAlias("photons_e1x5"));
@@ -4755,6 +4781,16 @@ void Init(TTree *tree) {
 	if (tree->GetAlias("photons_full5x5_hOverE") != 0) {
 		photons_full5x5_hOverE_branch = tree->GetBranch(tree->GetAlias("photons_full5x5_hOverE"));
 		photons_full5x5_hOverE_branch->SetAddress(&photons_full5x5_hOverE_);
+	}
+	photons_full5x5_hOverEtowBC_branch = 0;
+	if (tree->GetAlias("photons_full5x5_hOverEtowBC") != 0) {
+		photons_full5x5_hOverEtowBC_branch = tree->GetBranch(tree->GetAlias("photons_full5x5_hOverEtowBC"));
+		photons_full5x5_hOverEtowBC_branch->SetAddress(&photons_full5x5_hOverEtowBC_);
+	}
+	photons_full5x5_r9_branch = 0;
+	if (tree->GetAlias("photons_full5x5_r9") != 0) {
+		photons_full5x5_r9_branch = tree->GetBranch(tree->GetAlias("photons_full5x5_r9"));
+		photons_full5x5_r9_branch->SetAddress(&photons_full5x5_r9_);
 	}
 	photons_full5x5_sigmaEtaEta_branch = 0;
 	if (tree->GetAlias("photons_full5x5_sigmaEtaEta") != 0) {
@@ -4816,6 +4852,11 @@ void Init(TTree *tree) {
 		photons_mass_branch = tree->GetBranch(tree->GetAlias("photons_mass"));
 		photons_mass_branch->SetAddress(&photons_mass_);
 	}
+	photons_neutralHadronIso_branch = 0;
+	if (tree->GetAlias("photons_neutralHadronIso") != 0) {
+		photons_neutralHadronIso_branch = tree->GetBranch(tree->GetAlias("photons_neutralHadronIso"));
+		photons_neutralHadronIso_branch->SetAddress(&photons_neutralHadronIso_);
+	}
 	photons_ntkIsoHollow03_branch = 0;
 	if (tree->GetAlias("photons_ntkIsoHollow03") != 0) {
 		photons_ntkIsoHollow03_branch = tree->GetBranch(tree->GetAlias("photons_ntkIsoHollow03"));
@@ -4835,6 +4876,11 @@ void Init(TTree *tree) {
 	if (tree->GetAlias("photons_ntkIsoSolid04") != 0) {
 		photons_ntkIsoSolid04_branch = tree->GetBranch(tree->GetAlias("photons_ntkIsoSolid04"));
 		photons_ntkIsoSolid04_branch->SetAddress(&photons_ntkIsoSolid04_);
+	}
+	photons_photonIso_branch = 0;
+	if (tree->GetAlias("photons_photonIso") != 0) {
+		photons_photonIso_branch = tree->GetBranch(tree->GetAlias("photons_photonIso"));
+		photons_photonIso_branch->SetAddress(&photons_photonIso_);
 	}
 	photons_sigmaEtaEta_branch = 0;
 	if (tree->GetAlias("photons_sigmaEtaEta") != 0) {
@@ -5826,6 +5872,16 @@ void Init(TTree *tree) {
 		photons_fiduciality_branch = tree->GetBranch(tree->GetAlias("photons_fiduciality"));
 		photons_fiduciality_branch->SetAddress(&photons_fiduciality_);
 	}
+	photons_photonID_loose_branch = 0;
+	if (tree->GetAlias("photons_photonID_loose") != 0) {
+		photons_photonID_loose_branch = tree->GetBranch(tree->GetAlias("photons_photonID_loose"));
+		photons_photonID_loose_branch->SetAddress(&photons_photonID_loose_);
+	}
+	photons_photonID_tight_branch = 0;
+	if (tree->GetAlias("photons_photonID_tight") != 0) {
+		photons_photonID_tight_branch = tree->GetBranch(tree->GetAlias("photons_photonID_tight"));
+		photons_photonID_tight_branch->SetAddress(&photons_photonID_tight_);
+	}
 	puInfo_bunchCrossing_branch = 0;
 	if (tree->GetAlias("puInfo_bunchCrossing") != 0) {
 		puInfo_bunchCrossing_branch = tree->GetBranch(tree->GetAlias("puInfo_bunchCrossing"));
@@ -6786,6 +6842,7 @@ void GetEntry(unsigned int idx)
 		taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits_isLoaded = false;
 		taus_pf_byVLooseCombinedIsolationDeltaBetaCorr_isLoaded = false;
 		taus_pf_mass_isLoaded = false;
+		photons_chargedHadronIso_isLoaded = false;
 		photons_e1x5_isLoaded = false;
 		photons_e2x5Max_isLoaded = false;
 		photons_e3x3_isLoaded = false;
@@ -6797,6 +6854,8 @@ void GetEntry(unsigned int idx)
 		photons_full5x5_e2x5Max_isLoaded = false;
 		photons_full5x5_e5x5_isLoaded = false;
 		photons_full5x5_hOverE_isLoaded = false;
+		photons_full5x5_hOverEtowBC_isLoaded = false;
+		photons_full5x5_r9_isLoaded = false;
 		photons_full5x5_sigmaEtaEta_isLoaded = false;
 		photons_full5x5_sigmaIEtaIEta_isLoaded = false;
 		photons_hOverE_isLoaded = false;
@@ -6809,10 +6868,12 @@ void GetEntry(unsigned int idx)
 		photons_hcalTowerSumEtBcConeDR03_isLoaded = false;
 		photons_hcalTowerSumEtBcConeDR04_isLoaded = false;
 		photons_mass_isLoaded = false;
+		photons_neutralHadronIso_isLoaded = false;
 		photons_ntkIsoHollow03_isLoaded = false;
 		photons_ntkIsoHollow04_isLoaded = false;
 		photons_ntkIsoSolid03_isLoaded = false;
 		photons_ntkIsoSolid04_isLoaded = false;
+		photons_photonIso_isLoaded = false;
 		photons_sigmaEtaEta_isLoaded = false;
 		photons_sigmaIEtaIEta_isLoaded = false;
 		photons_tkIsoHollow03_isLoaded = false;
@@ -7011,6 +7072,8 @@ void GetEntry(unsigned int idx)
 		pfjets_photonMultiplicity_isLoaded = false;
 		taus_pf_charge_isLoaded = false;
 		photons_fiduciality_isLoaded = false;
+		photons_photonID_loose_isLoaded = false;
+		photons_photonID_tight_isLoaded = false;
 		puInfo_bunchCrossing_isLoaded = false;
 		puInfo_nPUvertices_isLoaded = false;
 		convs_algo_isLoaded = false;
@@ -7578,6 +7641,7 @@ void LoadAllBranches()
 	if (taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits_branch != 0) taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits();
 	if (taus_pf_byVLooseCombinedIsolationDeltaBetaCorr_branch != 0) taus_pf_byVLooseCombinedIsolationDeltaBetaCorr();
 	if (taus_pf_mass_branch != 0) taus_pf_mass();
+	if (photons_chargedHadronIso_branch != 0) photons_chargedHadronIso();
 	if (photons_e1x5_branch != 0) photons_e1x5();
 	if (photons_e2x5Max_branch != 0) photons_e2x5Max();
 	if (photons_e3x3_branch != 0) photons_e3x3();
@@ -7589,6 +7653,8 @@ void LoadAllBranches()
 	if (photons_full5x5_e2x5Max_branch != 0) photons_full5x5_e2x5Max();
 	if (photons_full5x5_e5x5_branch != 0) photons_full5x5_e5x5();
 	if (photons_full5x5_hOverE_branch != 0) photons_full5x5_hOverE();
+	if (photons_full5x5_hOverEtowBC_branch != 0) photons_full5x5_hOverEtowBC();
+	if (photons_full5x5_r9_branch != 0) photons_full5x5_r9();
 	if (photons_full5x5_sigmaEtaEta_branch != 0) photons_full5x5_sigmaEtaEta();
 	if (photons_full5x5_sigmaIEtaIEta_branch != 0) photons_full5x5_sigmaIEtaIEta();
 	if (photons_hOverE_branch != 0) photons_hOverE();
@@ -7601,10 +7667,12 @@ void LoadAllBranches()
 	if (photons_hcalTowerSumEtBcConeDR03_branch != 0) photons_hcalTowerSumEtBcConeDR03();
 	if (photons_hcalTowerSumEtBcConeDR04_branch != 0) photons_hcalTowerSumEtBcConeDR04();
 	if (photons_mass_branch != 0) photons_mass();
+	if (photons_neutralHadronIso_branch != 0) photons_neutralHadronIso();
 	if (photons_ntkIsoHollow03_branch != 0) photons_ntkIsoHollow03();
 	if (photons_ntkIsoHollow04_branch != 0) photons_ntkIsoHollow04();
 	if (photons_ntkIsoSolid03_branch != 0) photons_ntkIsoSolid03();
 	if (photons_ntkIsoSolid04_branch != 0) photons_ntkIsoSolid04();
+	if (photons_photonIso_branch != 0) photons_photonIso();
 	if (photons_sigmaEtaEta_branch != 0) photons_sigmaEtaEta();
 	if (photons_sigmaIEtaIEta_branch != 0) photons_sigmaIEtaIEta();
 	if (photons_tkIsoHollow03_branch != 0) photons_tkIsoHollow03();
@@ -7803,6 +7871,8 @@ void LoadAllBranches()
 	if (pfjets_photonMultiplicity_branch != 0) pfjets_photonMultiplicity();
 	if (taus_pf_charge_branch != 0) taus_pf_charge();
 	if (photons_fiduciality_branch != 0) photons_fiduciality();
+	if (photons_photonID_loose_branch != 0) photons_photonID_loose();
+	if (photons_photonID_tight_branch != 0) photons_photonID_tight();
 	if (puInfo_bunchCrossing_branch != 0) puInfo_bunchCrossing();
 	if (puInfo_nPUvertices_branch != 0) puInfo_nPUvertices();
 	if (convs_algo_branch != 0) convs_algo();
@@ -12543,6 +12613,16 @@ void LoadAllBranches()
 		}
 		return taus_pf_mass_;
 	}
+	vector<float> &photons_chargedHadronIso()
+	{
+		if (not photons_chargedHadronIso_isLoaded) {
+			if (photons_chargedHadronIso_branch != 0) {
+				photons_chargedHadronIso_branch->GetEntry(index);
+			} else { }
+			photons_chargedHadronIso_isLoaded = true;
+		}
+		return photons_chargedHadronIso_;
+	}
 	vector<float> &photons_e1x5()
 	{
 		if (not photons_e1x5_isLoaded) {
@@ -12652,6 +12732,26 @@ void LoadAllBranches()
 			photons_full5x5_hOverE_isLoaded = true;
 		}
 		return photons_full5x5_hOverE_;
+	}
+	vector<float> &photons_full5x5_hOverEtowBC()
+	{
+		if (not photons_full5x5_hOverEtowBC_isLoaded) {
+			if (photons_full5x5_hOverEtowBC_branch != 0) {
+				photons_full5x5_hOverEtowBC_branch->GetEntry(index);
+			} else { }
+			photons_full5x5_hOverEtowBC_isLoaded = true;
+		}
+		return photons_full5x5_hOverEtowBC_;
+	}
+	vector<float> &photons_full5x5_r9()
+	{
+		if (not photons_full5x5_r9_isLoaded) {
+			if (photons_full5x5_r9_branch != 0) {
+				photons_full5x5_r9_branch->GetEntry(index);
+			} else { }
+			photons_full5x5_r9_isLoaded = true;
+		}
+		return photons_full5x5_r9_;
 	}
 	vector<float> &photons_full5x5_sigmaEtaEta()
 	{
@@ -12773,6 +12873,16 @@ void LoadAllBranches()
 		}
 		return photons_mass_;
 	}
+	vector<float> &photons_neutralHadronIso()
+	{
+		if (not photons_neutralHadronIso_isLoaded) {
+			if (photons_neutralHadronIso_branch != 0) {
+				photons_neutralHadronIso_branch->GetEntry(index);
+			} else { }
+			photons_neutralHadronIso_isLoaded = true;
+		}
+		return photons_neutralHadronIso_;
+	}
 	vector<float> &photons_ntkIsoHollow03()
 	{
 		if (not photons_ntkIsoHollow03_isLoaded) {
@@ -12812,6 +12922,16 @@ void LoadAllBranches()
 			photons_ntkIsoSolid04_isLoaded = true;
 		}
 		return photons_ntkIsoSolid04_;
+	}
+	vector<float> &photons_photonIso()
+	{
+		if (not photons_photonIso_isLoaded) {
+			if (photons_photonIso_branch != 0) {
+				photons_photonIso_branch->GetEntry(index);
+			} else { }
+			photons_photonIso_isLoaded = true;
+		}
+		return photons_photonIso_;
 	}
 	vector<float> &photons_sigmaEtaEta()
 	{
@@ -14793,6 +14913,26 @@ void LoadAllBranches()
 		}
 		return photons_fiduciality_;
 	}
+	vector<int> &photons_photonID_loose()
+	{
+		if (not photons_photonID_loose_isLoaded) {
+			if (photons_photonID_loose_branch != 0) {
+				photons_photonID_loose_branch->GetEntry(index);
+			} else { }
+			photons_photonID_loose_isLoaded = true;
+		}
+		return photons_photonID_loose_;
+	}
+	vector<int> &photons_photonID_tight()
+	{
+		if (not photons_photonID_tight_isLoaded) {
+			if (photons_photonID_tight_branch != 0) {
+				photons_photonID_tight_branch->GetEntry(index);
+			} else { }
+			photons_photonID_tight_isLoaded = true;
+		}
+		return photons_photonID_tight_;
+	}
 	vector<int> &puInfo_bunchCrossing()
 	{
 		if (not puInfo_bunchCrossing_isLoaded) {
@@ -16279,6 +16419,7 @@ namespace tas {
 	vector<float> &taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits();
 	vector<float> &taus_pf_byVLooseCombinedIsolationDeltaBetaCorr();
 	vector<float> &taus_pf_mass();
+	vector<float> &photons_chargedHadronIso();
 	vector<float> &photons_e1x5();
 	vector<float> &photons_e2x5Max();
 	vector<float> &photons_e3x3();
@@ -16290,6 +16431,8 @@ namespace tas {
 	vector<float> &photons_full5x5_e2x5Max();
 	vector<float> &photons_full5x5_e5x5();
 	vector<float> &photons_full5x5_hOverE();
+	vector<float> &photons_full5x5_hOverEtowBC();
+	vector<float> &photons_full5x5_r9();
 	vector<float> &photons_full5x5_sigmaEtaEta();
 	vector<float> &photons_full5x5_sigmaIEtaIEta();
 	vector<float> &photons_hOverE();
@@ -16302,10 +16445,12 @@ namespace tas {
 	vector<float> &photons_hcalTowerSumEtBcConeDR03();
 	vector<float> &photons_hcalTowerSumEtBcConeDR04();
 	vector<float> &photons_mass();
+	vector<float> &photons_neutralHadronIso();
 	vector<float> &photons_ntkIsoHollow03();
 	vector<float> &photons_ntkIsoHollow04();
 	vector<float> &photons_ntkIsoSolid03();
 	vector<float> &photons_ntkIsoSolid04();
+	vector<float> &photons_photonIso();
 	vector<float> &photons_sigmaEtaEta();
 	vector<float> &photons_sigmaIEtaIEta();
 	vector<float> &photons_tkIsoHollow03();
@@ -16504,6 +16649,8 @@ namespace tas {
 	vector<int> &pfjets_photonMultiplicity();
 	vector<int> &taus_pf_charge();
 	vector<int> &photons_fiduciality();
+	vector<int> &photons_photonID_loose();
+	vector<int> &photons_photonID_tight();
 	vector<int> &puInfo_bunchCrossing();
 	vector<int> &puInfo_nPUvertices();
 	vector<int> &convs_algo();

@@ -465,6 +465,7 @@ namespace tas {
 	vector<float> &taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits() { return cms2.taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits(); }
 	vector<float> &taus_pf_byVLooseCombinedIsolationDeltaBetaCorr() { return cms2.taus_pf_byVLooseCombinedIsolationDeltaBetaCorr(); }
 	vector<float> &taus_pf_mass() { return cms2.taus_pf_mass(); }
+	vector<float> &photons_chargedHadronIso() { return cms2.photons_chargedHadronIso(); }
 	vector<float> &photons_e1x5() { return cms2.photons_e1x5(); }
 	vector<float> &photons_e2x5Max() { return cms2.photons_e2x5Max(); }
 	vector<float> &photons_e3x3() { return cms2.photons_e3x3(); }
@@ -476,6 +477,8 @@ namespace tas {
 	vector<float> &photons_full5x5_e2x5Max() { return cms2.photons_full5x5_e2x5Max(); }
 	vector<float> &photons_full5x5_e5x5() { return cms2.photons_full5x5_e5x5(); }
 	vector<float> &photons_full5x5_hOverE() { return cms2.photons_full5x5_hOverE(); }
+	vector<float> &photons_full5x5_hOverEtowBC() { return cms2.photons_full5x5_hOverEtowBC(); }
+	vector<float> &photons_full5x5_r9() { return cms2.photons_full5x5_r9(); }
 	vector<float> &photons_full5x5_sigmaEtaEta() { return cms2.photons_full5x5_sigmaEtaEta(); }
 	vector<float> &photons_full5x5_sigmaIEtaIEta() { return cms2.photons_full5x5_sigmaIEtaIEta(); }
 	vector<float> &photons_hOverE() { return cms2.photons_hOverE(); }
@@ -488,10 +491,12 @@ namespace tas {
 	vector<float> &photons_hcalTowerSumEtBcConeDR03() { return cms2.photons_hcalTowerSumEtBcConeDR03(); }
 	vector<float> &photons_hcalTowerSumEtBcConeDR04() { return cms2.photons_hcalTowerSumEtBcConeDR04(); }
 	vector<float> &photons_mass() { return cms2.photons_mass(); }
+	vector<float> &photons_neutralHadronIso() { return cms2.photons_neutralHadronIso(); }
 	vector<float> &photons_ntkIsoHollow03() { return cms2.photons_ntkIsoHollow03(); }
 	vector<float> &photons_ntkIsoHollow04() { return cms2.photons_ntkIsoHollow04(); }
 	vector<float> &photons_ntkIsoSolid03() { return cms2.photons_ntkIsoSolid03(); }
 	vector<float> &photons_ntkIsoSolid04() { return cms2.photons_ntkIsoSolid04(); }
+	vector<float> &photons_photonIso() { return cms2.photons_photonIso(); }
 	vector<float> &photons_sigmaEtaEta() { return cms2.photons_sigmaEtaEta(); }
 	vector<float> &photons_sigmaIEtaIEta() { return cms2.photons_sigmaIEtaIEta(); }
 	vector<float> &photons_tkIsoHollow03() { return cms2.photons_tkIsoHollow03(); }
@@ -690,6 +695,8 @@ namespace tas {
 	vector<int> &pfjets_photonMultiplicity() { return cms2.pfjets_photonMultiplicity(); }
 	vector<int> &taus_pf_charge() { return cms2.taus_pf_charge(); }
 	vector<int> &photons_fiduciality() { return cms2.photons_fiduciality(); }
+	vector<int> &photons_photonID_loose() { return cms2.photons_photonID_loose(); }
+	vector<int> &photons_photonID_tight() { return cms2.photons_photonID_tight(); }
 	vector<int> &puInfo_bunchCrossing() { return cms2.puInfo_bunchCrossing(); }
 	vector<int> &puInfo_nPUvertices() { return cms2.puInfo_nPUvertices(); }
 	vector<int> &convs_algo() { return cms2.convs_algo(); }
