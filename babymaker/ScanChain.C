@@ -101,7 +101,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         //lep_mcMatchId[nlep] = ;
         lep_lostHits[nlep] = cms2.els_exp_innerlayers().at(iEl); //cms2.els_lost_pixelhits().at(iEl);
         lep_convVeto[nlep] = cms2.els_conv_vtx_flag().at(iEl);
-        lep_tightCharge[nlep] = cms2.els_isGsfCtfScPixChargeConsistent().at(iEl); //threeChargeAgree(iEl);
+        lep_tightCharge[nlep] = tightChargeEle(iEl);
 
         nlep++;
       }
@@ -110,12 +110,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       nMuons10 = 0;
       for(unsigned int iMu = 0; iMu < cms2.mus_p4().size(); iMu++){
         if(cms2.mus_p4().at(iMu).pt() < 10.0) continue;
+        if(fabs(cms2.mus_p4().at(iMu).eta()) > 2.4) continue;
         if(!isLooseMuon(iMu)) continue;
         nMuons10++;
         lep_pt[nlep]   = cms2.mus_p4().at(iMu).pt();
         lep_eta[nlep]  = cms2.mus_p4().at(iMu).eta();
         lep_phi[nlep]  = cms2.mus_p4().at(iMu).phi();
-        //lep_mass[nlep] = 0.1395699;//cms2.mus_p4().at(iMu).mass();
         lep_mass[nlep] = cms2.mus_mass().at(iMu);
         lep_charge[nlep] = cms2.mus_charge().at(iMu);
         lep_pdgId[nlep] = (-13)*cms2.mus_charge().at(iMu);
@@ -127,7 +127,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         //lep_mcMatchId[nlep] = ;
         lep_lostHits[nlep] = 0; // use defaults as if "good electron"
         lep_convVeto[nlep] = 1;// use defaults as if "good electron"
-        lep_tightCharge[nlep] = 1; // use defaults as if "good electron"
+        lep_tightCharge[nlep] = tightChargeMuon(iMu);
 
         nlep++;
       }
@@ -162,9 +162,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         Jet_mass[nJet] = cms2.pfjets_mass().at(iJet);
         Jet_btagCSV[nJet] = cms2.pfjets_combinedSecondaryVertexBJetTag().at(iJet); 
         //Jet_mcPt: // need to add jet->genJet() to CMS3
-        Jet_mcFlavour[nJet] = cms2.pfjets_partonFlavour().at(iJet); //partonFlavour() is the "new" definition starting from 7_0_5_patch1, according to: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#New_jet_flavour_in_PAT
+        Jet_mcFlavour[nJet] = cms2.pfjets_partonFlavour().at(iJet);
         //Jet_quarkGluonID
         Jet_area[nJet] = cms2.pfjets_area().at(iJet);
+	Jet_rawPt[nJet] = cms2.pfjets_p4().at(iJet).pt() * cms2.pfjets_undoJEC().at(iJet);
 
         if(isTightPFJet(iJet))  Jet_id[nJet] = 2;
         else if(isMediumPFJet(iJet)) Jet_id[nJet] = 1;
@@ -216,8 +217,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         if(cms2.taus_pf_p4().at(iTau).pt() < 20.0) continue; 
         if(fabs(cms2.taus_pf_p4().at(iTau).eta()) > 2.3) continue; 
 	if (!cms2.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) continue; // HPS3 hits taus
-	//if (!cms2.taus_pf_againstElectronLoose().at(iTau)) continue; // loose electron rejection 
-	//if (!cms2.taus_pf_againstMuonTight().at(iTau)) continue; // loose muon rejection 
+	if (!cms2.taus_pf_againstElectronLoose().at(iTau)) continue; // loose electron rejection 
+	if (!cms2.taus_pf_againstMuonTight().at(iTau)) continue; // loose muon rejection 
         
 
         tau_pt[ntau]   = cms2.taus_pf_p4().at(iTau).pt();

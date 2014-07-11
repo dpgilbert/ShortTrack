@@ -221,14 +221,16 @@ bool isTightMuon(unsigned int muIdx){
 
 }
 
+int tightChargeEle(unsigned int elIdx){
+  if (cms2.els_isGsfCtfScPixChargeConsistent().at(elIdx))                         return 2;
+  else if (cms2.els_trk_charge().at(elIdx) == cms2.els_sccharge().at(elIdx))      return 1;
+  else                                                                            return 0;
+}
 
-//bool threeChargeAgree(unsigned int elIdx){
-//
-//  if(cms2.els_charge().at(elIdx) != cms2.els_trk_charge().at(elIdx)) return false;
-//  if(cms2.els_charge().at(elIdx) != cms2.els_sccharge().at(elIdx))   return false;
-//  return true;
-//
-//}
+int tightChargeMuon(unsigned int muIdx){
+  if ( cms2.mus_ptErr().at(muIdx) / cms2.mus_p4().at(muIdx).pt() < 0.2 )          return 2;
+  else                                                                            return 0;
+}
 
 float muRelIso03(unsigned int muIdx){
 
