@@ -46,8 +46,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
-    //for( unsigned int event = 0; event < nEventsTree; ++event) {
-    for( unsigned int event = 0; event < 10000; ++event) {
+    for( unsigned int event = 0; event < nEventsTree; ++event) {
+    //for( unsigned int event = 0; event < 10000; ++event) {
     
 
       // Get Event Content
@@ -90,7 +90,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         lep_pt[nlep]   = cms2.els_p4().at(iEl).pt();
         lep_eta[nlep]  = cms2.els_p4().at(iEl).eta(); //save eta, even though we use SCeta for ID
         lep_phi[nlep]  = cms2.els_p4().at(iEl).phi();
-        lep_mass[nlep] = cms2.els_p4().at(iEl).mass();
+        lep_mass[nlep] = cms2.els_mass().at(iEl);
         lep_charge[nlep] = cms2.els_charge().at(iEl);
         lep_pdgId[nlep] = (-11)*cms2.els_charge().at(iEl);
         lep_dxy[nlep] = cms2.els_dxyPV().at(iEl);
@@ -115,7 +115,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         lep_pt[nlep]   = cms2.mus_p4().at(iMu).pt();
         lep_eta[nlep]  = cms2.mus_p4().at(iMu).eta();
         lep_phi[nlep]  = cms2.mus_p4().at(iMu).phi();
-        lep_mass[nlep] = 0.1395699;//cms2.mus_p4().at(iMu).mass();
+        //lep_mass[nlep] = 0.1395699;//cms2.mus_p4().at(iMu).mass();
+        lep_mass[nlep] = cms2.mus_mass().at(iMu);
         lep_charge[nlep] = cms2.mus_charge().at(iMu);
         lep_pdgId[nlep] = (-13)*cms2.mus_charge().at(iMu);
         lep_dxy[nlep] = cms2.mus_dxyPV().at(iMu); // this uses the silicon track. should we use best track instead?
@@ -158,7 +159,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         Jet_pt[nJet]   = cms2.pfjets_p4().at(iJet).pt();
         Jet_eta[nJet]  = cms2.pfjets_p4().at(iJet).eta();
         Jet_phi[nJet]  = cms2.pfjets_p4().at(iJet).phi();
-        Jet_mass[nJet] = cms2.pfjets_p4().at(iJet).mass();
+        Jet_mass[nJet] = cms2.pfjets_mass().at(iJet);
         Jet_btagCSV[nJet] = cms2.pfjets_combinedSecondaryVertexBJetTag().at(iJet); 
         //Jet_mcPt: // need to add jet->genJet() to CMS3
         Jet_mcFlavour[nJet] = cms2.pfjets_partonFlavour().at(iJet); //partonFlavour() is the "new" definition starting from 7_0_5_patch1, according to: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#New_jet_flavour_in_PAT
@@ -222,7 +223,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         tau_pt[ntau]   = cms2.taus_pf_p4().at(iTau).pt();
         tau_eta[ntau]  = cms2.taus_pf_p4().at(iTau).eta();
         tau_phi[ntau]  = cms2.taus_pf_p4().at(iTau).phi();
-        tau_mass[ntau] = cms2.taus_pf_p4().at(iTau).mass();
+        tau_mass[ntau] = cms2.taus_pf_mass().at(iTau);
         tau_charge[ntau] = cms2.taus_pf_charge().at(iTau);
         tau_dxy[ntau] = 0; // could use the tau->dxy() function instead, but not sure what it does
         tau_dz[ntau] = 0; // not sure how to get this. 
@@ -245,7 +246,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         gamma_pt[ngamma]   = cms2.photons_p4().at(iGamma).pt();
         gamma_eta[ngamma]  = cms2.photons_p4().at(iGamma).eta();
         gamma_phi[ngamma]  = cms2.photons_p4().at(iGamma).phi();
-        gamma_mass[ngamma] = cms2.photons_p4().at(iGamma).mass();
+        gamma_mass[ngamma] = cms2.photons_mass().at(iGamma);
 
         //gamma_mcMatchId[ngamma] = ;
         //gamma_chadiso[ngamma] = ;
@@ -263,7 +264,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         genPart_pt[ngenPart] = cms2.genps_p4().at(iGen).pt();
         genPart_eta[ngenPart] = cms2.genps_p4().at(iGen).eta();
         genPart_phi[ngenPart] = cms2.genps_p4().at(iGen).phi();
-        genPart_mass[ngenPart] = cms2.genps_p4().at(iGen).mass();
+        genPart_mass[ngenPart] = cms2.genps_mass().at(iGen);
         genPart_pdgId[ngenPart] = cms2.genps_id().at(iGen);
         //genPart_charge[ngenPart] = ;
         genPart_motherId[ngenPart] = cms2.genps_id_mother().at(iGen);
@@ -300,7 +301,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         vec_isoTrack_pt.push_back    ( cand_pt                          );
         vec_isoTrack_eta.push_back   ( cms2.pfcands_p4().at(ipf).eta()  );
         vec_isoTrack_phi.push_back   ( cms2.pfcands_p4().at(ipf).phi()  );
-        vec_isoTrack_mass.push_back  ( cms2.pfcands_p4().at(ipf).mass() );
+        //vec_isoTrack_mass.push_back  ( cms2.pfcands_p4().at(ipf).mass() );
+        vec_isoTrack_mass.push_back  ( cms2.pfcands_mass().at(ipf)      );
         vec_isoTrack_absIso.push_back( absiso                           );
         vec_isoTrack_dz.push_back    ( cms2.pfcands_dz().at(ipf)        );
         vec_isoTrack_pdgId.push_back ( cms2.pfcands_particleId().at(ipf));
