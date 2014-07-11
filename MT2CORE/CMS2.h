@@ -743,6 +743,9 @@ protected:
 	vector<float> els_lh_;
 	TBranch *els_lh_branch;
 	bool els_lh_isLoaded;
+	vector<float> els_mass_;
+	TBranch *els_mass_branch;
+	bool els_mass_isLoaded;
 	vector<float> els_mc_patMatch_dr_;
 	TBranch *els_mc_patMatch_dr_branch;
 	bool els_mc_patMatch_dr_isLoaded;
@@ -842,6 +845,9 @@ protected:
 	vector<float> els_z0corr_;
 	TBranch *els_z0corr_branch;
 	bool els_z0corr_isLoaded;
+	vector<float> genps_mass_;
+	TBranch *genps_mass_branch;
+	bool genps_mass_isLoaded;
 	vector<float> mus_backToBackCompat_;
 	TBranch *mus_backToBackCompat_branch;
 	bool mus_backToBackCompat_isLoaded;
@@ -1145,6 +1151,9 @@ protected:
 	vector<float> mus_localDistance_;
 	TBranch *mus_localDistance_branch;
 	bool mus_localDistance_isLoaded;
+	vector<float> mus_mass_;
+	TBranch *mus_mass_branch;
+	bool mus_mass_isLoaded;
 	vector<float> mus_mc_patMatch_dr_;
 	TBranch *mus_mc_patMatch_dr_branch;
 	bool mus_mc_patMatch_dr_isLoaded;
@@ -1253,6 +1262,9 @@ protected:
 	vector<float> pfcands_dz_;
 	TBranch *pfcands_dz_branch;
 	bool pfcands_dz_isLoaded;
+	vector<float> pfcands_mass_;
+	TBranch *pfcands_mass_branch;
+	bool pfcands_mass_isLoaded;
 	vector<float> pfjets_area_;
 	TBranch *pfjets_area_branch;
 	bool pfjets_area_isLoaded;
@@ -1295,6 +1307,9 @@ protected:
 	vector<float> pfjets_jetProbabilityBJetTag_;
 	TBranch *pfjets_jetProbabilityBJetTag_branch;
 	bool pfjets_jetProbabilityBJetTag_isLoaded;
+	vector<float> pfjets_mass_;
+	TBranch *pfjets_mass_branch;
+	bool pfjets_mass_isLoaded;
 	vector<float> pfjets_muonE_;
 	TBranch *pfjets_muonE_branch;
 	bool pfjets_muonE_isLoaded;
@@ -1322,6 +1337,9 @@ protected:
 	vector<float> pfjets_trackCountingHighPurBJetTag_;
 	TBranch *pfjets_trackCountingHighPurBJetTag_branch;
 	bool pfjets_trackCountingHighPurBJetTag_isLoaded;
+	vector<float> pfjets_undoJEC_;
+	TBranch *pfjets_undoJEC_branch;
+	bool pfjets_undoJEC_isLoaded;
 	vector<float> taus_pf_againstElectronDeadECAL_;
 	TBranch *taus_pf_againstElectronDeadECAL_branch;
 	bool taus_pf_againstElectronDeadECAL_isLoaded;
@@ -1388,6 +1406,9 @@ protected:
 	vector<float> taus_pf_byVLooseCombinedIsolationDeltaBetaCorr_;
 	TBranch *taus_pf_byVLooseCombinedIsolationDeltaBetaCorr_branch;
 	bool taus_pf_byVLooseCombinedIsolationDeltaBetaCorr_isLoaded;
+	vector<float> taus_pf_mass_;
+	TBranch *taus_pf_mass_branch;
+	bool taus_pf_mass_isLoaded;
 	vector<float> photons_e1x5_;
 	TBranch *photons_e1x5_branch;
 	bool photons_e1x5_isLoaded;
@@ -1454,6 +1475,9 @@ protected:
 	vector<float> photons_hcalTowerSumEtBcConeDR04_;
 	TBranch *photons_hcalTowerSumEtBcConeDR04_branch;
 	bool photons_hcalTowerSumEtBcConeDR04_isLoaded;
+	vector<float> photons_mass_;
+	TBranch *photons_mass_branch;
+	bool photons_mass_isLoaded;
 	vector<float> photons_ntkIsoHollow03_;
 	TBranch *photons_ntkIsoHollow03_branch;
 	bool photons_ntkIsoHollow03_isLoaded;
@@ -3567,6 +3591,11 @@ void Init(TTree *tree) {
 		els_lh_branch = tree->GetBranch(tree->GetAlias("els_lh"));
 		els_lh_branch->SetAddress(&els_lh_);
 	}
+	els_mass_branch = 0;
+	if (tree->GetAlias("els_mass") != 0) {
+		els_mass_branch = tree->GetBranch(tree->GetAlias("els_mass"));
+		els_mass_branch->SetAddress(&els_mass_);
+	}
 	els_mc_patMatch_dr_branch = 0;
 	if (tree->GetAlias("els_mc_patMatch_dr") != 0) {
 		els_mc_patMatch_dr_branch = tree->GetBranch(tree->GetAlias("els_mc_patMatch_dr"));
@@ -3731,6 +3760,11 @@ void Init(TTree *tree) {
 	if (tree->GetAlias("els_z0corr") != 0) {
 		els_z0corr_branch = tree->GetBranch(tree->GetAlias("els_z0corr"));
 		els_z0corr_branch->SetAddress(&els_z0corr_);
+	}
+	genps_mass_branch = 0;
+	if (tree->GetAlias("genps_mass") != 0) {
+		genps_mass_branch = tree->GetBranch(tree->GetAlias("genps_mass"));
+		genps_mass_branch->SetAddress(&genps_mass_);
 	}
 	mus_backToBackCompat_branch = 0;
 	if (tree->GetAlias("mus_backToBackCompat") != 0) {
@@ -4237,6 +4271,11 @@ void Init(TTree *tree) {
 		mus_localDistance_branch = tree->GetBranch(tree->GetAlias("mus_localDistance"));
 		mus_localDistance_branch->SetAddress(&mus_localDistance_);
 	}
+	mus_mass_branch = 0;
+	if (tree->GetAlias("mus_mass") != 0) {
+		mus_mass_branch = tree->GetBranch(tree->GetAlias("mus_mass"));
+		mus_mass_branch->SetAddress(&mus_mass_);
+	}
 	mus_mc_patMatch_dr_branch = 0;
 	if (tree->GetAlias("mus_mc_patMatch_dr") != 0) {
 		mus_mc_patMatch_dr_branch = tree->GetBranch(tree->GetAlias("mus_mc_patMatch_dr"));
@@ -4417,6 +4456,11 @@ void Init(TTree *tree) {
 		pfcands_dz_branch = tree->GetBranch(tree->GetAlias("pfcands_dz"));
 		pfcands_dz_branch->SetAddress(&pfcands_dz_);
 	}
+	pfcands_mass_branch = 0;
+	if (tree->GetAlias("pfcands_mass") != 0) {
+		pfcands_mass_branch = tree->GetBranch(tree->GetAlias("pfcands_mass"));
+		pfcands_mass_branch->SetAddress(&pfcands_mass_);
+	}
 	pfjets_area_branch = 0;
 	if (tree->GetAlias("pfjets_area") != 0) {
 		pfjets_area_branch = tree->GetBranch(tree->GetAlias("pfjets_area"));
@@ -4487,6 +4531,11 @@ void Init(TTree *tree) {
 		pfjets_jetProbabilityBJetTag_branch = tree->GetBranch(tree->GetAlias("pfjets_jetProbabilityBJetTag"));
 		pfjets_jetProbabilityBJetTag_branch->SetAddress(&pfjets_jetProbabilityBJetTag_);
 	}
+	pfjets_mass_branch = 0;
+	if (tree->GetAlias("pfjets_mass") != 0) {
+		pfjets_mass_branch = tree->GetBranch(tree->GetAlias("pfjets_mass"));
+		pfjets_mass_branch->SetAddress(&pfjets_mass_);
+	}
 	pfjets_muonE_branch = 0;
 	if (tree->GetAlias("pfjets_muonE") != 0) {
 		pfjets_muonE_branch = tree->GetBranch(tree->GetAlias("pfjets_muonE"));
@@ -4531,6 +4580,11 @@ void Init(TTree *tree) {
 	if (tree->GetAlias("pfjets_trackCountingHighPurBJetTag") != 0) {
 		pfjets_trackCountingHighPurBJetTag_branch = tree->GetBranch(tree->GetAlias("pfjets_trackCountingHighPurBJetTag"));
 		pfjets_trackCountingHighPurBJetTag_branch->SetAddress(&pfjets_trackCountingHighPurBJetTag_);
+	}
+	pfjets_undoJEC_branch = 0;
+	if (tree->GetAlias("pfjets_undoJEC") != 0) {
+		pfjets_undoJEC_branch = tree->GetBranch(tree->GetAlias("pfjets_undoJEC"));
+		pfjets_undoJEC_branch->SetAddress(&pfjets_undoJEC_);
 	}
 	taus_pf_againstElectronDeadECAL_branch = 0;
 	if (tree->GetAlias("taus_pf_againstElectronDeadECAL") != 0) {
@@ -4642,6 +4696,11 @@ void Init(TTree *tree) {
 		taus_pf_byVLooseCombinedIsolationDeltaBetaCorr_branch = tree->GetBranch(tree->GetAlias("taus_pf_byVLooseCombinedIsolationDeltaBetaCorr"));
 		taus_pf_byVLooseCombinedIsolationDeltaBetaCorr_branch->SetAddress(&taus_pf_byVLooseCombinedIsolationDeltaBetaCorr_);
 	}
+	taus_pf_mass_branch = 0;
+	if (tree->GetAlias("taus_pf_mass") != 0) {
+		taus_pf_mass_branch = tree->GetBranch(tree->GetAlias("taus_pf_mass"));
+		taus_pf_mass_branch->SetAddress(&taus_pf_mass_);
+	}
 	photons_e1x5_branch = 0;
 	if (tree->GetAlias("photons_e1x5") != 0) {
 		photons_e1x5_branch = tree->GetBranch(tree->GetAlias("photons_e1x5"));
@@ -4751,6 +4810,11 @@ void Init(TTree *tree) {
 	if (tree->GetAlias("photons_hcalTowerSumEtBcConeDR04") != 0) {
 		photons_hcalTowerSumEtBcConeDR04_branch = tree->GetBranch(tree->GetAlias("photons_hcalTowerSumEtBcConeDR04"));
 		photons_hcalTowerSumEtBcConeDR04_branch->SetAddress(&photons_hcalTowerSumEtBcConeDR04_);
+	}
+	photons_mass_branch = 0;
+	if (tree->GetAlias("photons_mass") != 0) {
+		photons_mass_branch = tree->GetBranch(tree->GetAlias("photons_mass"));
+		photons_mass_branch->SetAddress(&photons_mass_);
 	}
 	photons_ntkIsoHollow03_branch = 0;
 	if (tree->GetAlias("photons_ntkIsoHollow03") != 0) {
@@ -6500,6 +6564,7 @@ void GetEntry(unsigned int idx)
 		els_iso04_pf_nhad05_isLoaded = false;
 		els_layer1_charge_isLoaded = false;
 		els_lh_isLoaded = false;
+		els_mass_isLoaded = false;
 		els_mc_patMatch_dr_isLoaded = false;
 		els_mva_isLoaded = false;
 		els_ndof_isLoaded = false;
@@ -6533,6 +6598,7 @@ void GetEntry(unsigned int idx)
 		els_z0_isLoaded = false;
 		els_z0Err_isLoaded = false;
 		els_z0corr_isLoaded = false;
+		genps_mass_isLoaded = false;
 		mus_backToBackCompat_isLoaded = false;
 		mus_best_dxyPV_isLoaded = false;
 		mus_best_dzPV_isLoaded = false;
@@ -6634,6 +6700,7 @@ void GetEntry(unsigned int idx)
 		mus_iso_hovetoDep_isLoaded = false;
 		mus_iso_trckvetoDep_isLoaded = false;
 		mus_localDistance_isLoaded = false;
+		mus_mass_isLoaded = false;
 		mus_mc_patMatch_dr_isLoaded = false;
 		mus_ndof_isLoaded = false;
 		mus_overlapCompat_isLoaded = false;
@@ -6670,6 +6737,7 @@ void GetEntry(unsigned int idx)
 		mus_z0Err_isLoaded = false;
 		mus_z0corr_isLoaded = false;
 		pfcands_dz_isLoaded = false;
+		pfcands_mass_isLoaded = false;
 		pfjets_area_isLoaded = false;
 		pfjets_chargedEmE_isLoaded = false;
 		pfjets_chargedHadronE_isLoaded = false;
@@ -6684,6 +6752,7 @@ void GetEntry(unsigned int idx)
 		pfjets_hfHadronE_isLoaded = false;
 		pfjets_jetBProbabilityBJetTag_isLoaded = false;
 		pfjets_jetProbabilityBJetTag_isLoaded = false;
+		pfjets_mass_isLoaded = false;
 		pfjets_muonE_isLoaded = false;
 		pfjets_neutralEmE_isLoaded = false;
 		pfjets_neutralHadronE_isLoaded = false;
@@ -6693,6 +6762,7 @@ void GetEntry(unsigned int idx)
 		pfjets_simpleSecondaryVertexHighPurBJetTags_isLoaded = false;
 		pfjets_trackCountingHighEffBJetTag_isLoaded = false;
 		pfjets_trackCountingHighPurBJetTag_isLoaded = false;
+		pfjets_undoJEC_isLoaded = false;
 		taus_pf_againstElectronDeadECAL_isLoaded = false;
 		taus_pf_againstElectronLoose_isLoaded = false;
 		taus_pf_againstElectronMedium_isLoaded = false;
@@ -6715,6 +6785,7 @@ void GetEntry(unsigned int idx)
 		taus_pf_byTightCombinedIsolationDeltaBetaCorr_isLoaded = false;
 		taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits_isLoaded = false;
 		taus_pf_byVLooseCombinedIsolationDeltaBetaCorr_isLoaded = false;
+		taus_pf_mass_isLoaded = false;
 		photons_e1x5_isLoaded = false;
 		photons_e2x5Max_isLoaded = false;
 		photons_e3x3_isLoaded = false;
@@ -6737,6 +6808,7 @@ void GetEntry(unsigned int idx)
 		photons_hcalIso04_isLoaded = false;
 		photons_hcalTowerSumEtBcConeDR03_isLoaded = false;
 		photons_hcalTowerSumEtBcConeDR04_isLoaded = false;
+		photons_mass_isLoaded = false;
 		photons_ntkIsoHollow03_isLoaded = false;
 		photons_ntkIsoHollow04_isLoaded = false;
 		photons_ntkIsoSolid03_isLoaded = false;
@@ -7284,6 +7356,7 @@ void LoadAllBranches()
 	if (els_iso04_pf_nhad05_branch != 0) els_iso04_pf_nhad05();
 	if (els_layer1_charge_branch != 0) els_layer1_charge();
 	if (els_lh_branch != 0) els_lh();
+	if (els_mass_branch != 0) els_mass();
 	if (els_mc_patMatch_dr_branch != 0) els_mc_patMatch_dr();
 	if (els_mva_branch != 0) els_mva();
 	if (els_ndof_branch != 0) els_ndof();
@@ -7317,6 +7390,7 @@ void LoadAllBranches()
 	if (els_z0_branch != 0) els_z0();
 	if (els_z0Err_branch != 0) els_z0Err();
 	if (els_z0corr_branch != 0) els_z0corr();
+	if (genps_mass_branch != 0) genps_mass();
 	if (mus_backToBackCompat_branch != 0) mus_backToBackCompat();
 	if (mus_best_dxyPV_branch != 0) mus_best_dxyPV();
 	if (mus_best_dzPV_branch != 0) mus_best_dzPV();
@@ -7418,6 +7492,7 @@ void LoadAllBranches()
 	if (mus_iso_hovetoDep_branch != 0) mus_iso_hovetoDep();
 	if (mus_iso_trckvetoDep_branch != 0) mus_iso_trckvetoDep();
 	if (mus_localDistance_branch != 0) mus_localDistance();
+	if (mus_mass_branch != 0) mus_mass();
 	if (mus_mc_patMatch_dr_branch != 0) mus_mc_patMatch_dr();
 	if (mus_ndof_branch != 0) mus_ndof();
 	if (mus_overlapCompat_branch != 0) mus_overlapCompat();
@@ -7454,6 +7529,7 @@ void LoadAllBranches()
 	if (mus_z0Err_branch != 0) mus_z0Err();
 	if (mus_z0corr_branch != 0) mus_z0corr();
 	if (pfcands_dz_branch != 0) pfcands_dz();
+	if (pfcands_mass_branch != 0) pfcands_mass();
 	if (pfjets_area_branch != 0) pfjets_area();
 	if (pfjets_chargedEmE_branch != 0) pfjets_chargedEmE();
 	if (pfjets_chargedHadronE_branch != 0) pfjets_chargedHadronE();
@@ -7468,6 +7544,7 @@ void LoadAllBranches()
 	if (pfjets_hfHadronE_branch != 0) pfjets_hfHadronE();
 	if (pfjets_jetBProbabilityBJetTag_branch != 0) pfjets_jetBProbabilityBJetTag();
 	if (pfjets_jetProbabilityBJetTag_branch != 0) pfjets_jetProbabilityBJetTag();
+	if (pfjets_mass_branch != 0) pfjets_mass();
 	if (pfjets_muonE_branch != 0) pfjets_muonE();
 	if (pfjets_neutralEmE_branch != 0) pfjets_neutralEmE();
 	if (pfjets_neutralHadronE_branch != 0) pfjets_neutralHadronE();
@@ -7477,6 +7554,7 @@ void LoadAllBranches()
 	if (pfjets_simpleSecondaryVertexHighPurBJetTags_branch != 0) pfjets_simpleSecondaryVertexHighPurBJetTags();
 	if (pfjets_trackCountingHighEffBJetTag_branch != 0) pfjets_trackCountingHighEffBJetTag();
 	if (pfjets_trackCountingHighPurBJetTag_branch != 0) pfjets_trackCountingHighPurBJetTag();
+	if (pfjets_undoJEC_branch != 0) pfjets_undoJEC();
 	if (taus_pf_againstElectronDeadECAL_branch != 0) taus_pf_againstElectronDeadECAL();
 	if (taus_pf_againstElectronLoose_branch != 0) taus_pf_againstElectronLoose();
 	if (taus_pf_againstElectronMedium_branch != 0) taus_pf_againstElectronMedium();
@@ -7499,6 +7577,7 @@ void LoadAllBranches()
 	if (taus_pf_byTightCombinedIsolationDeltaBetaCorr_branch != 0) taus_pf_byTightCombinedIsolationDeltaBetaCorr();
 	if (taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits_branch != 0) taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits();
 	if (taus_pf_byVLooseCombinedIsolationDeltaBetaCorr_branch != 0) taus_pf_byVLooseCombinedIsolationDeltaBetaCorr();
+	if (taus_pf_mass_branch != 0) taus_pf_mass();
 	if (photons_e1x5_branch != 0) photons_e1x5();
 	if (photons_e2x5Max_branch != 0) photons_e2x5Max();
 	if (photons_e3x3_branch != 0) photons_e3x3();
@@ -7521,6 +7600,7 @@ void LoadAllBranches()
 	if (photons_hcalIso04_branch != 0) photons_hcalIso04();
 	if (photons_hcalTowerSumEtBcConeDR03_branch != 0) photons_hcalTowerSumEtBcConeDR03();
 	if (photons_hcalTowerSumEtBcConeDR04_branch != 0) photons_hcalTowerSumEtBcConeDR04();
+	if (photons_mass_branch != 0) photons_mass();
 	if (photons_ntkIsoHollow03_branch != 0) photons_ntkIsoHollow03();
 	if (photons_ntkIsoHollow04_branch != 0) photons_ntkIsoHollow04();
 	if (photons_ntkIsoSolid03_branch != 0) photons_ntkIsoSolid03();
@@ -10243,6 +10323,16 @@ void LoadAllBranches()
 		}
 		return els_lh_;
 	}
+	vector<float> &els_mass()
+	{
+		if (not els_mass_isLoaded) {
+			if (els_mass_branch != 0) {
+				els_mass_branch->GetEntry(index);
+			} else { }
+			els_mass_isLoaded = true;
+		}
+		return els_mass_;
+	}
 	vector<float> &els_mc_patMatch_dr()
 	{
 		if (not els_mc_patMatch_dr_isLoaded) {
@@ -10572,6 +10662,16 @@ void LoadAllBranches()
 			els_z0corr_isLoaded = true;
 		}
 		return els_z0corr_;
+	}
+	vector<float> &genps_mass()
+	{
+		if (not genps_mass_isLoaded) {
+			if (genps_mass_branch != 0) {
+				genps_mass_branch->GetEntry(index);
+			} else { }
+			genps_mass_isLoaded = true;
+		}
+		return genps_mass_;
 	}
 	vector<float> &mus_backToBackCompat()
 	{
@@ -11583,6 +11683,16 @@ void LoadAllBranches()
 		}
 		return mus_localDistance_;
 	}
+	vector<float> &mus_mass()
+	{
+		if (not mus_mass_isLoaded) {
+			if (mus_mass_branch != 0) {
+				mus_mass_branch->GetEntry(index);
+			} else { }
+			mus_mass_isLoaded = true;
+		}
+		return mus_mass_;
+	}
 	vector<float> &mus_mc_patMatch_dr()
 	{
 		if (not mus_mc_patMatch_dr_isLoaded) {
@@ -11943,6 +12053,16 @@ void LoadAllBranches()
 		}
 		return pfcands_dz_;
 	}
+	vector<float> &pfcands_mass()
+	{
+		if (not pfcands_mass_isLoaded) {
+			if (pfcands_mass_branch != 0) {
+				pfcands_mass_branch->GetEntry(index);
+			} else { }
+			pfcands_mass_isLoaded = true;
+		}
+		return pfcands_mass_;
+	}
 	vector<float> &pfjets_area()
 	{
 		if (not pfjets_area_isLoaded) {
@@ -12083,6 +12203,16 @@ void LoadAllBranches()
 		}
 		return pfjets_jetProbabilityBJetTag_;
 	}
+	vector<float> &pfjets_mass()
+	{
+		if (not pfjets_mass_isLoaded) {
+			if (pfjets_mass_branch != 0) {
+				pfjets_mass_branch->GetEntry(index);
+			} else { }
+			pfjets_mass_isLoaded = true;
+		}
+		return pfjets_mass_;
+	}
 	vector<float> &pfjets_muonE()
 	{
 		if (not pfjets_muonE_isLoaded) {
@@ -12172,6 +12302,16 @@ void LoadAllBranches()
 			pfjets_trackCountingHighPurBJetTag_isLoaded = true;
 		}
 		return pfjets_trackCountingHighPurBJetTag_;
+	}
+	vector<float> &pfjets_undoJEC()
+	{
+		if (not pfjets_undoJEC_isLoaded) {
+			if (pfjets_undoJEC_branch != 0) {
+				pfjets_undoJEC_branch->GetEntry(index);
+			} else { }
+			pfjets_undoJEC_isLoaded = true;
+		}
+		return pfjets_undoJEC_;
 	}
 	vector<float> &taus_pf_againstElectronDeadECAL()
 	{
@@ -12393,6 +12533,16 @@ void LoadAllBranches()
 		}
 		return taus_pf_byVLooseCombinedIsolationDeltaBetaCorr_;
 	}
+	vector<float> &taus_pf_mass()
+	{
+		if (not taus_pf_mass_isLoaded) {
+			if (taus_pf_mass_branch != 0) {
+				taus_pf_mass_branch->GetEntry(index);
+			} else { }
+			taus_pf_mass_isLoaded = true;
+		}
+		return taus_pf_mass_;
+	}
 	vector<float> &photons_e1x5()
 	{
 		if (not photons_e1x5_isLoaded) {
@@ -12612,6 +12762,16 @@ void LoadAllBranches()
 			photons_hcalTowerSumEtBcConeDR04_isLoaded = true;
 		}
 		return photons_hcalTowerSumEtBcConeDR04_;
+	}
+	vector<float> &photons_mass()
+	{
+		if (not photons_mass_isLoaded) {
+			if (photons_mass_branch != 0) {
+				photons_mass_branch->GetEntry(index);
+			} else { }
+			photons_mass_isLoaded = true;
+		}
+		return photons_mass_;
 	}
 	vector<float> &photons_ntkIsoHollow03()
 	{
@@ -15897,6 +16057,7 @@ namespace tas {
 	vector<float> &els_iso04_pf_nhad05();
 	vector<float> &els_layer1_charge();
 	vector<float> &els_lh();
+	vector<float> &els_mass();
 	vector<float> &els_mc_patMatch_dr();
 	vector<float> &els_mva();
 	vector<float> &els_ndof();
@@ -15930,6 +16091,7 @@ namespace tas {
 	vector<float> &els_z0();
 	vector<float> &els_z0Err();
 	vector<float> &els_z0corr();
+	vector<float> &genps_mass();
 	vector<float> &mus_backToBackCompat();
 	vector<float> &mus_best_dxyPV();
 	vector<float> &mus_best_dzPV();
@@ -16031,6 +16193,7 @@ namespace tas {
 	vector<float> &mus_iso_hovetoDep();
 	vector<float> &mus_iso_trckvetoDep();
 	vector<float> &mus_localDistance();
+	vector<float> &mus_mass();
 	vector<float> &mus_mc_patMatch_dr();
 	vector<float> &mus_ndof();
 	vector<float> &mus_overlapCompat();
@@ -16067,6 +16230,7 @@ namespace tas {
 	vector<float> &mus_z0Err();
 	vector<float> &mus_z0corr();
 	vector<float> &pfcands_dz();
+	vector<float> &pfcands_mass();
 	vector<float> &pfjets_area();
 	vector<float> &pfjets_chargedEmE();
 	vector<float> &pfjets_chargedHadronE();
@@ -16081,6 +16245,7 @@ namespace tas {
 	vector<float> &pfjets_hfHadronE();
 	vector<float> &pfjets_jetBProbabilityBJetTag();
 	vector<float> &pfjets_jetProbabilityBJetTag();
+	vector<float> &pfjets_mass();
 	vector<float> &pfjets_muonE();
 	vector<float> &pfjets_neutralEmE();
 	vector<float> &pfjets_neutralHadronE();
@@ -16090,6 +16255,7 @@ namespace tas {
 	vector<float> &pfjets_simpleSecondaryVertexHighPurBJetTags();
 	vector<float> &pfjets_trackCountingHighEffBJetTag();
 	vector<float> &pfjets_trackCountingHighPurBJetTag();
+	vector<float> &pfjets_undoJEC();
 	vector<float> &taus_pf_againstElectronDeadECAL();
 	vector<float> &taus_pf_againstElectronLoose();
 	vector<float> &taus_pf_againstElectronMedium();
@@ -16112,6 +16278,7 @@ namespace tas {
 	vector<float> &taus_pf_byTightCombinedIsolationDeltaBetaCorr();
 	vector<float> &taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits();
 	vector<float> &taus_pf_byVLooseCombinedIsolationDeltaBetaCorr();
+	vector<float> &taus_pf_mass();
 	vector<float> &photons_e1x5();
 	vector<float> &photons_e2x5Max();
 	vector<float> &photons_e3x3();
@@ -16134,6 +16301,7 @@ namespace tas {
 	vector<float> &photons_hcalIso04();
 	vector<float> &photons_hcalTowerSumEtBcConeDR03();
 	vector<float> &photons_hcalTowerSumEtBcConeDR04();
+	vector<float> &photons_mass();
 	vector<float> &photons_ntkIsoHollow03();
 	vector<float> &photons_ntkIsoHollow04();
 	vector<float> &photons_ntkIsoSolid03();
