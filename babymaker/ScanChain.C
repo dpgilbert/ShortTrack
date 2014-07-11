@@ -244,17 +244,23 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       for(unsigned int iGamma = 0; iGamma < cms2.photons_p4().size(); iGamma++){
         if(cms2.photons_p4().at(iGamma).pt() < 20.0) continue;
         if(fabs(cms2.photons_p4().at(iGamma).pt()) > 2.5) continue;
+	//WAIT FOR NEW CMS3 if (cms2.photons_photonID_loose().at(iGamma)==0) continue;
         gamma_pt[ngamma]   = cms2.photons_p4().at(iGamma).pt();
         gamma_eta[ngamma]  = cms2.photons_p4().at(iGamma).eta();
         gamma_phi[ngamma]  = cms2.photons_p4().at(iGamma).phi();
         gamma_mass[ngamma] = cms2.photons_mass().at(iGamma);
 
+        gamma_sigmaIetaIeta[ngamma] = cms2.photons_sigmaIEtaIEta().at(iGamma);
+
+        //WAIT FOR NEW CMS3 gamma_chHadIso[ngamma] = photons_chargedHadronIso().at(iGamma);
+        //WAIT FOR NEW CMS3 gamma_neuHadIso[ngamma] = photons_neutralHadronIso().at(iGamma);
+        //WAIT FOR NEW CMS3 gamma_photIso[ngamma] = photons_photonIso().at(iGamma);
+        //WAIT FOR NEW CMS3 gamma_r9[ngamma] =  photons_full5x5_r9().at(iGamma);
+        //WAIT FOR NEW CMS3 gamma_hOverE[ngamma] =  photons_full5x5_hOverEtowBC().at(iGamma);
+        //WAIT FOR NEW CMS3 gamma_id[ngamma] =  photons_photonID_tight().at(iGamma) ? 2 : 0; // Medium working point is not saved in miniAOD, should implement on our own if we want it
+
+
         //gamma_mcMatchId[ngamma] = ;
-        //gamma_chadiso[ngamma] = ;
-        //gamma_nhadiso[ngamma] = ;
-        //gamma_photiso[ngamma] = ;
-        gamma_sigmaietaieta[ngamma] = cms2.photons_sigmaIEtaIEta().at(iGamma);
-        //gamma_id[ngamma] = ;
         
         ngamma++;
       }

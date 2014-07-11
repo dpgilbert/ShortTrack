@@ -138,10 +138,12 @@ class babyMaker {
   Float_t         gamma_phi[50];   //[ngamma]
   Float_t         gamma_mass[50];   //[ngamma]
   Int_t           gamma_mcMatchId[50];   //[ngamma]
-  Float_t         gamma_chadiso[50];   //[ngamma]
-  Float_t         gamma_nhadiso[50];   //[ngamma]
-  Float_t         gamma_photiso[50];   //[ngamma]
-  Float_t         gamma_sigmaietaieta[50];   //[ngamma]
+  Float_t         gamma_chHadIso[50];   //[ngamma]
+  Float_t         gamma_neuHadIso[50];   //[ngamma]
+  Float_t         gamma_photIso[50];   //[ngamma]
+  Float_t         gamma_sigmaIetaIeta[50];   //[ngamma]
+  Float_t         gamma_r9[50];   //[ngamma]
+  Float_t         gamma_hOverE[50];   //[ngamma]
   Int_t           gamma_id[50];   //[ngamma]
 
 //----- GEN PARTICLES
@@ -265,10 +267,12 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("gamma_phi", gamma_phi, "gamma_phi[ngamma]/F" );
   BabyTree_->Branch("gamma_mass", gamma_mass, "gamma_mass[ngamma]/F" );
   BabyTree_->Branch("gamma_mcMatchId", gamma_mcMatchId, "gamma_eta[ngamma]/I" );
-  BabyTree_->Branch("gamma_chadiso", gamma_chadiso, "gamma_chadiso[ngamma]/F" );
-  BabyTree_->Branch("gamma_nhadiso", gamma_nhadiso, "gamma_nhadiso[ngamma]/F" );
-  BabyTree_->Branch("gamma_photiso", gamma_photiso, "gamma_photiso[ngamma]/F" );
-  BabyTree_->Branch("gamma_sigmaietaieta", gamma_sigmaietaieta, "gamma_sigmaietaieta[ngamma]/F" );
+  BabyTree_->Branch("gamma_chHadIso", gamma_chHadIso, "gamma_chHadIso[ngamma]/F" );
+  BabyTree_->Branch("gamma_neuHadIso", gamma_neuHadIso, "gamma_neuHadIso[ngamma]/F" );
+  BabyTree_->Branch("gamma_photIso", gamma_photIso, "gamma_photIso[ngamma]/F" );
+  BabyTree_->Branch("gamma_sigmaIetaIeta", gamma_sigmaIetaIeta, "gamma_sigmaIetaIeta[ngamma]/F" );
+  BabyTree_->Branch("gamma_r9", gamma_r9, "gamma_r9[ngamma]/F" );
+  BabyTree_->Branch("gamma_hOverE", gamma_hOverE, "gamma_hOverE[ngamma]/F" );
   BabyTree_->Branch("gamma_id", gamma_id, "gamma_id[ngamma]/I" );
   BabyTree_->Branch("ngenPart", &ngenPart, "ngenPart/I" );
   BabyTree_->Branch("genPart_pt", genPart_pt, "genPart_pt[ngenPart]/F" );
