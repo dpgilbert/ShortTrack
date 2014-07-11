@@ -47,7 +47,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
-    //for( unsigned int event = 0; event < 10000; ++event) {
+    //for( unsigned int event = 0; event < 1000; ++event) {
     
 
       // Get Event Content
@@ -197,14 +197,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
         mt2 = MT2(met_pt, met_phi, hemJets.at(0), hemJets.at(1));
       
-        pseudojet1_pt   = hemJets.at(0).pt();
-        pseudojet1_eta  = hemJets.at(0).eta();
-        pseudojet1_phi  = hemJets.at(0).phi();
-        pseudojet1_mass = hemJets.at(0).mass();
-        pseudojet2_pt   = hemJets.at(1).pt();
-        pseudojet2_eta  = hemJets.at(1).eta();
-        pseudojet2_phi  = hemJets.at(1).phi();
-        pseudojet2_mass = hemJets.at(1).mass();
+        pseudoJet1_pt   = hemJets.at(0).pt();
+        pseudoJet1_eta  = hemJets.at(0).eta();
+        pseudoJet1_phi  = hemJets.at(0).phi();
+        pseudoJet1_mass = hemJets.at(0).mass();
+        pseudoJet2_pt   = hemJets.at(1).pt();
+        pseudoJet2_eta  = hemJets.at(1).eta();
+        pseudoJet2_phi  = hemJets.at(1).phi();
+        pseudoJet2_mass = hemJets.at(1).mass();
 
       }
 
@@ -243,22 +243,19 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       ngamma = 0;
       for(unsigned int iGamma = 0; iGamma < cms2.photons_p4().size(); iGamma++){
         if(cms2.photons_p4().at(iGamma).pt() < 20.0) continue;
-        if(fabs(cms2.photons_p4().at(iGamma).pt()) > 2.5) continue;
-	//WAIT FOR NEW CMS3 if (cms2.photons_photonID_loose().at(iGamma)==0) continue;
+        if(fabs(cms2.photons_p4().at(iGamma).eta()) > 2.5) continue;
+	      if (cms2.photons_photonID_loose().at(iGamma)==0) continue;
         gamma_pt[ngamma]   = cms2.photons_p4().at(iGamma).pt();
         gamma_eta[ngamma]  = cms2.photons_p4().at(iGamma).eta();
         gamma_phi[ngamma]  = cms2.photons_p4().at(iGamma).phi();
         gamma_mass[ngamma] = cms2.photons_mass().at(iGamma);
-
         gamma_sigmaIetaIeta[ngamma] = cms2.photons_sigmaIEtaIEta().at(iGamma);
-
-        //WAIT FOR NEW CMS3 gamma_chHadIso[ngamma] = photons_chargedHadronIso().at(iGamma);
-        //WAIT FOR NEW CMS3 gamma_neuHadIso[ngamma] = photons_neutralHadronIso().at(iGamma);
-        //WAIT FOR NEW CMS3 gamma_photIso[ngamma] = photons_photonIso().at(iGamma);
-        //WAIT FOR NEW CMS3 gamma_r9[ngamma] =  photons_full5x5_r9().at(iGamma);
-        //WAIT FOR NEW CMS3 gamma_hOverE[ngamma] =  photons_full5x5_hOverEtowBC().at(iGamma);
-        //WAIT FOR NEW CMS3 gamma_id[ngamma] =  photons_photonID_tight().at(iGamma) ? 2 : 0; // Medium working point is not saved in miniAOD, should implement on our own if we want it
-
+        gamma_chHadIso[ngamma] = photons_chargedHadronIso().at(iGamma);
+        gamma_neuHadIso[ngamma] = photons_neutralHadronIso().at(iGamma);
+        gamma_phIso[ngamma] = photons_photonIso().at(iGamma);
+        gamma_r9[ngamma] =  photons_full5x5_r9().at(iGamma);
+        gamma_hOverE[ngamma] =  photons_full5x5_hOverEtowBC().at(iGamma);
+        gamma_idCutBased[ngamma] =  photons_photonID_tight().at(iGamma) ? 2 : 0; // Medium working point is not saved in miniAOD, should implement on our own if we want it
 
         //gamma_mcMatchId[ngamma] = ;
         
@@ -308,7 +305,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         vec_isoTrack_pt.push_back    ( cand_pt                          );
         vec_isoTrack_eta.push_back   ( cms2.pfcands_p4().at(ipf).eta()  );
         vec_isoTrack_phi.push_back   ( cms2.pfcands_p4().at(ipf).phi()  );
-        //vec_isoTrack_mass.push_back  ( cms2.pfcands_p4().at(ipf).mass() );
         vec_isoTrack_mass.push_back  ( cms2.pfcands_mass().at(ipf)      );
         vec_isoTrack_absIso.push_back( absiso                           );
         vec_isoTrack_dz.push_back    ( cms2.pfcands_dz().at(ipf)        );

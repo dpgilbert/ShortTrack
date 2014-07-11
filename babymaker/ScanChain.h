@@ -63,14 +63,14 @@ class babyMaker {
   Float_t         ht;
   Float_t         mt2;
 
-  Float_t         pseudojet1_pt;
-  Float_t         pseudojet1_eta;
-  Float_t         pseudojet1_phi;
-  Float_t         pseudojet1_mass;
-  Float_t         pseudojet2_pt;
-  Float_t         pseudojet2_eta;
-  Float_t         pseudojet2_phi;
-  Float_t         pseudojet2_mass;
+  Float_t         pseudoJet1_pt;
+  Float_t         pseudoJet1_eta;
+  Float_t         pseudoJet1_phi;
+  Float_t         pseudoJet1_mass;
+  Float_t         pseudoJet2_pt;
+  Float_t         pseudoJet2_eta;
+  Float_t         pseudoJet2_phi;
+  Float_t         pseudoJet2_mass;
 
   Float_t         mht_pt;
   Float_t         mht_phi;
@@ -140,11 +140,11 @@ class babyMaker {
   Int_t           gamma_mcMatchId[50];   //[ngamma]
   Float_t         gamma_chHadIso[50];   //[ngamma]
   Float_t         gamma_neuHadIso[50];   //[ngamma]
-  Float_t         gamma_photIso[50];   //[ngamma]
+  Float_t         gamma_phIso[50];   //[ngamma]
   Float_t         gamma_sigmaIetaIeta[50];   //[ngamma]
   Float_t         gamma_r9[50];   //[ngamma]
   Float_t         gamma_hOverE[50];   //[ngamma]
-  Int_t           gamma_id[50];   //[ngamma]
+  Int_t           gamma_idCutBased[50];   //[ngamma]
 
 //----- GEN PARTICLES
   Int_t           ngenPart;
@@ -203,14 +203,14 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("diffMetMht", &diffMetMht );
   BabyTree_->Branch("ht", &ht );
   BabyTree_->Branch("mt2", &mt2 );
-  BabyTree_->Branch("pseudojet1_pt", &pseudojet1_pt );
-  BabyTree_->Branch("pseudojet1_eta", &pseudojet1_eta );
-  BabyTree_->Branch("pseudojet1_phi", &pseudojet1_phi );
-  BabyTree_->Branch("pseudojet1_mass", &pseudojet1_mass );
-  BabyTree_->Branch("pseudojet2_pt", &pseudojet2_pt );
-  BabyTree_->Branch("pseudojet2_eta", &pseudojet2_eta );
-  BabyTree_->Branch("pseudojet2_phi", &pseudojet2_phi );
-  BabyTree_->Branch("pseudojet2_mass", &pseudojet2_mass );
+  BabyTree_->Branch("pseudoJet1_pt", &pseudoJet1_pt );
+  BabyTree_->Branch("pseudoJet1_eta", &pseudoJet1_eta );
+  BabyTree_->Branch("pseudoJet1_phi", &pseudoJet1_phi );
+  BabyTree_->Branch("pseudoJet1_mass", &pseudoJet1_mass );
+  BabyTree_->Branch("pseudoJet2_pt", &pseudoJet2_pt );
+  BabyTree_->Branch("pseudoJet2_eta", &pseudoJet2_eta );
+  BabyTree_->Branch("pseudoJet2_phi", &pseudoJet2_phi );
+  BabyTree_->Branch("pseudoJet2_mass", &pseudoJet2_mass );
   BabyTree_->Branch("mht_pt", &met_pt );
   BabyTree_->Branch("mht_phi", &met_phi );
   BabyTree_->Branch("met_pt", &met_pt );
@@ -269,11 +269,11 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("gamma_mcMatchId", gamma_mcMatchId, "gamma_eta[ngamma]/I" );
   BabyTree_->Branch("gamma_chHadIso", gamma_chHadIso, "gamma_chHadIso[ngamma]/F" );
   BabyTree_->Branch("gamma_neuHadIso", gamma_neuHadIso, "gamma_neuHadIso[ngamma]/F" );
-  BabyTree_->Branch("gamma_photIso", gamma_photIso, "gamma_photIso[ngamma]/F" );
+  BabyTree_->Branch("gamma_phIso", gamma_phIso, "gamma_phIso[ngamma]/F" );
   BabyTree_->Branch("gamma_sigmaIetaIeta", gamma_sigmaIetaIeta, "gamma_sigmaIetaIeta[ngamma]/F" );
   BabyTree_->Branch("gamma_r9", gamma_r9, "gamma_r9[ngamma]/F" );
   BabyTree_->Branch("gamma_hOverE", gamma_hOverE, "gamma_hOverE[ngamma]/F" );
-  BabyTree_->Branch("gamma_id", gamma_id, "gamma_id[ngamma]/I" );
+  BabyTree_->Branch("gamma_idCutBased", gamma_idCutBased, "gamma_idCutBased[ngamma]/I" );
   BabyTree_->Branch("ngenPart", &ngenPart, "ngenPart/I" );
   BabyTree_->Branch("genPart_pt", genPart_pt, "genPart_pt[ngenPart]/F" );
   BabyTree_->Branch("genPart_eta", genPart_eta, "genPart_eta[ngenPart]/F" );
@@ -319,14 +319,14 @@ void babyMaker::InitBabyNtuple () {
   diffMetMht = -999.0;
   ht = -999.0;
   mt2 = -999.0;
-  pseudojet1_pt = -999.0;
-  pseudojet1_eta = -999.0;
-  pseudojet1_phi = -999.0;
-  pseudojet1_mass = -999.0;
-  pseudojet2_pt = -999.0;
-  pseudojet2_eta = -999.0;
-  pseudojet2_phi = -999.0;
-  pseudojet2_mass = -999.0;
+  pseudoJet1_pt = -999.0;
+  pseudoJet1_eta = -999.0;
+  pseudoJet1_phi = -999.0;
+  pseudoJet1_mass = -999.0;
+  pseudoJet2_pt = -999.0;
+  pseudoJet2_eta = -999.0;
+  pseudoJet2_phi = -999.0;
+  pseudoJet2_mass = -999.0;
   mht_pt = -999.0;
   mht_phi = -999.0;
   met_pt = -999.0;
