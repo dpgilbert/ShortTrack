@@ -134,7 +134,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     
 
       //JETS
-      nJet = 0;
+      njet = 0;
       nJet40 = 0;
       nBJet40 = 0;
       ht = 0;
@@ -156,38 +156,38 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         }
         if(lepOverlap) continue;
 
-        Jet_pt[nJet]   = cms2.pfjets_p4().at(iJet).pt();
-        Jet_eta[nJet]  = cms2.pfjets_p4().at(iJet).eta();
-        Jet_phi[nJet]  = cms2.pfjets_p4().at(iJet).phi();
-        Jet_mass[nJet] = cms2.pfjets_mass().at(iJet);
-        Jet_btagCSV[nJet] = cms2.pfjets_combinedSecondaryVertexBJetTag().at(iJet); 
-        //Jet_mcPt: // need to add jet->genJet() to CMS3
-        Jet_mcFlavour[nJet] = cms2.pfjets_partonFlavour().at(iJet);
-        //Jet_quarkGluonID
-        Jet_area[nJet] = cms2.pfjets_area().at(iJet);
-	Jet_rawPt[nJet] = cms2.pfjets_p4().at(iJet).pt() * cms2.pfjets_undoJEC().at(iJet);
+        jet_pt[njet]   = cms2.pfjets_p4().at(iJet).pt();
+        jet_eta[njet]  = cms2.pfjets_p4().at(iJet).eta();
+        jet_phi[njet]  = cms2.pfjets_p4().at(iJet).phi();
+        jet_mass[njet] = cms2.pfjets_mass().at(iJet);
+        jet_btagCSV[njet] = cms2.pfjets_combinedSecondaryVertexBJetTag().at(iJet); 
+        //jet_mcPt: // need to add jet->genJet() to CMS3
+        jet_mcFlavour[njet] = cms2.pfjets_partonFlavour().at(iJet);
+        //jet_quarkGluonID
+        jet_area[njet] = cms2.pfjets_area().at(iJet);
+	      jet_rawPt[njet] = cms2.pfjets_p4().at(iJet).pt() * cms2.pfjets_undoJEC().at(iJet);
 
-        if(isTightPFJet(iJet))  Jet_id[nJet] = 2;
-        else if(isMediumPFJet(iJet)) Jet_id[nJet] = 1;
-        else Jet_id[nJet] = 0;
+        if(isTightPFJet(iJet))  jet_id[njet] = 2;
+        else if(isMediumPFJet(iJet)) jet_id[njet] = 1;
+        else jet_id[njet] = 0;
 
-        Jet_puId[nJet] = cms2.pfjets_pileupJetId().at(iJet);
+        jet_puId[njet] = cms2.pfjets_pileupJetId().at(iJet);
 
-        if( (Jet_pt[nJet] > 40.0) && (fabs(Jet_eta[nJet]) < 2.5) ){ 
+        if( (jet_pt[njet] > 40.0) && (fabs(jet_eta[njet]) < 2.5) ){ 
           goodJets.push_back(cms2.pfjets_p4().at(iJet));
           nJet40++;
-          ht+= Jet_pt[nJet];
-          if(Jet_btagCSV[nJet] >= 0.679) nBJet40++; //CSVM
+          ht+= jet_pt[njet];
+          if(jet_btagCSV[njet] >= 0.679) nBJet40++; //CSVM
 
           sumJetp4 += cms2.pfjets_p4().at(iJet); 
 
           if(nJet40 <= 4){
-            deltaPhiMin = min(deltaPhiMin, DeltaPhi(met_phi, Jet_phi[nJet]));
+            deltaPhiMin = min(deltaPhiMin, DeltaPhi(met_phi, jet_phi[njet]));
           }
 
         }
 
-        nJet++;
+        njet++;
       }
 
       if(goodJets.size() > 1){

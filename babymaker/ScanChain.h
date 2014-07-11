@@ -158,19 +158,19 @@ class babyMaker {
   Int_t           genPart_grandmaId[200];   //[ngenPart]
 
 //----- JETS
-   Int_t           nJet;
-   Float_t         Jet_pt[100];   //[nJet]
-   Float_t         Jet_eta[100];   //[nJet]
-   Float_t         Jet_phi[100];   //[nJet]
-   Float_t         Jet_mass[100];   //[nJet]
-   Float_t         Jet_btagCSV[100];   //[nJet]
-   Float_t         Jet_rawPt[100];   //[nJet]
-   Float_t         Jet_mcPt[100];   //[nJet]
-   Int_t           Jet_mcFlavour[100];   //[nJet]
-   Float_t         Jet_quarkGluonID[100];   //[nJet]
-   Float_t         Jet_area[100];   //[nJet]
-   Int_t           Jet_id[100];   //[nJet]
-   Int_t           Jet_puId[100];   //[nJet]
+   Int_t           njet;
+   Float_t         jet_pt[100];   //[njet]
+   Float_t         jet_eta[100];   //[njet]
+   Float_t         jet_phi[100];   //[njet]
+   Float_t         jet_mass[100];   //[njet]
+   Float_t         jet_btagCSV[100];   //[njet]
+   Float_t         jet_rawPt[100];   //[njet]
+   Float_t         jet_mcPt[100];   //[njet]
+   Int_t           jet_mcFlavour[100];   //[njet]
+   Float_t         jet_quarkGluonID[100];   //[njet]
+   Float_t         jet_area[100];   //[njet]
+   Int_t           jet_id[100];   //[njet]
+   Int_t           jet_puId[100];   //[njet]
 
 };
 
@@ -283,18 +283,18 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("genPart_charge", genPart_charge, "genPart_charge[ngenPart]/I" );
   BabyTree_->Branch("genPart_motherId", genPart_motherId, "genPart_motherId[ngenPart]/I" );
   BabyTree_->Branch("genPart_grandmaId", genPart_grandmaId, "genPart_grandmaId[ngenPart]/I" );
-  BabyTree_->Branch("nJet", &nJet, "nJet/I" );
-  BabyTree_->Branch("Jet_pt", Jet_pt, "Jet_pt[nJet]/F" );
-  BabyTree_->Branch("Jet_eta", Jet_eta, "Jet_eta[nJet]/F" );
-  BabyTree_->Branch("Jet_phi", Jet_phi, "Jet_phi[nJet]/F" );
-  BabyTree_->Branch("Jet_mass", Jet_mass, "Jet_mass[nJet]/F" );
-  BabyTree_->Branch("Jet_btagCSV", Jet_btagCSV, "Jet_btagCSV[nJet]/F" );
-  BabyTree_->Branch("Jet_rawPt", Jet_rawPt, "Jet_rawPt[nJet]/F" );
-  BabyTree_->Branch("Jet_mcFlavour", Jet_mcFlavour, "Jet_mcFlavor[nJet]/I" );
-  BabyTree_->Branch("Jet_quarkGluonID", Jet_quarkGluonID, "Jet_quarkGluonID[nJet]/F" );
-  BabyTree_->Branch("Jet_area", Jet_area, "Jet_area[nJet]/F" );
-  BabyTree_->Branch("Jet_id", Jet_id, "Jet_id[nJet]/I" );
-  BabyTree_->Branch("Jet_puId", Jet_puId, "Jet_puId[nJet]/I" );
+  BabyTree_->Branch("njet", &njet, "njet/I" );
+  BabyTree_->Branch("jet_pt", jet_pt, "jet_pt[njet]/F" );
+  BabyTree_->Branch("jet_eta", jet_eta, "jet_eta[njet]/F" );
+  BabyTree_->Branch("jet_phi", jet_phi, "jet_phi[njet]/F" );
+  BabyTree_->Branch("jet_mass", jet_mass, "jet_mass[njet]/F" );
+  BabyTree_->Branch("jet_btagCSV", jet_btagCSV, "jet_btagCSV[njet]/F" );
+  BabyTree_->Branch("jet_rawPt", jet_rawPt, "jet_rawPt[njet]/F" );
+  BabyTree_->Branch("jet_mcFlavour", jet_mcFlavour, "jet_mcFlavor[njet]/I" );
+  BabyTree_->Branch("jet_quarkGluonID", jet_quarkGluonID, "jet_quarkGluonID[njet]/F" );
+  BabyTree_->Branch("jet_area", jet_area, "jet_area[njet]/F" );
+  BabyTree_->Branch("jet_id", jet_id, "jet_id[njet]/I" );
+  BabyTree_->Branch("jet_puId", jet_puId, "jet_puId[njet]/I" );
 
   return;
 }
@@ -345,7 +345,7 @@ void babyMaker::InitBabyNtuple () {
   ntau = -999;
   ngamma = -999;
   ngenPart = -999;
-  nJet = -999;
+  njet = -999;
 
   
   return;
