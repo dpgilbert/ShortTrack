@@ -172,7 +172,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         else if(isMediumPFJet(iJet)) jet_id[njet] = 1;
         else jet_id[njet] = 0;
 
-        jet_puId[njet] = cms2.pfjets_pileupJetId().at(iJet);
+        jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
 
         if( (jet_pt[njet] > 40.0) && (fabs(jet_eta[njet]) < 2.5) ){ 
           goodJets.push_back(cms2.pfjets_p4().at(iJet));

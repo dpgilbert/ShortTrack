@@ -2,9 +2,10 @@
 #define SELECTIONS_H
 #include "TString.h"
 
-bool isLoosePFJet(unsigned int pfJetIdx);
-bool isMediumPFJet(unsigned int pfJetIdx);
-bool isTightPFJet(unsigned int pfJetIdx);
+bool isLoosePFJet(unsigned int);
+bool isMediumPFJet(unsigned int);
+bool isTightPFJet(unsigned int);
+bool loosePileupJetId(unsigned int);
 bool isVetoElectron(unsigned int);
 bool isLooseElectron(unsigned int);
 bool isMediumElectron(unsigned int);
