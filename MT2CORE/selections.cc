@@ -5,14 +5,14 @@ using namespace tas;
 
 bool isLoosePFJet(unsigned int pfJetIdx){
 
-    float pfjet_chf_  = cms2.pfjets_chargedHadronE()[pfJetIdx] / cms2.pfjets_p4()[pfJetIdx].energy();
-    float pfjet_nhf_  = cms2.pfjets_neutralHadronE()[pfJetIdx] / cms2.pfjets_p4()[pfJetIdx].energy();
-    float pfjet_cef_  = cms2.pfjets_chargedEmE()[pfJetIdx] / cms2.pfjets_p4()[pfJetIdx].energy();
-    float pfjet_nef_  = cms2.pfjets_neutralEmE()[pfJetIdx] / cms2.pfjets_p4()[pfJetIdx].energy();
+    float pfjet_chf_  = cms2.pfjets_chargedHadronE()[pfJetIdx] / (cms2.pfjets_undoJEC().at(pfJetIdx)*cms2.pfjets_p4()[pfJetIdx].energy());
+    float pfjet_nhf_  = cms2.pfjets_neutralHadronE()[pfJetIdx] / (cms2.pfjets_undoJEC().at(pfJetIdx)*cms2.pfjets_p4()[pfJetIdx].energy());
+    float pfjet_cef_  = cms2.pfjets_chargedEmE()[pfJetIdx] / (cms2.pfjets_undoJEC().at(pfJetIdx)*cms2.pfjets_p4()[pfJetIdx].energy());
+    float pfjet_nef_  = cms2.pfjets_neutralEmE()[pfJetIdx] / (cms2.pfjets_undoJEC().at(pfJetIdx)*cms2.pfjets_p4()[pfJetIdx].energy());
     int   pfjet_cm_   = cms2.pfjets_chargedMultiplicity()[pfJetIdx];
     float pfjet_eta   = fabs(cms2.pfjets_p4()[pfJetIdx].eta());
 
-    if (cms2.pfjets_pfcandIndicies().size() < 2)
+    if (cms2.pfjets_pfcandIndicies().at(pfJetIdx).size() < 2)
         return false;
     if (pfjet_nef_ >= 0.99)
         return false;
@@ -34,8 +34,8 @@ bool isLoosePFJet(unsigned int pfJetIdx){
 bool isMediumPFJet(unsigned int pfJetIdx){
 
 
-    float pfjet_nhf_  = cms2.pfjets_neutralHadronE()[pfJetIdx] / cms2.pfjets_p4()[pfJetIdx].energy();
-    float pfjet_nef_  = cms2.pfjets_neutralEmE()[pfJetIdx] / cms2.pfjets_p4()[pfJetIdx].energy();
+    float pfjet_nhf_  = cms2.pfjets_neutralHadronE()[pfJetIdx] / (cms2.pfjets_undoJEC().at(pfJetIdx)*cms2.pfjets_p4()[pfJetIdx].energy());
+    float pfjet_nef_  = cms2.pfjets_neutralEmE()[pfJetIdx] / (cms2.pfjets_undoJEC().at(pfJetIdx)*cms2.pfjets_p4()[pfJetIdx].energy());
 
     if (pfjet_nef_ >= 0.95)
         return false;
@@ -50,8 +50,8 @@ bool isMediumPFJet(unsigned int pfJetIdx){
 bool isTightPFJet(unsigned int pfJetIdx){
 
 
-    float pfjet_nhf_  = cms2.pfjets_neutralHadronE()[pfJetIdx] / cms2.pfjets_p4()[pfJetIdx].energy();
-    float pfjet_nef_  = cms2.pfjets_neutralEmE()[pfJetIdx] / cms2.pfjets_p4()[pfJetIdx].energy();
+    float pfjet_nhf_  = cms2.pfjets_neutralHadronE()[pfJetIdx] / (cms2.pfjets_undoJEC().at(pfJetIdx)*cms2.pfjets_p4()[pfJetIdx].energy());
+    float pfjet_nef_  = cms2.pfjets_neutralEmE()[pfJetIdx] / (cms2.pfjets_undoJEC().at(pfJetIdx)*cms2.pfjets_p4()[pfJetIdx].energy());
 
     if (pfjet_nef_ >= 0.90)
         return false;
