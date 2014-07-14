@@ -290,6 +290,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("jet_mass", jet_mass, "jet_mass[njet]/F" );
   BabyTree_->Branch("jet_btagCSV", jet_btagCSV, "jet_btagCSV[njet]/F" );
   BabyTree_->Branch("jet_rawPt", jet_rawPt, "jet_rawPt[njet]/F" );
+  BabyTree_->Branch("jet_mcPt", jet_mcPt, "jet_mcPt[njet]/F" );
   BabyTree_->Branch("jet_mcFlavour", jet_mcFlavour, "jet_mcFlavor[njet]/I" );
   BabyTree_->Branch("jet_quarkGluonID", jet_quarkGluonID, "jet_quarkGluonID[njet]/F" );
   BabyTree_->Branch("jet_area", jet_area, "jet_area[njet]/F" );

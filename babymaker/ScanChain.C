@@ -85,6 +85,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       nElectrons10 = 0;
       for(unsigned int iEl = 0; iEl < cms2.els_p4().size(); iEl++){
         if(cms2.els_p4().at(iEl).pt() < 10.0) continue;
+        if(fabs(cms2.els_p4().at(iEl).eta()) > 2.4) continue;
         if(!isVetoElectron(iEl)) continue;
         nElectrons10++;
         lep_pt[nlep]   = cms2.els_p4().at(iEl).pt();
@@ -161,7 +162,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         jet_phi[njet]  = cms2.pfjets_p4().at(iJet).phi();
         jet_mass[njet] = cms2.pfjets_mass().at(iJet);
         jet_btagCSV[njet] = cms2.pfjets_combinedSecondaryVertexBJetTag().at(iJet); 
-        //jet_mcPt: // need to add jet->genJet() to CMS3
+        jet_mcPt[njet] = cms2.pfjets_mc_p4().at(iJet).pt();
         jet_mcFlavour[njet] = cms2.pfjets_partonFlavour().at(iJet);
         //jet_quarkGluonID
         jet_area[njet] = cms2.pfjets_area().at(iJet);
