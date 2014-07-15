@@ -48,6 +48,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
     //for( unsigned int event = 0; event < 1000; ++event) {
+
     
 
       // Get Event Content
@@ -64,6 +65,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       lumi = cms2.evt_lumiBlock();
       evt  = cms2.evt_event();
       isData = cms2.evt_isRealData();
+
 
       //crossSection = ;
       puWeight = 1.;
@@ -135,6 +137,49 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     
 
       //JETS
+      //check baseline selections
+      vector<int> passJets; //index of jets that pass baseline selections
+      for(unsigned int iJet = 0; iJet < cms2.pfjets_p4().size(); iJet++){
+        if(cms2.pfjets_p4().at(iJet).pt() < 10.0) continue;
+        if(fabs(cms2.pfjets_p4().at(iJet).eta()) > 5.2) continue;
+        if(!isLoosePFJet(iJet)) continue;
+
+        passJets.push_back(iJet);
+      }
+
+      //check overlapping with leptons
+      //only want to remove the closest jet to a lepton, threshold deltaR < 0.4
+      vector<int> removedJets; //index of jets to be removed because they overlap with a lepton
+      for(int iLep = 0; iLep < nlep; iLep++){
+
+        float minDR = 0.4;
+        int minIndex = -1;
+        for(unsigned int passIdx = 0; passIdx < passJets.size(); passIdx++){ //loop through jets that passed baseline selections
+
+          int iJet = passJets.at(passIdx);
+
+          if(cms2.pfjets_p4().at(iJet).pt() < 10.0) continue;
+          if(fabs(cms2.pfjets_p4().at(iJet).eta()) > 5.2) continue;
+          if(!isLoosePFJet(iJet)) continue;
+
+          bool alreadyRemoved = false;
+          for(unsigned int j=0; j<removedJets.size(); j++){
+            if(iJet == removedJets.at(j)){
+              alreadyRemoved = true;
+              break;
+            }
+          }
+          if(alreadyRemoved) continue;
+
+          float thisDR = DeltaR(pfjets_p4().at(iJet).eta(), lep_eta[iLep], pfjets_p4().at(iJet).phi(), lep_phi[iLep]);
+          if(thisDR < minDR){
+            minDR = thisDR; 
+            minIndex = iJet;
+          }
+        }
+        removedJets.push_back(minIndex);
+      }
+
       njet = 0;
       nJet40 = 0;
       nBJet40 = 0;
@@ -143,19 +188,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       vector<LorentzVector> goodJets;
       vector<LorentzVector> hemJets;
       deltaPhiMin = 999.9;
-      for(unsigned int iJet = 0; iJet < cms2.pfjets_p4().size(); iJet++){
-        if(cms2.pfjets_p4().at(iJet).pt() < 10.0) continue;
-        if(fabs(cms2.pfjets_p4().at(iJet).eta()) > 5.2) continue;
-        if(!isLoosePFJet(iJet)) continue;
-        
-        bool lepOverlap = false;
-        for(int iLep = 0; iLep < nlep; iLep++){
-          if(DeltaR(pfjets_p4().at(iJet).eta(), lep_eta[iLep], pfjets_p4().at(iJet).phi(), lep_phi[iLep]) < 0.5) {
-            lepOverlap = true; 
+
+      //now fill variables for jets that pass baseline selections and don't overlap with a lepton
+      for(unsigned int passIdx = 0; passIdx < passJets.size(); passIdx++){
+
+        int iJet = passJets.at(passIdx);
+
+        //check against list of jets that overlap with a lepton
+        bool isOverlapJet = false;
+        for(unsigned int j=0; j<removedJets.size(); j++){
+          if(iJet == removedJets.at(j)){
+            isOverlapJet = true;
             break;
           }
         }
-        if(lepOverlap) continue;
+        if(isOverlapJet) continue;
+        
 
         jet_pt[njet]   = cms2.pfjets_p4().at(iJet).pt();
         jet_eta[njet]  = cms2.pfjets_p4().at(iJet).eta();
@@ -168,9 +216,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         jet_area[njet] = cms2.pfjets_area().at(iJet);
 	      jet_rawPt[njet] = cms2.pfjets_p4().at(iJet).pt() * cms2.pfjets_undoJEC().at(iJet);
 
-        if(isTightPFJet(iJet))  jet_id[njet] = 2;
-        else if(isMediumPFJet(iJet)) jet_id[njet] = 1;
-        else jet_id[njet] = 0;
+        if(isTightPFJet(iJet))  jet_id[njet] = 3;
+        else if(isMediumPFJet(iJet)) jet_id[njet] = 2;
+        else jet_id[njet] = 1; //required to be loose above
 
         jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
 
@@ -217,9 +265,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       for(unsigned int iTau = 0; iTau < cms2.taus_pf_p4().size(); iTau++){
         if(cms2.taus_pf_p4().at(iTau).pt() < 20.0) continue; 
         if(fabs(cms2.taus_pf_p4().at(iTau).eta()) > 2.3) continue; 
-	if (!cms2.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) continue; // HPS3 hits taus
-	if (!cms2.taus_pf_againstElectronLoose().at(iTau)) continue; // loose electron rejection 
-	if (!cms2.taus_pf_againstMuonTight().at(iTau)) continue; // loose muon rejection 
+	      if (!cms2.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) continue; // HPS3 hits taus
+	      if (!cms2.taus_pf_againstElectronLoose().at(iTau)) continue; // loose electron rejection 
+	      if (!cms2.taus_pf_againstMuonTight().at(iTau)) continue; // loose muon rejection 
         
 
         tau_pt[ntau]   = cms2.taus_pf_p4().at(iTau).pt();
@@ -230,11 +278,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         tau_dxy[ntau] = 0; // could use the tau->dxy() function instead, but not sure what it does
         tau_dz[ntau] = 0; // not sure how to get this. 
         tau_isoCI3hit[ntau] = cms2.taus_pf_byCombinedIsolationDeltaBetaCorrRaw3Hits().at(iTau);
-	int temp = 0;
-	if (cms2.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 1;
-	if (cms2.taus_pf_byMediumCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 2;
-	if (cms2.taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 3;
-	tau_idCI3hit[ntau] = temp;
+        int temp = 0;
+        if (cms2.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 1;
+        if (cms2.taus_pf_byMediumCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 2;
+        if (cms2.taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 3;
+        tau_idCI3hit[ntau] = temp;
         //tau_mcMatchId[ntau] = ;
 
         ntau++;

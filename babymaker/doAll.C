@@ -11,7 +11,7 @@
   //ch->Add("/nfs-3/userdata/jgran/MT2Sync/ntuple1.root");
   //ch->Add("/nfs-3/userdata/jgran/MT2Sync/ntuple2.root");
   //ch->Add("/home/users/gzevi/miniAOD/CMSSW_7_0_6/src/CMS2/NtupleMaker/test/MT2ntuple1and2.root");
-  ch->Add("/home/users/jgran/CMSSW_7_0_6_patch1/src/CMS2/NtupleMaker/ntuple_first1000.root"); //changed deltaR to 0.3 for matching to gen jets
+  ch->Add("/home/users/jgran/CMSSW_7_0_6_patch1/src/CMS2/NtupleMaker/ntuple_first1000.root"); //changed deltaR to 0.4 for matching to gen jets
 
   babyMaker *looper = new babyMaker();
   looper->ScanChain(ch, "sntMT2Baby"); 
