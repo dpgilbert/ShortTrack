@@ -7,6 +7,7 @@
 #include "TDirectory.h"
 #include "TTreeCache.h"
 #include "Math/VectorUtil.h"
+#include "TVector2.h"
 
 // CMS2
 #include "../MT2CORE/CMS2.h"
@@ -288,6 +289,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       mht_pt  = sumJetp4.pt();
       mht_phi = -sumJetp4.phi();
+
+      TVector2 mhtVector = TVector2(mht_pt*cos(mht_phi), mht_pt*sin(mht_phi));
+      TVector2 metVector = TVector2(met_pt*cos(met_phi), met_pt*sin(met_phi));
+      diffMetMht = (mhtVector - metVector).Mod();
+
 
       //TAUS
       ntau = 0;

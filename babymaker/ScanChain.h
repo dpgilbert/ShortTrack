@@ -211,8 +211,8 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("pseudoJet2_eta", &pseudoJet2_eta );
   BabyTree_->Branch("pseudoJet2_phi", &pseudoJet2_phi );
   BabyTree_->Branch("pseudoJet2_mass", &pseudoJet2_mass );
-  BabyTree_->Branch("mht_pt", &met_pt );
-  BabyTree_->Branch("mht_phi", &met_phi );
+  BabyTree_->Branch("mht_pt", &mht_pt );
+  BabyTree_->Branch("mht_phi", &mht_phi );
   BabyTree_->Branch("met_pt", &met_pt );
   BabyTree_->Branch("met_phi", &met_phi );
   BabyTree_->Branch("rawmet_pt", &rawmet_pt );
