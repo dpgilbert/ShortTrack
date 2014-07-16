@@ -82,6 +82,27 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       HLT_MET150       = passHLTTriggerPattern("HLT_PFMET150_v"); 
       HLT_ht350met100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_v") || passHLTTriggerPattern("HLT_PFNoPUHT350_PFMET100_v"); 
       
+      //GEN PARTICLES
+      ngenPart = 0;
+      for(unsigned int iGen = 0; iGen < cms2.genps_p4().size(); iGen++){
+        genPart_pt[ngenPart] = cms2.genps_p4().at(iGen).pt();
+        genPart_eta[ngenPart] = cms2.genps_p4().at(iGen).eta();
+        genPart_phi[ngenPart] = cms2.genps_p4().at(iGen).phi();
+        genPart_mass[ngenPart] = cms2.genps_mass().at(iGen);
+        genPart_pdgId[ngenPart] = cms2.genps_id().at(iGen);
+        //genPart_charge[ngenPart] = ;
+	int momIdx=9999, grandmaIdx=9999;
+	momIdx = cms2.genps_idx_simplemother().at(iGen);
+        if (momIdx < (int) cms2.genps_p4().size() && momIdx != -999) {
+	  genPart_motherId[ngenPart] =cms2.genps_id().at(momIdx);
+	  grandmaIdx =  cms2.genps_idx_simplemother().at(momIdx);
+	  if (grandmaIdx < (int) cms2.genps_p4().size() && grandmaIdx != -999) {
+	    genPart_grandmaId[ngenPart] = cms2.genps_id().at(grandmaIdx);
+	  }
+	}
+        ngenPart++;
+      }
+
       //ELECTRONS
       nlep = 0;
       nElectrons10 = 0;
@@ -101,7 +122,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         lep_tightId[nlep] = eleTightID(iEl);
         lep_relIso03[nlep] =  eleRelIso03(iEl);
         //lep_relIso04[nlep] = ;
-        //lep_mcMatchId[nlep] = ;
+	if (cms2.els_mc3dr().at(iEl) < 0.2 && cms2.els_mc3idx().at(iEl) != -9999 && abs(cms2.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
+	  int momid =  abs(genPart_motherId[cms2.els_mc3idx().at(iEl)]);
+	  lep_mcMatchId[nlep] = momid != 11 ? momid : genPart_grandmaId[cms2.els_mc3idx().at(iEl)]; // if mother is different store mother, otherwise store grandmother
+	}
+
         lep_lostHits[nlep] = cms2.els_exp_innerlayers().at(iEl); //cms2.els_lost_pixelhits().at(iEl);
         lep_convVeto[nlep] = cms2.els_conv_vtx_flag().at(iEl);
         lep_tightCharge[nlep] = tightChargeEle(iEl);
@@ -128,7 +153,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         lep_tightId[nlep] = muTightID(iMu);
         lep_relIso03[nlep] = muRelIso03(iMu);
         lep_relIso04[nlep] = muRelIso04(iMu);
-        //lep_mcMatchId[nlep] = ;
+  	if (cms2.mus_mc3dr().at(iMu) < 0.2 && cms2.mus_mc3idx().at(iMu) != -9999 && abs(cms2.mus_mc3_id().at(iMu)) == 13) { // matched to a prunedGenParticle electron?
+	  int momid =  abs(genPart_motherId[cms2.mus_mc3idx().at(iMu)]);
+	  lep_mcMatchId[nlep] = momid != 13 ? momid : genPart_grandmaId[cms2.mus_mc3idx().at(iMu)]; // if mother is different store mother, otherwise store grandmother
+	}
         lep_lostHits[nlep] = 0; // use defaults as if "good electron"
         lep_convVeto[nlep] = 1;// use defaults as if "good electron"
         lep_tightCharge[nlep] = tightChargeMuon(iMu);
@@ -284,7 +312,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         if (cms2.taus_pf_byMediumCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 2;
         if (cms2.taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 3;
         tau_idCI3hit[ntau] = temp;
-        //tau_mcMatchId[ntau] = ;
+        //tau_mcMatchId[ntau] = ; // Have to do this by hand unless we want to add tau_mc branches in CMS3 through the CandToGenAssMaker
 
         ntau++;
       }
@@ -312,26 +340,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         ngamma++;
       }
 
-      //GEN PARTICLES
-      ngenPart = 0;
-      for(unsigned int iGen = 0; iGen < cms2.genps_p4().size(); iGen++){
-        genPart_pt[ngenPart] = cms2.genps_p4().at(iGen).pt();
-        genPart_eta[ngenPart] = cms2.genps_p4().at(iGen).eta();
-        genPart_phi[ngenPart] = cms2.genps_p4().at(iGen).phi();
-        genPart_mass[ngenPart] = cms2.genps_mass().at(iGen);
-        genPart_pdgId[ngenPart] = cms2.genps_id().at(iGen);
-        //genPart_charge[ngenPart] = ;
-	int momIdx=9999, grandmaIdx=9999;
-	momIdx = cms2.genps_idx_simplemother().at(iGen);
-        if (momIdx < (int) cms2.genps_p4().size() && momIdx != -999) {
-	  genPart_motherId[ngenPart] =cms2.genps_id().at(momIdx);
-	  grandmaIdx =  cms2.genps_idx_simplemother().at(momIdx);
-	  if (grandmaIdx < (int) cms2.genps_p4().size() && grandmaIdx != -999) {
-	    genPart_grandmaId[ngenPart] = cms2.genps_id().at(grandmaIdx);
-	  }
-	}
-        ngenPart++;
-      }
 
 
       //ISOTRACK
