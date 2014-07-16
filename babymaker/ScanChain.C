@@ -115,6 +115,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         if(cms2.mus_p4().at(iMu).pt() < 10.0) continue;
         if(fabs(cms2.mus_p4().at(iMu).eta()) > 2.4) continue;
         if(!isLooseMuon(iMu)) continue;
+	if (muRelIso03(iMu) > 0.15) continue; // to avoid DR(jet,lepton) with leptons from b 
         nMuons10++;
         lep_pt[nlep]   = cms2.mus_p4().at(iMu).pt();
         lep_eta[nlep]  = cms2.mus_p4().at(iMu).eta();
@@ -320,9 +321,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         genPart_mass[ngenPart] = cms2.genps_mass().at(iGen);
         genPart_pdgId[ngenPart] = cms2.genps_id().at(iGen);
         //genPart_charge[ngenPart] = ;
-        genPart_motherId[ngenPart] = cms2.genps_id_mother().at(iGen);
-        //genPart_grandmaId[ngenPart] = ;
-
+	int momIdx=9999, grandmaIdx=9999;
+	momIdx = cms2.genps_idx_simplemother().at(iGen);
+        if (momIdx < (int) cms2.genps_p4().size() && momIdx != -999) {
+	  genPart_motherId[ngenPart] =cms2.genps_id().at(momIdx);
+	  grandmaIdx =  cms2.genps_idx_simplemother().at(momIdx);
+	  if (grandmaIdx < (int) cms2.genps_p4().size() && grandmaIdx != -999) {
+	    genPart_grandmaId[ngenPart] = cms2.genps_id().at(grandmaIdx);
+	  }
+	}
         ngenPart++;
       }
 
