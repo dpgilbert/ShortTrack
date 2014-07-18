@@ -357,6 +357,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       vector<float>vec_isoTrack_absIso;
       vector<float>vec_isoTrack_dz;
       vector<int>  vec_isoTrack_pdgId;
+      vector<int>  vec_isoTrack_mcMatchId;
 
       nisoTrack = 0;
       for (unsigned int ipf = 0; ipf < pfcands_p4().size(); ipf++) {
@@ -379,6 +380,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         vec_isoTrack_absIso.push_back( absiso                           );
         vec_isoTrack_dz.push_back    ( cms2.pfcands_dz().at(ipf)        );
         vec_isoTrack_pdgId.push_back ( cms2.pfcands_particleId().at(ipf));
+        vec_isoTrack_mcMatchId.push_back ( 0 );
 
         nisoTrack++;
       }  
@@ -393,6 +395,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         isoTrack_absIso[i] = vec_isoTrack_absIso.at(it->second);
         isoTrack_dz[i]     = vec_isoTrack_dz.at(it->second);
         isoTrack_pdgId[i]  = vec_isoTrack_pdgId.at(it->second);
+        isoTrack_mcMatchId[i]  = vec_isoTrack_mcMatchId.at(it->second);
         i++;
       }
         

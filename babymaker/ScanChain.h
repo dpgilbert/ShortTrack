@@ -76,12 +76,12 @@ class babyMaker {
   Float_t         mht_phi;
   Float_t         met_pt;
   Float_t         met_phi;
-  Float_t         rawmet_pt;
-  Float_t         rawmet_phi;
-  Float_t         calomet_pt;
-  Float_t         calomet_phi;
-  Float_t         genmet_pt;
-  Float_t         genmet_phi;
+  Float_t         met_rawPt;
+  Float_t         met_rawPhi;
+  Float_t         met_caloPt;
+  Float_t         met_caloPhi;
+  Float_t         met_genPt;
+  Float_t         met_genPhi;
 
 //----- TRIGGER (to be better defined)
   Int_t           HLT_HT650;   
@@ -115,6 +115,7 @@ class babyMaker {
   Float_t           isoTrack_absIso[50];
   Float_t           isoTrack_dz[50];
   Int_t             isoTrack_pdgId[50];
+  Int_t             isoTrack_mcMatchId[50];
 
 //----- TAUS
   Int_t           ntau;
@@ -215,12 +216,12 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("mht_phi", &mht_phi );
   BabyTree_->Branch("met_pt", &met_pt );
   BabyTree_->Branch("met_phi", &met_phi );
-  BabyTree_->Branch("rawmet_pt", &rawmet_pt );
-  BabyTree_->Branch("rawmet_phi", &rawmet_phi );
-  BabyTree_->Branch("calomet_pt", &calomet_pt );
-  BabyTree_->Branch("calomet_phi", &calomet_phi );
-  BabyTree_->Branch("genmet_pt", &genmet_pt );
-  BabyTree_->Branch("genmet_phi", &genmet_phi );
+  BabyTree_->Branch("met_rawPt",  &met_rawPt );
+  BabyTree_->Branch("met_rawPhi", &met_rawPhi );
+  BabyTree_->Branch("met_caloPt",  &met_caloPt );
+  BabyTree_->Branch("met_caloPhi", &met_caloPhi );
+  BabyTree_->Branch("met_genPt",  &met_genPt );
+  BabyTree_->Branch("met_genPhi", &met_genPhi );
   BabyTree_->Branch("HLT_HT650", &HLT_HT650 );
   BabyTree_->Branch("HLT_MET150", &HLT_MET150 );
   BabyTree_->Branch("HLT_ht350met100", &HLT_ht350met100 );
@@ -245,9 +246,10 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("isoTrack_eta", isoTrack_eta, "isoTrack_eta[nisoTrack]/F" );
   BabyTree_->Branch("isoTrack_phi", isoTrack_phi, "isoTrack_phi[nisoTrack]/F" );
   BabyTree_->Branch("isoTrack_mass", isoTrack_mass, "isoTrack_mass[nisoTrack]/F" );
-  BabyTree_->Branch("isoTrackabssIso", isoTrack_absIso, "isoTrack_absIso[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_absIso", isoTrack_absIso, "isoTrack_absIso[nisoTrack]/F" );
   BabyTree_->Branch("isoTrack_dz", isoTrack_dz, "isoTrack_dz[nisoTrack]/F" );
   BabyTree_->Branch("isoTrack_pdgId", isoTrack_pdgId, "isoTrack_pdgId[nisoTrack]/I" );
+  BabyTree_->Branch("isoTrack_mcMatchId", isoTrack_mcMatchId, "isoTrack_mcMatchId[nisoTrack]/I" );
   BabyTree_->Branch("ntau", &ntau, "ntau/I" );
   BabyTree_->Branch("tau_pt", tau_pt, "tau_pt[ntau]/F" );
   BabyTree_->Branch("tau_eta", tau_eta, "tau_eta[ntau]/F" );
@@ -280,7 +282,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("genPart_phi", genPart_phi, "genPart_phi[ngenPart]/F" );
   BabyTree_->Branch("genPart_mass", genPart_mass, "genPart_mass[ngenPart]/F" );
   BabyTree_->Branch("genPart_pdgId", genPart_pdgId, "genPart_pdgId[ngenPart]/I" );
-  BabyTree_->Branch("genPart_charge", genPart_charge, "genPart_charge[ngenPart]/I" );
+  BabyTree_->Branch("genPart_charge", genPart_charge, "genPart_charge[ngenPart]/F" );
   BabyTree_->Branch("genPart_motherId", genPart_motherId, "genPart_motherId[ngenPart]/I" );
   BabyTree_->Branch("genPart_grandmaId", genPart_grandmaId, "genPart_grandmaId[ngenPart]/I" );
   BabyTree_->Branch("njet", &njet, "njet/I" );
@@ -332,12 +334,12 @@ void babyMaker::InitBabyNtuple () {
   mht_phi = -999.0;
   met_pt = -999.0;
   met_phi = -999.0;
-  rawmet_pt = -999.0;
-  rawmet_phi = -999.0;
-  calomet_pt = -999.0;
-  calomet_phi = -999.0;
-  genmet_pt = -999.0;
-  genmet_phi = -999.0;
+  met_rawPt = -999.0;
+  met_rawPhi = -999.0;
+  met_caloPt = -999.0;
+  met_caloPhi = -999.0;
+  met_genPt = -999.0;
+  met_genPhi = -999.0;
   HLT_HT650 = -999;
   HLT_MET150 = -999;
   HLT_ht350met100 = -999;
