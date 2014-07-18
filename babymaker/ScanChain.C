@@ -92,15 +92,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         genPart_mass[ngenPart] = cms2.genps_mass().at(iGen);
         genPart_pdgId[ngenPart] = cms2.genps_id().at(iGen);
         //genPart_charge[ngenPart] = ;
-	int momIdx=9999, grandmaIdx=9999;
-	momIdx = cms2.genps_idx_simplemother().at(iGen);
-        if (momIdx < (int) cms2.genps_p4().size() && momIdx != -999) {
-	  genPart_motherId[ngenPart] =cms2.genps_id().at(momIdx);
-	  grandmaIdx =  cms2.genps_idx_simplemother().at(momIdx);
-	  if (grandmaIdx < (int) cms2.genps_p4().size() && grandmaIdx != -999) {
-	    genPart_grandmaId[ngenPart] = cms2.genps_id().at(grandmaIdx);
-	  }
-	}
+        int momIdx=9999, grandmaIdx=9999;
+        momIdx = cms2.genps_idx_simplemother().at(iGen);
+              if (momIdx < (int) cms2.genps_p4().size() && momIdx != -999) {
+          genPart_motherId[ngenPart] =cms2.genps_id().at(momIdx);
+          grandmaIdx =  cms2.genps_idx_simplemother().at(momIdx);
+          if (grandmaIdx < (int) cms2.genps_p4().size() && grandmaIdx != -999) {
+            genPart_grandmaId[ngenPart] = cms2.genps_id().at(grandmaIdx);
+          }
+        }
         ngenPart++;
       }
 
@@ -123,10 +123,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         lep_tightId[nlep] = eleTightID(iEl);
         lep_relIso03[nlep] =  eleRelIso03(iEl);
         //lep_relIso04[nlep] = ;
-	if (cms2.els_mc3dr().at(iEl) < 0.2 && cms2.els_mc3idx().at(iEl) != -9999 && abs(cms2.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
-	  int momid =  abs(genPart_motherId[cms2.els_mc3idx().at(iEl)]);
-	  lep_mcMatchId[nlep] = momid != 11 ? momid : genPart_grandmaId[cms2.els_mc3idx().at(iEl)]; // if mother is different store mother, otherwise store grandmother
-	}
+        if (cms2.els_mc3dr().at(iEl) < 0.2 && cms2.els_mc3idx().at(iEl) != -9999 && abs(cms2.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
+          int momid =  abs(genPart_motherId[cms2.els_mc3idx().at(iEl)]);
+          lep_mcMatchId[nlep] = momid != 11 ? momid : genPart_grandmaId[cms2.els_mc3idx().at(iEl)]; // if mother is different store mother, otherwise store grandmother
+        }
 
         lep_lostHits[nlep] = cms2.els_exp_innerlayers().at(iEl); //cms2.els_lost_pixelhits().at(iEl);
         lep_convVeto[nlep] = cms2.els_conv_vtx_flag().at(iEl);
@@ -141,7 +141,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         if(cms2.mus_p4().at(iMu).pt() < 10.0) continue;
         if(fabs(cms2.mus_p4().at(iMu).eta()) > 2.4) continue;
         if(!isLooseMuon(iMu)) continue;
-	if (muRelIso03(iMu) > 0.15) continue; // to avoid DR(jet,lepton) with leptons from b 
+        if (muRelIso03(iMu) > 0.15) continue; // to avoid DR(jet,lepton) with leptons from b 
         nMuons10++;
         lep_pt[nlep]   = cms2.mus_p4().at(iMu).pt();
         lep_eta[nlep]  = cms2.mus_p4().at(iMu).eta();
@@ -154,10 +154,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         lep_tightId[nlep] = muTightID(iMu);
         lep_relIso03[nlep] = muRelIso03(iMu);
         lep_relIso04[nlep] = muRelIso04(iMu);
-  	if (cms2.mus_mc3dr().at(iMu) < 0.2 && cms2.mus_mc3idx().at(iMu) != -9999 && abs(cms2.mus_mc3_id().at(iMu)) == 13) { // matched to a prunedGenParticle electron?
-	  int momid =  abs(genPart_motherId[cms2.mus_mc3idx().at(iMu)]);
-	  lep_mcMatchId[nlep] = momid != 13 ? momid : genPart_grandmaId[cms2.mus_mc3idx().at(iMu)]; // if mother is different store mother, otherwise store grandmother
-	}
+        if (cms2.mus_mc3dr().at(iMu) < 0.2 && cms2.mus_mc3idx().at(iMu) != -9999 && abs(cms2.mus_mc3_id().at(iMu)) == 13) { // matched to a prunedGenParticle electron?
+          int momid =  abs(genPart_motherId[cms2.mus_mc3idx().at(iMu)]);
+          lep_mcMatchId[nlep] = momid != 13 ? momid : genPart_grandmaId[cms2.mus_mc3idx().at(iMu)]; // if mother is different store mother, otherwise store grandmother
+	      }
         lep_lostHits[nlep] = 0; // use defaults as if "good electron"
         lep_convVeto[nlep] = 1;// use defaults as if "good electron"
         lep_tightCharge[nlep] = tightChargeMuon(iMu);
@@ -258,7 +258,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
           ht+= jet_pt[njet];
           if(jet_btagCSV[njet] >= 0.679) nBJet40++; //CSVM
 
-          sumJetp4 += cms2.pfjets_p4().at(iJet); 
+          sumJetp4 -= cms2.pfjets_p4().at(iJet); 
 
           if(nJet40 <= 4){
             deltaPhiMin = min(deltaPhiMin, DeltaPhi(met_phi, jet_phi[njet]));
@@ -288,7 +288,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       }
 
       mht_pt  = sumJetp4.pt();
-      mht_phi = -sumJetp4.phi();
+      mht_phi = sumJetp4.phi();
 
       TVector2 mhtVector = TVector2(mht_pt*cos(mht_phi), mht_pt*sin(mht_phi));
       TVector2 metVector = TVector2(met_pt*cos(met_phi), met_pt*sin(met_phi));
