@@ -24,6 +24,15 @@ enum enum_mt2_method { BISECT, GRID };
 // MT2 Calculated with the Bisection method from Cheng & Han //
 ///////////////////////////////////////////////////////////////
 
+double HemMT2(
+  const float,
+  const float,
+  const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >,
+  const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >,
+  float = 0.0,
+  bool = false
+);
+
 // MT2 declaration
 double MT2(
   const float,

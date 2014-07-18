@@ -103,12 +103,19 @@ std::vector<LorentzVector> getHemJets(std::vector<LorentzVector>& jets){
   }
 
   std::vector<LorentzVector> result;
+
+//don't make hemispheres to be massless at this step
+/*
   float E1 = sqrt(axis1.Px()*axis1.Px() + axis1.Py()*axis1.Py() + axis1.Pz()*axis1.Pz()); //used to force hemisphere to be massless
   LorentzVector hem1 = LorentzVector(axis1.Px(), axis1.Py(), axis1.Pz(), E1);
   float E2 = sqrt(axis2.Px()*axis2.Px() + axis2.Py()*axis2.Py() + axis2.Pz()*axis2.Pz()); //used to force hemisphere to be massless
   LorentzVector hem2 = LorentzVector(axis2.Px(), axis2.Py(), axis2.Pz(), E2);
   result.push_back(hem1);
   result.push_back(hem2);
+*/
+
+  result.push_back(axis1);
+  result.push_back(axis2);
 
 /*
   //for debugging

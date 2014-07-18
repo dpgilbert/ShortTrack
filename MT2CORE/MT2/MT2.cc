@@ -9,6 +9,45 @@ using namespace std;
 // MT2 Calculated with the Bisection method from Cheng & Han //
 ///////////////////////////////////////////////////////////////
 
+// HemMT2( MET_MAGNITUDE, MET_PHI, P4_HEM_1, P4_HEM_2, MASS_INVISIBLE_PARTICLE )
+double HemMT2(
+  const float met,
+  const float metPhi,
+  const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > v1,
+  const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > v2,
+  float invisible_particle_mass,
+  bool verbose
+){
+
+//--- code here follows documentation in MT2Utility.cc ---//
+
+  // initialize arrays for lepton 1, lepton 2, MET
+  double pa[3]    = {0,0,0};
+  double pb[3]    = {0,0,0};
+  double pmiss[3] = {0,0,0};
+
+  // Set the masses
+    pa[0] = 0.0;
+    pb[0] = 0.0;
+
+  // set the transverse momenta for the leptons & MET
+  pa[1]     = (double) v1.Px();
+  pa[2]     = (double) v1.Py();
+  pb[1]     = (double) v2.Px();
+  pb[2]     = (double) v2.Py();
+  pmiss[0]  = 0.0;                      // not used
+  pmiss[1]  = (double) met*cos(metPhi);
+  pmiss[2]  = (double) met*sin(metPhi);
+
+  // instantiate mt2 class, set momenta and mass of invisible particle
+  mt2_bisect::mt2 mt2_event;
+  mt2_event.set_momenta( pa, pb, pmiss );
+  mt2_event.set_mn( invisible_particle_mass );
+
+  //
+  return mt2_event.get_mt2();
+}
+
 // MT2( MET_MAGNITUDE, MET_PHI, P4_LEPTON_1, P4_LEPTON_2, MASS_INVISIBLE_PARTICLE )
 double MT2(
   const float met,
