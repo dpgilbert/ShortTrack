@@ -77,6 +77,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       
       met_pt  = cms2.evt_pfmet();
       met_phi = cms2.evt_pfmetPhi();
+      met_genPt  = cms2.gen_met();
+      met_genPhi = cms2.gen_metPhi();
 
       //TRIGGER
       HLT_HT650        = passHLTTriggerPattern("HLT_PFHT650_v") ||  passHLTTriggerPattern("HLT_PFNoPUHT650_v");
@@ -274,7 +276,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         //Hemispheres used in MT2 calculation
         hemJets = getHemJets(goodJets);  
 
-        mt2 = MT2(met_pt, met_phi, hemJets.at(0), hemJets.at(1));
+        mt2 = HemMT2(met_pt, met_phi, hemJets.at(0), hemJets.at(1));
       
         pseudoJet1_pt   = hemJets.at(0).pt();
         pseudoJet1_eta  = hemJets.at(0).eta();
@@ -294,9 +296,23 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       TVector2 metVector = TVector2(met_pt*cos(met_phi), met_pt*sin(met_phi));
       diffMetMht = (mhtVector - metVector).Mod();
 
+      
+      //GEN MT2
+      vector<LorentzVector> goodGenJets;
+      for(unsigned int iGenJet=0; iGenJet < cms2.genjets_p4NoMuNoNu().size(); iGenJet++){
+        if(cms2.genjets_p4NoMuNoNu().at(iGenJet).pt() < 40.0) continue;
+        if(fabs(cms2.genjets_p4NoMuNoNu().at(iGenJet).eta()) > 2.5) continue;
+        goodGenJets.push_back(cms2.genjets_p4NoMuNoNu().at(iGenJet));
+      }
+      if(goodGenJets.size() > 1){
+        hemJets = getHemJets(goodGenJets);  
+        mt2_gen = HemMT2(met_genPt, met_genPhi, hemJets.at(0), hemJets.at(1));
+      }
+
 
       //TAUS
       ntau = 0;
+      nTaus20 = 0;
       for(unsigned int iTau = 0; iTau < cms2.taus_pf_p4().size(); iTau++){
         if(cms2.taus_pf_p4().at(iTau).pt() < 20.0) continue; 
         if(fabs(cms2.taus_pf_p4().at(iTau).eta()) > 2.3) continue; 
@@ -318,6 +334,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         if (cms2.taus_pf_byMediumCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 2;
         if (cms2.taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 3;
         tau_idCI3hit[ntau] = temp;
+        if(tau_pt[ntau] > 20) nTaus20++;
         //tau_mcMatchId[ntau] = ; // Have to do this by hand unless we want to add tau_mc branches in CMS3 through the CandToGenAssMaker
 
         ntau++;
@@ -325,6 +342,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       //PHOTONS
       ngamma = 0;
+      nGammas20 = 0;
       for(unsigned int iGamma = 0; iGamma < cms2.photons_p4().size(); iGamma++){
         if(cms2.photons_p4().at(iGamma).pt() < 20.0) continue;
         if(fabs(cms2.photons_p4().at(iGamma).eta()) > 2.5) continue;
@@ -340,6 +358,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         gamma_r9[ngamma] =  photons_full5x5_r9().at(iGamma);
         gamma_hOverE[ngamma] =  photons_full5x5_hOverEtowBC().at(iGamma);
         gamma_idCutBased[ngamma] =  photons_photonID_tight().at(iGamma) ? 2 : 0; // Medium working point is not saved in miniAOD, should implement on our own if we want it
+        if(gamma_pt[ngamma] > 20) nGammas20++;
 
         //gamma_mcMatchId[ngamma] = ;
         

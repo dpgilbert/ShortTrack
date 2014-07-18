@@ -56,12 +56,15 @@ class babyMaker {
   Int_t           nBJet40;
   Int_t           nMuons10;
   Int_t           nElectrons10;
+  Int_t           nTaus20;
+  Int_t           nGammas20;
 
   Float_t         deltaPhiMin;
   Float_t         diffMetMht;
 
   Float_t         ht;
   Float_t         mt2;
+  Float_t         mt2_gen;
 
   Float_t         pseudoJet1_pt;
   Float_t         pseudoJet1_eta;
@@ -200,10 +203,13 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("nBJet40", &nBJet40 );
   BabyTree_->Branch("nMuons10", &nMuons10 );
   BabyTree_->Branch("nElectrons10", &nElectrons10 );
+  BabyTree_->Branch("nTaus20", &nTaus20 );
+  BabyTree_->Branch("nGammas20", &nGammas20 );
   BabyTree_->Branch("deltaPhiMin", &deltaPhiMin );
   BabyTree_->Branch("diffMetMht", &diffMetMht );
   BabyTree_->Branch("ht", &ht );
   BabyTree_->Branch("mt2", &mt2 );
+  BabyTree_->Branch("mt2_gen", &mt2_gen );
   BabyTree_->Branch("pseudoJet1_pt", &pseudoJet1_pt );
   BabyTree_->Branch("pseudoJet1_eta", &pseudoJet1_eta );
   BabyTree_->Branch("pseudoJet1_phi", &pseudoJet1_phi );
@@ -318,10 +324,13 @@ void babyMaker::InitBabyNtuple () {
   nBJet40 = -999;
   nMuons10 = -999;
   nElectrons10 = -999;
+  nTaus20 = -999;
+  nGammas20 = -999;
   deltaPhiMin = -999.0;
   diffMetMht = -999.0;
   ht = -999.0;
   mt2 = -999.0;
+  mt2_gen = -999.0;
   pseudoJet1_pt = -999.0;
   pseudoJet1_eta = -999.0;
   pseudoJet1_phi = -999.0;
