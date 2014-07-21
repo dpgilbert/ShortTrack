@@ -105,7 +105,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         genPart_phi[ngenPart] = cms2.genps_p4().at(iGen).phi();
         genPart_mass[ngenPart] = cms2.genps_mass().at(iGen);
         genPart_pdgId[ngenPart] = cms2.genps_id().at(iGen);
-        //genPart_charge[ngenPart] = ;
+        genPart_charge[ngenPart] = cms2.genps_charge().at(iGen);
         int momIdx=9999, grandmaIdx=9999;
         momIdx = cms2.genps_idx_simplemother().at(iGen);
               if (momIdx < (int) cms2.genps_p4().size() && momIdx != -999) {
