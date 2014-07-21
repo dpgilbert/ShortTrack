@@ -351,7 +351,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         gamma_eta[ngamma]  = cms2.photons_p4().at(iGamma).eta();
         gamma_phi[ngamma]  = cms2.photons_p4().at(iGamma).phi();
         gamma_mass[ngamma] = cms2.photons_mass().at(iGamma);
-        gamma_sigmaIetaIeta[ngamma] = cms2.photons_full5x5sigmaIEtaIEta().at(iGamma);
+        gamma_sigmaIetaIeta[ngamma] = cms2.photons_full5x5_sigmaIEtaIEta().at(iGamma);
         gamma_chHadIso[ngamma] = photons_chargedHadronIso().at(iGamma);
         gamma_neuHadIso[ngamma] = photons_neutralHadronIso().at(iGamma);
         gamma_phIso[ngamma] = photons_photonIso().at(iGamma);
