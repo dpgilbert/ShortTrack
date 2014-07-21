@@ -187,7 +187,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   rootdir->cd();
   BabyFile_ = new TFile(Form("%s", BabyFilename), "RECREATE");
   BabyFile_->cd();
-  BabyTree_ = new TTree("tree", "A Baby Ntuple");
+  BabyTree_ = new TTree("treeProducerSusyFullHad", "A Baby Ntuple");
 
   BabyTree_->Branch("run", &run );
   BabyTree_->Branch("lumi", &lumi );
@@ -299,7 +299,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("jet_btagCSV", jet_btagCSV, "jet_btagCSV[njet]/F" );
   BabyTree_->Branch("jet_rawPt", jet_rawPt, "jet_rawPt[njet]/F" );
   BabyTree_->Branch("jet_mcPt", jet_mcPt, "jet_mcPt[njet]/F" );
-  BabyTree_->Branch("jet_mcFlavour", jet_mcFlavour, "jet_mcFlavor[njet]/I" );
+  BabyTree_->Branch("jet_mcFlavour", jet_mcFlavour, "jet_mcFlavour[njet]/I" );
   BabyTree_->Branch("jet_quarkGluonID", jet_quarkGluonID, "jet_quarkGluonID[njet]/F" );
   BabyTree_->Branch("jet_area", jet_area, "jet_area[njet]/F" );
   BabyTree_->Branch("jet_id", jet_id, "jet_id[njet]/I" );
