@@ -48,7 +48,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
-    //for( unsigned int event = 0; event < 1000; ++event) {
+    //for( unsigned int event = 0; event < 100; ++event) {
 
     
 
@@ -70,10 +70,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       //crossSection = ;
       puWeight = 1.;
-      nVert = cms2.evt_nvtxs();
       nTrueInt = cms2.puInfo_trueNumInteractions().at(0);
       rho = cms2.evt_fixgrid_all_rho(); // evt_fixgrid_all_rho() comes from miniAOD, while evt_fixgrid_rho_all() is calculated by the PFCandidateMaker. They are be identical.
       //rho25 = ;
+
+      //VERTICES
+      nVert = 0;
+      for(unsigned int ivtx=0; ivtx < cms2.evt_nvtxs(); ivtx++){
+
+        if(cms2.vtxs_isFake().at(ivtx)) continue;
+        if(cms2.vtxs_ndof().at(ivtx) <= 4) continue;
+        if(fabs(cms2.vtxs_position().at(ivtx).z()) > 24) continue;
+        if(cms2.vtxs_position().at(ivtx).Rho() > 2) continue;
+
+        nVert++;
+  
+      }
       
       met_pt  = cms2.evt_pfmet();
       met_phi = cms2.evt_pfmetPhi();
