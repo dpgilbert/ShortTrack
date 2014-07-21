@@ -124,7 +124,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         lep_dz[nlep] = cms2.els_dzPV().at(iEl);
         lep_tightId[nlep] = eleTightID(iEl);
         lep_relIso03[nlep] =  eleRelIso03(iEl);
-        //lep_relIso04[nlep] = ;
+        lep_relIso04[nlep] = 0;
         if (cms2.els_mc3dr().at(iEl) < 0.2 && cms2.els_mc3idx().at(iEl) != -9999 && abs(cms2.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms2.els_mc3idx().at(iEl)]);
           lep_mcMatchId[nlep] = momid != 11 ? momid : genPart_grandmaId[cms2.els_mc3idx().at(iEl)]; // if mother is different store mother, otherwise store grandmother
