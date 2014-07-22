@@ -53,8 +53,6 @@ namespace tas {
 	float &evt_scale1fb() { return cms2.evt_scale1fb(); }
 	float &evt_xsec_excl() { return cms2.evt_xsec_excl(); }
 	float &evt_xsec_incl() { return cms2.evt_xsec_incl(); }
-	float &gen_met() { return cms2.gen_met(); }
-	float &gen_metPhi() { return cms2.gen_metPhi(); }
 	float &genps_alphaQCD() { return cms2.genps_alphaQCD(); }
 	float &genps_pthat() { return cms2.genps_pthat(); }
 	float &genps_qScale() { return cms2.genps_qScale(); }
@@ -105,6 +103,8 @@ namespace tas {
 	float &evt_pfmetSig() { return cms2.evt_pfmetSig(); }
 	float &evt_pfmetSignificance() { return cms2.evt_pfmetSignificance(); }
 	float &evt_pfsumet() { return cms2.evt_pfsumet(); }
+	float &gen_met() { return cms2.gen_met(); }
+	float &gen_metPhi() { return cms2.gen_metPhi(); }
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >  &evt_bsp4() { return cms2.evt_bsp4(); }
 	vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > > &els_mc_motherp4() { return cms2.els_mc_motherp4(); }
 	vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > > &els_mc_p4() { return cms2.els_mc_p4(); }
@@ -277,6 +277,7 @@ namespace tas {
 	vector<float> &els_z0() { return cms2.els_z0(); }
 	vector<float> &els_z0Err() { return cms2.els_z0Err(); }
 	vector<float> &els_z0corr() { return cms2.els_z0corr(); }
+	vector<float> &genps_charge() { return cms2.genps_charge(); }
 	vector<float> &genps_mass() { return cms2.genps_mass(); }
 	vector<float> &mus_backToBackCompat() { return cms2.mus_backToBackCompat(); }
 	vector<float> &mus_best_dxyPV() { return cms2.mus_best_dxyPV(); }
