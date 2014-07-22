@@ -71,7 +71,7 @@ bool loosePileupJetId(unsigned int pfJetIdx){
     if( (eta >= 0   ) && (eta <= 2.5 ) && (value > -0.63) ) return true;
     if( (eta > 2.5  ) && (eta <= 2.75) && (value > -0.60) ) return true;
     if( (eta > 2.75 ) && (eta <= 3.0 ) && (value > -0.55) ) return true;
-    if( (eta > 3.0  ) && (eta <= 5.0 ) && (value > -0.45) ) return true;
+    if( (eta > 3.0  ) && (eta <= 5.2 ) && (value > -0.45) ) return true;
     
     return false;
 }

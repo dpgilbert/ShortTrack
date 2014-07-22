@@ -1856,6 +1856,12 @@ protected:
 	vector<int> genps_idx_simplemother_;
 	TBranch *genps_idx_simplemother_branch;
 	bool genps_idx_simplemother_isLoaded;
+  vector<int> genps_id_simplemother_;
+	TBranch *genps_id_simplemother_branch;
+	bool genps_id_simplemother_isLoaded;
+  vector<int> genps_id_simplegrandma_;
+	TBranch *genps_id_simplegrandma_branch;
+	bool genps_id_simplegrandma_isLoaded;
 	vector<int> genps_status_;
 	TBranch *genps_status_branch;
 	bool genps_status_isLoaded;
@@ -5476,6 +5482,16 @@ void Init(TTree *tree) {
 		genps_idx_simplemother_branch = tree->GetBranch(tree->GetAlias("genps_idx_simplemother"));
 		genps_idx_simplemother_branch->SetAddress(&genps_idx_simplemother_);
 	}
+  genps_id_simplemother_branch = 0;
+	if (tree->GetAlias("genps_id_simplemother") != 0) {
+		genps_id_simplemother_branch = tree->GetBranch(tree->GetAlias("genps_id_simplemother"));
+		genps_id_simplemother_branch->SetAddress(&genps_id_simplemother_);
+	}
+  genps_id_simplegrandma_branch = 0;
+	if (tree->GetAlias("genps_id_simplegrandma") != 0) {
+		genps_id_simplegrandma_branch = tree->GetBranch(tree->GetAlias("genps_id_simplegrandma"));
+		genps_id_simplegrandma_branch->SetAddress(&genps_id_simplegrandma_);
+	}
 	genps_status_branch = 0;
 	if (tree->GetAlias("genps_status") != 0) {
 		genps_status_branch = tree->GetBranch(tree->GetAlias("genps_status"));
@@ -7015,6 +7031,8 @@ void GetEntry(unsigned int idx)
 		genps_id_mother_isLoaded = false;
 		genps_idx_mother_isLoaded = false;
 		genps_idx_simplemother_isLoaded = false;
+    genps_id_simplemother_isLoaded = false;
+    genps_id_simplegrandma_isLoaded = false;
 		genps_status_isLoaded = false;
 		mus_algo_isLoaded = false;
 		mus_charge_isLoaded = false;
@@ -7817,6 +7835,8 @@ void LoadAllBranches()
 	if (genps_id_mother_branch != 0) genps_id_mother();
 	if (genps_idx_mother_branch != 0) genps_idx_mother();
 	if (genps_idx_simplemother_branch != 0) genps_idx_simplemother();
+  if (genps_id_simplemother_branch != 0) genps_id_simplemother();
+  if (genps_id_simplegrandma_branch != 0) genps_id_simplegrandma();
 	if (genps_status_branch != 0) genps_status();
 	if (mus_algo_branch != 0) mus_algo();
 	if (mus_charge_branch != 0) mus_charge();
@@ -14133,6 +14153,26 @@ void LoadAllBranches()
 		}
 		return genps_idx_simplemother_;
 	}
+  vector<int> &genps_id_simplemother()
+	{
+		if (not genps_id_simplemother_isLoaded) {
+			if (genps_id_simplemother_branch != 0) {
+				genps_id_simplemother_branch->GetEntry(index);
+			} else { }
+			genps_id_simplemother_isLoaded = true;
+		}
+		return genps_id_simplemother_;
+	}
+  vector<int> &genps_id_simplegrandma()
+	{
+		if (not genps_id_simplegrandma_isLoaded) {
+			if (genps_id_simplegrandma_branch != 0) {
+				genps_id_simplegrandma_branch->GetEntry(index);
+			} else { }
+			genps_id_simplegrandma_isLoaded = true;
+		}
+		return genps_id_simplegrandma_;
+	}
 	vector<int> &genps_status()
 	{
 		if (not genps_status_isLoaded) {
@@ -16628,6 +16668,8 @@ namespace tas {
 	vector<int> &genps_id_mother();
 	vector<int> &genps_idx_mother();
 	vector<int> &genps_idx_simplemother();
+  vector<int> &genps_id_simplemother();
+  vector<int> &genps_id_simplegrandma();
 	vector<int> &genps_status();
 	vector<int> &mus_algo();
 	vector<int> &mus_charge();

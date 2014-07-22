@@ -106,17 +106,30 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         genPart_mass[ngenPart] = cms2.genps_mass().at(iGen);
         genPart_pdgId[ngenPart] = cms2.genps_id().at(iGen);
         genPart_charge[ngenPart] = cms2.genps_charge().at(iGen);
-        int momIdx=9999, grandmaIdx=9999;
-        momIdx = cms2.genps_idx_simplemother().at(iGen);
-              if (momIdx < (int) cms2.genps_p4().size() && momIdx != -999) {
-          genPart_motherId[ngenPart] =cms2.genps_id().at(momIdx);
-          grandmaIdx =  cms2.genps_idx_simplemother().at(momIdx);
-          if (grandmaIdx < (int) cms2.genps_p4().size() && grandmaIdx != -999) {
-            genPart_grandmaId[ngenPart] = cms2.genps_id().at(grandmaIdx);
-          }
-        }
+	genPart_motherId[ngenPart] =cms2.genps_id_simplemother().at(iGen);
+	genPart_grandmaId[ngenPart] = cms2.genps_id_simplegrandma().at(iGen);
         ngenPart++;
       }
+
+
+      //LEPTONS
+      std::map<float, int> lep_pt_ordering;
+      vector<float>vec_lep_pt;
+      vector<float>vec_lep_eta;
+      vector<float>vec_lep_phi;
+      vector<float>vec_lep_mass;
+      vector<float>vec_lep_charge;
+      vector<int>  vec_lep_pdgId;
+      vector<float>vec_lep_dxy;
+      vector<float>vec_lep_dz;
+      vector<int>  vec_lep_tightId;
+      vector<float>vec_lep_relIso03;
+      vector<float>vec_lep_relIso04;
+      vector<int>  vec_lep_mcMatchId;
+      vector<int>  vec_lep_lostHits;
+      vector<int>  vec_lep_convVeto;
+      vector<int>  vec_lep_tightCharge;
+
 
       //ELECTRONS
       nlep = 0;
@@ -126,25 +139,27 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         if(fabs(cms2.els_p4().at(iEl).eta()) > 2.4) continue;
         if(!isVetoElectron(iEl)) continue;
         nElectrons10++;
-        lep_pt[nlep]   = cms2.els_p4().at(iEl).pt();
-        lep_eta[nlep]  = cms2.els_p4().at(iEl).eta(); //save eta, even though we use SCeta for ID
-        lep_phi[nlep]  = cms2.els_p4().at(iEl).phi();
-        lep_mass[nlep] = cms2.els_mass().at(iEl);
-        lep_charge[nlep] = cms2.els_charge().at(iEl);
-        lep_pdgId[nlep] = (-11)*cms2.els_charge().at(iEl);
-        lep_dxy[nlep] = cms2.els_dxyPV().at(iEl);
-        lep_dz[nlep] = cms2.els_dzPV().at(iEl);
-        lep_tightId[nlep] = eleTightID(iEl);
-        lep_relIso03[nlep] =  eleRelIso03(iEl);
-        lep_relIso04[nlep] = 0;
+        lep_pt_ordering[cms2.els_p4().at(iEl).pt()] = nlep;
+        vec_lep_pt.push_back ( cms2.els_p4().at(iEl).pt());
+        vec_lep_eta.push_back ( cms2.els_p4().at(iEl).eta()); //save eta, even though we use SCeta for ID
+        vec_lep_phi.push_back ( cms2.els_p4().at(iEl).phi());
+        vec_lep_mass.push_back ( cms2.els_mass().at(iEl));
+        vec_lep_charge.push_back ( cms2.els_charge().at(iEl));
+        vec_lep_pdgId.push_back ( (-11)*cms2.els_charge().at(iEl));
+        vec_lep_dxy.push_back ( cms2.els_dxyPV().at(iEl));
+        vec_lep_dz.push_back ( cms2.els_dzPV().at(iEl));
+        vec_lep_tightId.push_back ( eleTightID(iEl));
+        vec_lep_relIso03.push_back (  eleRelIso03(iEl));
+        vec_lep_relIso04.push_back ( 0);
         if (cms2.els_mc3dr().at(iEl) < 0.2 && cms2.els_mc3idx().at(iEl) != -9999 && abs(cms2.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms2.els_mc3idx().at(iEl)]);
-          lep_mcMatchId[nlep] = momid != 11 ? momid : genPart_grandmaId[cms2.els_mc3idx().at(iEl)]; // if mother is different store mother, otherwise store grandmother
+          vec_lep_mcMatchId.push_back ( momid != 11 ? momid : genPart_grandmaId[cms2.els_mc3idx().at(iEl)]); // if mother is different store mother, otherwise store grandmother
         }
+	else vec_lep_mcMatchId.push_back (0);
 
-        lep_lostHits[nlep] = cms2.els_exp_innerlayers().at(iEl); //cms2.els_lost_pixelhits().at(iEl);
-        lep_convVeto[nlep] = cms2.els_conv_vtx_flag().at(iEl);
-        lep_tightCharge[nlep] = tightChargeEle(iEl);
+        vec_lep_lostHits.push_back ( cms2.els_exp_innerlayers().at(iEl)); //cms2.els_lost_pixelhits().at(iEl);
+        vec_lep_convVeto.push_back ( cms2.els_conv_vtx_flag().at(iEl));
+        vec_lep_tightCharge.push_back ( tightChargeEle(iEl));
 
         nlep++;
       }
@@ -157,30 +172,73 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         if(!isLooseMuon(iMu)) continue;
         if (muRelIso03(iMu) > 0.15) continue; // to avoid DR(jet,lepton) with leptons from b 
         nMuons10++;
-        lep_pt[nlep]   = cms2.mus_p4().at(iMu).pt();
-        lep_eta[nlep]  = cms2.mus_p4().at(iMu).eta();
-        lep_phi[nlep]  = cms2.mus_p4().at(iMu).phi();
-        lep_mass[nlep] = cms2.mus_mass().at(iMu);
-        lep_charge[nlep] = cms2.mus_charge().at(iMu);
-        lep_pdgId[nlep] = (-13)*cms2.mus_charge().at(iMu);
-        lep_dxy[nlep] = cms2.mus_dxyPV().at(iMu); // this uses the silicon track. should we use best track instead?
-        lep_dz[nlep] = cms2.mus_dzPV().at(iMu); // this uses the silicon track. should we use best track instead?
-        lep_tightId[nlep] = muTightID(iMu);
-        lep_relIso03[nlep] = muRelIso03(iMu);
-        lep_relIso04[nlep] = muRelIso04(iMu);
+        lep_pt_ordering[cms2.mus_p4().at(iMu).pt()] = nlep;
+        vec_lep_pt.push_back ( cms2.mus_p4().at(iMu).pt());
+        vec_lep_eta.push_back ( cms2.mus_p4().at(iMu).eta());
+        vec_lep_phi.push_back ( cms2.mus_p4().at(iMu).phi());
+        vec_lep_mass.push_back ( cms2.mus_mass().at(iMu));
+        vec_lep_charge.push_back ( cms2.mus_charge().at(iMu));
+        vec_lep_pdgId.push_back ( (-13)*cms2.mus_charge().at(iMu));
+        vec_lep_dxy.push_back ( cms2.mus_dxyPV().at(iMu)); // this uses the silicon track. should we use best track instead?
+        vec_lep_dz.push_back ( cms2.mus_dzPV().at(iMu)); // this uses the silicon track. should we use best track instead?
+        vec_lep_tightId.push_back ( muTightID(iMu));
+        vec_lep_relIso03.push_back ( muRelIso03(iMu));
+        vec_lep_relIso04.push_back ( muRelIso04(iMu));
         if (cms2.mus_mc3dr().at(iMu) < 0.2 && cms2.mus_mc3idx().at(iMu) != -9999 && abs(cms2.mus_mc3_id().at(iMu)) == 13) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms2.mus_mc3idx().at(iMu)]);
-          lep_mcMatchId[nlep] = momid != 13 ? momid : genPart_grandmaId[cms2.mus_mc3idx().at(iMu)]; // if mother is different store mother, otherwise store grandmother
-	      }
-        lep_lostHits[nlep] = 0; // use defaults as if "good electron"
-        lep_convVeto[nlep] = 1;// use defaults as if "good electron"
-        lep_tightCharge[nlep] = tightChargeMuon(iMu);
+          vec_lep_mcMatchId.push_back ( momid != 13 ? momid : genPart_grandmaId[cms2.mus_mc3idx().at(iMu)]); // if mother is different store mother, otherwise store grandmother
+	}
+	else vec_lep_mcMatchId.push_back (0);
+        vec_lep_lostHits.push_back ( 0); // use defaults as if "good electron"
+        vec_lep_convVeto.push_back ( 1);// use defaults as if "good electron"
+        vec_lep_tightCharge.push_back ( tightChargeMuon(iMu));
 
         nlep++;
       }
-    
+
+      // Implement pT ordering for leptons (it's irrelevant but easier for us to add than for ETH to remove)
+      //now fill arrays from vectors, isotracks with largest pt first
+      int i = 0;
+      for(std::map<float, int>::reverse_iterator it = lep_pt_ordering.rbegin(); it!= lep_pt_ordering.rend(); ++it){
+        lep_pt[i]     = vec_lep_pt.at(it->second);
+        lep_eta[i]    = vec_lep_eta.at(it->second);
+        lep_phi[i]    = vec_lep_phi.at(it->second);
+        lep_mass[i]   = vec_lep_mass.at(it->second);
+        lep_charge[i] = vec_lep_charge.at(it->second);
+        lep_pdgId[i]  = vec_lep_pdgId.at(it->second);
+        lep_dz[i]     = vec_lep_dz.at(it->second);
+        lep_dxy[i]    = vec_lep_dxy.at(it->second);
+        lep_tightId[i]     = vec_lep_tightId.at(it->second);
+        lep_relIso03[i]    = vec_lep_relIso03.at(it->second);
+        lep_relIso04[i]    = vec_lep_relIso04.at(it->second);
+        lep_mcMatchId[i]   = vec_lep_mcMatchId.at(it->second);
+        lep_lostHits[i]    = vec_lep_lostHits.at(it->second);
+        lep_convVeto[i]    = vec_lep_convVeto.at(it->second);
+        lep_tightCharge[i] = vec_lep_tightCharge.at(it->second);
+        i++;
+      }
 
       //JETS
+      //before we start, check that no genGet is matched to multiple recoJets
+      vector<float> pTofMatchedGenJets;
+      for(unsigned int iJet = 0; iJet < cms2.pfjets_p4().size(); iJet++){
+        if(cms2.pfjets_p4().at(iJet).pt() < 10.0) continue;
+        if(fabs(cms2.pfjets_p4().at(iJet).eta()) > 5.2) continue;
+	float matchedPt = cms2.pfjets_mc_p4().at(iJet).pt();
+	if (matchedPt!=0) {
+	  if ( find( pTofMatchedGenJets.begin(), pTofMatchedGenJets.end(), matchedPt  ) != pTofMatchedGenJets.end() ) {
+	    cout<<" This genJetPt is identical to one that was already matched to another reco jet of higher pT. Need to find another match"<<endl;
+	    cout<<"event"<<evt_event()<<" jet pT: "<<cms2.pfjets_p4().at(iJet).pt()<<" genJetPt: "<<matchedPt<<endl;
+	  }
+	  else {
+	    pTofMatchedGenJets.push_back( matchedPt );
+	  }
+	}
+      }
+
+
+
+
       //check baseline selections
       vector<int> passJets; //index of jets that pass baseline selections
       for(unsigned int iJet = 0; iJet < cms2.pfjets_p4().size(); iJet++){
@@ -417,7 +475,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       }  
 
       //now fill arrays from vectors, isotracks with largest pt first
-      int i = 0;
+       i = 0;
       for(std::map<float, int>::reverse_iterator it = pt_ordering.rbegin(); it!= pt_ordering.rend(); ++it){
         isoTrack_pt[i]     = vec_isoTrack_pt.at(it->second);
         isoTrack_eta[i]    = vec_isoTrack_eta.at(it->second);

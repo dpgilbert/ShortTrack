@@ -614,6 +614,8 @@ namespace tas {
 	vector<int> &genps_id_mother() { return cms2.genps_id_mother(); }
 	vector<int> &genps_idx_mother() { return cms2.genps_idx_mother(); }
 	vector<int> &genps_idx_simplemother() { return cms2.genps_idx_simplemother(); }
+	vector<int> &genps_id_simplemother() { return cms2.genps_id_simplemother(); }
+        vector<int> &genps_id_simplgrandma() { return cms2.genps_id_simplegrandma(); }
 	vector<int> &genps_status() { return cms2.genps_status(); }
 	vector<int> &mus_algo() { return cms2.mus_algo(); }
 	vector<int> &mus_charge() { return cms2.mus_charge(); }
