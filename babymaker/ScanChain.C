@@ -158,7 +158,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	else vec_lep_mcMatchId.push_back (0);
 
         vec_lep_lostHits.push_back ( cms2.els_exp_innerlayers().at(iEl)); //cms2.els_lost_pixelhits().at(iEl);
-        vec_lep_convVeto.push_back ( cms2.els_conv_vtx_flag().at(iEl));
+        vec_lep_convVeto.push_back ( !cms2.els_conv_vtx_flag().at(iEl));
         vec_lep_tightCharge.push_back ( tightChargeEle(iEl));
 
         nlep++;
@@ -220,24 +220,21 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       //JETS
       //before we start, check that no genGet is matched to multiple recoJets
-      vector<float> pTofMatchedGenJets;
-      for(unsigned int iJet = 0; iJet < cms2.pfjets_p4().size(); iJet++){
-        if(cms2.pfjets_p4().at(iJet).pt() < 10.0) continue;
-        if(fabs(cms2.pfjets_p4().at(iJet).eta()) > 5.2) continue;
-	float matchedPt = cms2.pfjets_mc_p4().at(iJet).pt();
-	if (matchedPt!=0) {
-	  if ( find( pTofMatchedGenJets.begin(), pTofMatchedGenJets.end(), matchedPt  ) != pTofMatchedGenJets.end() ) {
-	    cout<<" This genJetPt is identical to one that was already matched to another reco jet of higher pT. Need to find another match"<<endl;
-	    cout<<"event"<<evt_event()<<" jet pT: "<<cms2.pfjets_p4().at(iJet).pt()<<" genJetPt: "<<matchedPt<<endl;
-	  }
-	  else {
-	    pTofMatchedGenJets.push_back( matchedPt );
-	  }
-	}
-      }
-
-
-
+      //vector<float> pTofMatchedGenJets;
+      //for(unsigned int iJet = 0; iJet < cms2.pfjets_p4().size(); iJet++){
+      //  if(cms2.pfjets_p4().at(iJet).pt() < 10.0) continue;
+      //  if(fabs(cms2.pfjets_p4().at(iJet).eta()) > 5.2) continue;
+      //	float matchedPt = cms2.pfjets_mc_p4().at(iJet).pt();
+      //	if (matchedPt!=0) {
+      //	  if ( find( pTofMatchedGenJets.begin(), pTofMatchedGenJets.end(), matchedPt  ) != pTofMatchedGenJets.end() ) {
+      //	    cout<<" This genJetPt is identical to one that was already matched to another reco jet of higher pT. Need to find another match"<<endl;
+      //	    cout<<"event"<<evt_event()<<" jet pT: "<<cms2.pfjets_p4().at(iJet).pt()<<" genJetPt: "<<matchedPt<<endl;
+      //	  }
+      //	  else {
+      //	    pTofMatchedGenJets.push_back( matchedPt );
+      //	  }
+      //	}
+      //}
 
       //check baseline selections
       vector<int> passJets; //index of jets that pass baseline selections
