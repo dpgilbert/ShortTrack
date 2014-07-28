@@ -189,7 +189,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
           vec_lep_mcMatchId.push_back ( momid != 13 ? momid : genPart_grandmaId[cms2.mus_mc3idx().at(iMu)]); // if mother is different store mother, otherwise store grandmother
 	}
 	else vec_lep_mcMatchId.push_back (0);
-        vec_lep_lostHits.push_back ( 0); // use defaults as if "good electron"
+        vec_lep_lostHits.push_back ( cms2.mus_exp_innerlayers().at(iMu)); // use defaults as if "good electron"
         vec_lep_convVeto.push_back ( 1);// use defaults as if "good electron"
         vec_lep_tightCharge.push_back ( tightChargeMuon(iMu));
 
