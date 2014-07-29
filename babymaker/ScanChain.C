@@ -71,7 +71,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       //crossSection = ;
       puWeight = 1.;
       nTrueInt = cms2.puInfo_trueNumInteractions().at(0);
-      rho = cms2.evt_fixgrid_all_rho(); // evt_fixgrid_all_rho() comes from miniAOD, while evt_fixgrid_rho_all() is calculated by the PFCandidateMaker. They are be identical.
+      rho = cms2.evt_fixgridfastjet_all_rho(); //this one is used in JECs
       //rho25 = ;
 
       //VERTICES
