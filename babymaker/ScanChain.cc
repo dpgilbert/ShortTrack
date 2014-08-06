@@ -505,3 +505,198 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
   return;
 }
+
+void babyMaker::MakeBabyNtuple(const char *BabyFilename){
+
+  //
+  TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
+  rootdir->cd();
+  BabyFile_ = new TFile(Form("%s", BabyFilename), "RECREATE");
+  BabyFile_->cd();
+  BabyTree_ = new TTree("treeProducerSusyFullHad", "A Baby Ntuple");
+
+  BabyTree_->Branch("run", &run );
+  BabyTree_->Branch("lumi", &lumi );
+  BabyTree_->Branch("evt", &evt );
+  BabyTree_->Branch("isData", &isData );
+  BabyTree_->Branch("crossSection", &crossSection );
+  BabyTree_->Branch("puWeight", &puWeight );
+  BabyTree_->Branch("nVert", &nVert );
+  BabyTree_->Branch("nTrueInt", &nTrueInt );
+  BabyTree_->Branch("rho", &rho );
+  BabyTree_->Branch("rho25", &rho25 );
+  BabyTree_->Branch("nJet40", &nJet40 );
+  BabyTree_->Branch("nBJet40", &nBJet40 );
+  BabyTree_->Branch("nMuons10", &nMuons10 );
+  BabyTree_->Branch("nElectrons10", &nElectrons10 );
+  BabyTree_->Branch("nTaus20", &nTaus20 );
+  BabyTree_->Branch("nGammas20", &nGammas20 );
+  BabyTree_->Branch("deltaPhiMin", &deltaPhiMin );
+  BabyTree_->Branch("diffMetMht", &diffMetMht );
+  BabyTree_->Branch("ht", &ht );
+  BabyTree_->Branch("mt2", &mt2 );
+  BabyTree_->Branch("mt2_gen", &mt2_gen );
+  BabyTree_->Branch("pseudoJet1_pt", &pseudoJet1_pt );
+  BabyTree_->Branch("pseudoJet1_eta", &pseudoJet1_eta );
+  BabyTree_->Branch("pseudoJet1_phi", &pseudoJet1_phi );
+  BabyTree_->Branch("pseudoJet1_mass", &pseudoJet1_mass );
+  BabyTree_->Branch("pseudoJet2_pt", &pseudoJet2_pt );
+  BabyTree_->Branch("pseudoJet2_eta", &pseudoJet2_eta );
+  BabyTree_->Branch("pseudoJet2_phi", &pseudoJet2_phi );
+  BabyTree_->Branch("pseudoJet2_mass", &pseudoJet2_mass );
+  BabyTree_->Branch("mht_pt", &mht_pt );
+  BabyTree_->Branch("mht_phi", &mht_phi );
+  BabyTree_->Branch("met_pt", &met_pt );
+  BabyTree_->Branch("met_phi", &met_phi );
+  BabyTree_->Branch("met_rawPt",  &met_rawPt );
+  BabyTree_->Branch("met_rawPhi", &met_rawPhi );
+  BabyTree_->Branch("met_caloPt",  &met_caloPt );
+  BabyTree_->Branch("met_caloPhi", &met_caloPhi );
+  BabyTree_->Branch("met_genPt",  &met_genPt );
+  BabyTree_->Branch("met_genPhi", &met_genPhi );
+  BabyTree_->Branch("HLT_HT650", &HLT_HT650 );
+  BabyTree_->Branch("HLT_MET150", &HLT_MET150 );
+  BabyTree_->Branch("HLT_ht350met100", &HLT_ht350met100 );
+  BabyTree_->Branch("nlep", &nlep, "nlep/I" );
+  BabyTree_->Branch("lep_pt", lep_pt, "lep_pt[nlep]/F");
+  BabyTree_->Branch("lep_eta", lep_eta, "lep_eta[nlep]/F" );
+  BabyTree_->Branch("lep_phi", lep_phi, "lep_phi[nlep]/F" );
+  BabyTree_->Branch("lep_mass", lep_mass, "lep_mass[nlep]/F" );
+  BabyTree_->Branch("lep_charge", lep_charge, "lep_charge[nlep]/I" );
+  BabyTree_->Branch("lep_pdgId", lep_pdgId, "lep_pdgId[nlep]/I" );
+  BabyTree_->Branch("lep_dxy", lep_dxy, "lep_dxy[nlep]/F" );
+  BabyTree_->Branch("lep_dz", lep_dz, "lep_dz[nlep]/F" );
+  BabyTree_->Branch("lep_tightId", lep_tightId, "lep_tightId[nlep]/I" );
+  BabyTree_->Branch("lep_relIso03", lep_relIso03, "lep_relIso03[nlep]/F" );
+  BabyTree_->Branch("lep_relIso04", lep_relIso04, "lep_relIso04[nlep]/F" );
+  BabyTree_->Branch("lep_mcMatchId", lep_mcMatchId, "lep_mcMatchId[nlep]/I" );
+  BabyTree_->Branch("lep_lostHits", lep_lostHits, "lep_lostHits[nlep]/I" );
+  BabyTree_->Branch("lep_convVeto", lep_convVeto, "lep_convVeto[nlep]/I" );
+  BabyTree_->Branch("lep_tightCharge", lep_tightCharge, "lep_tightCharge[nlep]/I" );
+  BabyTree_->Branch("nisoTrack", &nisoTrack, "nisoTrack/I" );
+  BabyTree_->Branch("isoTrack_pt", isoTrack_pt, "isoTrack_pt[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_eta", isoTrack_eta, "isoTrack_eta[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_phi", isoTrack_phi, "isoTrack_phi[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_mass", isoTrack_mass, "isoTrack_mass[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_absIso", isoTrack_absIso, "isoTrack_absIso[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_dz", isoTrack_dz, "isoTrack_dz[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_pdgId", isoTrack_pdgId, "isoTrack_pdgId[nisoTrack]/I" );
+  BabyTree_->Branch("isoTrack_mcMatchId", isoTrack_mcMatchId, "isoTrack_mcMatchId[nisoTrack]/I" );
+  BabyTree_->Branch("ntau", &ntau, "ntau/I" );
+  BabyTree_->Branch("tau_pt", tau_pt, "tau_pt[ntau]/F" );
+  BabyTree_->Branch("tau_eta", tau_eta, "tau_eta[ntau]/F" );
+  BabyTree_->Branch("tau_phi", tau_phi, "tau_phi[ntau]/F" );
+  BabyTree_->Branch("tau_mass", tau_mass, "tau_mass[ntau]/F" );
+  BabyTree_->Branch("tau_charge", tau_charge, "tau_charge[ntau]/I" );
+  BabyTree_->Branch("tau_dxy", tau_dxy, "tau_dxy[ntau]/F" );
+  BabyTree_->Branch("tau_dz", tau_dz, "tau_dz[ntau]/F" );
+  BabyTree_->Branch("tau_isoMVA2", tau_isoMVA2, "tau_isoMVA2[ntau]/F" );
+  BabyTree_->Branch("tau_idCI3hit", tau_idCI3hit, "tau_idCI3hit[ntau]/I" );
+  BabyTree_->Branch("tau_isoCI3hit", tau_isoCI3hit, "tau_isoCI3hit[ntau]/F" );
+  BabyTree_->Branch("tau_idMVA2", tau_idMVA2, "tau_idMVA2[ntau]/I" );
+  BabyTree_->Branch("tau_mcMatchId", tau_mcMatchId, "tau_mcMatchId[ntau]/I" );
+  BabyTree_->Branch("ngamma", &ngamma, "ngamma/I" );
+  BabyTree_->Branch("gamma_pt", gamma_pt, "gamma_pt[ngamma]/F" );
+  BabyTree_->Branch("gamma_eta", gamma_eta, "gamma_eta[ngamma]/F" );
+  BabyTree_->Branch("gamma_phi", gamma_phi, "gamma_phi[ngamma]/F" );
+  BabyTree_->Branch("gamma_mass", gamma_mass, "gamma_mass[ngamma]/F" );
+  BabyTree_->Branch("gamma_mcMatchId", gamma_mcMatchId, "gamma_eta[ngamma]/I" );
+  BabyTree_->Branch("gamma_chHadIso", gamma_chHadIso, "gamma_chHadIso[ngamma]/F" );
+  BabyTree_->Branch("gamma_neuHadIso", gamma_neuHadIso, "gamma_neuHadIso[ngamma]/F" );
+  BabyTree_->Branch("gamma_phIso", gamma_phIso, "gamma_phIso[ngamma]/F" );
+  BabyTree_->Branch("gamma_sigmaIetaIeta", gamma_sigmaIetaIeta, "gamma_sigmaIetaIeta[ngamma]/F" );
+  BabyTree_->Branch("gamma_r9", gamma_r9, "gamma_r9[ngamma]/F" );
+  BabyTree_->Branch("gamma_hOverE", gamma_hOverE, "gamma_hOverE[ngamma]/F" );
+  BabyTree_->Branch("gamma_idCutBased", gamma_idCutBased, "gamma_idCutBased[ngamma]/I" );
+  BabyTree_->Branch("ngenPart", &ngenPart, "ngenPart/I" );
+  BabyTree_->Branch("genPart_pt", genPart_pt, "genPart_pt[ngenPart]/F" );
+  BabyTree_->Branch("genPart_eta", genPart_eta, "genPart_eta[ngenPart]/F" );
+  BabyTree_->Branch("genPart_phi", genPart_phi, "genPart_phi[ngenPart]/F" );
+  BabyTree_->Branch("genPart_mass", genPart_mass, "genPart_mass[ngenPart]/F" );
+  BabyTree_->Branch("genPart_pdgId", genPart_pdgId, "genPart_pdgId[ngenPart]/I" );
+  BabyTree_->Branch("genPart_charge", genPart_charge, "genPart_charge[ngenPart]/F" );
+  BabyTree_->Branch("genPart_motherId", genPart_motherId, "genPart_motherId[ngenPart]/I" );
+  BabyTree_->Branch("genPart_grandmaId", genPart_grandmaId, "genPart_grandmaId[ngenPart]/I" );
+  BabyTree_->Branch("njet", &njet, "njet/I" );
+  BabyTree_->Branch("jet_pt", jet_pt, "jet_pt[njet]/F" );
+  BabyTree_->Branch("jet_eta", jet_eta, "jet_eta[njet]/F" );
+  BabyTree_->Branch("jet_phi", jet_phi, "jet_phi[njet]/F" );
+  BabyTree_->Branch("jet_mass", jet_mass, "jet_mass[njet]/F" );
+  BabyTree_->Branch("jet_btagCSV", jet_btagCSV, "jet_btagCSV[njet]/F" );
+  BabyTree_->Branch("jet_rawPt", jet_rawPt, "jet_rawPt[njet]/F" );
+  BabyTree_->Branch("jet_mcPt", jet_mcPt, "jet_mcPt[njet]/F" );
+  BabyTree_->Branch("jet_mcFlavour", jet_mcFlavour, "jet_mcFlavour[njet]/I" );
+  BabyTree_->Branch("jet_quarkGluonID", jet_quarkGluonID, "jet_quarkGluonID[njet]/F" );
+  BabyTree_->Branch("jet_area", jet_area, "jet_area[njet]/F" );
+  BabyTree_->Branch("jet_id", jet_id, "jet_id[njet]/I" );
+  BabyTree_->Branch("jet_puId", jet_puId, "jet_puId[njet]/I" );
+
+  return;
+}
+
+void babyMaker::InitBabyNtuple () {
+
+  run    = -999;
+  lumi   = -999;
+  evt    = -999;
+  isData = -999;
+  crossSection = -999.0;
+  puWeight = -999.0;
+  nVert = -999;
+  nTrueInt = -999;
+  rho = -999.0;
+  rho25 = -999.0;
+  nJet40 = -999;
+  nBJet40 = -999;
+  nMuons10 = -999;
+  nElectrons10 = -999;
+  nTaus20 = -999;
+  nGammas20 = -999;
+  deltaPhiMin = -999.0;
+  diffMetMht = -999.0;
+  ht = -999.0;
+  mt2 = -999.0;
+  mt2_gen = -999.0;
+  pseudoJet1_pt = 0.0;
+  pseudoJet1_eta = 0.0;
+  pseudoJet1_phi = 0.0;
+  pseudoJet1_mass = 0.0;
+  pseudoJet2_pt = 0.0;
+  pseudoJet2_eta = 0.0;
+  pseudoJet2_phi = 0.0;
+  pseudoJet2_mass = 0.0;
+  mht_pt = -999.0;
+  mht_phi = -999.0;
+  met_pt = -999.0;
+  met_phi = -999.0;
+  met_rawPt = -999.0;
+  met_rawPhi = -999.0;
+  met_caloPt = -999.0;
+  met_caloPhi = -999.0;
+  met_genPt = -999.0;
+  met_genPhi = -999.0;
+  HLT_HT650 = -999;
+  HLT_MET150 = -999;
+  HLT_ht350met100 = -999;
+  nlep = -999;
+  nisoTrack = -999;
+  ntau = -999;
+  ngamma = -999;
+  ngenPart = -999;
+  njet = -999;
+
+  
+  return;
+}
+
+void babyMaker::FillBabyNtuple(){
+  BabyTree_->Fill();
+  return;
+}
+
+void babyMaker::CloseBabyNtuple(){
+  BabyFile_->cd();
+  BabyTree_->Write();
+  BabyFile_->Close();
+  return;
+}
