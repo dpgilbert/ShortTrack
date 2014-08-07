@@ -50,7 +50,7 @@ the submission log should be in submit_logs
 > git clone git@github.com:cmstas/NtupleTools.git
 > cd NtupleTools/condorMergingTools
 > make
-> ./sweepRoot -b -o "t" /hadoop/cms/store/user/${USER}/mt2babies/<BABYDIRS>/*.root
+> ./sweepRoot -b -o "treeProducerSusyFullHad" /hadoop/cms/store/user/${USER}/mt2babies/<BABYDIRS>/*.root
 
 where <BABYDIRS> is something like V00-00-01_*
 
@@ -69,10 +69,6 @@ Then submit the jobs again as before:
 > condor_submit <NEWCMDFILE>
 
 You may have to iterate this process to get all jobs to converge.
-
-############################################
-###### work in progress below here #########
-############################################
 
 5) Once the jobs are done, merge the output with the mergeHadoopOutput script
 set the output directory where the babies are located to the COPYDIR location from before
