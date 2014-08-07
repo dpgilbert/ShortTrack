@@ -37,10 +37,6 @@ check status
 if jobs are listed as held ("H"):
 > condor_release <USERNAME>
 
-############################################
-###### work in progress below here #########
-############################################
-
 select datasets to run on in writeAllConfig.sh and execute
 > ./writeAllConfig.sh
 This should create a set of .cmd files and a submit script submitAll.sh
@@ -51,18 +47,18 @@ the submission log should be in submit_logs
 
 4) To verify that jobs ran and produced all the output files, first run sweepRoot to check all output root files.
 
-> cvs co -d NtupleTools UserCode/JRibnik/CMS2/NtupleMacros/NtupleTools
-> cd NtupleTools
+> git clone git@github.com:cmstas/NtupleTools.git
+> cd NtupleTools/condorMergingTools
 > make
-> ./sweepRoot -b -o "t" /hadoop/cms/store/user/${USERNAME}/babies/<BABYDIRS>/*.root
+> ./sweepRoot -b -o "t" /hadoop/cms/store/user/${USER}/mt2babies/<BABYDIRS>/*.root
 
-where <BABYDIRS> is something like V00-02-21_2012_*
+where <BABYDIRS> is something like V00-00-01_*
 
 Delete the files reported as bad, then run checkAllConfig to see which output files are missing:
 
 > ./checkAllConfig.sh <CONFIGDIR>
 
-where <CONFIGDIR> is something like configs_V00-02-21_2012/
+where <CONFIGDIR> is something like configs_V00-00-01/
 
 This creates resubmit configs for just the missing jobs, with names *_resubmit.cmd, in <CONFIGDIR>.  
 
@@ -72,7 +68,11 @@ To create the resubmit file for a single config:
 Then submit the jobs again as before:
 > condor_submit <NEWCMDFILE>
 
-You may have to iterate this process to get all jobs to converge..
+You may have to iterate this process to get all jobs to converge.
+
+############################################
+###### work in progress below here #########
+############################################
 
 5) Once the jobs are done, merge the output with the mergeHadoopOutput script
 set the output directory where the babies are located to the COPYDIR location from before

@@ -51,7 +51,7 @@ do
         echo $i " / "$num_args
 	input_file=$(echo ${arg_list[$i]} | awk '{print $1}' | cut -d= -f2)
 	file=$(basename ${input_file})
-	if [ ! $(find ${output_path} -type f -regex .*${file}_smallTree.root$) ]; then
+	if [ ! $(find ${output_path} -type f -regex .*${file}.root$) ]; then
 	        echo "missing file"
 		index_of_missing_files=(${index_of_missing_files[@]} $i)
 	fi
