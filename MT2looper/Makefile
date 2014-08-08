@@ -8,7 +8,7 @@ ifeq ($(shell root-config --platform),macosx)
 	LINKERFLAGS = -dynamiclib -undefined dynamic_lookup -Wl,-x -O -Xlinker -bind_at_load -flat_namespace $(shell root-config --libs) -lEG -lGenVector
 endif
 
-SOURCES =  Plotting/PlotUtilities.cc mt2tree.cc MT2Looper.cc
+SOURCES =  MT2Looper.cc Plotting/PlotUtilities.cc mt2tree.cc SignalRegion.cc
 OBJECTS = $(SOURCES:.cc=.o) LinkDef_out.o
 LIB = libMT2Looper.so
 

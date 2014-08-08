@@ -1,6 +1,6 @@
 {
 
-  gSystem->Load("libMiniFWLite.so");
+  //  gSystem->Load("libMiniFWLite.so");
   gSystem->Load("libMT2CORE.so");
   gSystem->Load("libMT2Looper.so");
 

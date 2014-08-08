@@ -21,13 +21,12 @@
 #include "MT2Looper.h"
 
 //MT2
-#include "mt2tree.h"
 #include "Plotting/PlotUtilities.h"
 
 
 using namespace std;
-//using namespace tas;
-//using namespace MT2;
+using namespace mt2;
+
 class mt2tree;
 
 MT2Looper::MT2Looper(){
@@ -65,15 +64,15 @@ void MT2Looper::loop(TChain* chain, std::string baby_name){
     TTree *tree = (TTree*)f.Get("treeProducerSusyFullHad");
     TTreeCache::SetLearnEntries(10);
     tree->SetCacheSize(128*1024*1024);
-    mt2tree mt2t(tree);
-    //mt2t.Init(tree);
+    //mt2tree t(tree);
+    t.Init(tree);
 
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
-    //for( unsigned int event = 0; event < 100; ++event) {
+    //    for( unsigned int event = 0; event < 100.; ++event) {
 
-      mt2t.GetEntry(event);
+      t.GetEntry(event);
 
       //---------------------
       // bookkeeping and progress report
@@ -81,8 +80,6 @@ void MT2Looper::loop(TChain* chain, std::string baby_name){
       ++nEventsTotal;
       if (nEventsTotal%10000==0) {
 	ULong64_t i_permille = (int)floor(1000 * nEventsTotal / float(nEventsChain));
-	//if (i_permille != i_permille_old) {//this prints too often!
-	// xterm magic from L. Vacavant and A. Cerri
 	if (isatty(1)) {
 	  printf("\015\033[32m ---> \033[1m\033[31m%4.1f%%"
 		 "\033[0m\033[32m <---\033[0m\015", i_permille/10.);
@@ -93,18 +90,29 @@ void MT2Looper::loop(TChain* chain, std::string baby_name){
       //---------------------
       // skip duplicates -- will need this eventually
       //---------------------
-
       //if( isData ) {
       //  DorkyEventIdentifier id = {stopt.run(), stopt.event(), stopt.lumi() };
       //  if (is_duplicate(id, already_seen) ){
       //    continue;
       //  }
       //}
-      outfile_->cd();
-      float evtweight = 1;
-      plot1D("h_nvtx_nosel",       mt2t.nVert,       evtweight, h_1d, 40, 0, 40);
-      plot1D("h_nvtx_nosel_copy",       mt2t.nVert,       evtweight, h_1d, 40, 0, 40);
 
+
+      //---------------------
+      // set weights and start making plots
+      //---------------------
+      outfile_->cd();
+      evtweight = 1;
+      plot1D("h_nvtx",       t.nVert,       evtweight, h_1d, 40, 0, 40);
+      plot1D("h_mt2",       t.mt2,       evtweight, h_1d, 80, 0, 800);
+
+      nlep = t.nMuons10 + t.nElectrons10 + t.nTaus20;
+      //cout <<"t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, nlep, t.jet_pt[0], t.jet_pt[1]"<<endl;
+      //cout<<t.met_pt<<" "<<t.ht<<" "<<t.nJet40<<" "<<t.nBJet40<<" "<<t.deltaPhiMin<<" "<<t.diffMetMht<<" "<<nlep<<" "<<t.jet_pt[0]<<" "<<t.jet_pt[1]<<endl;
+
+      fillHistos(h_1d, SignalRegionJets::sr0, SignalRegionHtMet::inclusive, "sr0");
+
+     
 
    }//end loop on events in a file
   
@@ -135,4 +143,11 @@ void MT2Looper::loop(TChain* chain, std::string baby_name){
 
 
   return;
+}
+
+void MT2Looper::fillHistos(std::map<std::string, TH1F*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, std::string name) {
+
+ if ( PassesSignalRegion(t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, nlep, t.jet_pt[0], t.jet_pt[1], 
+			 sr_jets, sr_htmet) ) 
+	plot1D("h_mt2_"+name,       t.mt2,   evtweight, h_1d, 80, 0, 800);
 }
