@@ -12,10 +12,11 @@ SOURCES =  Plotting/PlotUtilities.cc mt2tree.cc MT2Looper.cc
 OBJECTS = $(SOURCES:.cc=.o) LinkDef_out.o
 LIB = libMT2Looper.so
 
-CORELIB = ../MT2CORE/libMT2CORE.so
+CORELIB = libMT2CORE.so
+#CORELIB = ../MT2CORE/libMT2CORE.so
 
-#FWLIB = libMiniFWLite.so
-FWLIB = ../Tools/MiniFWLite/libMiniFWLite.so
+FWLIB = libMiniFWLite.so
+#FWLIB = ../Tools/MiniFWLite/libMiniFWLite.so
 
 LIBS = $(LIB) $(CORELIB) $(FWLIB) 
 
@@ -31,13 +32,13 @@ $(CORELIB):
 	echo "making MT2CORE"; \
         cd ../MT2CORE; \
         $(MAKE) -f Makefile; cd -; \
-	cp $(CORELIB) .;
+	cp ../MT2CORE/$(CORELIB) .;
 
 $(FWLIB):
 	echo "making MiniFWLite"; \
         cd ../Tools/MiniFWLite; \
         $(MAKE) -f Makefile; cd -; \
-	cp $(FWLIB) .;
+	cp ../Tools/MiniFWLite/$(FWLIB) .;
 
 LinkDef_out.cxx: LinkDef.h MT2Looper.h Plotting/PlotUtilities.h 
 	rootcint -f $@ -c $(INCLUDE) MT2Looper.h Plotting/PlotUtilities.h  $<
