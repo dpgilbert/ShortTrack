@@ -110,7 +110,7 @@ void MT2Looper::loop(TChain* chain, std::string baby_name){
       //cout <<"t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, nlep, t.jet_pt[0], t.jet_pt[1]"<<endl;
       //cout<<t.met_pt<<" "<<t.ht<<" "<<t.nJet40<<" "<<t.nBJet40<<" "<<t.deltaPhiMin<<" "<<t.diffMetMht<<" "<<nlep<<" "<<t.jet_pt[0]<<" "<<t.jet_pt[1]<<endl;
 
-      fillHistos(h_1d, SignalRegionJets::sr0, SignalRegionHtMet::inclusive, "sr0");
+      fillHistosSignalRegion(h_1d, SignalRegionJets::sr0, SignalRegionHtMet::inclusive, "sr0");
 
      
 
@@ -145,7 +145,7 @@ void MT2Looper::loop(TChain* chain, std::string baby_name){
   return;
 }
 
-void MT2Looper::fillHistos(std::map<std::string, TH1F*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, std::string name) {
+void MT2Looper::fillHistosSignalRegion(std::map<std::string, TH1F*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, std::string name) {
 
  if ( PassesSignalRegion(t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, nlep, t.jet_pt[0], t.jet_pt[1], 
 			 sr_jets, sr_htmet) ) 

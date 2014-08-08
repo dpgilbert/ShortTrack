@@ -28,10 +28,10 @@ class MT2Looper {
   ~MT2Looper();
 
   void loop(TChain*, std::string = "testSample");
-  void fillHistos(std::map<std::string, TH1F*>& h_1d, 
-		  const SignalRegionJets::value_type& signal_region = SignalRegionJets::sr0, 
-		  const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::inclusive,
-		  std::string name = "default");
+  void fillHistosSignalRegion(std::map<std::string, TH1F*>& h_1d, 
+			      const SignalRegionJets::value_type& signal_region = SignalRegionJets::sr0, 
+			      const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::inclusive,
+			      std::string name = "default");
 
 
  private:
