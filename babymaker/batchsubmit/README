@@ -1,5 +1,5 @@
 --------------------------------------------------
---- RUNNING SINGLE LEPTON LOOPER IN BATCH MODE ---
+--- RUNNING ALL HADRONIC MT2 LOOPER IN BATCH MODE ---
 --------------------------------------------------
 
 0) environment setup: see MT2Analysis/README.txt.  This setup sends the compiled libraries with the job so assumes that you're using a particular CMSSW/root version.
