@@ -50,8 +50,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     for( unsigned int event = 0; event < nEventsTree; ++event) {
     //for( unsigned int event = 0; event < 100; ++event) {
 
-    
-
       // Get Event Content
       tree->LoadTree(event);
       cms2.GetEntry(event);
@@ -67,8 +65,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       evt  = cms2.evt_event();
       isData = cms2.evt_isRealData();
 
-
-      //crossSection = ;
+      nevents = cms2.evt_nEvts();
+      scale1fb = cms2.evt_scale1fb();
+      crossSection = cms2.evt_xsec_incl();
       puWeight = 1.;
       nTrueInt = cms2.puInfo_trueNumInteractions().at(0);
       rho = cms2.evt_fixgridfastjet_all_rho(); //this one is used in JECs
@@ -519,6 +518,9 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lumi", &lumi );
   BabyTree_->Branch("evt", &evt );
   BabyTree_->Branch("isData", &isData );
+
+  BabyTree_->Branch("nevents", &nevents );
+  BabyTree_->Branch("scale1fb", &scale1fb);
   BabyTree_->Branch("crossSection", &crossSection );
   BabyTree_->Branch("puWeight", &puWeight );
   BabyTree_->Branch("nVert", &nVert );
@@ -640,6 +642,8 @@ void babyMaker::InitBabyNtuple () {
   lumi   = -999;
   evt    = -999;
   isData = -999;
+  nevents = 0;
+  scale1fb = 0;
   crossSection = -999.0;
   puWeight = -999.0;
   nVert = -999;

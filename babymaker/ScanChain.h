@@ -45,6 +45,8 @@ class babyMaker {
   Int_t           evt;
   Int_t           isData;
 
+  Int_t           nevents;
+  Float_t         scale1fb;
   Float_t         crossSection;
   Float_t         puWeight;
   Int_t           nVert;
