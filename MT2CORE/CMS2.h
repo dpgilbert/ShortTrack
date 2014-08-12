@@ -173,6 +173,9 @@ protected:
 	float evt_xsec_incl_;
 	TBranch *evt_xsec_incl_branch;
 	bool evt_xsec_incl_isLoaded;
+	int evt_nEvts_;
+	TBranch *evt_nEvts_branch;
+	bool evt_nEvts_isLoaded;
 	float genps_alphaQCD_;
 	TBranch *genps_alphaQCD_branch;
 	bool genps_alphaQCD_isLoaded;
@@ -2871,6 +2874,11 @@ void Init(TTree *tree) {
 	if (tree->GetAlias("evt_xsec_incl") != 0) {
 		evt_xsec_incl_branch = tree->GetBranch(tree->GetAlias("evt_xsec_incl"));
 		evt_xsec_incl_branch->SetAddress(&evt_xsec_incl_);
+	}
+	evt_nEvts_branch = 0;
+	if (tree->GetAlias("evt_nEvts") != 0) {
+		evt_nEvts_branch = tree->GetBranch(tree->GetAlias("evt_nEvts"));
+		evt_nEvts_branch->SetAddress(&evt_nEvts_);
 	}
 	genps_alphaQCD_branch = 0;
 	if (tree->GetAlias("genps_alphaQCD") != 0) {
@@ -6470,6 +6478,7 @@ void GetEntry(unsigned int idx)
 		evt_scale1fb_isLoaded = false;
 		evt_xsec_excl_isLoaded = false;
 		evt_xsec_incl_isLoaded = false;
+		evt_nEvts_isLoaded = false;
 		genps_alphaQCD_isLoaded = false;
 		genps_pthat_isLoaded = false;
 		genps_qScale_isLoaded = false;
@@ -7274,6 +7283,7 @@ void LoadAllBranches()
 	if (evt_scale1fb_branch != 0) evt_scale1fb();
 	if (evt_xsec_excl_branch != 0) evt_xsec_excl();
 	if (evt_xsec_incl_branch != 0) evt_xsec_incl();
+	if (evt_nEvts_branch != 0) evt_nEvts();
 	if (genps_alphaQCD_branch != 0) genps_alphaQCD();
 	if (genps_pthat_branch != 0) genps_pthat();
 	if (genps_qScale_branch != 0) genps_qScale();
@@ -8542,6 +8552,16 @@ void LoadAllBranches()
 			evt_xsec_incl_isLoaded = true;
 		}
 		return evt_xsec_incl_;
+	}
+	int &evt_nEvts()
+	{
+		if (not evt_nEvts_isLoaded) {
+			if (evt_nEvts_branch != 0) {
+				evt_nEvts_branch->GetEntry(index);
+			} else { }
+			evt_nEvts_isLoaded = true;
+		}
+		return evt_nEvts_;
 	}
 	float &genps_alphaQCD()
 	{
@@ -16107,6 +16127,7 @@ namespace tas {
 	float &evt_scale1fb();
 	float &evt_xsec_excl();
 	float &evt_xsec_incl();
+	int &evt_nEvts();
 	float &genps_alphaQCD();
 	float &genps_pthat();
 	float &genps_qScale();

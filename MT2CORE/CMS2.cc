@@ -53,6 +53,7 @@ namespace tas {
 	float &evt_scale1fb() { return cms2.evt_scale1fb(); }
 	float &evt_xsec_excl() { return cms2.evt_xsec_excl(); }
 	float &evt_xsec_incl() { return cms2.evt_xsec_incl(); }
+	int &evt_nEvts() { return cms2.evt_nEvts(); }
 	float &genps_alphaQCD() { return cms2.genps_alphaQCD(); }
 	float &genps_pthat() { return cms2.genps_pthat(); }
 	float &genps_qScale() { return cms2.genps_qScale(); }
