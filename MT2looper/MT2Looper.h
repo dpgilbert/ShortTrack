@@ -29,18 +29,21 @@ class MT2Looper {
 
   void loop(TChain*, std::string = "testSample");
   void fillHistosSignalRegion(std::map<std::string, TH1F*>& h_1d, 
-			      const SignalRegionJets::value_type& signal_region = SignalRegionJets::sr0, 
-			      const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::inclusive,
-			      std::string name = "default");
-
-
+			      const SignalRegionJets::value_type& signal_region = SignalRegionJets::nocut, 
+			      const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::nocut,
+			      const std::string& dir = "", const std::string& suffix = "");
+  void fillHistos(std::map<std::string, TH1F*>& h_1d, 
+		  const SignalRegionJets::value_type& signal_region = SignalRegionJets::nocut, 
+		  const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::nocut,
+		  const std::string& dir = "", const std::string& suffix = ""); 
+  
  private:
 
   TFile * outfile_;
   mt2tree t;
   float evtweight;
   int nlep;
-  
+  std::map<std::string, TH1F*> h_1d_global;
 };
 
 #endif

@@ -11,16 +11,16 @@ namespace mt2
         enum value_type
         {
             // inclusive
-            sr0  = 0,
-	    sr1  = 1,   //2j, 0b
-	    sr2  = 2,   //2j, 1-2 b
-	    sr3  = 3,   //3-5j, 0b
-	    sr4  = 4,   //3-5j, 1b
-	    sr5  = 5,   //3-5j, 2b
-	    sr6  = 6,   //6j, 0b
-	    sr7  = 7,   //6j, 1b
-	    sr8  = 8,   //6j, 2b
-	    sr9  = 9,   //3j, 3b
+	    nocut= 0,   //inclusive
+	    sr1  = 1,   //2j, 0b    
+	    sr2  = 2,   //2j, 1-2 b 
+	    sr3  = 3,   //3-5j, 0b  
+	    sr4  = 4,   //3-5j, 1b  
+	    sr5  = 5,   //3-5j, 2b  
+	    sr6  = 6,   //6j, 0b    
+	    sr7  = 7,   //6j, 1b    
+	    sr8  = 8,   //6j, 2b    
+	    sr9  = 9,   //3j, 3b    
             // keep track of the size
             static_size
         };
@@ -30,10 +30,10 @@ namespace mt2
     {
         enum value_type
         {
-            inclusive, 
-            h_ht, // ht > 1200
-            m_ht, // 750 < ht < 1200
-            l_ht, // 450 < ht < 750  && met > 200
+            nocut = 0, 
+            h_ht = 20, // ht > 1200
+            m_ht = 40, // 750 < ht < 1200
+            l_ht = 60, // 450 < ht < 750  && met > 200
             static_size
         };
     };
@@ -49,8 +49,8 @@ namespace mt2
         const int nlep,
         const float j1pt,
         const float j2pt,
-        const SignalRegionJets::value_type& signal_region = SignalRegionJets::sr0,
-        const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::inclusive
+        const SignalRegionJets::value_type& signal_region = SignalRegionJets::nocut,
+        const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::nocut
     );
 
 } // namespace ss

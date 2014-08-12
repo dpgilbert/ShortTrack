@@ -36,7 +36,7 @@ void plot2DUnderOverFlow(string title, double xval, double yval, double weight, 
 
 void savePlots(std::map<string, TH1F*>&, char* );
 void savePlots2(std::map<string, TH2F*>&, char* );
-void savePlotsDir(std::map<string, TH1F*>& h_1d, TFile* outfile, char* outdir = "");
+void savePlotsDir(std::map<string, TH1F*>& h_1d, TFile* outfile, const char* outdir = "");
 void savePlots2Dir(std::map<string, TH2F*>& h_2d, TFile* outfile, char* outdir = "");
 void savePlots12(std::map<string, TH1F*>&, std::map<string, TH2F*>&, char* );
 

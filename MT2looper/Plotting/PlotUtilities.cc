@@ -308,7 +308,7 @@ void savePlots2(std::map<string, TH2F*> &h_1d, char* outfilename){
 }
 
 
-void savePlotsDir(std::map<string, TH1F*> &h_1d, TFile* outfile, char* dirname){
+void savePlotsDir(std::map<string, TH1F*> &h_1d, TFile* outfile, const char* dirname){
 
   printf("[PlotUtilities::savePlots] Saving 1d histograms to dir: %s\n", dirname);
 
