@@ -79,10 +79,10 @@ void processBaby( TString outfileid = "tt_test", TString infile = "/hadoop/cms/s
   else if (infile.Contains("W3JetsToLNu"))                           sample = Form("w3jets_%s",          outfileid.Data());
   else if (infile.Contains("W4JetsToLNu"))                           sample = Form("w4jets_%s",          outfileid.Data());
   else if (infile.Contains("WLNubbar"))                              sample = Form("wlnubb_amcatnlo_%s",         outfileid.Data());
-  else if (infile.Contains("DYJetsToLL_M-50_HT-100to200"))           sample = Form("DYjets_ht100to200_%s",   outfileid.Data());
-  else if (infile.Contains("DYJetsToLL_M-50_HT-200to400"))           sample = Form("DYjets_ht200to400_%s",   outfileid.Data());
-  else if (infile.Contains("DYJetsToLL_M-50_HT-400to600"))           sample = Form("DYjets_ht400to600_%s",   outfileid.Data());
-  else if (infile.Contains("DYJetsToLL_M-50_HT-600toInf"))           sample = Form("DYjets_ht600toInf_%s",   outfileid.Data());
+  else if (infile.Contains("DYJetsToLL_M-50_HT-100to200"))           sample = Form("dyjetsll_ht100to200_%s",   outfileid.Data());
+  else if (infile.Contains("DYJetsToLL_M-50_HT-200to400"))           sample = Form("dyjetsll_ht200to400_%s",   outfileid.Data());
+  else if (infile.Contains("DYJetsToLL_M-50_HT-400to600"))           sample = Form("dyjetsll_ht400to600_%s",   outfileid.Data());
+  else if (infile.Contains("DYJetsToLL_M-50_HT-600toInf"))           sample = Form("dyjetsll_ht600toInf_%s",   outfileid.Data());
   else if (infile.Contains("DYJetsToLL"))                            sample = Form("DYtot_%s",           outfileid.Data());
   else if (infile.Contains("DY1JetsToLL"))                           sample = Form("DY1Jtot_%s",         outfileid.Data());
   else if (infile.Contains("DY2JetsToLL"))                           sample = Form("DY2Jtot_%s",         outfileid.Data());
