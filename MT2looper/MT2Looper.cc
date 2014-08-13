@@ -97,8 +97,8 @@ void MT2Looper::loop(TChain* chain, std::string baby_name){
 
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
-    //    for( unsigned int event = 0; event < nEventsTree; ++event) {
-    for( unsigned int event = 0; event < nEventsTree/10.; ++event) {
+    for( unsigned int event = 0; event < nEventsTree; ++event) {
+    //    for( unsigned int event = 0; event < nEventsTree/10.; ++event) {
     //    for( unsigned int event = 0; event < 100.; ++event) {
 
       t.GetEntry(event);

@@ -271,16 +271,6 @@ public :
 #ifdef mt2tree_cxx
 mt2tree::mt2tree(TTree *tree) : fChain(0) 
 {
-// if parameter tree is not specified (or zero), connect the file
-// used to generate this class and read the Tree.
-   if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("sntMT2Baby.root");
-      if (!f || !f->IsOpen()) {
-         f = new TFile("sntMT2Baby.root");
-      }
-      f->GetObject("treeProducerSusyFullHad",tree);
-
-   }
    Init(tree);
 }
 
