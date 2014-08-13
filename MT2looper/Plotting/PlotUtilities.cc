@@ -277,7 +277,7 @@ TH1F* getHist1D(string title, std::map<string, TH1F*> &allhistos,
   return currentHisto;
 }
 
-void savePlots(std::map<string, TH1F*> &h_1d, char* outfilename){
+void savePlots(std::map<string, TH1F*> &h_1d, const char* outfilename){
   TFile outfile(outfilename,"RECREATE") ;
 
   printf("[PlotUtilities::savePlots] Saving histograms to %s\n", outfilename);
@@ -292,7 +292,7 @@ void savePlots(std::map<string, TH1F*> &h_1d, char* outfilename){
   outfile.Close();
 }
 
-void savePlots2(std::map<string, TH2F*> &h_1d, char* outfilename){
+void savePlots2(std::map<string, TH2F*> &h_1d, const char* outfilename){
   TFile outfile(outfilename,"RECREATE") ;
 
   printf("[PlotUtilities::savePlots] Saving histograms to %s\n", outfilename);
@@ -334,7 +334,7 @@ void savePlotsDir(std::map<string, TH1F*> &h_1d, TFile* outfile, const char* dir
 
 }
 
-void savePlots2Dir(std::map<string, TH2F*> &h_2d, TFile* outfile, char* dirname){
+void savePlots2Dir(std::map<string, TH2F*> &h_2d, TFile* outfile, const char* dirname){
 
   printf("[StopTreeLooper::loop] Saving 2d histograms to dir: %s\n", dirname);
 
@@ -360,7 +360,7 @@ void savePlots2Dir(std::map<string, TH2F*> &h_2d, TFile* outfile, char* dirname)
 
 }
 
-void savePlots12(std::map<string, TH1F*> &h_1d, std::map<string, TH2F*> &h_2d, char* outfilename){
+void savePlots12(std::map<string, TH1F*> &h_1d, std::map<string, TH2F*> &h_2d, const char* outfilename){
   TFile outfile(outfilename,"RECREATE") ;
 
   printf("[StopTreeLooper::loop] Saving histograms to %s\n", outfilename);
