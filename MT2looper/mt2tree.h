@@ -26,6 +26,8 @@ public :
    Int_t           lumi;
    Int_t           evt;
    Int_t           isData;
+   Int_t           nevents;
+   Float_t         scale1fb;
    Float_t         crossSection;
    Float_t         puWeight;
    Int_t           nVert;
@@ -143,6 +145,8 @@ public :
    TBranch        *b_lumi;   //!
    TBranch        *b_evt;   //!
    TBranch        *b_isData;   //!
+   TBranch        *b_nevents;   //!
+   TBranch        *b_scale1fb;   //!
    TBranch        *b_crossSection;   //!
    TBranch        *b_puWeight;   //!
    TBranch        *b_nVert;   //!
@@ -319,6 +323,8 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("lumi", &lumi, &b_lumi);
    fChain->SetBranchAddress("evt", &evt, &b_evt);
    fChain->SetBranchAddress("isData", &isData, &b_isData);
+   fChain->SetBranchAddress("nevents", &nevents, &b_nevents);
+   fChain->SetBranchAddress("scale1fb", &scale1fb, &b_scale1fb);
    fChain->SetBranchAddress("crossSection", &crossSection, &b_crossSection);
    fChain->SetBranchAddress("puWeight", &puWeight, &b_puWeight);
    fChain->SetBranchAddress("nVert", &nVert, &b_nVert);
