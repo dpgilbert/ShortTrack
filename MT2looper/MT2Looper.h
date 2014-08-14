@@ -41,8 +41,8 @@ class MT2Looper {
 
   TFile * outfile_;
   mt2tree t;
-  float evtweight;
-  int nlep;
+  float evtweight_;
+  int nlepveto_;
   std::map<std::string, TH1F*> h_1d_global;
 };
 

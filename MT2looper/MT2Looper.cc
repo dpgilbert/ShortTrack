@@ -131,13 +131,14 @@ void MT2Looper::loop(TChain* chain, std::string baby_name){
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      evtweight = 1;
-      plot1D("h_nvtx",       t.nVert,       evtweight, h_1d_global, 80, 0, 80);
-      plot1D("h_mt2",       t.mt2,       evtweight, h_1d_global, 80, 0, 800);
+      const float lumi = 1.;
+      evtweight_ = t.scale1fb * lumi;
+      plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, 80, 0, 80);
+      plot1D("h_mt2",       t.mt2,       evtweight_, h_1d_global, 80, 0, 800);
 
-      nlep = t.nMuons10 + t.nElectrons10 + t.nTaus20;
-      //cout <<"t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, nlep, t.jet_pt[0], t.jet_pt[1]"<<endl;
-      //cout<<t.met_pt<<" "<<t.ht<<" "<<t.nJet40<<" "<<t.nBJet40<<" "<<t.deltaPhiMin<<" "<<t.diffMetMht<<" "<<nlep<<" "<<t.jet_pt[0]<<" "<<t.jet_pt[1]<<endl;
+      nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nTaus20;
+      //cout <<"t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, nlepveto_, t.jet_pt[0], t.jet_pt[1]"<<endl;
+      //cout<<t.met_pt<<" "<<t.ht<<" "<<t.nJet40<<" "<<t.nBJet40<<" "<<t.deltaPhiMin<<" "<<t.diffMetMht<<" "<<nlepveto_<<" "<<t.jet_pt[0]<<" "<<t.jet_pt[1]<<endl;
 
       fillHistosSignalRegion(h_1d_nocut, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "nocut");
 
@@ -231,9 +232,9 @@ void MT2Looper::loop(TChain* chain, std::string baby_name){
 void MT2Looper::fillHistosSignalRegion(std::map<std::string, TH1F*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dir, const std::string& suffix) {
 
  if ( PassesSignalRegion(t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, 
-			 nlep, t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) 
+			 nlepveto_, t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) 
    {
-     plot1D("h_SignalRegion",  sr_jets+sr_htmet,   evtweight, h_1d_global, 100, 0, 100);
+     plot1D("h_SignalRegion",  sr_jets+sr_htmet,   evtweight_, h_1d_global, 100, 0, 100);
      fillHistos( h_1d, sr_jets, sr_htmet, dir, suffix);
    }
  return;
@@ -247,18 +248,17 @@ void MT2Looper::fillHistos(std::map<std::string, TH1F*>& h_1d, const SignalRegio
   dir->cd();
 
   plot1D("h_Events"+s,  1, 1, h_1d, 1, 0, 2);
-  plot1D("h_Events_w"+s,  1,   evtweight, h_1d, 1, 0, 2);
-  plot1D("h_SignalRegion"+s,  sr_jets+sr_htmet,   evtweight, h_1d, 100, 0, 100);
-  plot1D("h_mt2"+s,       t.mt2,   evtweight, h_1d, 80, 0, 800);
-  plot1D("h_met"+s,       t.met_pt,   evtweight, h_1d, 80, 0, 800);
-  plot1D("h_ht"+s,       t.ht,   evtweight, h_1d, 80, 0, 2000);
-  plot1D("h_nJet40"+s,       t.nJet40,   evtweight, h_1d, 15, 0, 15);
-  plot1D("h_nBJet40"+s,      t.nBJet40,   evtweight, h_1d, 6, 0, 6);
-  plot1D("h_deltaPhiMin"+s,  t.deltaPhiMin,   evtweight, h_1d, 32, 0, 3.2);
-  plot1D("h_diffMetMht"+s,   t.diffMetMht,   evtweight, h_1d, 80, 0, 200);
-  plot1D("h_nlep"+s,       t.nlep,   evtweight, h_1d, 10, 0, 10);
-  plot1D("h_J0pt"+s,       t.jet_pt[0],   evtweight, h_1d, 80, 0, 800);
-  plot1D("h_J1pt"+s,       t.jet_pt[1],   evtweight, h_1d, 80, 0, 800);
+  plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, 1, 0, 2);
+  plot1D("h_mt2"+s,       t.mt2,   evtweight_, h_1d, 80, 0, 800);
+  plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, 80, 0, 800);
+  plot1D("h_ht"+s,       t.ht,   evtweight_, h_1d, 80, 0, 2000);
+  plot1D("h_nJet40"+s,       t.nJet40,   evtweight_, h_1d, 15, 0, 15);
+  plot1D("h_nBJet40"+s,      t.nBJet40,   evtweight_, h_1d, 6, 0, 6);
+  plot1D("h_deltaPhiMin"+s,  t.deltaPhiMin,   evtweight_, h_1d, 32, 0, 3.2);
+  plot1D("h_diffMetMht"+s,   t.diffMetMht,   evtweight_, h_1d, 80, 0, 200);
+  plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, 10, 0, 10);
+  plot1D("h_J0pt"+s,       t.jet_pt[0],   evtweight_, h_1d, 80, 0, 800);
+  plot1D("h_J1pt"+s,       t.jet_pt[1],   evtweight_, h_1d, 80, 0, 800);
   outfile_->cd();
   return;
 }
