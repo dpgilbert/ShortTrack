@@ -32,6 +32,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
   int nDuplicates = 0;
   int nEvents = chain->GetEntries();
   unsigned int nEventsChain = nEvents;
+  cout << "Running on " << nEventsChain << " events" << endl;
   unsigned int nEventsTotal = 0;
   TObjArray *listOfFiles = chain->GetListOfFiles();
   TIter fileIter(listOfFiles);
@@ -99,6 +100,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       //GEN PARTICLES
       ngenPart = 0;
       for(unsigned int iGen = 0; iGen < cms2.genps_p4().size(); iGen++){
+	if (ngenPart >= max_ngenPart) {
+          std::cout << "WARNING: attempted to fill more than " << max_ngenPart << " gen particles" << std::endl;
+	  break;
+	}
         genPart_pt[ngenPart] = cms2.genps_p4().at(iGen).pt();
         genPart_eta[ngenPart] = cms2.genps_p4().at(iGen).eta();
         genPart_phi[ngenPart] = cms2.genps_p4().at(iGen).phi();
@@ -199,6 +204,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       //now fill arrays from vectors, isotracks with largest pt first
       int i = 0;
       for(std::map<float, int>::reverse_iterator it = lep_pt_ordering.rbegin(); it!= lep_pt_ordering.rend(); ++it){
+
+	if (i >= max_nlep) {
+          std::cout << "WARNING: attempted to fill more than " << max_nlep << " leptons" << std::endl;
+	  break;
+	}
+
         lep_pt[i]     = vec_lep_pt.at(it->second);
         lep_eta[i]    = vec_lep_eta.at(it->second);
         lep_phi[i]    = vec_lep_phi.at(it->second);
@@ -302,6 +313,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         }
         if(isOverlapJet) continue;
         
+	if (njet >= max_njet) {
+          std::cout << "WARNING: attempted to fill more than " << max_njet << " jets" << std::endl;
+	  break;
+	}
 
         jet_pt[njet]   = cms2.pfjets_p4().at(iJet).pt();
         jet_eta[njet]  = cms2.pfjets_p4().at(iJet).eta();
@@ -386,6 +401,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	      if (!cms2.taus_pf_againstElectronLoose().at(iTau)) continue; // loose electron rejection 
 	      if (!cms2.taus_pf_againstMuonTight().at(iTau)) continue; // loose muon rejection 
         
+	if (ntau >= max_ntau) {
+          std::cout << "WARNING: attempted to fill more than " << max_ntau << " taus" << std::endl;
+	  break;
+	}
 
         tau_pt[ntau]   = cms2.taus_pf_p4().at(iTau).pt();
         tau_eta[ntau]  = cms2.taus_pf_p4().at(iTau).eta();
@@ -413,6 +432,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         if(cms2.photons_p4().at(iGamma).pt() < 20.0) continue;
         if(fabs(cms2.photons_p4().at(iGamma).eta()) > 2.5) continue;
 	      if (cms2.photons_photonID_loose().at(iGamma)==0) continue;
+
+	if (ngamma >= max_ngamma) {
+          std::cout << "WARNING: attempted to fill more than " << max_ngamma << " photons" << std::endl;
+	  break;
+	}
+
         gamma_pt[ngamma]   = cms2.photons_p4().at(iGamma).pt();
         gamma_eta[ngamma]  = cms2.photons_p4().at(iGamma).eta();
         gamma_phi[ngamma]  = cms2.photons_p4().at(iGamma).phi();
@@ -473,6 +498,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       //now fill arrays from vectors, isotracks with largest pt first
        i = 0;
       for(std::map<float, int>::reverse_iterator it = pt_ordering.rbegin(); it!= pt_ordering.rend(); ++it){
+
+	if (i >= max_nisoTrack) {
+          std::cout << "WARNING: attempted to fill more than " << max_nisoTrack << " iso tracks" << std::endl;
+	  break;
+	}
+
         isoTrack_pt[i]     = vec_isoTrack_pt.at(it->second);
         isoTrack_eta[i]    = vec_isoTrack_eta.at(it->second);
         isoTrack_phi[i]    = vec_isoTrack_phi.at(it->second);
@@ -494,6 +525,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     f.Close();
   }//end loop on files
   
+  cout << "Processed " << nEventsTotal << " events" << endl;
   if ( nEventsChain != nEventsTotal ) {
     std::cout << "ERROR: number of events from files is not equal to total number of events" << std::endl;
   }
