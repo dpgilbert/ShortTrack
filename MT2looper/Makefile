@@ -8,7 +8,7 @@ ifeq ($(shell root-config --platform),macosx)
 	LINKERFLAGS = -dynamiclib -undefined dynamic_lookup -Wl,-x -O -Xlinker -bind_at_load -flat_namespace $(shell root-config --libs) -lEG -lGenVector
 endif
 
-SOURCES =  MT2Looper.cc Plotting/PlotUtilities.cc mt2tree.cc SignalRegion.cc
+SOURCES =  MT2Looper.cc 
 OBJECTS = $(SOURCES:.cc=.o) LinkDef_out.o
 LIB = libMT2Looper.so
 
@@ -40,8 +40,8 @@ $(FWLIB):
         $(MAKE) -f Makefile; cd -; \
 	cp ../Tools/MiniFWLite/$(FWLIB) .;
 
-LinkDef_out.cxx: LinkDef.h MT2Looper.h Plotting/PlotUtilities.h 
-	rootcint -f $@ -c $(INCLUDE) MT2Looper.h Plotting/PlotUtilities.h  $<
+LinkDef_out.cxx: LinkDef.h MT2Looper.h 
+	rootcint -f $@ -c $(INCLUDE) MT2Looper.h  $<
 
 # General rule for making object files
 %.d:	%.cc

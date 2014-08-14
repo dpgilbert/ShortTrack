@@ -14,8 +14,8 @@
 #include "Math/LorentzVector.h"
 
 //MT2
-#include "mt2tree.h"
-#include "SignalRegion.h"
+#include "../MT2CORE/mt2tree.h"
+#include "../MT2CORE/sigSelections.h"
 
 
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;

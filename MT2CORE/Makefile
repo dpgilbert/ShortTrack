@@ -1,6 +1,6 @@
 include Makefile.arch
 
-SOURCES=$(wildcard *.cc) $(wildcard MT2/*.cc)
+SOURCES=$(wildcard *.cc) $(wildcard MT2/*.cc) $(wildcard Plotting/*.cc)
 
 OBJECTS=$(SOURCES:.cc=.o)
 
@@ -19,4 +19,7 @@ clean:
 	rm -f *.so \
 	rm -f MT2/*.o \ 
 	rm -f MT2/*.d \
-	rm -f MT2/*.so
+	rm -f MT2/*.so \
+	rm -f Plotting/*.o \ 
+	rm -f Plotting/*.d \
+	rm -f Plotting/*.so
