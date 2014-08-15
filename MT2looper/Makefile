@@ -12,13 +12,11 @@ SOURCES =  MT2Looper.cc
 OBJECTS = $(SOURCES:.cc=.o) LinkDef_out.o
 LIB = libMT2Looper.so
 
-CORELIB = libMT2CORE.so
-#CORELIB = ../MT2CORE/libMT2CORE.so
+CORESOURCES = $(wildcard ../MT2CORE/*.cc) $(wildcard ../MT2CORE/MT2/*.cc) $(wildcard ../MT2CORE/Plotting/*.cc)
+COREOBJECTS = $(CORESOURCES:.cc=.o) 
+CORELIB = libMT2LooperCORE.so
 
-FWLIB = libMiniFWLite.so
-#FWLIB = ../Tools/MiniFWLite/libMiniFWLite.so
-
-LIBS = $(LIB) $(CORELIB) $(FWLIB) 
+LIBS = $(LIB) $(CORELIB) 
 
 .PHONY: all help compile clean cms2env
 
@@ -28,17 +26,9 @@ $(LIB):	$(OBJECTS)
 	echo "Linking $(LIB)"; \
 	$(LINKER) $(LINKERFLAGS) -shared $(OBJECTS) -o $@
 
-$(CORELIB):
-	echo "making MT2CORE"; \
-        cd ../MT2CORE; \
-        $(MAKE) -f Makefile; cd -; \
-	cp ../MT2CORE/$(CORELIB) .;
-
-$(FWLIB):
-	echo "making MiniFWLite"; \
-        cd ../Tools/MiniFWLite; \
-        $(MAKE) -f Makefile; cd -; \
-	cp ../Tools/MiniFWLite/$(FWLIB) .;
+$(CORELIB):	$(COREOBJECTS) 
+	echo "Linking $(CORELIB)"; \
+	$(LINKER) $(LINKERFLAGS) -shared $(COREOBJECTS) -o $@
 
 LinkDef_out.cxx: LinkDef.h MT2Looper.h 
 	rootcint -f $@ -c $(INCLUDE) MT2Looper.h  $<
@@ -66,11 +56,13 @@ clean:
         ../MT2CORE/*.o \
         ../MT2CORE/*.d \
         ../MT2CORE/*.so \
-        ../Tools/*.o \
-	../Tools/*.d \
-        ../Tools/MiniFWLite/*.o \
-	../Tools/MiniFWLite/*.d \
-        $(CORELIB) $(LIB) $(FWLIB) \
+	../MT2CORE/MT2/*.o \
+	../MT2CORE/MT2/*.d \
+	../MT2CORE/MT2/*.so \
+	../MT2CORE/Plotting/*.o \
+	../MT2CORE/Plotting/*.d \
+	../MT2CORE/Plotting/*.so \
+        $(CORELIB) $(LIB) \
         LinkDef_out.cxx  LinkDef_out.h \
         *.o *.d *.so; echo "Done"
 

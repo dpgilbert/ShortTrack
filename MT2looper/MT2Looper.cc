@@ -79,6 +79,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   int nDuplicates = 0;
   int nEvents = chain->GetEntries();
   unsigned int nEventsChain = nEvents;
+  cout << "[MT2Looper::loop] running on " << nEventsChain << " events" << endl;
   unsigned int nEventsTotal = 0;
   TObjArray *listOfFiles = chain->GetListOfFiles();
   TIter fileIter(listOfFiles);
@@ -180,6 +181,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
     f.Close();
   }//end loop on files
   
+  cout << "[MT2Looper::loop] processed " << nEventsTotal << " events" << endl;
   if ( nEventsChain != nEventsTotal ) {
     std::cout << "ERROR: number of events from files is not equal to total number of events" << std::endl;
   }

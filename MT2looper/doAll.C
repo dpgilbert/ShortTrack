@@ -5,7 +5,7 @@
 void doAll(std::string input_dir = "/nfs-6/userdata/mt2/V00-00-02", std::string sample = "ttall_msdecays", std::string output_dir = ".") {
 
   //  gSystem->Load("libMiniFWLite.so");
-  gSystem->Load("libMT2CORE.so");
+  gSystem->Load("libMT2LooperCORE.so");
   gSystem->Load("libMT2Looper.so");
 
   TChain *ch = new TChain("treeProducerSusyFullHad"); 
