@@ -9,6 +9,7 @@ namespace mt2 {
     )
     {
       if (nvtx == 0) return false;
+      // need to add: "cleaning cuts against instrumental effects" (section 7.3 of 2012 MT2 AN)
       return true;
     }
 
@@ -39,7 +40,7 @@ namespace mt2 {
 	case SignalRegionHtMet::m_ht:
 	  if (met  < 30.0   ) return false;
 	  if (ht   > 1200.0 ) return false;
-	  if (ht   >  750.0 ) return false;
+	  if (ht   <  750.0 ) return false;
 	  break;
 	case SignalRegionHtMet::l_ht:
 	  if (met  < 200.0  ) return false;
@@ -52,7 +53,6 @@ namespace mt2 {
      
       bool dijet100 = njets>=2 && j1pt > 100. && j2pt > 100.;
       bool cleaning = deltaPhiMin > 0.3 && diffMetMht < 70.; 
-      // need to add: "cleaning cuts against instrumental effects" (section 7.3)
       bool baseline = (cleaning && dijet100 && nlep==0);
 
       switch (sr_jets)
