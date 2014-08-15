@@ -1,0 +1,259 @@
+#include <iostream>
+#include <utility>
+#include <vector>
+
+#include "TROOT.h"
+#include "TLatex.h"
+#include "TString.h"
+#include "TH2.h"
+#include "THStack.h"
+#include "TLegend.h"
+#include "TCanvas.h"
+#include "TFile.h"
+#include "TH1.h"
+#include "TPaveText.h"
+
+using namespace std;
+
+//_______________________________________________________________________________
+int getColor(const string& sample) {
+  if (sample.find("ttbar") != string::npos) return kBlue;
+  if (sample.find("wjets") != string::npos) return kGreen+1;
+  if (sample.find("zinv") != string::npos) return kGreen-1;
+  if (sample.find("qcd") != string::npos) return kYellow;
+
+  cout << "getColor: WARNING: didn't recognize sample: " << sample << endl;
+  return kBlack;
+}
+
+//_______________________________________________________________________________
+string getLegendName(const string& sample) {
+  if (sample.find("ttbar") != string::npos) return "top";
+  if (sample.find("wjets") != string::npos) return "W+jets";
+  if (sample.find("zinv") != string::npos) return "Z+jets";
+  if (sample.find("qcd") != string::npos) return "QCD";
+
+  cout << "getLegendName: WARNING: didn't recognize sample: " << sample << endl;
+  return sample;
+}
+
+//_______________________________________________________________________________
+string getTableName(const string& sample) {
+  if (sample.find("ttbar") != string::npos) return "top";
+  if (sample.find("wjets") != string::npos) return "W+jets";
+  if (sample.find("zinv") != string::npos) return "Z+jets";
+  if (sample.find("qcd") != string::npos) return "QCD";
+
+  cout << "getTableName: WARNING: didn't recognize sample: " << sample << endl;
+  return sample;
+}
+
+//_______________________________________________________________________________
+TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names , const string& histdir , const string& histname , const string& xtitle , const string& ytitle , float xmin , float xmax , int rebin = 1 , bool logplot = true, bool printplot = false ) {
+
+  cout << "-- plotting histdir: " << histdir << ", histname: " << histname << endl;
+
+  TString canvas_name = Form("c_%s_%s",histdir.c_str(),histname.c_str());
+  TCanvas* can = new TCanvas(canvas_name,canvas_name);
+  can->cd();
+  if (logplot) can->SetLogy();
+
+  THStack* t = new THStack(Form("stack_%s_%s",histdir.c_str(),histname.c_str()),Form("stack_%s_%s",histdir.c_str(),histname.c_str()));
+  TH1F* h_bgtot = 0;
+
+  TLegend* leg = new TLegend(0.7,0.6,0.9,0.85);
+  leg->SetFillColor(0);
+  leg->SetBorderSize(0);
+
+  // to make legend
+  vector<TH1F*> bg_hists;
+  vector<string> bg_names;
+
+  const unsigned int n = samples.size();
+  // background hists
+  for( unsigned int i = 0 ; i < n ; ++i ) {
+    if( TString(names.at(i)).Contains("sig")  ) continue;
+    TString fullhistname = Form("%s/%s",histdir.c_str(),histname.c_str());
+    if (histdir.size() == 0) fullhistname = TString(histname);
+    TString newhistname = Form("%s_%s_%s",histname.c_str(),histdir.c_str(),names.at(i).c_str());
+    TH1F* h_temp = (TH1F*) samples.at(i)->Get(fullhistname);
+    TH1F* h = (TH1F*) h_temp->Clone(newhistname);
+    //    h->Sumw2();
+    h->SetFillColor(getColor(names.at(i)));
+    h->SetLineColor(getColor(names.at(i)));
+    if (rebin > 1) h->Rebin(rebin);
+    t->Add(h);
+    if( i==0 ) h_bgtot = (TH1F*) h->Clone(Form("%s_%s_bgtot",histname.c_str(),histdir.c_str()));
+    else h_bgtot->Add(h);
+
+    bg_hists.push_back(h);
+    bg_names.push_back(names.at(i));
+  }
+
+  // loop backwards to add to legend
+  for (int ibg = (int) bg_hists.size()-1; ibg >= 0; --ibg) {
+    leg->AddEntry(bg_hists.at(ibg),getLegendName(bg_names.at(ibg)).c_str(),"f");
+  }
+
+  float ymax = h_bgtot->GetMaximum();
+  if( logplot ) ymax*=10;
+  else          ymax*=1.1;
+  float ymin = 0.1;
+
+  TH2F* h_axes = new TH2F(Form("%s_%s_axes",histname.c_str(),histdir.c_str()),"",100,xmin,xmax,100,ymin,ymax);
+  h_axes->GetXaxis()->SetTitle(xtitle.c_str());
+  h_axes->GetYaxis()->SetTitle(ytitle.c_str());
+  h_axes->Draw();
+
+  t->Draw("hist same");
+
+  for( unsigned int i = 0 ; i < n ; ++i ){
+    if( !TString(names.at(i)).Contains("sig") ) continue;
+    TString fullhistname = Form("%s/%s",histdir.c_str(),histname.c_str());
+    if (histdir.size() == 0) fullhistname = TString(histname);
+    TString newhistname = Form("%s_%s_%s",histname.c_str(),histdir.c_str(),names.at(i).c_str());
+    TH1F* h_temp = (TH1F*) samples.at(i)->Get(fullhistname);
+    TH1F* h = (TH1F*) h_temp->Clone(newhistname);
+    //    h->Sumw2();
+    h->SetLineColor(getColor(names.at(i)));
+    if (rebin > 1) h->Rebin(rebin);
+    h->Draw("hist same");
+    leg->AddEntry(h,getLegendName(names.at(i)).c_str(),"l");
+  }
+
+
+  leg->Draw();
+  h_axes->Draw("axissame");
+  gPad->Modified();
+
+  if( printplot ) can->Print(Form("plots/%s.pdf",canvas_name.Data()));
+
+  return can;
+}
+
+//_______________________________________________________________________________
+void printTable( vector<TFile*> samples , vector<string> names , vector<string> dirs ) {
+
+  const unsigned int n = samples.size();
+  const unsigned int ndirs = dirs.size();
+
+  vector<double> bgtot(ndirs,0.);
+  vector<double> bgerr(ndirs,0.);
+
+  cout << "\\hline" << endl
+       << "Sample";
+
+  // header
+  for (unsigned int idir = 0; idir < ndirs; ++idir) {
+    cout << " & " << dirs.at(idir);
+  }
+  cout << " \\\\" << endl
+       << "\\hline\\hline" << endl;
+
+  // backgrounds first
+  for( unsigned int i = 0 ; i < n ; i++ ){
+    if( TString(names.at(i)).Contains("sig")  ) continue;
+    cout << getTableName(names.at(i));
+    for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+      TString fullhistname = Form("%s/h_Events_w",dirs.at(idir).c_str());
+      TH1F* h = (TH1F*) samples.at(i)->Get(fullhistname);
+      double yield = 0.;
+      double err = 0.;
+      if (h) {
+	yield = h->GetBinContent(1);
+	err = h->GetBinError(1);
+	bgtot.at(idir) += yield;
+	bgerr.at(idir) = sqrt(bgerr.at(idir)**2 + err**2);
+      }
+      if (yield > 10.) {
+  	cout << "  &  " << Form("%.0f $\\pm$ %.0f",yield,err);
+      } else {
+  	cout << "  &  " << Form("%.1f $\\pm$ %.1f",yield,err);
+      }
+    }
+    cout << " \\\\" << endl;
+  } // loop over samples
+
+  // print bg totals
+  cout << "\\hline" << endl;
+  cout << "Total SM";
+  for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+    double yield = bgtot.at(idir);
+    double err = bgerr.at(idir);
+    if (yield > 10.) {
+      cout << "  &  " << Form("%.0f $\\pm$ %.0f",yield,err);
+    } else {
+      cout << "  &  " << Form("%.1f $\\pm$ %.1f",yield,err);
+    }
+  }
+  cout << " \\\\" << endl;
+  cout << "\\hline" << endl;
+
+  for( unsigned int i = 0 ; i < n ; i++ ){
+    if( !TString(names.at(i)).Contains("sig") ) continue;
+    cout << getTableName(names.at(i));
+    for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+      TString fullhistname = Form("%s/h_Events_w",dirs.at(idir).c_str());
+      TH1F* h = (TH1F*) samples.at(i)->Get(fullhistname);
+      double yield = 0.;
+      double err = 0.;
+      if (h) {
+	yield = h->GetBinContent(1);
+	err = h->GetBinError(1);
+      }
+      if (yield > 10.) {
+  	cout << "  &  " << Form("%.0f $\\pm$ %.0f",yield,err);
+      } else {
+  	cout << "  &  " << Form("%.1f $\\pm$ %.1f",yield,err);
+      }
+    }
+    cout << " \\\\" << endl;
+  } // loop over samples
+
+  return;
+}
+
+//_______________________________________________________________________________
+void plotMaker(){
+
+  string input_dir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/test/";
+
+  // ----------------------------------------
+  //  samples definition
+  // ----------------------------------------
+
+  // get input files
+  TFile* f_ttbar = new TFile(Form("%s/ttall_msdecays.root",input_dir.c_str()));
+  TFile* f_wjets = new TFile(Form("%s/wjets_ht.root",input_dir.c_str()));
+  TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
+
+  vector<TFile*> samples;
+  vector<string>  names;
+
+  samples.push_back(f_wjets); names.push_back("wjets");
+  samples.push_back(f_zinv);  names.push_back("zinv");
+  samples.push_back(f_ttbar); names.push_back("ttbar");
+
+  // ----------------------------------------
+  //  plots definitions
+  // ----------------------------------------
+
+  bool printplots = false;
+
+  makePlot( samples , names , "" , "h_SignalRegion"  , "Signal Region" , "Events" , 0 , 100 , 1 , true, printplots );
+  makePlot( samples , names , "nocut" , "h_ht"  , "H_{T} [GeV]" , "Events / 10 GeV" , 0 , 2000 , 1 , true, printplots );
+  makePlot( samples , names , "nocut" , "h_mt2" , "M_{T2} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
+
+  // ----------------------------------------
+  //  tables definitions
+  // ----------------------------------------
+
+  vector<string> dirs;
+  dirs.push_back("nocut");
+  dirs.push_back("sr1L");
+  dirs.push_back("sr1M");
+  dirs.push_back("sr1T");
+
+  printTable(samples, names, dirs);
+
+}
