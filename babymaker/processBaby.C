@@ -48,7 +48,7 @@ void processBaby( TString outfileid = "tt_test", TString infile = "/hadoop/cms/s
 
   // assumes these files have been copied or simlinked to the current dir
   gSystem->Load("libMiniFWLite.so");
-  gSystem->Load("libMT2CORE.so");
+  gSystem->Load("libBabymakerMT2CORE.so");
   gSystem->Load("libScanChain.so");
   //  gROOT->ProcessLine(".L ScanChain.C+");
 

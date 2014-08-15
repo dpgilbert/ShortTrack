@@ -1,7 +1,7 @@
 {
 
   gSystem->Load("libMiniFWLite.so");
-  gSystem->Load("libMT2CORE.so");
+  gSystem->Load("libBabymakerMT2CORE.so");
   gSystem->Load("libScanChain.so");
 
   TChain *ch = new TChain("Events"); 

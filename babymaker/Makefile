@@ -12,7 +12,9 @@ SOURCES = ScanChain.cc
 OBJECTS = $(SOURCES:.cc=.o) LinkDef_out.o
 LIB = libScanChain.so
 
-CORELIB = ../MT2CORE/libMT2CORE.so
+CORESOURCES = $(wildcard ../MT2CORE/*.cc) $(wildcard ../MT2CORE/MT2/*.cc) $(wildcard ../MT2CORE/Plotting/*.cc)
+COREOBJECTS = $(CORESOURCES:.cc=.o) 
+CORELIB = libBabymakerMT2CORE.so
 
 #FWLIB = libMiniFWLite.so
 FWLIB = ../Tools/MiniFWLite/libMiniFWLite.so
@@ -27,11 +29,9 @@ $(LIB):	$(OBJECTS)
 	echo "Linking $(LIB)"; \
 	$(LINKER) $(LINKERFLAGS) -shared $(OBJECTS) -o $@
 
-$(CORELIB):
-	echo "making MT2CORE"; \
-        cd ../MT2CORE; \
-        $(MAKE) -f Makefile; cd -; \
-	cp $(CORELIB) .;
+$(CORELIB):	$(COREOBJECTS) 
+	echo "Linking $(CORELIB)"; \
+	$(LINKER) $(LINKERFLAGS) -shared $(COREOBJECTS) -o $@
 
 $(FWLIB):
 	echo "making MiniFWLite"; \
@@ -65,6 +65,12 @@ clean:
         ../MT2CORE/*.o \
         ../MT2CORE/*.d \
         ../MT2CORE/*.so \
+        ../MT2CORE/MT2/*.o \
+        ../MT2CORE/MT2/*.d \
+        ../MT2CORE/MT2/*.so \
+        ../MT2CORE/Plotting/*.o \
+        ../MT2CORE/Plotting/*.d \
+        ../MT2CORE/Plotting/*.so \
         ../Tools/*.o \
 	../Tools/*.d \
         ../Tools/MiniFWLite/*.o \
