@@ -27,7 +27,7 @@ class MT2Looper {
   MT2Looper();
   ~MT2Looper();
 
-  void loop(TChain*, std::string = "testSample");
+  void loop(TChain* chain, std::string output_name = "test.root");
   void fillHistosSignalRegion(std::map<std::string, TH1F*>& h_1d, 
 			      const SignalRegionJets::value_type& signal_region = SignalRegionJets::nocut, 
 			      const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::nocut,

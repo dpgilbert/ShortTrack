@@ -36,13 +36,12 @@ MT2Looper::~MT2Looper(){
 
 };
 
-void MT2Looper::loop(TChain* chain, std::string baby_name){
+void MT2Looper::loop(TChain* chain, std::string output_name){
 
   gROOT->cd();
-  TString m_outfilename_ = "test.root";
-  cout << "[MT2Looper::loop] creating output file: " << m_outfilename_ << endl;
+  cout << "[MT2Looper::loop] creating output file: " << output_name << endl;
 
-  outfile_ = new TFile(m_outfilename_,"RECREATE") ; 
+  outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
 
   cout << "[MT2Looper::loop] setting up histos" << endl;
 
@@ -126,6 +125,11 @@ void MT2Looper::loop(TChain* chain, std::string baby_name){
       //  }
       //}
 
+      //---------------------
+      // basic event selection and cleaning
+      //---------------------
+
+      if (!PassesEventSelection(t.nVert)) continue;
 
       //---------------------
       // set weights and start making plots
