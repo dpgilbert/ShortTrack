@@ -2,6 +2,16 @@
 
 namespace mt2 {
 
+    // passes basic event selection, including cleaning cuts
+    bool PassesEventSelection
+    (
+        const int nvtx
+    )
+    {
+      if (nvtx == 0) return false;
+      return true;
+    }
+
     // passes signal region
     bool PassesSignalRegion
     (

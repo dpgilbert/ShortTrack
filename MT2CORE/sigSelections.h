@@ -53,6 +53,12 @@ namespace mt2
         const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::nocut
     );
 
+    // event level and cleaning cuts
+    bool PassesEventSelection
+    (
+        const int nvtx
+    );
+
 } // namespace ss
 
 #endif // SIGNALREGIONS_H
