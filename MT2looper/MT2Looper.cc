@@ -8,6 +8,7 @@
 #include "TTreeCache.h"
 #include "Math/VectorUtil.h"
 #include "TVector2.h"
+#include "TBenchmark.h"
 
 // CMS2
 //#include "../MT2CORE/CMS2.h"
@@ -37,6 +38,10 @@ MT2Looper::~MT2Looper(){
 };
 
 void MT2Looper::loop(TChain* chain, std::string output_name){
+
+  // Benchmark
+  TBenchmark *bmark = new TBenchmark();
+  bmark->Start("benchmark");
 
   gROOT->cd();
   cout << "[MT2Looper::loop] creating output file: " << output_name << endl;
@@ -231,6 +236,14 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   outfile_->Close();
   delete outfile_;
 
+  bmark->Stop("benchmark");
+  cout << endl;
+  cout << nEventsTotal << " Events Processed" << endl;
+  cout << "------------------------------" << endl;
+  cout << "CPU  Time:	" << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
+  cout << "Real Time:	" << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
+  cout << endl;
+  delete bmark;
 
   return;
 }
@@ -255,16 +268,16 @@ void MT2Looper::fillHistos(std::map<std::string, TH1F*>& h_1d, const SignalRegio
 
   plot1D("h_Events"+s,  1, 1, h_1d, 1, 0, 2);
   plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, 1, 0, 2);
-  plot1D("h_mt2"+s,       t.mt2,   evtweight_, h_1d, 80, 0, 800);
-  plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, 80, 0, 800);
-  plot1D("h_ht"+s,       t.ht,   evtweight_, h_1d, 80, 0, 2000);
+  plot1D("h_mt2"+s,       t.mt2,   evtweight_, h_1d, 150, 0, 1500);
+  plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, 150, 0, 1500);
+  plot1D("h_ht"+s,       t.ht,   evtweight_, h_1d, 120, 0, 3000);
   plot1D("h_nJet40"+s,       t.nJet40,   evtweight_, h_1d, 15, 0, 15);
   plot1D("h_nBJet40"+s,      t.nBJet40,   evtweight_, h_1d, 6, 0, 6);
   plot1D("h_deltaPhiMin"+s,  t.deltaPhiMin,   evtweight_, h_1d, 32, 0, 3.2);
-  plot1D("h_diffMetMht"+s,   t.diffMetMht,   evtweight_, h_1d, 80, 0, 200);
+  plot1D("h_diffMetMht"+s,   t.diffMetMht,   evtweight_, h_1d, 120, 0, 300);
   plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, 10, 0, 10);
-  plot1D("h_J0pt"+s,       t.jet_pt[0],   evtweight_, h_1d, 80, 0, 800);
-  plot1D("h_J1pt"+s,       t.jet_pt[1],   evtweight_, h_1d, 80, 0, 800);
+  plot1D("h_J0pt"+s,       t.jet_pt[0],   evtweight_, h_1d, 150, 0, 1500);
+  plot1D("h_J1pt"+s,       t.jet_pt[1],   evtweight_, h_1d, 150, 0, 1500);
   outfile_->cd();
   return;
 }

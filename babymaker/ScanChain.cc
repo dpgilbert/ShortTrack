@@ -8,6 +8,7 @@
 #include "TTreeCache.h"
 #include "Math/VectorUtil.h"
 #include "TVector2.h"
+#include "TBenchmark.h"
 
 // CMS2
 #include "../MT2CORE/CMS2.h"
@@ -25,6 +26,10 @@ using namespace tas;
 
 
 void babyMaker::ScanChain(TChain* chain, std::string baby_name){
+
+  // Benchmark
+  TBenchmark *bmark = new TBenchmark();
+  bmark->Start("benchmark");
 
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
@@ -533,6 +538,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
   cout << nDuplicates << " duplicate events were skipped." << endl;
 
   CloseBabyNtuple();
+
+  bmark->Stop("benchmark");
+  cout << endl;
+  cout << nEventsTotal << " Events Processed" << endl;
+  cout << "------------------------------" << endl;
+  cout << "CPU  Time:	" << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
+  cout << "Real Time:	" << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
+  cout << endl;
+  delete bmark;
 
   return;
 }
