@@ -31,9 +31,9 @@ namespace mt2
         enum value_type
         {
             nocut = 0, 
-            h_ht = 20, // ht > 1200
+            l_ht = 20, // 450 < ht < 750  && met > 200
             m_ht = 40, // 750 < ht < 1200
-            l_ht = 60, // 450 < ht < 750  && met > 200
+            h_ht = 60, // ht > 1200
             static_size
         };
     };
