@@ -75,8 +75,15 @@ TAG="V00-00-02"
 # SIGNAL
 #
 
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/SMS-T1tttt_2J_mGl-1500_mLSP-100_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_T1tttt_1500_100
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/SMS-T1tttt_2J_mGl-1200_mLSP-800_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_T1tttt_1200_800
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/SMS-T1qqqq_2J_mGl-1400_mLSP-100_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_T1qqqq_1400_100
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/SMS-T1bbbb_2J_mGl-1000_mLSP-900_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_T1bbbb_1000_900
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/SMS-T1bbbb_2J_mGl-1500_mLSP-100_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_T1bbbb_1500_100
+
 # --- write submit script ---
-mkdir configs_${TAG}
+mkdir -p configs_${TAG}
+
 mv condor_${TAG}*.cmd configs_${TAG}
 echo "#!/bin/bash" > submitAll.sh
 echo "voms-proxy-init -voms cms -valid 240:00" >> submitAll.sh

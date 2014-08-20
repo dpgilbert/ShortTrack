@@ -155,6 +155,14 @@ void processBaby( TString outfileid = "tt_test", TString infile = "/hadoop/cms/s
   else if (infile.Contains("WH_WToLNu_HToBB"))   	             sample = Form("whbb_%s",            outfileid.Data());
   else if (infile.Contains("SMS-T2tt"))                              sample = Form("T2tt_%s",            outfileid.Data());
   else if (infile.Contains("SMS-T2bw"))                              sample = Form("T2bw_%s",            outfileid.Data());
+  else if (infile.Contains("SMS-T1tttt_2J_mGl-1500_mLSP-100"))       sample = Form("T1tttt_1500_100_%s", outfileid.Data());
+  else if (infile.Contains("SMS-T1tttt_2J_mGl-1200_mLSP-800"))       sample = Form("T1tttt_1200_800_%s", outfileid.Data());
+  else if (infile.Contains("SMS-T1qqqq_2J_mGl-1400_mLSP-100"))       sample = Form("T1qqqq_1400_100_%s", outfileid.Data());
+  else if (infile.Contains("SMS-T1bbbb_2J_mGl-1000_mLSP-900"))       sample = Form("T1bbbb_1000_900_%s", outfileid.Data());
+  else if (infile.Contains("SMS-T1bbbb_2J_mGl-1500_mLSP-100"))       sample = Form("T1bbbb_1500_100_%s", outfileid.Data());
+  else if (infile.Contains("SMS-T1tttt"))                            sample = Form("T1tttt_%s",          outfileid.Data());
+  else if (infile.Contains("SMS-T1qqqq"))                            sample = Form("T1qqqq_%s",          outfileid.Data());
+  else if (infile.Contains("SMS-T1bbbb"))                            sample = Form("T1bbbb_%s",          outfileid.Data());
   //Data
   // //single mu-had
   // else if (infile.Contains("MuHad_Run2012A-recover-06Aug2012-v1_AOD"))          sample =  Form("MuHad2012A_recover06Aug2012v1V532_%s",     outfileid.Data());
