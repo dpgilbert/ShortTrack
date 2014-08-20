@@ -33,8 +33,6 @@ class MT2Looper {
 			      const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::nocut,
 			      const std::string& dir = "", const std::string& suffix = "");
   void fillHistos(std::map<std::string, TH1F*>& h_1d, 
-		  const SignalRegionJets::value_type& signal_region = SignalRegionJets::nocut, 
-		  const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::nocut,
 		  const std::string& dir = "", const std::string& suffix = ""); 
   
  private:

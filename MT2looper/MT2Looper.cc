@@ -150,7 +150,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       //cout <<"t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, nlepveto_, t.jet_pt[0], t.jet_pt[1]"<<endl;
       //cout<<t.met_pt<<" "<<t.ht<<" "<<t.nJet40<<" "<<t.nBJet40<<" "<<t.deltaPhiMin<<" "<<t.diffMetMht<<" "<<nlepveto_<<" "<<t.jet_pt[0]<<" "<<t.jet_pt[1]<<endl;
 
-      fillHistosSignalRegion(h_1d_nocut, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "nocut");
+      fillHistos(h_1d_nocut, "nocut");
 
       fillHistosSignalRegion(h_1d_sr1H, SignalRegionJets::sr1, SignalRegionHtMet::h_ht, "sr1H");
       fillHistosSignalRegion(h_1d_sr2H, SignalRegionJets::sr2, SignalRegionHtMet::h_ht, "sr2H");
@@ -254,12 +254,12 @@ void MT2Looper::fillHistosSignalRegion(std::map<std::string, TH1F*>& h_1d, const
 			 nlepveto_, t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) 
    {
      plot1D("h_SignalRegion",  sr_jets+sr_htmet,   evtweight_, h_1d_global, 100, 0, 100);
-     fillHistos( h_1d, sr_jets, sr_htmet, dir, suffix);
+     fillHistos( h_1d, dir, suffix);
    }
  return;
 }
 
-void MT2Looper::fillHistos(std::map<std::string, TH1F*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dirname, const std::string& s) {
+void MT2Looper::fillHistos(std::map<std::string, TH1F*>& h_1d, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
     dir = outfile_->mkdir(dirname.c_str());

@@ -59,6 +59,32 @@ namespace mt2
         const int nvtx
     );
 
+    bool PassesSignalRegionBase
+    (
+        const float met,
+        const float ht,
+        const int njets,
+        const float deltaPhiMin,
+        const float diffMetMht,
+        const int nlep,
+        const float j1pt,
+        const float j2pt
+    );
+
+    SignalRegionJets::value_type PassesSignalRegionJets
+    (
+        const int njets,
+        const int nbtag
+    );
+
+    SignalRegionHtMet::value_type PassesSignalRegionHtMet
+    (
+        const float met,
+        const float ht
+    );
+
+
+
 } // namespace ss
 
 #endif // SIGNALREGIONS_H
