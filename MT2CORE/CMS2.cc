@@ -50,6 +50,7 @@ namespace tas {
 	float &evt_fixgridfastjet_centralchargedpileup_rho() { return cms2.evt_fixgridfastjet_centralchargedpileup_rho(); }
 	float &evt_fixgridfastjet_centralneutral_rho() { return cms2.evt_fixgridfastjet_centralneutral_rho(); }
 	float &evt_kfactor() { return cms2.evt_kfactor(); }
+	float &evt_filt_eff() { return cms2.evt_filt_eff(); }
 	float &evt_scale1fb() { return cms2.evt_scale1fb(); }
 	float &evt_xsec_excl() { return cms2.evt_xsec_excl(); }
 	float &evt_xsec_incl() { return cms2.evt_xsec_incl(); }

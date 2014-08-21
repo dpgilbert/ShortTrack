@@ -71,9 +71,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       evt  = cms2.evt_event();
       isData = cms2.evt_isRealData();
 
-      nevents = cms2.evt_nEvts();
-      scale1fb = cms2.evt_scale1fb();
-      crossSection = cms2.evt_xsec_incl();
+      evt_nEvts = cms2.evt_nEvts();
+      evt_scale1fb = cms2.evt_scale1fb();
+      evt_xsec = cms2.evt_xsec_incl();
+      evt_kfactor = cms2.evt_kfactor();
+      evt_filter = cms2.evt_filt_eff();
       puWeight = 1.;
       nTrueInt = cms2.puInfo_trueNumInteractions().at(0);
       rho = cms2.evt_fixgridfastjet_all_rho(); //this one is used in JECs
@@ -558,16 +560,17 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   rootdir->cd();
   BabyFile_ = new TFile(Form("%s", BabyFilename), "RECREATE");
   BabyFile_->cd();
-  BabyTree_ = new TTree("treeProducerSusyFullHad", "A Baby Ntuple");
+  BabyTree_ = new TTree("mt2", "A Baby Ntuple");
 
   BabyTree_->Branch("run", &run );
   BabyTree_->Branch("lumi", &lumi );
   BabyTree_->Branch("evt", &evt );
   BabyTree_->Branch("isData", &isData );
-
-  BabyTree_->Branch("nevents", &nevents );
-  BabyTree_->Branch("scale1fb", &scale1fb);
-  BabyTree_->Branch("crossSection", &crossSection );
+  BabyTree_->Branch("evt_scale1fb", &evt_scale1fb);
+  BabyTree_->Branch("evt_xsec", &evt_xsec );
+  BabyTree_->Branch("evt_kfactor", &evt_kfactor );
+  BabyTree_->Branch("evt_filter", &evt_filter );
+  BabyTree_->Branch("evt_nEvts", &evt_nEvts );
   BabyTree_->Branch("puWeight", &puWeight );
   BabyTree_->Branch("nVert", &nVert );
   BabyTree_->Branch("nTrueInt", &nTrueInt );
@@ -688,9 +691,11 @@ void babyMaker::InitBabyNtuple () {
   lumi   = -999;
   evt    = -999;
   isData = -999;
-  nevents = 0;
-  scale1fb = 0;
-  crossSection = -999.0;
+  evt_scale1fb = 0;
+  evt_xsec = -999.0;
+  evt_kfactor = -999.0;
+  evt_filter = -999.0;
+  evt_nEvts = 0;
   puWeight = -999.0;
   nVert = -999;
   nTrueInt = -999;

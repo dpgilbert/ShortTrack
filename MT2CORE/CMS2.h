@@ -164,6 +164,9 @@ protected:
 	float evt_kfactor_;
 	TBranch *evt_kfactor_branch;
 	bool evt_kfactor_isLoaded;
+	float evt_filt_eff_;
+	TBranch *evt_filt_eff_branch;
+	bool evt_filt_eff_isLoaded;
 	float evt_scale1fb_;
 	TBranch *evt_scale1fb_branch;
 	bool evt_scale1fb_isLoaded;
@@ -2859,6 +2862,11 @@ void Init(TTree *tree) {
 	if (tree->GetAlias("evt_kfactor") != 0) {
 		evt_kfactor_branch = tree->GetBranch(tree->GetAlias("evt_kfactor"));
 		evt_kfactor_branch->SetAddress(&evt_kfactor_);
+	}
+	evt_filt_eff_branch = 0;
+	if (tree->GetAlias("evt_filt_eff") != 0) {
+		evt_filt_eff_branch = tree->GetBranch(tree->GetAlias("evt_filt_eff"));
+		evt_filt_eff_branch->SetAddress(&evt_filt_eff_);
 	}
 	evt_scale1fb_branch = 0;
 	if (tree->GetAlias("evt_scale1fb") != 0) {
@@ -6475,6 +6483,7 @@ void GetEntry(unsigned int idx)
 		evt_fixgridfastjet_centralchargedpileup_rho_isLoaded = false;
 		evt_fixgridfastjet_centralneutral_rho_isLoaded = false;
 		evt_kfactor_isLoaded = false;
+		evt_filt_eff_isLoaded = false;
 		evt_scale1fb_isLoaded = false;
 		evt_xsec_excl_isLoaded = false;
 		evt_xsec_incl_isLoaded = false;
@@ -7280,6 +7289,7 @@ void LoadAllBranches()
 	if (evt_fixgridfastjet_centralchargedpileup_rho_branch != 0) evt_fixgridfastjet_centralchargedpileup_rho();
 	if (evt_fixgridfastjet_centralneutral_rho_branch != 0) evt_fixgridfastjet_centralneutral_rho();
 	if (evt_kfactor_branch != 0) evt_kfactor();
+	if (evt_filt_eff_branch != 0) evt_filt_eff();
 	if (evt_scale1fb_branch != 0) evt_scale1fb();
 	if (evt_xsec_excl_branch != 0) evt_xsec_excl();
 	if (evt_xsec_incl_branch != 0) evt_xsec_incl();
@@ -8522,6 +8532,16 @@ void LoadAllBranches()
 			evt_kfactor_isLoaded = true;
 		}
 		return evt_kfactor_;
+	}
+	float &evt_filt_eff()
+	{
+		if (not evt_filt_eff_isLoaded) {
+			if (evt_filt_eff_branch != 0) {
+				evt_filt_eff_branch->GetEntry(index);
+			} else { }
+			evt_filt_eff_isLoaded = true;
+		}
+		return evt_filt_eff_;
 	}
 	float &evt_scale1fb()
 	{
@@ -16124,6 +16144,7 @@ namespace tas {
 	float &evt_fixgridfastjet_centralchargedpileup_rho();
 	float &evt_fixgridfastjet_centralneutral_rho();
 	float &evt_kfactor();
+	float &evt_filt_eff();
 	float &evt_scale1fb();
 	float &evt_xsec_excl();
 	float &evt_xsec_incl();

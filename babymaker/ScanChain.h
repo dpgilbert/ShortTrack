@@ -45,9 +45,11 @@ class babyMaker {
   Int_t           evt;
   Int_t           isData;
 
-  Int_t           nevents;
-  Float_t         scale1fb;
-  Float_t         crossSection;
+  Float_t         evt_scale1fb;
+  Float_t         evt_xsec;
+  Float_t         evt_kfactor;
+  Float_t         evt_filter;
+  Int_t           evt_nEvts;
   Float_t         puWeight;
   Int_t           nVert;
   Int_t           nTrueInt;
