@@ -11,7 +11,7 @@ fi
 echo "
 void mergeHadoopFiles() {
   gSystem->Load(\"../libMiniFWLite.so\");
-  TChain *chain = new TChain(\"treeProducerSusyFullHad\");
+  TChain *chain = new TChain(\"mt2\");
   chain->SetMaxTreeSize(5000000000LL); //default is 100000000000LL
 " > mergeHadoopFiles.C
 

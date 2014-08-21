@@ -8,7 +8,7 @@ void doAll(std::string input_dir = "/nfs-6/userdata/mt2/V00-00-02", std::string 
   gSystem->Load("libMT2LooperCORE.so");
   gSystem->Load("libMT2Looper.so");
 
-  TChain *ch = new TChain("treeProducerSusyFullHad"); 
+  TChain *ch = new TChain("mt2"); 
  
   ch->Add(Form("%s/%s*.root",input_dir.c_str(),sample.c_str()));
 

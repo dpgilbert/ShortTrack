@@ -94,7 +94,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
     // Get File Content
     TFile f( currentFile->GetTitle() );
-    TTree *tree = (TTree*)f.Get("treeProducerSusyFullHad");
+    TTree *tree = (TTree*)f.Get("mt2");
     TTreeCache::SetLearnEntries(10);
     tree->SetCacheSize(128*1024*1024);
     //mt2tree t(tree);
@@ -142,7 +142,8 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       //---------------------
       outfile_->cd();
       const float lumi = 1.;
-      evtweight_ = t.scale1fb * lumi;
+      evtweight_ = t.evt_scale1fb * lumi;
+
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, 80, 0, 80);
       plot1D("h_mt2",       t.mt2,       evtweight_, h_1d_global, 80, 0, 800);
 

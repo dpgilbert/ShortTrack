@@ -26,9 +26,12 @@ public :
    Int_t           lumi;
    Int_t           evt;
    Int_t           isData;
-   Int_t           nevents;
-   Float_t         scale1fb;
-   Float_t         crossSection;
+   Float_t         evt_scale1fb;
+   Float_t         evt_xsec;
+   Float_t         evt_kfactor;
+   Float_t         evt_filter;
+   Int_t           evt_nEvts;
+   Int_t           evt_id;
    Float_t         puWeight;
    Int_t           nVert;
    Int_t           nTrueInt;
@@ -145,9 +148,12 @@ public :
    TBranch        *b_lumi;   //!
    TBranch        *b_evt;   //!
    TBranch        *b_isData;   //!
-   TBranch        *b_nevents;   //!
-   TBranch        *b_scale1fb;   //!
-   TBranch        *b_crossSection;   //!
+   TBranch        *b_evt_scale1fb;   //!
+   TBranch        *b_evt_xsec;   //!
+   TBranch        *b_evt_kfactor;   //!
+   TBranch        *b_evt_filter;   //!
+   TBranch        *b_evt_nEvts;   //!
+   TBranch        *b_evt_id;   //!
    TBranch        *b_puWeight;   //!
    TBranch        *b_nVert;   //!
    TBranch        *b_nTrueInt;   //!
@@ -323,9 +329,12 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("lumi", &lumi, &b_lumi);
    fChain->SetBranchAddress("evt", &evt, &b_evt);
    fChain->SetBranchAddress("isData", &isData, &b_isData);
-   fChain->SetBranchAddress("nevents", &nevents, &b_nevents);
-   fChain->SetBranchAddress("scale1fb", &scale1fb, &b_scale1fb);
-   fChain->SetBranchAddress("crossSection", &crossSection, &b_crossSection);
+   fChain->SetBranchAddress("evt_scale1fb", &evt_scale1fb, &b_evt_scale1fb);
+   fChain->SetBranchAddress("evt_xsec", &evt_xsec, &b_evt_xsec);
+   fChain->SetBranchAddress("evt_kfactor", &evt_kfactor, &b_evt_kfactor);
+   fChain->SetBranchAddress("evt_filter", &evt_filter, &b_evt_filter);
+   fChain->SetBranchAddress("evt_nEvts", &evt_nEvts, &b_evt_nEvts);
+   fChain->SetBranchAddress("evt_id", &evt_id, &b_evt_id);
    fChain->SetBranchAddress("puWeight", &puWeight, &b_puWeight);
    fChain->SetBranchAddress("nVert", &nVert, &b_nVert);
    fChain->SetBranchAddress("nTrueInt", &nTrueInt, &b_nTrueInt);
