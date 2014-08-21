@@ -50,6 +50,7 @@ class babyMaker {
   Float_t         evt_kfactor;
   Float_t         evt_filter;
   Int_t           evt_nEvts;
+  Int_t           evt_id;
   Float_t         puWeight;
   Int_t           nVert;
   Int_t           nTrueInt;

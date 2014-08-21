@@ -15,6 +15,7 @@
 #include "../MT2CORE/tools.h"
 #include "../MT2CORE/selections.h"
 #include "../MT2CORE/hemJet.h"
+#include "../MT2CORE/sampleID.h"
 #include "../MT2CORE/MT2/MT2.h"
 #include "../MT2CORE/IsoTrackVeto.h"
 
@@ -43,6 +44,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
   TIter fileIter(listOfFiles);
   TFile *currentFile = 0;
   while ( (currentFile = (TFile*)fileIter.Next()) ) {
+    cout << "running on file: " << currentFile->GetTitle() << endl;
+
+    evt_id = sampleID(currentFile->GetTitle());
 
     // Get File Content
     TFile f( currentFile->GetTitle() );
@@ -571,6 +575,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("evt_kfactor", &evt_kfactor );
   BabyTree_->Branch("evt_filter", &evt_filter );
   BabyTree_->Branch("evt_nEvts", &evt_nEvts );
+  BabyTree_->Branch("evt_id", &evt_id );
   BabyTree_->Branch("puWeight", &puWeight );
   BabyTree_->Branch("nVert", &nVert );
   BabyTree_->Branch("nTrueInt", &nTrueInt );
@@ -696,6 +701,7 @@ void babyMaker::InitBabyNtuple () {
   evt_kfactor = -999.0;
   evt_filter = -999.0;
   evt_nEvts = 0;
+  //evt_id = -1; // don't reset every event
   puWeight = -999.0;
   nVert = -999;
   nTrueInt = -999;
