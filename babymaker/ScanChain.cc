@@ -148,6 +148,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       vector<LorentzVector> p4sForHems;
       LorentzVector sumMhtp4 = LorentzVector(0,0,0,0);
 
+      vector<LorentzVector> p4sForHemsGamma;
+      LorentzVector sumMhtp4Gamma = LorentzVector(0,0,0,0);
+
       //ELECTRONS
       nlep = 0;
       nElectrons10 = 0;
@@ -249,6 +252,51 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         i++;
       }
 
+      //PHOTONS
+      ngamma = 0;
+      nGammas20 = 0;
+      // to recalculate MET adding photons
+      float gamma_met_px  = met_pt * cos(met_phi);
+      float gamma_met_py  = met_pt * sin(met_phi);
+      for(unsigned int iGamma = 0; iGamma < cms2.photons_p4().size(); iGamma++){
+        if(cms2.photons_p4().at(iGamma).pt() < 20.0) continue;
+        if(fabs(cms2.photons_p4().at(iGamma).eta()) > 2.5) continue;
+	if (cms2.photons_photonID_loose().at(iGamma)==0) continue;
+
+	if (ngamma >= max_ngamma) {
+          std::cout << "WARNING: attempted to fill more than " << max_ngamma << " photons" << std::endl;
+	  break;
+	}
+
+        gamma_pt[ngamma]   = cms2.photons_p4().at(iGamma).pt();
+        gamma_eta[ngamma]  = cms2.photons_p4().at(iGamma).eta();
+        gamma_phi[ngamma]  = cms2.photons_p4().at(iGamma).phi();
+        gamma_mass[ngamma] = cms2.photons_mass().at(iGamma);
+        gamma_sigmaIetaIeta[ngamma] = cms2.photons_full5x5_sigmaIEtaIEta().at(iGamma);
+        gamma_chHadIso[ngamma] = photons_chargedHadronIso().at(iGamma);
+        gamma_neuHadIso[ngamma] = photons_neutralHadronIso().at(iGamma);
+        gamma_phIso[ngamma] = photons_photonIso().at(iGamma);
+        gamma_r9[ngamma] =  photons_full5x5_r9().at(iGamma);
+        gamma_hOverE[ngamma] =  photons_full5x5_hOverEtowBC().at(iGamma);
+        gamma_idCutBased[ngamma] =  photons_photonID_tight().at(iGamma) ? 2 : 0; // Medium working point is not saved in miniAOD, should implement on our own if we want it
+        if(gamma_pt[ngamma] > 20) nGammas20++;
+
+        //gamma_mcMatchId[ngamma] = ;
+
+	// for photon+jets control regions
+	gamma_met_px += cms2.photons_p4().at(iGamma).px();
+	gamma_met_py += cms2.photons_p4().at(iGamma).py();
+	p4sForHemsGamma.push_back(cms2.photons_p4().at(iGamma));
+        sumMhtp4Gamma -= cms2.photons_p4().at(iGamma); 
+        
+        ngamma++;
+      }
+
+      // recalculated MET with photons added
+      TVector2 gamma_met_vec(gamma_met_px, gamma_met_py);
+      gamma_met_pt = gamma_met_vec.Mod();
+      gamma_met_phi = TVector2::Phi_mpi_pi(gamma_met_vec.Phi());
+
       //JETS
       //before we start, check that no genGet is matched to multiple recoJets
       //vector<float> pTofMatchedGenJets;
@@ -310,12 +358,49 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         removedJets.push_back(minIndex);
       }
 
+      //check overlapping with photons
+      //only want to remove the closest jet to a photon, threshold deltaR < 0.4
+      vector<int> removedJetsGamma; //index of jets to be removed because they overlap with a photon
+      for(int iGamma = 0; iGamma < ngamma; iGamma++){
+
+        float minDR = 0.4;
+        int minIndex = -1;
+        for(unsigned int passIdx = 0; passIdx < passJets.size(); passIdx++){ //loop through jets that passed baseline selections
+
+          int iJet = passJets.at(passIdx);
+
+          if(cms2.pfjets_p4().at(iJet).pt() < 10.0) continue;
+          if(fabs(cms2.pfjets_p4().at(iJet).eta()) > 5.2) continue;
+          if(!isLoosePFJet(iJet)) continue;
+
+          bool alreadyRemoved = false;
+          for(unsigned int j=0; j<removedJetsGamma.size(); j++){
+            if(iJet == removedJetsGamma.at(j)){
+              alreadyRemoved = true;
+              break;
+            }
+          }
+          if(alreadyRemoved) continue;
+
+          float thisDR = DeltaR(pfjets_p4().at(iJet).eta(), gamma_eta[iGamma], pfjets_p4().at(iJet).phi(), gamma_phi[iGamma]);
+          if(thisDR < minDR){
+            minDR = thisDR; 
+            minIndex = iJet;
+          }
+        }
+        removedJetsGamma.push_back(minIndex);
+      }
+
       njet = 0;
       nJet40 = 0;
       nBJet40 = 0;
       ht = 0;
-      vector<LorentzVector> hemJets;
       deltaPhiMin = 999;
+
+      gamma_nJet40 = 0;
+      gamma_nBJet40 = 0;
+      gamma_ht = 0;
+      gamma_deltaPhiMin = 999;
 
       //now fill variables for jets that pass baseline selections and don't overlap with a lepton
       for(unsigned int passIdx = 0; passIdx < passJets.size(); passIdx++){
@@ -366,11 +451,35 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
             deltaPhiMin = min(deltaPhiMin, DeltaPhi(met_phi, jet_phi[njet]));
           }
 
+
+	  //check against list of jets that overlap with a photon
+	  bool isOverlapJetGamma = false;
+	  for(unsigned int j=0; j<removedJetsGamma.size(); j++){
+	    if(iJet == removedJetsGamma.at(j)){
+	      isOverlapJetGamma = true;
+	      break;
+	    }
+	  }
+	  if(!isOverlapJetGamma) {
+	    p4sForHemsGamma.push_back(cms2.pfjets_p4().at(iJet));
+	    gamma_nJet40++;
+	    gamma_ht+= jet_pt[njet];
+	    if(jet_btagCSV[njet] >= 0.679) gamma_nBJet40++; //CSVM
+
+	    sumMhtp4Gamma -= cms2.pfjets_p4().at(iJet); 
+
+	    if(gamma_nJet40 <= 4){
+	      gamma_deltaPhiMin = min(gamma_deltaPhiMin, DeltaPhi(gamma_met_phi, jet_phi[njet]));
+	    }
+	  } // !isOverlapJetGamma
+
         }
 
         njet++;
       }
 
+      // MT2 and MHT
+      vector<LorentzVector> hemJets;
       if(p4sForHems.size() > 1){
 
         //Hemispheres used in MT2 calculation
@@ -395,6 +504,26 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       TVector2 mhtVector = TVector2(mht_pt*cos(mht_phi), mht_pt*sin(mht_phi));
       TVector2 metVector = TVector2(met_pt*cos(met_phi), met_pt*sin(met_phi));
       diffMetMht = (mhtVector - metVector).Mod();
+
+      // MT2 and MHT for photon+jets regions
+      //  note that leptons are NOT included in this MT2 calculation
+      //  would need to do lepton/photon overlap to include them
+      vector<LorentzVector> hemJetsGamma;
+      if(p4sForHemsGamma.size() > 1){
+
+        //Hemispheres used in MT2 calculation
+        hemJetsGamma = getHemJets(p4sForHemsGamma);  
+
+        gamma_mt2 = HemMT2(gamma_met_pt, gamma_met_phi, hemJetsGamma.at(0), hemJetsGamma.at(1));
+
+      }
+
+      gamma_mht_pt  = sumMhtp4Gamma.pt();
+      gamma_mht_phi = sumMhtp4Gamma.phi();
+
+      TVector2 mhtVectorGamma = TVector2(gamma_mht_pt*cos(gamma_mht_phi), gamma_mht_pt*sin(gamma_mht_phi));
+      TVector2 metVectorGamma = TVector2(gamma_met_pt*cos(gamma_met_phi), gamma_met_pt*sin(gamma_met_phi));
+      gamma_diffMetMht = (mhtVectorGamma - metVectorGamma).Mod();
 
       
       //GEN MT2
@@ -443,38 +572,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
         ntau++;
       }
-
-      //PHOTONS
-      ngamma = 0;
-      nGammas20 = 0;
-      for(unsigned int iGamma = 0; iGamma < cms2.photons_p4().size(); iGamma++){
-        if(cms2.photons_p4().at(iGamma).pt() < 20.0) continue;
-        if(fabs(cms2.photons_p4().at(iGamma).eta()) > 2.5) continue;
-	if (cms2.photons_photonID_loose().at(iGamma)==0) continue;
-
-	if (ngamma >= max_ngamma) {
-          std::cout << "WARNING: attempted to fill more than " << max_ngamma << " photons" << std::endl;
-	  break;
-	}
-
-        gamma_pt[ngamma]   = cms2.photons_p4().at(iGamma).pt();
-        gamma_eta[ngamma]  = cms2.photons_p4().at(iGamma).eta();
-        gamma_phi[ngamma]  = cms2.photons_p4().at(iGamma).phi();
-        gamma_mass[ngamma] = cms2.photons_mass().at(iGamma);
-        gamma_sigmaIetaIeta[ngamma] = cms2.photons_full5x5_sigmaIEtaIEta().at(iGamma);
-        gamma_chHadIso[ngamma] = photons_chargedHadronIso().at(iGamma);
-        gamma_neuHadIso[ngamma] = photons_neutralHadronIso().at(iGamma);
-        gamma_phIso[ngamma] = photons_photonIso().at(iGamma);
-        gamma_r9[ngamma] =  photons_full5x5_r9().at(iGamma);
-        gamma_hOverE[ngamma] =  photons_full5x5_hOverEtowBC().at(iGamma);
-        gamma_idCutBased[ngamma] =  photons_photonID_tight().at(iGamma) ? 2 : 0; // Medium working point is not saved in miniAOD, should implement on our own if we want it
-        if(gamma_pt[ngamma] > 20) nGammas20++;
-
-        //gamma_mcMatchId[ngamma] = ;
-        
-        ngamma++;
-      }
-
 
 
       //ISOTRACK
@@ -672,6 +769,16 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("gamma_r9", gamma_r9, "gamma_r9[ngamma]/F" );
   BabyTree_->Branch("gamma_hOverE", gamma_hOverE, "gamma_hOverE[ngamma]/F" );
   BabyTree_->Branch("gamma_idCutBased", gamma_idCutBased, "gamma_idCutBased[ngamma]/I" );
+  BabyTree_->Branch("gamma_mt2", &gamma_mt2 );
+  BabyTree_->Branch("gamma_nJet40", &gamma_nJet40 );
+  BabyTree_->Branch("gamma_nBJet40", &gamma_nBJet40 );
+  BabyTree_->Branch("gamma_ht", &gamma_ht );
+  BabyTree_->Branch("gamma_deltaPhiMin", &gamma_deltaPhiMin );
+  BabyTree_->Branch("gamma_diffMetMht", &gamma_diffMetMht );
+  BabyTree_->Branch("gamma_mht_pt", &gamma_mht_pt );
+  BabyTree_->Branch("gamma_mht_phi", &gamma_mht_phi );
+  BabyTree_->Branch("gamma_met_pt", &gamma_met_pt );
+  BabyTree_->Branch("gamma_met_phi", &gamma_met_phi );
   BabyTree_->Branch("ngenPart", &ngenPart, "ngenPart/I" );
   BabyTree_->Branch("genPart_pt", genPart_pt, "genPart_pt[ngenPart]/F" );
   BabyTree_->Branch("genPart_eta", genPart_eta, "genPart_eta[ngenPart]/F" );
@@ -753,6 +860,16 @@ void babyMaker::InitBabyNtuple () {
   ngamma = -999;
   ngenPart = -999;
   njet = -999;
+  gamma_mt2 = -999.0;
+  gamma_nJet40 = -999;
+  gamma_nBJet40 = -999;
+  gamma_ht = -999.0;
+  gamma_deltaPhiMin = -999.0;
+  gamma_diffMetMht = -999.0;
+  gamma_mht_pt = -999.0;
+  gamma_mht_phi = -999.0;
+  gamma_met_pt = -999.0;
+  gamma_met_phi = -999.0;
 
   
   return;

@@ -159,6 +159,18 @@ class babyMaker {
   Float_t         gamma_hOverE[max_ngamma];   //[ngamma]
   Int_t           gamma_idCutBased[max_ngamma];   //[ngamma]
 
+  // event level vars recalculated for photon+jets control region
+  Float_t         gamma_mt2;
+  Int_t           gamma_nJet40;
+  Int_t           gamma_nBJet40;
+  Float_t         gamma_ht;
+  Float_t         gamma_deltaPhiMin;
+  Float_t         gamma_diffMetMht;
+  Float_t         gamma_mht_pt;
+  Float_t         gamma_mht_phi;
+  Float_t         gamma_met_pt;
+  Float_t         gamma_met_phi;
+
 //----- GEN PARTICLES
   static const int max_ngenPart = 200;
   Int_t           ngenPart;
