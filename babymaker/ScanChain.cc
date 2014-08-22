@@ -145,6 +145,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       vector<int>  vec_lep_convVeto;
       vector<int>  vec_lep_tightCharge;
 
+      vector<LorentzVector> p4sForHems;
+      LorentzVector sumMhtp4 = LorentzVector(0,0,0,0);
 
       //ELECTRONS
       nlep = 0;
@@ -177,6 +179,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         vec_lep_tightCharge.push_back ( tightChargeEle(iEl));
 
         nlep++;
+
+	// for mt2 and mht in lepton control region
+	p4sForHems.push_back(cms2.els_p4().at(iEl));
+        sumMhtp4 -= cms2.els_p4().at(iEl); 
       }
 
       //MUONS
@@ -209,6 +215,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         vec_lep_tightCharge.push_back ( tightChargeMuon(iMu));
 
         nlep++;
+
+	// for mt2 and mht in lepton control region
+	p4sForHems.push_back(cms2.mus_p4().at(iMu));
+        sumMhtp4 -= cms2.mus_p4().at(iMu); 
       }
 
       // Implement pT ordering for leptons (it's irrelevant but easier for us to add than for ETH to remove)
@@ -304,8 +314,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       nJet40 = 0;
       nBJet40 = 0;
       ht = 0;
-      LorentzVector sumJetp4 = LorentzVector(0,0,0,0);
-      vector<LorentzVector> goodJets;
       vector<LorentzVector> hemJets;
       deltaPhiMin = 999;
 
@@ -347,12 +355,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
 
         if( (jet_pt[njet] > 40.0) && (fabs(jet_eta[njet]) < 2.5) ){ 
-          goodJets.push_back(cms2.pfjets_p4().at(iJet));
+          p4sForHems.push_back(cms2.pfjets_p4().at(iJet));
           nJet40++;
           ht+= jet_pt[njet];
           if(jet_btagCSV[njet] >= 0.679) nBJet40++; //CSVM
 
-          sumJetp4 -= cms2.pfjets_p4().at(iJet); 
+          sumMhtp4 -= cms2.pfjets_p4().at(iJet); 
 
           if(nJet40 <= 4){
             deltaPhiMin = min(deltaPhiMin, DeltaPhi(met_phi, jet_phi[njet]));
@@ -363,10 +371,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         njet++;
       }
 
-      if(goodJets.size() > 1){
+      if(p4sForHems.size() > 1){
 
         //Hemispheres used in MT2 calculation
-        hemJets = getHemJets(goodJets);  
+        hemJets = getHemJets(p4sForHems);  
 
         mt2 = HemMT2(met_pt, met_phi, hemJets.at(0), hemJets.at(1));
       
@@ -381,8 +389,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       }
 
-      mht_pt  = sumJetp4.pt();
-      mht_phi = sumJetp4.phi();
+      mht_pt  = sumMhtp4.pt();
+      mht_phi = sumMhtp4.phi();
 
       TVector2 mhtVector = TVector2(mht_pt*cos(mht_phi), mht_pt*sin(mht_phi));
       TVector2 metVector = TVector2(met_pt*cos(met_phi), met_pt*sin(met_phi));
@@ -442,7 +450,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       for(unsigned int iGamma = 0; iGamma < cms2.photons_p4().size(); iGamma++){
         if(cms2.photons_p4().at(iGamma).pt() < 20.0) continue;
         if(fabs(cms2.photons_p4().at(iGamma).eta()) > 2.5) continue;
-	      if (cms2.photons_photonID_loose().at(iGamma)==0) continue;
+	if (cms2.photons_photonID_loose().at(iGamma)==0) continue;
 
 	if (ngamma >= max_ngamma) {
           std::cout << "WARNING: attempted to fill more than " << max_ngamma << " photons" << std::endl;
