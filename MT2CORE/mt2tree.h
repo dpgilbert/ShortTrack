@@ -126,6 +126,7 @@ public :
    Float_t         genPart_phi[200];   //[ngenPart]
    Float_t         genPart_mass[200];   //[ngenPart]
    Int_t           genPart_pdgId[200];   //[ngenPart]
+   Int_t           genPart_status[200];   //[ngenPart]
    Float_t         genPart_charge[200];   //[ngenPart]
    Int_t           genPart_motherId[200];   //[ngenPart]
    Int_t           genPart_grandmaId[200];   //[ngenPart]
@@ -248,6 +249,7 @@ public :
    TBranch        *b_genPart_phi;   //!
    TBranch        *b_genPart_mass;   //!
    TBranch        *b_genPart_pdgId;   //!
+   TBranch        *b_genPart_status;   //!
    TBranch        *b_genPart_charge;   //!
    TBranch        *b_genPart_motherId;   //!
    TBranch        *b_genPart_grandmaId;   //!
@@ -429,6 +431,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("genPart_phi", genPart_phi, &b_genPart_phi);
    fChain->SetBranchAddress("genPart_mass", genPart_mass, &b_genPart_mass);
    fChain->SetBranchAddress("genPart_pdgId", genPart_pdgId, &b_genPart_pdgId);
+   fChain->SetBranchAddress("genPart_status", genPart_status, &b_genPart_status);
    fChain->SetBranchAddress("genPart_charge", genPart_charge, &b_genPart_charge);
    fChain->SetBranchAddress("genPart_motherId", genPart_motherId, &b_genPart_motherId);
    fChain->SetBranchAddress("genPart_grandmaId", genPart_grandmaId, &b_genPart_grandmaId);
