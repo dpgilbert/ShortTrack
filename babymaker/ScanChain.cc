@@ -120,6 +120,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         genPart_phi[ngenPart] = cms2.genps_p4().at(iGen).phi();
         genPart_mass[ngenPart] = cms2.genps_mass().at(iGen);
         genPart_pdgId[ngenPart] = cms2.genps_id().at(iGen);
+        genPart_status[ngenPart] = cms2.genps_status().at(iGen);
         genPart_charge[ngenPart] = cms2.genps_charge().at(iGen);
 	genPart_motherId[ngenPart] =cms2.genps_id_simplemother().at(iGen);
 	genPart_grandmaId[ngenPart] = cms2.genps_id_simplegrandma().at(iGen);
@@ -785,6 +786,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("genPart_phi", genPart_phi, "genPart_phi[ngenPart]/F" );
   BabyTree_->Branch("genPart_mass", genPart_mass, "genPart_mass[ngenPart]/F" );
   BabyTree_->Branch("genPart_pdgId", genPart_pdgId, "genPart_pdgId[ngenPart]/I" );
+  BabyTree_->Branch("genPart_status", genPart_status, "genPart_status[ngenPart]/I" );
   BabyTree_->Branch("genPart_charge", genPart_charge, "genPart_charge[ngenPart]/F" );
   BabyTree_->Branch("genPart_motherId", genPart_motherId, "genPart_motherId[ngenPart]/I" );
   BabyTree_->Branch("genPart_grandmaId", genPart_grandmaId, "genPart_grandmaId[ngenPart]/I" );

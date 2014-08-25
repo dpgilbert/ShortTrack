@@ -179,6 +179,7 @@ class babyMaker {
   Float_t         genPart_phi[max_ngenPart];   //[ngenPart]
   Float_t         genPart_mass[max_ngenPart];   //[ngenPart]
   Int_t           genPart_pdgId[max_ngenPart];   //[ngenPart]
+  Int_t           genPart_status[max_ngenPart];   //[ngenPart]
   Float_t         genPart_charge[max_ngenPart];   //[ngenPart]
   Int_t           genPart_motherId[max_ngenPart];   //[ngenPart]
   Int_t           genPart_grandmaId[max_ngenPart];   //[ngenPart]
