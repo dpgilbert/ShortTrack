@@ -46,11 +46,13 @@ void processBaby( TString outfileid = "tt_test", TString infile = "/hadoop/cms/s
   gSystem->Load("libEG.so");
   gSystem->Load("libMathCore.so");
 
-  // assumes these files have been copied or simlinked to the current dir
+  // definitely need these, at least for batch running
+  gSystem->Load("libGenVector.so");
+
+  // these libraries should be in babymaker dir after build
   gSystem->Load("libMiniFWLite.so");
   gSystem->Load("libBabymakerMT2CORE.so");
   gSystem->Load("libScanChain.so");
-  //  gROOT->ProcessLine(".L ScanChain.C+");
 
   TChain *chain = new TChain("Events");
   loadChain(chain, infile.Data());
