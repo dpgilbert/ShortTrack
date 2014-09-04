@@ -25,6 +25,14 @@
 using namespace std;
 using namespace tas;
 
+//--------------------------------------------------------------------
+
+// This is meant to be passed as the third argument, the predicate, of the standard library sort algorithm
+inline bool sortByPt(const LorentzVector &vec1, const LorentzVector &vec2 ) {
+    return vec1.pt() > vec2.pt();
+}
+
+//--------------------------------------------------------------------
 
 void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
@@ -187,6 +195,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	// for mt2 and mht in lepton control region
 	p4sForHems.push_back(cms2.els_p4().at(iEl));
         sumMhtp4 -= cms2.els_p4().at(iEl); 
+	p4sForHemsGamma.push_back(cms2.els_p4().at(iEl));
+        sumMhtp4Gamma -= cms2.els_p4().at(iEl); 
       }
 
       //MUONS
@@ -223,6 +233,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	// for mt2 and mht in lepton control region
 	p4sForHems.push_back(cms2.mus_p4().at(iMu));
         sumMhtp4 -= cms2.mus_p4().at(iMu); 
+	p4sForHemsGamma.push_back(cms2.mus_p4().at(iMu));
+        sumMhtp4Gamma -= cms2.mus_p4().at(iMu); 
       }
 
       // Implement pT ordering for leptons (it's irrelevant but easier for us to add than for ETH to remove)
@@ -287,8 +299,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	// for photon+jets control regions
 	gamma_met_px += cms2.photons_p4().at(iGamma).px();
 	gamma_met_py += cms2.photons_p4().at(iGamma).py();
-	p4sForHemsGamma.push_back(cms2.photons_p4().at(iGamma));
-        sumMhtp4Gamma -= cms2.photons_p4().at(iGamma); 
+	// do not use photon in MT2 or MHT calculations!!
+	//p4sForHemsGamma.push_back(cms2.photons_p4().at(iGamma));
+        //sumMhtp4Gamma -= cms2.photons_p4().at(iGamma); 
         
         ngamma++;
       }
@@ -479,6 +492,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         njet++;
       }
 
+      // sort vectors by pt for hemisphere calculation
+      sort(p4sForHems.begin(), p4sForHems.end(), sortByPt);
+      sort(p4sForHemsGamma.begin(), p4sForHemsGamma.end(), sortByPt);
+
       // MT2 and MHT
       vector<LorentzVector> hemJets;
       if(p4sForHems.size() > 1){
@@ -488,14 +505,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
         mt2 = HemMT2(met_pt, met_phi, hemJets.at(0), hemJets.at(1));
       
-        pseudoJet1_pt   = hemJets.at(0).pt();
-        pseudoJet1_eta  = hemJets.at(0).eta();
-        pseudoJet1_phi  = hemJets.at(0).phi();
-        pseudoJet1_mass = hemJets.at(0).mass();
-        pseudoJet2_pt   = hemJets.at(1).pt();
-        pseudoJet2_eta  = hemJets.at(1).eta();
-        pseudoJet2_phi  = hemJets.at(1).phi();
-        pseudoJet2_mass = hemJets.at(1).mass();
+	// order hemispheres by pt for saving
+	int idx_lead = 0;
+	int idx_subl = 1;
+	if (hemJets.at(1).pt() > hemJets.at(0).pt()) {
+	  idx_lead = 1;
+	  idx_subl = 0;
+	}
+
+        pseudoJet1_pt   = hemJets.at(idx_lead).pt();
+        pseudoJet1_eta  = hemJets.at(idx_lead).eta();
+        pseudoJet1_phi  = hemJets.at(idx_lead).phi();
+        pseudoJet1_mass = hemJets.at(idx_lead).mass();
+        pseudoJet2_pt   = hemJets.at(idx_subl).pt();
+        pseudoJet2_eta  = hemJets.at(idx_subl).eta();
+        pseudoJet2_phi  = hemJets.at(idx_subl).phi();
+        pseudoJet2_mass = hemJets.at(idx_subl).mass();
 
       }
 
@@ -574,7 +599,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         ntau++;
       }
 
-
       //ISOTRACK
       std::map<float, int> pt_ordering;
       vector<float>vec_isoTrack_pt;
@@ -632,8 +656,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         i++;
       }
         
-
-
       FillBabyNtuple();
 
    }//end loop on events in a file

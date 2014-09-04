@@ -12,6 +12,7 @@
 #include "TTree.h"
 //#include "TH1F.h"
 #include "Math/LorentzVector.h"
+#include "Math/GenVector/LorentzVector.h"
 
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
 
