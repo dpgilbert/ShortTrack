@@ -4,7 +4,7 @@
 # All MT2 related datasets available on hadoop
 #
 
-TAG="V00-00-02"
+TAG="V00-00-04"
 
 #
 # DATA
@@ -39,13 +39,18 @@ TAG="V00-00-02"
 #
 
 ./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/DYJetsToLL_M-50_HT-100to200_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_DYJetsToLL_M-50_HT-100to200
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/DYJetsToLL_M-50_HT-200to400_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_DYJetsToLL_M-50_HT-200to400
 ./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/DYJetsToLL_M-50_HT-400to600_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_DYJetsToLL_M-50_HT-400to600
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/DYJetsToLL_M-50_HT-600toInf_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_DYJetsToLL_M-50_HT-600toInf
 
 #
 # Z INVISIBLE
 #
 
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/ZJetsToNuNu_HT-100to200_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_ZInv_HT100to200
 ./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/ZJetsToNuNu_HT-200to400_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_ZInv_HT200to400
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/ZJetsToNuNu_HT-400to600_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_ZInv_HT400to600
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/ZJetsToNuNu_HT-600toInf_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_ZInv_HT600toInf
 
 #
 # DIBOSON
@@ -63,6 +68,11 @@ TAG="V00-00-02"
 # QCD
 #
 
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/QCD_Pt-30to50_Tune4C_13TeV_pythia8/merged/ ${TAG}_QCD_PT30to50
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/QCD_Pt-50to80_Tune4C_13TeV_pythia8/merged/ ${TAG}_QCD_PT50to80
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/QCD_Pt-80to120_Tune4C_13TeV_pythia8/merged/ ${TAG}_QCD_PT80to120
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/QCD_Pt-120to170_Tune4C_13TeV_pythia8/merged/ ${TAG}_QCD_PT120to170
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/QCD_Pt-170to300_Tune4C_13TeV_pythia8/merged/ ${TAG}_QCD_PT170to300
 ./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/QCD_Pt-300to470_Tune4C_13TeV_pythia8/merged/ ${TAG}_QCD_PT300to470
 ./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/QCD_Pt-470to600_Tune4C_13TeV_pythia8/merged/ ${TAG}_QCD_PT470to600
 ./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/QCD_Pt-600to800_Tune4C_13TeV_pythia8/merged/ ${TAG}_QCD_PT600to800
