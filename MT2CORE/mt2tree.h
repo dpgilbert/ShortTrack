@@ -120,6 +120,24 @@ public :
    Float_t         gamma_r9[50];   //[ngamma]
    Float_t         gamma_hOverE[50];   //[ngamma]
    Int_t           gamma_idCutBased[50];   //[ngamma]
+   Float_t         gamma_mt2;
+   Int_t           gamma_nJet40;
+   Int_t           gamma_nBJet40;
+   Float_t         gamma_ht;
+   Float_t         gamma_met_pt;
+   Float_t         gamma_met_phi;
+   Float_t         gamma_mht_pt;
+   Float_t         gamma_mht_phi;
+   Float_t         gamma_deltaPhiMin;
+   Float_t         gamma_diffMetMht;
+   Float_t         zll_mt2;
+   Float_t         zll_met_pt;
+   Float_t         zll_met_phi;
+   Float_t         zll_mht_pt;
+   Float_t         zll_mht_phi;
+   Float_t         zll_deltaPhiMin;
+   Float_t         zll_diffMetMht;
+   Float_t         zll_invmass;
    Int_t           ngenPart;
    Float_t         genPart_pt[200];   //[ngenPart]
    Float_t         genPart_eta[200];   //[ngenPart]
@@ -243,6 +261,24 @@ public :
    TBranch        *b_gamma_r9;   //!
    TBranch        *b_gamma_hOverE;   //!
    TBranch        *b_gamma_idCutBased;   //!
+   TBranch        *b_gamma_mt2;
+   TBranch        *b_gamma_nJet40;
+   TBranch        *b_gamma_nBJet40;
+   TBranch        *b_gamma_ht;
+   TBranch        *b_gamma_met_pt;
+   TBranch        *b_gamma_met_phi;
+   TBranch        *b_gamma_mht_pt;
+   TBranch        *b_gamma_mht_phi;
+   TBranch        *b_gamma_deltaPhiMin;
+   TBranch        *b_gamma_diffMetMht;
+   TBranch        *b_zll_mt2;
+   TBranch        *b_zll_met_pt;
+   TBranch        *b_zll_met_phi;
+   TBranch        *b_zll_mht_pt;
+   TBranch        *b_zll_mht_phi;
+   TBranch        *b_zll_deltaPhiMin;
+   TBranch        *b_zll_diffMetMht;
+   TBranch        *b_zll_invmass;
    TBranch        *b_ngenPart;   //!
    TBranch        *b_genPart_pt;   //!
    TBranch        *b_genPart_eta;   //!
@@ -425,6 +461,24 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("gamma_r9", gamma_r9, &b_gamma_r9);
    fChain->SetBranchAddress("gamma_hOverE", gamma_hOverE, &b_gamma_hOverE);
    fChain->SetBranchAddress("gamma_idCutBased", gamma_idCutBased, &b_gamma_idCutBased);
+   fChain->SetBranchAddress("gamma_mt2", &gamma_mt2, &b_gamma_mt2);
+   fChain->SetBranchAddress("gamma_nJet40", &gamma_nJet40, &b_gamma_nJet40);
+   fChain->SetBranchAddress("gamma_nBJet40", &gamma_nBJet40, &b_gamma_nBJet40);
+   fChain->SetBranchAddress("gamma_ht", &gamma_ht, &b_gamma_ht);
+   fChain->SetBranchAddress("gamma_met_pt", &gamma_met_pt, &b_gamma_met_pt);
+   fChain->SetBranchAddress("gamma_met_phi", &gamma_met_phi, &b_gamma_met_phi);
+   fChain->SetBranchAddress("gamma_mht_pt", &gamma_mht_pt, &b_gamma_mht_pt);
+   fChain->SetBranchAddress("gamma_mht_phi", &gamma_mht_phi, &b_gamma_mht_phi);
+   fChain->SetBranchAddress("gamma_deltaPhiMin", &gamma_deltaPhiMin, &b_gamma_deltaPhiMin);
+   fChain->SetBranchAddress("gamma_diffMetMht", &gamma_diffMetMht, &b_gamma_diffMetMht);
+   fChain->SetBranchAddress("zll_mt2", &zll_mt2, &b_zll_mt2);
+   fChain->SetBranchAddress("zll_met_pt", &zll_met_pt, &b_zll_met_pt);
+   fChain->SetBranchAddress("zll_met_phi", &zll_met_phi, &b_zll_met_phi);
+   fChain->SetBranchAddress("zll_mht_pt", &zll_mht_pt, &b_zll_mht_pt);
+   fChain->SetBranchAddress("zll_mht_phi", &zll_mht_phi, &b_zll_mht_phi);
+   fChain->SetBranchAddress("zll_deltaPhiMin", &zll_deltaPhiMin, &b_zll_deltaPhiMin);
+   fChain->SetBranchAddress("zll_diffMetMht", &zll_diffMetMht, &b_zll_diffMetMht);
+   fChain->SetBranchAddress("zll_invmass", &zll_invmass, &b_zll_invmass);
    fChain->SetBranchAddress("ngenPart", &ngenPart, &b_ngenPart);
    fChain->SetBranchAddress("genPart_pt", genPart_pt, &b_genPart_pt);
    fChain->SetBranchAddress("genPart_eta", genPart_eta, &b_genPart_eta);
