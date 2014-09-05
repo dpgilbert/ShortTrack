@@ -172,6 +172,16 @@ class babyMaker {
   Float_t         gamma_met_pt;
   Float_t         gamma_met_phi;
 
+  // event level vars recalculated for Z-->ll control region
+  Float_t         zll_mt2;
+  Float_t         zll_deltaPhiMin;
+  Float_t         zll_diffMetMht;
+  Float_t         zll_met_pt;
+  Float_t         zll_met_phi;
+  Float_t         zll_mht_pt;
+  Float_t         zll_mht_phi;
+  Float_t         zll_invmass;
+
 //----- GEN PARTICLES
   static const int max_ngenPart = 200;
   Int_t           ngenPart;
