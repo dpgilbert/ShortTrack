@@ -79,12 +79,12 @@ std::vector<LorentzVector> getHemJets(std::vector<LorentzVector>& jets){
           //cout << "newAxis2: " << newAxis2.E() << endl;
           //cout << "lund dists: " << LundDist(newAxis1, jets.at(jet)) << ", " << LundDist(newAxis2, jets.at(jet)) << endl;//debug
           if (LundDist(newAxis1, jets.at(jet)) <= LundDist(newAxis2, jets.at(jet))) {
-            if (hemAssoc.at(jet) != 1) move = true;
+            if (hemAssoc.at(jet) != 1 && hemAssoc.at(jet) != 0) move = true;
             tempAxis1 += jets.at(jet);
             hemAssoc.at(jet) = 1;
           }
           else {
-            if (hemAssoc.at(jet) != 2) move = true;
+            if (hemAssoc.at(jet) != 2 && hemAssoc.at(jet) != 0) move = true;
             tempAxis2 += jets.at(jet);
             hemAssoc.at(jet) = 2;
           }
