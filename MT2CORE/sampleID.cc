@@ -30,7 +30,7 @@ int sampleID (const string& name) {
   }
 
   else if (name.find("GJet") != string::npos) {
-    if (name.find("GJet_Pt15to8000") != string::npos) return 200;
+    if (name.find("GJet_Pt-15to3000") != string::npos) return 200;
     else if (name.find("GJets_HT-100to200") != string::npos) return 202;
     else if (name.find("GJets_HT-200to400") != string::npos) return 203;
     else if (name.find("GJets_HT-400to600") != string::npos) return 204;

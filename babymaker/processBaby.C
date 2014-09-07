@@ -109,6 +109,11 @@ void processBaby( TString outfileid = "tt_test", TString infile = "/hadoop/cms/s
   else if (infile.Contains("QCD_Pt-1000to1400"))                     sample = Form("qcd_pt1000to1400_%s",  outfileid.Data());
   else if (infile.Contains("QCD_Pt-1400to1800"))                     sample = Form("qcd_pt1400to1800_%s",  outfileid.Data());
   else if (infile.Contains("QCD_Pt-1800"))                           sample = Form("qcd_pt1800_%s",  outfileid.Data());
+  else if (infile.Contains("GJet_Pt-15to3000"))                      sample = Form("gjet_pt15to3000_%s",  outfileid.Data());
+  else if (infile.Contains("GJets_HT-100to200"))                      sample = Form("gjet_ht100to200_%s",  outfileid.Data());
+  else if (infile.Contains("GJets_HT-200to400"))                      sample = Form("gjet_ht200to400_%s",  outfileid.Data());
+  else if (infile.Contains("GJets_HT-400to600"))                      sample = Form("gjet_ht400to600_%s",  outfileid.Data());
+  else if (infile.Contains("GJets_HT-600toInf"))                      sample = Form("gjet_ht600toInf_%s",  outfileid.Data());
   else if (infile.Contains("TBarToDilepton_tW-channel"))	     sample = Form("tbartWchanb_2l_%s",  outfileid.Data());
   else if (infile.Contains("TBarToLeptons_s-channel"))		     sample = Form("tbarschan_l_%s", 	 outfileid.Data());
   else if (infile.Contains("TBarToLeptons_t-channel"))		     sample = Form("tbartchan_l_%s", 	 outfileid.Data());

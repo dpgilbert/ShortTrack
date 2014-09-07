@@ -43,6 +43,16 @@ TAG="V00-00-04"
 ./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/DYJetsToLL_M-50_HT-400to600_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_DYJetsToLL_M-50_HT-400to600
 ./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/DYJetsToLL_M-50_HT-600toInf_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_DYJetsToLL_M-50_HT-600toInf
 
+
+#
+# GAMMA + JETS
+#
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/GJet_Pt-15to3000_Tune4C_13TeV_pythia8/merged/ ${TAG}_GJet_Pt15to3000
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/GJets_HT-100to200_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_GJet_HT100to200
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/GJets_HT-200to400_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_GJet_HT200to400
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/GJets_HT-400to600_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_GJet_HT400to600
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/GJets_HT-600toInf_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_GJet_HT600toInf
+
 #
 # Z INVISIBLE
 #
