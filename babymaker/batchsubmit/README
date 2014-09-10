@@ -71,7 +71,10 @@ Then submit the jobs again as before:
 You may have to iterate this process to get all jobs to converge.
 
 5) Once the jobs are done, merge the output with the mergeHadoopOutput script
-set the output directory where the babies are located to the COPYDIR location from before
-pass as argument the output tag name
-> ./mergeHadoopFiles.sh <TAGNAME> 
-the merged baby output should be in the merged directory
+You can select which datasets to merge by editing the script below, then run it.
+Note that all the merge jobs run locally in parallel, so you may not want to merge
+everything at once
+> ./mergeHadoopFiles.sh
+You can also specify the output directory in the script. Typically the babies are
+stored under:
+/nfs-6/userdata/mt2/<VERSION>/
