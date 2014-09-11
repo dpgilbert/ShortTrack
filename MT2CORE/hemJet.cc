@@ -100,6 +100,7 @@ std::vector<LorentzVector> getHemJets(std::vector<LorentzVector>& jets){
     axis1 = tempAxis1;
     axis2 = tempAxis2;
 
+    if (counter <= 1) move = true;
   }
 
   std::vector<LorentzVector> result;
