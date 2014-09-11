@@ -43,23 +43,48 @@ class MiniBabyIsoTrackLooper {
 
   int passevt_;
   int sigbase_;
+  int sigbase_nolepveto_;
   int sigjets_;
   int sightmet_;
 
   // isoTrack vars
-  float isoTrack_lead_pt_;
-  float isoTrack_lead_eta_;
-  float isoTrack_lead_phi_;
-  float isoTrack_lead_absIso_;
-  float isoTrack_lead_dz_;
-  int isoTrack_lead_pdgId_;
+  float isoTrackLepPt5_pt_;
+  float isoTrackLepPt5_eta_;
+  float isoTrackLepPt5_phi_;
+  float isoTrackLepPt5_absIso_;
+  float isoTrackLepPt5_dz_;
+  int isoTrackLepPt5_pdgId_;
 
-  float isoTrack_mostiso_pt_;
-  float isoTrack_mostiso_eta_;
-  float isoTrack_mostiso_phi_;
-  float isoTrack_mostiso_absIso_;
-  float isoTrack_mostiso_dz_;
-  int isoTrack_mostiso_pdgId_;
+  float isoTrackLepPt10_pt_;
+  float isoTrackLepPt10_eta_;
+  float isoTrackLepPt10_phi_;
+  float isoTrackLepPt10_absIso_;
+  float isoTrackLepPt10_dz_;
+  int isoTrackLepPt10_pdgId_;
+
+  float isoTrackHadPt5_pt_;
+  float isoTrackHadPt5_eta_;
+  float isoTrackHadPt5_phi_;
+  float isoTrackHadPt5_absIso_;
+  float isoTrackHadPt5_dz_;
+
+  float isoTrackHadPt10_pt_;
+  float isoTrackHadPt10_eta_;
+  float isoTrackHadPt10_phi_;
+  float isoTrackHadPt10_absIso_;
+  float isoTrackHadPt10_dz_;
+
+  float isoTrackHadPt15_pt_;
+  float isoTrackHadPt15_eta_;
+  float isoTrackHadPt15_phi_;
+  float isoTrackHadPt15_absIso_;
+  float isoTrackHadPt15_dz_;
+
+  float isoTrackHadPt20_pt_;
+  float isoTrackHadPt20_eta_;
+  float isoTrackHadPt20_phi_;
+  float isoTrackHadPt20_absIso_;
+  float isoTrackHadPt20_dz_;
 
   // reco lep vars
   float lep1_pt_;

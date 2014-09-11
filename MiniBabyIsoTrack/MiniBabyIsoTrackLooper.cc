@@ -112,45 +112,114 @@ void MiniBabyIsoTrackLooper::loop(TChain* chain, std::string output_name){
       int nlepveto = t.nMuons10 + t.nElectrons10 + t.nTaus20;
       sigbase_ = (int) PassesSignalRegionBase(t.met_pt, t.ht, t.nJet40, t.deltaPhiMin, t.diffMetMht, 
 					      nlepveto, t.jet_pt[0], t.jet_pt[1]);
+      sigbase_nolepveto_ = (int) PassesSignalRegionBase(t.met_pt, t.ht, t.nJet40, t.deltaPhiMin, t.diffMetMht, 
+					      0, t.jet_pt[0], t.jet_pt[1]);
       sigjets_ = (int) PassesSignalRegionJets(t.nJet40, t.nBJet40);
       sightmet_ = (int) PassesSignalRegionHtMet(t.met_pt, t.ht);
 
       // need to save: 
       //  - gen match for iso tracks?
 
-      // loop over isolated tracks to find highest pt and most isolated
-      int isoTrack_lead_idx = -1;
-      float isoTrack_lead_pt = -1.;
-      int isoTrack_mostiso_idx = -1;
-      float isoTrack_mostiso_iso = 99.;
+      // loop over isolated tracks to find the most isolated for each category
+      int isoTrackLepPt5_mostiso_idx = -1;
+      float isoTrackLepPt5_mostiso_iso = 99.;
+      int isoTrackLepPt10_mostiso_idx = -1;
+      float isoTrackLepPt10_mostiso_iso = 99.;
+
+      int isoTrackHadPt5_mostiso_idx = -1;
+      float isoTrackHadPt5_mostiso_iso = 99.;
+      int isoTrackHadPt10_mostiso_idx = -1;
+      float isoTrackHadPt10_mostiso_iso = 99.;
+      int isoTrackHadPt15_mostiso_idx = -1;
+      float isoTrackHadPt15_mostiso_iso = 99.;
+      int isoTrackHadPt20_mostiso_idx = -1;
+      float isoTrackHadPt20_mostiso_iso = 99.;
+
 
       for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
-	if (t.isoTrack_pt[itrk] > isoTrack_lead_pt) {
-	  isoTrack_lead_idx = itrk;
-	  isoTrack_lead_pt = t.isoTrack_pt[itrk];
-	}
-	if (t.isoTrack_absIso[itrk] < isoTrack_mostiso_iso) {
-	  isoTrack_mostiso_idx = itrk;
-	  isoTrack_mostiso_iso = t.isoTrack_absIso[itrk];
-	}
-      }
+	int pdgId = abs(t.isoTrack_pdgId[itrk]);
+	float pt = t.isoTrack_pt[itrk];
+	float absIso = t.isoTrack_absIso[itrk];
+	float relIso = absIso/pt;
+
+	// pf leptons
+	if (pdgId == 11 || pdgId == 13) {
+	  if (pt > 5. && relIso < isoTrackLepPt5_mostiso_iso) {
+	    isoTrackLepPt5_mostiso_idx = itrk;
+	    isoTrackLepPt5_mostiso_iso = absIso;
+	  }
+	  if (pt > 10. && relIso < isoTrackLepPt10_mostiso_iso) {
+	    isoTrackLepPt10_mostiso_idx = itrk;
+	    isoTrackLepPt10_mostiso_iso = absIso;
+	  }
+	} // pf leptons
+
+	// pf hadrons
+	else if (pdgId == 211) {
+	  if (pt > 5. && relIso < isoTrackHadPt5_mostiso_iso) {
+	    isoTrackHadPt5_mostiso_idx = itrk;
+	    isoTrackHadPt5_mostiso_iso = absIso;
+	  }
+	  if (pt > 10. && relIso < isoTrackHadPt10_mostiso_iso) {
+	    isoTrackHadPt10_mostiso_idx = itrk;
+	    isoTrackHadPt10_mostiso_iso = absIso;
+	  }
+	  if (pt > 15. && relIso < isoTrackHadPt15_mostiso_iso) {
+	    isoTrackHadPt15_mostiso_idx = itrk;
+	    isoTrackHadPt15_mostiso_iso = absIso;
+	  }
+	  if (pt > 20. && relIso < isoTrackHadPt20_mostiso_iso) {
+	    isoTrackHadPt20_mostiso_idx = itrk;
+	    isoTrackHadPt20_mostiso_iso = absIso;
+	  }
+	} // pf hadrons
+
+      } // isoTrack loop
 
       // store isolated tracks
-      if (isoTrack_lead_idx >= 0) {
-	isoTrack_lead_pt_ = t.isoTrack_pt[isoTrack_lead_idx];
-	isoTrack_lead_eta_ = t.isoTrack_eta[isoTrack_lead_idx];
-	isoTrack_lead_phi_ = t.isoTrack_phi[isoTrack_lead_idx];
-	isoTrack_lead_absIso_ = t.isoTrack_absIso[isoTrack_lead_idx];
-	isoTrack_lead_dz_ = t.isoTrack_dz[isoTrack_lead_idx];
-	isoTrack_lead_pdgId_ = t.isoTrack_pdgId[isoTrack_lead_idx];
+      if (isoTrackLepPt5_mostiso_idx >= 0) {
+	isoTrackLepPt5_pt_ = t.isoTrack_pt[isoTrackLepPt5_mostiso_idx];
+	isoTrackLepPt5_eta_ = t.isoTrack_eta[isoTrackLepPt5_mostiso_idx];
+	isoTrackLepPt5_phi_ = t.isoTrack_phi[isoTrackLepPt5_mostiso_idx];
+	isoTrackLepPt5_absIso_ = t.isoTrack_absIso[isoTrackLepPt5_mostiso_idx];
+	isoTrackLepPt5_dz_ = t.isoTrack_dz[isoTrackLepPt5_mostiso_idx];
+	isoTrackLepPt5_pdgId_ = t.isoTrack_pdgId[isoTrackLepPt5_mostiso_idx];
       }
-      if (isoTrack_mostiso_idx >= 0) {
-	isoTrack_mostiso_pt_ = t.isoTrack_pt[isoTrack_mostiso_idx];
-	isoTrack_mostiso_eta_ = t.isoTrack_eta[isoTrack_mostiso_idx];
-	isoTrack_mostiso_phi_ = t.isoTrack_phi[isoTrack_mostiso_idx];
-	isoTrack_mostiso_absIso_ = t.isoTrack_absIso[isoTrack_mostiso_idx];
-	isoTrack_mostiso_dz_ = t.isoTrack_dz[isoTrack_mostiso_idx];
-	isoTrack_mostiso_pdgId_ = t.isoTrack_pdgId[isoTrack_mostiso_idx];
+      if (isoTrackLepPt10_mostiso_idx >= 0) {
+	isoTrackLepPt10_pt_ = t.isoTrack_pt[isoTrackLepPt10_mostiso_idx];
+	isoTrackLepPt10_eta_ = t.isoTrack_eta[isoTrackLepPt10_mostiso_idx];
+	isoTrackLepPt10_phi_ = t.isoTrack_phi[isoTrackLepPt10_mostiso_idx];
+	isoTrackLepPt10_absIso_ = t.isoTrack_absIso[isoTrackLepPt10_mostiso_idx];
+	isoTrackLepPt10_dz_ = t.isoTrack_dz[isoTrackLepPt10_mostiso_idx];
+	isoTrackLepPt10_pdgId_ = t.isoTrack_pdgId[isoTrackLepPt10_mostiso_idx];
+      }
+      if (isoTrackHadPt5_mostiso_idx >= 0) {
+	isoTrackHadPt5_pt_ = t.isoTrack_pt[isoTrackHadPt5_mostiso_idx];
+	isoTrackHadPt5_eta_ = t.isoTrack_eta[isoTrackHadPt5_mostiso_idx];
+	isoTrackHadPt5_phi_ = t.isoTrack_phi[isoTrackHadPt5_mostiso_idx];
+	isoTrackHadPt5_absIso_ = t.isoTrack_absIso[isoTrackHadPt5_mostiso_idx];
+	isoTrackHadPt5_dz_ = t.isoTrack_dz[isoTrackHadPt5_mostiso_idx];
+      }
+      if (isoTrackHadPt10_mostiso_idx >= 0) {
+	isoTrackHadPt10_pt_ = t.isoTrack_pt[isoTrackHadPt10_mostiso_idx];
+	isoTrackHadPt10_eta_ = t.isoTrack_eta[isoTrackHadPt10_mostiso_idx];
+	isoTrackHadPt10_phi_ = t.isoTrack_phi[isoTrackHadPt10_mostiso_idx];
+	isoTrackHadPt10_absIso_ = t.isoTrack_absIso[isoTrackHadPt10_mostiso_idx];
+	isoTrackHadPt10_dz_ = t.isoTrack_dz[isoTrackHadPt10_mostiso_idx];
+      }
+      if (isoTrackHadPt15_mostiso_idx >= 0) {
+	isoTrackHadPt15_pt_ = t.isoTrack_pt[isoTrackHadPt15_mostiso_idx];
+	isoTrackHadPt15_eta_ = t.isoTrack_eta[isoTrackHadPt15_mostiso_idx];
+	isoTrackHadPt15_phi_ = t.isoTrack_phi[isoTrackHadPt15_mostiso_idx];
+	isoTrackHadPt15_absIso_ = t.isoTrack_absIso[isoTrackHadPt15_mostiso_idx];
+	isoTrackHadPt15_dz_ = t.isoTrack_dz[isoTrackHadPt15_mostiso_idx];
+      }
+      if (isoTrackHadPt20_mostiso_idx >= 0) {
+	isoTrackHadPt20_pt_ = t.isoTrack_pt[isoTrackHadPt20_mostiso_idx];
+	isoTrackHadPt20_eta_ = t.isoTrack_eta[isoTrackHadPt20_mostiso_idx];
+	isoTrackHadPt20_phi_ = t.isoTrack_phi[isoTrackHadPt20_mostiso_idx];
+	isoTrackHadPt20_absIso_ = t.isoTrack_absIso[isoTrackHadPt20_mostiso_idx];
+	isoTrackHadPt20_dz_ = t.isoTrack_dz[isoTrackHadPt20_mostiso_idx];
       }
 
       // leading reco lepton
@@ -183,6 +252,10 @@ void MiniBabyIsoTrackLooper::loop(TChain* chain, std::string output_name){
 	int motherId = abs(t.genPart_motherId[igen]);
 	int grandmaId = abs(t.genPart_grandmaId[igen]);
 
+	// reject leptons with direct parents of quarks or hadrons. Allow SUSY parents
+	if (motherId <= 5 || (motherId > 100 && motherId < 1000000)) continue;
+
+	// need to reject parents: 111 (pi0), quarks 1-6, 
 	bool save = false;
 	// electrons, muons: status 1 and mother or grandmother W/Z or tau from W/Z
 	if (((pdgId == 11) || (pdgId == 13)) && (t.genPart_status[igen] == 1)) {
@@ -194,7 +267,7 @@ void MiniBabyIsoTrackLooper::loop(TChain* chain, std::string output_name){
 	    save = true;
 	  } 
 	  // leptons from W/Z
-	  else if (motherId == 24 || grandmaId == 24 || motherId == 23 || grandmaId == 23) {
+	  else if (motherId == 24 || motherId == 23 || ( motherId == pdgId && (grandmaId == 24 || grandmaId == 23) ) ) {
 	    if (pdgId == 11) ++ngenel_;
 	    if (pdgId == 13) ++ngenmu_;
 	    save = true;
@@ -330,22 +403,47 @@ void MiniBabyIsoTrackLooper::makeTree(TChain* chain){
   outtree_->Branch("mini_ngenlep"       , &ngenlep_       ,  "mini_ngenlep/I"	 );
   outtree_->Branch("mini_passevt"       , &passevt_       ,  "mini_passevt/I"	 );
   outtree_->Branch("mini_sigbase"       , &sigbase_       ,  "mini_sigbase/I"	 );
+  outtree_->Branch("mini_sigbase_nolepveto"       , &sigbase_nolepveto_       ,  "mini_sigbase_nolepveto/I"	 );
   outtree_->Branch("mini_sigjets"       , &sigjets_       ,  "mini_sigjets/I"	 );
   outtree_->Branch("mini_sightmet"      , &sightmet_      ,  "mini_sightmet/I"	 );
 
-  outtree_->Branch("mini_isoTrack_lead_pt"        , &isoTrack_lead_pt_        ,  "mini_isoTrack_lead_pt/F"	 );
-  outtree_->Branch("mini_isoTrack_lead_eta"        , &isoTrack_lead_eta_        ,  "mini_isoTrack_lead_eta/F"	 );
-  outtree_->Branch("mini_isoTrack_lead_phi"        , &isoTrack_lead_phi_        ,  "mini_isoTrack_lead_phi/F"	 );
-  outtree_->Branch("mini_isoTrack_lead_absIso"        , &isoTrack_lead_absIso_        ,  "mini_isoTrack_lead_absIso/F"	 );
-  outtree_->Branch("mini_isoTrack_lead_dz"        , &isoTrack_lead_dz_        ,  "mini_isoTrack_lead_dz/F"	 );
-  outtree_->Branch("mini_isoTrack_lead_pdgId"        , &isoTrack_lead_pdgId_        ,  "mini_isoTrack_lead_pdgId/I"	 );
+  outtree_->Branch("mini_isoTrackLepPt5_pt"        , &isoTrackLepPt5_pt_        ,  "mini_isoTrackLepPt5_pt/F"	 );
+  outtree_->Branch("mini_isoTrackLepPt5_eta"        , &isoTrackLepPt5_eta_        ,  "mini_isoTrackLepPt5_eta/F"	 );
+  outtree_->Branch("mini_isoTrackLepPt5_phi"        , &isoTrackLepPt5_phi_        ,  "mini_isoTrackLepPt5_phi/F"	 );
+  outtree_->Branch("mini_isoTrackLepPt5_absIso"        , &isoTrackLepPt5_absIso_        ,  "mini_isoTrackLepPt5_absIso/F"	 );
+  outtree_->Branch("mini_isoTrackLepPt5_dz"        , &isoTrackLepPt5_dz_        ,  "mini_isoTrackLepPt5_dz/F"	 );
+  outtree_->Branch("mini_isoTrackLepPt5_pdgId"        , &isoTrackLepPt5_pdgId_        ,  "mini_isoTrackLepPt5_pdgId/I"	 );
 
-  outtree_->Branch("mini_isoTrack_mostiso_pt"        , &isoTrack_mostiso_pt_        ,  "mini_isoTrack_mostiso_pt/F"	 );
-  outtree_->Branch("mini_isoTrack_mostiso_eta"        , &isoTrack_mostiso_eta_        ,  "mini_isoTrack_mostiso_eta/F"	 );
-  outtree_->Branch("mini_isoTrack_mostiso_phi"        , &isoTrack_mostiso_phi_        ,  "mini_isoTrack_mostiso_phi/F"	 );
-  outtree_->Branch("mini_isoTrack_mostiso_absIso"        , &isoTrack_mostiso_absIso_        ,  "mini_isoTrack_mostiso_absIso/F"	 );
-  outtree_->Branch("mini_isoTrack_mostiso_dz"        , &isoTrack_mostiso_dz_        ,  "mini_isoTrack_mostiso_dz/F"	 );
-  outtree_->Branch("mini_isoTrack_mostiso_pdgId"        , &isoTrack_mostiso_pdgId_        ,  "mini_isoTrack_mostiso_pdgId/I"	 );
+  outtree_->Branch("mini_isoTrackLepPt10_pt"        , &isoTrackLepPt10_pt_        ,  "mini_isoTrackLepPt10_pt/F"	 );
+  outtree_->Branch("mini_isoTrackLepPt10_eta"        , &isoTrackLepPt10_eta_        ,  "mini_isoTrackLepPt10_eta/F"	 );
+  outtree_->Branch("mini_isoTrackLepPt10_phi"        , &isoTrackLepPt10_phi_        ,  "mini_isoTrackLepPt10_phi/F"	 );
+  outtree_->Branch("mini_isoTrackLepPt10_absIso"        , &isoTrackLepPt10_absIso_        ,  "mini_isoTrackLepPt10_absIso/F"	 );
+  outtree_->Branch("mini_isoTrackLepPt10_dz"        , &isoTrackLepPt10_dz_        ,  "mini_isoTrackLepPt10_dz/F"	 );
+  outtree_->Branch("mini_isoTrackLepPt10_pdgId"        , &isoTrackLepPt10_pdgId_        ,  "mini_isoTrackLepPt10_pdgId/I"	 );
+
+  outtree_->Branch("mini_isoTrackHadPt5_pt"        , &isoTrackHadPt5_pt_        ,  "mini_isoTrackHadPt5_pt/F"	 );
+  outtree_->Branch("mini_isoTrackHadPt5_eta"        , &isoTrackHadPt5_eta_        ,  "mini_isoTrackHadPt5_eta/F"	 );
+  outtree_->Branch("mini_isoTrackHadPt5_phi"        , &isoTrackHadPt5_phi_        ,  "mini_isoTrackHadPt5_phi/F"	 );
+  outtree_->Branch("mini_isoTrackHadPt5_absIso"        , &isoTrackHadPt5_absIso_        ,  "mini_isoTrackHadPt5_absIso/F"	 );
+  outtree_->Branch("mini_isoTrackHadPt5_dz"        , &isoTrackHadPt5_dz_        ,  "mini_isoTrackHadPt5_dz/F"	 );
+
+  outtree_->Branch("mini_isoTrackHadPt10_pt"        , &isoTrackHadPt10_pt_        ,  "mini_isoTrackHadPt10_pt/F"	 );
+  outtree_->Branch("mini_isoTrackHadPt10_eta"        , &isoTrackHadPt10_eta_        ,  "mini_isoTrackHadPt10_eta/F"	 );
+  outtree_->Branch("mini_isoTrackHadPt10_phi"        , &isoTrackHadPt10_phi_        ,  "mini_isoTrackHadPt10_phi/F"	 );
+  outtree_->Branch("mini_isoTrackHadPt10_absIso"        , &isoTrackHadPt10_absIso_        ,  "mini_isoTrackHadPt10_absIso/F"	 );
+  outtree_->Branch("mini_isoTrackHadPt10_dz"        , &isoTrackHadPt10_dz_        ,  "mini_isoTrackHadPt10_dz/F"	 );
+
+  outtree_->Branch("mini_isoTrackHadPt15_pt"        , &isoTrackHadPt15_pt_        ,  "mini_isoTrackHadPt15_pt/F"	 );
+  outtree_->Branch("mini_isoTrackHadPt15_eta"        , &isoTrackHadPt15_eta_        ,  "mini_isoTrackHadPt15_eta/F"	 );
+  outtree_->Branch("mini_isoTrackHadPt15_phi"        , &isoTrackHadPt15_phi_        ,  "mini_isoTrackHadPt15_phi/F"	 );
+  outtree_->Branch("mini_isoTrackHadPt15_absIso"        , &isoTrackHadPt15_absIso_        ,  "mini_isoTrackHadPt15_absIso/F"	 );
+  outtree_->Branch("mini_isoTrackHadPt15_dz"        , &isoTrackHadPt15_dz_        ,  "mini_isoTrackHadPt15_dz/F"	 );
+
+  outtree_->Branch("mini_isoTrackHadPt20_pt"        , &isoTrackHadPt20_pt_        ,  "mini_isoTrackHadPt20_pt/F"	 );
+  outtree_->Branch("mini_isoTrackHadPt20_eta"        , &isoTrackHadPt20_eta_        ,  "mini_isoTrackHadPt20_eta/F"	 );
+  outtree_->Branch("mini_isoTrackHadPt20_phi"        , &isoTrackHadPt20_phi_        ,  "mini_isoTrackHadPt20_phi/F"	 );
+  outtree_->Branch("mini_isoTrackHadPt20_absIso"        , &isoTrackHadPt20_absIso_        ,  "mini_isoTrackHadPt20_absIso/F"	 );
+  outtree_->Branch("mini_isoTrackHadPt20_dz"        , &isoTrackHadPt20_dz_        ,  "mini_isoTrackHadPt20_dz/F"	 );
 
   outtree_->Branch("mini_lep1_pt"        , &lep1_pt_        ,  "mini_lep1_pt/F"	 );
   outtree_->Branch("mini_lep1_eta"        , &lep1_eta_        ,  "mini_lep1_eta/F"	 );
@@ -367,7 +465,7 @@ void MiniBabyIsoTrackLooper::makeTree(TChain* chain){
 
   outtree_->Branch("mini_ngenel"      , &ngenel_      ,  "mini_ngenel/I"	 );
   outtree_->Branch("mini_ngenmu"      , &ngenmu_      ,  "mini_ngenmu/I"	 );
-  outtree_->Branch("mini_ngentauelp"      , &ngentaulep_      ,  "mini_ngentaulep/I"	 );
+  outtree_->Branch("mini_ngentaulep"      , &ngentaulep_      ,  "mini_ngentaulep/I"	 );
   outtree_->Branch("mini_ngentauhad"      , &ngentauhad_      ,  "mini_ngentauhad/I"	 );
   outtree_->Branch("mini_ngenlep"      , &ngenlep_      ,  "mini_ngenlep/I"	 );
 
@@ -414,22 +512,47 @@ void MiniBabyIsoTrackLooper::initBaby(){
 
   passevt_    = -1;
   sigbase_    = -1;
+  sigbase_nolepveto_    = -1;
   sigjets_    = -1;
   sightmet_   = -1;
 
-  isoTrack_lead_pt_ = -1.;
-  isoTrack_lead_eta_ = -1.;
-  isoTrack_lead_phi_ = -1.;
-  isoTrack_lead_absIso_ = -1.;
-  isoTrack_lead_dz_ = -1.;
-  isoTrack_lead_pdgId_ = -99;
+  isoTrackLepPt5_pt_ = -1.;
+  isoTrackLepPt5_eta_ = -1.;
+  isoTrackLepPt5_phi_ = -1.;
+  isoTrackLepPt5_absIso_ = -1.;
+  isoTrackLepPt5_dz_ = -1.;
+  isoTrackLepPt5_pdgId_ = -99;
 
-  isoTrack_mostiso_pt_ = -1.;
-  isoTrack_mostiso_eta_ = -1.;
-  isoTrack_mostiso_phi_ = -1.;
-  isoTrack_mostiso_absIso_ = -1.;
-  isoTrack_mostiso_dz_ = -1.;
-  isoTrack_mostiso_pdgId_ = -99;
+  isoTrackLepPt10_pt_ = -1.;
+  isoTrackLepPt10_eta_ = -1.;
+  isoTrackLepPt10_phi_ = -1.;
+  isoTrackLepPt10_absIso_ = -1.;
+  isoTrackLepPt10_dz_ = -1.;
+  isoTrackLepPt10_pdgId_ = -99;
+
+  isoTrackHadPt5_pt_ = -1.;
+  isoTrackHadPt5_eta_ = -1.;
+  isoTrackHadPt5_phi_ = -1.;
+  isoTrackHadPt5_absIso_ = -1.;
+  isoTrackHadPt5_dz_ = -1.;
+
+  isoTrackHadPt10_pt_ = -1.;
+  isoTrackHadPt10_eta_ = -1.;
+  isoTrackHadPt10_phi_ = -1.;
+  isoTrackHadPt10_absIso_ = -1.;
+  isoTrackHadPt10_dz_ = -1.;
+
+  isoTrackHadPt15_pt_ = -1.;
+  isoTrackHadPt15_eta_ = -1.;
+  isoTrackHadPt15_phi_ = -1.;
+  isoTrackHadPt15_absIso_ = -1.;
+  isoTrackHadPt15_dz_ = -1.;
+
+  isoTrackHadPt20_pt_ = -1.;
+  isoTrackHadPt20_eta_ = -1.;
+  isoTrackHadPt20_phi_ = -1.;
+  isoTrackHadPt20_absIso_ = -1.;
+  isoTrackHadPt20_dz_ = -1.;
 
   lep1_pt_ = -1.;
   lep1_eta_ = -1.;
