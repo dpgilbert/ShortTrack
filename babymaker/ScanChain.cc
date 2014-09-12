@@ -441,7 +441,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       gamma_ht = 0;
       gamma_deltaPhiMin = 999;
 
-      zll_deltaPhiMin = 999;
+      if (nlep == 2) zll_deltaPhiMin = 999;
 
       //now fill variables for jets that pass baseline selections and don't overlap with a lepton
       for(unsigned int passIdx = 0; passIdx < passJets.size(); passIdx++){
@@ -492,7 +492,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
           if(nJet40 <= 4){
             deltaPhiMin = min(deltaPhiMin, DeltaPhi(met_phi, jet_phi[njet]));
-	    zll_deltaPhiMin = min(zll_deltaPhiMin, DeltaPhi(zll_met_phi, jet_phi[njet]));
+	    if (nlep == 2) zll_deltaPhiMin = min(zll_deltaPhiMin, DeltaPhi(zll_met_phi, jet_phi[njet]));
           }
 
 
