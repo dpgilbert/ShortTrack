@@ -48,7 +48,15 @@ string getLegendName(const string& sample) {
 //_______________________________________________________________________________
 string getTableName(const string& sample) {
   if (sample.find("ttbar") != string::npos) return "Top";
+  if (sample.find("wjets_ht100to200") != string::npos) return "W+jets HT100to200";
+  if (sample.find("wjets_ht200to400") != string::npos) return "W+jets HT200to400";
+  if (sample.find("wjets_ht400to600") != string::npos) return "W+jets HT400to600";
+  if (sample.find("wjets_ht600toInf") != string::npos) return "W+jets HT600toInf";
   if (sample.find("wjets") != string::npos) return "W+jets";
+  if (sample.find("zinv_ht100to200") != string::npos) return "Z+jets HT100to200";
+  if (sample.find("zinv_ht200to400") != string::npos) return "Z+jets HT200to400";
+  if (sample.find("zinv_ht400to600") != string::npos) return "Z+jets HT400to600";
+  if (sample.find("zinv_ht600toInf") != string::npos) return "Z+jets HT600toInf";
   if (sample.find("zinv") != string::npos) return "Z+jets";
   if (sample.find("qcd") != string::npos) return "QCD";
   if (sample.find("T1tttt_1500_100") != string::npos) return "T1tttt 1500, 100";
@@ -88,14 +96,14 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   if (logplot) can->SetLogy();
 
   THStack* t = new THStack(Form("stack_%s_%s",histdir.c_str(),histname.c_str()),Form("stack_%s_%s",histdir.c_str(),histname.c_str()));
-  TH1F* h_bgtot = 0;
+  TH1D* h_bgtot = 0;
 
   TLegend* leg = new TLegend(0.7,0.6,0.9,0.85);
   leg->SetFillColor(0);
   leg->SetBorderSize(0);
 
   // to make legend
-  vector<TH1F*> bg_hists;
+  vector<TH1D*> bg_hists;
   vector<string> bg_names;
 
   const unsigned int n = samples.size();
@@ -105,14 +113,14 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     TString fullhistname = Form("%s/%s",histdir.c_str(),histname.c_str());
     if (histdir.size() == 0) fullhistname = TString(histname);
     TString newhistname = Form("%s_%s_%s",histname.c_str(),histdir.c_str(),names.at(i).c_str());
-    TH1F* h_temp = (TH1F*) samples.at(i)->Get(fullhistname);
-    TH1F* h = (TH1F*) h_temp->Clone(newhistname);
+    TH1D* h_temp = (TH1D*) samples.at(i)->Get(fullhistname);
+    TH1D* h = (TH1D*) h_temp->Clone(newhistname);
     //    h->Sumw2();
     h->SetFillColor(getColor(names.at(i)));
     h->SetLineColor(getColor(names.at(i)));
     if (rebin > 1) h->Rebin(rebin);
     t->Add(h);
-    if( i==0 ) h_bgtot = (TH1F*) h->Clone(Form("%s_%s_bgtot",histname.c_str(),histdir.c_str()));
+    if( i==0 ) h_bgtot = (TH1D*) h->Clone(Form("%s_%s_bgtot",histname.c_str(),histdir.c_str()));
     else h_bgtot->Add(h);
 
     bg_hists.push_back(h);
@@ -141,8 +149,8 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     TString fullhistname = Form("%s/%s",histdir.c_str(),histname.c_str());
     if (histdir.size() == 0) fullhistname = TString(histname);
     TString newhistname = Form("%s_%s_%s",histname.c_str(),histdir.c_str(),names.at(i).c_str());
-    TH1F* h_temp = (TH1F*) samples.at(i)->Get(fullhistname);
-    TH1F* h = (TH1F*) h_temp->Clone(newhistname);
+    TH1D* h_temp = (TH1D*) samples.at(i)->Get(fullhistname);
+    TH1D* h = (TH1D*) h_temp->Clone(newhistname);
     //    h->Sumw2();
     h->SetLineColor(getColor(names.at(i)));
     h->SetLineWidth(2);
@@ -189,7 +197,7 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
     cout << getTableName(names.at(i));
     for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
       TString fullhistname = Form("%s/h_Events_w",dirs.at(idir).c_str());
-      TH1F* h = (TH1F*) samples.at(i)->Get(fullhistname);
+      TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
       double yield = 0.;
       double err = 0.;
       if (h) {
@@ -231,7 +239,7 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
     cout << getTableName(names.at(i));
     for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
       TString fullhistname = Form("%s/h_Events_w",dirs.at(idir).c_str());
-      TH1F* h = (TH1F*) samples.at(i)->Get(fullhistname);
+      TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
       double yield = 0.;
       double err = 0.;
       if (h) {
@@ -256,22 +264,34 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
 //_______________________________________________________________________________
 void plotMaker(){
 
-  string input_dir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-00-04_skim_nj2_ht450_mt2gt50/";
+  string input_dir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-00-05/";
 
   // ----------------------------------------
   //  samples definition
   // ----------------------------------------
 
   // get input files
+
   TFile* f_ttbar = new TFile(Form("%s/ttall_msdecays.root",input_dir.c_str()));
   TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
   TFile* f_wjets = new TFile(Form("%s/wjets_ht.root",input_dir.c_str()));
   TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
+
   // TFile* f_T1tttt_1500_100 = new TFile(Form("%s/T1tttt_1500_100.root",input_dir.c_str()));
   // TFile* f_T1tttt_1200_800 = new TFile(Form("%s/T1tttt_1200_800.root",input_dir.c_str()));
   // TFile* f_T1bbbb_1000_900 = new TFile(Form("%s/T1bbbb_1000_900.root",input_dir.c_str()));
   // TFile* f_T1bbbb_1500_100 = new TFile(Form("%s/T1bbbb_1500_100.root",input_dir.c_str()));
   // TFile* f_T1qqqq_1400_100 = new TFile(Form("%s/T1qqqq_1400_100.root",input_dir.c_str()));
+
+  // TFile* f_zinv_ht100to200 = new TFile(Form("%s/zinv_ht100to200.root",input_dir.c_str()));
+  // TFile* f_zinv_ht200to400 = new TFile(Form("%s/zinv_ht200to400.root",input_dir.c_str()));
+  // TFile* f_zinv_ht400to600 = new TFile(Form("%s/zinv_ht400to600.root",input_dir.c_str()));
+  // TFile* f_zinv_ht600toInf = new TFile(Form("%s/zinv_ht600toInf.root",input_dir.c_str()));
+
+  // TFile* f_wjets_ht100to200 = new TFile(Form("%s/wjets_ht100to200.root",input_dir.c_str()));
+  // TFile* f_wjets_ht200to400 = new TFile(Form("%s/wjets_ht200to400.root",input_dir.c_str()));
+  // TFile* f_wjets_ht400to600 = new TFile(Form("%s/wjets_ht400to600.root",input_dir.c_str()));
+  // TFile* f_wjets_ht600toInf = new TFile(Form("%s/wjets_ht600toInf.root",input_dir.c_str()));
 
   vector<TFile*> samples;
   vector<string>  names;
@@ -280,11 +300,22 @@ void plotMaker(){
   samples.push_back(f_wjets); names.push_back("wjets");
   samples.push_back(f_zinv);  names.push_back("zinv");
   samples.push_back(f_ttbar); names.push_back("ttbar");
+
   // samples.push_back(f_T1tttt_1500_100); names.push_back("sig_T1tttt_1500_100");
   // samples.push_back(f_T1tttt_1200_800); names.push_back("sig_T1tttt_1200_800");
   // samples.push_back(f_T1bbbb_1000_900); names.push_back("sig_T1bbbb_1000_900");
   // samples.push_back(f_T1bbbb_1500_100); names.push_back("sig_T1bbbb_1500_100");
   // samples.push_back(f_T1qqqq_1400_100); names.push_back("sig_T1qqqq_1400_100");
+
+  // samples.push_back(f_wjets_ht600toInf);  names.push_back("wjets_ht600toInf");
+  // samples.push_back(f_wjets_ht400to600);  names.push_back("wjets_ht400to600");
+  // samples.push_back(f_wjets_ht200to400);  names.push_back("wjets_ht200to400");
+  // samples.push_back(f_wjets_ht100to200);  names.push_back("wjets_ht100to200");
+
+  // samples.push_back(f_zinv_ht600toInf);  names.push_back("zinv_ht600toInf");
+  // samples.push_back(f_zinv_ht400to600);  names.push_back("zinv_ht400to600");
+  // samples.push_back(f_zinv_ht200to400);  names.push_back("zinv_ht200to400");
+  // samples.push_back(f_zinv_ht100to200);  names.push_back("zinv_ht100to200");
 
   // ----------------------------------------
   //  plots definitions
