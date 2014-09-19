@@ -12,7 +12,7 @@
 
 using namespace std;
 
-typedef TH1F H;
+typedef TH1D H;
 
 H cumulate (const H &in, bool increasing);
 TGraph eff_rej (const H &signal, H &background, bool normalize, bool increasing);
@@ -22,11 +22,11 @@ TCanvas *ComparePlots(TFile *f, const char *hist1, const char *hist2, const char
 		      unsigned int rebin, bool norm, bool log, unsigned int opt);
 TGraph GetROC(TFile *f, const char *hist1, const char *hist2, bool increasing);
 TGraph GetEff(TFile *f, const char *hist1, bool increasing);
-void plot1D(string title, float xval, double weight, std::map<string, TH1F*> &allhistos, 
+void plot1D(string title, float xval, double weight, std::map<string, TH1D*> &allhistos, 
 	    int numbinsx, float xmin, float xmax);
-TH1F* getHist1D(string title, std::map<string, TH1F*> &allhistos, 
+TH1D* getHist1D(string title, std::map<string, TH1D*> &allhistos, 
 	    int numbinsx, float xmin, float xmax);
-void plot2D(string title, float xval, float yval, double weight, std::map<string, TH2F*> &allhistos, 
+void plot2D(string title, float xval, float yval, double weight, std::map<string, TH2D*> &allhistos, 
 	    int numbinsx, float xmin, float xmax, int numbinsy, float ymin, float ymax);
 
 void plot1DUnderOverFlow(string title, double xval, double weight, std::map<string, TH1D*> &allhistos, 
@@ -34,11 +34,11 @@ void plot1DUnderOverFlow(string title, double xval, double weight, std::map<stri
 void plot2DUnderOverFlow(string title, double xval, double yval, double weight, std::map<string, TH2D*> &allhistos, 
 	    int numbinsx, double xmin, double xmax, int numbinsy, double ymin, double ymax);
 
-void savePlots(std::map<string, TH1F*>&, const char* );
-void savePlots2(std::map<string, TH2F*>&, const char* );
-void savePlotsDir(std::map<string, TH1F*>& h_1d, TFile* outfile, const char* outdir = "");
-void savePlots2Dir(std::map<string, TH2F*>& h_2d, TFile* outfile, const char* outdir = "");
-void savePlots12(std::map<string, TH1F*>&, std::map<string, TH2F*>&, const char* );
+void savePlots(std::map<string, TH1D*>&, const char* );
+void savePlots2(std::map<string, TH2D*>&, const char* );
+void savePlotsDir(std::map<string, TH1D*>& h_1d, TFile* outfile, const char* outdir = "");
+void savePlots2Dir(std::map<string, TH2D*>& h_2d, TFile* outfile, const char* outdir = "");
+void savePlots12(std::map<string, TH1D*>&, std::map<string, TH2D*>&, const char* );
 
 #endif
 

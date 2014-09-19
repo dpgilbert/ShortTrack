@@ -50,34 +50,34 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
   cout << "[MT2Looper::loop] setting up histos" << endl;
 
-  std::map<std::string, TH1F*> h_1d_nocut;
-  std::map<std::string, TH1F*> h_1d_sr1H;
-  std::map<std::string, TH1F*> h_1d_sr2H;
-  std::map<std::string, TH1F*> h_1d_sr3H;
-  std::map<std::string, TH1F*> h_1d_sr4H;
-  std::map<std::string, TH1F*> h_1d_sr5H;
-  std::map<std::string, TH1F*> h_1d_sr6H;
-  std::map<std::string, TH1F*> h_1d_sr7H;
-  std::map<std::string, TH1F*> h_1d_sr8H;
-  std::map<std::string, TH1F*> h_1d_sr9H;
-  std::map<std::string, TH1F*> h_1d_sr1M;
-  std::map<std::string, TH1F*> h_1d_sr2M;
-  std::map<std::string, TH1F*> h_1d_sr3M;
-  std::map<std::string, TH1F*> h_1d_sr4M;
-  std::map<std::string, TH1F*> h_1d_sr5M;
-  std::map<std::string, TH1F*> h_1d_sr6M;
-  std::map<std::string, TH1F*> h_1d_sr7M;
-  std::map<std::string, TH1F*> h_1d_sr8M;
-  std::map<std::string, TH1F*> h_1d_sr9M;
-  std::map<std::string, TH1F*> h_1d_sr1L;
-  std::map<std::string, TH1F*> h_1d_sr2L;
-  std::map<std::string, TH1F*> h_1d_sr3L;
-  std::map<std::string, TH1F*> h_1d_sr4L;
-  std::map<std::string, TH1F*> h_1d_sr5L;
-  std::map<std::string, TH1F*> h_1d_sr6L;
-  std::map<std::string, TH1F*> h_1d_sr7L;
-  std::map<std::string, TH1F*> h_1d_sr8L;
-  std::map<std::string, TH1F*> h_1d_sr9L;
+  std::map<std::string, TH1D*> h_1d_nocut;
+  std::map<std::string, TH1D*> h_1d_sr1H;
+  std::map<std::string, TH1D*> h_1d_sr2H;
+  std::map<std::string, TH1D*> h_1d_sr3H;
+  std::map<std::string, TH1D*> h_1d_sr4H;
+  std::map<std::string, TH1D*> h_1d_sr5H;
+  std::map<std::string, TH1D*> h_1d_sr6H;
+  std::map<std::string, TH1D*> h_1d_sr7H;
+  std::map<std::string, TH1D*> h_1d_sr8H;
+  std::map<std::string, TH1D*> h_1d_sr9H;
+  std::map<std::string, TH1D*> h_1d_sr1M;
+  std::map<std::string, TH1D*> h_1d_sr2M;
+  std::map<std::string, TH1D*> h_1d_sr3M;
+  std::map<std::string, TH1D*> h_1d_sr4M;
+  std::map<std::string, TH1D*> h_1d_sr5M;
+  std::map<std::string, TH1D*> h_1d_sr6M;
+  std::map<std::string, TH1D*> h_1d_sr7M;
+  std::map<std::string, TH1D*> h_1d_sr8M;
+  std::map<std::string, TH1D*> h_1d_sr9M;
+  std::map<std::string, TH1D*> h_1d_sr1L;
+  std::map<std::string, TH1D*> h_1d_sr2L;
+  std::map<std::string, TH1D*> h_1d_sr3L;
+  std::map<std::string, TH1D*> h_1d_sr4L;
+  std::map<std::string, TH1D*> h_1d_sr5L;
+  std::map<std::string, TH1D*> h_1d_sr6L;
+  std::map<std::string, TH1D*> h_1d_sr7L;
+  std::map<std::string, TH1D*> h_1d_sr8L;
+  std::map<std::string, TH1D*> h_1d_sr9L;
   
   
   // File Loop
@@ -150,6 +150,9 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nTaus20;
       //cout <<"t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, nlepveto_, t.jet_pt[0], t.jet_pt[1]"<<endl;
       //cout<<t.met_pt<<" "<<t.ht<<" "<<t.nJet40<<" "<<t.nBJet40<<" "<<t.deltaPhiMin<<" "<<t.diffMetMht<<" "<<nlepveto_<<" "<<t.jet_pt[0]<<" "<<t.jet_pt[1]<<endl;
+
+      // remove low pt QCD samples 
+      if (t.evt_id >= 100 && t.evt_id < 108) continue;
 
       fillHistos(h_1d_nocut, "nocut");
 
@@ -249,7 +252,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   return;
 }
 
-void MT2Looper::fillHistosSignalRegion(std::map<std::string, TH1F*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dir, const std::string& suffix) {
+void MT2Looper::fillHistosSignalRegion(std::map<std::string, TH1D*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dir, const std::string& suffix) {
 
  if ( PassesSignalRegion(t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, 
 			 nlepveto_, t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) 
@@ -260,7 +263,7 @@ void MT2Looper::fillHistosSignalRegion(std::map<std::string, TH1F*>& h_1d, const
  return;
 }
 
-void MT2Looper::fillHistos(std::map<std::string, TH1F*>& h_1d, const std::string& dirname, const std::string& s) {
+void MT2Looper::fillHistos(std::map<std::string, TH1D*>& h_1d, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
     dir = outfile_->mkdir(dirname.c_str());
