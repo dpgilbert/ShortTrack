@@ -10,7 +10,7 @@
 #include "TFile.h"
 #include "TChain.h"
 #include "TTree.h"
-#include "TH1F.h"
+#include "TH1D.h"
 #include "Math/LorentzVector.h"
 
 //MT2
@@ -28,11 +28,11 @@ class MT2Looper {
   ~MT2Looper();
 
   void loop(TChain* chain, std::string output_name = "test.root");
-  void fillHistosSignalRegion(std::map<std::string, TH1F*>& h_1d, 
+  void fillHistosSignalRegion(std::map<std::string, TH1D*>& h_1d, 
 			      const SignalRegionJets::value_type& signal_region = SignalRegionJets::nocut, 
 			      const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::nocut,
 			      const std::string& dir = "", const std::string& suffix = "");
-  void fillHistos(std::map<std::string, TH1F*>& h_1d, 
+  void fillHistos(std::map<std::string, TH1D*>& h_1d, 
 		  const std::string& dir = "", const std::string& suffix = ""); 
   
  private:
@@ -41,7 +41,7 @@ class MT2Looper {
   mt2tree t;
   float evtweight_;
   int nlepveto_;
-  std::map<std::string, TH1F*> h_1d_global;
+  std::map<std::string, TH1D*> h_1d_global;
 };
 
 #endif
