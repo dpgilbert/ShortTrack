@@ -25,6 +25,8 @@
 #include "../MT2CORE/Plotting/PlotUtilities.h"
 
 
+bool printHtCalc = false;
+
 using namespace std;
 using namespace mt2;
 
@@ -81,6 +83,8 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
   std::map<std::string, TH1F*> h_1d_sr7L;
   std::map<std::string, TH1F*> h_1d_sr8L;
   std::map<std::string, TH1F*> h_1d_sr9L;
+  std::map<std::string, TH2F*> h_2d;
+  
   
   
   // File Loop
@@ -105,9 +109,9 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
 
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
-    for( unsigned int event = 0; event < nEventsTree; ++event) {
+    //for( unsigned int event = 0; event < nEventsTree; ++event) {
     //    for( unsigned int event = 0; event < nEventsTree/10.; ++event) {
-    //    for( unsigned int event = 0; event < 10000.; ++event) {
+    for( unsigned int event = 0; event < 10000.; ++event) {
 
       t.GetEntry(event);
 
@@ -135,28 +139,291 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
       //}
 
       //---------------------
-      // basic event selection and cleaning
-      //---------------------
-
-      if (!PassesEventSelection(t.nVert)) continue;
-
-      //---------------------
       // set weights and start making plots
       //---------------------
       outfile_->cd();
       const float lumi = 1.;
       evtweight_ = t.evt_scale1fb * lumi;
 
+      //---------------------
+      // Generator level plots
+      //---------------------
+      float genVphi;
+      float genVeta;
+      float posLepPt;
+      float posLepEta;
+      float posLepPhi;
+      float negLepPt;
+      float negLepEta;
+      float negLepPhi;
+      bool ismu = false;
+      bool isel = false;
+      bool istau = false;
+      bool isZ = false;
+      bool isG = false;
+      partonHT_ = 0;
+      for (int i = 0; i < t.ngenPart; i++) {
+	//	if (t.genPart_pdgId[i]!=23 && t.genPart_pdgId[i]!=22 && t.genPart_status[i]==23) { 
+	if ((fabs(t.genPart_pdgId[i])<10 || t.genPart_pdgId[i]==21) && (t.genPart_status[i]==23 || t.genPart_status[i]==22)) { 
+	  // sum final state quarks and gluons
+	  partonHT_ += t.genPart_pt[i];
+	}
+	if (  t.evt_id >= 700 && t.evt_id < 800 ) { // dilepton
+	  if (t.genPart_pdgId[i]==23 && t.genPart_status[i]==22)  {	    
+	    genVpt_  = t.genPart_pt[i];
+	    genVphi = t.genPart_phi[i];
+	    genVeta = t.genPart_eta[i];
+	  }
+	  float pdgId = t.genPart_pdgId[i];
+	  float momId =  t.genPart_motherId[i];
+	  bool thisIsMuOrE = false;
+	  if (fabs(pdgId) == 13 && momId==23) { ismu=true; thisIsMuOrE = true; }
+	  if (fabs(pdgId) == 11 && momId==23) { isel=true; thisIsMuOrE = true; }
+	  if (fabs(pdgId) == 15 && momId==23) istau=true;
+	  if (pdgId<0 && thisIsMuOrE) { posLepPt = t.genPart_pt[i]; posLepEta = t.genPart_eta[i]; posLepPhi = t.genPart_phi[i]; }
+	  if (pdgId>0 && thisIsMuOrE) { negLepPt = t.genPart_pt[i]; negLepEta = t.genPart_eta[i]; negLepPhi = t.genPart_phi[i]; }
+	  
+	  isZ=true;
+	}
+	else if (  t.evt_id >= 200 && t.evt_id < 300 ) { // gamma
+	  if (t.genPart_pdgId[i]==22 && t.genPart_status[i]==23) {
+	    genVpt_  = t.genPart_pt[i];
+	    genVphi = t.genPart_phi[i];
+	    genVeta = t.genPart_eta[i];
+	  }
+	  isG=true;
+	}	
+      }
+      if (!isG && !isZ) continue; // this should never happen
+
+      // _________________________________________________
+      // Make plots for Acceptance and lepton efficiency:
+      // Denominator: e+mu, Zpt >70
+      // Numerator: Denom, lepPt>20, lepEta<2.5
+      if (isZ && !istau && genVpt_ > 70) {
+	plot1D("h_AccDen_partonHT",   partonHT_, evtweight_, h_1d_global, 120, 0, 3000);
+	if ( posLepPt > 20 && negLepPt > 20 && fabs(posLepEta)<2.5 && fabs(negLepEta)<2.5) { // In the fiducial region!
+	  plot1D("h_AccNum_partonHT",   partonHT_, evtweight_, h_1d_global, 120, 0, 3000);
+
+	  // Lepton efficiency (include charge, since we will request it)
+	  std::string type = isel ? "el" : (ismu ? "mu" : "");
+	  plot2D("h_LepEffDen_"+type, posLepPt, posLepEta, evtweight_, h_2d, 98, 20, 1000, 10, -2.5, 2.5);
+	  bool foundIt = false;
+	  for (int i = 0; i < t.nlep; i++) {
+	    if (t.lep_charge[i] < 0) continue; // match with positive
+	    float thisDR = DeltaR(t.lep_eta[i], posLepEta, t.lep_phi[i], posLepPhi);
+	    if (thisDR<0.1) foundIt = true;
+	  }
+	  if (foundIt) plot2D("h_LepEffNum_"+type, negLepPt, negLepEta, evtweight_, h_2d, 98, 20, 1000, 10, -2.5, 2.5);
+	  // again for the other lepton
+	  plot2D("h_LepEffDen_"+type, negLepPt, negLepEta, evtweight_, h_2d, 98, 20, 1000, 10, -2.5, 2.5);
+	  foundIt = false;
+	  for (int i = 0; i < t.nlep; i++) {
+	    if (t.lep_charge[i] > 0) continue; // match with negative
+	    float thisDR = DeltaR(t.lep_eta[i], negLepEta, t.lep_phi[i], negLepPhi);
+	    if (thisDR<0.1) foundIt = true;
+	  }
+	  if (foundIt) plot2D("h_LepEffNum_"+type, negLepPt, negLepEta, evtweight_, h_2d, 98, 20, 1000, 10, -2.5, 2.5);
+
+	  // Efficiency of the invariant mass cut
+	  if (t.nlep==2) {
+	    if (t.lep_charge[0] * t.lep_charge[1] == -1 && abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1])) { // OS SF
+	      plot1D("h_InvMassEffDen_partonHT",   partonHT_, evtweight_, h_1d_global, 120, 0, 3000);
+	      if ( fabs(t.zll_invmass - 90) < 20 ) 
+		plot1D("h_InvMassEffNum_partonHT",   partonHT_, evtweight_, h_1d_global, 120, 0, 3000);
+	    }
+	  }
+	} // Leaving the fiducial region
+      } // End denominator
+
+
+      if (genVpt_ < 70 || fabs(genVeta) > 2.5) continue; // require fiducial cuts
+
+      float metPt  = t.met_genPt;
+      plot1D("h_truth_met_emutau",       metPt,       evtweight_, h_1d_global, 200, 0, 1500);	
+      if (istau) plot1D("h_truth_met_tau",       metPt,       evtweight_, h_1d_global, 200, 0, 1500);	
+      else { // taus ruin MET. they're also not part of our Z-->ll
+	
+	// PS This could be an issue when Z-->tau-->mu give rise to real MET with no gamma+jets equivalent
+	
+	////// Recalculate MET including the vector boson pT //////
+	TVector2 newMet;
+	TVector2 genV;
+	newMet.SetMagPhi(metPt, t.met_genPhi);
+	genV.SetMagPhi(genVpt_, genVphi);
+	newMet += genV;
+	
+	plot1D("h_truth_Vpt",       genVpt_,       evtweight_, h_1d_global, 400, 0, 2000);
+	plot1D("h_truth_Veta",      genVeta,      evtweight_, h_1d_global, 100, -4, 4);
+	plot1D("h_truth_met",       metPt,        evtweight_, h_1d_global, 200, 0, 1500);
+	plot1D("h_truth_newmet",    newMet.Mod(), evtweight_, h_1d_global, 200, 0, 1500);
+	plot1D("h_truth_partonHT",   partonHT_, evtweight_, h_1d_global, 120, 0, 3000);
+	
+	////// Recalculate HT with overlap removal ///////
+	HTdrMinV_ = 0;
+	HTdr04V_  = 0;
+	float stdHt = 0;
+	float minDr = 5;
+	float minDrP = 5;
+	float minDrN = 5;
+	float secondClosestDr = 5;
+	int minDrIdx = -1;
+	int minDrIdxP = -1;
+	int minDrIdxN = -1;
+	float thisDRP = 6;
+	float thisDRN = 6;
+	bool recoLepP = false;
+	bool recoLepN = false;
+	if (t.nlep==2) {recoLepN = true; recoLepP = true;}
+	if (t.nlep==1) {
+	  if (t.lep_charge[0]<0) recoLepN = true;
+	  if (t.lep_charge[0]>0) recoLepP = true;
+	}
+	
+	if (printHtCalc) {
+	  cout<<"---- New Event "<<t.evt<<" ---"<<endl;
+	  cout<<"Truth leptons have pt/eta/phi: "<<posLepPt<<"/"<<posLepEta<<"/"<<posLepPhi<<", "<<negLepPt<<"/"<<negLepEta<<"/"<<negLepPhi<<endl;
+	  cout<<"Reco leptons ("<< t.nlep <<") have pt/eta/phi: ";
+	  for (int i = 0; i < t.nlep; i++) cout<<t.lep_pt[i]<<"/"<<t.lep_eta[i]<<"/"<<t.lep_phi[i]<<", ";
+	  cout<<endl;
+	  cout<<"Reco jets (after o.r. with "<< t.nlep <<" reco leptons): ";
+	}
+	for (int i = 0; i < t.njet; i++) {
+	  //if (t.jet_pt[i] < 40) break; // pt ordered jets, stop looping
+	  if (fabs(t.jet_eta[i]) > 2.5 ) continue;
+	  
+	  float thisDR = DeltaR(t.jet_eta[i], genVeta, t.jet_phi[i], genVphi);
+	  if (thisDR < minDr) { secondClosestDr = minDr; minDr = thisDR; minDrIdx = i; }
+	  if (thisDR < secondClosestDr && thisDR > minDr) secondClosestDr = thisDR;
+	  
+	  if (isZ) {
+	    thisDRP = DeltaR(t.jet_eta[i], posLepEta, t.jet_phi[i], posLepPhi);
+	    if (thisDRP < minDrP) { minDrP = thisDRP; minDrIdxP = i; }
+	    thisDRN = DeltaR(t.jet_eta[i], negLepEta, t.jet_phi[i], negLepPhi);
+	    if (thisDRN < minDrN) { minDrN = thisDRN; minDrIdxN = i; }
+	  }
+	  if (t.jet_pt[i] > 40) {
+	    if (thisDR > 0.4 && (recoLepP || thisDRP > 0.4 ) && (recoLepN || thisDRN > 0.4)) HTdr04V_ += t.jet_pt[i];
+	    stdHt += t.jet_pt[i];
+	    if (printHtCalc) cout<<"("<<t.jet_pt[i]<<", "<<t.jet_eta[i]<<", "<<t.jet_phi[i]<<"), ";
+	  }
+	}
+	if (printHtCalc) {
+	  cout<<" making up a reco HT of "<<stdHt<<endl;
+	  // Subtract closest jets to leptons from standard HT, unless they are reco leptons (in that case jets are already subtracted)
+	  cout<<"Closest jet to PosLepton (reco "<< recoLepP <<") has minDrP "<<minDrP<<" and pt/eta/phi "<<t.jet_pt[minDrIdxP]<<", "<<t.jet_eta[minDrIdxP]<<", "<<t.jet_phi[minDrIdxP]<<endl;
+	  cout<<"Closest jet to NegLepton (reco "<< recoLepN <<") has minDrN "<<minDrN<<" and pt/eta/phi "<<t.jet_pt[minDrIdxN]<<", "<<t.jet_eta[minDrIdxN]<<", "<<t.jet_phi[minDrIdxN]<<endl;
+	}
+	int alreadyRemovedP = -1;
+	int alreadyRemovedN = -1;
+	if (!recoLepP && minDrP<0.4 && t.jet_pt[minDrIdxP]>40) 
+	  { stdHt = stdHt - t.jet_pt[minDrIdxP]; alreadyRemovedP = minDrIdxP; }
+	if (!recoLepN && minDrN<0.4 && minDrIdxN != alreadyRemovedP && t.jet_pt[minDrIdxN]>40) 
+	  { stdHt = stdHt - t.jet_pt[minDrIdxN]; alreadyRemovedN = minDrIdxN; }
+	
+	if (printHtCalc) cout<<"After gen lepton removal, HT is "<<stdHt<<endl;
+	// Subtract closest jets to vector bosons 
+	HTdrMinV_ = stdHt;
+	if (minDr<0.4 && t.jet_pt[minDrIdx]>40 && minDrIdx != alreadyRemovedP && minDrIdx != alreadyRemovedN)   
+	  HTdrMinV_ = HTdrMinV_ - t.jet_pt[minDrIdx];
+	if (printHtCalc) cout<<"After removing vector boson, reco HT is "<< HTdrMinV_<<endl;
+	
+	// DR boson jet
+	plot1D("h_DRJetBoson",         minDr,   evtweight_, h_1d_global, 100, 0, 5);
+	if (genVpt_ < 100)      plot1D("h_DRJetBoson_VptLT100" ,         minDr,   evtweight_, h_1d_global, 100, 0, 5);
+	else if (genVpt_ < 200) plot1D("h_DRJetBoson_Vpt100200",         minDr,   evtweight_, h_1d_global, 100, 0, 5);
+	else if (genVpt_ < 400) plot1D("h_DRJetBoson_Vpt200400",         minDr,   evtweight_, h_1d_global, 100, 0, 5);
+	else if (genVpt_ < 600) plot1D("h_DRJetBoson_Vpt400600",         minDr,   evtweight_, h_1d_global, 100, 0, 5);
+	else if (genVpt_ < 800) plot1D("h_DRJetBoson_Vpt600800",         minDr,   evtweight_, h_1d_global, 100, 0, 5);
+	else if (genVpt_ <1000) plot1D("h_DRJetBoson_Vpt8001000",         minDr,   evtweight_, h_1d_global, 100, 0, 5);
+	else                    plot1D("h_DRJetBoson_VptGT1000" ,         minDr,   evtweight_, h_1d_global, 100, 0, 5);
+	plot1D("h_DRJet2Boson",  secondClosestDr,   evtweight_, h_1d_global, 100, 0, 5);
+	if (genVpt_ < 100)      plot1D("h_DRJet2Boson_VptLT100" ,   secondClosestDr,   evtweight_, h_1d_global, 100, 0, 5);
+	else if (genVpt_ < 200) plot1D("h_DRJet2Boson_Vpt100200",   secondClosestDr,   evtweight_, h_1d_global, 100, 0, 5);
+	else if (genVpt_ < 400) plot1D("h_DRJet2Boson_Vpt200400",   secondClosestDr,   evtweight_, h_1d_global, 100, 0, 5);
+	else if (genVpt_ < 600) plot1D("h_DRJet2Boson_Vpt400600",   secondClosestDr,   evtweight_, h_1d_global, 100, 0, 5);
+	else if (genVpt_ < 800) plot1D("h_DRJet2Boson_Vpt600800",   secondClosestDr,   evtweight_, h_1d_global, 100, 0, 5);
+	else if (genVpt_ <1000) plot1D("h_DRJet2Boson_Vpt8001000",   secondClosestDr,   evtweight_, h_1d_global, 100, 0, 5);
+	else                    plot1D("h_DRJet2Boson_VptGT1000" ,   secondClosestDr,   evtweight_, h_1d_global, 100, 0, 5);
+	if (minDr < 0.4) { 
+	  float deltaPt = (t.jet_pt[minDrIdx] - genVpt_)/genVpt_;
+	  plot1D("h_DPtJetBoson",  deltaPt,   evtweight_, h_1d_global, 100, 0, 5);
+	  if (genVpt_ < 100)      plot1D("h_DPtJetBoson_VptLT100" ,   deltaPt,   evtweight_, h_1d_global, 100, -3, 3);
+	  else if (genVpt_ < 200) plot1D("h_DPtJetBoson_Vpt100200",   deltaPt,   evtweight_, h_1d_global, 100, -3, 3);
+	  else if (genVpt_ < 400) plot1D("h_DPtJetBoson_Vpt200400",   deltaPt,   evtweight_, h_1d_global, 100, -3, 3);
+	  else if (genVpt_ < 600) plot1D("h_DPtJetBoson_Vpt400600",   deltaPt,   evtweight_, h_1d_global, 100, -3, 3);
+	  else if (genVpt_ < 800) plot1D("h_DPtJetBoson_Vpt600800",   deltaPt,   evtweight_, h_1d_global, 100, -3, 3);
+	  else if (genVpt_ <1000) plot1D("h_DPtJetBoson_Vpt8001000",   deltaPt,   evtweight_, h_1d_global, 100, -3, 3);
+	  else                    plot1D("h_DPtJetBoson_VptGT1000" ,   deltaPt,   evtweight_, h_1d_global, 100, -3, 3);
+	}
+	plot1D("h_truth_recoHT",    stdHt, evtweight_, h_1d_global, 120, 0, 3000); // remove closest jets to lepton ...
+	plot1D("h_truth_recoHTdr04V",   HTdr04V_ , evtweight_, h_1d_global, 120, 0, 3000); // ... and all in DR04 with leptons/V
+	plot1D("h_truth_recoHTdrMinV",  HTdrMinV_, evtweight_, h_1d_global, 120, 0, 3000); // ... and only closest (in DR04) to V
+	
+	//if (fabs(t.ht - stdHt)> 10) cout<<"event "<<t.evt<<" has ht "<<t.ht<<" and stdHt "<<stdHt<<endl;
+	//	plot2D("h_DeltaHTvsHT")
+	
+//	  ////// Calculate Gen HT with overlap removal ///////	  
+//	  minDr = 5;
+//	  minDrP = 5;
+//	  minDrN = 5;
+//	  minDrIdx = -1;
+//	  minDrIdxP = -1;
+//	  minDrIdxN = -1;
+//	  float GenHTdr04V_;
+//	  float GenHTdrMinV_;
+//	  float stdGenHt;
+//	  for (int i = 0; i < t.ngenjet; i++) {
+//	    if (fabs(t.genjet_eta[i]) > 2.5 ) continue;
+//	    
+//	    float thisDR = DeltaR(t.genjet_eta[i], genVeta, t.genjet_phi[i], genVphi);
+//	    if (thisDR < minDr) { minDr = thisDR; minDrIdx = i; }
+//	    
+//	    if (isZ) {
+//	      thisDRP = DeltaR(t.genjet_eta[i], posLepEta, t.genjet_phi[i], posLepPhi);
+//	      if (thisDRP < minDrP) { minDrP = thisDRP; minDrIdxP = i; }
+//	      thisDRN = DeltaR(t.genjet_eta[i], negLepEta, t.genjet_phi[i], negLepPhi);
+//	      if (thisDRN < minDrN) { minDrN = thisDRN; minDrIdxN = i; }
+//	    }
+//	    if (t.jet_pt[i] > 40) {
+//	      if (thisDR > 0.4 && thisDRP > 0.4 && thisDRN > 0.4) GenHTdr04V_ += t.jet_pt[i];
+//	      stdGenHt += t.jet_pt[i];
+//	    }
+//	  }
+//	  // Remove closest genjets to leptons
+//	  int alreadyRemovedP = -1;
+//	  int alreadyRemovedN = -1;
+//	  if ( minDrP<0.4 && t.jet_pt[minDrIdxP]>40) 
+//	    { stdGenHt = stdGenHt - t.genjet_pt[minDrIdxP]; alreadyRemovedP = minDrIdxP; }
+//	  if ( minDrN<0.4 && minDrIdxN != alreadyRemovedP && t.jet_pt[minDrIdxN]>40) 
+//	    { stdGenHt = stdGenHt - t.genjet_pt[minDrIdxN]; alreadyRemovedN = minDrIdxN; }
+//	  // Subtract closest genjets to vector bosons 
+//	  GenHTdrMinV_ = stdGenHt;
+//	  if (minDr<0.4 && t.jet_pt[minDrIdx]>40 && minDrIdx != alreadyRemovedP && minDrIdx != alreadyRemovedN)   
+//	    GenHTdrMinV_ = GenHTdrMinV_ - t.genjet_pt[minDrIdx];
+
+	
+      } 
+      
+      //      continue; // Exit after truth plots
+
+
+      //---------------------
+      // basic event selection and cleaning
+      //---------------------
+
+      if (!PassesEventSelection(t.nVert)) continue;
+      
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, 80, 0, 80);
       plot1D("h_mt2raw",       t.mt2,       evtweight_, h_1d_global, 80, 0, 800);
       plot1D("h_zll_mt2",       t.zll_mt2,       evtweight_, h_1d_global, 80, 0, 800);
       plot1D("h_gamma_mt2",       t.gamma_mt2,       evtweight_, h_1d_global, 80, 0, 800);
-
+      
       nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nTaus20;
       //cout <<"t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, nlepveto_, t.jet_pt[0], t.jet_pt[1]"<<endl;
       //cout<<t.met_pt<<" "<<t.ht<<" "<<t.nJet40<<" "<<t.nBJet40<<" "<<t.deltaPhiMin<<" "<<t.diffMetMht<<" "<<nlepveto_<<" "<<t.jet_pt[0]<<" "<<t.jet_pt[1]<<endl;
-
-
+      
+      
       //______________________________
       // Select Z-->ll or gamma+jets
       if ( t.nlep == 2 && t.evt_id >= 700 && t.evt_id < 800 ) { // dilepton
@@ -170,6 +437,7 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
 	if ( abs(t.lep_pdgId[0]) != abs(t.lep_pdgId[1])) continue; // SF (will also look at e-mu pairs later)
 	plot1D("h_zllInvMass", t.zll_invmass  , evtweight_, h_1d_global, 200, 0, 200);
 	if ( fabs(t.zll_invmass - 90) > 20 ) continue; // 70-110 GeV mass
+	if (printHtCalc) cout<<"!! Event "<<t.evt<<" passes dilepton reco requirements !!"<<endl;
 	TLorentzVector l0(0,0,0,0);
 	TLorentzVector l1(0,0,0,0);
 	l0.SetPtEtaPhiM(t.lep_pt[0], t.lep_eta[0], t.lep_phi[0], t.lep_mass[0]);
@@ -192,9 +460,10 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
 
 
       }
-      else if ( t.nGammas20 == 1 && t.nlep==0  && t.evt_id >= 200 && t.evt_id < 300 ) { // gamma
+      else if ( t.nGammas20 > 0 && t.nlep==0  && t.evt_id >= 200 && t.evt_id < 300 ) { // gamma
 	//	if (t.gamma_ht < 400) continue; // require at least 100 HT apart from the photon
-
+	
+	if ( DeltaR(genVeta, t.gamma_eta[0], genVphi, t.gamma_phi[0]) >  0.1) continue; // truth-match the photon
 	mt2_Zinv_	  =  t.gamma_mt2;
 	nJet40_Zinv_	  =  t.gamma_nJet40;
 	nBJet40_Zinv_     =  t.gamma_nBJet40;
@@ -222,7 +491,7 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
 	jetIdx1_ = 1;
 	if (gammaJet==0) { jetIdx0_++; jetIdx1_++;}
 	if (gammaJet==1) { jetIdx1_++;}
-       
+	
 	
 	// Still need to require MET < 100 to reduce signal contamination 
 
@@ -283,6 +552,7 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
 
   outfile_->cd();
   savePlotsDir(h_1d_global,outfile_,"");
+  savePlots2Dir(h_2d,outfile_,"");
   savePlotsDir(h_1d_nocut,outfile_,"nocut");
   savePlotsDir(h_1d_srH,outfile_,"srH");
   savePlotsDir(h_1d_srM,outfile_,"srM");
@@ -358,8 +628,12 @@ void ZllLooper::fillHistos(std::map<std::string, TH1F*>& h_1d, const std::string
   plot1D("h_mt2raw"+s,    t.mt2,   evtweight_, h_1d, 150, 0, 1500);
   plot1D("h_mt2"+s,       mt2_Zinv_,   evtweight_, h_1d, 150, 0, 1500);
   plot1D("h_metraw"+s,      t.met_pt,   evtweight_, h_1d, 150, 0, 1500);
-  plot1D("h_met"+s,       met_pt_Zinv_,   evtweight_, h_1d, 150, 0, 1500);
+  plot1D("h_met"+s,       met_pt_Zinv_,   evtweight_, h_1d, 200, 0, 1500);
   plot1D("h_ht"+s,        ht_Zinv_,   evtweight_, h_1d, 120, 0, 3000);
+  plot1D("h_htraw"+s,     t.ht,   evtweight_, h_1d, 120, 0, 3000);
+  plot1D("h_partonHT"+s,     partonHT_,   evtweight_, h_1d, 120, 0, 3000);
+  plot1D("h_HTdr04V",   HTdr04V_ , evtweight_, h_1d, 120, 0, 3000);
+  plot1D("h_HTdrMinV",  HTdrMinV_, evtweight_, h_1d, 120, 0, 3000);
   plot1D("h_nJet40"+s,       nJet40_Zinv_,   evtweight_, h_1d, 15, 0, 15);
   plot1D("h_nBJet40"+s,      nBJet40_Zinv_,   evtweight_, h_1d, 6, 0, 6);
   plot1D("h_deltaPhiMin"+s,  deltaPhiMin_Zinv_,   evtweight_, h_1d, 32, 0, 3.2);
@@ -367,7 +641,9 @@ void ZllLooper::fillHistos(std::map<std::string, TH1F*>& h_1d, const std::string
   plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, 10, 0, 10);
   plot1D("h_J0pt"+s,         t.jet_pt[jetIdx0_],   evtweight_, h_1d, 200, 0, 500);
   plot1D("h_J1pt"+s,         t.jet_pt[jetIdx1_],   evtweight_, h_1d, 200, 0, 500);
-  plot1D("h_Vpt"+s,          Zinv_pt_,   evtweight_, h_1d, 400, 0, 1000);
+  plot1D("h_Vpt"+s,          Zinv_pt_,   evtweight_, h_1d, 400, 0, 2000);
+  plot1D("h_truth_Vpt",       genVpt_,   evtweight_, h_1d, 400, 0, 2000);
+  
   outfile_->cd();
   return;
 }

@@ -55,6 +55,10 @@ class ZllLooper {
   float met_phi_Zinv_;
   int   jetIdx0_;
   int   jetIdx1_;
+  float HTdrMinV_;
+  float HTdr04V_;
+  float genVpt_;
+  float partonHT_;
 };
 
 #endif
