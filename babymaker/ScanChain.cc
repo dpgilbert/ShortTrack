@@ -17,6 +17,7 @@
 #include "../MT2CORE/selections.h"
 #include "../MT2CORE/hemJet.h"
 #include "../MT2CORE/sampleID.h"
+#include "../MT2CORE/genUtils.h"
 #include "../MT2CORE/MT2/MT2.h"
 #include "../MT2CORE/IsoTrackVeto.h"
 
@@ -158,16 +159,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  if (motherId == 15 && (grandmaId == 25 || grandmaId == 24 || grandmaId == 23 || grandmaId == 15)) {
 	    goodLepFromTau = true;
 	    goodLep = true;
-	    sourceId = grandmaId;
 	  } 
 	  // leptons from W/Z/H
 	  else if (motherId == 25 || motherId == 24 || motherId == 23) {
 	    goodLep = true;
-	    sourceId = motherId;
 	  } 
 	  else if ( motherId == pdgId && (grandmaId == 25 || grandmaId == 24 || grandmaId == 23) ) {
 	    goodLep = true;
-	    sourceId = grandmaId;
 	  }
 	} // status 1 e or mu
 
@@ -176,13 +174,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  // leptons from W/Z/H
 	  if (motherId == 25 || motherId == 24 || motherId == 23) {
 	    goodLep = true;
-	    sourceId = motherId;
 	  } 
 	  else if ( motherId == pdgId && (grandmaId == 25 || grandmaId == 24 || grandmaId == 23) ) {
 	    goodLep = true;
-	    sourceId = grandmaId;
 	  }
 	} // status 2 tau
+
+	if (goodLep || goodLepFromTau) {
+	  sourceId = getSourceId(iGen);
+	}
 
 	// save gen leptons from W/Z/H, including taus
 	if (goodLep) {
