@@ -195,7 +195,7 @@ class babyMaker {
   Int_t           genPart_motherId[max_ngenPart];   //[ngenPart]
   Int_t           genPart_grandmaId[max_ngenPart];   //[ngenPart]
 
-//----- GEN LEPTONS (INCLUDING TAUS)
+//----- GEN LEPTONS (ELECTRONS/MUONS)
   static const int max_ngenLep = 10;
   Int_t           ngenLep;
   Float_t         genLep_pt[max_ngenLep];   //[ngenLep]
@@ -206,6 +206,18 @@ class babyMaker {
   Int_t           genLep_status[max_ngenLep];   //[ngenLep]
   Float_t         genLep_charge[max_ngenLep];   //[ngenLep]
   Int_t           genLep_sourceId[max_ngenLep];   //[ngenLep]
+
+//----- GEN TAUS
+  static const int max_ngenTau = 10;
+  Int_t           ngenTau;
+  Float_t         genTau_pt[max_ngenTau];   //[ngenTau]
+  Float_t         genTau_eta[max_ngenTau];   //[ngenTau]
+  Float_t         genTau_phi[max_ngenTau];   //[ngenTau]
+  Float_t         genTau_mass[max_ngenTau];   //[ngenTau]
+  Int_t           genTau_pdgId[max_ngenTau];   //[ngenTau]
+  Int_t           genTau_status[max_ngenTau];   //[ngenTau]
+  Float_t         genTau_charge[max_ngenTau];   //[ngenTau]
+  Int_t           genTau_sourceId[max_ngenTau];   //[ngenTau]
 
 //----- GEN LEPTONS FROM TAUS
   static const int max_ngenLepFromTau = 10;
