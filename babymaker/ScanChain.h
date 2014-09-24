@@ -195,6 +195,30 @@ class babyMaker {
   Int_t           genPart_motherId[max_ngenPart];   //[ngenPart]
   Int_t           genPart_grandmaId[max_ngenPart];   //[ngenPart]
 
+//----- GEN LEPTONS (INCLUDING TAUS)
+  static const int max_ngenLep = 10;
+  Int_t           ngenLep;
+  Float_t         genLep_pt[max_ngenLep];   //[ngenLep]
+  Float_t         genLep_eta[max_ngenLep];   //[ngenLep]
+  Float_t         genLep_phi[max_ngenLep];   //[ngenLep]
+  Float_t         genLep_mass[max_ngenLep];   //[ngenLep]
+  Int_t           genLep_pdgId[max_ngenLep];   //[ngenLep]
+  Int_t           genLep_status[max_ngenLep];   //[ngenLep]
+  Float_t         genLep_charge[max_ngenLep];   //[ngenLep]
+  Int_t           genLep_sourceId[max_ngenLep];   //[ngenLep]
+
+//----- GEN LEPTONS FROM TAUS
+  static const int max_ngenLepFromTau = 10;
+  Int_t           ngenLepFromTau;
+  Float_t         genLepFromTau_pt[max_ngenLepFromTau];   //[ngenLepFromTau]
+  Float_t         genLepFromTau_eta[max_ngenLepFromTau];   //[ngenLepFromTau]
+  Float_t         genLepFromTau_phi[max_ngenLepFromTau];   //[ngenLepFromTau]
+  Float_t         genLepFromTau_mass[max_ngenLepFromTau];   //[ngenLepFromTau]
+  Int_t           genLepFromTau_pdgId[max_ngenLepFromTau];   //[ngenLepFromTau]
+  Int_t           genLepFromTau_status[max_ngenLepFromTau];   //[ngenLepFromTau]
+  Float_t         genLepFromTau_charge[max_ngenLepFromTau];   //[ngenLepFromTau]
+  Int_t           genLepFromTau_sourceId[max_ngenLepFromTau];   //[ngenLepFromTau]
+
 //----- JETS
   static const int max_njet = 100;
   Int_t           njet;

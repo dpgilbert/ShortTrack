@@ -119,6 +119,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       
       //GEN PARTICLES
       ngenPart = 0;
+      ngenLep = 0;
+      ngenLepFromTau = 0;
       for(unsigned int iGen = 0; iGen < cms2.genps_p4().size(); iGen++){
 	if (ngenPart >= max_ngenPart) {
           std::cout << "WARNING: attempted to fill more than " << max_ngenPart << " gen particles" << std::endl;
@@ -131,10 +133,84 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         genPart_pdgId[ngenPart] = cms2.genps_id().at(iGen);
         genPart_status[ngenPart] = cms2.genps_status().at(iGen);
         genPart_charge[ngenPart] = cms2.genps_charge().at(iGen);
-	genPart_motherId[ngenPart] =cms2.genps_id_simplemother().at(iGen);
+	genPart_motherId[ngenPart] = cms2.genps_id_simplemother().at(iGen);
 	genPart_grandmaId[ngenPart] = cms2.genps_id_simplegrandma().at(iGen);
         ngenPart++;
-      }
+
+	// save lepton info
+	int pdgId = abs(cms2.genps_id().at(iGen));
+	if ((pdgId != 11) && (pdgId != 13) && (pdgId != 15)) continue;
+
+	int motherId = abs(cms2.genps_id_simplemother().at(iGen));
+	int grandmaId = abs(cms2.genps_id_simplegrandma().at(iGen));
+
+	// reject leptons with direct parents of quarks or hadrons. 
+	//  Allow SUSY parents - not explicitly checking for now though
+	if (motherId <= 5 || (motherId > 100 && motherId < 1000000)) continue;
+
+	bool goodLep = false;
+	bool goodLepFromTau = false;
+	int sourceId = 0;
+
+	// electrons, muons: status 1 and mother or grandmother W/Z/H or tau from W/Z/H
+	if (((pdgId == 11) || (pdgId == 13)) && (cms2.genps_status().at(iGen) == 1)) {
+	  // leptons from taus
+	  if (motherId == 15 && (grandmaId == 25 || grandmaId == 24 || grandmaId == 23 || grandmaId == 15)) {
+	    goodLepFromTau = true;
+	    goodLep = true;
+	    sourceId = grandmaId;
+	  } 
+	  // leptons from W/Z/H
+	  else if (motherId == 25 || motherId == 24 || motherId == 23) {
+	    goodLep = true;
+	    sourceId = motherId;
+	  } 
+	  else if ( motherId == pdgId && (grandmaId == 25 || grandmaId == 24 || grandmaId == 23) ) {
+	    goodLep = true;
+	    sourceId = grandmaId;
+	  }
+	} // status 1 e or mu
+
+	// taus: status 2, from W/Z/H
+	if (pdgId == 15 && cms2.genps_status().at(iGen) == 2) {
+	  // leptons from W/Z/H
+	  if (motherId == 25 || motherId == 24 || motherId == 23) {
+	    goodLep = true;
+	    sourceId = motherId;
+	  } 
+	  else if ( motherId == pdgId && (grandmaId == 25 || grandmaId == 24 || grandmaId == 23) ) {
+	    goodLep = true;
+	    sourceId = grandmaId;
+	  }
+	} // status 2 tau
+
+	// save gen leptons from W/Z/H, including taus
+	if (goodLep) {
+	  genLep_pt[ngenLep] = cms2.genps_p4().at(iGen).pt();
+	  genLep_eta[ngenLep] = cms2.genps_p4().at(iGen).eta();
+	  genLep_phi[ngenLep] = cms2.genps_p4().at(iGen).phi();
+	  genLep_mass[ngenLep] = cms2.genps_mass().at(iGen);
+	  genLep_pdgId[ngenLep] = cms2.genps_id().at(iGen);
+	  genLep_status[ngenLep] = cms2.genps_status().at(iGen);
+	  genLep_charge[ngenLep] = cms2.genps_charge().at(iGen);
+	  genLep_sourceId[ngenLep] = sourceId;
+	  ++ngenLep;
+	}
+
+	// save gen e/mu from taus (which are from W/Z/H)
+	if (goodLepFromTau) {
+	  genLepFromTau_pt[ngenLepFromTau] = cms2.genps_p4().at(iGen).pt();
+	  genLepFromTau_eta[ngenLepFromTau] = cms2.genps_p4().at(iGen).eta();
+	  genLepFromTau_phi[ngenLepFromTau] = cms2.genps_p4().at(iGen).phi();
+	  genLepFromTau_mass[ngenLepFromTau] = cms2.genps_mass().at(iGen);
+	  genLepFromTau_pdgId[ngenLepFromTau] = cms2.genps_id().at(iGen);
+	  genLepFromTau_status[ngenLepFromTau] = cms2.genps_status().at(iGen);
+	  genLepFromTau_charge[ngenLepFromTau] = cms2.genps_charge().at(iGen);
+	  genLepFromTau_sourceId[ngenLepFromTau] = sourceId;
+	  ++ngenLepFromTau;
+	}
+
+      } // loop over genPart
 
 
       //LEPTONS
@@ -869,6 +945,24 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("genPart_charge", genPart_charge, "genPart_charge[ngenPart]/F" );
   BabyTree_->Branch("genPart_motherId", genPart_motherId, "genPart_motherId[ngenPart]/I" );
   BabyTree_->Branch("genPart_grandmaId", genPart_grandmaId, "genPart_grandmaId[ngenPart]/I" );
+  BabyTree_->Branch("ngenLep", &ngenLep, "ngenLep/I" );
+  BabyTree_->Branch("genLep_pt", genLep_pt, "genLep_pt[ngenLep]/F" );
+  BabyTree_->Branch("genLep_eta", genLep_eta, "genLep_eta[ngenLep]/F" );
+  BabyTree_->Branch("genLep_phi", genLep_phi, "genLep_phi[ngenLep]/F" );
+  BabyTree_->Branch("genLep_mass", genLep_mass, "genLep_mass[ngenLep]/F" );
+  BabyTree_->Branch("genLep_pdgId", genLep_pdgId, "genLep_pdgId[ngenLep]/I" );
+  BabyTree_->Branch("genLep_status", genLep_status, "genLep_status[ngenLep]/I" );
+  BabyTree_->Branch("genLep_charge", genLep_charge, "genLep_charge[ngenLep]/F" );
+  BabyTree_->Branch("genLep_sourceId", genLep_sourceId, "genLep_sourceId[ngenLep]/I" );
+  BabyTree_->Branch("ngenLepFromTau", &ngenLepFromTau, "ngenLepFromTau/I" );
+  BabyTree_->Branch("genLepFromTau_pt", genLepFromTau_pt, "genLepFromTau_pt[ngenLepFromTau]/F" );
+  BabyTree_->Branch("genLepFromTau_eta", genLepFromTau_eta, "genLepFromTau_eta[ngenLepFromTau]/F" );
+  BabyTree_->Branch("genLepFromTau_phi", genLepFromTau_phi, "genLepFromTau_phi[ngenLepFromTau]/F" );
+  BabyTree_->Branch("genLepFromTau_mass", genLepFromTau_mass, "genLepFromTau_mass[ngenLepFromTau]/F" );
+  BabyTree_->Branch("genLepFromTau_pdgId", genLepFromTau_pdgId, "genLepFromTau_pdgId[ngenLepFromTau]/I" );
+  BabyTree_->Branch("genLepFromTau_status", genLepFromTau_status, "genLepFromTau_status[ngenLepFromTau]/I" );
+  BabyTree_->Branch("genLepFromTau_charge", genLepFromTau_charge, "genLepFromTau_charge[ngenLepFromTau]/F" );
+  BabyTree_->Branch("genLepFromTau_sourceId", genLepFromTau_sourceId, "genLepFromTau_sourceId[ngenLepFromTau]/I" );
   BabyTree_->Branch("njet", &njet, "njet/I" );
   BabyTree_->Branch("jet_pt", jet_pt, "jet_pt[njet]/F" );
   BabyTree_->Branch("jet_eta", jet_eta, "jet_eta[njet]/F" );
