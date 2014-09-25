@@ -6,9 +6,9 @@ using namespace tas;
 //________________________________________________________________
 int getSourceId(int genpIdx){
 
-  // look for earliest mother that is: top, W, Z, photon, or H
+  // look for earliest mother that is: top, W, Z, or H
   //   terminate search if top or H is found
-  //   continue if W, Z, or photon is found, to see if there's a top or H
+  //   continue if W, Z is found, to see if there's a top or H
   //   can also add SUSY particles to logic, not yet done
 
   int currentIdx = genpIdx;
@@ -39,11 +39,11 @@ bool stopSourceId(int sourceId){
 
 //________________________________________________________________
 // list of sourceIds to allow
-//   top, photon, Z, W, H
+//   top, Z, W, H
 //   can add susy particles here
 bool useSourceId(int motherId){
   int id = abs(motherId);
-  if (id == 6 || (id >= 22 && id <= 25)) return true;
+  if (id == 6 || (id >= 23 && id <= 25)) return true;
   return false;
 }
 

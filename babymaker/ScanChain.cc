@@ -160,7 +160,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  // leptons from taus
 	  if (motherId == 15 && (grandmaId == 25 || grandmaId == 24 || grandmaId == 23 || grandmaId == 15)) {
 	    goodLepFromTau = true;
-	    goodLep = true;
 	  } 
 	  // leptons from W/Z/H
 	  else if (motherId == 25 || motherId == 24 || motherId == 23) {
@@ -186,7 +185,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  sourceId = getSourceId(iGen);
 	}
 
-	// save gen leptons (e/mu) from W/Z/H
+	// save gen leptons (e/mu) directly from W/Z/H
 	if (goodLep) {
 	  genLep_pt[ngenLep] = cms2.genps_p4().at(iGen).pt();
 	  genLep_eta[ngenLep] = cms2.genps_p4().at(iGen).eta();
