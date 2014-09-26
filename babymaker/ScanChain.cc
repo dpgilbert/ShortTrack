@@ -117,7 +117,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       HLT_HT650        = passHLTTriggerPattern("HLT_PFHT650_v") ||  passHLTTriggerPattern("HLT_PFNoPUHT650_v");
       HLT_MET150       = passHLTTriggerPattern("HLT_PFMET150_v"); 
       HLT_ht350met100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_v") || passHLTTriggerPattern("HLT_PFNoPUHT350_PFMET100_v"); 
+
+      HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu24_eta2p1_v"); 
+      HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"); 
+      HLT_MuEG         = passHLTTriggerPattern("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v") || passHLTTriggerPattern("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"); 
+      HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_Mu8_v") || passHLTTriggerPattern("HLT_Mu17_TkMu8_v"); 
+      HLT_Photons      = passHLTTriggerPattern("HLT_Photon150_v"); 
       
+
       //GEN PARTICLES
       ngenPart = 0;
       ngenLep = 0;
@@ -145,6 +152,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
 	int motherId = abs(cms2.genps_id_simplemother().at(iGen));
 	int grandmaId = abs(cms2.genps_id_simplegrandma().at(iGen));
+	int status = cms2.genps_status().at(iGen);
 
 	// reject leptons with direct parents of quarks or hadrons. 
 	//  Allow SUSY parents - not explicitly checking for now though
@@ -155,30 +163,32 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	bool goodLepFromTau = false;
 	int sourceId = 0;
 
-	// electrons, muons: status 1 and mother or grandmother W/Z/H or tau from W/Z/H
-	if (((pdgId == 11) || (pdgId == 13)) && (cms2.genps_status().at(iGen) == 1)) {
+	// electrons, muons: status 1 or 23 and mother W/Z/H or tau from W/Z/H
+	if ( (pdgId == 11 || pdgId == 13) && (status == 1 || status == 23) ) {
+	  // save leptons pre-FSR: prefer status 23 over status 1
+	  if (status == 1 && motherId == pdgId && (cms2.genps_status().at(cms2.genps_idx_simplemother().at(iGen)) == 23)) {
+	    // don't save
+	  }
 	  // leptons from taus
-	  if (motherId == 15 && (grandmaId == 25 || grandmaId == 24 || grandmaId == 23 || grandmaId == 15)) {
+	  else if (motherId == 15 && (grandmaId == 25 || grandmaId == 24 || grandmaId == 23 || grandmaId == 15)) {
 	    goodLepFromTau = true;
 	  } 
 	  // leptons from W/Z/H
 	  else if (motherId == 25 || motherId == 24 || motherId == 23) {
 	    goodLep = true;
 	  } 
-	  else if ( motherId == pdgId && (grandmaId == 25 || grandmaId == 24 || grandmaId == 23) ) {
-	    goodLep = true;
-	  }
 	} // status 1 e or mu
 
-	// taus: status 2, from W/Z/H
-	if (pdgId == 15 && cms2.genps_status().at(iGen) == 2) {
+	// taus: status 2 or 23, from W/Z/H
+	else if (pdgId == 15 && (status == 2 || status == 23)) {
+	  // save leptons pre-FSR: prefer status 23 over status 2
+	  if (status == 2 && motherId == pdgId && (cms2.genps_status().at(cms2.genps_idx_simplemother().at(iGen)) == 23)) {
+	    // don't save
+	  }
 	  // leptons from W/Z/H
-	  if (motherId == 25 || motherId == 24 || motherId == 23) {
+	  else if (motherId == 25 || motherId == 24 || motherId == 23) {
 	    goodTau = true;
 	  } 
-	  else if ( motherId == pdgId && (grandmaId == 25 || grandmaId == 24 || grandmaId == 23) ) {
-	    goodTau = true;
-	  }
 	} // status 2 tau
 
 	if (goodLep || goodTau || goodLepFromTau) {
@@ -880,6 +890,11 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("HLT_HT650", &HLT_HT650 );
   BabyTree_->Branch("HLT_MET150", &HLT_MET150 );
   BabyTree_->Branch("HLT_ht350met100", &HLT_ht350met100 );
+  BabyTree_->Branch("HLT_SingleMu", &HLT_SingleMu );
+  BabyTree_->Branch("HLT_DoubleEl", &HLT_DoubleEl );
+  BabyTree_->Branch("HLT_MuEG", &HLT_MuEG );
+  BabyTree_->Branch("HLT_DoubleMu", &HLT_DoubleMu );
+  BabyTree_->Branch("HLT_Photons", &HLT_Photons );
   BabyTree_->Branch("nlep", &nlep, "nlep/I" );
   BabyTree_->Branch("lep_pt", lep_pt, "lep_pt[nlep]/F");
   BabyTree_->Branch("lep_eta", lep_eta, "lep_eta[nlep]/F" );
@@ -1052,6 +1067,11 @@ void babyMaker::InitBabyNtuple () {
   HLT_HT650 = -999;
   HLT_MET150 = -999;
   HLT_ht350met100 = -999;
+  HLT_SingleMu = -999;   
+  HLT_DoubleEl = -999;   
+  HLT_MuEG = -999;   
+  HLT_DoubleMu = -999;   
+  HLT_Photons = -999;   
   nlep = -999;
   nisoTrack = -999;
   ntau = -999;

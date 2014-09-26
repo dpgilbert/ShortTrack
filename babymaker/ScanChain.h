@@ -96,6 +96,11 @@ class babyMaker {
   Int_t           HLT_HT650;   
   Int_t           HLT_MET150;
   Int_t           HLT_ht350met100;   
+  Int_t           HLT_SingleMu;   
+  Int_t           HLT_DoubleEl;   
+  Int_t           HLT_MuEG;   
+  Int_t           HLT_DoubleMu;   
+  Int_t           HLT_Photons;   
 
 //----- LEPTONS
   static const int max_nlep = 50;
