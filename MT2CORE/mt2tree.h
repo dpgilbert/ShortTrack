@@ -69,6 +69,11 @@ public :
    Int_t           HLT_HT650;
    Int_t           HLT_MET150;
    Int_t           HLT_ht350met100;
+   Int_t           HLT_SingleMu;   
+   Int_t           HLT_DoubleEl;   
+   Int_t           HLT_MuEG;   
+   Int_t           HLT_DoubleMu;   
+   Int_t           HLT_Photons;   
    Int_t           nlep;
    Float_t         lep_pt[50];   //[nlep]
    Float_t         lep_eta[50];   //[nlep]
@@ -148,6 +153,33 @@ public :
    Float_t         genPart_charge[200];   //[ngenPart]
    Int_t           genPart_motherId[200];   //[ngenPart]
    Int_t           genPart_grandmaId[200];   //[ngenPart]
+   Int_t           ngenLep;
+   Float_t         genLep_pt[10];   //[ngenLep]
+   Float_t         genLep_eta[10];   //[ngenLep]
+   Float_t         genLep_phi[10];   //[ngenLep]
+   Float_t         genLep_mass[10];   //[ngenLep]
+   Int_t           genLep_pdgId[10];   //[ngenLep]
+   Int_t           genLep_status[10];   //[ngenLep]
+   Float_t         genLep_charge[10];   //[ngenLep]
+   Int_t           genLep_sourceId[10];   //[ngenLep]
+   Int_t           ngenLepFromTau;
+   Float_t         genLepFromTau_pt[10];   //[ngenLepFromTau]
+   Float_t         genLepFromTau_eta[10];   //[ngenLepFromTau]
+   Float_t         genLepFromTau_phi[10];   //[ngenLepFromTau]
+   Float_t         genLepFromTau_mass[10];   //[ngenLepFromTau]
+   Int_t           genLepFromTau_pdgId[10];   //[ngenLepFromTau]
+   Int_t           genLepFromTau_status[10];   //[ngenLepFromTau]
+   Float_t         genLepFromTau_charge[10];   //[ngenLepFromTau]
+   Int_t           genLepFromTau_sourceId[10];   //[ngenLepFromTau]
+   Int_t           ngenTau;
+   Float_t         genTau_pt[10];   //[ngenTau]
+   Float_t         genTau_eta[10];   //[ngenTau]
+   Float_t         genTau_phi[10];   //[ngenTau]
+   Float_t         genTau_mass[10];   //[ngenTau]
+   Int_t           genTau_pdgId[10];   //[ngenTau]
+   Int_t           genTau_status[10];   //[ngenTau]
+   Float_t         genTau_charge[10];   //[ngenTau]
+   Int_t           genTau_sourceId[10];   //[ngenTau]
    Int_t           njet;
    Float_t         jet_pt[100];   //[njet]
    Float_t         jet_eta[100];   //[njet]
@@ -210,6 +242,11 @@ public :
    TBranch        *b_HLT_HT650;   //!
    TBranch        *b_HLT_MET150;   //!
    TBranch        *b_HLT_ht350met100;   //!
+   TBranch        *b_HLT_SingleMu;   //!
+   TBranch        *b_HLT_DoubleEl;   //!
+   TBranch        *b_HLT_MuEG;   //!
+   TBranch        *b_HLT_DoubleMu;   //!
+   TBranch        *b_HLT_Photons;   //!
    TBranch        *b_nlep;   //!
    TBranch        *b_lep_pt;   //!
    TBranch        *b_lep_eta;   //!
@@ -289,6 +326,33 @@ public :
    TBranch        *b_genPart_charge;   //!
    TBranch        *b_genPart_motherId;   //!
    TBranch        *b_genPart_grandmaId;   //!
+   TBranch        *b_ngenLep;   //!
+   TBranch        *b_genLep_pt;   //!
+   TBranch        *b_genLep_eta;   //!
+   TBranch        *b_genLep_phi;   //!
+   TBranch        *b_genLep_mass;   //!
+   TBranch        *b_genLep_pdgId;   //!
+   TBranch        *b_genLep_status;   //!
+   TBranch        *b_genLep_charge;   //!
+   TBranch        *b_genLep_sourceId;   //!
+   TBranch        *b_ngenLepFromTau;   //!
+   TBranch        *b_genLepFromTau_pt;   //!
+   TBranch        *b_genLepFromTau_eta;   //!
+   TBranch        *b_genLepFromTau_phi;   //!
+   TBranch        *b_genLepFromTau_mass;   //!
+   TBranch        *b_genLepFromTau_pdgId;   //!
+   TBranch        *b_genLepFromTau_status;   //!
+   TBranch        *b_genLepFromTau_charge;   //!
+   TBranch        *b_genLepFromTau_sourceId;   //!
+   TBranch        *b_ngenTau;   //!
+   TBranch        *b_genTau_pt;   //!
+   TBranch        *b_genTau_eta;   //!
+   TBranch        *b_genTau_phi;   //!
+   TBranch        *b_genTau_mass;   //!
+   TBranch        *b_genTau_pdgId;   //!
+   TBranch        *b_genTau_status;   //!
+   TBranch        *b_genTau_charge;   //!
+   TBranch        *b_genTau_sourceId;   //!
    TBranch        *b_njet;   //!
    TBranch        *b_jet_pt;   //!
    TBranch        *b_jet_eta;   //!
@@ -410,6 +474,11 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_HT650", &HLT_HT650, &b_HLT_HT650);
    fChain->SetBranchAddress("HLT_MET150", &HLT_MET150, &b_HLT_MET150);
    fChain->SetBranchAddress("HLT_ht350met100", &HLT_ht350met100, &b_HLT_ht350met100);
+   fChain->SetBranchAddress("HLT_SingleMu", &HLT_SingleMu, &b_HLT_SingleMu);
+   fChain->SetBranchAddress("HLT_DoubleEl", &HLT_DoubleEl, &b_HLT_DoubleEl);
+   fChain->SetBranchAddress("HLT_MuEG", &HLT_MuEG, &b_HLT_MuEG);
+   fChain->SetBranchAddress("HLT_DoubleMu", &HLT_DoubleMu, &b_HLT_DoubleMu);
+   fChain->SetBranchAddress("HLT_Photons", &HLT_Photons, &b_HLT_Photons);
    fChain->SetBranchAddress("nlep", &nlep, &b_nlep);
    fChain->SetBranchAddress("lep_pt", lep_pt, &b_lep_pt);
    fChain->SetBranchAddress("lep_eta", lep_eta, &b_lep_eta);
@@ -489,6 +558,33 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("genPart_charge", genPart_charge, &b_genPart_charge);
    fChain->SetBranchAddress("genPart_motherId", genPart_motherId, &b_genPart_motherId);
    fChain->SetBranchAddress("genPart_grandmaId", genPart_grandmaId, &b_genPart_grandmaId);
+   fChain->SetBranchAddress("ngenLep", &ngenLep, &b_ngenLep);
+   fChain->SetBranchAddress("genLep_pt", genLep_pt, &b_genLep_pt);
+   fChain->SetBranchAddress("genLep_eta", genLep_eta, &b_genLep_eta);
+   fChain->SetBranchAddress("genLep_phi", genLep_phi, &b_genLep_phi);
+   fChain->SetBranchAddress("genLep_mass", genLep_mass, &b_genLep_mass);
+   fChain->SetBranchAddress("genLep_pdgId", genLep_pdgId, &b_genLep_pdgId);
+   fChain->SetBranchAddress("genLep_status", genLep_status, &b_genLep_status);
+   fChain->SetBranchAddress("genLep_charge", genLep_charge, &b_genLep_charge);
+   fChain->SetBranchAddress("genLep_sourceId", genLep_sourceId, &b_genLep_sourceId);
+   fChain->SetBranchAddress("ngenLepFromTau", &ngenLepFromTau, &b_ngenLepFromTau);
+   fChain->SetBranchAddress("genLepFromTau_pt", genLepFromTau_pt, &b_genLepFromTau_pt);
+   fChain->SetBranchAddress("genLepFromTau_eta", genLepFromTau_eta, &b_genLepFromTau_eta);
+   fChain->SetBranchAddress("genLepFromTau_phi", genLepFromTau_phi, &b_genLepFromTau_phi);
+   fChain->SetBranchAddress("genLepFromTau_mass", genLepFromTau_mass, &b_genLepFromTau_mass);
+   fChain->SetBranchAddress("genLepFromTau_pdgId", genLepFromTau_pdgId, &b_genLepFromTau_pdgId);
+   fChain->SetBranchAddress("genLepFromTau_status", genLepFromTau_status, &b_genLepFromTau_status);
+   fChain->SetBranchAddress("genLepFromTau_charge", genLepFromTau_charge, &b_genLepFromTau_charge);
+   fChain->SetBranchAddress("genLepFromTau_sourceId", genLepFromTau_sourceId, &b_genLepFromTau_sourceId);
+   fChain->SetBranchAddress("ngenTau", &ngenTau, &b_ngenTau);
+   fChain->SetBranchAddress("genTau_pt", genTau_pt, &b_genTau_pt);
+   fChain->SetBranchAddress("genTau_eta", genTau_eta, &b_genTau_eta);
+   fChain->SetBranchAddress("genTau_phi", genTau_phi, &b_genTau_phi);
+   fChain->SetBranchAddress("genTau_mass", genTau_mass, &b_genTau_mass);
+   fChain->SetBranchAddress("genTau_pdgId", genTau_pdgId, &b_genTau_pdgId);
+   fChain->SetBranchAddress("genTau_status", genTau_status, &b_genTau_status);
+   fChain->SetBranchAddress("genTau_charge", genTau_charge, &b_genTau_charge);
+   fChain->SetBranchAddress("genTau_sourceId", genTau_sourceId, &b_genTau_sourceId);
    fChain->SetBranchAddress("njet", &njet, &b_njet);
    fChain->SetBranchAddress("jet_pt", jet_pt, &b_jet_pt);
    fChain->SetBranchAddress("jet_eta", jet_eta, &b_jet_eta);
