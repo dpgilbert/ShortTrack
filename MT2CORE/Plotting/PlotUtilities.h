@@ -22,12 +22,12 @@ TCanvas *ComparePlots(TFile *f, const char *hist1, const char *hist2, const char
 		      unsigned int rebin, bool norm, bool log, unsigned int opt);
 TGraph GetROC(TFile *f, const char *hist1, const char *hist2, bool increasing);
 TGraph GetEff(TFile *f, const char *hist1, bool increasing);
-void plot1D(string title, float xval, double weight, std::map<string, TH1D*> &allhistos, 
-	    int numbinsx, float xmin, float xmax);
+void plot1D(string name, float xval, double weight, std::map<string, TH1D*> &allhistos, 
+	    string title, int numbinsx, float xmin, float xmax);
 TH1D* getHist1D(string title, std::map<string, TH1D*> &allhistos, 
 	    int numbinsx, float xmin, float xmax);
-void plot2D(string title, float xval, float yval, double weight, std::map<string, TH2D*> &allhistos, 
-	    int numbinsx, float xmin, float xmax, int numbinsy, float ymin, float ymax);
+void plot2D(string name, float xval, float yval, double weight, std::map<string, TH2D*> &allhistos, 
+	    string title, int numbinsx, float xmin, float xmax, int numbinsy, float ymin, float ymax);
 
 void plot1DUnderOverFlow(string title, double xval, double weight, std::map<string, TH1D*> &allhistos, 
 	    int numbinsx, double xmin, double xmax);

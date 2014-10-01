@@ -216,17 +216,17 @@ TGraph GetEff(TFile *f, const char *hist1, bool increasing)
 }
 
 
-void plot1D(string title, float xval, double weight, std::map<string, TH1D*> &allhistos, 
-	    int numbinsx, float xmin, float xmax)  
+void plot1D(string name, float xval, double weight, std::map<string, TH1D*> &allhistos, 
+	    string title, int numbinsx, float xmin, float xmax)  
 {
 
-  std::map<string, TH1D*>::iterator iter= allhistos.find(title);
+  std::map<string, TH1D*>::iterator iter= allhistos.find(name);
   if(iter == allhistos.end()) //no histo for this yet, so make a new one
     {
-      TH1D* currentHisto= new TH1D(title.c_str(), title.c_str(), numbinsx, xmin, xmax);
+      TH1D* currentHisto= new TH1D(name.c_str(), title.c_str(), numbinsx, xmin, xmax);
       currentHisto->Sumw2();
       currentHisto->Fill(xval, weight);
-      allhistos.insert(std::pair<string, TH1D*> (title,currentHisto) );
+      allhistos.insert(std::pair<string, TH1D*> (name,currentHisto) );
     }
   else // exists already, so just fill it
     {
@@ -382,16 +382,16 @@ void savePlots12(std::map<string, TH1D*> &h_1d, std::map<string, TH2D*> &h_2d, c
 }
 
 
-void plot2D(string title, float xval, float yval, double weight, std::map<string, TH2D*> &allhistos, 
-	    int numbinsx, float xmin, float xmax, int numbinsy, float ymin, float ymax){
+void plot2D(string name, float xval, float yval, double weight, std::map<string, TH2D*> &allhistos, 
+	    string title, int numbinsx, float xmin, float xmax, int numbinsy, float ymin, float ymax){
 
  
-  std::map<string, TH2D*>::iterator iter= allhistos.find(title);
+  std::map<string, TH2D*>::iterator iter= allhistos.find(name);
   if(iter == allhistos.end()) //no histo for this yet, so make a new one
     {
-      TH2D* currentHisto= new TH2D(title.c_str(), title.c_str(), numbinsx, xmin, xmax, numbinsy, ymin, ymax);
+      TH2D* currentHisto= new TH2D(name.c_str(), title.c_str(), numbinsx, xmin, xmax, numbinsy, ymin, ymax);
       currentHisto->Fill(xval, yval, weight);
-      allhistos.insert(std::pair<string, TH2D*> (title,currentHisto) );
+      allhistos.insert(std::pair<string, TH2D*> (name,currentHisto) );
     }
   else // exists already, so just fill it
     {
