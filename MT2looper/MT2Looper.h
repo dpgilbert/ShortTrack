@@ -31,9 +31,15 @@ class MT2Looper {
   void fillHistosSignalRegion(std::map<std::string, TH1D*>& h_1d, 
 			      const SignalRegionJets::value_type& signal_region = SignalRegionJets::nocut, 
 			      const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::nocut,
-			      const std::string& dir = "", const std::string& suffix = "");
+			      const std::string& dirname = "", const std::string& suffix = "");
+  void fillHistosCRSL(std::map<std::string, TH1D*>& h_1d, 
+		      const SignalRegionJets::value_type& signal_region = SignalRegionJets::nocut, 
+		      const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::nocut,
+		      const std::string& dirname = "", const std::string& suffix = "", const float mtcut = -1.);
   void fillHistos(std::map<std::string, TH1D*>& h_1d, 
 		  const std::string& dir = "", const std::string& suffix = ""); 
+  void fillHistosSingleLepton(std::map<std::string, TH1D*>& h_1d, 
+			      const std::string& dir = "", const std::string& suffix = ""); 
   
  private:
 
@@ -41,6 +47,8 @@ class MT2Looper {
   mt2tree t;
   float evtweight_;
   int nlepveto_;
+  float leppt_;
+  float mt_;
   std::map<std::string, TH1D*> h_1d_global;
 };
 

@@ -31,7 +31,30 @@ namespace mt2 {
         const SignalRegionHtMet::value_type& sr_htmet
     )
     {
-      if (!PassesSignalRegionBase(met, ht, njets, deltaPhiMin, diffMetMht, nlep, j1pt, j2pt)) return false;
+      if (!PassesSignalRegionBase(met, ht, njets, deltaPhiMin, diffMetMht, j1pt, j2pt)) return false;
+      if (nlep > 0) return false;
+      if ((sr_jets != SignalRegionJets::nocut) && (PassesSignalRegionJets(njets, nbtag) != sr_jets)) return false;
+      if ((sr_htmet != SignalRegionHtMet::nocut) && (PassesSignalRegionHtMet(met, ht) != sr_htmet)) return false;
+      return true;
+    }
+
+    //_________________________________________
+    // passes signal region, no lepton veto applied
+    bool PassesSignalRegionNoLepVeto
+    (
+        const float met,
+        const float ht,
+        const int njets,
+        const int nbtag,
+        const float deltaPhiMin,
+        const float diffMetMht,
+        const float j1pt,
+        const float j2pt,
+        const SignalRegionJets::value_type& sr_jets,
+        const SignalRegionHtMet::value_type& sr_htmet
+    )
+    {
+      if (!PassesSignalRegionBase(met, ht, njets, deltaPhiMin, diffMetMht, j1pt, j2pt)) return false;
       if ((sr_jets != SignalRegionJets::nocut) && (PassesSignalRegionJets(njets, nbtag) != sr_jets)) return false;
       if ((sr_htmet != SignalRegionHtMet::nocut) && (PassesSignalRegionHtMet(met, ht) != sr_htmet)) return false;
       return true;
@@ -46,17 +69,16 @@ namespace mt2 {
         const int njets,
         const float deltaPhiMin,
         const float diffMetMht,
-        const int nlep,
         const float j1pt,
         const float j2pt
     )
     {
 
-      bool ht450 = ht > 450;
-      bool met30 = met > 30;     
+      bool ht450 = ht > 450. && met > 200.;
+      bool ht750 = ht > 750. && met > 30.;     
       bool dijet100 = njets>=2 && j1pt > 100. && j2pt > 100.;
       bool cleaning = deltaPhiMin > 0.3 && diffMetMht < 70.; 
-      bool baseline = (cleaning && dijet100 && nlep==0 && ht450 && met30);
+      bool baseline = (cleaning && dijet100 && (ht450 || ht750));
 
       return baseline;
     }

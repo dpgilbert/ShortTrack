@@ -53,6 +53,20 @@ namespace mt2
         const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::nocut
     );
 
+    bool PassesSignalRegionNoLepVeto
+    (
+        const float met,
+        const float ht,
+        const int njets,
+        const int nbtag,
+        const float deltaPhiMin,
+        const float diffMetMht,
+        const float j1pt,
+        const float j2pt,
+        const SignalRegionJets::value_type& signal_region = SignalRegionJets::nocut,
+        const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::nocut
+    );
+
     // event level and cleaning cuts
     bool PassesEventSelection
     (
@@ -66,7 +80,6 @@ namespace mt2
         const int njets,
         const float deltaPhiMin,
         const float diffMetMht,
-        const int nlep,
         const float j1pt,
         const float j2pt
     );
