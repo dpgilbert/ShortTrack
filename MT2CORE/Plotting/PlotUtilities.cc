@@ -235,6 +235,25 @@ void plot1D(string name, float xval, double weight, std::map<string, TH1D*> &all
   
 }
 
+void plot1D(string name, float xval, double weight, std::map<string, TH1D*> &allhistos, 
+	    string title, int numbinsx, const float * xbins)  
+{
+
+  std::map<string, TH1D*>::iterator iter= allhistos.find(name);
+  if(iter == allhistos.end()) //no histo for this yet, so make a new one
+    {
+      TH1D* currentHisto= new TH1D(name.c_str(), title.c_str(), numbinsx, xbins);
+      currentHisto->Sumw2();
+      currentHisto->Fill(xval, weight);
+      allhistos.insert(std::pair<string, TH1D*> (name,currentHisto) );
+    }
+  else // exists already, so just fill it
+    {
+      (*iter).second->Fill(xval, weight);
+    }
+  
+}
+
 void plot1DUnderOverFlow(string title, double xval, double weight, std::map<string, TH1D*> &allhistos, 
       int numbinsx, double xmin, double xmax)  
 {
@@ -390,6 +409,26 @@ void plot2D(string name, float xval, float yval, double weight, std::map<string,
   if(iter == allhistos.end()) //no histo for this yet, so make a new one
     {
       TH2D* currentHisto= new TH2D(name.c_str(), title.c_str(), numbinsx, xmin, xmax, numbinsy, ymin, ymax);
+      currentHisto->Fill(xval, yval, weight);
+      allhistos.insert(std::pair<string, TH2D*> (name,currentHisto) );
+    }
+  else // exists already, so just fill it
+    {
+      (*iter).second->Fill(xval, yval, weight);
+    }
+
+  return;
+
+}
+
+void plot2D(string name, float xval, float yval, double weight, std::map<string, TH2D*> &allhistos, 
+	    string title, int numbinsx, const float * xbins, int numbinsy, const float * ybins){
+
+ 
+  std::map<string, TH2D*>::iterator iter= allhistos.find(name);
+  if(iter == allhistos.end()) //no histo for this yet, so make a new one
+    {
+      TH2D* currentHisto= new TH2D(name.c_str(), title.c_str(), numbinsx, xbins, numbinsy, ybins);
       currentHisto->Fill(xval, yval, weight);
       allhistos.insert(std::pair<string, TH2D*> (name,currentHisto) );
     }
