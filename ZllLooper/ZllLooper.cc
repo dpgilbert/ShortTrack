@@ -26,6 +26,12 @@
 
 
 bool printHtCalc = false;
+bool makeEffAccWeights = true;
+bool useEffAccWeights = true;
+const int nptbins = 12;
+const int netabins = 10;
+const float ptbins[] = {20, 25, 30, 40, 60, 80, 100, 150, 200, 300, 500, 800, 1100};
+const float etabins[] = {-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5};
 
 using namespace std;
 using namespace mt2;
@@ -34,7 +40,10 @@ class mt2tree;
 
 ZllLooper::ZllLooper(){
   // set some stuff here
+
 }
+
+
 ZllLooper::~ZllLooper(){
 
 };
@@ -52,40 +61,122 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
 
   cout << "[ZllLooper::loop] setting up histos" << endl;
 
-  std::map<std::string, TH1F*> h_1d_nocut;
-  std::map<std::string, TH1F*> h_1d_srH;
-  std::map<std::string, TH1F*> h_1d_srM;
-  std::map<std::string, TH1F*> h_1d_srL;
-  std::map<std::string, TH1F*> h_1d_sr1H;
-  std::map<std::string, TH1F*> h_1d_sr2H;
-  std::map<std::string, TH1F*> h_1d_sr3H;
-  std::map<std::string, TH1F*> h_1d_sr4H;
-  std::map<std::string, TH1F*> h_1d_sr5H;
-  std::map<std::string, TH1F*> h_1d_sr6H;
-  std::map<std::string, TH1F*> h_1d_sr7H;
-  std::map<std::string, TH1F*> h_1d_sr8H;
-  std::map<std::string, TH1F*> h_1d_sr9H;
-  std::map<std::string, TH1F*> h_1d_sr1M;
-  std::map<std::string, TH1F*> h_1d_sr2M;
-  std::map<std::string, TH1F*> h_1d_sr3M;
-  std::map<std::string, TH1F*> h_1d_sr4M;
-  std::map<std::string, TH1F*> h_1d_sr5M;
-  std::map<std::string, TH1F*> h_1d_sr6M;
-  std::map<std::string, TH1F*> h_1d_sr7M;
-  std::map<std::string, TH1F*> h_1d_sr8M;
-  std::map<std::string, TH1F*> h_1d_sr9M;
-  std::map<std::string, TH1F*> h_1d_sr1L;
-  std::map<std::string, TH1F*> h_1d_sr2L;
-  std::map<std::string, TH1F*> h_1d_sr3L;
-  std::map<std::string, TH1F*> h_1d_sr4L;
-  std::map<std::string, TH1F*> h_1d_sr5L;
-  std::map<std::string, TH1F*> h_1d_sr6L;
-  std::map<std::string, TH1F*> h_1d_sr7L;
-  std::map<std::string, TH1F*> h_1d_sr8L;
-  std::map<std::string, TH1F*> h_1d_sr9L;
-  std::map<std::string, TH2F*> h_2d;
+  std::map<std::string, TH1D*> h_1d_nocut;
+  std::map<std::string, TH1D*> h_1d_srH;
+  std::map<std::string, TH1D*> h_1d_srM;
+  std::map<std::string, TH1D*> h_1d_srL;
+  std::map<std::string, TH1D*> h_1d_sr1H;
+  std::map<std::string, TH1D*> h_1d_sr2H;
+  std::map<std::string, TH1D*> h_1d_sr3H;
+  std::map<std::string, TH1D*> h_1d_sr4H;
+  std::map<std::string, TH1D*> h_1d_sr5H;
+  std::map<std::string, TH1D*> h_1d_sr6H;
+  std::map<std::string, TH1D*> h_1d_sr7H;
+  std::map<std::string, TH1D*> h_1d_sr8H;
+  std::map<std::string, TH1D*> h_1d_sr9H;
+  std::map<std::string, TH1D*> h_1d_sr1M;
+  std::map<std::string, TH1D*> h_1d_sr2M;
+  std::map<std::string, TH1D*> h_1d_sr3M;
+  std::map<std::string, TH1D*> h_1d_sr4M;
+  std::map<std::string, TH1D*> h_1d_sr5M;
+  std::map<std::string, TH1D*> h_1d_sr6M;
+  std::map<std::string, TH1D*> h_1d_sr7M;
+  std::map<std::string, TH1D*> h_1d_sr8M;
+  std::map<std::string, TH1D*> h_1d_sr9M;
+  std::map<std::string, TH1D*> h_1d_sr1L;
+  std::map<std::string, TH1D*> h_1d_sr2L;
+  std::map<std::string, TH1D*> h_1d_sr3L;
+  std::map<std::string, TH1D*> h_1d_sr4L;
+  std::map<std::string, TH1D*> h_1d_sr5L;
+  std::map<std::string, TH1D*> h_1d_sr6L;
+  std::map<std::string, TH1D*> h_1d_sr7L;
+  std::map<std::string, TH1D*> h_1d_sr8L;
+  std::map<std::string, TH1D*> h_1d_sr9L;
+  std::map<std::string, TH2D*> h_2d;
   
-  
+
+    // Beginning of Efficiency and Acceptance
+
+
+  if (makeEffAccWeights) {
+    TString file1 =  "output/test/test.root";
+    TFile f1(file1, "READ");
+    if(!f1.IsOpen()){      
+      std::cout<<"!!! BAD !!! File "<<file1<<" can't be found, will not be used "<<std::endl;
+      makeEffAccWeights = false;
+    }
+    if (makeEffAccWeights) {
+      cout<<"Opened file "<<file1<<" for EffAccWeights!"<<endl;
+      if(f1.GetKey("h_AccDen_genVpt")==0){
+	std::cout<<"Histogram h_AccDen_genVpt not found in file "<<file1<<std::endl;
+	makeEffAccWeights = false;
+      }
+      if (makeEffAccWeights) {
+	// Get histograms
+	TH1D* AccDen= (TH1D*) f1.Get("h_AccDen_genVpt");
+	TH1D* AccNum= (TH1D*) f1.Get("h_AccNum_genVpt");
+	TH1D* InvMassEffDen= (TH1D*) f1.Get("h_InvMassEffDen_genVpt");
+	TH1D* InvMassEffNum= (TH1D*) f1.Get("h_InvMassEffNum_genVpt");
+	TH1D* GenInvMassEffDen= (TH1D*) f1.Get("h_GenInvMassEffDen_genVpt");
+	TH1D* GenInvMassEffNum= (TH1D*) f1.Get("h_GenInvMassEffNum_genVpt");
+	TH1D* GenDilepEffDen= (TH1D*) f1.Get("h_GenDilepEffDen_genVpt");
+	TH1D* GenDilepEffNum= (TH1D*) f1.Get("h_GenDilepEffNum_genVpt");
+	TH2D* LepEffDen_el= (TH2D*) f1.Get("h_LepEffDen_el");
+	TH2D* LepEffNum_el= (TH2D*) f1.Get("h_LepEffNum_el");
+	TH2D* LepEffDen_mu= (TH2D*) f1.Get("h_LepEffDen_mu");
+	TH2D* LepEffNum_mu= (TH2D*) f1.Get("h_LepEffNum_mu");
+	
+	outfile_->cd();
+	TH1D* Acc= (TH1D*) f1.Get("h_AccNum_genVpt")->Clone("LepAcc");
+	Acc->Reset();
+	Acc->SetTitle("LepAcc");
+	if (!Acc->GetSumw2N()) Acc->Sumw2();
+	
+	TH1D* InvMassEff= (TH1D*) f1.Get("h_InvMassEffNum_genVpt")->Clone("InvMassEff");
+	InvMassEff->Reset();
+	InvMassEff->SetTitle("InvMassEff");
+	if (!InvMassEff->GetSumw2N()) InvMassEff->Sumw2();
+
+	TH1D* GenInvMassEff= (TH1D*) f1.Get("h_GenInvMassEffNum_genVpt")->Clone("GenInvMassEff");
+	GenInvMassEff->Reset();
+	GenInvMassEff->SetTitle("GenInvMassEff");
+	if (!GenInvMassEff->GetSumw2N()) GenInvMassEff->Sumw2();
+	
+	TH1D* GenDilepEff= (TH1D*) f1.Get("h_GenDilepEffNum_genVpt")->Clone("GenDilepEff");
+	GenDilepEff->Reset();
+	GenDilepEff->SetTitle("GenDilepEff");
+	if (!GenDilepEff->GetSumw2N()) GenDilepEff->Sumw2();
+
+	TH2D* LepEff_el= (TH2D*) f1.Get("h_LepEffNum_el")->Clone("ElEff");
+	LepEff_el->Reset();
+	LepEff_el->SetTitle("LepEff_el");
+	if (!LepEff_el->GetSumw2N()) LepEff_el->Sumw2();
+	
+	TH2D* LepEff_mu= (TH2D*) f1.Get("h_LepEffNum_mu")->Clone("MuEff");
+	LepEff_mu->Reset();
+	LepEff_mu->SetTitle("LepEff_mu");
+	if (!LepEff_mu->GetSumw2N()) LepEff_mu->Sumw2();
+	// Divide them
+	Acc->Divide(AccNum, AccDen, 1.0, 1.0, "B");
+	InvMassEff->Divide(InvMassEffNum, InvMassEffDen, 1.0, 1.0, "B");
+	GenInvMassEff->Divide(GenInvMassEffNum, GenInvMassEffDen, 1.0, 1.0, "B");
+	GenDilepEff->Divide(GenDilepEffNum, GenDilepEffDen, 1.0, 1.0, "B");
+	LepEff_el->Divide(LepEffNum_el, LepEffDen_el, 1.0, 1.0, "B");
+	LepEff_mu->Divide(LepEffNum_mu, LepEffDen_mu, 1.0, 1.0, "B");
+	h_1d_global.insert(std::pair<std::string, TH1D*> ("Acc",Acc));
+	h_1d_global.insert(std::pair<std::string, TH1D*> ("InvMassEff",InvMassEff));
+	h_1d_global.insert(std::pair<std::string, TH1D*> ("GenInvMassEff",GenInvMassEff));
+	h_1d_global.insert(std::pair<std::string, TH1D*> ("GenDilepEff",GenDilepEff));
+	h_2d_global.insert(std::pair<std::string, TH2D*> ("LepEff_el",LepEff_el));
+	h_2d_global.insert(std::pair<std::string, TH2D*> ("LepEff_mu",LepEff_mu));
+      }
+    }	
+  }
+    // End of Efficiency and Acceptance
+
+
+
+
   
   // File Loop
   int nDuplicates = 0;
@@ -109,9 +200,9 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
 
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
-    //for( unsigned int event = 0; event < nEventsTree; ++event) {
+    for( unsigned int event = 0; event < nEventsTree; ++event) {
     //    for( unsigned int event = 0; event < nEventsTree/10.; ++event) {
-    for( unsigned int event = 0; event < 10000.; ++event) {
+    //for( unsigned int event = 0; event < 100; ++event) { 
 
       t.GetEntry(event);
 
@@ -127,7 +218,7 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
 	  fflush(stdout);
 	}
       }
-
+ 
       //---------------------
       // skip duplicates -- will need this eventually
       //---------------------
@@ -146,7 +237,7 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
       evtweight_ = t.evt_scale1fb * lumi;
 
       //---------------------
-      // Generator level plots
+      // Generator level plots to classify samples and find Z, l, g
       //---------------------
       float genVphi;
       float genVeta;
@@ -161,6 +252,7 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
       bool istau = false;
       bool isZ = false;
       bool isG = false;
+      bool isZnn = false;
       partonHT_ = 0;
       for (int i = 0; i < t.ngenPart; i++) {
 	//	if (t.genPart_pdgId[i]!=23 && t.genPart_pdgId[i]!=22 && t.genPart_status[i]==23) { 
@@ -192,57 +284,115 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
 	    genVeta = t.genPart_eta[i];
 	  }
 	  isG=true;
+	}
+	else if (  t.evt_id >= 600 && t.evt_id < 700 ) { // Z invisible
+	  if (t.genPart_pdgId[i]==23 && t.genPart_status[i]==22)  {	    
+	    genVpt_  = t.genPart_pt[i];
+	    genVphi = t.genPart_phi[i];
+	    genVeta = t.genPart_eta[i];
+	  }
+	  isZ=true;
+	  isZnn=true;
 	}	
       }
       if (!isG && !isZ) continue; // this should never happen
+      if (genVpt_ < 60) continue; // require this to match gamma+jets samples
 
-      // _________________________________________________
-      // Make plots for Acceptance and lepton efficiency:
-      // Denominator: e+mu, Zpt >70
+
+      //---------------------
+      // Plots for Acceptance and lepton efficiency
+      //---------------------
+      // Denominator: e+mu, Zpt >60
       // Numerator: Denom, lepPt>20, lepEta<2.5
-      if (isZ && !istau && genVpt_ > 70) {
-	plot1D("h_AccDen_partonHT",   partonHT_, evtweight_, h_1d_global, 120, 0, 3000);
+      if (isZ && !istau && !isZnn) {
+
+	float lep1pt = posLepPt > negLepPt ? posLepPt : negLepPt;
+	float lep1eta = posLepPt > negLepPt ? posLepEta : negLepEta;
+	float lep2pt = posLepPt > negLepPt ? negLepPt : posLepPt;
+	float lep2eta = posLepPt > negLepPt ? negLepEta : posLepEta;
+	plot1D("h_Z_lep1pt",   lep1pt, evtweight_, h_1d_global, "", 100, 0, 1000);
+	plot1D("h_Z_lep2pt",   lep2pt, evtweight_, h_1d_global, "", 100, 0, 1000);
+	plot1D("h_Z_lep1eta",   lep1eta, evtweight_, h_1d_global, "", 50, -5, 5);
+	plot1D("h_Z_lep2eta",   lep2eta, evtweight_, h_1d_global, "", 50, -5, 5);
+	plot2D("h__Z_lep1ptVeta",  lep1pt, lep1eta, evtweight_, h_2d, "",  100, 0, 1000, 50, -5, 5);
+	plot2D("h__Z_lep2ptVeta",  lep2pt, lep1eta, evtweight_, h_2d, "",  100, 0, 1000, 50, -5, 5);
+
+	plot1D("h_AccDen_genVpt",   genVpt_, evtweight_, h_1d_global, "", 200, 0, 2000);
 	if ( posLepPt > 20 && negLepPt > 20 && fabs(posLepEta)<2.5 && fabs(negLepEta)<2.5) { // In the fiducial region!
-	  plot1D("h_AccNum_partonHT",   partonHT_, evtweight_, h_1d_global, 120, 0, 3000);
+	  plot1D("h_AccNum_genVpt",   genVpt_, evtweight_, h_1d_global, "", 200, 0, 2000);
 
 	  // Lepton efficiency (include charge, since we will request it)
 	  std::string type = isel ? "el" : (ismu ? "mu" : "");
-	  plot2D("h_LepEffDen_"+type, posLepPt, posLepEta, evtweight_, h_2d, 98, 20, 1000, 10, -2.5, 2.5);
+	  plot2D("h_LepEffDen_"+type, (posLepPt), posLepEta, evtweight_, h_2d, "", nptbins, ptbins, netabins, etabins);
 	  bool foundIt = false;
 	  for (int i = 0; i < t.nlep; i++) {
 	    if (t.lep_charge[i] < 0) continue; // match with positive
 	    float thisDR = DeltaR(t.lep_eta[i], posLepEta, t.lep_phi[i], posLepPhi);
 	    if (thisDR<0.1) foundIt = true;
 	  }
-	  if (foundIt) plot2D("h_LepEffNum_"+type, negLepPt, negLepEta, evtweight_, h_2d, 98, 20, 1000, 10, -2.5, 2.5);
+	  if (foundIt) plot2D("h_LepEffNum_"+type,  (posLepPt), posLepEta, evtweight_, h_2d, "", nptbins, ptbins, netabins, etabins);
 	  // again for the other lepton
-	  plot2D("h_LepEffDen_"+type, negLepPt, negLepEta, evtweight_, h_2d, 98, 20, 1000, 10, -2.5, 2.5);
+	  plot2D("h_LepEffDen_"+type, (negLepPt), negLepEta, evtweight_, h_2d, "", nptbins, ptbins, netabins, etabins);
 	  foundIt = false;
 	  for (int i = 0; i < t.nlep; i++) {
 	    if (t.lep_charge[i] > 0) continue; // match with negative
 	    float thisDR = DeltaR(t.lep_eta[i], negLepEta, t.lep_phi[i], negLepPhi);
 	    if (thisDR<0.1) foundIt = true;
 	  }
-	  if (foundIt) plot2D("h_LepEffNum_"+type, negLepPt, negLepEta, evtweight_, h_2d, 98, 20, 1000, 10, -2.5, 2.5);
+	  if (foundIt) plot2D("h_LepEffNum_"+type, (negLepPt), negLepEta, evtweight_, h_2d, "", nptbins, ptbins, netabins, etabins);
+
+	  // Gen level efficiency of the invariant mass cut
+	  TLorentzVector l0(0,0,0,0);
+	  TLorentzVector l1(0,0,0,0);
+	  l0.SetPtEtaPhiM(posLepPt, posLepEta, posLepPhi, 0);
+	  l1.SetPtEtaPhiM(negLepPt, negLepEta, negLepPhi, 0);
+	  TLorentzVector Dilep = l0+l1;
+	  float genZmass = Dilep.M();
+	  plot1D("h_GenInvMassEffDen_genVpt",   genVpt_, evtweight_, h_1d_global, "", 200, 0, 2000);
+	  if ( fabs(genZmass - 90) < 20 ) 
+	    plot1D("h_GenInvMassEffNum_genVpt",   genVpt_, evtweight_, h_1d_global, "", 200, 0, 2000);
+
+	  // Dilepton efficiency
+	  plot1D("h_GenDilepEffDen_genVpt",   genVpt_, evtweight_, h_1d_global, "", 200, 0, 2000);
+	  if (t.nlep==2) {
+	    if (t.lep_charge[0] * t.lep_charge[1] == -1 && abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1])) { // OS SF
+	      plot1D("h_GenDilepEffNum_genVpt",   genVpt_, evtweight_, h_1d_global, "", 200, 0, 2000);
+	    }
+	  }
+	  // How does dilepton efficiency compare with the Eff1*Eff2 ?
+	  // Basically we want to compare the dilepton efficiency (above) with the efficiency using as "numerator" the Den*EffLep1*EffLep2
+	  if (makeEffAccWeights) {
+	    int PtEtaBin0 = h_2d_global["LepEff_mu"]->FindBin((lep1pt),  lep1eta);
+	    int PtEtaBin1 = h_2d_global["LepEff_mu"]->FindBin((lep2pt),  lep2eta);
+	    float lepEff0 = 1;
+	    float lepEff1 = 1;
+	    if (ismu) lepEff0 = h_2d_global["LepEff_mu"]->GetBinContent(PtEtaBin0);
+	    else lepEff0 = h_2d_global["LepEff_el"]->GetBinContent(PtEtaBin0);
+	    if (ismu) lepEff1 = h_2d_global["LepEff_mu"]->GetBinContent(PtEtaBin1);
+	    else lepEff1 = h_2d_global["LepEff_el"]->GetBinContent(PtEtaBin1);				  
+	    float EffEff = lepEff0 * lepEff1;
+	    plot1D("h_GenDilepEffNum_FromLepEff1LepEff2_genVpt",   genVpt_, evtweight_ * EffEff, h_1d_global, "", 200, 0, 2000);
+	  } 
 
 	  // Efficiency of the invariant mass cut
 	  if (t.nlep==2) {
 	    if (t.lep_charge[0] * t.lep_charge[1] == -1 && abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1])) { // OS SF
-	      plot1D("h_InvMassEffDen_partonHT",   partonHT_, evtweight_, h_1d_global, 120, 0, 3000);
+	      plot1D("h_InvMassEffDen_genVpt",   genVpt_, evtweight_, h_1d_global, "", 200, 0, 2000);
 	      if ( fabs(t.zll_invmass - 90) < 20 ) 
-		plot1D("h_InvMassEffNum_partonHT",   partonHT_, evtweight_, h_1d_global, 120, 0, 3000);
+		plot1D("h_InvMassEffNum_genVpt",   genVpt_, evtweight_, h_1d_global, "", 200, 0, 2000);
 	    }
 	  }
 	} // Leaving the fiducial region
       } // End denominator
 
 
-      if (genVpt_ < 70 || fabs(genVeta) > 2.5) continue; // require fiducial cuts
-
+      //---------------------
+      // Adapting Zll and Gamma+Jets events to look like Z invisible (Truth Level)
+      //---------------------
       float metPt  = t.met_genPt;
-      plot1D("h_truth_met_emutau",       metPt,       evtweight_, h_1d_global, 200, 0, 1500);	
-      if (istau) plot1D("h_truth_met_tau",       metPt,       evtweight_, h_1d_global, 200, 0, 1500);	
-      else { // taus ruin MET. they're also not part of our Z-->ll
+      plot1D("h_truth_met_emutau",       metPt,       evtweight_, h_1d_global, "", 200, 0, 1500);	
+      if (istau) plot1D("h_truth_met_tau",       metPt,       evtweight_, h_1d_global, "", 200, 0, 1500);	
+      else if (!isZnn) { // taus ruin MET. they're also not part of our Z-->ll
 	
 	// PS This could be an issue when Z-->tau-->mu give rise to real MET with no gamma+jets equivalent
 	
@@ -253,11 +403,11 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
 	genV.SetMagPhi(genVpt_, genVphi);
 	newMet += genV;
 	
-	plot1D("h_truth_Vpt",       genVpt_,       evtweight_, h_1d_global, 400, 0, 2000);
-	plot1D("h_truth_Veta",      genVeta,      evtweight_, h_1d_global, 100, -4, 4);
-	plot1D("h_truth_met",       metPt,        evtweight_, h_1d_global, 200, 0, 1500);
-	plot1D("h_truth_newmet",    newMet.Mod(), evtweight_, h_1d_global, 200, 0, 1500);
-	plot1D("h_truth_partonHT",   partonHT_, evtweight_, h_1d_global, 120, 0, 3000);
+	plot1D("h_truth_Vpt",       genVpt_,       evtweight_, h_1d_global, "", 400, 0, 2000);
+	plot1D("h_truth_Veta",      genVeta,      evtweight_, h_1d_global, "", 100, -4, 4);
+	plot1D("h_truth_met",       metPt,        evtweight_, h_1d_global, "", 200, 0, 1500);
+	plot1D("h_truth_newmet",    newMet.Mod(), evtweight_, h_1d_global, "", 200, 0, 1500);
+	plot1D("h_truth_partonHT",   partonHT_, evtweight_, h_1d_global, "", 120, 0, 3000);
 	
 	////// Recalculate HT with overlap removal ///////
 	HTdrMinV_ = 0;
@@ -329,36 +479,36 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
 	if (printHtCalc) cout<<"After removing vector boson, reco HT is "<< HTdrMinV_<<endl;
 	
 	// DR boson jet
-	plot1D("h_DRJetBoson",         minDr,   evtweight_, h_1d_global, 100, 0, 5);
-	if (genVpt_ < 100)      plot1D("h_DRJetBoson_VptLT100" ,         minDr,   evtweight_, h_1d_global, 100, 0, 5);
-	else if (genVpt_ < 200) plot1D("h_DRJetBoson_Vpt100200",         minDr,   evtweight_, h_1d_global, 100, 0, 5);
-	else if (genVpt_ < 400) plot1D("h_DRJetBoson_Vpt200400",         minDr,   evtweight_, h_1d_global, 100, 0, 5);
-	else if (genVpt_ < 600) plot1D("h_DRJetBoson_Vpt400600",         minDr,   evtweight_, h_1d_global, 100, 0, 5);
-	else if (genVpt_ < 800) plot1D("h_DRJetBoson_Vpt600800",         minDr,   evtweight_, h_1d_global, 100, 0, 5);
-	else if (genVpt_ <1000) plot1D("h_DRJetBoson_Vpt8001000",         minDr,   evtweight_, h_1d_global, 100, 0, 5);
-	else                    plot1D("h_DRJetBoson_VptGT1000" ,         minDr,   evtweight_, h_1d_global, 100, 0, 5);
-	plot1D("h_DRJet2Boson",  secondClosestDr,   evtweight_, h_1d_global, 100, 0, 5);
-	if (genVpt_ < 100)      plot1D("h_DRJet2Boson_VptLT100" ,   secondClosestDr,   evtweight_, h_1d_global, 100, 0, 5);
-	else if (genVpt_ < 200) plot1D("h_DRJet2Boson_Vpt100200",   secondClosestDr,   evtweight_, h_1d_global, 100, 0, 5);
-	else if (genVpt_ < 400) plot1D("h_DRJet2Boson_Vpt200400",   secondClosestDr,   evtweight_, h_1d_global, 100, 0, 5);
-	else if (genVpt_ < 600) plot1D("h_DRJet2Boson_Vpt400600",   secondClosestDr,   evtweight_, h_1d_global, 100, 0, 5);
-	else if (genVpt_ < 800) plot1D("h_DRJet2Boson_Vpt600800",   secondClosestDr,   evtweight_, h_1d_global, 100, 0, 5);
-	else if (genVpt_ <1000) plot1D("h_DRJet2Boson_Vpt8001000",   secondClosestDr,   evtweight_, h_1d_global, 100, 0, 5);
-	else                    plot1D("h_DRJet2Boson_VptGT1000" ,   secondClosestDr,   evtweight_, h_1d_global, 100, 0, 5);
+	plot1D("h_DRJetBoson",         minDr,   evtweight_, h_1d_global, "", 100, 0, 5);
+	if (genVpt_ < 100)      plot1D("h_DRJetBoson_VptLT100" ,         minDr,   evtweight_,  h_1d_global, "", 100, 0, 5);
+	else if (genVpt_ < 200) plot1D("h_DRJetBoson_Vpt100200",         minDr,   evtweight_,  h_1d_global, "", 100, 0, 5);
+	else if (genVpt_ < 400) plot1D("h_DRJetBoson_Vpt200400",         minDr,   evtweight_,  h_1d_global, "", 100, 0, 5);
+	else if (genVpt_ < 600) plot1D("h_DRJetBoson_Vpt400600",         minDr,   evtweight_,  h_1d_global, "", 100, 0, 5);
+	else if (genVpt_ < 800) plot1D("h_DRJetBoson_Vpt600800",         minDr,   evtweight_,  h_1d_global, "", 100, 0, 5);
+	else if (genVpt_ <1000) plot1D("h_DRJetBoson_Vpt8001000",         minDr,   evtweight_, h_1d_global, "", 100, 0, 5);
+	else                    plot1D("h_DRJetBoson_VptGT1000" ,         minDr,   evtweight_, h_1d_global, "", 100, 0, 5);
+	plot1D("h_DRJet2Boson",  secondClosestDr,   evtweight_, h_1d_global, "", 100, 0, 5);
+	if (genVpt_ < 100)      plot1D("h_DRJet2Boson_VptLT100" ,   secondClosestDr,   evtweight_,  h_1d_global, "", 100, 0, 5);
+	else if (genVpt_ < 200) plot1D("h_DRJet2Boson_Vpt100200",   secondClosestDr,   evtweight_,  h_1d_global, "", 100, 0, 5);
+	else if (genVpt_ < 400) plot1D("h_DRJet2Boson_Vpt200400",   secondClosestDr,   evtweight_,  h_1d_global, "", 100, 0, 5);
+	else if (genVpt_ < 600) plot1D("h_DRJet2Boson_Vpt400600",   secondClosestDr,   evtweight_,  h_1d_global, "", 100, 0, 5);
+	else if (genVpt_ < 800) plot1D("h_DRJet2Boson_Vpt600800",   secondClosestDr,   evtweight_,  h_1d_global, "", 100, 0, 5);
+	else if (genVpt_ <1000) plot1D("h_DRJet2Boson_Vpt8001000",   secondClosestDr,   evtweight_, h_1d_global, "", 100, 0, 5);
+	else                    plot1D("h_DRJet2Boson_VptGT1000" ,   secondClosestDr,   evtweight_, h_1d_global, "", 100, 0, 5);
 	if (minDr < 0.4) { 
 	  float deltaPt = (t.jet_pt[minDrIdx] - genVpt_)/genVpt_;
-	  plot1D("h_DPtJetBoson",  deltaPt,   evtweight_, h_1d_global, 100, 0, 5);
-	  if (genVpt_ < 100)      plot1D("h_DPtJetBoson_VptLT100" ,   deltaPt,   evtweight_, h_1d_global, 100, -3, 3);
-	  else if (genVpt_ < 200) plot1D("h_DPtJetBoson_Vpt100200",   deltaPt,   evtweight_, h_1d_global, 100, -3, 3);
-	  else if (genVpt_ < 400) plot1D("h_DPtJetBoson_Vpt200400",   deltaPt,   evtweight_, h_1d_global, 100, -3, 3);
-	  else if (genVpt_ < 600) plot1D("h_DPtJetBoson_Vpt400600",   deltaPt,   evtweight_, h_1d_global, 100, -3, 3);
-	  else if (genVpt_ < 800) plot1D("h_DPtJetBoson_Vpt600800",   deltaPt,   evtweight_, h_1d_global, 100, -3, 3);
-	  else if (genVpt_ <1000) plot1D("h_DPtJetBoson_Vpt8001000",   deltaPt,   evtweight_, h_1d_global, 100, -3, 3);
-	  else                    plot1D("h_DPtJetBoson_VptGT1000" ,   deltaPt,   evtweight_, h_1d_global, 100, -3, 3);
+	  plot1D("h_DPtJetBoson",  deltaPt,   evtweight_, h_1d_global, "", 100, 0, 5);
+	  if (genVpt_ < 100)      plot1D("h_DPtJetBoson_VptLT100" ,   deltaPt,   evtweight_,  h_1d_global, "", 100, -3, 3);
+	  else if (genVpt_ < 200) plot1D("h_DPtJetBoson_Vpt100200",   deltaPt,   evtweight_,  h_1d_global, "", 100, -3, 3);
+	  else if (genVpt_ < 400) plot1D("h_DPtJetBoson_Vpt200400",   deltaPt,   evtweight_,  h_1d_global, "", 100, -3, 3);
+	  else if (genVpt_ < 600) plot1D("h_DPtJetBoson_Vpt400600",   deltaPt,   evtweight_,  h_1d_global, "", 100, -3, 3);
+	  else if (genVpt_ < 800) plot1D("h_DPtJetBoson_Vpt600800",   deltaPt,   evtweight_,  h_1d_global, "", 100, -3, 3);
+	  else if (genVpt_ <1000) plot1D("h_DPtJetBoson_Vpt8001000",   deltaPt,   evtweight_, h_1d_global, "", 100, -3, 3);
+	  else                    plot1D("h_DPtJetBoson_VptGT1000" ,   deltaPt,   evtweight_, h_1d_global, "", 100, -3, 3);
 	}
-	plot1D("h_truth_recoHT",    stdHt, evtweight_, h_1d_global, 120, 0, 3000); // remove closest jets to lepton ...
-	plot1D("h_truth_recoHTdr04V",   HTdr04V_ , evtweight_, h_1d_global, 120, 0, 3000); // ... and all in DR04 with leptons/V
-	plot1D("h_truth_recoHTdrMinV",  HTdrMinV_, evtweight_, h_1d_global, 120, 0, 3000); // ... and only closest (in DR04) to V
+	plot1D("h_truth_recoHT",    stdHt, evtweight_, h_1d_global, "", 120, 0, 3000); // remove closest jets to lepton ...
+	plot1D("h_truth_recoHTdr04V",   HTdr04V_ , evtweight_, h_1d_global, "", 120, 0, 3000); // ... and all in DR04 with leptons/V
+	plot1D("h_truth_recoHTdrMinV",  HTdrMinV_, evtweight_, h_1d_global, "", 120, 0, 3000); // ... and only closest (in DR04) to V
 	
 	//if (fabs(t.ht - stdHt)> 10) cout<<"event "<<t.evt<<" has ht "<<t.ht<<" and stdHt "<<stdHt<<endl;
 	//	plot2D("h_DeltaHTvsHT")
@@ -403,39 +553,42 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
 //	    GenHTdrMinV_ = GenHTdrMinV_ - t.genjet_pt[minDrIdx];
 
 	
-      } 
+      }
       
       //      continue; // Exit after truth plots
 
 
       //---------------------
-      // basic event selection and cleaning
+      // Move to Reco level
       //---------------------
 
       if (!PassesEventSelection(t.nVert)) continue;
       
-      plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, 80, 0, 80);
-      plot1D("h_mt2raw",       t.mt2,       evtweight_, h_1d_global, 80, 0, 800);
-      plot1D("h_zll_mt2",       t.zll_mt2,       evtweight_, h_1d_global, 80, 0, 800);
-      plot1D("h_gamma_mt2",       t.gamma_mt2,       evtweight_, h_1d_global, 80, 0, 800);
+      plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, "", 80, 0, 80);
+      plot1D("h_mt2raw",       t.mt2,       evtweight_, h_1d_global, "", 80, 0, 800);
+      plot1D("h_zll_mt2",       t.zll_mt2,       evtweight_, h_1d_global, "", 80, 0, 800);
+      plot1D("h_gamma_mt2",       t.gamma_mt2,       evtweight_, h_1d_global, "", 80, 0, 800);
       
       nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nTaus20;
       //cout <<"t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, nlepveto_, t.jet_pt[0], t.jet_pt[1]"<<endl;
       //cout<<t.met_pt<<" "<<t.ht<<" "<<t.nJet40<<" "<<t.nBJet40<<" "<<t.deltaPhiMin<<" "<<t.diffMetMht<<" "<<nlepveto_<<" "<<t.jet_pt[0]<<" "<<t.jet_pt[1]<<endl;
       
-      
+      //---------------------
+      // Adapting Zll and Gamma+Jets events to look like Z invisible (Reco Level)
+      // Also simply running on Z invisible
+      //---------------------
       //______________________________
       // Select Z-->ll or gamma+jets
       if ( t.nlep == 2 && t.evt_id >= 700 && t.evt_id < 800 ) { // dilepton
 	//	if (t.ht < 400) continue; // require at least 100 HT apart from the Z
-	plot1D("h_lepCharge",    t.lep_charge[0], evtweight_, h_1d_global, 3, -1.5, 1.5);
-	plot1D("h_lepCharge",    t.lep_charge[1], evtweight_, h_1d_global, 3, -1.5, 1.5);
-	plot1D("h_lepChargeMult",    t.lep_charge[0] * t.lep_charge[1], evtweight_, h_1d_global, 3, -1.5, 1.5);
-	plot1D("h_lepPdgId", t.lep_pdgId[0]  , evtweight_, h_1d_global, 20, 0, 20);
-	plot1D("h_lepPdgId", t.lep_pdgId[1]  , evtweight_, h_1d_global, 20, 0, 20);
+	plot1D("h_lepCharge",    t.lep_charge[0], evtweight_, h_1d_global, "", 3, -1.5, 1.5);
+	plot1D("h_lepCharge",    t.lep_charge[1], evtweight_, h_1d_global, "", 3, -1.5, 1.5);
+	plot1D("h_lepChargeMult",    t.lep_charge[0] * t.lep_charge[1], evtweight_, h_1d_global, "", 3, -1.5, 1.5);
+	plot1D("h_lepPdgId", t.lep_pdgId[0]  , evtweight_, h_1d_global, "", 20, 0, 20);
+	plot1D("h_lepPdgId", t.lep_pdgId[1]  , evtweight_, h_1d_global, "", 20, 0, 20);
 	if ( t.lep_charge[0] * t.lep_charge[1] != -1 ) continue; // OS
 	if ( abs(t.lep_pdgId[0]) != abs(t.lep_pdgId[1])) continue; // SF (will also look at e-mu pairs later)
-	plot1D("h_zllInvMass", t.zll_invmass  , evtweight_, h_1d_global, 200, 0, 200);
+	plot1D("h_zllInvMass", t.zll_invmass  , evtweight_, h_1d_global, "", 200, 0, 200);
 	if ( fabs(t.zll_invmass - 90) > 20 ) continue; // 70-110 GeV mass
 	if (printHtCalc) cout<<"!! Event "<<t.evt<<" passes dilepton reco requirements !!"<<endl;
 	TLorentzVector l0(0,0,0,0);
@@ -458,7 +611,30 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
 	jetIdx0_          =  0;
 	jetIdx1_          =  1;
 
+	// Modified weight to estimate Z-->nn content
+	if (makeEffAccWeights) {
+	  evtweightZnn_ = evtweight_;
 
+	  int PtEtaBin0 = h_2d_global["LepEff_mu"]->FindBin((t.lep_pt[0]),  t.lep_eta[0]);
+	  int PtEtaBin1 = h_2d_global["LepEff_mu"]->FindBin((t.lep_pt[1]),  t.lep_eta[1]);
+	  int GenVptBin = h_1d_global["Acc"]->FindBin(Zinv_pt_);
+	  float lepEff0 = 1;
+	  float lepEff1 = 1;
+	  float lepAcc = 1;
+	  float invMassEff = 1;
+	  if (fabs(t.lep_pdgId[0])==13) lepEff0 = h_2d_global["LepEff_mu"]->GetBinContent(PtEtaBin0);
+	  else lepEff0 = h_2d_global["LepEff_el"]->GetBinContent(PtEtaBin0);
+	  if (fabs(t.lep_pdgId[1])==13) lepEff1 = h_2d_global["LepEff_mu"]->GetBinContent(PtEtaBin1);
+	  else lepEff1 = h_2d_global["LepEff_el"]->GetBinContent(PtEtaBin1);				  
+	  lepAcc = h_1d_global["Acc"]->GetBinContent(GenVptBin);
+	  invMassEff =h_1d_global["InvMassEff"]->GetBinContent(GenVptBin);
+	  float EffAcc = lepEff0 * lepEff1 * lepAcc * invMassEff;
+	  if (EffAcc<0.0001) {
+	    evtweightZnn_ = 0; // Watch out for large weights or divisions by 0...
+	    //cout<<evtweight_ <<" "<<evtweightZnn_<<endl;	  
+	  }
+	  else evtweightZnn_ = evtweight_ * 3. / EffAcc ; // *1.5 to include taus, *2 to go from leptons to neutrinos
+	} 
       }
       else if ( t.nGammas20 > 0 && t.nlep==0  && t.evt_id >= 200 && t.evt_id < 300 ) { // gamma
 	//	if (t.gamma_ht < 400) continue; // require at least 100 HT apart from the photon
@@ -496,9 +672,26 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
 	// Still need to require MET < 100 to reduce signal contamination 
 
       }
+      else if ( t.nlep==0  && t.evt_id >= 600 && t.evt_id < 700 ) { // Z invisible
+	//	if (t.gamma_ht < 400) continue; // require at least 100 HT apart from the photon
+	
+	mt2_Zinv_	  =  t.mt2;
+	nJet40_Zinv_	  =  t.nJet40;
+	nBJet40_Zinv_     =  t.nBJet40;
+	ht_Zinv_	  =  t.ht;
+	deltaPhiMin_Zinv_ =  t.deltaPhiMin;
+	diffMetMht_Zinv_  =  t.diffMetMht;
+	mht_pt_Zinv_	  =  t.mht_pt;
+	mht_phi_Zinv_     =  t.mht_phi;
+	met_pt_Zinv_	  =  t.met_pt;
+	met_phi_Zinv_     =  t.met_phi;   
+	Zinv_pt_          =  0;
+	jetIdx0_          =  0;
+	jetIdx1_          =  1;
+      }
       else continue; // Skip event if it is not a Z-->ll or Gamma+jets event
 
-      if (Zinv_pt_ < 70) continue; // Gamma+jets have a Generator cut at 60 GeV GammaPt
+      //if (Zinv_pt_ < 70) continue; // Gamma+jets have a Generator cut at 60 GeV GammaPt
 
       fillHistos(h_1d_nocut, "nocut");
 
@@ -552,6 +745,7 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
 
   outfile_->cd();
   savePlotsDir(h_1d_global,outfile_,"");
+  savePlots2Dir(h_2d_global,outfile_,"");
   savePlots2Dir(h_2d,outfile_,"");
   savePlotsDir(h_1d_nocut,outfile_,"nocut");
   savePlotsDir(h_1d_srH,outfile_,"srH");
@@ -605,44 +799,51 @@ void ZllLooper::loop(TChain* chain, std::string output_name){
   return;
 }
 
-void ZllLooper::fillHistosSignalRegion(std::map<std::string, TH1F*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dir, const std::string& suffix) {
+void ZllLooper::fillHistosSignalRegion(std::map<std::string, TH1D*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dir, const std::string& suffix) {
   
  if ( PassesSignalRegion(met_pt_Zinv_, ht_Zinv_, nJet40_Zinv_, nBJet40_Zinv_, deltaPhiMin_Zinv_, diffMetMht_Zinv_, 
 			 nlepveto_, t.jet_pt[jetIdx0_], t.jet_pt[jetIdx1_], sr_jets, sr_htmet) ) 
    {
-     plot1D("h_SignalRegion",  sr_jets+sr_htmet,   evtweight_, h_1d_global, 100, 0, 100);
+     plot1D("h_SignalRegion",  sr_jets+sr_htmet,   evtweight_, h_1d_global, "", 100, 0, 100);
+     plot1D("h_SignalRegion_wZll",  sr_jets+sr_htmet,   evtweightZnn_, h_1d_global, "", 100, 0, 100);
+
      fillHistos( h_1d, dir, suffix);
    }
  return;
 }
 
-void ZllLooper::fillHistos(std::map<std::string, TH1F*>& h_1d, const std::string& dirname, const std::string& s) {
+void ZllLooper::fillHistos(std::map<std::string, TH1D*>& h_1d, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
     dir = outfile_->mkdir(dirname.c_str());
   } 
   dir->cd();
 
-  plot1D("h_Events"+s,  1, 1, h_1d, 1, 0, 2);
-  plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, 1, 0, 2);
-  plot1D("h_mt2raw"+s,    t.mt2,   evtweight_, h_1d, 150, 0, 1500);
-  plot1D("h_mt2"+s,       mt2_Zinv_,   evtweight_, h_1d, 150, 0, 1500);
-  plot1D("h_metraw"+s,      t.met_pt,   evtweight_, h_1d, 150, 0, 1500);
-  plot1D("h_met"+s,       met_pt_Zinv_,   evtweight_, h_1d, 200, 0, 1500);
-  plot1D("h_ht"+s,        ht_Zinv_,   evtweight_, h_1d, 120, 0, 3000);
-  plot1D("h_htraw"+s,     t.ht,   evtweight_, h_1d, 120, 0, 3000);
-  plot1D("h_partonHT"+s,     partonHT_,   evtweight_, h_1d, 120, 0, 3000);
-  plot1D("h_HTdr04V",   HTdr04V_ , evtweight_, h_1d, 120, 0, 3000);
-  plot1D("h_HTdrMinV",  HTdrMinV_, evtweight_, h_1d, 120, 0, 3000);
-  plot1D("h_nJet40"+s,       nJet40_Zinv_,   evtweight_, h_1d, 15, 0, 15);
-  plot1D("h_nBJet40"+s,      nBJet40_Zinv_,   evtweight_, h_1d, 6, 0, 6);
-  plot1D("h_deltaPhiMin"+s,  deltaPhiMin_Zinv_,   evtweight_, h_1d, 32, 0, 3.2);
-  plot1D("h_diffMetMht"+s,   diffMetMht_Zinv_,   evtweight_, h_1d, 120, 0, 300);
-  plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, 10, 0, 10);
-  plot1D("h_J0pt"+s,         t.jet_pt[jetIdx0_],   evtweight_, h_1d, 200, 0, 500);
-  plot1D("h_J1pt"+s,         t.jet_pt[jetIdx1_],   evtweight_, h_1d, 200, 0, 500);
-  plot1D("h_Vpt"+s,          Zinv_pt_,   evtweight_, h_1d, 400, 0, 2000);
-  plot1D("h_truth_Vpt",       genVpt_,   evtweight_, h_1d, 400, 0, 2000);
+  plot1D("h_Events"+s,  1, 1, h_1d, "", 1, 0, 2);
+  plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, "", 1, 0, 2);
+  plot1D("h_Events_wZll"+s,  1,   evtweightZnn_, h_1d, "", 1, 0, 2);
+  plot1D("h_mt2raw"+s,    t.mt2,   evtweight_, h_1d, "", 150, 0, 1500);
+  plot1D("h_mt2"+s,       mt2_Zinv_,   evtweight_, h_1d, "", 150, 0, 1500);
+  plot1D("h_mt2_wZll"+s,       mt2_Zinv_,   evtweightZnn_, h_1d, "", 150, 0, 1500);
+  plot1D("h_metraw"+s,      t.met_pt,   evtweight_, h_1d, "", 150, 0, 1500);
+  plot1D("h_met"+s,       met_pt_Zinv_,   evtweight_, h_1d, "", 200, 0, 1500);
+  plot1D("h_met_wZll"+s,       met_pt_Zinv_,   evtweightZnn_, h_1d, "", 200, 0, 1500);
+  plot1D("h_ht"+s,        ht_Zinv_,   evtweight_, h_1d, "", 120, 0, 3000);
+  plot1D("h_ht_wZll"+s,        ht_Zinv_,   evtweightZnn_, h_1d, "", 120, 0, 3000);
+  plot1D("h_htraw"+s,     t.ht,   evtweight_, h_1d, "", 120, 0, 3000);
+  plot1D("h_partonHT"+s,     partonHT_,   evtweight_, h_1d, "", 120, 0, 3000);
+  plot1D("h_HTdr04V",   HTdr04V_ , evtweight_, h_1d, "", 120, 0, 3000);
+  plot1D("h_HTdrMinV",  HTdrMinV_, evtweight_, h_1d, "", 120, 0, 3000);
+  plot1D("h_nJet40"+s,       nJet40_Zinv_,   evtweight_, h_1d, "", 15, 0, 15);
+  plot1D("h_nBJet40"+s,      nBJet40_Zinv_,   evtweight_, h_1d, "", 6, 0, 6);
+  plot1D("h_deltaPhiMin"+s,  deltaPhiMin_Zinv_,   evtweight_, h_1d, "", 32, 0, 3.2);
+  plot1D("h_diffMetMht"+s,   diffMetMht_Zinv_,   evtweight_, h_1d, "", 120, 0, 300);
+  plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, "", 10, 0, 10);
+  plot1D("h_J0pt"+s,         t.jet_pt[jetIdx0_],   evtweight_, h_1d, "", 200, 0, 500);
+  plot1D("h_J1pt"+s,         t.jet_pt[jetIdx1_],   evtweight_, h_1d, "", 200, 0, 500);
+  plot1D("h_Vpt"+s,          Zinv_pt_,   evtweight_, h_1d, "", 400, 0, 2000);
+  plot1D("h_truth_Vpt",       genVpt_,   evtweight_, h_1d, "", 400, 0, 2000);
+  plot1D("h_truth_Vpt_wZll",       genVpt_,   evtweightZnn_, h_1d, "", 400, 0, 2000);
   
   outfile_->cd();
   return;
