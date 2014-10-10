@@ -219,7 +219,7 @@ TGraph GetEff(TFile *f, const char *hist1, bool increasing)
 void plot1D(string name, float xval, double weight, std::map<string, TH1D*> &allhistos, 
 	    string title, int numbinsx, float xmin, float xmax)  
 {
-
+  if (title=="") title=name; 
   std::map<string, TH1D*>::iterator iter= allhistos.find(name);
   if(iter == allhistos.end()) //no histo for this yet, so make a new one
     {
@@ -238,7 +238,7 @@ void plot1D(string name, float xval, double weight, std::map<string, TH1D*> &all
 void plot1D(string name, float xval, double weight, std::map<string, TH1D*> &allhistos, 
 	    string title, int numbinsx, const float * xbins)  
 {
-
+  if (title=="") title=name; 
   std::map<string, TH1D*>::iterator iter= allhistos.find(name);
   if(iter == allhistos.end()) //no histo for this yet, so make a new one
     {
@@ -404,7 +404,7 @@ void savePlots12(std::map<string, TH1D*> &h_1d, std::map<string, TH2D*> &h_2d, c
 void plot2D(string name, float xval, float yval, double weight, std::map<string, TH2D*> &allhistos, 
 	    string title, int numbinsx, float xmin, float xmax, int numbinsy, float ymin, float ymax){
 
- 
+  if (title=="") title=name; 
   std::map<string, TH2D*>::iterator iter= allhistos.find(name);
   if(iter == allhistos.end()) //no histo for this yet, so make a new one
     {
@@ -424,7 +424,7 @@ void plot2D(string name, float xval, float yval, double weight, std::map<string,
 void plot2D(string name, float xval, float yval, double weight, std::map<string, TH2D*> &allhistos, 
 	    string title, int numbinsx, const float * xbins, int numbinsy, const float * ybins){
 
- 
+  if (title=="") title=name; 
   std::map<string, TH2D*>::iterator iter= allhistos.find(name);
   if(iter == allhistos.end()) //no histo for this yet, so make a new one
     {
