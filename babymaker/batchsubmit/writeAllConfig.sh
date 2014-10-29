@@ -100,6 +100,11 @@ TAG="V00-00-04"
 ./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/SMS-T1qqqq_2J_mGl-1400_mLSP-100_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_T1qqqq_1400_100
 ./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/SMS-T1bbbb_2J_mGl-1000_mLSP-900_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_T1bbbb_1000_900
 ./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/SMS-T1bbbb_2J_mGl-1500_mLSP-100_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_T1bbbb_1500_100
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/SMS-T2tt_2J_mStop-425_mLSP-325_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_T2tt_425_325
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/SMS-T2tt_2J_mStop-500_mLSP-325_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_T2tt_500_325
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/SMS-T2tt_2J_mStop-650_mLSP-325_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_T2tt_650_325
+./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/SMS-T2tt_2J_mStop-850_mLSP-100_Tune4C_13TeV-madgraph-tauola/merged/ ${TAG}_T2tt_850_100
+
 
 # --- write submit script ---
 mkdir -p configs_${TAG}

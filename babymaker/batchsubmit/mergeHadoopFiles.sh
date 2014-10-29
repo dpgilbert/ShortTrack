@@ -103,6 +103,11 @@ run T1tttt_1200_800
 run T1qqqq_1400_100
 run T1bbbb_1000_900
 run T1bbbb_1500_100
+run T2tt_425_325
+run T2tt_500_325
+run T2tt_650_325
+run T2tt_850_100
+
 
 
 
