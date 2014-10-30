@@ -5,7 +5,7 @@ function run () {
     root -b -q mergeHadoopFiles.C\(\"${HADOOPDIR}/${TAG}_$1/\",\"${OUTPUTDIR}/$1.root\"\) >& log_merge_${TAG}_$1.txt &
 }
 
-TAG=V00-00-04
+TAG=V00-00-06
 
 HADOOPDIR=/hadoop/cms/store/user/${USER}/mt2babies/
 OUTPUTDIR=/nfs-6/userdata/mt2/$TAG/
@@ -107,6 +107,10 @@ run T2tt_425_325
 run T2tt_500_325
 run T2tt_650_325
 run T2tt_850_100
+run T2bb_900_100
+run T2bb_600_580
+run T2qq_1200_100
+run T2qq_600_550
 
 
 
