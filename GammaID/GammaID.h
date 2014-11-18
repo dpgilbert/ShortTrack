@@ -35,6 +35,8 @@ class GammaID {
 			      const std::string& dir = "", const std::string& suffix = "");
   void fillHistosPh(std::map<std::string, TH1D*>& h_1d, 
 		  const std::string& dir = "", int phIndex = 0); 
+  void fillGenIso(std::map<std::string, TH1D*>& h_1d, 
+		  const std::string& dir = "", int phIndex = 0, float iso = -1); 
   
  private:
 
