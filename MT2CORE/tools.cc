@@ -14,3 +14,7 @@ float DeltaPhi(float phi1, float phi2){
   while (dPhi <= -TMath::Pi()) dPhi += 2*TMath::Pi();
   return fabs(dPhi);
 }
+
+float MT(float pt1, float phi1, float pt2, float phi2){
+  return sqrt( 2 * pt1 * pt2 * ( 1 - cos( phi1 - phi2 ) ) );
+}
