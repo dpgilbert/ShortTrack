@@ -760,6 +760,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       vector<int>  vec_isoTrack_mcMatchId;
 
       nisoTrack = 0;
+      nPFLep5LowMT = 0;
+      nPFHad10LowMT = 0;
       for (unsigned int ipf = 0; ipf < pfcands_p4().size(); ipf++) {
  
         if(cms2.pfcands_charge().at(ipf) == 0) continue;
@@ -770,6 +772,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
  
         float absiso  = TrackIso(ipf);
         if(absiso >= min(0.2*cand_pt, 8.0)) continue;
+
+	float mt = MT(cand_pt,cms2.pfcands_p4().at(ipf).phi(),met_pt,met_phi);
+	int pdgId = abs(cms2.pfcands_particleId().at(ipf));
+
+	if ((cand_pt > 5.) && (pdgId == 11 || pdgId == 13) && (absiso/cand_pt < 0.2) && (mt < 100.)) ++nPFLep5LowMT;
+	if ((cand_pt > 10.) && (pdgId == 211) && (absiso/cand_pt < 0.1) && (mt < 100.)) ++nPFHad10LowMT;
 
         pt_ordering[cand_pt] = nisoTrack;
 
@@ -920,6 +928,8 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("isoTrack_dz", isoTrack_dz, "isoTrack_dz[nisoTrack]/F" );
   BabyTree_->Branch("isoTrack_pdgId", isoTrack_pdgId, "isoTrack_pdgId[nisoTrack]/I" );
   BabyTree_->Branch("isoTrack_mcMatchId", isoTrack_mcMatchId, "isoTrack_mcMatchId[nisoTrack]/I" );
+  BabyTree_->Branch("nPFLep5LowMT", &nPFLep5LowMT, "nPFLep5LowMT/I" );
+  BabyTree_->Branch("nPFHad10LowMT", &nPFHad10LowMT, "nPFHad10LowMT/I" );
   BabyTree_->Branch("ntau", &ntau, "ntau/I" );
   BabyTree_->Branch("tau_pt", tau_pt, "tau_pt[ntau]/F" );
   BabyTree_->Branch("tau_eta", tau_eta, "tau_eta[ntau]/F" );
@@ -1074,6 +1084,8 @@ void babyMaker::InitBabyNtuple () {
   HLT_Photons = -999;   
   nlep = -999;
   nisoTrack = -999;
+  nPFLep5LowMT = -999;
+  nPFHad10LowMT = -999;
   ntau = -999;
   ngamma = -999;
   ngenPart = -999;

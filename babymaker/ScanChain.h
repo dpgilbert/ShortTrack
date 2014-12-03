@@ -133,6 +133,9 @@ class babyMaker {
   Int_t             isoTrack_pdgId[max_nisoTrack];
   Int_t             isoTrack_mcMatchId[max_nisoTrack];
 
+  Int_t             nPFLep5LowMT;
+  Int_t             nPFHad10LowMT;
+
 //----- TAUS
   static const int max_ntau = 50;
   Int_t           ntau;
