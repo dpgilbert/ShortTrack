@@ -256,13 +256,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       vector<int>  vec_lep_tightCharge;
 
       vector<LorentzVector> p4sForHems;
-      LorentzVector sumMhtp4 = LorentzVector(0,0,0,0);
-
       vector<LorentzVector> p4sForHemsGamma;
-      LorentzVector sumMhtp4Gamma = LorentzVector(0,0,0,0);
-
       vector<LorentzVector> p4sForHemsZll;
-      LorentzVector sumMhtp4Zll = LorentzVector(0,0,0,0);
+
+      vector<LorentzVector> p4sForDphi;
+      vector<LorentzVector> p4sForDphiGamma;
+      vector<LorentzVector> p4sForDphiZll;
 
       //ELECTRONS
       nlep = 0;
@@ -298,9 +297,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
 	// for mt2 and mht in lepton control region
 	p4sForHems.push_back(cms2.els_p4().at(iEl));
-        sumMhtp4 -= cms2.els_p4().at(iEl); 
+	p4sForDphi.push_back(cms2.els_p4().at(iEl));
 	p4sForHemsGamma.push_back(cms2.els_p4().at(iEl));
-        sumMhtp4Gamma -= cms2.els_p4().at(iEl); 
+	p4sForDphiGamma.push_back(cms2.els_p4().at(iEl));
       }
 
       //MUONS
@@ -336,9 +335,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
 	// for mt2 and mht in lepton control region
 	p4sForHems.push_back(cms2.mus_p4().at(iMu));
-        sumMhtp4 -= cms2.mus_p4().at(iMu); 
+	p4sForDphi.push_back(cms2.mus_p4().at(iMu));
 	p4sForHemsGamma.push_back(cms2.mus_p4().at(iMu));
-        sumMhtp4Gamma -= cms2.mus_p4().at(iMu); 
+	p4sForDphiGamma.push_back(cms2.mus_p4().at(iMu));
       }
 
       // Implement pT ordering for leptons (it's irrelevant but easier for us to add than for ETH to remove)
@@ -429,7 +428,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	gamma_met_py += cms2.photons_p4().at(iGamma).py();
 	// do not use photon in MT2 or MHT calculations!!
 	//p4sForHemsGamma.push_back(cms2.photons_p4().at(iGamma));
-        //sumMhtp4Gamma -= cms2.photons_p4().at(iGamma); 
+	//p4sForDphiGamma.push_back(cms2.photons_p4().at(iGamma));
         
         ngamma++;
       }
@@ -535,16 +534,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       njet = 0;
       nJet40 = 0;
+      nFwdJet40 = 0;
       nBJet40 = 0;
-      ht = 0;
-      deltaPhiMin = 999;
 
       gamma_nJet40 = 0;
       gamma_nBJet40 = 0;
-      gamma_ht = 0;
-      gamma_deltaPhiMin = 999;
-
-      if (nlep == 2) zll_deltaPhiMin = 999;
 
       //now fill variables for jets that pass baseline selections and don't overlap with a lepton
       for(unsigned int passIdx = 0; passIdx < passJets.size(); passIdx++){
@@ -585,19 +579,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
         if( (jet_pt[njet] > 40.0) && (fabs(jet_eta[njet]) < 2.5) ){ 
           p4sForHems.push_back(cms2.pfjets_p4().at(iJet));
+          p4sForDphi.push_back(cms2.pfjets_p4().at(iJet));
           p4sForHemsZll.push_back(cms2.pfjets_p4().at(iJet));
+          p4sForDphiZll.push_back(cms2.pfjets_p4().at(iJet));
           nJet40++;
-          ht+= jet_pt[njet];
           if(jet_btagCSV[njet] >= 0.679) nBJet40++; //CSVM
-
-          sumMhtp4 -= cms2.pfjets_p4().at(iJet); 
-          sumMhtp4Zll -= cms2.pfjets_p4().at(iJet); 
-
-          if(nJet40 <= 4){
-            deltaPhiMin = min(deltaPhiMin, DeltaPhi(met_phi, jet_phi[njet]));
-	    if (nlep == 2) zll_deltaPhiMin = min(zll_deltaPhiMin, DeltaPhi(zll_met_phi, jet_phi[njet]));
-          }
-
 
 	  //check against list of jets that overlap with a photon
 	  bool isOverlapJetGamma = false;
@@ -609,18 +595,20 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  }
 	  if(!isOverlapJetGamma) {
 	    p4sForHemsGamma.push_back(cms2.pfjets_p4().at(iJet));
+	    p4sForDphiGamma.push_back(cms2.pfjets_p4().at(iJet));
 	    gamma_nJet40++;
-	    gamma_ht+= jet_pt[njet];
 	    if(jet_btagCSV[njet] >= 0.679) gamma_nBJet40++; //CSVM
 
-	    sumMhtp4Gamma -= cms2.pfjets_p4().at(iJet); 
-
-	    if(gamma_nJet40 <= 4){
-	      gamma_deltaPhiMin = min(gamma_deltaPhiMin, DeltaPhi(gamma_met_phi, jet_phi[njet]));
-	    }
 	  } // !isOverlapJetGamma
 
-        }
+        } // pt 40 eta 2.5
+	// accept jets out to eta 5.0 for dphi
+	else if ( (jet_pt[njet] > 40.0) && (fabs(jet_eta[njet]) < 5.0) ) {
+          nFwdJet40++;
+          p4sForDphi.push_back(cms2.pfjets_p4().at(iJet));
+          p4sForDphiZll.push_back(cms2.pfjets_p4().at(iJet));
+          p4sForDphiGamma.push_back(cms2.pfjets_p4().at(iJet));
+	}
 
         njet++;
       }
@@ -629,9 +617,24 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       sort(p4sForHems.begin(), p4sForHems.end(), sortByPt);
       sort(p4sForHemsGamma.begin(), p4sForHemsGamma.end(), sortByPt);
 
-      // MT2 and MHT
+      ht = 0;
+      deltaPhiMin = 999;
+      LorentzVector sumMhtp4 = LorentzVector(0,0,0,0);
+
+      // HT, MT2 and MHT
       vector<LorentzVector> hemJets;
       if(p4sForHems.size() > 1){
+
+	// compute HT, MHT using same objects as MT2 inputs
+	for (unsigned int ip4 = 0; ip4 < p4sForHems.size(); ++ip4) {
+	  ht += p4sForHems.at(ip4).pt();
+          sumMhtp4 -= p4sForHems.at(ip4);
+	}
+
+        // min(dphi) of 4 leading objects
+	for (unsigned int ip4 = 0; ip4 < p4sForDphi.size(); ++ip4) {
+          if(ip4 < 4) deltaPhiMin = min(deltaPhiMin, DeltaPhi( met_phi, p4sForDphi.at(ip4).phi() ));
+	}
 
         //Hemispheres used in MT2 calculation
         hemJets = getHemJets(p4sForHems);  
@@ -664,11 +667,27 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       TVector2 metVector = TVector2(met_pt*cos(met_phi), met_pt*sin(met_phi));
       diffMetMht = (mhtVector - metVector).Mod();
 
-      // MT2 and MHT for photon+jets regions
+      // HT, MT2 and MHT for photon+jets regions
       //  note that leptons are NOT included in this MT2 calculation
       //  would need to do lepton/photon overlap to include them
+
+      gamma_ht = 0;
+      gamma_deltaPhiMin = 999;
+      LorentzVector sumMhtp4Gamma = LorentzVector(0,0,0,0);
+
       vector<LorentzVector> hemJetsGamma;
       if(p4sForHemsGamma.size() > 1){
+
+	// compute HT, MHT using same objects as MT2 inputs
+	for (unsigned int ip4 = 0; ip4 < p4sForHemsGamma.size(); ++ip4) {
+	  gamma_ht += p4sForHemsGamma.at(ip4).pt();
+          sumMhtp4Gamma -= p4sForHemsGamma.at(ip4);
+	}
+
+        // min(dphi) of 4 leading objects
+	for (unsigned int ip4 = 0; ip4 < p4sForDphiGamma.size(); ++ip4) {
+          if(ip4 < 4) gamma_deltaPhiMin = min(gamma_deltaPhiMin, DeltaPhi( gamma_met_phi, p4sForDphiGamma.at(ip4).phi() ));
+	}
 
         //Hemispheres used in MT2 calculation
         hemJetsGamma = getHemJets(p4sForHemsGamma);  
@@ -684,11 +703,24 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       TVector2 metVectorGamma = TVector2(gamma_met_pt*cos(gamma_met_phi), gamma_met_pt*sin(gamma_met_phi));
       gamma_diffMetMht = (mhtVectorGamma - metVectorGamma).Mod();
 
-      // MT2 for Z-->ll control region
+      // MT2, MHT for Z-->ll control region
       if (nlep == 2) {
+        zll_deltaPhiMin = 999;
+        LorentzVector sumMhtp4Zll = LorentzVector(0,0,0,0);
+
 	vector<LorentzVector> hemJetsZll;
 	if(p4sForHemsZll.size() > 1){
 	  
+	  // compute MHT using same objects as MT2 inputs
+	  for (unsigned int ip4 = 0; ip4 < p4sForHemsZll.size(); ++ip4) {
+            sumMhtp4Zll -= p4sForHemsZll.at(ip4);
+	  }
+
+	  // min(dphi) of 4 leading objects
+	  for (unsigned int ip4 = 0; ip4 < p4sForDphiZll.size(); ++ip4) {
+	    if(ip4 < 4) zll_deltaPhiMin = min(zll_deltaPhiMin, DeltaPhi( zll_met_phi, p4sForDphiZll.at(ip4).phi() ));
+	  }
+
 	  //Hemispheres used in MT2 calculation
 	  hemJetsZll = getHemJets(p4sForHemsZll);  
 	  
@@ -870,6 +902,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("rho", &rho );
   BabyTree_->Branch("rho25", &rho25 );
   BabyTree_->Branch("nJet40", &nJet40 );
+  BabyTree_->Branch("nFwdJet40", &nFwdJet40 );
   BabyTree_->Branch("nBJet40", &nBJet40 );
   BabyTree_->Branch("nMuons10", &nMuons10 );
   BabyTree_->Branch("nElectrons10", &nElectrons10 );
@@ -1052,6 +1085,7 @@ void babyMaker::InitBabyNtuple () {
   rho = -999.0;
   rho25 = -999.0;
   nJet40 = -999;
+  nFwdJet40 = -999;
   nBJet40 = -999;
   nMuons10 = -999;
   nElectrons10 = -999;

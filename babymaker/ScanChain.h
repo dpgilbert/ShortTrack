@@ -59,6 +59,7 @@ class babyMaker {
   Float_t         rho25;
 
   Int_t           nJet40;
+  Int_t           nFwdJet40;
   Int_t           nBJet40;
   Int_t           nMuons10;
   Int_t           nElectrons10;
