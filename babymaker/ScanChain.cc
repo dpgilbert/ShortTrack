@@ -388,6 +388,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	l1.SetPtEtaPhiM(lep_pt[1], lep_eta[1], lep_phi[1], lep_mass[1]);
 	TLorentzVector ll = l0+l1;
 	zll_invmass = ll.M();
+	zll_pt = ll.Pt();
+	zll_eta = ll.Eta();
+	zll_phi = ll.Phi();
       }
 
       //PHOTONS
@@ -974,6 +977,9 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("zll_mht_pt", &zll_mht_pt );
   BabyTree_->Branch("zll_mht_phi", &zll_mht_phi );
   BabyTree_->Branch("zll_invmass", &zll_invmass );
+  BabyTree_->Branch("zll_pt", &zll_pt );
+  BabyTree_->Branch("zll_eta", &zll_eta );
+  BabyTree_->Branch("zll_phi", &zll_phi );
   BabyTree_->Branch("ngenPart", &ngenPart, "ngenPart/I" );
   BabyTree_->Branch("genPart_pt", genPart_pt, "genPart_pt[ngenPart]/F" );
   BabyTree_->Branch("genPart_eta", genPart_eta, "genPart_eta[ngenPart]/F" );
@@ -1108,6 +1114,9 @@ void babyMaker::InitBabyNtuple () {
   zll_mht_pt = -999.0;
   zll_mht_phi = -999.0;
   zll_invmass = -999.0;
+  zll_pt = -999.0;
+  zll_eta = -999.0;
+  zll_phi = -999.0;
 
 
   
