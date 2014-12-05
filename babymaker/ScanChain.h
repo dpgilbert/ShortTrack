@@ -59,7 +59,6 @@ class babyMaker {
   Float_t         rho25;
 
   Int_t           nJet40;
-  Int_t           nFwdJet40;
   Int_t           nBJet40;
   Int_t           nMuons10;
   Int_t           nElectrons10;
@@ -68,6 +67,7 @@ class babyMaker {
 
   Float_t         deltaPhiMin;
   Float_t         diffMetMht;
+  Float_t         minMTBMet;
 
   Float_t         ht;
   Float_t         mt2;

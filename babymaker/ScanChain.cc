@@ -534,8 +534,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       njet = 0;
       nJet40 = 0;
-      nFwdJet40 = 0;
       nBJet40 = 0;
+      minMTBMet = 999999.;
 
       gamma_nJet40 = 0;
       gamma_nBJet40 = 0;
@@ -583,7 +583,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
           p4sForHemsZll.push_back(cms2.pfjets_p4().at(iJet));
           p4sForDphiZll.push_back(cms2.pfjets_p4().at(iJet));
           nJet40++;
-          if(jet_btagCSV[njet] >= 0.679) nBJet40++; //CSVM
+	  //CSVM
+          if(jet_btagCSV[njet] >= 0.679) {
+	    nBJet40++; 
+	    float mt = MT(jet_pt[njet],jet_phi[njet],met_pt,met_phi);
+	    if (mt < minMTBMet) minMTBMet = mt;
+	  }
 
 	  //check against list of jets that overlap with a photon
 	  bool isOverlapJetGamma = false;
@@ -602,9 +607,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  } // !isOverlapJetGamma
 
         } // pt 40 eta 2.5
-	// accept jets out to eta 5.0 for dphi
-	else if ( (jet_pt[njet] > 40.0) && (fabs(jet_eta[njet]) < 5.0) ) {
-          nFwdJet40++;
+	// accept jets out to eta 5.2 for dphi
+	else if ( (jet_pt[njet] > 40.0) && (fabs(jet_eta[njet]) < 5.2) ) {
           p4sForDphi.push_back(cms2.pfjets_p4().at(iJet));
           p4sForDphiZll.push_back(cms2.pfjets_p4().at(iJet));
           p4sForDphiGamma.push_back(cms2.pfjets_p4().at(iJet));
@@ -615,31 +619,35 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       // sort vectors by pt for hemisphere calculation
       sort(p4sForHems.begin(), p4sForHems.end(), sortByPt);
+      sort(p4sForDphi.begin(), p4sForDphi.end(), sortByPt);
       sort(p4sForHemsGamma.begin(), p4sForHemsGamma.end(), sortByPt);
+      sort(p4sForDphiGamma.begin(), p4sForDphiGamma.end(), sortByPt);
+      sort(p4sForHemsZll.begin(), p4sForHemsZll.end(), sortByPt);
+      sort(p4sForDphiZll.begin(), p4sForDphiZll.end(), sortByPt);
 
       ht = 0;
       deltaPhiMin = 999;
       LorentzVector sumMhtp4 = LorentzVector(0,0,0,0);
 
       // HT, MT2 and MHT
+
+      // compute HT, MHT using same objects as MT2 inputs
+      for (unsigned int ip4 = 0; ip4 < p4sForHems.size(); ++ip4) {
+	ht += p4sForHems.at(ip4).pt();
+	sumMhtp4 -= p4sForHems.at(ip4);
+      }
+
+      // min(dphi) of 4 leading objects
+      for (unsigned int ip4 = 0; ip4 < p4sForDphi.size(); ++ip4) {
+	if(ip4 < 4) deltaPhiMin = min(deltaPhiMin, DeltaPhi( met_phi, p4sForDphi.at(ip4).phi() ));
+      }
+
       vector<LorentzVector> hemJets;
       if(p4sForHems.size() > 1){
+	//Hemispheres used in MT2 calculation
+	hemJets = getHemJets(p4sForHems);  
 
-	// compute HT, MHT using same objects as MT2 inputs
-	for (unsigned int ip4 = 0; ip4 < p4sForHems.size(); ++ip4) {
-	  ht += p4sForHems.at(ip4).pt();
-          sumMhtp4 -= p4sForHems.at(ip4);
-	}
-
-        // min(dphi) of 4 leading objects
-	for (unsigned int ip4 = 0; ip4 < p4sForDphi.size(); ++ip4) {
-          if(ip4 < 4) deltaPhiMin = min(deltaPhiMin, DeltaPhi( met_phi, p4sForDphi.at(ip4).phi() ));
-	}
-
-        //Hemispheres used in MT2 calculation
-        hemJets = getHemJets(p4sForHems);  
-
-        mt2 = HemMT2(met_pt, met_phi, hemJets.at(0), hemJets.at(1));
+	mt2 = HemMT2(met_pt, met_phi, hemJets.at(0), hemJets.at(1));
       
 	// order hemispheres by pt for saving
 	int idx_lead = 0;
@@ -649,15 +657,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  idx_subl = 0;
 	}
 
-        pseudoJet1_pt   = hemJets.at(idx_lead).pt();
-        pseudoJet1_eta  = hemJets.at(idx_lead).eta();
-        pseudoJet1_phi  = hemJets.at(idx_lead).phi();
-        pseudoJet1_mass = hemJets.at(idx_lead).mass();
-        pseudoJet2_pt   = hemJets.at(idx_subl).pt();
-        pseudoJet2_eta  = hemJets.at(idx_subl).eta();
-        pseudoJet2_phi  = hemJets.at(idx_subl).phi();
-        pseudoJet2_mass = hemJets.at(idx_subl).mass();
-
+	pseudoJet1_pt   = hemJets.at(idx_lead).pt();
+	pseudoJet1_eta  = hemJets.at(idx_lead).eta();
+	pseudoJet1_phi  = hemJets.at(idx_lead).phi();
+	pseudoJet1_mass = hemJets.at(idx_lead).mass();
+	pseudoJet2_pt   = hemJets.at(idx_subl).pt();
+	pseudoJet2_eta  = hemJets.at(idx_subl).eta();
+	pseudoJet2_phi  = hemJets.at(idx_subl).phi();
+	pseudoJet2_mass = hemJets.at(idx_subl).mass();
       }
 
       mht_pt  = sumMhtp4.pt();
@@ -675,25 +682,23 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       gamma_deltaPhiMin = 999;
       LorentzVector sumMhtp4Gamma = LorentzVector(0,0,0,0);
 
+      // compute HT, MHT using same objects as MT2 inputs
+      for (unsigned int ip4 = 0; ip4 < p4sForHemsGamma.size(); ++ip4) {
+	gamma_ht += p4sForHemsGamma.at(ip4).pt();
+	sumMhtp4Gamma -= p4sForHemsGamma.at(ip4);
+      }
+
+      // min(dphi) of 4 leading objects
+      for (unsigned int ip4 = 0; ip4 < p4sForDphiGamma.size(); ++ip4) {
+	if(ip4 < 4) gamma_deltaPhiMin = min(gamma_deltaPhiMin, DeltaPhi( gamma_met_phi, p4sForDphiGamma.at(ip4).phi() ));
+      }
+
       vector<LorentzVector> hemJetsGamma;
       if(p4sForHemsGamma.size() > 1){
+	//Hemispheres used in MT2 calculation
+	hemJetsGamma = getHemJets(p4sForHemsGamma);  
 
-	// compute HT, MHT using same objects as MT2 inputs
-	for (unsigned int ip4 = 0; ip4 < p4sForHemsGamma.size(); ++ip4) {
-	  gamma_ht += p4sForHemsGamma.at(ip4).pt();
-          sumMhtp4Gamma -= p4sForHemsGamma.at(ip4);
-	}
-
-        // min(dphi) of 4 leading objects
-	for (unsigned int ip4 = 0; ip4 < p4sForDphiGamma.size(); ++ip4) {
-          if(ip4 < 4) gamma_deltaPhiMin = min(gamma_deltaPhiMin, DeltaPhi( gamma_met_phi, p4sForDphiGamma.at(ip4).phi() ));
-	}
-
-        //Hemispheres used in MT2 calculation
-        hemJetsGamma = getHemJets(p4sForHemsGamma);  
-
-        gamma_mt2 = HemMT2(gamma_met_pt, gamma_met_phi, hemJetsGamma.at(0), hemJetsGamma.at(1));
-
+	gamma_mt2 = HemMT2(gamma_met_pt, gamma_met_phi, hemJetsGamma.at(0), hemJetsGamma.at(1));
       }
 
       gamma_mht_pt  = sumMhtp4Gamma.pt();
@@ -708,25 +713,23 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         zll_deltaPhiMin = 999;
         LorentzVector sumMhtp4Zll = LorentzVector(0,0,0,0);
 
+	// compute MHT using same objects as MT2 inputs
+	for (unsigned int ip4 = 0; ip4 < p4sForHemsZll.size(); ++ip4) {
+	  sumMhtp4Zll -= p4sForHemsZll.at(ip4);
+	}
+
+	// min(dphi) of 4 leading objects
+	for (unsigned int ip4 = 0; ip4 < p4sForDphiZll.size(); ++ip4) {
+	  if(ip4 < 4) zll_deltaPhiMin = min(zll_deltaPhiMin, DeltaPhi( zll_met_phi, p4sForDphiZll.at(ip4).phi() ));
+	}
+
 	vector<LorentzVector> hemJetsZll;
 	if(p4sForHemsZll.size() > 1){
-	  
-	  // compute MHT using same objects as MT2 inputs
-	  for (unsigned int ip4 = 0; ip4 < p4sForHemsZll.size(); ++ip4) {
-            sumMhtp4Zll -= p4sForHemsZll.at(ip4);
-	  }
-
-	  // min(dphi) of 4 leading objects
-	  for (unsigned int ip4 = 0; ip4 < p4sForDphiZll.size(); ++ip4) {
-	    if(ip4 < 4) zll_deltaPhiMin = min(zll_deltaPhiMin, DeltaPhi( zll_met_phi, p4sForDphiZll.at(ip4).phi() ));
-	  }
-
 	  //Hemispheres used in MT2 calculation
 	  hemJetsZll = getHemJets(p4sForHemsZll);  
 	  
 	  zll_mt2 = HemMT2(zll_met_pt, zll_met_phi, hemJetsZll.at(0), hemJetsZll.at(1));
-	  
-	}
+	}	  
 	
 	zll_mht_pt  = sumMhtp4Zll.pt();
 	zll_mht_phi = sumMhtp4Zll.phi();
@@ -734,6 +737,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	TVector2 mhtVectorZll = TVector2(zll_mht_pt*cos(zll_mht_phi), zll_mht_pt*sin(zll_mht_phi));
 	TVector2 metVectorZll = TVector2(zll_met_pt*cos(zll_met_phi), zll_met_pt*sin(zll_met_phi));
 	zll_diffMetMht = (mhtVectorZll - metVectorZll).Mod();
+
       }
       
       //GEN MT2
@@ -902,7 +906,6 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("rho", &rho );
   BabyTree_->Branch("rho25", &rho25 );
   BabyTree_->Branch("nJet40", &nJet40 );
-  BabyTree_->Branch("nFwdJet40", &nFwdJet40 );
   BabyTree_->Branch("nBJet40", &nBJet40 );
   BabyTree_->Branch("nMuons10", &nMuons10 );
   BabyTree_->Branch("nElectrons10", &nElectrons10 );
@@ -910,6 +913,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("nGammas20", &nGammas20 );
   BabyTree_->Branch("deltaPhiMin", &deltaPhiMin );
   BabyTree_->Branch("diffMetMht", &diffMetMht );
+  BabyTree_->Branch("minMTBMet", &minMTBMet );
   BabyTree_->Branch("ht", &ht );
   BabyTree_->Branch("mt2", &mt2 );
   BabyTree_->Branch("mt2_gen", &mt2_gen );
@@ -1085,7 +1089,6 @@ void babyMaker::InitBabyNtuple () {
   rho = -999.0;
   rho25 = -999.0;
   nJet40 = -999;
-  nFwdJet40 = -999;
   nBJet40 = -999;
   nMuons10 = -999;
   nElectrons10 = -999;
@@ -1093,6 +1096,7 @@ void babyMaker::InitBabyNtuple () {
   nGammas20 = -999;
   deltaPhiMin = -999.0;
   diffMetMht = -999.0;
+  minMTBMet = -999.0;
   ht = -999.0;
   mt2 = -999.0;
   mt2_gen = -999.0;
