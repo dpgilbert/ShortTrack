@@ -68,6 +68,8 @@ class babyMaker {
   Float_t         deltaPhiMin;
   Float_t         diffMetMht;
   Float_t         minMTBMet;
+  Float_t         gamma_minMTBMet;
+  Float_t         zll_minMTBMet;
 
   Float_t         ht;
   Float_t         mt2;
@@ -194,6 +196,7 @@ class babyMaker {
   Float_t         zll_pt;
   Float_t         zll_eta;
   Float_t         zll_phi;
+  Float_t         zll_ht;
 
 //----- GEN PARTICLES
   static const int max_ngenPart = 200;

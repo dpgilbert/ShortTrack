@@ -298,8 +298,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	// for mt2 and mht in lepton control region
 	p4sForHems.push_back(cms2.els_p4().at(iEl));
 	p4sForDphi.push_back(cms2.els_p4().at(iEl));
-	p4sForHemsGamma.push_back(cms2.els_p4().at(iEl));
-	p4sForDphiGamma.push_back(cms2.els_p4().at(iEl));
       }
 
       //MUONS
@@ -336,8 +334,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	// for mt2 and mht in lepton control region
 	p4sForHems.push_back(cms2.mus_p4().at(iMu));
 	p4sForDphi.push_back(cms2.mus_p4().at(iMu));
-	p4sForHemsGamma.push_back(cms2.mus_p4().at(iMu));
-	p4sForDphiGamma.push_back(cms2.mus_p4().at(iMu));
       }
 
       // Implement pT ordering for leptons (it's irrelevant but easier for us to add than for ETH to remove)
@@ -569,11 +565,39 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       gamma_nJet40 = 0;
       gamma_nBJet40 = 0;
+      gamma_minMTBMet = 999999.;
+      zll_minMTBMet = 999999.;
 
       //now fill variables for jets that pass baseline selections and don't overlap with a lepton
       for(unsigned int passIdx = 0; passIdx < passJets.size(); passIdx++){
 
         int iJet = passJets.at(passIdx);
+
+	// fill gamma_XXX variables before checking for lepton overlap.
+        if( ( cms2.pfjets_p4().at(iJet).pt() > 40.0) && (fabs(cms2.pfjets_p4().at(iJet).eta()) < 2.5) ){ 
+	  //check against list of jets that overlap with a photon
+	  bool isOverlapJetGamma = false;
+	  for(unsigned int j=0; j<removedJetsGamma.size(); j++){
+	    if(iJet == removedJetsGamma.at(j)){
+	      isOverlapJetGamma = true;
+	      break;
+	    }
+	  }
+	  if(!isOverlapJetGamma) {
+	    p4sForHemsGamma.push_back(cms2.pfjets_p4().at(iJet));
+	    p4sForDphiGamma.push_back(cms2.pfjets_p4().at(iJet));
+	    gamma_nJet40++;
+	    if(cms2.pfjets_combinedSecondaryVertexBJetTag().at(iJet) >= 0.679) { //CSVM
+	      gamma_nBJet40++; 
+	      float mt = MT( cms2.pfjets_p4().at(iJet).pt(),cms2.pfjets_p4().at(iJet).phi(),gamma_met_pt,gamma_met_phi);
+	      if (mt < gamma_minMTBMet) gamma_minMTBMet = mt;	 
+	    }   
+	  } 
+        } // accept jets out to eta 5.2 for dphi
+	else if ( (cms2.pfjets_p4().at(iJet).pt() > 40.0) && (fabs(cms2.pfjets_p4().at(iJet).eta()) < 5.2) ) {
+          p4sForDphiGamma.push_back(cms2.pfjets_p4().at(iJet));
+	}
+
 
         //check against list of jets that overlap with a lepton
         bool isOverlapJet = false;
@@ -618,30 +642,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	    nBJet40++; 
 	    float mt = MT(jet_pt[njet],jet_phi[njet],met_pt,met_phi);
 	    if (mt < minMTBMet) minMTBMet = mt;
-	  }
-
-	  //check against list of jets that overlap with a photon
-	  bool isOverlapJetGamma = false;
-	  for(unsigned int j=0; j<removedJetsGamma.size(); j++){
-	    if(iJet == removedJetsGamma.at(j)){
-	      isOverlapJetGamma = true;
-	      break;
+	    if (nlep == 2) {
+	      float zllmt = MT(jet_pt[njet],jet_phi[njet],zll_met_pt,zll_met_phi);
+	      if (zllmt < zll_minMTBMet) zll_minMTBMet = zllmt;
 	    }
 	  }
-	  if(!isOverlapJetGamma) {
-	    p4sForHemsGamma.push_back(cms2.pfjets_p4().at(iJet));
-	    p4sForDphiGamma.push_back(cms2.pfjets_p4().at(iJet));
-	    gamma_nJet40++;
-	    if(jet_btagCSV[njet] >= 0.679) gamma_nBJet40++; //CSVM
-
-	  } // !isOverlapJetGamma
-
         } // pt 40 eta 2.5
 	// accept jets out to eta 5.2 for dphi
 	else if ( (jet_pt[njet] > 40.0) && (fabs(jet_eta[njet]) < 5.2) ) {
           p4sForDphi.push_back(cms2.pfjets_p4().at(iJet));
           p4sForDphiZll.push_back(cms2.pfjets_p4().at(iJet));
-          p4sForDphiGamma.push_back(cms2.pfjets_p4().at(iJet));
 	}
 
         njet++;
@@ -739,12 +749,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       gamma_diffMetMht = (mhtVectorGamma - metVectorGamma).Mod();
 
       // MT2, MHT for Z-->ll control region
+      zll_ht = 0;
       if (nlep == 2) {
         zll_deltaPhiMin = 999;
         LorentzVector sumMhtp4Zll = LorentzVector(0,0,0,0);
 
 	// compute MHT using same objects as MT2 inputs
 	for (unsigned int ip4 = 0; ip4 < p4sForHemsZll.size(); ++ip4) {
+	  zll_ht += p4sForHemsZll.at(ip4).pt();
 	  sumMhtp4Zll -= p4sForHemsZll.at(ip4);
 	}
 
@@ -944,6 +956,8 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("deltaPhiMin", &deltaPhiMin );
   BabyTree_->Branch("diffMetMht", &diffMetMht );
   BabyTree_->Branch("minMTBMet", &minMTBMet );
+  BabyTree_->Branch("zll_minMTBMet", &zll_minMTBMet );
+  BabyTree_->Branch("gamma_minMTBMet", &gamma_minMTBMet );
   BabyTree_->Branch("ht", &ht );
   BabyTree_->Branch("mt2", &mt2 );
   BabyTree_->Branch("mt2_gen", &mt2_gen );
@@ -1048,6 +1062,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("zll_pt", &zll_pt );
   BabyTree_->Branch("zll_eta", &zll_eta );
   BabyTree_->Branch("zll_phi", &zll_phi );
+  BabyTree_->Branch("zll_ht", &zll_ht );
   BabyTree_->Branch("ngenPart", &ngenPart, "ngenPart/I" );
   BabyTree_->Branch("genPart_pt", genPart_pt, "genPart_pt[ngenPart]/F" );
   BabyTree_->Branch("genPart_eta", genPart_eta, "genPart_eta[ngenPart]/F" );
@@ -1128,6 +1143,8 @@ void babyMaker::InitBabyNtuple () {
   deltaPhiMin = -999.0;
   diffMetMht = -999.0;
   minMTBMet = -999.0;
+  zll_minMTBMet = -999.0;
+  gamma_minMTBMet = -999.0;
   ht = -999.0;
   mt2 = -999.0;
   mt2_gen = -999.0;
@@ -1186,6 +1203,7 @@ void babyMaker::InitBabyNtuple () {
   zll_pt = -999.0;
   zll_eta = -999.0;
   zll_phi = -999.0;
+  zll_ht = -999.0;
 
 
   
