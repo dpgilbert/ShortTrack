@@ -19,6 +19,8 @@ float muRelIso04(unsigned int);
 float eleRelIso03(unsigned int);
 int eleTightID(unsigned int);
 int muTightID(unsigned int);
+bool isLoosePhoton(unsigned int);
+bool isTightPhoton(unsigned int);
 TString triggerName(TString);
 bool passHLTTriggerPattern(const char*);
 
