@@ -45,6 +45,7 @@ public :
    Int_t           nGammas20;
    Float_t         deltaPhiMin;
    Float_t         diffMetMht;
+   Float_t         minMTBMet;
    Float_t         ht;
    Float_t         mt2;
    Float_t         mt2_gen;
@@ -99,6 +100,8 @@ public :
    Float_t         isoTrack_dz[50];   //[nisoTrack]
    Int_t           isoTrack_pdgId[50];   //[nisoTrack]
    Int_t           isoTrack_mcMatchId[50];   //[nisoTrack]
+   Int_t           nPFLep5LowMT;
+   Int_t           nPFHad10LowMT;
    Int_t           ntau;
    Float_t         tau_pt[50];   //[ntau]
    Float_t         tau_eta[50];   //[ntau]
@@ -118,6 +121,7 @@ public :
    Float_t         gamma_phi[50];   //[ngamma]
    Float_t         gamma_mass[50];   //[ngamma]
    Int_t           gamma_mcMatchId[50];   //[ngamma]
+   Float_t         gamma_genIso[50];   //[ngamma]
    Float_t         gamma_chHadIso[50];   //[ngamma]
    Float_t         gamma_neuHadIso[50];   //[ngamma]
    Float_t         gamma_phIso[50];   //[ngamma]
@@ -142,7 +146,10 @@ public :
    Float_t         zll_mht_phi;
    Float_t         zll_deltaPhiMin;
    Float_t         zll_diffMetMht;
-   Float_t         zll_invmass;
+   Float_t         zll_mass;
+   Float_t         zll_pt;
+   Float_t         zll_eta;
+   Float_t         zll_phi;
    Int_t           ngenPart;
    Float_t         genPart_pt[200];   //[ngenPart]
    Float_t         genPart_eta[200];   //[ngenPart]
@@ -218,6 +225,7 @@ public :
    TBranch        *b_nGammas20;   //!
    TBranch        *b_deltaPhiMin;   //!
    TBranch        *b_diffMetMht;   //!
+   TBranch        *b_minMTBMet;   //!
    TBranch        *b_ht;   //!
    TBranch        *b_mt2;   //!
    TBranch        *b_mt2_gen;   //!
@@ -272,6 +280,8 @@ public :
    TBranch        *b_isoTrack_dz;   //!
    TBranch        *b_isoTrack_pdgId;   //!
    TBranch        *b_isoTrack_mcMatchId;   //!
+   TBranch        *b_nPFLep5LowMT;   //!
+   TBranch        *b_nPFHad10LowMT;   //!
    TBranch        *b_ntau;   //!
    TBranch        *b_tau_pt;   //!
    TBranch        *b_tau_eta;   //!
@@ -291,6 +301,7 @@ public :
    TBranch        *b_gamma_phi;   //!
    TBranch        *b_gamma_mass;   //!
    TBranch        *b_gamma_mcMatchId;   //!
+   TBranch        *b_gamma_genIso;   //!
    TBranch        *b_gamma_chHadIso;   //!
    TBranch        *b_gamma_neuHadIso;   //!
    TBranch        *b_gamma_phIso;   //!
@@ -315,7 +326,10 @@ public :
    TBranch        *b_zll_mht_phi;
    TBranch        *b_zll_deltaPhiMin;
    TBranch        *b_zll_diffMetMht;
-   TBranch        *b_zll_invmass;
+   TBranch        *b_zll_mass;
+   TBranch        *b_zll_pt;
+   TBranch        *b_zll_eta;
+   TBranch        *b_zll_phi;
    TBranch        *b_ngenPart;   //!
    TBranch        *b_genPart_pt;   //!
    TBranch        *b_genPart_eta;   //!
@@ -450,6 +464,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("nGammas20", &nGammas20, &b_nGammas20);
    fChain->SetBranchAddress("deltaPhiMin", &deltaPhiMin, &b_deltaPhiMin);
    fChain->SetBranchAddress("diffMetMht", &diffMetMht, &b_diffMetMht);
+   fChain->SetBranchAddress("minMTBMet", &minMTBMet, &b_minMTBMet);
    fChain->SetBranchAddress("ht", &ht, &b_ht);
    fChain->SetBranchAddress("mt2", &mt2, &b_mt2);
    fChain->SetBranchAddress("mt2_gen", &mt2_gen, &b_mt2_gen);
@@ -504,6 +519,8 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("isoTrack_dz", isoTrack_dz, &b_isoTrack_dz);
    fChain->SetBranchAddress("isoTrack_pdgId", isoTrack_pdgId, &b_isoTrack_pdgId);
    fChain->SetBranchAddress("isoTrack_mcMatchId", isoTrack_mcMatchId, &b_isoTrack_mcMatchId);
+   fChain->SetBranchAddress("nPFLep5LowMT", &nPFLep5LowMT, &b_nPFLep5LowMT);
+   fChain->SetBranchAddress("nPFHad10LowMT", &nPFHad10LowMT, &b_nPFHad10LowMT);
    fChain->SetBranchAddress("ntau", &ntau, &b_ntau);
    fChain->SetBranchAddress("tau_pt", tau_pt, &b_tau_pt);
    fChain->SetBranchAddress("tau_eta", tau_eta, &b_tau_eta);
@@ -523,6 +540,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("gamma_phi", gamma_phi, &b_gamma_phi);
    fChain->SetBranchAddress("gamma_mass", gamma_mass, &b_gamma_mass);
    fChain->SetBranchAddress("gamma_mcMatchId", gamma_mcMatchId, &b_gamma_mcMatchId);
+   fChain->SetBranchAddress("gamma_genIso", gamma_genIso, &b_gamma_genIso);
    fChain->SetBranchAddress("gamma_chHadIso", gamma_chHadIso, &b_gamma_chHadIso);
    fChain->SetBranchAddress("gamma_neuHadIso", gamma_neuHadIso, &b_gamma_neuHadIso);
    fChain->SetBranchAddress("gamma_phIso", gamma_phIso, &b_gamma_phIso);
@@ -547,7 +565,10 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("zll_mht_phi", &zll_mht_phi, &b_zll_mht_phi);
    fChain->SetBranchAddress("zll_deltaPhiMin", &zll_deltaPhiMin, &b_zll_deltaPhiMin);
    fChain->SetBranchAddress("zll_diffMetMht", &zll_diffMetMht, &b_zll_diffMetMht);
-   fChain->SetBranchAddress("zll_invmass", &zll_invmass, &b_zll_invmass);
+   fChain->SetBranchAddress("zll_mass", &zll_mass, &b_zll_mass);
+   fChain->SetBranchAddress("zll_pt", &zll_pt, &b_zll_pt);
+   fChain->SetBranchAddress("zll_eta", &zll_eta, &b_zll_eta);
+   fChain->SetBranchAddress("zll_phi", &zll_phi, &b_zll_phi);
    fChain->SetBranchAddress("ngenPart", &ngenPart, &b_ngenPart);
    fChain->SetBranchAddress("genPart_pt", genPart_pt, &b_genPart_pt);
    fChain->SetBranchAddress("genPart_eta", genPart_eta, &b_genPart_eta);
