@@ -854,6 +854,9 @@ protected:
 	vector<float> genps_charge_;
 	TBranch *genps_charge_branch;
 	bool genps_charge_isLoaded;
+	vector<float> genps_iso_;
+	TBranch *genps_iso_branch;
+	bool genps_iso_isLoaded;
 	vector<float> genps_mass_;
 	TBranch *genps_mass_branch;
 	bool genps_mass_isLoaded;
@@ -3818,6 +3821,11 @@ void Init(TTree *tree) {
 		genps_charge_branch = tree->GetBranch(tree->GetAlias("genps_charge"));
 		genps_charge_branch->SetAddress(&genps_charge_);
 	}
+	genps_iso_branch = 0;
+	if (tree->GetAlias("genps_iso") != 0) {
+		genps_iso_branch = tree->GetBranch(tree->GetAlias("genps_iso"));
+		genps_iso_branch->SetAddress(&genps_iso_);
+	}
 	genps_mass_branch = 0;
 	if (tree->GetAlias("genps_mass") != 0) {
 		genps_mass_branch = tree->GetBranch(tree->GetAlias("genps_mass"));
@@ -6713,6 +6721,7 @@ void GetEntry(unsigned int idx)
 		els_z0Err_isLoaded = false;
 		els_z0corr_isLoaded = false;
 		genps_charge_isLoaded = false;
+		genps_iso_isLoaded = false;
 		genps_mass_isLoaded = false;
 		mus_backToBackCompat_isLoaded = false;
 		mus_best_dxyPV_isLoaded = false;
@@ -7519,6 +7528,7 @@ void LoadAllBranches()
 	if (els_z0Err_branch != 0) els_z0Err();
 	if (els_z0corr_branch != 0) els_z0corr();
 	if (genps_charge_branch != 0) genps_charge();
+	if (genps_iso_branch != 0) genps_iso();
 	if (genps_mass_branch != 0) genps_mass();
 	if (mus_backToBackCompat_branch != 0) mus_backToBackCompat();
 	if (mus_best_dxyPV_branch != 0) mus_best_dxyPV();
@@ -10832,6 +10842,16 @@ void LoadAllBranches()
 			genps_charge_isLoaded = true;
 		}
 		return genps_charge_;
+	}
+	vector<float> &genps_iso()
+	{
+		if (not genps_iso_isLoaded) {
+			if (genps_iso_branch != 0) {
+				genps_iso_branch->GetEntry(index);
+			} else { }
+			genps_iso_isLoaded = true;
+		}
+		return genps_iso_;
 	}
 	vector<float> &genps_mass()
 	{
@@ -16374,6 +16394,7 @@ namespace tas {
 	vector<float> &els_z0Err();
 	vector<float> &els_z0corr();
 	vector<float> &genps_charge();
+	vector<float> &genps_iso();
 	vector<float> &genps_mass();
 	vector<float> &mus_backToBackCompat();
 	vector<float> &mus_best_dxyPV();

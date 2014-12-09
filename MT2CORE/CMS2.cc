@@ -280,6 +280,7 @@ namespace tas {
 	vector<float> &els_z0Err() { return cms2.els_z0Err(); }
 	vector<float> &els_z0corr() { return cms2.els_z0corr(); }
 	vector<float> &genps_charge() { return cms2.genps_charge(); }
+	vector<float> &genps_iso() { return cms2.genps_iso(); }
 	vector<float> &genps_mass() { return cms2.genps_mass(); }
 	vector<float> &mus_backToBackCompat() { return cms2.mus_backToBackCompat(); }
 	vector<float> &mus_best_dxyPV() { return cms2.mus_best_dxyPV(); }

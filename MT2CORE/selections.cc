@@ -287,6 +287,38 @@ int muTightID(unsigned int muIdx){
   if (isLooseMuon(muIdx))   return 0;
   return -1;
 }
+
+bool isLoosePhoton(unsigned int phIdx){
+  if( fabs(cms2.photons_p4().at(phIdx).eta()) <= 1.479 ){
+    if(cms2.photons_full5x5_sigmaIEtaIEta().at(phIdx) >= 0.012) return false; // looser than POG (0.01) to get a sideband
+    if(cms2.photons_full5x5_hOverEtowBC().at(phIdx) >= 0.0559) return false; 
+    if(cms2.photons_haspixelSeed().at(phIdx)) return false;
+    return true;
+    
+  } else if( fabs(cms2.photons_p4().at(phIdx).eta()) > 1.479 && fabs(cms2.photons_p4().at(phIdx).eta())  < 2.5){
+    if(cms2.photons_full5x5_sigmaIEtaIEta().at(phIdx) >= 0.035) return false; // larger than POG (0.0321) to get a sideband
+    if(cms2.photons_full5x5_hOverEtowBC().at(phIdx) >= 0.049) return false; 
+    if(cms2.photons_haspixelSeed().at(phIdx)) return false;
+    return true;
+
+  } else return false;
+}
+
+bool isTightPhoton(unsigned int phIdx){
+  if (!isLoosePhoton(phIdx)) return false;
+
+  if( fabs(cms2.photons_p4().at(phIdx).eta()) <= 1.479 ){
+    if(cms2.photons_full5x5_sigmaIEtaIEta().at(phIdx) >= 0.010) return false; 
+    return true;
+    
+  } else if( fabs(cms2.photons_p4().at(phIdx).eta()) > 1.479 && fabs(cms2.photons_p4().at(phIdx).eta())  < 2.5){
+    if(cms2.photons_full5x5_sigmaIEtaIEta().at(phIdx) >= 0.0321) return false; 
+    return true;
+
+  } else return false;
+}
+
+
 //-------------------------------------------------------
 // get exact trigger name corresponding to given pattern
 //-------------------------------------------------------

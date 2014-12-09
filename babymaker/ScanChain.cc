@@ -401,16 +401,19 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       for(unsigned int iGamma = 0; iGamma < cms2.photons_p4().size(); iGamma++){
         if(cms2.photons_p4().at(iGamma).pt() < 20.0) continue;
         if(fabs(cms2.photons_p4().at(iGamma).eta()) > 2.5) continue;
-	if (cms2.photons_photonID_loose().at(iGamma)==0) continue;
+	if ( !isLoosePhoton(iGamma) ) continue;
 
 	if (ngamma >= max_ngamma) {
           std::cout << "WARNING: attempted to fill more than " << max_ngamma << " photons" << std::endl;
 	  break;
 	}
 
-        gamma_pt[ngamma]   = cms2.photons_p4().at(iGamma).pt();
-        gamma_eta[ngamma]  = cms2.photons_p4().at(iGamma).eta();
-        gamma_phi[ngamma]  = cms2.photons_p4().at(iGamma).phi();
+	float pt = cms2.photons_p4().at(iGamma).pt();
+	float eta = cms2.photons_p4().at(iGamma).eta();
+	float phi = cms2.photons_p4().at(iGamma).phi();
+        gamma_pt[ngamma]   = pt;
+        gamma_eta[ngamma]  = eta;
+        gamma_phi[ngamma]  = phi;
         gamma_mass[ngamma] = cms2.photons_mass().at(iGamma);
         gamma_sigmaIetaIeta[ngamma] = cms2.photons_full5x5_sigmaIEtaIEta().at(iGamma);
         gamma_chHadIso[ngamma] = photons_chargedHadronIso().at(iGamma);
@@ -418,14 +421,40 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         gamma_phIso[ngamma] = photons_photonIso().at(iGamma);
         gamma_r9[ngamma] =  photons_full5x5_r9().at(iGamma);
         gamma_hOverE[ngamma] =  photons_full5x5_hOverEtowBC().at(iGamma);
-        gamma_idCutBased[ngamma] =  photons_photonID_tight().at(iGamma) ? 2 : 0; // Medium working point is not saved in miniAOD, should implement on our own if we want it
+        gamma_idCutBased[ngamma] =  isTightPhoton(iGamma) ? 1 : 0; 
         if(gamma_pt[ngamma] > 20) nGammas20++;
-
-        //gamma_mcMatchId[ngamma] = ;
-
+	
+	// Some work for truth-matching (should be integrated in CMS3 as for the leptons)
+	int bestMatch = -1;
+	float bestDr = 0.1;
+	for(unsigned int iGen = 0; iGen < cms2.genps_p4().size(); iGen++){
+	  if (cms2.genps_id().at(iGen) != 22) continue; 
+	  if (cms2.genps_status().at(iGen) != 1) continue; 
+	  if (fabs(cms2.genps_id_simplemother().at(iGen)) > 22) continue; // pions etc 
+	  if ( fabs(eta - cms2.genps_p4().at(iGen).eta()) > 0.1) continue;
+	  if ( pt > 2*cms2.genps_p4().at(iGen).pt() ) continue;
+	  if ( pt < 0.5*cms2.genps_p4().at(iGen).pt() ) continue;
+          float thisDR = DeltaR( cms2.genps_p4().at(iGen).eta(), eta, cms2.genps_p4().at(iGen).phi(), phi);
+	  if (thisDR < bestDr) {
+	    bestDr = thisDR;
+	    bestMatch = iGen;
+	  }
+	}
+	if (bestMatch != -1) {
+	  // 7 is a special code for photons without a mother. this seems to be due to a miniAOD bug where links are broken.
+	  gamma_mcMatchId[ngamma] = cms2.genps_id_simplemother().at(bestMatch) == 0 ? 7 : 22; 
+	  gamma_genIso[ngamma] = -1; //cms2.genps_iso().at(bestMatch);
+	}
+	else {
+	  gamma_mcMatchId[ngamma] = 0;
+	  gamma_genIso[ngamma] = -1;
+	}
+   
 	// for photon+jets control regions
-	gamma_met_px += cms2.photons_p4().at(iGamma).px();
-	gamma_met_py += cms2.photons_p4().at(iGamma).py();
+	if (nGammas20==1) { // Only use the leading Loose photon. Otherwise mt2 will be affected by a bunch of tiny photons
+	  gamma_met_px += cms2.photons_p4().at(iGamma).px();
+	  gamma_met_py += cms2.photons_p4().at(iGamma).py();
+	}
 	// do not use photon in MT2 or MHT calculations!!
 	//p4sForHemsGamma.push_back(cms2.photons_p4().at(iGamma));
 	//p4sForDphiGamma.push_back(cms2.photons_p4().at(iGamma));
@@ -503,6 +532,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       //only want to remove the closest jet to a photon, threshold deltaR < 0.4
       vector<int> removedJetsGamma; //index of jets to be removed because they overlap with a photon
       for(int iGamma = 0; iGamma < ngamma; iGamma++){
+	if (iGamma>0) continue; // Only check leading photon. Let the others be
 
         float minDR = 0.4;
         int minIndex = -1;
@@ -988,7 +1018,8 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("gamma_eta", gamma_eta, "gamma_eta[ngamma]/F" );
   BabyTree_->Branch("gamma_phi", gamma_phi, "gamma_phi[ngamma]/F" );
   BabyTree_->Branch("gamma_mass", gamma_mass, "gamma_mass[ngamma]/F" );
-  BabyTree_->Branch("gamma_mcMatchId", gamma_mcMatchId, "gamma_eta[ngamma]/I" );
+  BabyTree_->Branch("gamma_mcMatchId", gamma_mcMatchId, "gamma_mcMatchId[ngamma]/I" );
+  BabyTree_->Branch("gamma_genIso", gamma_genIso, "gamma_genIso[ngamma]/F" );
   BabyTree_->Branch("gamma_chHadIso", gamma_chHadIso, "gamma_chHadIso[ngamma]/F" );
   BabyTree_->Branch("gamma_neuHadIso", gamma_neuHadIso, "gamma_neuHadIso[ngamma]/F" );
   BabyTree_->Branch("gamma_phIso", gamma_phIso, "gamma_phIso[ngamma]/F" );
