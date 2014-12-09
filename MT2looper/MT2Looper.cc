@@ -177,7 +177,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       // basic event selection and cleaning
       //---------------------
 
-      if (!PassesEventSelection(t.nVert)) continue;
+      if (!PassesEventSelection(SignalRegionVersion::sel2012, t.nVert)) continue;
 
       // remove low pt QCD samples 
       if (t.evt_id >= 100 && t.evt_id < 108) continue;
@@ -396,7 +396,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
 void MT2Looper::fillHistosSignalRegion(std::map<std::string, TH1D*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dirname, const std::string& suffix) {
 
-  if ( !PassesSignalRegion(t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, 
+  if ( !PassesSignalRegion(SignalRegionVersion::sel2012, t.mt2, t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, 0.,
 			   nlepveto_, t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) return;
   if (t.mt2 < 50.) return;
 
@@ -409,7 +409,7 @@ void MT2Looper::fillHistosSignalRegion(std::map<std::string, TH1D*>& h_1d, const
 // hists for single lepton control region
 void MT2Looper::fillHistosCRSL(std::map<std::string, TH1D*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dirname, const std::string& suffix, const float mtcut) {
 
-  if ( !PassesSignalRegionNoLepVeto(t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, 
+  if ( !PassesSignalRegionNoLepVeto(SignalRegionVersion::sel2012, t.mt2, t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, 0.,
 				    t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) return;
   if (t.mt2 < 50.) return;
   if (nlepveto_ != 1) return;
