@@ -255,6 +255,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       vector<int>  vec_lep_convVeto;
       vector<int>  vec_lep_tightCharge;
 
+      vector<LorentzVector> p4sLeptonsForJetCleaning;
+
       vector<LorentzVector> p4sForHems;
       vector<LorentzVector> p4sForHemsGamma;
       vector<LorentzVector> p4sForHemsZll;
@@ -298,6 +300,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	// for mt2 and mht in lepton control region
 	p4sForHems.push_back(cms2.els_p4().at(iEl));
 	p4sForDphi.push_back(cms2.els_p4().at(iEl));
+	p4sLeptonsForJetCleaning.push_back(cms2.els_p4().at(iEl));
+
       }
 
       //MUONS
@@ -334,6 +338,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	// for mt2 and mht in lepton control region
 	p4sForHems.push_back(cms2.mus_p4().at(iMu));
 	p4sForDphi.push_back(cms2.mus_p4().at(iMu));
+	p4sLeptonsForJetCleaning.push_back(cms2.mus_p4().at(iMu));
       }
 
       // Implement pT ordering for leptons (it's irrelevant but easier for us to add than for ETH to remove)
@@ -388,6 +393,90 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	zll_phi = ll.Phi();
       }
 
+      //ISOTRACK
+      std::map<float, int> pt_ordering;
+      vector<float>vec_isoTrack_pt;
+      vector<float>vec_isoTrack_eta;
+      vector<float>vec_isoTrack_phi;
+      vector<float>vec_isoTrack_mass;
+      vector<float>vec_isoTrack_absIso;
+      vector<float>vec_isoTrack_dz;
+      vector<int>  vec_isoTrack_pdgId;
+      vector<int>  vec_isoTrack_mcMatchId;
+
+      nisoTrack = 0;
+      nPFLep5LowMT = 0;
+      nPFHad10LowMT = 0;
+      for (unsigned int ipf = 0; ipf < pfcands_p4().size(); ipf++) {
+ 
+        if(cms2.pfcands_charge().at(ipf) == 0) continue;
+        if(fabs(cms2.pfcands_dz().at(ipf)) > 0.1) continue;
+
+        float cand_pt = cms2.pfcands_p4().at(ipf).pt();
+        if(cand_pt < 5) continue;
+ 
+        float absiso  = TrackIso(ipf);
+        if(absiso >= min(0.2*cand_pt, 8.0)) continue;
+
+	float mt = MT(cand_pt,cms2.pfcands_p4().at(ipf).phi(),met_pt,met_phi);
+	int pdgId = abs(cms2.pfcands_particleId().at(ipf));
+
+	if ((cand_pt > 5.) && (pdgId == 11 || pdgId == 13) && (absiso/cand_pt < 0.2) && (mt < 100.)) {
+	  ++nPFLep5LowMT;
+
+	  // use PF leptons for hemispheres etc same as reco leptons
+	  //  BUT first do overlap removal with reco leptons to avoid double counting
+	  bool overlap = false;
+	  for(int iLep = 0; iLep < nlep; iLep++){
+	    float thisDR = DeltaR(pfcands_p4().at(ipf).eta(), lep_eta[iLep], pfcands_p4().at(ipf).phi(), lep_phi[iLep]);
+	    if (thisDR < 0.1) {
+	      overlap = true;
+	      break;
+	    }
+	  } // loop over reco leps
+	  if (!overlap) {
+	    p4sForHems.push_back(cms2.pfcands_p4().at(ipf));
+	    p4sForDphi.push_back(cms2.pfcands_p4().at(ipf));
+	    p4sLeptonsForJetCleaning.push_back(cms2.pfcands_p4().at(ipf));
+	  }
+	} 
+
+	if ((cand_pt > 10.) && (pdgId == 211) && (absiso/cand_pt < 0.1) && (mt < 100.)) ++nPFHad10LowMT;
+
+        pt_ordering[cand_pt] = nisoTrack;
+
+        vec_isoTrack_pt.push_back    ( cand_pt                          );
+        vec_isoTrack_eta.push_back   ( cms2.pfcands_p4().at(ipf).eta()  );
+        vec_isoTrack_phi.push_back   ( cms2.pfcands_p4().at(ipf).phi()  );
+        vec_isoTrack_mass.push_back  ( cms2.pfcands_mass().at(ipf)      );
+        vec_isoTrack_absIso.push_back( absiso                           );
+        vec_isoTrack_dz.push_back    ( cms2.pfcands_dz().at(ipf)        );
+        vec_isoTrack_pdgId.push_back ( cms2.pfcands_particleId().at(ipf));
+        vec_isoTrack_mcMatchId.push_back ( 0 );
+
+        nisoTrack++;
+      }  
+
+      //now fill arrays from vectors, isotracks with largest pt first
+       i = 0;
+      for(std::map<float, int>::reverse_iterator it = pt_ordering.rbegin(); it!= pt_ordering.rend(); ++it){
+
+	if (i >= max_nisoTrack) {
+          std::cout << "WARNING: attempted to fill more than " << max_nisoTrack << " iso tracks" << std::endl;
+	  break;
+	}
+
+        isoTrack_pt[i]     = vec_isoTrack_pt.at(it->second);
+        isoTrack_eta[i]    = vec_isoTrack_eta.at(it->second);
+        isoTrack_phi[i]    = vec_isoTrack_phi.at(it->second);
+        isoTrack_mass[i]   = vec_isoTrack_mass.at(it->second);
+        isoTrack_absIso[i] = vec_isoTrack_absIso.at(it->second);
+        isoTrack_dz[i]     = vec_isoTrack_dz.at(it->second);
+        isoTrack_pdgId[i]  = vec_isoTrack_pdgId.at(it->second);
+        isoTrack_mcMatchId[i]  = vec_isoTrack_mcMatchId.at(it->second);
+        i++;
+      }
+        
       //PHOTONS
       ngamma = 0;
       nGammas20 = 0;
@@ -494,7 +583,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       //check overlapping with leptons
       //only want to remove the closest jet to a lepton, threshold deltaR < 0.4
       vector<int> removedJets; //index of jets to be removed because they overlap with a lepton
-      for(int iLep = 0; iLep < nlep; iLep++){
+      for(unsigned int iLep = 0; iLep < p4sLeptonsForJetCleaning.size(); iLep++){
 
         float minDR = 0.4;
         int minIndex = -1;
@@ -515,7 +604,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
           }
           if(alreadyRemoved) continue;
 
-          float thisDR = DeltaR(pfjets_p4().at(iJet).eta(), lep_eta[iLep], pfjets_p4().at(iJet).phi(), lep_phi[iLep]);
+          float thisDR = DeltaR(pfjets_p4().at(iJet).eta(), p4sLeptonsForJetCleaning.at(iLep).eta(), pfjets_p4().at(iJet).phi(), p4sLeptonsForJetCleaning.at(iLep).phi());
           if(thisDR < minDR){
             minDR = thisDR; 
             minIndex = iJet;
@@ -829,71 +918,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         ntau++;
       }
 
-      //ISOTRACK
-      std::map<float, int> pt_ordering;
-      vector<float>vec_isoTrack_pt;
-      vector<float>vec_isoTrack_eta;
-      vector<float>vec_isoTrack_phi;
-      vector<float>vec_isoTrack_mass;
-      vector<float>vec_isoTrack_absIso;
-      vector<float>vec_isoTrack_dz;
-      vector<int>  vec_isoTrack_pdgId;
-      vector<int>  vec_isoTrack_mcMatchId;
-
-      nisoTrack = 0;
-      nPFLep5LowMT = 0;
-      nPFHad10LowMT = 0;
-      for (unsigned int ipf = 0; ipf < pfcands_p4().size(); ipf++) {
- 
-        if(cms2.pfcands_charge().at(ipf) == 0) continue;
-        if(fabs(cms2.pfcands_dz().at(ipf)) > 0.1) continue;
-
-        float cand_pt = cms2.pfcands_p4().at(ipf).pt();
-        if(cand_pt < 5) continue;
- 
-        float absiso  = TrackIso(ipf);
-        if(absiso >= min(0.2*cand_pt, 8.0)) continue;
-
-	float mt = MT(cand_pt,cms2.pfcands_p4().at(ipf).phi(),met_pt,met_phi);
-	int pdgId = abs(cms2.pfcands_particleId().at(ipf));
-
-	if ((cand_pt > 5.) && (pdgId == 11 || pdgId == 13) && (absiso/cand_pt < 0.2) && (mt < 100.)) ++nPFLep5LowMT;
-	if ((cand_pt > 10.) && (pdgId == 211) && (absiso/cand_pt < 0.1) && (mt < 100.)) ++nPFHad10LowMT;
-
-        pt_ordering[cand_pt] = nisoTrack;
-
-        vec_isoTrack_pt.push_back    ( cand_pt                          );
-        vec_isoTrack_eta.push_back   ( cms2.pfcands_p4().at(ipf).eta()  );
-        vec_isoTrack_phi.push_back   ( cms2.pfcands_p4().at(ipf).phi()  );
-        vec_isoTrack_mass.push_back  ( cms2.pfcands_mass().at(ipf)      );
-        vec_isoTrack_absIso.push_back( absiso                           );
-        vec_isoTrack_dz.push_back    ( cms2.pfcands_dz().at(ipf)        );
-        vec_isoTrack_pdgId.push_back ( cms2.pfcands_particleId().at(ipf));
-        vec_isoTrack_mcMatchId.push_back ( 0 );
-
-        nisoTrack++;
-      }  
-
-      //now fill arrays from vectors, isotracks with largest pt first
-       i = 0;
-      for(std::map<float, int>::reverse_iterator it = pt_ordering.rbegin(); it!= pt_ordering.rend(); ++it){
-
-	if (i >= max_nisoTrack) {
-          std::cout << "WARNING: attempted to fill more than " << max_nisoTrack << " iso tracks" << std::endl;
-	  break;
-	}
-
-        isoTrack_pt[i]     = vec_isoTrack_pt.at(it->second);
-        isoTrack_eta[i]    = vec_isoTrack_eta.at(it->second);
-        isoTrack_phi[i]    = vec_isoTrack_phi.at(it->second);
-        isoTrack_mass[i]   = vec_isoTrack_mass.at(it->second);
-        isoTrack_absIso[i] = vec_isoTrack_absIso.at(it->second);
-        isoTrack_dz[i]     = vec_isoTrack_dz.at(it->second);
-        isoTrack_pdgId[i]  = vec_isoTrack_pdgId.at(it->second);
-        isoTrack_mcMatchId[i]  = vec_isoTrack_mcMatchId.at(it->second);
-        i++;
-      }
-        
       FillBabyNtuple();
 
    }//end loop on events in a file
