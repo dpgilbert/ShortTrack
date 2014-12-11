@@ -17,3 +17,13 @@ make
 # to run:
 cd babymaker
 root -b doAll.C
+
+# Laptop setup to run on MT2babies
+(this assumes you alread have root setup)
+
+git clone git@github.com:cmstas/MT2Analysis.git
+cd MT2Analysis/MT2Looper
+make
+
+# to run, modify INDIR and Samples in do.sh, then do:
+root -b do.sh
