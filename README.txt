@@ -26,4 +26,4 @@ cd MT2Analysis/MT2Looper
 make
 
 # to run, modify INDIR and Samples in do.sh, then do:
-root -b do.sh
+source do.sh
