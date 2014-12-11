@@ -87,7 +87,6 @@ namespace mt2 {
         const int njets,
         const float deltaPhiMin,
         const float diffMetMht,
-        const float minMTBMet,
         const float j1pt,
         const float j2pt
     )
