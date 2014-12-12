@@ -22,7 +22,7 @@ root -b doAll.C
 (this assumes you alread have root setup)
 
 git clone git@github.com:cmstas/MT2Analysis.git
-cd MT2Analysis/MT2Looper
+cd MT2Analysis/MT2looper
 make
 
 # to run, modify INDIR and Samples in do.sh, then do:
