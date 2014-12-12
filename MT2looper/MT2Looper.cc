@@ -64,6 +64,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   std::map<std::string, TH1D*> h_1d_sr7H;
   std::map<std::string, TH1D*> h_1d_sr8H;
   std::map<std::string, TH1D*> h_1d_sr9H;
+  std::map<std::string, TH1D*> h_1d_sr10H;
   std::map<std::string, TH1D*> h_1d_sr1M;
   std::map<std::string, TH1D*> h_1d_sr2M;
   std::map<std::string, TH1D*> h_1d_sr3M;
@@ -73,6 +74,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   std::map<std::string, TH1D*> h_1d_sr7M;
   std::map<std::string, TH1D*> h_1d_sr8M;
   std::map<std::string, TH1D*> h_1d_sr9M;
+  std::map<std::string, TH1D*> h_1d_sr10M;
   std::map<std::string, TH1D*> h_1d_sr1L;
   std::map<std::string, TH1D*> h_1d_sr2L;
   std::map<std::string, TH1D*> h_1d_sr3L;
@@ -82,6 +84,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   std::map<std::string, TH1D*> h_1d_sr7L;
   std::map<std::string, TH1D*> h_1d_sr8L;
   std::map<std::string, TH1D*> h_1d_sr9L;
+  std::map<std::string, TH1D*> h_1d_sr10L;
 
   std::map<std::string, TH1D*> h_1d_crslbase_nomt;
   std::map<std::string, TH1D*> h_1d_crslH_nomt;
@@ -192,7 +195,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
       plot1D("h_mt2",       t.mt2,       evtweight_, h_1d_global, ";M_{T2} [GeV]", 80, 0, 800);
 
-      nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nTaus20;
+      nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
 
       // variables for single lep control region
       leppt_ = -1.;
@@ -227,6 +230,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       fillHistosSignalRegion(h_1d_sr7H, SignalRegionJets::sr7, SignalRegionHtMet::h_ht, "sr7H");
       fillHistosSignalRegion(h_1d_sr8H, SignalRegionJets::sr8, SignalRegionHtMet::h_ht, "sr8H");
       fillHistosSignalRegion(h_1d_sr9H, SignalRegionJets::sr9, SignalRegionHtMet::h_ht, "sr9H");
+      fillHistosSignalRegion(h_1d_sr10H, SignalRegionJets::sr10, SignalRegionHtMet::h_ht, "sr10H");
       fillHistosSignalRegion(h_1d_sr1M, SignalRegionJets::sr1, SignalRegionHtMet::m_ht, "sr1M");
       fillHistosSignalRegion(h_1d_sr2M, SignalRegionJets::sr2, SignalRegionHtMet::m_ht, "sr2M");
       fillHistosSignalRegion(h_1d_sr3M, SignalRegionJets::sr3, SignalRegionHtMet::m_ht, "sr3M");
@@ -236,6 +240,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       fillHistosSignalRegion(h_1d_sr7M, SignalRegionJets::sr7, SignalRegionHtMet::m_ht, "sr7M");
       fillHistosSignalRegion(h_1d_sr8M, SignalRegionJets::sr8, SignalRegionHtMet::m_ht, "sr8M");
       fillHistosSignalRegion(h_1d_sr9M, SignalRegionJets::sr9, SignalRegionHtMet::m_ht, "sr9M");
+      fillHistosSignalRegion(h_1d_sr10M, SignalRegionJets::sr10, SignalRegionHtMet::m_ht, "sr10M");
       fillHistosSignalRegion(h_1d_sr1L, SignalRegionJets::sr1, SignalRegionHtMet::l_ht, "sr1L");
       fillHistosSignalRegion(h_1d_sr2L, SignalRegionJets::sr2, SignalRegionHtMet::l_ht, "sr2L");
       fillHistosSignalRegion(h_1d_sr3L, SignalRegionJets::sr3, SignalRegionHtMet::l_ht, "sr3L");
@@ -245,6 +250,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       fillHistosSignalRegion(h_1d_sr7L, SignalRegionJets::sr7, SignalRegionHtMet::l_ht, "sr7L");
       fillHistosSignalRegion(h_1d_sr8L, SignalRegionJets::sr8, SignalRegionHtMet::l_ht, "sr8L");
       fillHistosSignalRegion(h_1d_sr9L, SignalRegionJets::sr9, SignalRegionHtMet::l_ht, "sr9L");
+      fillHistosSignalRegion(h_1d_sr10L, SignalRegionJets::sr10, SignalRegionHtMet::l_ht, "sr10L");
 
       fillHistosCRSL(h_1d_crslbase_nomt, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crslbase_nomt");
       fillHistosCRSL(h_1d_crslH_nomt, SignalRegionJets::nocut, SignalRegionHtMet::h_ht, "crslH_nomt");
@@ -317,6 +323,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   savePlotsDir(h_1d_sr7H,outfile_,"sr7H");
   savePlotsDir(h_1d_sr8H,outfile_,"sr8H");
   savePlotsDir(h_1d_sr9H,outfile_,"sr9H");
+  savePlotsDir(h_1d_sr10H,outfile_,"sr10H");
   savePlotsDir(h_1d_sr1M,outfile_,"sr1M");
   savePlotsDir(h_1d_sr2M,outfile_,"sr2M");
   savePlotsDir(h_1d_sr3M,outfile_,"sr3M");
@@ -326,6 +333,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   savePlotsDir(h_1d_sr7M,outfile_,"sr7M");
   savePlotsDir(h_1d_sr8M,outfile_,"sr8M");
   savePlotsDir(h_1d_sr9M,outfile_,"sr9M");
+  savePlotsDir(h_1d_sr10M,outfile_,"sr10M");
   savePlotsDir(h_1d_sr1L,outfile_,"sr1L");
   savePlotsDir(h_1d_sr2L,outfile_,"sr2L");
   savePlotsDir(h_1d_sr3L,outfile_,"sr3L");
@@ -335,6 +343,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   savePlotsDir(h_1d_sr7L,outfile_,"sr7L");
   savePlotsDir(h_1d_sr8L,outfile_,"sr8L");
   savePlotsDir(h_1d_sr9L,outfile_,"sr9L");
+  savePlotsDir(h_1d_sr10L,outfile_,"sr10L");
 
   savePlotsDir(h_1d_crslbase_nomt,outfile_,"crslbase_nomt");
   savePlotsDir(h_1d_crslH_nomt,outfile_,"crslH_nomt");
@@ -396,9 +405,8 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
 void MT2Looper::fillHistosSignalRegion(std::map<std::string, TH1D*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dirname, const std::string& suffix) {
 
-  if ( !PassesSignalRegion(SignalRegionVersion::sel2012, t.mt2, t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, 0.,
-			   nlepveto_, t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) return;
-  if (t.mt2 < 50.) return;
+  if ( !PassesSignalRegion(SignalRegionVersion::sel2015LowLumi, t.mt2, t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, 
+			   t.minMTBMet, nlepveto_, t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) return;
 
   plot1D("h_SignalRegion",  sr_jets+sr_htmet,   evtweight_, h_1d_global, ";Signal Region", 100, 0, 100);
   fillHistos( h_1d, dirname, suffix);
@@ -409,9 +417,8 @@ void MT2Looper::fillHistosSignalRegion(std::map<std::string, TH1D*>& h_1d, const
 // hists for single lepton control region
 void MT2Looper::fillHistosCRSL(std::map<std::string, TH1D*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dirname, const std::string& suffix, const float mtcut) {
 
-  if ( !PassesSignalRegionNoLepVeto(SignalRegionVersion::sel2012, t.mt2, t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, 0.,
-				    t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) return;
-  if (t.mt2 < 50.) return;
+  if ( !PassesSignalRegionNoLepVeto(SignalRegionVersion::sel2015LowLumi, t.mt2, t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht,
+				    t.minMTBMet, t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) return;
   if (nlepveto_ != 1) return;
 
   // apply mtcut if requested
@@ -446,9 +453,17 @@ void MT2Looper::fillHistos(std::map<std::string, TH1D*>& h_1d, const std::string
   plot1D("h_nBJet40"+s,      t.nBJet40,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
   plot1D("h_deltaPhiMin"+s,  t.deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
   plot1D("h_diffMetMht"+s,   t.diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
+  plot1D("h_diffMetMhtOverMet"+s,   t.diffMetMht/t.met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
+  plot1D("h_minMTBMet"+s,   t.minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
   plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
   plot1D("h_J0pt"+s,       t.jet_pt[0],   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
   plot1D("h_J1pt"+s,       t.jet_pt[1],   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
+
+  // mt2 binning for results
+  const int n_mt2bins = 5;
+  const float mt2bins[n_mt2bins+1] = {200., 300., 400., 600., 1000., 1500.};
+  plot1D("h_mt2bins"+s,       t.mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+
   outfile_->cd();
   return;
 }
