@@ -103,10 +103,10 @@ namespace mt2 {
       else if (version == SignalRegionVersion::sel2015LowLumi) {
 	bool mt2_200 = mt2 > 200.;
 	bool ht450 = ht > 450. && met > 200.;
-	bool ht575 = ht > 575. && met > 30.;     
+	bool ht1000 = ht > 1000. && met > 30.;     
 	bool dijet100 = njets>=2 && j1pt > 100. && j2pt > 100.;
 	bool cleaning = deltaPhiMin > 0.3 && diffMetMht/met < 0.5; 
-	bool baseline = (cleaning && dijet100 && (ht450 || ht575) && mt2_200);
+	bool baseline = (cleaning && dijet100 && (ht450 || ht1000) && mt2_200);
 	return baseline;
       }
 
