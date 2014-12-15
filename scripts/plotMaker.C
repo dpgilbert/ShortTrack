@@ -71,15 +71,19 @@ string getTableName(const string& sample) {
 
 //_______________________________________________________________________________
 string getRegionName(const string& dir) {
-  if (dir.find("sr1") != string::npos) return "2j, 0b";
-  if (dir.find("sr2") != string::npos) return "2j, 1-2b";
-  if (dir.find("sr3") != string::npos) return "3-5j, 0b";
-  if (dir.find("sr4") != string::npos) return "3-5j, 1b";
-  if (dir.find("sr5") != string::npos) return "3-5j, 2b";
-  if (dir.find("sr6") != string::npos) return "$\\geq$6j, 0b";
-  if (dir.find("sr7") != string::npos) return "$\\geq$6j, 1b";
-  if (dir.find("sr8") != string::npos) return "$\\geq$6j, 2b";
-  if (dir.find("sr9") != string::npos) return "$\\geq$3j, $\\geq$3b";
+  if (dir.find("sr10") != string::npos) return "$\\geq$2j, $\\geq$3b, high minMT,MT2";
+  if (dir.find("sr1") != string::npos) return "2-3j, 0b";
+  if (dir.find("sr2") != string::npos) return "2-3j, 1b";
+  if (dir.find("sr3") != string::npos) return "2-3j, 2b, low minMT,MT2";
+  if (dir.find("sr4") != string::npos) return "2-3j, 2b, high minMT,MT2";
+  if (dir.find("sr5") != string::npos) return "$\\geq$4j, 0b";
+  if (dir.find("sr6") != string::npos) return "$\\geq$4j, 1b";
+  if (dir.find("sr7") != string::npos) return "$\\geq$4j, 2b, low minMT,MT2";
+  if (dir.find("sr8") != string::npos) return "$\\geq$4j, 2b, high minMT,MT2";
+  if (dir.find("sr9") != string::npos) return "$\\geq$2j, $\\geq$3b, low minMT,MT2";
+  if (dir.find("sr") != string::npos) return "Signal";
+  if (dir.find("nomt") != string::npos) return "CRSL, No $M_{T}$ Cut";
+  if (dir.find("crsl") != string::npos) return "CRSL";
 
   cout << "getRegionName: WARNING: didn't recognize dir: " << dir << endl;
   return dir;
@@ -173,7 +177,9 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
 }
 
 //_______________________________________________________________________________
-void printTable( vector<TFile*> samples , vector<string> names , vector<string> dirs ) {
+void printTable( vector<TFile*> samples , vector<string> names , vector<string> dirs, int mt2bin = -1 ) {
+
+  // read off yields from h_mt2bins hist in each topological region
 
   const unsigned int n = samples.size();
   const unsigned int ndirs = dirs.size();
@@ -196,15 +202,30 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
     if( TString(names.at(i)).Contains("sig")  ) continue;
     cout << getTableName(names.at(i));
     for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-      TString fullhistname = Form("%s/h_Events_w",dirs.at(idir).c_str());
+      TString fullhistname = Form("%s/h_mt2bins",dirs.at(idir).c_str());
       TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
       double yield = 0.;
       double err = 0.;
       if (h) {
-	yield = h->GetBinContent(1);
-	err = h->GetBinError(1);
-	bgtot.at(idir) += yield;
-	bgerr.at(idir) = sqrt(bgerr.at(idir)**2 + err**2);
+	// use all bins
+	if (mt2bin < 0) {
+	  yield = h->IntegralAndError(0,-1,err);
+	  bgtot.at(idir) += yield;
+	  bgerr.at(idir) = sqrt(bgerr.at(idir)**2 + err**2);
+	}
+	// last bin: include overflow
+	else if (mt2bin == h->GetXaxis()->GetNbins()) {
+	  yield = h->IntegralAndError(mt2bin,-1,err);
+	  bgtot.at(idir) += yield;
+	  bgerr.at(idir) = sqrt(bgerr.at(idir)**2 + err**2);
+	}
+	// single bin, not last bin
+	else {
+	  yield = h->GetBinContent(mt2bin);
+	  err = h->GetBinError(mt2bin);
+	  bgtot.at(idir) += yield;
+	  bgerr.at(idir) = sqrt(bgerr.at(idir)**2 + err**2);
+	}
       }
       if (yield > 10.) {
 	//  	cout << "  &  " << Form("%.0f $\\pm$ %.0f",yield,err);
@@ -238,13 +259,24 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
     if( !TString(names.at(i)).Contains("sig") ) continue;
     cout << getTableName(names.at(i));
     for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-      TString fullhistname = Form("%s/h_Events_w",dirs.at(idir).c_str());
+      TString fullhistname = Form("%s/h_mt2bins",dirs.at(idir).c_str());
       TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
       double yield = 0.;
       double err = 0.;
       if (h) {
-	yield = h->GetBinContent(1);
-	err = h->GetBinError(1);
+	// use all bins
+	if (mt2bin < 0) {
+	  yield = h->IntegralAndError(0,-1,err);
+	}
+	// last bin: include overflow
+	else if (mt2bin == h->GetXaxis()->GetNbins()) {
+	  yield = h->IntegralAndError(mt2bin,-1,err);
+	}
+	// single bin, not last bin
+	else {
+	  yield = h->GetBinContent(mt2bin);
+	  err = h->GetBinError(mt2bin);
+	}
       }
       if (yield > 10.) {
 	//  	cout << "  &  " << Form("%.0f $\\pm$ %.0f",yield,err);
@@ -264,7 +296,7 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
 //_______________________________________________________________________________
 void plotMaker(){
 
-  string input_dir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-00-05/";
+  string input_dir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-00-07_sel2015LowLumi/";
 
   // ----------------------------------------
   //  samples definition
@@ -340,43 +372,71 @@ void plotMaker(){
 
   printTable(samples, names, dirs);
 
-  dirs.clear();
-  dirs.push_back("sr1L");
-  dirs.push_back("sr2L");
-  dirs.push_back("sr3L");
-  dirs.push_back("sr4L");
-  dirs.push_back("sr5L");
-  dirs.push_back("sr6L");
-  dirs.push_back("sr7L");
-  dirs.push_back("sr8L");
-  dirs.push_back("sr9L");
+  vector<string> dirsL;
+  dirsL.push_back("sr1L");
+  dirsL.push_back("sr2L");
+  dirsL.push_back("sr3L");
+  dirsL.push_back("sr4L");
+  dirsL.push_back("sr5L");
+  dirsL.push_back("sr6L");
+  dirsL.push_back("sr7L");
+  dirsL.push_back("sr8L");
+  dirsL.push_back("sr9L");
+  dirsL.push_back("sr10L");
 
-  printTable(samples, names, dirs);
+  vector<string> dirsM;
+  dirsM.push_back("sr1M");
+  dirsM.push_back("sr2M");
+  dirsM.push_back("sr3M");
+  dirsM.push_back("sr4M");
+  dirsM.push_back("sr5M");
+  dirsM.push_back("sr6M");
+  dirsM.push_back("sr7M");
+  dirsM.push_back("sr8M");
+  dirsM.push_back("sr9M");
+  dirsM.push_back("sr10M");
 
-  dirs.clear();
-  dirs.push_back("sr1M");
-  dirs.push_back("sr2M");
-  dirs.push_back("sr3M");
-  dirs.push_back("sr4M");
-  dirs.push_back("sr5M");
-  dirs.push_back("sr6M");
-  dirs.push_back("sr7M");
-  dirs.push_back("sr8M");
-  dirs.push_back("sr9M");
+  vector<string> dirsH;
+  dirsH.push_back("sr1H");
+  dirsH.push_back("sr2H");
+  dirsH.push_back("sr3H");
+  dirsH.push_back("sr4H");
+  dirsH.push_back("sr5H");
+  dirsH.push_back("sr6H");
+  dirsH.push_back("sr7H");
+  dirsH.push_back("sr8H");
+  dirsH.push_back("sr9H");
+  dirsH.push_back("sr10H");
 
-  printTable(samples, names, dirs);
+  // inclusive in mt2
+  printTable(samples, names, dirsL);
+  printTable(samples, names, dirsM);
+  printTable(samples, names, dirsH);
 
-  dirs.clear();
-  dirs.push_back("sr1H");
-  dirs.push_back("sr2H");
-  dirs.push_back("sr3H");
-  dirs.push_back("sr4H");
-  dirs.push_back("sr5H");
-  dirs.push_back("sr6H");
-  dirs.push_back("sr7H");
-  dirs.push_back("sr8H");
-  dirs.push_back("sr9H");
+  // // mt2 bin 1
+  // printTable(samples, names, dirsL, 1);
+  // printTable(samples, names, dirsM, 1);
+  // printTable(samples, names, dirsH, 1);
 
-  printTable(samples, names, dirs);
+  // // mt2 bin 2
+  // printTable(samples, names, dirsL, 2);
+  // printTable(samples, names, dirsM, 2);
+  // printTable(samples, names, dirsH, 2);
+
+  // // mt2 bin 3
+  // printTable(samples, names, dirsL, 3);
+  // printTable(samples, names, dirsM, 3);
+  // printTable(samples, names, dirsH, 3);
+
+  // // mt2 bin 4
+  // printTable(samples, names, dirsL, 4);
+  // printTable(samples, names, dirsM, 4);
+  // printTable(samples, names, dirsH, 4);
+
+  // // mt2 bin 5
+  // printTable(samples, names, dirsL, 5);
+  // printTable(samples, names, dirsM, 5);
+  // printTable(samples, names, dirsH, 5);
+
 
 }
