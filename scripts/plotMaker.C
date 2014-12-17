@@ -40,6 +40,14 @@ string getLegendName(const string& sample) {
   if (sample.find("T1bbbb_1000_900") != string::npos) return "T1bbbb 1000, 900";
   if (sample.find("T1bbbb_1500_100") != string::npos) return "T1bbbb 1500, 100";
   if (sample.find("T1qqqq_1400_100") != string::npos) return "T1qqqq 1400, 100";
+  if (sample.find("T2tt_425_325") != string::npos) return "T2tt 425, 325";
+  if (sample.find("T2tt_500_325") != string::npos) return "T2tt 500, 325";
+  if (sample.find("T2tt_650_325") != string::npos) return "T2tt 650, 325";
+  if (sample.find("T2tt_850_100") != string::npos) return "T2tt 850, 100";
+  if (sample.find("T2bb_900_100") != string::npos) return "T2bb 900, 100";
+  if (sample.find("T2bb_600_580") != string::npos) return "T2bb 600, 580";
+  if (sample.find("T2qq_1200_100") != string::npos) return "T2qq 1200, 100";
+  if (sample.find("T2qq_600_550") != string::npos) return "T2qq 600, 550";
 
   cout << "getLegendName: WARNING: didn't recognize sample: " << sample << endl;
   return sample;
@@ -64,6 +72,14 @@ string getTableName(const string& sample) {
   if (sample.find("T1bbbb_1000_900") != string::npos) return "T1bbbb 1000, 900";
   if (sample.find("T1bbbb_1500_100") != string::npos) return "T1bbbb 1500, 100";
   if (sample.find("T1qqqq_1400_100") != string::npos) return "T1qqqq 1400, 100";
+  if (sample.find("T2tt_425_325") != string::npos) return "T2tt 425, 325";
+  if (sample.find("T2tt_500_325") != string::npos) return "T2tt 500, 325";
+  if (sample.find("T2tt_650_325") != string::npos) return "T2tt 650, 325";
+  if (sample.find("T2tt_850_100") != string::npos) return "T2tt 850, 100";
+  if (sample.find("T2bb_900_100") != string::npos) return "T2bb 900, 100";
+  if (sample.find("T2bb_600_580") != string::npos) return "T2bb 600, 580";
+  if (sample.find("T2qq_1200_100") != string::npos) return "T2qq 1200, 100";
+  if (sample.find("T2qq_600_550") != string::npos) return "T2qq 600, 550";
 
   cout << "getTableName: WARNING: didn't recognize sample: " << sample << endl;
   return sample;
@@ -315,6 +331,16 @@ void plotMaker(){
   // TFile* f_T1bbbb_1500_100 = new TFile(Form("%s/T1bbbb_1500_100.root",input_dir.c_str()));
   // TFile* f_T1qqqq_1400_100 = new TFile(Form("%s/T1qqqq_1400_100.root",input_dir.c_str()));
 
+  // TFile* f_T2tt_425_325 = new TFile(Form("%s/T2tt_425_325.root",input_dir.c_str()));
+  // TFile* f_T2tt_500_325 = new TFile(Form("%s/T2tt_500_325.root",input_dir.c_str()));
+  // TFile* f_T2tt_650_325 = new TFile(Form("%s/T2tt_650_325.root",input_dir.c_str()));
+  // TFile* f_T2tt_850_100 = new TFile(Form("%s/T2tt_850_100.root",input_dir.c_str()));
+
+  // TFile* f_T2bb_900_100 = new TFile(Form("%s/T2bb_900_100.root",input_dir.c_str()));
+  // TFile* f_T2bb_600_580 = new TFile(Form("%s/T2bb_600_580.root",input_dir.c_str()));
+  // TFile* f_T2qq_1200_100 = new TFile(Form("%s/T2qq_1200_100.root",input_dir.c_str()));
+  // TFile* f_T2qq_600_550 = new TFile(Form("%s/T2qq_600_550.root",input_dir.c_str()));
+
   // TFile* f_zinv_ht100to200 = new TFile(Form("%s/zinv_ht100to200.root",input_dir.c_str()));
   // TFile* f_zinv_ht200to400 = new TFile(Form("%s/zinv_ht200to400.root",input_dir.c_str()));
   // TFile* f_zinv_ht400to600 = new TFile(Form("%s/zinv_ht400to600.root",input_dir.c_str()));
@@ -338,6 +364,16 @@ void plotMaker(){
   // samples.push_back(f_T1bbbb_1000_900); names.push_back("sig_T1bbbb_1000_900");
   // samples.push_back(f_T1bbbb_1500_100); names.push_back("sig_T1bbbb_1500_100");
   // samples.push_back(f_T1qqqq_1400_100); names.push_back("sig_T1qqqq_1400_100");
+
+  // samples.push_back(f_T2tt_425_325); names.push_back("sig_T2tt_425_325");
+  // samples.push_back(f_T2tt_500_325); names.push_back("sig_T2tt_500_325");
+  // samples.push_back(f_T2tt_650_325); names.push_back("sig_T2tt_650_325");
+  // samples.push_back(f_T2tt_850_100); names.push_back("sig_T2tt_850_100");
+
+  // samples.push_back(f_T2bb_900_100); names.push_back("sig_T2bb_900_100");
+  // samples.push_back(f_T2bb_600_580); names.push_back("sig_T2bb_600_580");
+  // samples.push_back(f_T2qq_1200_100); names.push_back("sig_T2qq_1200_100");
+  // samples.push_back(f_T2qq_600_550); names.push_back("sig_T2qq_600_550");
 
   // samples.push_back(f_wjets_ht600toInf);  names.push_back("wjets_ht600toInf");
   // samples.push_back(f_wjets_ht400to600);  names.push_back("wjets_ht400to600");
