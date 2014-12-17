@@ -168,6 +168,8 @@ void cardMaker(string signal = "T1tttt_1500_100"){
   const unsigned int n_mt2bins = 5;
   for (unsigned int isr = 1; isr <= n_sr; ++isr) {
     for (unsigned int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {
+      // only do lowest 2 mt2 bins for regions with low minMT
+      if (imt2 > 2 && (isr == 3 || isr == 7 || isr == 9)) continue;
       printCard(isr, "L", imt2);
       printCard(isr, "M", imt2);
       printCard(isr, "H", imt2);
