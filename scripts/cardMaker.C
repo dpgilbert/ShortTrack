@@ -16,11 +16,13 @@ TFile* f_zinv = 0;
 TFile* f_qcd = 0;
 TFile* f_sig = 0;
 
-string input_dir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-00-07_sel2015LowLumi/";
+string input_dir = "/home/users/olivito/mt2_babymaker/MT2Analysis/MT2looper/output/V00-00-07_sel2015LowLumi/";
 
-string output_dir = "./cards/";
+string output_dir = "./cards_v1/";
 
 string signame = "";
+
+bool suppressZeroBins = true;
 
 //_______________________________________________________________________________
 void printCard( int sr , string htbin , int mt2bin ) {
@@ -41,27 +43,45 @@ void printCard( int sr , string htbin , int mt2bin ) {
   double n_sig(0.);
 
   // get yields for each sample
+  // !!!!! HACK: set zero bins to 0.01 for now to make combine happy
   TH1D* h_lostlep = (TH1D*) f_lostlep->Get(fullhistname);
   if (h_lostlep != 0) {
     n_lostlep = h_lostlep->GetBinContent(mt2bin);
     n_lostlep_tr = h_lostlep->Integral(0,-1);
   } 
+  else {
+    n_lostlep = 0.01;
+    n_lostlep_tr = 0.01;
+  }
   TH1D* h_zinv = (TH1D*) f_zinv->Get(fullhistname);
   if (h_zinv != 0) n_zinv = h_zinv->GetBinContent(mt2bin);
+  else n_zinv = 0.01;
   TH1D* h_qcd = (TH1D*) f_qcd->Get(fullhistname);
   if (h_qcd != 0) n_qcd = h_qcd->GetBinContent(mt2bin);
+  else n_qcd = 0.01;
   TH1D* h_sig = (TH1D*) f_sig->Get(fullhistname);
   if (h_sig != 0) n_sig = h_sig->GetBinContent(mt2bin);
 
   n_bkg = n_lostlep+n_zinv+n_qcd;
 
+  if (suppressZeroBins && n_sig < 0.01) {
+    std::cout << "Zero signal, card not printed: " << cardname << std::endl;
+    return;
+  }
+
+  int n_syst = 0;
+
   // ----- lost lepton bkg uncertainties
   // uncorrelated across TRs and MT2 bins
   double lostlep_shape = 1.075;
   TString name_lostlep_shape = Form("LL_SHAPE_%s_m%d",dir.Data(),mt2bin);
+  ++n_syst;
   // correlated for MT2 bins in a TR
-  double lostlep_crstat = 1. + sqrt( pow(0.15,2) + pow(1./sqrt(n_lostlep_tr),2));
+  double lostlep_crstat = 1.;
+  if (n_lostlep_tr > 0.) lostlep_crstat = 1. + sqrt( pow(0.15,2) + pow(1./sqrt(n_lostlep_tr),2));
+  else lostlep_crstat = 1. + sqrt( pow(0.15,2) + 1.);
   TString name_lostlep_crstat = Form("LL_CRSTAT_%s",dir.Data());
+  ++n_syst;
 
   // ----- zinv bkg uncertainties - depend on signal region, b selection
   // uncorrelated across TRs and MT2 bins
@@ -79,32 +99,39 @@ void printCard( int sr , string htbin , int mt2bin ) {
   // 2+b: pure MC estimate
   if (sr == 3 || sr == 4 || sr >= 7) {
     zinv_mcsyst = 2.;
+    ++n_syst;
   }
   // 1b: data CR with 0->1b sf
   else if (sr == 2 || sr == 6) {
-    zinv_crstat = 1. + 1./sqrt(20. * n_zinv);
+    if (n_zinv > 0.) zinv_crstat = 1. + 1./sqrt(20. * n_zinv);
+    else zinv_crstat = 2.;
     zinv_zgamma = 1.20;
     zinv_bratio = 1.30;
+    n_syst += 3;
   }
   // 0b: data CR
   else if (sr == 1 || sr == 5) {
-    zinv_crstat = 1. + 1./sqrt(2. * n_zinv);
+    if (n_zinv > 0.) zinv_crstat = 1. + 1./sqrt(2. * n_zinv);
+    else zinv_crstat = 2.;
     zinv_zgamma = 1.20;
+    n_syst += 2;
   }
 
   // ----- qcd bkg uncertainties: uncorrelated for all bins
   double qcd_syst = 2.00;
   TString name_qcd_syst = Form("QCD_SYST_%s_m%d",dir.Data(),mt2bin);
+  ++n_syst;
 
   // ----- sig uncertainties: correlated for all bins
   double sig_syst = 1.10;
+  ++n_syst;
 
   ofstream* ofile = new ofstream();
   ofile->open(cardname);
 
   *ofile <<  "imax 1  number of channels"                                                    << endl;
   *ofile <<  "jmax 3  number of backgrounds"                                                 << endl;
-  //  *ofile <<  "kmax 2  number of nuisance parameters (sources of systematical uncertainties)" << endl;
+  *ofile <<  Form("kmax %d  number of nuisance parameters",n_syst)                           << endl;
   *ofile <<  "------------"                                                                  << endl;
   *ofile <<  "bin         1"                                                                 << endl;
   *ofile <<  Form("observation %.0f",n_bkg)                                                  << endl;
@@ -112,21 +139,21 @@ void printCard( int sr , string htbin , int mt2bin ) {
   *ofile <<  "bin             1      1        1      1"                                      << endl;
   *ofile <<  "process       signal  lostlep  zinv   qcd"                                     << endl; 
   *ofile <<  "process         0      1        2      3"                                      << endl;
-  *ofile <<  Form("rate            %.1f    %.1f     %.1f    %.1f",n_sig,n_lostlep,n_zinv,n_qcd) << endl;
+  *ofile <<  Form("rate            %.2f    %.2f     %.2f    %.2f",n_sig,n_lostlep,n_zinv,n_qcd) << endl;
   *ofile <<  "------------"                                                                  << endl;
   *ofile <<  Form("SIG_SYST              lnN   %.2f    -      -     -     uncertainty on signal",sig_syst)  << endl;
   *ofile <<  Form("%s     lnN    -   %.3f     -     -     lost lepton shape uncert",name_lostlep_shape.Data(),lostlep_shape)  << endl;
   *ofile <<  Form("%s       lnN    -   %.3f     -     -     lost lepton CR stats/lep eff",name_lostlep_crstat.Data(),lostlep_crstat)  << endl;
-  if (zinv_crstat > 0.) {
+  if (sr == 1 || sr == 5 || sr == 2 || sr == 6) {
     *ofile <<  Form("%s  lnN    -      -    %.3f   -     zinv CR stats",name_zinv_crstat.Data(),zinv_crstat)  << endl;
   }
-  if (zinv_zgamma > 0.) {
+  if (sr == 1 || sr == 5 || sr == 2 || sr == 6) {
     *ofile <<  Form("%s          lnN    -      -    %.2f    -     zinv Z/gamma ratio",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;
   }
-  if (zinv_bratio > 0.) {
+  if (sr == 2 || sr == 6) {
     *ofile <<  Form("%s     lnN    -      -    %.2f    -     zinv 0/1b ratio",name_zinv_bratio.Data(),zinv_bratio)  << endl;
   }
-  if (zinv_mcsyst > 0.) {
+  if (sr == 3 || sr == 4 || sr >= 7) {
     *ofile <<  Form("%s  lnN    -      -    %.2f    -     zinv MC syst",name_zinv_mcsyst.Data(),zinv_mcsyst)  << endl;
   }
   *ofile <<  Form("%s     lnN    -      -       -   %.2f    QCD syst",name_qcd_syst.Data(),qcd_syst)  << endl;
@@ -168,6 +195,8 @@ void cardMaker(string signal = "T1tttt_1500_100"){
   const unsigned int n_mt2bins = 5;
   for (unsigned int isr = 1; isr <= n_sr; ++isr) {
     for (unsigned int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {
+      // only do lowest 2 mt2 bins for regions with low minMT
+      if (imt2 > 2 && (isr == 3 || isr == 7 || isr == 9)) continue;
       printCard(isr, "L", imt2);
       printCard(isr, "M", imt2);
       printCard(isr, "H", imt2);
