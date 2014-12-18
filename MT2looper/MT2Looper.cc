@@ -12,7 +12,7 @@
 
 // CMS2
 //#include "../MT2CORE/CMS2.h"
-//#include "../MT2CORE/tools.h"
+#include "../MT2CORE/tools.h"
 //#include "../MT2CORE/selections.h"
 //#include "../MT2CORE/hemJet.h"
 //#include "../MT2CORE/MT2/MT2.h"
@@ -124,6 +124,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   // std::map<std::string, TH1D*> h_1d_crsl8L;
   // std::map<std::string, TH1D*> h_1d_crsl9L;
   
+  std::map<std::string, TH1D*> h_1d_crgjbase;
   
   // File Loop
   int nDuplicates = 0;
@@ -143,6 +144,10 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
     TTreeCache::SetLearnEntries(10);
     tree->SetCacheSize(128*1024*1024);
     //mt2tree t(tree);
+    
+    // Use this to speed things up when not looking at genParticles
+    //tree->SetBranchStatus("genPart_*", 0); 
+
     t.Init(tree);
 
     // Event Loop
@@ -150,7 +155,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
     for( unsigned int event = 0; event < nEventsTree; ++event) {
     //    for( unsigned int event = 0; event < nEventsTree/10.; ++event) {
     //    for( unsigned int event = 0; event < 100.; ++event) {
-
+      
       t.GetEntry(event);
 
       //---------------------
@@ -214,6 +219,31 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 	// mt with lep1
 	mt_ = sqrt( 2 * t.met_pt * leppt_ * ( 1 - cos( t.met_phi - lepphi) ) );
       }
+
+      // Variables for gamma+jets control region
+      bool doGJplots = false;
+      int jetIdx0 = 0;
+      int jetIdx1 = 1;
+      if (t.evt_id < 300) {
+	if (t.ngamma > 0) {
+	  if (t.evt_id < 200 && t.gamma_mcMatchId[0]>0  /*&& t.gamma_genIso[0]<5*/) doGJplots = false; // Reject true photons from QCD (iso is always 0 for now)
+	  if (t.evt_id >=200 && t.gamma_mcMatchId[0]==0 ) doGJplots = false;                       // Reject unmatched photons from Gamma+Jets
+	  if (t.evt_id >=200 && t.gamma_mcMatchId[0] >0 && t.gamma_genIso[0]>5) doGJplots = false; // Reject non-iso photons from Gamma+Jets
+	  // Redefine leading two jets after jet/photon overlap
+	  float minDR = 0.4;
+	  int gammaJet = -1;
+	  for (int i = 0; i < t.njet; i++) {
+	    float thisDR = DeltaR(t.jet_eta[i], t.gamma_eta[0], t.jet_phi[i], t.gamma_phi[0]);
+	    if(thisDR < minDR){
+	      minDR = thisDR; 
+	      gammaJet = i;
+	    }
+	  } 
+	  if (gammaJet==0) { jetIdx0++; jetIdx1++;}
+	  if (gammaJet==1) { jetIdx1++;} 
+	  doGJplots = true;	  
+	} // ngamma > 0
+      }// evt_id < 300
 
       fillHistos(h_1d_nocut, "nocut");
 
@@ -289,6 +319,10 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       // fillHistosCRSL(h_1d_crsl7L, SignalRegionJets::sr7, SignalRegionHtMet::l_ht, "crsl7L");
       // fillHistosCRSL(h_1d_crsl8L, SignalRegionJets::sr8, SignalRegionHtMet::l_ht, "crsl8L");
       // fillHistosCRSL(h_1d_crsl9L, SignalRegionJets::sr9, SignalRegionHtMet::l_ht, "crsl9L");
+
+      if (doGJplots) {
+	fillHistosCRGJ(h_1d_crgjbase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crgjbase","", jetIdx0, jetIdx1);
+      }
 
    }//end loop on events in a file
   
@@ -383,6 +417,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   // savePlotsDir(h_1d_crsl8L,outfile_,"crsl8L");
   // savePlotsDir(h_1d_crsl9L,outfile_,"crsl9L");
 
+  savePlotsDir(h_1d_crgjbase,outfile_,"crgjbase");
 
   //---------------------
   // Write and Close file
@@ -437,6 +472,24 @@ void MT2Looper::fillHistosCRSL(std::map<std::string, TH1D*>& h_1d, const SignalR
   return;
 }
 
+// hists for Gamma+Jets control region
+void MT2Looper::fillHistosCRGJ(std::map<std::string, TH1D*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dirname, const std::string& suffix, const int jetIdx0, const int jetIdx1) {
+
+  if (t.ngamma==0) return;
+
+
+  if ( !PassesSignalRegion(SignalRegionVersion::sel2015LowLumi, t.gamma_mt2, t.gamma_met_pt, t.gamma_ht, t.gamma_nJet40, t.gamma_nBJet40, t.gamma_deltaPhiMin, t.gamma_diffMetMht,
+				    t.gamma_minMTBMet, nlepveto_, t.jet_pt[jetIdx0], t.jet_pt[jetIdx1], sr_jets, sr_htmet) ) return;
+
+  bool passSieie = t.gamma_idCutBased[0] ? true : false; // just deal with the standard case now. Worry later about sideband in sieie
+
+  // fill hists
+  if (passSieie) {
+    fillHistosGammaJets( h_1d, dirname, suffix);
+  }
+  return;
+}
+
 void MT2Looper::fillHistos(std::map<std::string, TH1D*>& h_1d, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
@@ -477,6 +530,30 @@ void MT2Looper::fillHistosSingleLepton(std::map<std::string, TH1D*>& h_1d, const
 
   plot1D("h_leppt"+s,      leppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
   plot1D("h_mt"+s,            mt_,   evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
+
+  outfile_->cd();
+  return;
+}
+
+
+void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, const std::string& dirname, const std::string& s) {
+  TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
+  if (dir == 0) {
+    dir = outfile_->mkdir(dirname.c_str());
+  } 
+  dir->cd();
+  float iso = t.gamma_chHadIso[0] + t.gamma_neuHadIso[0];
+
+  plot1D("h_iso"+s,      iso,   evtweight_, h_1d, ";iso [GeV]", 100, 0, 50);
+  // mt2 binning for results
+  const int n_mt2bins = 5;
+  const float mt2bins[n_mt2bins+1] = {200., 300., 400., 600., 1000., 1500.};
+  std::string mt2binsname[n_mt2bins+1] = {"200", "300", "400", "600", "1000", "1500"};
+  plot1D("h_mt2bins"+s,       t.gamma_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  for (unsigned int i = 0; i < n_mt2bins; i++) {
+    if ( t.gamma_mt2 > mt2bins[n_mt2bins] &&  t.gamma_mt2 < mt2bins[n_mt2bins+1]) 
+      plot1D("h_iso_mt2bin"+mt2binsname[i]+s,  iso,  evtweight_, h_1d, "; iso", 100, 0, 50);
+  }
 
   outfile_->cd();
   return;
