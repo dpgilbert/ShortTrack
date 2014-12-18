@@ -133,6 +133,7 @@ public :
    Int_t           gamma_nJet40;
    Int_t           gamma_nBJet40;
    Float_t         gamma_ht;
+   Float_t         gamma_minMTBMet;
    Float_t         gamma_met_pt;
    Float_t         gamma_met_phi;
    Float_t         gamma_mht_pt;
@@ -313,6 +314,7 @@ public :
    TBranch        *b_gamma_nJet40;
    TBranch        *b_gamma_nBJet40;
    TBranch        *b_gamma_ht;
+   TBranch        *b_gamma_minMTBMet;
    TBranch        *b_gamma_met_pt;
    TBranch        *b_gamma_met_phi;
    TBranch        *b_gamma_mht_pt;
@@ -552,6 +554,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("gamma_nJet40", &gamma_nJet40, &b_gamma_nJet40);
    fChain->SetBranchAddress("gamma_nBJet40", &gamma_nBJet40, &b_gamma_nBJet40);
    fChain->SetBranchAddress("gamma_ht", &gamma_ht, &b_gamma_ht);
+   fChain->SetBranchAddress("gamma_minMTBMet", &gamma_minMTBMet, &b_gamma_minMTBMet);
    fChain->SetBranchAddress("gamma_met_pt", &gamma_met_pt, &b_gamma_met_pt);
    fChain->SetBranchAddress("gamma_met_phi", &gamma_met_phi, &b_gamma_met_phi);
    fChain->SetBranchAddress("gamma_mht_pt", &gamma_mht_pt, &b_gamma_mht_pt);
