@@ -151,6 +151,8 @@ public :
    Float_t         zll_pt;
    Float_t         zll_eta;
    Float_t         zll_phi;
+   Float_t         zll_ht;
+   Float_t         zll_minMTBMet;
    Int_t           ngenPart;
    Float_t         genPart_pt[200];   //[ngenPart]
    Float_t         genPart_eta[200];   //[ngenPart]
@@ -332,6 +334,8 @@ public :
    TBranch        *b_zll_pt;
    TBranch        *b_zll_eta;
    TBranch        *b_zll_phi;
+   TBranch        *b_zll_ht;
+   TBranch        *b_zll_minMTBMet;
    TBranch        *b_ngenPart;   //!
    TBranch        *b_genPart_pt;   //!
    TBranch        *b_genPart_eta;   //!
@@ -572,6 +576,8 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("zll_pt", &zll_pt, &b_zll_pt);
    fChain->SetBranchAddress("zll_eta", &zll_eta, &b_zll_eta);
    fChain->SetBranchAddress("zll_phi", &zll_phi, &b_zll_phi);
+   fChain->SetBranchAddress("zll_ht", &zll_ht, &b_zll_ht);
+   fChain->SetBranchAddress("zll_minMTBMet", &zll_minMTBMet, &b_zll_minMTBMet);
    fChain->SetBranchAddress("ngenPart", &ngenPart, &b_ngenPart);
    fChain->SetBranchAddress("genPart_pt", genPart_pt, &b_genPart_pt);
    fChain->SetBranchAddress("genPart_eta", genPart_eta, &b_genPart_eta);
