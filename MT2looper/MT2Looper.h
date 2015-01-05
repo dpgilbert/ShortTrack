@@ -40,13 +40,18 @@ class MT2Looper {
 		      const SignalRegionJets::value_type& signal_region = SignalRegionJets::nocut, 
 		      const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::nocut,
 		      const std::string& dirname = "", const std::string& suffix = "", const int jetIdx0 = 0, const int jetIdx1 = 1);
+  void fillHistosCRDY(std::map<std::string, TH1D*>& h_1d, 
+		      const SignalRegionJets::value_type& signal_region = SignalRegionJets::nocut, 
+		      const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::nocut,
+		      const std::string& dirname = "", const std::string& suffix = "");
   void fillHistos(std::map<std::string, TH1D*>& h_1d, 
 		  const std::string& dir = "", const std::string& suffix = ""); 
   void fillHistosSingleLepton(std::map<std::string, TH1D*>& h_1d, 
 			      const std::string& dir = "", const std::string& suffix = ""); 
   void fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, 
 			      const std::string& dir = "", const std::string& suffix = ""); 
-  
+  void fillHistosDY(std::map<std::string, TH1D*>& h_1d, 
+			      const std::string& dir = "", const std::string& suffix = ""); 
  private:
 
   TFile * outfile_;

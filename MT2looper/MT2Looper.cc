@@ -123,9 +123,114 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   // std::map<std::string, TH1D*> h_1d_crsl7L;
   // std::map<std::string, TH1D*> h_1d_crsl8L;
   // std::map<std::string, TH1D*> h_1d_crsl9L;
-  
+
+
+  std::vector< std::string > regions;
+  std::vector< SignalRegionJets::value_type > srJets;
+  std::vector< SignalRegionHtMet::value_type > srHtMet;
+  regions.push_back("1H");  srJets.push_back(SignalRegionJets::sr1);  srHtMet.push_back(SignalRegionHtMet::h_ht);
+  regions.push_back("2H");  srJets.push_back(SignalRegionJets::sr2);  srHtMet.push_back(SignalRegionHtMet::h_ht);
+  regions.push_back("3H");  srJets.push_back(SignalRegionJets::sr3);  srHtMet.push_back(SignalRegionHtMet::h_ht);
+  regions.push_back("4H");  srJets.push_back(SignalRegionJets::sr4);  srHtMet.push_back(SignalRegionHtMet::h_ht);
+  regions.push_back("5H");  srJets.push_back(SignalRegionJets::sr5);  srHtMet.push_back(SignalRegionHtMet::h_ht);
+  regions.push_back("6H");  srJets.push_back(SignalRegionJets::sr6);  srHtMet.push_back(SignalRegionHtMet::h_ht);
+  regions.push_back("7H");  srJets.push_back(SignalRegionJets::sr7);  srHtMet.push_back(SignalRegionHtMet::h_ht);
+  regions.push_back("8H");  srJets.push_back(SignalRegionJets::sr8);  srHtMet.push_back(SignalRegionHtMet::h_ht);
+  regions.push_back("9H");  srJets.push_back(SignalRegionJets::sr9);  srHtMet.push_back(SignalRegionHtMet::h_ht);
+  regions.push_back("10H"); srJets.push_back(SignalRegionJets::sr10); srHtMet.push_back(SignalRegionHtMet::h_ht);
+  regions.push_back("1M");  srJets.push_back(SignalRegionJets::sr1);  srHtMet.push_back(SignalRegionHtMet::m_ht);
+  regions.push_back("2M");  srJets.push_back(SignalRegionJets::sr2);  srHtMet.push_back(SignalRegionHtMet::m_ht);
+  regions.push_back("3M");  srJets.push_back(SignalRegionJets::sr3);  srHtMet.push_back(SignalRegionHtMet::m_ht);
+  regions.push_back("4M");  srJets.push_back(SignalRegionJets::sr4);  srHtMet.push_back(SignalRegionHtMet::m_ht);
+  regions.push_back("5M");  srJets.push_back(SignalRegionJets::sr5);  srHtMet.push_back(SignalRegionHtMet::m_ht);
+  regions.push_back("6M");  srJets.push_back(SignalRegionJets::sr6);  srHtMet.push_back(SignalRegionHtMet::m_ht);
+  regions.push_back("7M");  srJets.push_back(SignalRegionJets::sr7);  srHtMet.push_back(SignalRegionHtMet::m_ht);
+  regions.push_back("8M");  srJets.push_back(SignalRegionJets::sr8);  srHtMet.push_back(SignalRegionHtMet::m_ht);
+  regions.push_back("9M");  srJets.push_back(SignalRegionJets::sr9);  srHtMet.push_back(SignalRegionHtMet::m_ht);
+  regions.push_back("10M"); srJets.push_back(SignalRegionJets::sr10); srHtMet.push_back(SignalRegionHtMet::m_ht);
+  regions.push_back("1L");  srJets.push_back(SignalRegionJets::sr1);  srHtMet.push_back(SignalRegionHtMet::l_ht);
+  regions.push_back("2L");  srJets.push_back(SignalRegionJets::sr2);  srHtMet.push_back(SignalRegionHtMet::l_ht);
+  regions.push_back("3L");  srJets.push_back(SignalRegionJets::sr3);  srHtMet.push_back(SignalRegionHtMet::l_ht);
+  regions.push_back("4L");  srJets.push_back(SignalRegionJets::sr4);  srHtMet.push_back(SignalRegionHtMet::l_ht);
+  regions.push_back("5L");  srJets.push_back(SignalRegionJets::sr5);  srHtMet.push_back(SignalRegionHtMet::l_ht);
+  regions.push_back("6L");  srJets.push_back(SignalRegionJets::sr6);  srHtMet.push_back(SignalRegionHtMet::l_ht);
+  regions.push_back("7L");  srJets.push_back(SignalRegionJets::sr7);  srHtMet.push_back(SignalRegionHtMet::l_ht);
+  regions.push_back("8L");  srJets.push_back(SignalRegionJets::sr8);  srHtMet.push_back(SignalRegionHtMet::l_ht);
+  regions.push_back("9L");  srJets.push_back(SignalRegionJets::sr9);  srHtMet.push_back(SignalRegionHtMet::l_ht);
+  regions.push_back("10L"); srJets.push_back(SignalRegionJets::sr10); srHtMet.push_back(SignalRegionHtMet::l_ht);
+
+  std::vector< std::map<std::string, TH1D*> > h_1d_crgj_v;
+  std::map<std::string, TH1D*> h_1d_crgj1H;  h_1d_crgj_v.push_back(h_1d_crgj1H);  
+  std::map<std::string, TH1D*> h_1d_crgj2H;  h_1d_crgj_v.push_back(h_1d_crgj2H);  
+  std::map<std::string, TH1D*> h_1d_crgj3H;  h_1d_crgj_v.push_back(h_1d_crgj3H);  
+  std::map<std::string, TH1D*> h_1d_crgj4H;  h_1d_crgj_v.push_back(h_1d_crgj4H);  
+  std::map<std::string, TH1D*> h_1d_crgj5H;  h_1d_crgj_v.push_back(h_1d_crgj5H);  
+  std::map<std::string, TH1D*> h_1d_crgj6H;  h_1d_crgj_v.push_back(h_1d_crgj6H);  
+  std::map<std::string, TH1D*> h_1d_crgj7H;  h_1d_crgj_v.push_back(h_1d_crgj7H);  
+  std::map<std::string, TH1D*> h_1d_crgj8H;  h_1d_crgj_v.push_back(h_1d_crgj8H);  
+  std::map<std::string, TH1D*> h_1d_crgj9H;  h_1d_crgj_v.push_back(h_1d_crgj9H);  
+  std::map<std::string, TH1D*> h_1d_crgj10H; h_1d_crgj_v.push_back(h_1d_crgj10H); 
+  std::map<std::string, TH1D*> h_1d_crgj1M;  h_1d_crgj_v.push_back(h_1d_crgj1M);  
+  std::map<std::string, TH1D*> h_1d_crgj2M;  h_1d_crgj_v.push_back(h_1d_crgj2M);  
+  std::map<std::string, TH1D*> h_1d_crgj3M;  h_1d_crgj_v.push_back(h_1d_crgj3M);  
+  std::map<std::string, TH1D*> h_1d_crgj4M;  h_1d_crgj_v.push_back(h_1d_crgj4M);  
+  std::map<std::string, TH1D*> h_1d_crgj5M;  h_1d_crgj_v.push_back(h_1d_crgj5M);  
+  std::map<std::string, TH1D*> h_1d_crgj6M;  h_1d_crgj_v.push_back(h_1d_crgj6M);  
+  std::map<std::string, TH1D*> h_1d_crgj7M;  h_1d_crgj_v.push_back(h_1d_crgj7M);  
+  std::map<std::string, TH1D*> h_1d_crgj8M;  h_1d_crgj_v.push_back(h_1d_crgj8M);  
+  std::map<std::string, TH1D*> h_1d_crgj9M;  h_1d_crgj_v.push_back(h_1d_crgj9M);  
+  std::map<std::string, TH1D*> h_1d_crgj10M; h_1d_crgj_v.push_back(h_1d_crgj10M); 
+  std::map<std::string, TH1D*> h_1d_crgj1L;  h_1d_crgj_v.push_back(h_1d_crgj1L);  
+  std::map<std::string, TH1D*> h_1d_crgj2L;  h_1d_crgj_v.push_back(h_1d_crgj2L);  
+  std::map<std::string, TH1D*> h_1d_crgj3L;  h_1d_crgj_v.push_back(h_1d_crgj3L);  
+  std::map<std::string, TH1D*> h_1d_crgj4L;  h_1d_crgj_v.push_back(h_1d_crgj4L);  
+  std::map<std::string, TH1D*> h_1d_crgj5L;  h_1d_crgj_v.push_back(h_1d_crgj5L);  
+  std::map<std::string, TH1D*> h_1d_crgj6L;  h_1d_crgj_v.push_back(h_1d_crgj6L);  
+  std::map<std::string, TH1D*> h_1d_crgj7L;  h_1d_crgj_v.push_back(h_1d_crgj7L);  
+  std::map<std::string, TH1D*> h_1d_crgj8L;  h_1d_crgj_v.push_back(h_1d_crgj8L);  
+  std::map<std::string, TH1D*> h_1d_crgj9L;  h_1d_crgj_v.push_back(h_1d_crgj9L);  
+  std::map<std::string, TH1D*> h_1d_crgj10L; h_1d_crgj_v.push_back(h_1d_crgj10L); 
+
   std::map<std::string, TH1D*> h_1d_crgjbase;
+
+  std::vector< std::map<std::string, TH1D*> > h_1d_crdy_v;
+  std::map<std::string, TH1D*> h_1d_crdy1H;  h_1d_crdy_v.push_back(h_1d_crdy1H);  
+  std::map<std::string, TH1D*> h_1d_crdy2H;  h_1d_crdy_v.push_back(h_1d_crdy2H);  
+  std::map<std::string, TH1D*> h_1d_crdy3H;  h_1d_crdy_v.push_back(h_1d_crdy3H);  
+  std::map<std::string, TH1D*> h_1d_crdy4H;  h_1d_crdy_v.push_back(h_1d_crdy4H);  
+  std::map<std::string, TH1D*> h_1d_crdy5H;  h_1d_crdy_v.push_back(h_1d_crdy5H);  
+  std::map<std::string, TH1D*> h_1d_crdy6H;  h_1d_crdy_v.push_back(h_1d_crdy6H);  
+  std::map<std::string, TH1D*> h_1d_crdy7H;  h_1d_crdy_v.push_back(h_1d_crdy7H);  
+  std::map<std::string, TH1D*> h_1d_crdy8H;  h_1d_crdy_v.push_back(h_1d_crdy8H);  
+  std::map<std::string, TH1D*> h_1d_crdy9H;  h_1d_crdy_v.push_back(h_1d_crdy9H);  
+  std::map<std::string, TH1D*> h_1d_crdy10H; h_1d_crdy_v.push_back(h_1d_crdy10H); 
+  std::map<std::string, TH1D*> h_1d_crdy1M;  h_1d_crdy_v.push_back(h_1d_crdy1M);  
+  std::map<std::string, TH1D*> h_1d_crdy2M;  h_1d_crdy_v.push_back(h_1d_crdy2M);  
+  std::map<std::string, TH1D*> h_1d_crdy3M;  h_1d_crdy_v.push_back(h_1d_crdy3M);  
+  std::map<std::string, TH1D*> h_1d_crdy4M;  h_1d_crdy_v.push_back(h_1d_crdy4M);  
+  std::map<std::string, TH1D*> h_1d_crdy5M;  h_1d_crdy_v.push_back(h_1d_crdy5M);  
+  std::map<std::string, TH1D*> h_1d_crdy6M;  h_1d_crdy_v.push_back(h_1d_crdy6M);  
+  std::map<std::string, TH1D*> h_1d_crdy7M;  h_1d_crdy_v.push_back(h_1d_crdy7M);  
+  std::map<std::string, TH1D*> h_1d_crdy8M;  h_1d_crdy_v.push_back(h_1d_crdy8M);  
+  std::map<std::string, TH1D*> h_1d_crdy9M;  h_1d_crdy_v.push_back(h_1d_crdy9M);  
+  std::map<std::string, TH1D*> h_1d_crdy10M; h_1d_crdy_v.push_back(h_1d_crdy10M); 
+  std::map<std::string, TH1D*> h_1d_crdy1L;  h_1d_crdy_v.push_back(h_1d_crdy1L);  
+  std::map<std::string, TH1D*> h_1d_crdy2L;  h_1d_crdy_v.push_back(h_1d_crdy2L);  
+  std::map<std::string, TH1D*> h_1d_crdy3L;  h_1d_crdy_v.push_back(h_1d_crdy3L);  
+  std::map<std::string, TH1D*> h_1d_crdy4L;  h_1d_crdy_v.push_back(h_1d_crdy4L);  
+  std::map<std::string, TH1D*> h_1d_crdy5L;  h_1d_crdy_v.push_back(h_1d_crdy5L);  
+  std::map<std::string, TH1D*> h_1d_crdy6L;  h_1d_crdy_v.push_back(h_1d_crdy6L);  
+  std::map<std::string, TH1D*> h_1d_crdy7L;  h_1d_crdy_v.push_back(h_1d_crdy7L);  
+  std::map<std::string, TH1D*> h_1d_crdy8L;  h_1d_crdy_v.push_back(h_1d_crdy8L);  
+  std::map<std::string, TH1D*> h_1d_crdy9L;  h_1d_crdy_v.push_back(h_1d_crdy9L);  
+  std::map<std::string, TH1D*> h_1d_crdy10L; h_1d_crdy_v.push_back(h_1d_crdy10L); 
+
+
   
+  // These will be set to true if any GJ or DY control region plots are produced
+  bool saveGJplots = false;
+  bool saveDYplots = false;
+
   // File Loop
   int nDuplicates = 0;
   int nEvents = chain->GetEntries();
@@ -226,24 +331,42 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       int jetIdx1 = 1;
       if (t.evt_id < 300) {
 	if (t.ngamma > 0) {
-	  if (t.evt_id < 200 && t.gamma_mcMatchId[0]>0  /*&& t.gamma_genIso[0]<5*/) doGJplots = false; // Reject true photons from QCD (iso is always 0 for now)
-	  if (t.evt_id >=200 && t.gamma_mcMatchId[0]==0 ) doGJplots = false;                       // Reject unmatched photons from Gamma+Jets
-	  if (t.evt_id >=200 && t.gamma_mcMatchId[0] >0 && t.gamma_genIso[0]>5) doGJplots = false; // Reject non-iso photons from Gamma+Jets
-	  // Redefine leading two jets after jet/photon overlap
-	  float minDR = 0.4;
-	  int gammaJet = -1;
-	  for (int i = 0; i < t.njet; i++) {
-	    float thisDR = DeltaR(t.jet_eta[i], t.gamma_eta[0], t.jet_phi[i], t.gamma_phi[0]);
-	    if(thisDR < minDR){
-	      minDR = thisDR; 
-	      gammaJet = i;
-	    }
-	  } 
-	  if (gammaJet==0) { jetIdx0++; jetIdx1++;}
-	  if (gammaJet==1) { jetIdx1++;} 
-	  doGJplots = true;	  
+	  if ( (t.evt_id < 200 && t.gamma_mcMatchId[0]>0  /*&& t.gamma_genIso[0]<5*/)    // Reject true photons from QCD (iso is always 0 for now)
+	       || (t.evt_id >=200 && t.gamma_mcMatchId[0]==0 )                           // Reject unmatched photons from Gamma+Jets
+	       || (t.evt_id >=200 && t.gamma_mcMatchId[0] >0 && t.gamma_genIso[0]>5) )   // Reject non-iso photons from Gamma+Jets
+	    { doGJplots = false; }
+	  else {
+	    // Redefine leading two jets after jet/photon overlap
+	    float minDR = 0.4;
+	    int gammaJet = -1;
+	    for (int i = 0; i < t.njet; i++) {
+	      float thisDR = DeltaR(t.jet_eta[i], t.gamma_eta[0], t.jet_phi[i], t.gamma_phi[0]);
+	      if(thisDR < minDR){
+		minDR = thisDR; 
+		gammaJet = i;
+	      }
+	    } 
+	    if (gammaJet==0) { jetIdx0++; jetIdx1++;}
+	    if (gammaJet==1) { jetIdx1++;} 
+	    doGJplots = true;
+	  }
 	} // ngamma > 0
       }// evt_id < 300
+
+      // Variables for Zll (DY) control region
+      bool doDYplots = false;
+      if (t.evt_id >= 700 && t.evt_id < 800) {
+	if (t.nlep == 2) {
+	  if ( (t.lep_charge[0] * t.lep_charge[1] != -1)
+	       || (abs(t.lep_pdgId[0]) != abs(t.lep_pdgId[1]) )
+	       || (fabs(t.zll_mass - 90) > 20 ) ) {
+		 nlepveto_ = nlepveto_ - 2;
+		 doDYplots = true;
+	       }
+	} // nlep == 2
+      }// evt_id 
+
+
 
       fillHistos(h_1d_nocut, "nocut");
 
@@ -321,7 +444,18 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       // fillHistosCRSL(h_1d_crsl9L, SignalRegionJets::sr9, SignalRegionHtMet::l_ht, "crsl9L");
 
       if (doGJplots) {
+	saveGJplots = true;
 	fillHistosCRGJ(h_1d_crgjbase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crgjbase","", jetIdx0, jetIdx1);
+	for (unsigned int imap = 0; imap < h_1d_crgj_v.size(); imap++) {
+	  fillHistosCRGJ(h_1d_crgj_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crgj"+regions.at(imap),"", jetIdx0, jetIdx1);
+	} 
+      }
+
+      if (doDYplots) {
+	saveDYplots = true;
+	for (unsigned int imap = 0; imap < h_1d_crdy_v.size(); imap++) {
+	  fillHistosCRDY(h_1d_crdy_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crgj"+regions.at(imap),"");
+	} 
       }
 
    }//end loop on events in a file
@@ -417,7 +551,18 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   // savePlotsDir(h_1d_crsl8L,outfile_,"crsl8L");
   // savePlotsDir(h_1d_crsl9L,outfile_,"crsl9L");
 
-  savePlotsDir(h_1d_crgjbase,outfile_,"crgjbase");
+  if (saveGJplots) {
+    for (unsigned int imap = 0; imap < h_1d_crgj_v.size(); imap++) {
+      savePlotsDir(h_1d_crgj_v.at(imap),outfile_,("crgj"+regions.at(imap)).c_str());
+    } 
+    savePlotsDir(h_1d_crgjbase,outfile_,"crgjbase");
+  }
+
+  if (saveDYplots) {
+    for (unsigned int imap = 0; imap < h_1d_crdy_v.size(); imap++) {
+      savePlotsDir(h_1d_crdy_v.at(imap),outfile_,("crdy"+regions.at(imap)).c_str());
+    } 
+  }
 
   //---------------------
   // Write and Close file
@@ -490,6 +635,19 @@ void MT2Looper::fillHistosCRGJ(std::map<std::string, TH1D*>& h_1d, const SignalR
   return;
 }
 
+// hists for Zll control region
+void MT2Looper::fillHistosCRDY(std::map<std::string, TH1D*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dirname, const std::string& suffix) {
+
+  if (t.nlep!=2) return;
+
+  if ( !PassesSignalRegion(SignalRegionVersion::sel2015LowLumi, t.zll_mt2, t.zll_met_pt, t.zll_ht, t.nJet40, t.nBJet40, t.zll_deltaPhiMin, t.zll_diffMetMht,
+				    t.zll_minMTBMet, nlepveto_, t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) return;
+
+  fillHistosDY( h_1d, dirname, suffix);
+  return;
+}
+
+
 void MT2Looper::fillHistos(std::map<std::string, TH1D*>& h_1d, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
@@ -554,6 +712,21 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, const st
     if ( t.gamma_mt2 > mt2bins[n_mt2bins] &&  t.gamma_mt2 < mt2bins[n_mt2bins+1]) 
       plot1D("h_iso_mt2bin"+mt2binsname[i]+s,  iso,  evtweight_, h_1d, "; iso", 100, 0, 50);
   }
+
+  outfile_->cd();
+  return;
+}
+
+void MT2Looper::fillHistosDY(std::map<std::string, TH1D*>& h_1d, const std::string& dirname, const std::string& s) {
+  TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
+  if (dir == 0) {
+    dir = outfile_->mkdir(dirname.c_str());
+  } 
+  dir->cd();
+
+  const int n_mt2bins = 5;
+  const float mt2bins[n_mt2bins+1] = {200., 300., 400., 600., 1000., 1500.};
+  plot1D("h_mt2bins"+s,       t.zll_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
 
   outfile_->cd();
   return;
