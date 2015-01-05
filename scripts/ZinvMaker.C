@@ -85,7 +85,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fQCD, vector<string
       double quadrature = Stat->GetBinError(ibin)*Stat->GetBinError(ibin) + Syst->GetBinError(ibin)*Syst->GetBinError(ibin);
       pred->SetBinError(ibin, sqrt(quadrature));
     }
-    pred->Print("all");
+    //pred->Print("all");
 
     pred->Write();
     Stat->Write();
@@ -167,7 +167,7 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
       double quadrature = Stat->GetBinError(ibin)*Stat->GetBinError(ibin) + Syst->GetBinError(ibin)*Syst->GetBinError(ibin);
       pred->SetBinError(ibin, sqrt(quadrature));
     }
-    pred->Print("all");
+    //pred->Print("all");
 
     pred->Write();
     Stat->Write();
