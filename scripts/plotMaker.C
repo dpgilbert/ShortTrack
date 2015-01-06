@@ -134,13 +134,14 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     if (histdir.size() == 0) fullhistname = TString(histname);
     TString newhistname = Form("%s_%s_%s",histname.c_str(),histdir.c_str(),names.at(i).c_str());
     TH1D* h_temp = (TH1D*) samples.at(i)->Get(fullhistname);
+    if (h_temp == 0) continue;
     TH1D* h = (TH1D*) h_temp->Clone(newhistname);
     //    h->Sumw2();
     h->SetFillColor(getColor(names.at(i)));
     h->SetLineColor(getColor(names.at(i)));
     if (rebin > 1) h->Rebin(rebin);
     t->Add(h);
-    if( i==0 ) h_bgtot = (TH1D*) h->Clone(Form("%s_%s_bgtot",histname.c_str(),histdir.c_str()));
+    if( h_bgtot==0 ) h_bgtot = (TH1D*) h->Clone(Form("%s_%s_bgtot",histname.c_str(),histdir.c_str()));
     else h_bgtot->Add(h);
 
     bg_hists.push_back(h);
@@ -170,6 +171,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     if (histdir.size() == 0) fullhistname = TString(histname);
     TString newhistname = Form("%s_%s_%s",histname.c_str(),histdir.c_str(),names.at(i).c_str());
     TH1D* h_temp = (TH1D*) samples.at(i)->Get(fullhistname);
+    if (h_temp == 0) continue;
     TH1D* h = (TH1D*) h_temp->Clone(newhistname);
     //    h->Sumw2();
     h->SetLineColor(getColor(names.at(i)));
