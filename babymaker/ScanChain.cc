@@ -27,6 +27,9 @@
 using namespace std;
 using namespace tas;
 
+// turn on to add debugging statements
+const bool verbose = false;
+
 //--------------------------------------------------------------------
 
 // This is meant to be passed as the third argument, the predicate, of the standard library sort algorithm
@@ -95,6 +98,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       rho = cms2.evt_fixgridfastjet_all_rho(); //this one is used in JECs
       //rho25 = ;
 
+      if (verbose) cout << "before vertices" << endl;
+
       //VERTICES
       nVert = 0;
       for(unsigned int ivtx=0; ivtx < cms2.evt_nvtxs(); ivtx++){
@@ -124,6 +129,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_Mu8_v") || passHLTTriggerPattern("HLT_Mu17_TkMu8_v"); 
       HLT_Photons      = passHLTTriggerPattern("HLT_Photon150_v"); 
       
+      if (verbose) cout << "before gen particles" << endl;
 
       //GEN PARTICLES
       ngenPart = 0;
@@ -265,6 +271,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       vector<LorentzVector> p4sForDphiGamma;
       vector<LorentzVector> p4sForDphiZll;
 
+      if (verbose) cout << "before electrons" << endl;
+
       //ELECTRONS
       nlep = 0;
       nElectrons10 = 0;
@@ -303,6 +311,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	p4sLeptonsForJetCleaning.push_back(cms2.els_p4().at(iEl));
 
       }
+
+      if (verbose) cout << "before muons" << endl;
 
       //MUONS
       nMuons10 = 0;
@@ -393,6 +403,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	zll_phi = ll.Phi();
       }
 
+      if (verbose) cout << "before isotracks" << endl;
+
       //ISOTRACK
       std::map<float, int> pt_ordering;
       vector<float>vec_isoTrack_pt;
@@ -477,6 +489,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         i++;
       }
         
+      if (verbose) cout << "before photons" << endl;
+
       //PHOTONS
       ngamma = 0;
       nGammas20 = 0;
@@ -552,6 +566,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       gamma_met_pt = gamma_met_vec.Mod();
       gamma_met_phi = TVector2::Phi_mpi_pi(gamma_met_vec.Phi());
 
+      if (verbose) cout << "before jets" << endl;
+
       //JETS
       //before we start, check that no genGet is matched to multiple recoJets
       //vector<float> pTofMatchedGenJets;
@@ -579,6 +595,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
         passJets.push_back(iJet);
       }
+
+      if (verbose) cout << "before jet/lepton overlap" << endl;
 
       //check overlapping with leptons
       //only want to remove the closest jet to a lepton, threshold deltaR < 0.4
@@ -612,6 +630,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         }
         removedJets.push_back(minIndex);
       }
+
+      if (verbose) cout << "before jet/photon overlap" << endl;
 
       //check overlapping with photons
       //only want to remove the closest jet to a photon, threshold deltaR < 0.4
@@ -657,6 +677,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       gamma_minMTBMet = 999999.;
       zll_minMTBMet = 999999.;
 
+      if (verbose) cout << "before main jet loop" << endl;
+
       //now fill variables for jets that pass baseline selections and don't overlap with a lepton
       for(unsigned int passIdx = 0; passIdx < passJets.size(); passIdx++){
 
@@ -672,11 +694,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	      break;
 	    }
 	  }
+
 	  if(!isOverlapJetGamma) {
 	    p4sForHemsGamma.push_back(cms2.pfjets_p4().at(iJet));
 	    p4sForDphiGamma.push_back(cms2.pfjets_p4().at(iJet));
 	    gamma_nJet40++;
-	    if(cms2.pfjets_combinedSecondaryVertexBJetTag().at(iJet) >= 0.679) { //CSVM
+	    if(cms2.pfjets_pfCombinedSecondaryVertexBJetTag().at(iJet) >= 0.679) { //CSVM
 	      gamma_nBJet40++; 
 	      float mt = MT( cms2.pfjets_p4().at(iJet).pt(),cms2.pfjets_p4().at(iJet).phi(),gamma_met_pt,gamma_met_phi);
 	      if (mt < gamma_minMTBMet) gamma_minMTBMet = mt;	 
@@ -687,7 +710,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
           p4sForDphiGamma.push_back(cms2.pfjets_p4().at(iJet));
 	}
 
-
         //check against list of jets that overlap with a lepton
         bool isOverlapJet = false;
         for(unsigned int j=0; j<removedJets.size(); j++){
@@ -697,7 +719,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
           }
         }
         if(isOverlapJet) continue;
-        
+
 	if (njet >= max_njet) {
           std::cout << "WARNING: attempted to fill more than " << max_njet << " jets" << std::endl;
 	  break;
@@ -707,7 +729,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         jet_eta[njet]  = cms2.pfjets_p4().at(iJet).eta();
         jet_phi[njet]  = cms2.pfjets_p4().at(iJet).phi();
         jet_mass[njet] = cms2.pfjets_mass().at(iJet);
-        jet_btagCSV[njet] = cms2.pfjets_combinedSecondaryVertexBJetTag().at(iJet); 
+        jet_btagCSV[njet] = cms2.pfjets_pfCombinedSecondaryVertexBJetTag().at(iJet); 
         jet_mcPt[njet] = cms2.pfjets_mc_p4().at(iJet).pt();
         jet_mcFlavour[njet] = cms2.pfjets_partonFlavour().at(iJet);
         //jet_quarkGluonID
@@ -745,6 +767,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
         njet++;
       }
+
+      if (verbose) cout << "before hemispheres" << endl;
 
       // sort vectors by pt for hemisphere calculation
       sort(p4sForHems.begin(), p4sForHems.end(), sortByPt);
@@ -883,6 +907,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         mt2_gen = HemMT2(met_genPt, met_genPhi, hemJets.at(0), hemJets.at(1));
       }
 
+
+      if (verbose) cout << "before taus" << endl;
 
       //TAUS
       ntau = 0;
