@@ -27,6 +27,13 @@ int sampleID (const string& name) {
     else if (name.find("QCD_Pt-1000to1400") != string::npos) return 114;
     else if (name.find("QCD_Pt-1400to1800") != string::npos) return 115;
     else if (name.find("QCD_Pt-1800") != string::npos) return 116;
+    else if (name.find("QCD_Pt-2400to3200") != string::npos) return 117;
+    else if (name.find("QCD_Pt-3200") != string::npos) return 118;
+
+    else if (name.find("QCD_HT-100To250") != string::npos) return 120;
+    else if (name.find("QCD_HT_250To500") != string::npos) return 121;
+    else if (name.find("QCD_HT-500To1000") != string::npos) return 122;
+    else if (name.find("QCD_HT_1000") != string::npos) return 123;
   }
 
   else if (name.find("GJet") != string::npos) {
