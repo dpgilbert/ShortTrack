@@ -119,15 +119,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       met_genPhi = cms2.gen_metPhi();
 
       //TRIGGER
-      HLT_HT650        = passHLTTriggerPattern("HLT_PFHT650_v") ||  passHLTTriggerPattern("HLT_PFNoPUHT650_v");
-      HLT_MET150       = passHLTTriggerPattern("HLT_PFMET150_v"); 
-      HLT_ht350met100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_v") || passHLTTriggerPattern("HLT_PFNoPUHT350_PFMET100_v"); 
+      HLT_HT900        = passHLTTriggerPattern("HLT_PFHT900_v");
+      HLT_MET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v"); 
+      HLT_ht350met120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v"); 
 
-      HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu24_eta2p1_v"); 
-      HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"); 
-      HLT_MuEG         = passHLTTriggerPattern("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v") || passHLTTriggerPattern("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"); 
-      HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_Mu8_v") || passHLTTriggerPattern("HLT_Mu17_TkMu8_v"); 
-      HLT_Photons      = passHLTTriggerPattern("HLT_Photon150_v"); 
+      HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu24_eta2p1_IterTrk02_v"); 
+      HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloId_TrackId_Iso_v"); 
+      HLT_MuEG         = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v") || passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v"); 
+      HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") || passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v"); 
+      HLT_Photons      = passHLTTriggerPattern("HLT_Photon155_v"); 
       
       if (verbose) cout << "before gen particles" << endl;
 
@@ -1029,9 +1029,9 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("met_caloPhi", &met_caloPhi );
   BabyTree_->Branch("met_genPt",  &met_genPt );
   BabyTree_->Branch("met_genPhi", &met_genPhi );
-  BabyTree_->Branch("HLT_HT650", &HLT_HT650 );
-  BabyTree_->Branch("HLT_MET150", &HLT_MET150 );
-  BabyTree_->Branch("HLT_ht350met100", &HLT_ht350met100 );
+  BabyTree_->Branch("HLT_HT900", &HLT_HT900 );
+  BabyTree_->Branch("HLT_MET170", &HLT_MET170 );
+  BabyTree_->Branch("HLT_ht350met120", &HLT_ht350met120 );
   BabyTree_->Branch("HLT_SingleMu", &HLT_SingleMu );
   BabyTree_->Branch("HLT_DoubleEl", &HLT_DoubleEl );
   BabyTree_->Branch("HLT_MuEG", &HLT_MuEG );
@@ -1216,9 +1216,9 @@ void babyMaker::InitBabyNtuple () {
   met_caloPhi = -999.0;
   met_genPt = -999.0;
   met_genPhi = -999.0;
-  HLT_HT650 = -999;
-  HLT_MET150 = -999;
-  HLT_ht350met100 = -999;
+  HLT_HT900 = -999;
+  HLT_MET170 = -999;
+  HLT_ht350met120 = -999;
   HLT_SingleMu = -999;   
   HLT_DoubleEl = -999;   
   HLT_MuEG = -999;   

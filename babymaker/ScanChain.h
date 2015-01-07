@@ -96,9 +96,9 @@ class babyMaker {
   Float_t         met_genPhi;
 
 //----- TRIGGER (to be better defined)
-  Int_t           HLT_HT650;   
-  Int_t           HLT_MET150;
-  Int_t           HLT_ht350met100;   
+  Int_t           HLT_HT900;   
+  Int_t           HLT_MET170;
+  Int_t           HLT_ht350met120;   
   Int_t           HLT_SingleMu;   
   Int_t           HLT_DoubleEl;   
   Int_t           HLT_MuEG;   
