@@ -255,6 +255,7 @@ class babyMaker {
   Float_t         jet_phi[max_njet];   //[njet]
   Float_t         jet_mass[max_njet];   //[njet]
   Float_t         jet_btagCSV[max_njet];   //[njet]
+  Float_t         jet_btagCSVv2IVF[max_njet];   //[njet]
   Float_t         jet_rawPt[max_njet];   //[njet]
   Float_t         jet_mcPt[max_njet];   //[njet]
   Int_t           jet_mcFlavour[max_njet];   //[njet]

@@ -699,7 +699,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	    p4sForHemsGamma.push_back(cms2.pfjets_p4().at(iJet));
 	    p4sForDphiGamma.push_back(cms2.pfjets_p4().at(iJet));
 	    gamma_nJet40++;
-	    if(cms2.pfjets_pfCombinedSecondaryVertexBJetTag().at(iJet) >= 0.679) { //CSVM
+	    if(cms2.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.814) { //CSVv2IVFM
 	      gamma_nBJet40++; 
 	      float mt = MT( cms2.pfjets_p4().at(iJet).pt(),cms2.pfjets_p4().at(iJet).phi(),gamma_met_pt,gamma_met_phi);
 	      if (mt < gamma_minMTBMet) gamma_minMTBMet = mt;	 
@@ -730,6 +730,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         jet_phi[njet]  = cms2.pfjets_p4().at(iJet).phi();
         jet_mass[njet] = cms2.pfjets_mass().at(iJet);
         jet_btagCSV[njet] = cms2.pfjets_pfCombinedSecondaryVertexBJetTag().at(iJet); 
+        jet_btagCSVv2IVF[njet] = cms2.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet); 
         jet_mcPt[njet] = cms2.pfjets_mc_p4().at(iJet).pt();
         jet_mcFlavour[njet] = cms2.pfjets_partonFlavour().at(iJet);
         //jet_quarkGluonID
@@ -748,8 +749,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
           p4sForHemsZll.push_back(cms2.pfjets_p4().at(iJet));
           p4sForDphiZll.push_back(cms2.pfjets_p4().at(iJet));
           nJet40++;
-	  //CSVM
-          if(jet_btagCSV[njet] >= 0.679) {
+	  //CSVv2IVFM
+          if(jet_btagCSVv2IVF[njet] >= 0.814) {
 	    nBJet40++; 
 	    float mt = MT(jet_pt[njet],jet_phi[njet],met_pt,met_phi);
 	    if (mt < minMTBMet) minMTBMet = mt;
@@ -1156,6 +1157,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("jet_phi", jet_phi, "jet_phi[njet]/F" );
   BabyTree_->Branch("jet_mass", jet_mass, "jet_mass[njet]/F" );
   BabyTree_->Branch("jet_btagCSV", jet_btagCSV, "jet_btagCSV[njet]/F" );
+  BabyTree_->Branch("jet_btagCSVv2IVF", jet_btagCSVv2IVF, "jet_btagCSVv2IVF[njet]/F" );
   BabyTree_->Branch("jet_rawPt", jet_rawPt, "jet_rawPt[njet]/F" );
   BabyTree_->Branch("jet_mcPt", jet_mcPt, "jet_mcPt[njet]/F" );
   BabyTree_->Branch("jet_mcFlavour", jet_mcFlavour, "jet_mcFlavour[njet]/I" );
