@@ -194,6 +194,8 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   std::map<std::string, TH1D*> h_1d_crdy10L; h_1d_crdy_v.push_back(h_1d_crdy10L); 
 
   std::map<std::string, TH1D*> h_1d_crslbase;
+  std::map<std::string, TH1D*> h_1d_crslw;
+  std::map<std::string, TH1D*> h_1d_crsltt;
 
   std::vector< std::map<std::string, TH1D*> > h_1d_crsl_v;
   std::map<std::string, TH1D*> h_1d_crsl1H;  h_1d_crsl_v.push_back(h_1d_crsl1H);  
@@ -227,12 +229,123 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   std::map<std::string, TH1D*> h_1d_crsl9L;  h_1d_crsl_v.push_back(h_1d_crsl9L);  
   std::map<std::string, TH1D*> h_1d_crsl10L; h_1d_crsl_v.push_back(h_1d_crsl10L); 
 
+  std::map<std::string, TH1D*> h_1d_crslmubase;
+  std::map<std::string, TH1D*> h_1d_crslmuw;
+  std::map<std::string, TH1D*> h_1d_crslmutt;
+
+  std::vector< std::map<std::string, TH1D*> > h_1d_crslmu_v;
+  std::map<std::string, TH1D*> h_1d_crslmu1H;  h_1d_crslmu_v.push_back(h_1d_crslmu1H);  
+  std::map<std::string, TH1D*> h_1d_crslmu2H;  h_1d_crslmu_v.push_back(h_1d_crslmu2H);  
+  std::map<std::string, TH1D*> h_1d_crslmu3H;  h_1d_crslmu_v.push_back(h_1d_crslmu3H);  
+  std::map<std::string, TH1D*> h_1d_crslmu4H;  h_1d_crslmu_v.push_back(h_1d_crslmu4H);  
+  std::map<std::string, TH1D*> h_1d_crslmu5H;  h_1d_crslmu_v.push_back(h_1d_crslmu5H);  
+  std::map<std::string, TH1D*> h_1d_crslmu6H;  h_1d_crslmu_v.push_back(h_1d_crslmu6H);  
+  std::map<std::string, TH1D*> h_1d_crslmu7H;  h_1d_crslmu_v.push_back(h_1d_crslmu7H);  
+  std::map<std::string, TH1D*> h_1d_crslmu8H;  h_1d_crslmu_v.push_back(h_1d_crslmu8H);  
+  std::map<std::string, TH1D*> h_1d_crslmu9H;  h_1d_crslmu_v.push_back(h_1d_crslmu9H);  
+  std::map<std::string, TH1D*> h_1d_crslmu10H; h_1d_crslmu_v.push_back(h_1d_crslmu10H); 
+  std::map<std::string, TH1D*> h_1d_crslmu1M;  h_1d_crslmu_v.push_back(h_1d_crslmu1M);  
+  std::map<std::string, TH1D*> h_1d_crslmu2M;  h_1d_crslmu_v.push_back(h_1d_crslmu2M);  
+  std::map<std::string, TH1D*> h_1d_crslmu3M;  h_1d_crslmu_v.push_back(h_1d_crslmu3M);  
+  std::map<std::string, TH1D*> h_1d_crslmu4M;  h_1d_crslmu_v.push_back(h_1d_crslmu4M);  
+  std::map<std::string, TH1D*> h_1d_crslmu5M;  h_1d_crslmu_v.push_back(h_1d_crslmu5M);  
+  std::map<std::string, TH1D*> h_1d_crslmu6M;  h_1d_crslmu_v.push_back(h_1d_crslmu6M);  
+  std::map<std::string, TH1D*> h_1d_crslmu7M;  h_1d_crslmu_v.push_back(h_1d_crslmu7M);  
+  std::map<std::string, TH1D*> h_1d_crslmu8M;  h_1d_crslmu_v.push_back(h_1d_crslmu8M);  
+  std::map<std::string, TH1D*> h_1d_crslmu9M;  h_1d_crslmu_v.push_back(h_1d_crslmu9M);  
+  std::map<std::string, TH1D*> h_1d_crslmu10M; h_1d_crslmu_v.push_back(h_1d_crslmu10M); 
+  std::map<std::string, TH1D*> h_1d_crslmu1L;  h_1d_crslmu_v.push_back(h_1d_crslmu1L);  
+  std::map<std::string, TH1D*> h_1d_crslmu2L;  h_1d_crslmu_v.push_back(h_1d_crslmu2L);  
+  std::map<std::string, TH1D*> h_1d_crslmu3L;  h_1d_crslmu_v.push_back(h_1d_crslmu3L);  
+  std::map<std::string, TH1D*> h_1d_crslmu4L;  h_1d_crslmu_v.push_back(h_1d_crslmu4L);  
+  std::map<std::string, TH1D*> h_1d_crslmu5L;  h_1d_crslmu_v.push_back(h_1d_crslmu5L);  
+  std::map<std::string, TH1D*> h_1d_crslmu6L;  h_1d_crslmu_v.push_back(h_1d_crslmu6L);  
+  std::map<std::string, TH1D*> h_1d_crslmu7L;  h_1d_crslmu_v.push_back(h_1d_crslmu7L);  
+  std::map<std::string, TH1D*> h_1d_crslmu8L;  h_1d_crslmu_v.push_back(h_1d_crslmu8L);  
+  std::map<std::string, TH1D*> h_1d_crslmu9L;  h_1d_crslmu_v.push_back(h_1d_crslmu9L);  
+  std::map<std::string, TH1D*> h_1d_crslmu10L; h_1d_crslmu_v.push_back(h_1d_crslmu10L); 
+
+  std::map<std::string, TH1D*> h_1d_crslelbase;
+  std::map<std::string, TH1D*> h_1d_crslelw;
+  std::map<std::string, TH1D*> h_1d_crsleltt;
+
+  std::vector< std::map<std::string, TH1D*> > h_1d_crslel_v;
+  std::map<std::string, TH1D*> h_1d_crslel1H;  h_1d_crslel_v.push_back(h_1d_crslel1H);  
+  std::map<std::string, TH1D*> h_1d_crslel2H;  h_1d_crslel_v.push_back(h_1d_crslel2H);  
+  std::map<std::string, TH1D*> h_1d_crslel3H;  h_1d_crslel_v.push_back(h_1d_crslel3H);  
+  std::map<std::string, TH1D*> h_1d_crslel4H;  h_1d_crslel_v.push_back(h_1d_crslel4H);  
+  std::map<std::string, TH1D*> h_1d_crslel5H;  h_1d_crslel_v.push_back(h_1d_crslel5H);  
+  std::map<std::string, TH1D*> h_1d_crslel6H;  h_1d_crslel_v.push_back(h_1d_crslel6H);  
+  std::map<std::string, TH1D*> h_1d_crslel7H;  h_1d_crslel_v.push_back(h_1d_crslel7H);  
+  std::map<std::string, TH1D*> h_1d_crslel8H;  h_1d_crslel_v.push_back(h_1d_crslel8H);  
+  std::map<std::string, TH1D*> h_1d_crslel9H;  h_1d_crslel_v.push_back(h_1d_crslel9H);  
+  std::map<std::string, TH1D*> h_1d_crslel10H; h_1d_crslel_v.push_back(h_1d_crslel10H); 
+  std::map<std::string, TH1D*> h_1d_crslel1M;  h_1d_crslel_v.push_back(h_1d_crslel1M);  
+  std::map<std::string, TH1D*> h_1d_crslel2M;  h_1d_crslel_v.push_back(h_1d_crslel2M);  
+  std::map<std::string, TH1D*> h_1d_crslel3M;  h_1d_crslel_v.push_back(h_1d_crslel3M);  
+  std::map<std::string, TH1D*> h_1d_crslel4M;  h_1d_crslel_v.push_back(h_1d_crslel4M);  
+  std::map<std::string, TH1D*> h_1d_crslel5M;  h_1d_crslel_v.push_back(h_1d_crslel5M);  
+  std::map<std::string, TH1D*> h_1d_crslel6M;  h_1d_crslel_v.push_back(h_1d_crslel6M);  
+  std::map<std::string, TH1D*> h_1d_crslel7M;  h_1d_crslel_v.push_back(h_1d_crslel7M);  
+  std::map<std::string, TH1D*> h_1d_crslel8M;  h_1d_crslel_v.push_back(h_1d_crslel8M);  
+  std::map<std::string, TH1D*> h_1d_crslel9M;  h_1d_crslel_v.push_back(h_1d_crslel9M);  
+  std::map<std::string, TH1D*> h_1d_crslel10M; h_1d_crslel_v.push_back(h_1d_crslel10M); 
+  std::map<std::string, TH1D*> h_1d_crslel1L;  h_1d_crslel_v.push_back(h_1d_crslel1L);  
+  std::map<std::string, TH1D*> h_1d_crslel2L;  h_1d_crslel_v.push_back(h_1d_crslel2L);  
+  std::map<std::string, TH1D*> h_1d_crslel3L;  h_1d_crslel_v.push_back(h_1d_crslel3L);  
+  std::map<std::string, TH1D*> h_1d_crslel4L;  h_1d_crslel_v.push_back(h_1d_crslel4L);  
+  std::map<std::string, TH1D*> h_1d_crslel5L;  h_1d_crslel_v.push_back(h_1d_crslel5L);  
+  std::map<std::string, TH1D*> h_1d_crslel6L;  h_1d_crslel_v.push_back(h_1d_crslel6L);  
+  std::map<std::string, TH1D*> h_1d_crslel7L;  h_1d_crslel_v.push_back(h_1d_crslel7L);  
+  std::map<std::string, TH1D*> h_1d_crslel8L;  h_1d_crslel_v.push_back(h_1d_crslel8L);  
+  std::map<std::string, TH1D*> h_1d_crslel9L;  h_1d_crslel_v.push_back(h_1d_crslel9L);  
+  std::map<std::string, TH1D*> h_1d_crslel10L; h_1d_crslel_v.push_back(h_1d_crslel10L); 
+
+  std::map<std::string, TH1D*> h_1d_crslhadbase;
+  std::map<std::string, TH1D*> h_1d_crslhadw;
+  std::map<std::string, TH1D*> h_1d_crslhadtt;
+
+  std::vector< std::map<std::string, TH1D*> > h_1d_crslhad_v;
+  std::map<std::string, TH1D*> h_1d_crslhad1H;  h_1d_crslhad_v.push_back(h_1d_crslhad1H);  
+  std::map<std::string, TH1D*> h_1d_crslhad2H;  h_1d_crslhad_v.push_back(h_1d_crslhad2H);  
+  std::map<std::string, TH1D*> h_1d_crslhad3H;  h_1d_crslhad_v.push_back(h_1d_crslhad3H);  
+  std::map<std::string, TH1D*> h_1d_crslhad4H;  h_1d_crslhad_v.push_back(h_1d_crslhad4H);  
+  std::map<std::string, TH1D*> h_1d_crslhad5H;  h_1d_crslhad_v.push_back(h_1d_crslhad5H);  
+  std::map<std::string, TH1D*> h_1d_crslhad6H;  h_1d_crslhad_v.push_back(h_1d_crslhad6H);  
+  std::map<std::string, TH1D*> h_1d_crslhad7H;  h_1d_crslhad_v.push_back(h_1d_crslhad7H);  
+  std::map<std::string, TH1D*> h_1d_crslhad8H;  h_1d_crslhad_v.push_back(h_1d_crslhad8H);  
+  std::map<std::string, TH1D*> h_1d_crslhad9H;  h_1d_crslhad_v.push_back(h_1d_crslhad9H);  
+  std::map<std::string, TH1D*> h_1d_crslhad10H; h_1d_crslhad_v.push_back(h_1d_crslhad10H); 
+  std::map<std::string, TH1D*> h_1d_crslhad1M;  h_1d_crslhad_v.push_back(h_1d_crslhad1M);  
+  std::map<std::string, TH1D*> h_1d_crslhad2M;  h_1d_crslhad_v.push_back(h_1d_crslhad2M);  
+  std::map<std::string, TH1D*> h_1d_crslhad3M;  h_1d_crslhad_v.push_back(h_1d_crslhad3M);  
+  std::map<std::string, TH1D*> h_1d_crslhad4M;  h_1d_crslhad_v.push_back(h_1d_crslhad4M);  
+  std::map<std::string, TH1D*> h_1d_crslhad5M;  h_1d_crslhad_v.push_back(h_1d_crslhad5M);  
+  std::map<std::string, TH1D*> h_1d_crslhad6M;  h_1d_crslhad_v.push_back(h_1d_crslhad6M);  
+  std::map<std::string, TH1D*> h_1d_crslhad7M;  h_1d_crslhad_v.push_back(h_1d_crslhad7M);  
+  std::map<std::string, TH1D*> h_1d_crslhad8M;  h_1d_crslhad_v.push_back(h_1d_crslhad8M);  
+  std::map<std::string, TH1D*> h_1d_crslhad9M;  h_1d_crslhad_v.push_back(h_1d_crslhad9M);  
+  std::map<std::string, TH1D*> h_1d_crslhad10M; h_1d_crslhad_v.push_back(h_1d_crslhad10M); 
+  std::map<std::string, TH1D*> h_1d_crslhad1L;  h_1d_crslhad_v.push_back(h_1d_crslhad1L);  
+  std::map<std::string, TH1D*> h_1d_crslhad2L;  h_1d_crslhad_v.push_back(h_1d_crslhad2L);  
+  std::map<std::string, TH1D*> h_1d_crslhad3L;  h_1d_crslhad_v.push_back(h_1d_crslhad3L);  
+  std::map<std::string, TH1D*> h_1d_crslhad4L;  h_1d_crslhad_v.push_back(h_1d_crslhad4L);  
+  std::map<std::string, TH1D*> h_1d_crslhad5L;  h_1d_crslhad_v.push_back(h_1d_crslhad5L);  
+  std::map<std::string, TH1D*> h_1d_crslhad6L;  h_1d_crslhad_v.push_back(h_1d_crslhad6L);  
+  std::map<std::string, TH1D*> h_1d_crslhad7L;  h_1d_crslhad_v.push_back(h_1d_crslhad7L);  
+  std::map<std::string, TH1D*> h_1d_crslhad8L;  h_1d_crslhad_v.push_back(h_1d_crslhad8L);  
+  std::map<std::string, TH1D*> h_1d_crslhad9L;  h_1d_crslhad_v.push_back(h_1d_crslhad9L);  
+  std::map<std::string, TH1D*> h_1d_crslhad10L; h_1d_crslhad_v.push_back(h_1d_crslhad10L); 
+
 
   
   // These will be set to true if any SL GJ or DY control region plots are produced
   bool saveGJplots = false;
   bool saveDYplots = false;
   bool saveSLplots = false;
+  bool saveSLMUplots = false;
+  bool saveSLELplots = false;
+  bool saveSLHADplots = false;
 
   // File Loop
   int nDuplicates = 0;
@@ -314,68 +427,152 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
       plot1D("h_mt2",       t.mt2,       evtweight_, h_1d_global, ";M_{T2} [GeV]", 80, 0, 800);
 
-      nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
+      // note: this will double count some leptons, since reco leptons can appear as PFcands
+      nlepveto_ = 0;
+      int nlepveto_overlap = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
 
       // variables for single lep control region
       bool doSLplots = false;
+      bool doSLMUplots = false;
+      bool doSLELplots = false;
+      bool doSLHADplots = false;
       leppt_ = -1.;
       mt_ = -1.;
-      // do 1L control regions for all samples for now..
-      if (nlepveto_ == 1) {
-	float lepphi;
-	if (t.nMuons10 == 1 || t.nElectrons10 == 1) {
-	  leppt_ = t.lep_pt[0];
-	  lepphi = t.lep_phi[0];
+      // do lepton overlap removal and 1L CR selections
+      if (nlepveto_overlap >= 1) {
+	std::vector<MT2Looper::lepcand> all_cands;
+	std::vector<MT2Looper::lepcand> unique_cands;
+	// require MT < 100 for reco leptons
+	//  require at most 1 reco lepton at this point, do overlap with PFcands below
+	if ( (t.nMuons10 == 1 && t.nElectrons10 == 0) || (t.nMuons10 == 0 && t.nElectrons10 == 1) ) {
+	  MT2Looper::lepcand cand;
+	  cand.pt = t.lep_pt[0];
+	  cand.phi = t.lep_phi[0];
+	  cand.mt = sqrt( 2 * t.met_pt * cand.pt * ( 1 - cos( t.met_phi - cand.phi) ) );
+	  if (cand.mt > 100.) continue;
+
+	  // cand passes cuts: add to vector
+	  cand.eta = t.lep_eta[0];
+	  cand.pdgId = t.lep_pdgId[0];
+	  cand.isPFCand = false;
+	  all_cands.push_back(cand);
+	  //doSLplots = true;
 	} 
-	else if (t.nTaus20 == 1) {
-	  leppt_ = t.tau_pt[0];
-	  lepphi = t.tau_phi[0];
+	// pf leptons: need to find cand passing selection
+	else if (t.nPFLep5LowMT == 1) {
+	  for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
+	    MT2Looper::lepcand cand;
+	    cand.pt = t.isoTrack_pt[itrk];
+	    cand.phi = t.isoTrack_phi[itrk];
+	    cand.pdgId = t.isoTrack_pdgId[itrk];
+	    if (cand.pt < 5.) continue;
+	    if (abs(cand.pdgId) != 11 && abs(cand.pdgId) != 13) continue;
+	    float absiso = t.isoTrack_absIso[itrk];
+	    if (absiso/cand.pt > 0.2) continue;
+	    cand.mt = sqrt( 2 * t.met_pt * cand.pt * ( 1 - cos( t.met_phi - cand.phi) ) );
+	    if (cand.mt > 100.) continue;
+
+	    // cand passes cuts: add to vector
+	    cand.eta = t.isoTrack_eta[itrk];
+	    cand.isPFCand = true;
+	    all_cands.push_back(cand);
+	  } // loop on isoTracks
+	}
+	// pf hadrons: need to find cand passing selection
+	else if (t.nPFHad10LowMT == 1) {
+	  for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
+	    MT2Looper::lepcand cand;
+	    cand.pt = t.isoTrack_pt[itrk];
+	    cand.phi = t.isoTrack_phi[itrk];
+	    cand.pdgId = t.isoTrack_pdgId[itrk];
+	    if (cand.pt < 10.) continue;
+	    if (abs(cand.pdgId) != 211) continue;
+	    float absiso = t.isoTrack_absIso[itrk];
+	    if (absiso/cand.pt > 0.1) continue;
+	    cand.mt = sqrt( 2 * t.met_pt * cand.pt * ( 1 - cos( t.met_phi - cand.phi) ) );
+	    if (cand.mt > 100.) continue;
+
+	    // cand passes cuts: add to vector
+	    cand.eta = t.isoTrack_eta[itrk];
+	    cand.isPFCand = true;
+	    all_cands.push_back(cand);
+	  } // loop on isoTracks
 	}
 
-	// mt with lep1
-	mt_ = sqrt( 2 * t.met_pt * leppt_ * ( 1 - cos( t.met_phi - lepphi) ) );
-	doSLplots = true;
-      }
+	// check all_cands for overlaps
+	for (unsigned int icand = 0; icand < all_cands.size(); ++icand) {
+	  bool keep = true;
+	  for (unsigned int jcand = 0; jcand < all_cands.size(); ++jcand) {
+	    float dr = DeltaR(all_cands.at(icand).eta, all_cands.at(jcand).eta, all_cands.at(icand).phi, all_cands.at(jcand).phi);
+	    if (dr < 0.1) {
+	      // if overlap, check whether the cands have the same pdgId
+	      // keep the reco lepton in case of overlap with PF lepton
+	      if (all_cands.at(icand).pdgId != all_cands.at(jcand).pdgId) {
+		std::cout << "WARNING: leptons with different pdgIds overlap." << std::endl
+			  << "  lep 1: pt: " << all_cands.at(icand).pt << ", pdgId: " << all_cands.at(icand).pdgId
+			  << ", isPFCand: " << all_cands.at(icand).isPFCand << std::endl
+			  << "  lep 2: pt: " << all_cands.at(jcand).pt << ", pdgId: " << all_cands.at(jcand).pdgId
+			  << ", isPFCand: " << all_cands.at(jcand).isPFCand << std::endl;
+	      }
+	      if (all_cands.at(icand).isPFCand && !all_cands.at(jcand).isPFCand) keep = false;
+	    }
+	  }
+	  if (keep) unique_cands.push_back(all_cands.at(icand));
+	}
+
+	// check size of unique cands, and if == 1, fill 1L CR plots
+	if (unique_cands.size() == 1) {
+	  leppt_ = unique_cands.at(0).pt;
+	  mt_ = unique_cands.at(0).mt;
+	  doSLplots = true;
+	  if (abs(unique_cands.at(0).pdgId) == 13) doSLMUplots = true;
+	  else if (abs(unique_cands.at(0).pdgId) == 11) doSLELplots = true;
+	  else if (abs(unique_cands.at(0).pdgId) == 211) doSLHADplots = true;
+	}
+
+	nlepveto_ = (int) unique_cands.size();
+
+      } // for 1L control region
 
       // Variables for gamma+jets control region
       bool doGJplots = false;
       int jetIdx0 = 0;
       int jetIdx1 = 1;
       if (t.evt_id < 300) {
-	if (t.ngamma > 0) {
-	  if ( (t.evt_id < 200 && t.gamma_mcMatchId[0]>0  /*&& t.gamma_genIso[0]<5*/)    // Reject true photons from QCD (iso is always 0 for now)
-	       || (t.evt_id >=200 && t.gamma_mcMatchId[0]==0 )                           // Reject unmatched photons from Gamma+Jets
-	       || (t.evt_id >=200 && t.gamma_mcMatchId[0] >0 && t.gamma_genIso[0]>5) )   // Reject non-iso photons from Gamma+Jets
-	    { doGJplots = false; }
-	  else {
-	    // Redefine leading two jets after jet/photon overlap
-	    float minDR = 0.4;
-	    int gammaJet = -1;
-	    for (int i = 0; i < t.njet; i++) {
-	      float thisDR = DeltaR(t.jet_eta[i], t.gamma_eta[0], t.jet_phi[i], t.gamma_phi[0]);
-	      if(thisDR < minDR){
-		minDR = thisDR; 
-		gammaJet = i;
-	      }
-	    } 
-	    if (gammaJet==0) { jetIdx0++; jetIdx1++;}
-	    if (gammaJet==1) { jetIdx1++;} 
-	    doGJplots = true;
-	  }
-	} // ngamma > 0
+      	if (t.ngamma > 0) {
+      	  if ( (t.evt_id < 200 && t.gamma_mcMatchId[0]>0  /*&& t.gamma_genIso[0]<5*/)    // Reject true photons from QCD (iso is always 0 for now)
+      	       || (t.evt_id >=200 && t.gamma_mcMatchId[0]==0 )                           // Reject unmatched photons from Gamma+Jets
+      	       || (t.evt_id >=200 && t.gamma_mcMatchId[0] >0 && t.gamma_genIso[0]>5) )   // Reject non-iso photons from Gamma+Jets
+      	    { doGJplots = false; }
+      	  else {
+      	    // Redefine leading two jets after jet/photon overlap
+      	    float minDR = 0.4;
+      	    int gammaJet = -1;
+      	    for (int i = 0; i < t.njet; i++) {
+      	      float thisDR = DeltaR(t.jet_eta[i], t.gamma_eta[0], t.jet_phi[i], t.gamma_phi[0]);
+      	      if(thisDR < minDR){
+      		minDR = thisDR; 
+      		gammaJet = i;
+      	      }
+      	    } 
+      	    if (gammaJet==0) { jetIdx0++; jetIdx1++;}
+      	    if (gammaJet==1) { jetIdx1++;} 
+      	    doGJplots = true;
+      	  }
+      	} // ngamma > 0
       }// evt_id < 300
 
       // Variables for Zll (DY) control region
       bool doDYplots = false;
       if (t.evt_id >= 700 && t.evt_id < 800) {
-	if (t.nlep == 2) {
-	  if ( (t.lep_charge[0] * t.lep_charge[1] != -1)
-	       || (abs(t.lep_pdgId[0]) != abs(t.lep_pdgId[1]) )
-	       || (fabs(t.zll_mass - 90) > 20 ) ) {
-		 nlepveto_ = nlepveto_ - 2;
-		 doDYplots = true;
-	       }
-	} // nlep == 2
+      	if (t.nlep == 2) {
+      	  if ( (t.lep_charge[0] * t.lep_charge[1] != -1)
+      	       || (abs(t.lep_pdgId[0]) != abs(t.lep_pdgId[1]) )
+      	       || (fabs(t.zll_mass - 90) > 20 ) ) {
+      		 nlepveto_ = nlepveto_ - 2;
+      		 doDYplots = true;
+      	       }
+      	} // nlep == 2
       }// evt_id 
 
 
@@ -392,26 +589,56 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       } 
 
       if (doGJplots) {
-	saveGJplots = true;
-	fillHistosCRGJ(h_1d_crgjbase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crgjbase","", jetIdx0, jetIdx1);
-	for (unsigned int imap = 0; imap < h_1d_crgj_v.size(); imap++) {
-	  fillHistosCRGJ(h_1d_crgj_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crgj"+regions.at(imap),"", jetIdx0, jetIdx1);
-	} 
+      	saveGJplots = true;
+      	fillHistosCRGJ(h_1d_crgjbase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crgjbase","", jetIdx0, jetIdx1);
+      	for (unsigned int imap = 0; imap < h_1d_crgj_v.size(); imap++) {
+      	  fillHistosCRGJ(h_1d_crgj_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crgj"+regions.at(imap),"", jetIdx0, jetIdx1);
+      	} 
       }
 
       if (doDYplots) {
-	saveDYplots = true;
-	for (unsigned int imap = 0; imap < h_1d_crdy_v.size(); imap++) {
-	  fillHistosCRDY(h_1d_crdy_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crdy"+regions.at(imap),"");
-	} 
+      	saveDYplots = true;
+      	for (unsigned int imap = 0; imap < h_1d_crdy_v.size(); imap++) {
+      	  fillHistosCRDY(h_1d_crdy_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crdy"+regions.at(imap),"");
+      	} 
       }
 
       if (doSLplots) {
-	saveSLplots = true;
-        fillHistosCRSL(h_1d_crslbase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crslbase","",100.);
-	for (unsigned int imap = 0; imap < h_1d_crsl_v.size(); imap++) {
-	  fillHistosCRSL(h_1d_crsl_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crsl"+regions.at(imap),"",100.);
-	} 
+      	saveSLplots = true;
+        fillHistosCRSL(h_1d_crslbase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crslbase");
+        fillHistosCRSL(h_1d_crslw, SignalRegionJets::crw, SignalRegionHtMet::nocut, "crslw");
+        fillHistosCRSL(h_1d_crsltt, SignalRegionJets::crtt, SignalRegionHtMet::nocut, "crsltt");
+      	for (unsigned int imap = 0; imap < h_1d_crsl_v.size(); imap++) {
+      	  fillHistosCRSL(h_1d_crsl_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crsl"+regions.at(imap));
+      	} 
+
+	if (doSLMUplots) {
+	  fillHistosCRSL(h_1d_crslmubase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crslmubase");
+	  fillHistosCRSL(h_1d_crslmuw, SignalRegionJets::crw, SignalRegionHtMet::nocut, "crslmuw");
+	  fillHistosCRSL(h_1d_crslmutt, SignalRegionJets::crtt, SignalRegionHtMet::nocut, "crslmutt");
+	  for (unsigned int imap = 0; imap < h_1d_crslmu_v.size(); imap++) {
+	    fillHistosCRSL(h_1d_crslmu_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crslmu"+regions.at(imap));
+	  } 
+	}
+
+	if (doSLELplots) {
+	  fillHistosCRSL(h_1d_crslelbase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crslelbase");
+	  fillHistosCRSL(h_1d_crslelw, SignalRegionJets::crw, SignalRegionHtMet::nocut, "crslelw");
+	  fillHistosCRSL(h_1d_crsleltt, SignalRegionJets::crtt, SignalRegionHtMet::nocut, "crsleltt");
+	  for (unsigned int imap = 0; imap < h_1d_crslel_v.size(); imap++) {
+	    fillHistosCRSL(h_1d_crslel_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crslel"+regions.at(imap));
+	  } 
+	}
+
+	if (doSLHADplots) {
+	  fillHistosCRSL(h_1d_crslhadbase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crslhadbase");
+	  fillHistosCRSL(h_1d_crslhadw, SignalRegionJets::crw, SignalRegionHtMet::nocut, "crslhadw");
+	  fillHistosCRSL(h_1d_crslhadtt, SignalRegionJets::crtt, SignalRegionHtMet::nocut, "crslhadtt");
+	  for (unsigned int imap = 0; imap < h_1d_crslhad_v.size(); imap++) {
+	    fillHistosCRSL(h_1d_crslhad_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crslhad"+regions.at(imap));
+	  } 
+	}
+
       }
 
    }//end loop on events in a file
@@ -458,9 +685,38 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
   if (saveSLplots) {
     savePlotsDir(h_1d_crslbase,outfile_,"crslbase");
+    savePlotsDir(h_1d_crslw,outfile_,"crslw");
+    savePlotsDir(h_1d_crsltt,outfile_,"crsltt");
     for (unsigned int imap = 0; imap < h_1d_crsl_v.size(); imap++) {
       savePlotsDir(h_1d_crsl_v.at(imap),outfile_,("crsl"+regions.at(imap)).c_str());
     } 
+
+    if (saveSLMUplots) {
+      savePlotsDir(h_1d_crslmubase,outfile_,"crslmubase");
+      savePlotsDir(h_1d_crslmuw,outfile_,"crslmuw");
+      savePlotsDir(h_1d_crslmutt,outfile_,"crslmutt");
+      for (unsigned int imap = 0; imap < h_1d_crslmu_v.size(); imap++) {
+	savePlotsDir(h_1d_crslmu_v.at(imap),outfile_,("crslmu"+regions.at(imap)).c_str());
+      } 
+    }
+
+    if (saveSLELplots) {
+      savePlotsDir(h_1d_crslelbase,outfile_,"crslelbase");
+      savePlotsDir(h_1d_crslelw,outfile_,"crslelw");
+      savePlotsDir(h_1d_crsleltt,outfile_,"crsleltt");
+      for (unsigned int imap = 0; imap < h_1d_crslel_v.size(); imap++) {
+	savePlotsDir(h_1d_crslel_v.at(imap),outfile_,("crslel"+regions.at(imap)).c_str());
+      } 
+    }
+
+    if (saveSLHADplots) {
+      savePlotsDir(h_1d_crslhadbase,outfile_,"crslhadbase");
+      savePlotsDir(h_1d_crslhadw,outfile_,"crslhadw");
+      savePlotsDir(h_1d_crslhadtt,outfile_,"crslhadtt");
+      for (unsigned int imap = 0; imap < h_1d_crslhad_v.size(); imap++) {
+	savePlotsDir(h_1d_crslhad_v.at(imap),outfile_,("crslhad"+regions.at(imap)).c_str());
+      } 
+    }
   }
 
 
@@ -495,24 +751,19 @@ void MT2Looper::fillHistosSignalRegion(std::map<std::string, TH1D*>& h_1d, const
 }
 
 // hists for single lepton control region
-void MT2Looper::fillHistosCRSL(std::map<std::string, TH1D*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dirname, const std::string& suffix, const float mtcut) {
+void MT2Looper::fillHistosCRSL(std::map<std::string, TH1D*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dirname, const std::string& suffix) {
 
   if ( !PassesSignalRegionNoLepVeto(SignalRegionVersion::sel2015LowLumi, t.mt2, t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht,
 				    t.minMTBMet, t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) return;
   if (nlepveto_ != 1) return;
 
-  // apply mtcut if requested
-  if (mtcut > 0. && mt_ > mtcut) return;
-
   // fill hists
   fillHistos( h_1d, dirname, suffix);
-  //  fillHistosSingleLepton( h_1d, dirname, suffix);
+  fillHistosSingleLepton( h_1d, dirname, suffix);
 
-  // fill CR summary hist only if mt cut was applied
-  if (mtcut > 0.) {
-    outfile_->cd();
-    plot1D("h_SingleLeptonControlRegion",  sr_jets+sr_htmet,   evtweight_, h_1d_global, ";Single Lepton Control Region", 100, 0, 100);
-  }
+  // // fill CR summary hist
+  // outfile_->cd();
+  // plot1D("h_SingleLeptonControlRegion",  sr_jets+sr_htmet,   evtweight_, h_1d_global, ";Single Lepton Control Region", 100, 0, 100);
 
   return;
 }

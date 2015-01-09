@@ -17,12 +17,20 @@
 #include "../MT2CORE/mt2tree.h"
 #include "../MT2CORE/sigSelections.h"
 
-
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
 using namespace mt2;
 class MT2Looper {
 
  public:
+
+  struct lepcand {
+    float pt;
+    float eta;
+    float phi;
+    int pdgId;
+    float mt;
+    bool isPFCand;
+  };
 
   MT2Looper();
   ~MT2Looper();
@@ -35,7 +43,7 @@ class MT2Looper {
   void fillHistosCRSL(std::map<std::string, TH1D*>& h_1d, 
 		      const SignalRegionJets::value_type& signal_region = SignalRegionJets::nocut, 
 		      const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::nocut,
-		      const std::string& dirname = "", const std::string& suffix = "", const float mtcut = -1.);
+		      const std::string& dirname = "", const std::string& suffix = "");
   void fillHistosCRGJ(std::map<std::string, TH1D*>& h_1d, 
 		      const SignalRegionJets::value_type& signal_region = SignalRegionJets::nocut, 
 		      const SignalRegionHtMet::value_type& signal_region_type = SignalRegionHtMet::nocut,
