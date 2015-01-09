@@ -853,11 +853,11 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, const st
   plot1D("h_iso"+s,      iso,   evtweight_, h_1d, ";iso [GeV]", 100, 0, 50);
 
   for (unsigned int i = 0; i < n_mt2bins; i++) {
-    if ( t.gamma_mt2 > mt2bins[n_mt2bins] &&  t.gamma_mt2 < mt2bins[n_mt2bins+1]) 
+    if ( t.gamma_mt2 > mt2bins[i] &&  t.gamma_mt2 < mt2bins[i+1]) 
       plot1D("h_iso_mt2bin"+mt2binsname[i]+s,  iso,  evtweight_, h_1d, "; iso", 100, 0, 50);
   }
 
-  if (iso < 5) 
+  if (iso < 10) 
     plot1D("h_mt2bins"+s,       t.gamma_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
 
   outfile_->cd();
