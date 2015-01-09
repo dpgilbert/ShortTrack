@@ -21,7 +21,9 @@ namespace mt2
 	    sr7  = 7,   
 	    sr8  = 8,   
 	    sr9  = 9,   
-	    sr10  = 10,   
+	    sr10 = 10,   
+	    crw  = 11,   
+	    crtt = 12,   
             // keep track of the size
             static_size
         };

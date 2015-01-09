@@ -46,7 +46,14 @@ namespace mt2 {
     {
       if (!PassesSignalRegionBase(version, mt2, met, ht, njets, deltaPhiMin, diffMetMht, j1pt, j2pt)) return false;
       if (nlep > 0) return false;
-      if ((sr_jets != SignalRegionJets::nocut) && (PassesSignalRegionJets(version, njets, nbtag, minMTBMet, mt2) != sr_jets)) return false;
+      if (sr_jets != SignalRegionJets::nocut) {
+	SignalRegionJets::value_type passed_sr_jets = PassesSignalRegionJets(version, njets, nbtag, minMTBMet, mt2);
+	if (sr_jets <= SignalRegionJets::sr10 && passed_sr_jets != sr_jets) return false;
+	// W control region: at least 2 jets (implicit), bveto
+	else if ((sr_jets == SignalRegionJets::crw) && (nbtag > 0)) return false;
+	// ttbar control region: at least 4 jets, at least 1 btag
+	else if ((sr_jets == SignalRegionJets::crtt) && (njets < 4 || nbtag < 1)) return false;
+      }
       if ((sr_htmet != SignalRegionHtMet::nocut) && (PassesSignalRegionHtMet(version, met, ht) != sr_htmet)) return false;
       return true;
     }
@@ -71,7 +78,14 @@ namespace mt2 {
     )
     {
       if (!PassesSignalRegionBase(version, mt2, met, ht, njets, deltaPhiMin, diffMetMht, j1pt, j2pt)) return false;
-      if ((sr_jets != SignalRegionJets::nocut) && (PassesSignalRegionJets(version, njets, nbtag, minMTBMet, mt2) != sr_jets)) return false;
+      if (sr_jets != SignalRegionJets::nocut) {
+	SignalRegionJets::value_type passed_sr_jets = PassesSignalRegionJets(version, njets, nbtag, minMTBMet, mt2);
+	if (sr_jets <= SignalRegionJets::sr10 && passed_sr_jets != sr_jets) return false;
+	// W control region: at least 2 jets (implicit), bveto
+	else if ((sr_jets == SignalRegionJets::crw) && (nbtag > 0)) return false;
+	// ttbar control region: at least 4 jets, at least 1 btag
+	else if ((sr_jets == SignalRegionJets::crtt) && (njets < 4 || nbtag < 1)) return false;
+      }
       if ((sr_htmet != SignalRegionHtMet::nocut) && (PassesSignalRegionHtMet(version, met, ht) != sr_htmet)) return false;
       return true;
     }
