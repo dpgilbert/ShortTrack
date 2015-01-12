@@ -20,6 +20,7 @@
 #include "../MT2CORE/genUtils.h"
 #include "../MT2CORE/MT2/MT2.h"
 #include "../MT2CORE/IsoTrackVeto.h"
+#include "../MT2CORE/jetcorr/FactorizedJetCorrector.h"
 
 // header
 #include "ScanChain.h"
@@ -29,6 +30,8 @@ using namespace tas;
 
 // turn on to add debugging statements
 const bool verbose = false;
+// turn on to apply JEC from text files
+const bool applyJECfromFile = true;
 
 //--------------------------------------------------------------------
 
@@ -68,6 +71,24 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     tree->SetCacheSize(128*1024*1024);
     cms2.Init(tree);
     
+    // ----------------------------------
+    // retrieve JEC from files, if using
+    // ----------------------------------
+
+    std::vector<std::string> jetcorr_filenames_pfL1FastJetL2L3;
+    FactorizedJetCorrector *jet_corrector_pfL1FastJetL2L3;
+
+    if (applyJECfromFile) {
+      jetcorr_filenames_pfL1FastJetL2L3.clear();
+
+      // files for Phys14 MC  
+      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PHYS14_V1_MC_L1FastJet_AK4PFchs.txt");
+      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PHYS14_V1_MC_L2Relative_AK4PFchs.txt");
+      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PHYS14_V1_MC_L3Absolute_AK4PFchs.txt");
+
+      jet_corrector_pfL1FastJetL2L3  = makeJetCorrector(jetcorr_filenames_pfL1FastJetL2L3);
+    }
+
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
@@ -141,7 +162,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       HLT_MET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v"); 
       HLT_ht350met120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v"); 
 
-      HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu24_eta2p1_IterTrk02_v"); 
+      HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu20_eta2p1_IterTrk02_v") || passHLTTriggerPattern("HLT_IsoTkMu20_eta2p1_IterTrk02_v"); 
       HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloId_TrackId_Iso_v"); 
       HLT_MuEG         = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v") || passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v"); 
       HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") || passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
@@ -604,14 +625,39 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       //	}
       //}
 
-      //check baseline selections
+      //correct jets and check baseline selections
+      vector<LorentzVector> p4sCorrJets; // store corrected p4 for ALL jets, so indices match CMS3 ntuple
       vector<int> passJets; //index of jets that pass baseline selections
       for(unsigned int iJet = 0; iJet < cms2.pfjets_p4().size(); iJet++){
-        if(cms2.pfjets_p4().at(iJet).pt() < 10.0) continue;
-        if(fabs(cms2.pfjets_p4().at(iJet).eta()) > 5.2) continue;
+
+	LorentzVector pfjet_p4_cor = cms2.pfjets_p4().at(iJet);
+
+	if (applyJECfromFile) {
+
+	  // get uncorrected jet p4 to use as input for corrections
+	  LorentzVector pfjet_p4_uncor = cms2.pfjets_p4().at(iJet) * cms2.pfjets_undoJEC().at(iJet);
+
+	  // get L1FastL2L3Residual total correction
+	  jet_corrector_pfL1FastJetL2L3->setRho   ( cms2.evt_fixgridfastjet_all_rho() );
+	  jet_corrector_pfL1FastJetL2L3->setJetA  ( cms2.pfjets_area().at(iJet)       );
+	  jet_corrector_pfL1FastJetL2L3->setJetPt ( pfjet_p4_uncor.pt()               );
+	  jet_corrector_pfL1FastJetL2L3->setJetEta( pfjet_p4_uncor.eta()              );
+	  double corr = jet_corrector_pfL1FastJetL2L3->getCorrection();
+
+	  // apply new JEC to p4
+	  pfjet_p4_cor = pfjet_p4_uncor * corr;
+	}
+
+	p4sCorrJets.push_back(pfjet_p4_cor);
+
+        if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
+        if(fabs(p4sCorrJets.at(iJet).eta()) > 5.2) continue;
+	// note this uses the eta of the jet as stored in CMS3
+	//  chance for small discrepancies if JEC changes direction slightly..
         if(!isLoosePFJet(iJet)) continue;
 
         passJets.push_back(iJet);
+
       }
 
       if (verbose) cout << "before jet/lepton overlap" << endl;
@@ -627,8 +673,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
           int iJet = passJets.at(passIdx);
 
-          if(cms2.pfjets_p4().at(iJet).pt() < 10.0) continue;
-          if(fabs(cms2.pfjets_p4().at(iJet).eta()) > 5.2) continue;
+          if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
+          if(fabs(p4sCorrJets.at(iJet).eta()) > 5.2) continue;
           if(!isLoosePFJet(iJet)) continue;
 
           bool alreadyRemoved = false;
@@ -640,7 +686,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
           }
           if(alreadyRemoved) continue;
 
-          float thisDR = DeltaR(pfjets_p4().at(iJet).eta(), p4sLeptonsForJetCleaning.at(iLep).eta(), pfjets_p4().at(iJet).phi(), p4sLeptonsForJetCleaning.at(iLep).phi());
+          float thisDR = DeltaR(p4sCorrJets.at(iJet).eta(), p4sLeptonsForJetCleaning.at(iLep).eta(), p4sCorrJets.at(iJet).phi(), p4sLeptonsForJetCleaning.at(iLep).phi());
           if(thisDR < minDR){
             minDR = thisDR; 
             minIndex = iJet;
@@ -663,8 +709,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
           int iJet = passJets.at(passIdx);
 
-          if(cms2.pfjets_p4().at(iJet).pt() < 10.0) continue;
-          if(fabs(cms2.pfjets_p4().at(iJet).eta()) > 5.2) continue;
+          if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
+          if(fabs(p4sCorrJets.at(iJet).eta()) > 5.2) continue;
           if(!isLoosePFJet(iJet)) continue;
 
           bool alreadyRemoved = false;
@@ -676,7 +722,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
           }
           if(alreadyRemoved) continue;
 
-          float thisDR = DeltaR(pfjets_p4().at(iJet).eta(), gamma_eta[iGamma], pfjets_p4().at(iJet).phi(), gamma_phi[iGamma]);
+          float thisDR = DeltaR(p4sCorrJets.at(iJet).eta(), gamma_eta[iGamma], p4sCorrJets.at(iJet).phi(), gamma_phi[iGamma]);
           if(thisDR < minDR){
             minDR = thisDR; 
             minIndex = iJet;
@@ -703,7 +749,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         int iJet = passJets.at(passIdx);
 
 	// fill gamma_XXX variables before checking for lepton overlap.
-        if( ( cms2.pfjets_p4().at(iJet).pt() > 40.0) && (fabs(cms2.pfjets_p4().at(iJet).eta()) < 2.5) ){ 
+        if( ( p4sCorrJets.at(iJet).pt() > 40.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ){ 
 	  //check against list of jets that overlap with a photon
 	  bool isOverlapJetGamma = false;
 	  for(unsigned int j=0; j<removedJetsGamma.size(); j++){
@@ -714,18 +760,18 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  }
 
 	  if(!isOverlapJetGamma) {
-	    p4sForHemsGamma.push_back(cms2.pfjets_p4().at(iJet));
-	    p4sForDphiGamma.push_back(cms2.pfjets_p4().at(iJet));
+	    p4sForHemsGamma.push_back(p4sCorrJets.at(iJet));
+	    p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
 	    gamma_nJet40++;
 	    if(cms2.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.814) { //CSVv2IVFM
 	      gamma_nBJet40++; 
-	      float mt = MT( cms2.pfjets_p4().at(iJet).pt(),cms2.pfjets_p4().at(iJet).phi(),gamma_met_pt,gamma_met_phi);
+	      float mt = MT( p4sCorrJets.at(iJet).pt(),p4sCorrJets.at(iJet).phi(),gamma_met_pt,gamma_met_phi);
 	      if (mt < gamma_minMTBMet) gamma_minMTBMet = mt;	 
 	    }   
 	  } 
         } // accept jets out to eta 5.2 for dphi
-	else if ( (cms2.pfjets_p4().at(iJet).pt() > 40.0) && (fabs(cms2.pfjets_p4().at(iJet).eta()) < 5.2) ) {
-          p4sForDphiGamma.push_back(cms2.pfjets_p4().at(iJet));
+	else if ( (p4sCorrJets.at(iJet).pt() > 40.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 5.2) ) {
+          p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
 	}
 
         //check against list of jets that overlap with a lepton
@@ -743,9 +789,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  break;
 	}
 
-        jet_pt[njet]   = cms2.pfjets_p4().at(iJet).pt();
-        jet_eta[njet]  = cms2.pfjets_p4().at(iJet).eta();
-        jet_phi[njet]  = cms2.pfjets_p4().at(iJet).phi();
+        jet_pt[njet]   = p4sCorrJets.at(iJet).pt();
+        jet_eta[njet]  = p4sCorrJets.at(iJet).eta();
+        jet_phi[njet]  = p4sCorrJets.at(iJet).phi();
         jet_mass[njet] = cms2.pfjets_mass().at(iJet);
         jet_btagCSV[njet] = cms2.pfjets_pfCombinedSecondaryVertexBJetTag().at(iJet); 
         jet_btagCSVv2IVF[njet] = cms2.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet); 
@@ -753,7 +799,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         jet_mcFlavour[njet] = cms2.pfjets_partonFlavour().at(iJet);
         //jet_quarkGluonID
         jet_area[njet] = cms2.pfjets_area().at(iJet);
-	      jet_rawPt[njet] = cms2.pfjets_p4().at(iJet).pt() * cms2.pfjets_undoJEC().at(iJet);
+	jet_rawPt[njet] = cms2.pfjets_p4().at(iJet).pt() * cms2.pfjets_undoJEC().at(iJet);
 
         if(isTightPFJet(iJet))  jet_id[njet] = 3;
         else if(isMediumPFJet(iJet)) jet_id[njet] = 2;
@@ -762,10 +808,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
 
         if( (jet_pt[njet] > 40.0) && (fabs(jet_eta[njet]) < 2.5) ){ 
-          p4sForHems.push_back(cms2.pfjets_p4().at(iJet));
-          p4sForDphi.push_back(cms2.pfjets_p4().at(iJet));
-          p4sForHemsZll.push_back(cms2.pfjets_p4().at(iJet));
-          p4sForDphiZll.push_back(cms2.pfjets_p4().at(iJet));
+          p4sForHems.push_back(p4sCorrJets.at(iJet));
+          p4sForDphi.push_back(p4sCorrJets.at(iJet));
+          p4sForHemsZll.push_back(p4sCorrJets.at(iJet));
+          p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
           nJet40++;
 	  //CSVv2IVFM
           if(jet_btagCSVv2IVF[njet] >= 0.814) {
@@ -780,8 +826,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         } // pt 40 eta 2.5
 	// accept jets out to eta 5.2 for dphi
 	else if ( (jet_pt[njet] > 40.0) && (fabs(jet_eta[njet]) < 5.2) ) {
-          p4sForDphi.push_back(cms2.pfjets_p4().at(iJet));
-          p4sForDphiZll.push_back(cms2.pfjets_p4().at(iJet));
+          p4sForDphi.push_back(p4sCorrJets.at(iJet));
+          p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
 	}
 
         njet++;

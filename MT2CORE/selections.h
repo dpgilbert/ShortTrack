@@ -1,11 +1,16 @@
 #ifndef SELECTIONS_H
 #define SELECTIONS_H
+#include <vector>
+#include <string>
 #include "TString.h"
 
 bool isLoosePFJet(unsigned int);
 bool isMediumPFJet(unsigned int);
 bool isTightPFJet(unsigned int);
 bool loosePileupJetId(unsigned int);
+// code to retrieve jet corrections from jet-correction text files
+class FactorizedJetCorrector;
+FactorizedJetCorrector *makeJetCorrector (const std::vector<std::string> &vector_of_file_names);
 bool isVetoElectron(unsigned int);
 bool isLooseElectron(unsigned int);
 bool isMediumElectron(unsigned int);
