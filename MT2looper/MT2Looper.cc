@@ -428,8 +428,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       plot1D("h_mt2",       t.mt2,       evtweight_, h_1d_global, ";M_{T2} [GeV]", 80, 0, 800);
 
       // note: this will double count some leptons, since reco leptons can appear as PFcands
-      nlepveto_ = 0;
-      int nlepveto_overlap = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
+      nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
 
       // variables for single lep control region
       bool doSLplots = false;
@@ -439,27 +438,28 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       leppt_ = -1.;
       mt_ = -1.;
       // do lepton overlap removal and 1L CR selections
-      if (nlepveto_overlap >= 1) {
-	std::vector<MT2Looper::lepcand> all_cands;
-	std::vector<MT2Looper::lepcand> unique_cands;
+      if (nlepveto_ >= 1) {
+	std::vector<MT2Looper::lepcand> all_cands_lowmt;
+	std::vector<MT2Looper::lepcand> unique_cands_lowmt;
 	// require MT < 100 for reco leptons
-	//  require at most 1 reco lepton at this point, do overlap with PFcands below
-	if ( (t.nMuons10 == 1 && t.nElectrons10 == 0) || (t.nMuons10 == 0 && t.nElectrons10 == 1) ) {
-	  MT2Looper::lepcand cand;
-	  cand.pt = t.lep_pt[0];
-	  cand.phi = t.lep_phi[0];
-	  cand.mt = sqrt( 2 * t.met_pt * cand.pt * ( 1 - cos( t.met_phi - cand.phi) ) );
-	  if (cand.mt > 100.) continue;
+	//   do overlap with PFcands below
+	if ( t.nMuons10 > 0 || t.nElectrons10 > 0) {
+	  for (int ilep = 0; ilep < t.nlep; ++ilep) {
+	    MT2Looper::lepcand cand;
+	    cand.pt = t.lep_pt[ilep];
+	    cand.phi = t.lep_phi[ilep];
+	    cand.mt = sqrt( 2 * t.met_pt * cand.pt * ( 1 - cos( t.met_phi - cand.phi) ) );
+	    if (cand.mt > 100.) continue;
 
-	  // cand passes cuts: add to vector
-	  cand.eta = t.lep_eta[0];
-	  cand.pdgId = t.lep_pdgId[0];
-	  cand.isPFCand = false;
-	  all_cands.push_back(cand);
-	  //doSLplots = true;
+	    // cand passes cuts: add to vector
+	    cand.eta = t.lep_eta[ilep];
+	    cand.pdgId = t.lep_pdgId[ilep];
+	    cand.isPFCand = false;
+	    all_cands_lowmt.push_back(cand);
+	  } // loop over reco leps
 	} 
-	// pf leptons: need to find cand passing selection
-	else if (t.nPFLep5LowMT == 1) {
+	// pf leptons: need to find cands passing selection
+	else if (t.nPFLep5LowMT > 0) {
 	  for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
 	    MT2Looper::lepcand cand;
 	    cand.pt = t.isoTrack_pt[itrk];
@@ -475,11 +475,11 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 	    // cand passes cuts: add to vector
 	    cand.eta = t.isoTrack_eta[itrk];
 	    cand.isPFCand = true;
-	    all_cands.push_back(cand);
+	    all_cands_lowmt.push_back(cand);
 	  } // loop on isoTracks
 	}
-	// pf hadrons: need to find cand passing selection
-	else if (t.nPFHad10LowMT == 1) {
+	// pf hadrons: need to find cands passing selection
+	else if (t.nPFHad10LowMT > 0) {
 	  for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
 	    MT2Looper::lepcand cand;
 	    cand.pt = t.isoTrack_pt[itrk];
@@ -495,42 +495,35 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 	    // cand passes cuts: add to vector
 	    cand.eta = t.isoTrack_eta[itrk];
 	    cand.isPFCand = true;
-	    all_cands.push_back(cand);
+	    all_cands_lowmt.push_back(cand);
 	  } // loop on isoTracks
 	}
 
 	// check all_cands for overlaps
-	for (unsigned int icand = 0; icand < all_cands.size(); ++icand) {
+	for (unsigned int icand = 0; icand < all_cands_lowmt.size(); ++icand) {
 	  bool keep = true;
-	  for (unsigned int jcand = 0; jcand < all_cands.size(); ++jcand) {
-	    float dr = DeltaR(all_cands.at(icand).eta, all_cands.at(jcand).eta, all_cands.at(icand).phi, all_cands.at(jcand).phi);
+	  for (unsigned int jcand = 0; jcand < all_cands_lowmt.size(); ++jcand) {
+	    float dr = DeltaR(all_cands_lowmt.at(icand).eta, all_cands_lowmt.at(jcand).eta, all_cands_lowmt.at(icand).phi, all_cands_lowmt.at(jcand).phi);
 	    if (dr < 0.1) {
 	      // if overlap, check whether the cands have the same pdgId
 	      // keep the reco lepton in case of overlap with PF lepton
-	      if (all_cands.at(icand).pdgId != all_cands.at(jcand).pdgId) {
-		std::cout << "WARNING: leptons with different pdgIds overlap." << std::endl
-			  << "  lep 1: pt: " << all_cands.at(icand).pt << ", pdgId: " << all_cands.at(icand).pdgId
-			  << ", isPFCand: " << all_cands.at(icand).isPFCand << std::endl
-			  << "  lep 2: pt: " << all_cands.at(jcand).pt << ", pdgId: " << all_cands.at(jcand).pdgId
-			  << ", isPFCand: " << all_cands.at(jcand).isPFCand << std::endl;
-	      }
-	      if (all_cands.at(icand).isPFCand && !all_cands.at(jcand).isPFCand) keep = false;
+	      if (all_cands_lowmt.at(icand).pdgId == all_cands_lowmt.at(jcand).pdgId && 
+		  all_cands_lowmt.at(icand).isPFCand && !all_cands_lowmt.at(jcand).isPFCand) 
+		keep = false;
 	    }
 	  }
-	  if (keep) unique_cands.push_back(all_cands.at(icand));
+	  if (keep) unique_cands_lowmt.push_back(all_cands_lowmt.at(icand));
 	}
 
 	// check size of unique cands, and if == 1, fill 1L CR plots
-	if (unique_cands.size() == 1) {
-	  leppt_ = unique_cands.at(0).pt;
-	  mt_ = unique_cands.at(0).mt;
+	if (unique_cands_lowmt.size() == 1) {
+	  leppt_ = unique_cands_lowmt.at(0).pt;
+	  mt_ = unique_cands_lowmt.at(0).mt;
 	  doSLplots = true;
-	  if (abs(unique_cands.at(0).pdgId) == 13) doSLMUplots = true;
-	  else if (abs(unique_cands.at(0).pdgId) == 11) doSLELplots = true;
-	  else if (abs(unique_cands.at(0).pdgId) == 211) doSLHADplots = true;
+	  if (abs(unique_cands_lowmt.at(0).pdgId) == 13) doSLMUplots = true;
+	  else if (abs(unique_cands_lowmt.at(0).pdgId) == 11) doSLELplots = true;
+	  else if (abs(unique_cands_lowmt.at(0).pdgId) == 211) doSLHADplots = true;
 	}
-
-	nlepveto_ = (int) unique_cands.size();
 
       } // for 1L control region
 
@@ -755,7 +748,7 @@ void MT2Looper::fillHistosCRSL(std::map<std::string, TH1D*>& h_1d, const SignalR
 
   if ( !PassesSignalRegionNoLepVeto(SignalRegionVersion::sel2015LowLumi, t.mt2, t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht,
 				    t.minMTBMet, t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) return;
-  if (nlepveto_ != 1) return;
+  //  if (nlepveto_ != 1) return;
 
   // fill hists
   fillHistos( h_1d, dirname, suffix);
