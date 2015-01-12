@@ -439,26 +439,25 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       mt_ = -1.;
       // do lepton overlap removal and 1L CR selections
       if (nlepveto_ >= 1) {
-	std::vector<MT2Looper::lepcand> all_cands_lowmt;
-	std::vector<MT2Looper::lepcand> unique_cands_lowmt;
-	// require MT < 100 for reco leptons
-	//   do overlap with PFcands below
+	std::vector<MT2Looper::lepcand> all_cands;
+	std::vector<MT2Looper::lepcand> unique_cands;
+	// check reco leptons - apply MT cut later
+	// do overlap with PFcands below
 	if ( t.nMuons10 > 0 || t.nElectrons10 > 0) {
 	  for (int ilep = 0; ilep < t.nlep; ++ilep) {
 	    MT2Looper::lepcand cand;
 	    cand.pt = t.lep_pt[ilep];
 	    cand.phi = t.lep_phi[ilep];
 	    cand.mt = sqrt( 2 * t.met_pt * cand.pt * ( 1 - cos( t.met_phi - cand.phi) ) );
-	    if (cand.mt > 100.) continue;
-
-	    // cand passes cuts: add to vector
 	    cand.eta = t.lep_eta[ilep];
 	    cand.pdgId = t.lep_pdgId[ilep];
 	    cand.isPFCand = false;
-	    all_cands_lowmt.push_back(cand);
+
+	    // add cand to vector
+	    all_cands.push_back(cand);
 	  } // loop over reco leps
 	} 
-	// pf leptons: need to find cands passing selection
+	// pf leptons: need to find cands passing selection. 
 	else if (t.nPFLep5LowMT > 0) {
 	  for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
 	    MT2Looper::lepcand cand;
@@ -470,15 +469,15 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 	    float absiso = t.isoTrack_absIso[itrk];
 	    if (absiso/cand.pt > 0.2) continue;
 	    cand.mt = sqrt( 2 * t.met_pt * cand.pt * ( 1 - cos( t.met_phi - cand.phi) ) );
-	    if (cand.mt > 100.) continue;
-
-	    // cand passes cuts: add to vector
 	    cand.eta = t.isoTrack_eta[itrk];
 	    cand.isPFCand = true;
-	    all_cands_lowmt.push_back(cand);
+
+	    // cand passes cuts: add to vector
+	    if (cand.mt > 100.) continue;
+	    all_cands.push_back(cand);
 	  } // loop on isoTracks
 	}
-	// pf hadrons: need to find cands passing selection
+	// pf hadrons: need to find cands passing selection. 
 	else if (t.nPFHad10LowMT > 0) {
 	  for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
 	    MT2Looper::lepcand cand;
@@ -490,40 +489,42 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 	    float absiso = t.isoTrack_absIso[itrk];
 	    if (absiso/cand.pt > 0.1) continue;
 	    cand.mt = sqrt( 2 * t.met_pt * cand.pt * ( 1 - cos( t.met_phi - cand.phi) ) );
-	    if (cand.mt > 100.) continue;
-
-	    // cand passes cuts: add to vector
 	    cand.eta = t.isoTrack_eta[itrk];
 	    cand.isPFCand = true;
-	    all_cands_lowmt.push_back(cand);
+
+	    // cand passes cuts: add to vector
+	    if (cand.mt > 100.) continue;
+	    all_cands.push_back(cand);
 	  } // loop on isoTracks
 	}
 
 	// check all_cands for overlaps
-	for (unsigned int icand = 0; icand < all_cands_lowmt.size(); ++icand) {
+	for (unsigned int icand = 0; icand < all_cands.size(); ++icand) {
 	  bool keep = true;
-	  for (unsigned int jcand = 0; jcand < all_cands_lowmt.size(); ++jcand) {
-	    float dr = DeltaR(all_cands_lowmt.at(icand).eta, all_cands_lowmt.at(jcand).eta, all_cands_lowmt.at(icand).phi, all_cands_lowmt.at(jcand).phi);
+	  for (unsigned int jcand = 0; jcand < all_cands.size(); ++jcand) {
+	    float dr = DeltaR(all_cands.at(icand).eta, all_cands.at(jcand).eta, all_cands.at(icand).phi, all_cands.at(jcand).phi);
 	    if (dr < 0.1) {
 	      // if overlap, check whether the cands have the same pdgId
 	      // keep the reco lepton in case of overlap with PF lepton
-	      if (all_cands_lowmt.at(icand).pdgId == all_cands_lowmt.at(jcand).pdgId && 
-		  all_cands_lowmt.at(icand).isPFCand && !all_cands_lowmt.at(jcand).isPFCand) 
+	      if (all_cands.at(icand).pdgId == all_cands.at(jcand).pdgId && 
+		  all_cands.at(icand).isPFCand && !all_cands.at(jcand).isPFCand) 
 		keep = false;
 	    }
 	  }
-	  if (keep) unique_cands_lowmt.push_back(all_cands_lowmt.at(icand));
+	  if (keep) unique_cands.push_back(all_cands.at(icand));
 	}
 
-	// check size of unique cands, and if == 1, fill 1L CR plots
-	if (unique_cands_lowmt.size() == 1) {
-	  leppt_ = unique_cands_lowmt.at(0).pt;
-	  mt_ = unique_cands_lowmt.at(0).mt;
-	  doSLplots = true;
-	  if (abs(unique_cands_lowmt.at(0).pdgId) == 13) doSLMUplots = true;
-	  else if (abs(unique_cands_lowmt.at(0).pdgId) == 11) doSLELplots = true;
-	  else if (abs(unique_cands_lowmt.at(0).pdgId) == 211) doSLHADplots = true;
-	}
+	// check size of unique cands. if size == 1 and MT < 100, fill 1L CR plots
+	if (unique_cands.size() == 1) {
+	  leppt_ = unique_cands.at(0).pt;
+	  mt_ = unique_cands.at(0).mt;
+	  if (mt_ < 100.) {
+	    doSLplots = true;
+	    if (abs(unique_cands.at(0).pdgId) == 13) doSLMUplots = true;
+	    else if (abs(unique_cands.at(0).pdgId) == 11) doSLELplots = true;
+	    else if (abs(unique_cands.at(0).pdgId) == 211) doSLHADplots = true;
+	  } // mt < 100
+	} // 1 unique cand
 
       } // for 1L control region
 
