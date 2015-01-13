@@ -214,7 +214,7 @@ class babyMaker {
   Float_t         zll_ht;
 
 //----- GEN PARTICLES
-  static const int max_ngenPart = 200;
+  static const int max_ngenPart = 300;
   Int_t           ngenPart;
   Float_t         genPart_pt[max_ngenPart];   //[ngenPart]
   Float_t         genPart_eta[max_ngenPart];   //[ngenPart]
