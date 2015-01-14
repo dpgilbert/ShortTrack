@@ -418,12 +418,6 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       const float lumi = 5.;
       evtweight_ = t.evt_scale1fb * lumi;
 
-      // ***************************************
-      // ***** HACK FOR CSA14 ttbar SAMPLE *****
-      // ***************************************
-      // fix scale1fb weight
-      if (t.evt_id == 300) evtweight_ *= 25394255./25031921.;
-
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
       plot1D("h_mt2",       t.mt2,       evtweight_, h_1d_global, ";M_{T2} [GeV]", 80, 0, 800);
 
