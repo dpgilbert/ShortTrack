@@ -192,6 +192,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   std::map<std::string, TH1D*> h_1d_crdy8L;  h_1d_crdy_v.push_back(h_1d_crdy8L);  
   std::map<std::string, TH1D*> h_1d_crdy9L;  h_1d_crdy_v.push_back(h_1d_crdy9L);  
   std::map<std::string, TH1D*> h_1d_crdy10L; h_1d_crdy_v.push_back(h_1d_crdy10L); 
+  std::map<std::string, TH1D*> h_1d_crdybase;
 
   std::map<std::string, TH1D*> h_1d_crslbase;
   std::map<std::string, TH1D*> h_1d_crslw;
@@ -423,6 +424,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
       // note: this will double count some leptons, since reco leptons can appear as PFcands
       nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
+      int nlep_unique = nlepveto_;
 
       // variables for single lep control region
       bool doSLplots = false;
@@ -507,6 +509,8 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 	  }
 	  if (keep) unique_cands.push_back(all_cands.at(icand));
 	}
+	
+	nlep_unique = unique_cands.size() ; // useful counter (for DYCR)
 
 	// check size of unique cands. if size == 1 and MT < 100, fill 1L CR plots
 	if (unique_cands.size() == 1) {
@@ -554,10 +558,11 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       bool doDYplots = false;
       if (t.evt_id >= 700 && t.evt_id < 800) {
       	if (t.nlep == 2) {
-      	  if ( (t.lep_charge[0] * t.lep_charge[1] != -1)
-      	       || (abs(t.lep_pdgId[0]) != abs(t.lep_pdgId[1]) )
-      	       || (fabs(t.zll_mass - 90) > 20 ) ) {
-      		 nlepveto_ = nlepveto_ - 2;
+      	  if ( (t.lep_charge[0] * t.lep_charge[1] == -1)
+      	       && (abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1]) )
+      	       && (fabs(t.zll_mass - 90) < 20 ) 
+	       && t.lep_pt[0] > 20 && t.lep_pt[1] > 20) {
+      		 nlepveto_ = nlep_unique - 2;
       		 doDYplots = true;
       	       }
       	} // nlep == 2
@@ -586,6 +591,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
       if (doDYplots) {
       	saveDYplots = true;
+      	fillHistosCRDY(h_1d_crdybase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crdybase","");
       	for (unsigned int imap = 0; imap < h_1d_crdy_v.size(); imap++) {
       	  fillHistosCRDY(h_1d_crdy_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crdy"+regions.at(imap),"");
       	} 
@@ -669,6 +675,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
     for (unsigned int imap = 0; imap < h_1d_crdy_v.size(); imap++) {
       savePlotsDir(h_1d_crdy_v.at(imap),outfile_,("crdy"+regions.at(imap)).c_str());
     } 
+    savePlotsDir(h_1d_crdybase,outfile_,"crdybase");
   }
 
   if (saveSLplots) {
@@ -780,7 +787,7 @@ void MT2Looper::fillHistosCRDY(std::map<std::string, TH1D*>& h_1d, const SignalR
   if (t.nlep!=2) return;
 
   if ( !PassesSignalRegion(SignalRegionVersion::sel2015LowLumi, t.zll_mt2, t.zll_met_pt, t.zll_ht, t.nJet40, t.nBJet40, t.zll_deltaPhiMin, t.zll_diffMetMht,
-				    t.zll_minMTBMet, nlepveto_, t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) return;
+			   t.zll_minMTBMet, nlepveto_, t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) return;
 
   fillHistosDY( h_1d, dirname, suffix);
   return;
@@ -860,6 +867,21 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1D*>& h_1d, const std::stri
   dir->cd();
 
   plot1D("h_mt2bins"+s,       t.zll_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+
+  if (dirname=="crdybase") {
+    plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
+    plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
+    plot1D("h_mt2"+s,       t.zll_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
+    plot1D("h_met"+s,       t.zll_met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
+    plot1D("h_ht"+s,       t.zll_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
+    plot1D("h_nJet40"+s,       t.nJet40,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
+    plot1D("h_nBJet40"+s,      t.nBJet40,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
+    plot1D("h_deltaPhiMin"+s,  t.zll_deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
+    plot1D("h_diffMetMht"+s,   t.zll_diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
+    plot1D("h_diffMetMhtOverMet"+s,   t.zll_diffMetMht/t.zll_met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
+    plot1D("h_minMTBMet"+s,   t.zll_minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
+    plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
+  }
 
   outfile_->cd();
   return;
