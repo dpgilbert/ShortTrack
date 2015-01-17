@@ -581,7 +581,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	if (bestMatch != -1) {
 	  // 7 is a special code for photons without a mother. this seems to be due to a miniAOD bug where links are broken.
 	  gamma_mcMatchId[ngamma] = cms2.genps_id_simplemother().at(bestMatch) == 0 ? 7 : 22; 
-	  gamma_genIso[ngamma] = -1; //cms2.genps_iso().at(bestMatch);
+	  gamma_genIso[ngamma] = cms2.genps_iso().at(bestMatch);
 	}
 	else {
 	  gamma_mcMatchId[ngamma] = 0;
@@ -748,32 +748,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
         int iJet = passJets.at(passIdx);
 
-	// fill gamma_XXX variables before checking for lepton overlap.
-        if( ( p4sCorrJets.at(iJet).pt() > 40.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ){ 
-	  //check against list of jets that overlap with a photon
-	  bool isOverlapJetGamma = false;
-	  for(unsigned int j=0; j<removedJetsGamma.size(); j++){
-	    if(iJet == removedJetsGamma.at(j)){
-	      isOverlapJetGamma = true;
-	      break;
-	    }
-	  }
-
-	  if(!isOverlapJetGamma) {
-	    p4sForHemsGamma.push_back(p4sCorrJets.at(iJet));
-	    p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
-	    gamma_nJet40++;
-	    if(cms2.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.814) { //CSVv2IVFM
-	      gamma_nBJet40++; 
-	      float mt = MT( p4sCorrJets.at(iJet).pt(),p4sCorrJets.at(iJet).phi(),gamma_met_pt,gamma_met_phi);
-	      if (mt < gamma_minMTBMet) gamma_minMTBMet = mt;	 
-	    }   
-	  } 
-        } // accept jets out to eta 5.2 for dphi
-	else if ( (p4sCorrJets.at(iJet).pt() > 40.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 5.2) ) {
-          p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
-	}
-
         //check against list of jets that overlap with a lepton
         bool isOverlapJet = false;
         for(unsigned int j=0; j<removedJets.size(); j++){
@@ -828,6 +802,33 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
           p4sForDphi.push_back(p4sCorrJets.at(iJet));
           p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
 	}
+
+	// fill gamma_XXX variables before checking for lepton overlap. Why? Let's keep them consistent with the lepton-overlapped jets
+        if( ( p4sCorrJets.at(iJet).pt() > 40.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ){ 
+	  //check against list of jets that overlap with a photon
+	  bool isOverlapJetGamma = false;
+	  for(unsigned int j=0; j<removedJetsGamma.size(); j++){
+	    if(iJet == removedJetsGamma.at(j)){
+	      isOverlapJetGamma = true;
+	      break;
+	    }
+	  }
+
+	  if(!isOverlapJetGamma) {
+	    p4sForHemsGamma.push_back(p4sCorrJets.at(iJet));
+	    p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
+	    gamma_nJet40++;
+	    if(cms2.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.814) { //CSVv2IVFM
+	      gamma_nBJet40++; 
+	      float mt = MT( p4sCorrJets.at(iJet).pt(),p4sCorrJets.at(iJet).phi(),gamma_met_pt,gamma_met_phi);
+	      if (mt < gamma_minMTBMet) gamma_minMTBMet = mt;	 
+	    }   
+	  } 
+        } // accept jets out to eta 5.2 for dphi
+	else if ( (p4sCorrJets.at(iJet).pt() > 40.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 5.2) ) {
+          p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
+	}
+
 
         njet++;
       }
