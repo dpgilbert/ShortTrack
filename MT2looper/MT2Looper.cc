@@ -88,12 +88,13 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   regions.push_back("8L");  srJets.push_back(SignalRegionJets::sr8);  srHtMet.push_back(SignalRegionHtMet::l_ht);
   regions.push_back("9L");  srJets.push_back(SignalRegionJets::sr9);  srHtMet.push_back(SignalRegionHtMet::l_ht);
   regions.push_back("10L"); srJets.push_back(SignalRegionJets::sr10); srHtMet.push_back(SignalRegionHtMet::l_ht);
+  regions.push_back("H");   srJets.push_back(SignalRegionJets::nocut); srHtMet.push_back(SignalRegionHtMet::h_ht);
+  regions.push_back("M");   srJets.push_back(SignalRegionJets::nocut); srHtMet.push_back(SignalRegionHtMet::m_ht);
+  regions.push_back("L");   srJets.push_back(SignalRegionJets::nocut); srHtMet.push_back(SignalRegionHtMet::l_ht);
+
 
   std::map<std::string, TH1D*> h_1d_nocut;
   std::map<std::string, TH1D*> h_1d_srbase;
-  std::map<std::string, TH1D*> h_1d_srH;
-  std::map<std::string, TH1D*> h_1d_srM;
-  std::map<std::string, TH1D*> h_1d_srL;
 
   std::vector< std::map<std::string, TH1D*> > h_1d_sr_v;
   std::map<std::string, TH1D*> h_1d_sr1H;  h_1d_sr_v.push_back(h_1d_sr1H);  
@@ -126,6 +127,10 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   std::map<std::string, TH1D*> h_1d_sr8L;  h_1d_sr_v.push_back(h_1d_sr8L);  
   std::map<std::string, TH1D*> h_1d_sr9L;  h_1d_sr_v.push_back(h_1d_sr9L);  
   std::map<std::string, TH1D*> h_1d_sr10L; h_1d_sr_v.push_back(h_1d_sr10L); 
+  std::map<std::string, TH1D*> h_1d_srH; h_1d_sr_v.push_back(h_1d_srH); 
+  std::map<std::string, TH1D*> h_1d_srM; h_1d_sr_v.push_back(h_1d_srM); 
+  std::map<std::string, TH1D*> h_1d_srL; h_1d_sr_v.push_back(h_1d_srL); 
+
 
   std::vector< std::map<std::string, TH1D*> > h_1d_crgj_v;
   std::map<std::string, TH1D*> h_1d_crgj1H;  h_1d_crgj_v.push_back(h_1d_crgj1H);  
@@ -158,6 +163,9 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   std::map<std::string, TH1D*> h_1d_crgj8L;  h_1d_crgj_v.push_back(h_1d_crgj8L);  
   std::map<std::string, TH1D*> h_1d_crgj9L;  h_1d_crgj_v.push_back(h_1d_crgj9L);  
   std::map<std::string, TH1D*> h_1d_crgj10L; h_1d_crgj_v.push_back(h_1d_crgj10L); 
+  std::map<std::string, TH1D*> h_1d_crgjH; h_1d_crgj_v.push_back(h_1d_crgjH); 
+  std::map<std::string, TH1D*> h_1d_crgjM; h_1d_crgj_v.push_back(h_1d_crgjM); 
+  std::map<std::string, TH1D*> h_1d_crgjL; h_1d_crgj_v.push_back(h_1d_crgjL); 
 
   std::map<std::string, TH1D*> h_1d_crgjbase;
 
@@ -192,6 +200,9 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   std::map<std::string, TH1D*> h_1d_crdy8L;  h_1d_crdy_v.push_back(h_1d_crdy8L);  
   std::map<std::string, TH1D*> h_1d_crdy9L;  h_1d_crdy_v.push_back(h_1d_crdy9L);  
   std::map<std::string, TH1D*> h_1d_crdy10L; h_1d_crdy_v.push_back(h_1d_crdy10L); 
+  std::map<std::string, TH1D*> h_1d_crdyH; h_1d_crdy_v.push_back(h_1d_crdyH); 
+  std::map<std::string, TH1D*> h_1d_crdyM; h_1d_crdy_v.push_back(h_1d_crdyM); 
+  std::map<std::string, TH1D*> h_1d_crdyL; h_1d_crdy_v.push_back(h_1d_crdyL); 
   std::map<std::string, TH1D*> h_1d_crdybase;
 
   std::map<std::string, TH1D*> h_1d_crslbase;
@@ -530,7 +541,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       bool doGJplots = false;
       int jetIdx0 = 0;
       int jetIdx1 = 1;
-      if (t.evt_id < 300) {
+      if (t.evt_id < 300 && t.evt_id!=120) { // remove lowest qcd_ht sample
       	if (t.ngamma > 0) {
       	  if ( (t.evt_id < 200 && t.gamma_mcMatchId[0]>0  /*&& t.gamma_genIso[0]<5*/)    // Reject true photons from QCD (iso is always 0 for now)
       	       || (t.evt_id >=200 && t.gamma_mcMatchId[0]==0 )                           // Reject unmatched photons from Gamma+Jets
@@ -573,9 +584,6 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       fillHistos(h_1d_nocut, "nocut");
 
       fillHistosSignalRegion(h_1d_srbase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "srbase");
-      fillHistosSignalRegion(h_1d_srH, SignalRegionJets::nocut, SignalRegionHtMet::h_ht, "srH");
-      fillHistosSignalRegion(h_1d_srM, SignalRegionJets::nocut, SignalRegionHtMet::m_ht, "srM");
-      fillHistosSignalRegion(h_1d_srL, SignalRegionJets::nocut, SignalRegionHtMet::l_ht, "srL");
 
       for (unsigned int imap = 0; imap < h_1d_sr_v.size(); imap++) {
 	fillHistosSignalRegion(h_1d_sr_v.at(imap), srJets.at(imap), srHtMet.at(imap), "sr"+regions.at(imap));
@@ -584,6 +592,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       if (doGJplots) {
       	saveGJplots = true;
       	fillHistosCRGJ(h_1d_crgjbase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crgjbase","", jetIdx0, jetIdx1);
+
       	for (unsigned int imap = 0; imap < h_1d_crgj_v.size(); imap++) {
       	  fillHistosCRGJ(h_1d_crgj_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crgj"+regions.at(imap),"", jetIdx0, jetIdx1);
       	} 
@@ -656,9 +665,6 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   savePlotsDir(h_1d_global,outfile_,"");
   savePlotsDir(h_1d_nocut,outfile_,"nocut");
   savePlotsDir(h_1d_srbase,outfile_,"srbase");
-  savePlotsDir(h_1d_srH,outfile_,"srH");
-  savePlotsDir(h_1d_srM,outfile_,"srM");
-  savePlotsDir(h_1d_srL,outfile_,"srL");
 
   for (unsigned int imap = 0; imap < h_1d_sr_v.size(); imap++) {
     savePlotsDir(h_1d_sr_v.at(imap),outfile_,("sr"+regions.at(imap)).c_str());
@@ -852,9 +858,24 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, const st
       plot1D("h_iso_mt2bin"+mt2binsname[i]+s,  iso,  evtweight_, h_1d, "; iso", 100, 0, 50);
   }
 
-  if (iso < 10) 
+  if (iso < 10)  {
     plot1D("h_mt2bins"+s,       t.gamma_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-
+  if (dirname=="crgjbase" || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH") {
+      plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
+      plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
+      plot1D("h_mt2"+s,       t.gamma_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
+      plot1D("h_met"+s,       t.gamma_met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
+      plot1D("h_ht"+s,       t.gamma_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
+      plot1D("h_nJet40"+s,       t.gamma_nJet40,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
+      plot1D("h_nBJet40"+s,      t.gamma_nBJet40,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
+      plot1D("h_deltaPhiMin"+s,  t.gamma_deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
+      plot1D("h_diffMetMht"+s,   t.gamma_diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
+      plot1D("h_diffMetMhtOverMet"+s,   t.gamma_diffMetMht/t.gamma_met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
+      plot1D("h_minMTBMet"+s,   t.gamma_minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
+      plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
+    }
+    
+  }
   outfile_->cd();
   return;
 }
@@ -868,7 +889,7 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1D*>& h_1d, const std::stri
 
   plot1D("h_mt2bins"+s,       t.zll_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
 
-  if (dirname=="crdybase") {
+  if (dirname=="crdybase" || dirname=="crdyL" || dirname=="crdyM" || dirname=="crdyH") {
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
     plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
     plot1D("h_mt2"+s,       t.zll_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
