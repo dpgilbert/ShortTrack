@@ -81,10 +81,12 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
 
     TH1D* Stat = (TH1D*) hlostlep_sr->Clone("h_mt2binsStat");
     cout<<"Looking at histo "<<fullhistname<<endl;
-    if (method==0) { // --- Simple: Zinv +/- Zinv/sqrt(GJet)
+    if (method==0) { // --- Simple: lostlep_sr +/- lostlep_sr/sqrt(lostlep_cr)
+      // use full CR stats integrated over MT2
+      double n_cr = hlostlep_cr->Integral(0,-1);
       for ( unsigned int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { // "<=" to deal with overflow bin
-	if (hlostlep_cr->GetBinContent(ibin) > 0)
-	  Stat->SetBinError(ibin, hlostlep_sr->GetBinContent(ibin)/sqrt( hlostlep_cr->GetBinContent(ibin) ));
+	if (n_cr > 0)
+	  Stat->SetBinError(ibin, hlostlep_sr->GetBinContent(ibin)/sqrt(n_cr));
 	else Stat->SetBinError(ibin, hlostlep_sr->GetBinContent(ibin));
       }
     }
@@ -168,7 +170,7 @@ vector<TString> getCRsToCombine(const string& dir) {
 //_______________________________________________________________________________
 void lostlepMaker(){
 
-  string input_dir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-00-08_4fb/";
+  string input_dir = "/home/users/olivito/mt2_babymaker/MT2Analysis/MT2looper/output/V00-00-08_4fb/";
   //  string input_dir = "../MT2looper/output/test/";
   string output_name = input_dir+"lostlepFromCRs.root";
   // ----------------------------------------
