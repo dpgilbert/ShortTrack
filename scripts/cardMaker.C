@@ -16,20 +16,13 @@ TFile* f_zinv = 0;
 TFile* f_qcd = 0;
 TFile* f_sig = 0;
 
-string input_dir = "/home/users/olivito/mt2_babymaker/MT2Analysis/MT2looper/output/V00-00-07_sel2015LowLumi/";
-//string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/test/";
-
-string output_dir = "./cards_v1/";
-
-string signame = "";
-
 bool suppressZeroBins = true;
 
 bool iteration1 = false; // Here we try to get realistic statistical errors from control region statistics
                          // To use this option, first run the ZinvMaker.C
 
 //_______________________________________________________________________________
-void printCard( int sr , string htbin , int mt2bin ) {
+void printCard( int sr , string htbin , int mt2bin , string signal, string output_dir) {
 
   // read off yields from h_mt2bins hist in each topological region
 
@@ -37,7 +30,7 @@ void printCard( int sr , string htbin , int mt2bin ) {
   TString fullhistname = dir + "/h_mt2bins";
   TString fullhistnameStat  = fullhistname+"Stat";
 
-  TString cardname = Form("%s/card_%s_m%d_%s.txt",output_dir.c_str(),dir.Data(),mt2bin,signame.c_str());
+  TString cardname = Form("%s/card_%s_m%d_%s.txt",output_dir.c_str(),dir.Data(),mt2bin,signal.c_str());
 
   double n_lostlep(0.);
   double n_lostlep_tr(0.);
@@ -186,9 +179,7 @@ void printCard( int sr , string htbin , int mt2bin ) {
 }
 
 //_______________________________________________________________________________
-void cardMaker(string signal = "T1tttt_1500_100"){
-
-  signame = signal;
+void cardMaker(string signal = "T1tttt_1500_100", string input_dir, string output_dir){
 
   // ----------------------------------------
   //  samples definition
@@ -201,7 +192,7 @@ void cardMaker(string signal = "T1tttt_1500_100"){
   else f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
   f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
 
-  f_sig = new TFile(Form("%s/%s.root",input_dir.c_str(),signame.c_str()));
+  f_sig = new TFile(Form("%s/%s.root",input_dir.c_str(),signal.c_str()));
 
   // ----------------------------------------
   //  cards definitions
@@ -218,9 +209,9 @@ void cardMaker(string signal = "T1tttt_1500_100"){
     for (unsigned int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {
       // only do lowest 2 mt2 bins for regions with low minMT
       if (imt2 > 2 && (isr == 3 || isr == 7 || isr == 9)) continue;
-      printCard(isr, "L", imt2);
-      printCard(isr, "M", imt2);
-      printCard(isr, "H", imt2);
+      printCard(isr, "L", imt2, signal.c_str(), output_dir.c_str());
+      printCard(isr, "M", imt2, signal.c_str(), output_dir.c_str());
+      printCard(isr, "H", imt2, signal.c_str(), output_dir.c_str());
     }
   }
 
