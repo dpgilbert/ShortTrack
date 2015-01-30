@@ -16,20 +16,13 @@ TFile* f_zinv = 0;
 TFile* f_qcd = 0;
 TFile* f_sig = 0;
 
-string input_dir = "/home/users/olivito/mt2_babymaker/MT2Analysis/MT2looper/output/V00-00-07_sel2015LowLumi/";
-//string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/test/";
-
-string output_dir = "./cards_v1/";
-
-string signame = "";
-
 bool suppressZeroBins = true;
 
 bool iteration1 = false; // Here we try to get realistic statistical errors from control region statistics
-                         // To use this option, first run the ZinvMaker.C
+                         // To use this option, first run the ZinvMaker.C and lostlepMaker.C
 
 //_______________________________________________________________________________
-void printCard( int sr , string htbin , int mt2bin ) {
+void printCard( int sr , string htbin , int mt2bin , string signal, string output_dir) {
 
   // read off yields from h_mt2bins hist in each topological region
 
@@ -37,12 +30,13 @@ void printCard( int sr , string htbin , int mt2bin ) {
   TString fullhistname = dir + "/h_mt2bins";
   TString fullhistnameStat  = fullhistname+"Stat";
 
-  TString cardname = Form("%s/card_%s_m%d_%s.txt",output_dir.c_str(),dir.Data(),mt2bin,signame.c_str());
+  TString cardname = Form("%s/card_%s_m%d_%s.txt",output_dir.c_str(),dir.Data(),mt2bin,signal.c_str());
 
   double n_lostlep(0.);
   double n_lostlep_tr(0.);
+  double err_lostlep_stat(0.);
   double n_zinv(0.);
-  double n_zinv_stat(0.);
+  double err_zinv_stat(0.);
   double n_qcd(0.);
   double n_bkg(0.);
 
@@ -59,16 +53,22 @@ void printCard( int sr , string htbin , int mt2bin ) {
     n_lostlep = 0.01;
     n_lostlep_tr = 0.01;
   }
+  if (iteration1) {
+    // stat error comes from CR -> CR stats already integrated over MT2 bins in input
+    TH1D* h_lostlep_stat = (TH1D*) f_lostlep->Get(fullhistnameStat);
+    if (h_lostlep_stat != 0 && h_lostlep_stat->GetBinContent(mt2bin) != 0) 
+      err_lostlep_stat = h_lostlep_stat->GetBinError(mt2bin)/h_lostlep_stat->GetBinContent(mt2bin);
+  }
   TH1D* h_zinv = (TH1D*) f_zinv->Get(fullhistname);
   if (h_zinv != 0) n_zinv = h_zinv->GetBinContent(mt2bin);
   else n_zinv = 0.01;
   if (iteration1) {
     // For 1b regions, use the statistical uncertainty from corresponding 0b region
-    if (sr == 2) fullhistnameStat.ReplaceAll("sr2", "sr1");
-    if (sr == 6) fullhistnameStat.ReplaceAll("sr6", "sr5");
+    // if (sr == 2) fullhistnameStat.ReplaceAll("sr2", "sr1");
+    // if (sr == 6) fullhistnameStat.ReplaceAll("sr6", "sr5");
     TH1D* h_zinv_stat = (TH1D*) f_zinv->Get(fullhistnameStat);
     if (h_zinv_stat != 0 && h_zinv_stat->GetBinContent(mt2bin) != 0) 
-      n_zinv_stat = h_zinv_stat->GetBinError(mt2bin)/h_zinv_stat->GetBinContent(mt2bin);
+      err_zinv_stat = h_zinv_stat->GetBinError(mt2bin)/h_zinv_stat->GetBinContent(mt2bin);
   }
   TH1D* h_qcd = (TH1D*) f_qcd->Get(fullhistname);
   if (h_qcd != 0) n_qcd = h_qcd->GetBinContent(mt2bin);
@@ -92,9 +92,19 @@ void printCard( int sr , string htbin , int mt2bin ) {
   ++n_syst;
   // correlated for MT2 bins in a TR
   double lostlep_crstat = 1.;
-  if (n_lostlep_tr > 0.) lostlep_crstat = 1. + sqrt( pow(0.15,2) + pow(1./sqrt(n_lostlep_tr),2));
-  else lostlep_crstat = 1. + sqrt( pow(0.15,2) + 1.);
+  if (iteration1) { // iteration1: use CR stats
+    if (err_lostlep_stat > 0.) lostlep_crstat = 1. + sqrt( pow(0.15,2) + pow(err_lostlep_stat,2));
+    else lostlep_crstat = 1. + sqrt( pow(0.15,2) + 1.);
+  }
+  else { // iteration0: emulate CR stats
+    if (n_lostlep_tr > 0.) lostlep_crstat = 1. + sqrt( pow(0.15,2) + pow(1./sqrt(n_lostlep_tr),2));
+    else lostlep_crstat = 1. + sqrt( pow(0.15,2) + 1.);
+  }
   TString name_lostlep_crstat = Form("LL_CRSTAT_%s",dir.Data());
+  if (iteration1) {
+    TString crdir = getCorrelatedSLCRs(dir);
+    name_lostlep_crstat = Form("LL_CRSTAT_%s",crdir.Data());
+  }
   ++n_syst;
 
   // ----- zinv bkg uncertainties - depend on signal region, b selection
@@ -118,18 +128,19 @@ void printCard( int sr , string htbin , int mt2bin ) {
   // 1b: data CR with 0->1b sf
   else if (sr == 2 || sr == 6) {
     if (n_zinv > 0.) {
-      if (iteration1) zinv_crstat = 1. + 1.*n_zinv_stat;
+      if (iteration1) zinv_crstat = 1. + 1.*err_zinv_stat;
       else zinv_crstat = 1. + 1./sqrt(20. * n_zinv);
     }
     else zinv_crstat = 2.;
     zinv_zgamma = 1.20;
-    zinv_bratio = 1.30;
+    if (iteration1) zinv_bratio = 1.00;
+    else zinv_bratio = 1.30;
     n_syst += 3;
   }
   // 0b: data CR
   else if (sr == 1 || sr == 5) {
     if (n_zinv > 0.) {
-      if (iteration1) zinv_crstat = 1. + 1.*n_zinv_stat;
+      if (iteration1) zinv_crstat = 1. + 1.*err_zinv_stat;
       else zinv_crstat = 1. + 1./sqrt(2. * n_zinv);
     }
     else zinv_crstat = 2.;
@@ -186,9 +197,47 @@ void printCard( int sr , string htbin , int mt2bin ) {
 }
 
 //_______________________________________________________________________________
-void cardMaker(string signal = "T1tttt_1500_100"){
+TString getCorrelatedSLCRs(const TString& dir) {
 
-  signame = signal;
+  // combine loMT and hiMT bins for regions split by that
+  if (dir.Contains("3L") || dir.Contains("4L")) {
+    return "sr3L4L";
+  }
+  else if (dir.Contains("3M") || dir.Contains("4M")) {
+    return "sr3M4M";
+  }
+  else if (dir.Contains("3H") || dir.Contains("4H")) {
+    return "sr3H4H";
+  }
+
+  // combine loMT and hiMT bins for regions split by that
+  if (dir.Contains("7L") || dir.Contains("8L")) {
+    return "sr7L8L";
+  }
+  else if (dir.Contains("7M") || dir.Contains("8M")) {
+    return "sr7M8M";
+  }
+  else if (dir.Contains("7H") || dir.Contains("8H")) {
+    return "sr7H8H";
+  }
+
+  // combine loMT and hiMT bins for regions split by that
+  if (dir.Contains("9L") || dir.Contains("10L")) {
+    return "sr9L10L";
+  }
+  else if (dir.Contains("9M") || dir.Contains("10M")) {
+    return "sr9M10M";
+  }
+  else if (dir.Contains("9H") || dir.Contains("10H")) {
+    return "sr9H10H";
+  }
+
+  // default: use only this TR
+  return dir;
+}
+
+//_______________________________________________________________________________
+void cardMaker(string signal, string input_dir, string output_dir){
 
   // ----------------------------------------
   //  samples definition
@@ -196,12 +245,16 @@ void cardMaker(string signal = "T1tttt_1500_100"){
 
   // set input files
 
-  f_lostlep = new TFile(Form("%s/lostlep.root",input_dir.c_str()));
-  if (iteration1) f_zinv = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str()));
-  else f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
-  f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
+  if (iteration1) {
+    f_lostlep = new TFile(Form("%s/lostlepFromCRs.root",input_dir.c_str()));
+    f_zinv = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str()));
+  } else { 
+    f_lostlep = new TFile(Form("%s/lostlep.root",input_dir.c_str()));
+    f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
+  }
+  f_qcd = new TFile(Form("%s/qcd_ht.root",input_dir.c_str()));
 
-  f_sig = new TFile(Form("%s/%s.root",input_dir.c_str(),signame.c_str()));
+  f_sig = new TFile(Form("%s/%s.root",input_dir.c_str(),signal.c_str()));
 
   // ----------------------------------------
   //  cards definitions
@@ -218,9 +271,9 @@ void cardMaker(string signal = "T1tttt_1500_100"){
     for (unsigned int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {
       // only do lowest 2 mt2 bins for regions with low minMT
       if (imt2 > 2 && (isr == 3 || isr == 7 || isr == 9)) continue;
-      printCard(isr, "L", imt2);
-      printCard(isr, "M", imt2);
-      printCard(isr, "H", imt2);
+      printCard(isr, "L", imt2, signal, output_dir);
+      printCard(isr, "M", imt2, signal, output_dir);
+      printCard(isr, "H", imt2, signal, output_dir);
     }
   }
 
