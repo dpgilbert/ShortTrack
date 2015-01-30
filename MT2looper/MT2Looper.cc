@@ -821,8 +821,14 @@ void MT2Looper::fillHistos(std::map<std::string, TH1D*>& h_1d, const std::string
   plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
   plot1D("h_J0pt"+s,       t.jet_pt[0],   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
   plot1D("h_J1pt"+s,       t.jet_pt[1],   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
-
-  plot1D("h_mt2bins"+s,       t.mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+//  for (int i = 0; i < t.njet; i++) {
+//    if (t.jet_pt[i] < 40 || fabs(t.jet_eta[i])>2.5) continue;
+//    if (t.jet_btagCSV[i] < 0.814) continue;
+//    int flav = fabs(t.jet_mcFlavour[i]);
+//    plot1D("h_jetflavor"+s,     flav,   evtweight_, h_1d, ";Jet MC ID", 25, 0, 25);
+//  }
+  
+  plot1D("h_mt2bins"+s, std::min(mt2bins[n_mt2bins-1]-1, t.mt2),   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
 
   outfile_->cd();
   return;
@@ -859,8 +865,8 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, const st
   }
 
   if (iso < 10)  {
-    plot1D("h_mt2bins"+s,       t.gamma_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-  if (dirname=="crgjbase" || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH") {
+    plot1D("h_mt2bins"+s,     std::min(mt2bins[n_mt2bins-1]-1, t.gamma_mt2),   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    if (dirname=="crgjbase" || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH") {
       plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
       plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
       plot1D("h_mt2"+s,       t.gamma_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
@@ -874,6 +880,12 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, const st
       plot1D("h_minMTBMet"+s,   t.gamma_minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
       plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
     }
+//    for (int i = 0; i < t.njet; i++) {
+//      if (t.jet_pt[i] < 40 || fabs(t.jet_eta[i])>2.5 ) continue;
+//      if (t.jet_btagCSV[i] < 0.814) continue;
+//      int flav = fabs(t.jet_mcFlavour[i]);
+//      plot1D("h_jetflavor"+s,     flav,   evtweight_, h_1d, ";Jet MC ID", 25, 0, 25);
+//    }
     
   }
   outfile_->cd();
@@ -887,7 +899,7 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1D*>& h_1d, const std::stri
   } 
   dir->cd();
 
-  plot1D("h_mt2bins"+s,       t.zll_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  plot1D("h_mt2bins"+s,   std::min(mt2bins[n_mt2bins-1]-1, t.zll_mt2),   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
 
   if (dirname=="crdybase" || dirname=="crdyL" || dirname=="crdyM" || dirname=="crdyH") {
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
@@ -903,6 +915,13 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1D*>& h_1d, const std::stri
     plot1D("h_minMTBMet"+s,   t.zll_minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
     plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
   }
+//  for (int i = 0; i < t.njet; i++) {
+//    if (t.jet_pt[i] < 40 || fabs(t.jet_eta[i])>2.5) continue;
+//    if (t.jet_btagCSV[i] < 0.814) continue;
+//    int flav = fabs(t.jet_mcFlavour[i]);
+//    plot1D("h_jetflavor"+s,     flav,   evtweight_, h_1d, ";Jet MC ID", 25, 0, 25);
+//  }
+  
 
   outfile_->cd();
   return;
