@@ -49,19 +49,19 @@ void printCard( int sr , string htbin , int mt2bin , string signal, string outpu
     n_lostlep = h_lostlep->GetBinContent(mt2bin);
     n_lostlep_tr = h_lostlep->Integral(0,-1);
   } 
-  else {
-    n_lostlep = 0.01;
-    n_lostlep_tr = 0.01;
-  }
+  if (n_lostlep < 0.01) n_lostlep = 0.01;
+  if (n_lostlep_tr < 0.01) n_lostlep_tr = 0.01;
   if (iteration1) {
     // stat error comes from CR -> CR stats already integrated over MT2 bins in input
     TH1D* h_lostlep_stat = (TH1D*) f_lostlep->Get(fullhistnameStat);
     if (h_lostlep_stat != 0 && h_lostlep_stat->GetBinContent(mt2bin) != 0) 
       err_lostlep_stat = h_lostlep_stat->GetBinError(mt2bin)/h_lostlep_stat->GetBinContent(mt2bin);
   }
+
+
   TH1D* h_zinv = (TH1D*) f_zinv->Get(fullhistname);
   if (h_zinv != 0) n_zinv = h_zinv->GetBinContent(mt2bin);
-  else n_zinv = 0.01;
+  if (n_zinv < 0.01) n_zinv = 0.01;
   if (iteration1) {
     // For 1b regions, use the statistical uncertainty from corresponding 0b region
     // if (sr == 2) fullhistnameStat.ReplaceAll("sr2", "sr1");
@@ -70,9 +70,12 @@ void printCard( int sr , string htbin , int mt2bin , string signal, string outpu
     if (h_zinv_stat != 0 && h_zinv_stat->GetBinContent(mt2bin) != 0) 
       err_zinv_stat = h_zinv_stat->GetBinError(mt2bin)/h_zinv_stat->GetBinContent(mt2bin);
   }
+
+
   TH1D* h_qcd = (TH1D*) f_qcd->Get(fullhistname);
   if (h_qcd != 0) n_qcd = h_qcd->GetBinContent(mt2bin);
-  else n_qcd = 0.01;
+  if (n_qcd < 0.01) n_qcd = 0.01;
+
   TH1D* h_sig = (TH1D*) f_sig->Get(fullhistname);
   if (h_sig != 0) n_sig = h_sig->GetBinContent(mt2bin);
 
