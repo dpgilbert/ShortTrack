@@ -100,6 +100,64 @@ string getTableName(const string& sample) {
 }
 
 //_______________________________________________________________________________
+string getRegionPlotLabel(const string& dir) {
+  if (dir.find("sr10") != string::npos) return "#geq 2j, #geq 3b";
+  if (dir.find("sr1") != string::npos) return "2-3j, 0b";
+  if (dir.find("sr2") != string::npos) return "2-3j, 1b";
+  if (dir.find("sr3") != string::npos) return "2-3j, 2b";
+  if (dir.find("sr4") != string::npos) return "2-3j, 2b";
+  if (dir.find("sr5") != string::npos) return "#geq 4j, 0b";
+  if (dir.find("sr6") != string::npos) return "#geq 4j, 1b";
+  if (dir.find("sr7") != string::npos) return "#geq 4j, 2b";
+  if (dir.find("sr8") != string::npos) return "#geq 4j, 2b";
+  if (dir.find("sr9") != string::npos) return "#geq 2j, #geq 3b";
+  if (dir.find("srbase") != string::npos) return "#geq 2j";
+  //  if (dir.find("crsl") != string::npos) return "CRSL";
+
+  cout << "getRegionPlotLabel: WARNING: didn't recognize dir: " << dir << endl;
+  return dir;
+}
+
+//_______________________________________________________________________________
+string getRegionPlotLabelLine2(const string& dir) {
+  if (dir.find("sr10") != string::npos) return "minM_{T} > 200 GeV ||";
+  if (dir.find("sr3") != string::npos) return "minM_{T} < 200 GeV &&";
+  if (dir.find("sr4") != string::npos) return "minM_{T} > 200 GeV ||";
+  if (dir.find("sr7") != string::npos) return "minM_{T} < 200 GeV &&";
+  if (dir.find("sr8") != string::npos) return "minM_{T} > 200 GeV ||";
+  if (dir.find("sr9") != string::npos) return "minM_{T} < 200 GeV &&";
+  //  if (dir.find("crsl") != string::npos) return "CRSL";
+
+  //  cout << "getRegionPlotLabelLine2: WARNING: didn't recognize dir: " << dir << endl;
+  return "";
+}
+
+//_______________________________________________________________________________
+string getRegionPlotLabelLine3(const string& dir) {
+  if (dir.find("sr10") != string::npos) return "M_{T2} > 400 GeV";
+  if (dir.find("sr3") != string::npos) return "M_{T2} < 400 GeV";
+  if (dir.find("sr4") != string::npos) return "M_{T2} > 400 GeV";
+  if (dir.find("sr7") != string::npos) return "M_{T2} < 400 GeV";
+  if (dir.find("sr8") != string::npos) return "M_{T2} > 400 GeV";
+  if (dir.find("sr9") != string::npos) return "M_{T2} < 400 GeV";
+  //  if (dir.find("crsl") != string::npos) return "CRSL";
+
+  //  cout << "getRegionPlotLabelLine2: WARNING: didn't recognize dir: " << dir << endl;
+  return "";
+}
+
+//_______________________________________________________________________________
+string getHTPlotLabel(const string& dir) {
+  if (dir.find("H") != string::npos) return "H_{T} > 1000 GeV";
+  if (dir.find("M") != string::npos) return "575 < H_{T} < 1000 GeV";
+  if (dir.find("L") != string::npos) return "450 < H_{T} < 575 GeV";
+  if (dir.find("srbase") != string::npos) return "H_{T} > 450 GeV";
+
+  cout << "getHTPlotLabel: WARNING: didn't recognize dir: " << dir << endl;
+  return dir;
+}
+
+//_______________________________________________________________________________
 string getRegionName(const string& dir) {
   if (dir.find("sr10") != string::npos) return "$\\geq$2j, $\\geq$3b, high minMT,MT2";
   if (dir.find("sr1") != string::npos) return "2-3j, 0b";
@@ -139,9 +197,11 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   leg->SetBorderSize(0);
   leg->SetTextSize(0.032);
 
-  // to make legend
+  // to make legend and find max yvalue
   vector<TH1D*> bg_hists;
   vector<string> bg_names;
+  vector<TH1D*> sig_hists;
+  vector<string> sig_names;
 
   const unsigned int n = samples.size();
   // background hists
@@ -170,12 +230,36 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     leg->AddEntry(bg_hists.at(ibg),getLegendName(bg_names.at(ibg)).c_str(),"f");
   }
 
+  // signal hists - all samples must have "sig" in the name
+  for( unsigned int i = 0 ; i < n ; ++i ){
+    if( !TString(names.at(i)).Contains("sig") ) continue;
+    TString fullhistname = Form("%s/%s",histdir.c_str(),histname.c_str());
+    if (histdir.size() == 0) fullhistname = TString(histname);
+    TString newhistname = Form("%s_%s_%s",histname.c_str(),histdir.c_str(),names.at(i).c_str());
+    TH1D* h_temp = (TH1D*) samples.at(i)->Get(fullhistname);
+    if (h_temp == 0) continue;
+    // don't draw signal if the total yield in the plot is < 0.1 events
+    if (h_temp->Integral(0,-1) < 0.1) continue;
+    TH1D* h = (TH1D*) h_temp->Clone(newhistname);
+    //    h->Sumw2();
+    h->SetLineColor(getColor(names.at(i)));
+    h->SetLineWidth(2);
+    if (rebin > 1) h->Rebin(rebin);
+    if (scalesig > 0.) h->Scale(scalesig);
+    sig_hists.push_back(h);
+    sig_names.push_back(names.at(i));
+  }
+
   float ymax = h_bgtot->GetMaximum();
-  if( logplot ) ymax*=10;
-  else          ymax*=1.1;
+  // also check signals for max val
+  for (unsigned int isig = 0; isig < sig_hists.size(); ++isig) {
+    if (sig_hists.at(isig)->GetMaximum() > ymax) ymax = sig_hists.at(isig)->GetMaximum();
+  }
+  if( logplot ) ymax*=15;
+  else          ymax*=1.5;
   float ymin = 0.1;
 
-  TH2F* h_axes = new TH2F(Form("%s_%s_axes",histname.c_str(),histdir.c_str()),"",100,xmin,xmax,100,ymin,ymax);
+  TH2F* h_axes = new TH2F(Form("%s_%s_axes",histname.c_str(),histdir.c_str()),"",1000,xmin,xmax,1000,ymin,ymax);
   h_axes->GetXaxis()->SetTitle(xtitle.c_str());
   h_axes->GetXaxis()->SetLabelSize(0.04);
   h_axes->GetYaxis()->SetTitle(ytitle.c_str());
@@ -184,24 +268,27 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
 
   t->Draw("hist same");
 
-  for( unsigned int i = 0 ; i < n ; ++i ){
-    if( !TString(names.at(i)).Contains("sig") ) continue;
-    TString fullhistname = Form("%s/%s",histdir.c_str(),histname.c_str());
-    if (histdir.size() == 0) fullhistname = TString(histname);
-    TString newhistname = Form("%s_%s_%s",histname.c_str(),histdir.c_str(),names.at(i).c_str());
-    TH1D* h_temp = (TH1D*) samples.at(i)->Get(fullhistname);
-    if (h_temp == 0) continue;
-    TH1D* h = (TH1D*) h_temp->Clone(newhistname);
-    //    h->Sumw2();
-    h->SetLineColor(getColor(names.at(i)));
-    h->SetLineWidth(2);
-    if (rebin > 1) h->Rebin(rebin);
-    if (scalesig > 0.) h->Scale(scalesig);
-    h->Draw("hist same");
-    TString legend_name = getLegendName(names.at(i));
+  // add signal hists
+  for (unsigned int isig = 0; isig < sig_hists.size(); ++isig) {
+    sig_hists.at(isig)->Draw("hist same");
+    TString legend_name = getLegendName(sig_names.at(isig));
     if (scalesig > 0.) legend_name += Form(" x %.0f",scalesig);
     leg->AddEntry(h,legend_name,"l");
   }
+
+  TLatex label;
+  label.SetNDC();
+  label.SetTextSize(0.032);
+  TString ht_label = getHTPlotLabel(histdir);
+  TString region_label = getRegionPlotLabel(histdir);
+  TString region_label_line2 = getRegionPlotLabelLine2(histdir);
+  TString region_label_line3 = getRegionPlotLabelLine3(histdir);
+  label.DrawLatex(0.2,0.85,ht_label);
+  // minMT plot always requires at least 2 bjets
+  if ((histdir.find("srbase") != std::string::npos) && (histname.find("minMTBMet") != std::string::npos)) region_label = "#geq 2j, #geq 2b";
+  if (region_label.Length() > 0) label.DrawLatex(0.2,0.81,region_label);
+  if (region_label_line2.Length() > 0) label.DrawLatex(0.2,0.77,region_label_line2);
+  if (region_label_line3.Length() > 0) label.DrawLatex(0.2,0.73,region_label_line3);
 
   leg->Draw();
   h_axes->Draw("axissame");
@@ -358,8 +445,8 @@ void plotMaker(){
 
   // TFile* f_T1tttt_1500_100 = new TFile(Form("%s/T1tttt_1500_100.root",input_dir.c_str()));
   // TFile* f_T1tttt_1200_800 = new TFile(Form("%s/T1tttt_1200_800.root",input_dir.c_str()));
-  // TFile* f_T1bbbb_1000_900 = new TFile(Form("%s/T1bbbb_1000_900.root",input_dir.c_str()));
   // TFile* f_T1bbbb_1500_100 = new TFile(Form("%s/T1bbbb_1500_100.root",input_dir.c_str()));
+  // TFile* f_T1bbbb_1000_900 = new TFile(Form("%s/T1bbbb_1000_900.root",input_dir.c_str()));
   // TFile* f_T1qqqq_1400_100 = new TFile(Form("%s/T1qqqq_1400_100.root",input_dir.c_str()));
   // TFile* f_T1qqqq_1000_800 = new TFile(Form("%s/T1qqqq_1000_800.root",input_dir.c_str()));
 
@@ -422,7 +509,7 @@ void plotMaker(){
   //  plots definitions
   // ----------------------------------------
 
-  float scalesig = 50.;
+  float scalesig = -1.;
   bool printplots = false;
 
   // makePlot( samples , names , "" , "h_SignalRegion"  , "Signal Region" , "Events" , 0 , 100 , 1 , true, printplots );
@@ -434,11 +521,18 @@ void plotMaker(){
   // makePlot( samples , names , "nocut" , "h_nBJet40" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots );
   // makePlot( samples , names , "nocut" , "h_minMTBMet"  , "min M_{T}(b,MET) [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
 
-  makePlot( samples , names , "srbase" , "h_ht"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , true, printplots, scalesig );
-  makePlot( samples , names , "srbase" , "h_mt2" , "M_{T2} [GeV]" , "Events / 10 GeV" , 0 , 1000 , 1 , true, printplots, scalesig );
-  makePlot( samples , names , "srbase" , "h_nJet40" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig );
-  makePlot( samples , names , "srbase" , "h_nBJet40" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig );
-  makePlot( samples , names , "srbase" , "h_minMTBMet"  , "min M_{T}(b,MET) [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , false, printplots, scalesig );
+  // makePlot( samples , names , "srbase" , "h_ht"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , true, printplots, scalesig );
+  // makePlot( samples , names , "srbase" , "h_mt2" , "M_{T2} [GeV]" , "Events / 10 GeV" , 0 , 1000 , 1 , true, printplots, scalesig );
+  // makePlot( samples , names , "srbase" , "h_nJet40" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig );
+  // makePlot( samples , names , "srbase" , "h_nBJet40" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig );
+  // makePlot( samples , names , "srbase" , "h_minMTBMet"  , "min M_{T}(b,MET) [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , false, printplots, scalesig );
+
+  // makePlot( samples , names , "sr1L" , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig );
+  // makePlot( samples , names , "sr3L" , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig );
+  // makePlot( samples , names , "sr4H" , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig );
+  // makePlot( samples , names , "sr8H" , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig );
+  // makePlot( samples , names , "sr10H" , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig );
+
 
   // makePlot( samples , names , "crslbase" , "h_ht"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , true, printplots );
   // makePlot( samples , names , "crslbase" , "h_mt2" , "M_{T2} [GeV]" , "Events / 10 GeV" , 0 , 1000 , 1 , true, printplots );
