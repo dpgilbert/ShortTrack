@@ -273,7 +273,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     sig_hists.at(isig)->Draw("hist same");
     TString legend_name = getLegendName(sig_names.at(isig));
     if (scalesig > 0.) legend_name += Form(" x %.0f",scalesig);
-    leg->AddEntry(h,legend_name,"l");
+    leg->AddEntry(sig_hists.at(isig),legend_name,"l");
   }
 
   TLatex label;
