@@ -427,7 +427,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      const float lumi = 5.;
+      const float lumi = 4.;
       evtweight_ = t.evt_scale1fb * lumi;
 
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
