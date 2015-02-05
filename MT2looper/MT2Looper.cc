@@ -628,14 +628,6 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
     }
   }
 
-  // fill hists
-  //fillHistos( h_1d, dirname, suffix);
-  //fillHistosSingleLepton( h_1d, dirname, suffix);
-
-  // // fill CR summary hist
-  // outfile_->cd();
-  // plot1D("h_SingleLeptonControlRegion",  sr_jets+sr_htmet,   evtweight_, h_1d_global, ";Single Lepton Control Region", 100, 0, 100);
-
   return;
 }
 
@@ -740,6 +732,8 @@ void MT2Looper::fillHistosSingleLepton(std::map<std::string, TH1D*>& h_1d, const
   plot1D("h_mt"+s,            mt_,   evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
 
   outfile_->cd();
+
+  fillHistos(h_1d, dirname, s);
   return;
 }
 
