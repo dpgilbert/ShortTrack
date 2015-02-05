@@ -8,6 +8,9 @@
 #include "TString.h"
 #include "TFile.h"
 #include "TH1.h"
+#include "TList.h"
+#include "TCollection.h"
+#include "TKey.h"
 
 using namespace std;
 
@@ -22,11 +25,11 @@ bool iteration1 = false; // Here we try to get realistic statistical errors from
                          // To use this option, first run the ZinvMaker.C and lostlepMaker.C
 
 //_______________________________________________________________________________
-void printCard( int sr , string htbin , int mt2bin , string signal, string output_dir) {
+void printCard( string dir , int mt2bin , string signal, string output_dir) {
 
   // read off yields from h_mt2bins hist in each topological region
 
-  TString dir = Form("sr%d%s",sr,htbin.c_str());
+  //TString dir = Form("sr%d%s",sr,htbin.c_str());
   TString fullhistname = dir + "/h_mt2bins";
   TString fullhistnameStat  = fullhistname+"Stat";
 
@@ -41,6 +44,14 @@ void printCard( int sr , string htbin , int mt2bin , string signal, string outpu
   double n_bkg(0.);
 
   double n_sig(0.);
+
+  TH1D* h_sig = (TH1D*) f_sig->Get(fullhistname);
+  if (h_sig != 0) n_sig = h_sig->GetBinContent(mt2bin);
+
+  if (suppressZeroBins && n_sig < 0.01) {
+    std::cout << "Zero signal, card not printed: " << cardname << std::endl;
+    return;
+  }
 
   // get yields for each sample
   // !!!!! HACK: set zero bins to 0.01 for now to make combine happy
@@ -76,15 +87,9 @@ void printCard( int sr , string htbin , int mt2bin , string signal, string outpu
   if (h_qcd != 0) n_qcd = h_qcd->GetBinContent(mt2bin);
   if (n_qcd < 0.01) n_qcd = 0.01;
 
-  TH1D* h_sig = (TH1D*) f_sig->Get(fullhistname);
-  if (h_sig != 0) n_sig = h_sig->GetBinContent(mt2bin);
 
   n_bkg = n_lostlep+n_zinv+n_qcd;
 
-  if (suppressZeroBins && n_sig < 0.01) {
-    std::cout << "Zero signal, card not printed: " << cardname << std::endl;
-    return;
-  }
 
   int n_syst = 0;
 
@@ -240,7 +245,7 @@ TString getCorrelatedSLCRs(const TString& dir) {
 }
 
 //_______________________________________________________________________________
-void cardMaker(string signal, string input_dir, string output_dir){
+void new_cardMaker(string signal, string input_dir, string output_dir){
 
   // ----------------------------------------
   //  samples definition
@@ -263,20 +268,21 @@ void cardMaker(string signal, string input_dir, string output_dir){
   //  cards definitions
   // ----------------------------------------
 
-  // printCard(1, "L",1);
-  // printCard(2, "L",1);
-  // printCard(3, "L",1);
-
-  // loop over SRs and MT2 bins, print all cards
-  const unsigned int n_sr = 10;
+  // root -b -q "new_cardMaker.C(\"T1tttt_1500_100\", \"/home/users/jgran/new_signal_regions_MT2/new/MT2Analysis/MT2looper/output/phys14_status_4fb\", \"testing\")"
+  
   const unsigned int n_mt2bins = 5;
-  for (unsigned int isr = 1; isr <= n_sr; ++isr) {
-    for (unsigned int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {
-      // only do lowest 2 mt2 bins for regions with low minMT
-      if (imt2 > 2 && (isr == 3 || isr == 7 || isr == 9)) continue;
-      printCard(isr, "L", imt2, signal, output_dir);
-      printCard(isr, "M", imt2, signal, output_dir);
-      printCard(isr, "H", imt2, signal, output_dir);
+
+  TIter it(f_sig->GetListOfKeys());
+  TKey* k;
+  std::string keep = "sr";
+  std::string skip = "srbase";
+  while (k = (TKey *)it()) {
+    if (k->GetTitle() == "srbase") continue;
+    if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
+    if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) { //it is a signal region
+      for (unsigned int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {
+        printCard(k->GetTitle(), imt2, signal, output_dir);
+      }
     }
   }
 
