@@ -32,7 +32,7 @@ float SR::GetUpperBound(std::string var_name){
   return (bins_.at(var_name)).second;
 }
 
-int SR::GetNumberOfVariables(){
+unsigned int SR::GetNumberOfVariables(){
   return (bins_.size());
 }
 
@@ -46,6 +46,9 @@ std::vector<std::string> SR::GetListOfVariables(){
 
 bool SR::PassesSelection(std::map<std::string, float> values){
   float ep = 0.000001;
+  if(GetNumberOfVariables() != values.size()){
+    throw std::invalid_argument("Number of variables to cut on != number of variables in signal region");
+  }
   for(std::map<std::string, float>::const_iterator it = values.begin(); it != values.end(); it++){
     if(bins_.find(it->first) != bins_.end()){ //check that we actually have bounds set for this variable
       float value = it->second;

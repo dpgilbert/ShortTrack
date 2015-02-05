@@ -18,7 +18,7 @@ class SR {
     std::string GetName();
     float GetLowerBound(std::string var_name);
     float GetUpperBound(std::string var_name);
-    int GetNumberOfVariables();
+    unsigned int GetNumberOfVariables();
     std::vector<std::string> GetListOfVariables();
 
     bool PassesSelection(std::map<std::string, float> values);
