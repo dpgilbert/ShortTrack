@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#Needs to be run from CMSSW_7_1_5/src/HiggsAnalysis/CombinedLimit/scripts/
+
 cmsenv
 
 INDIR="/home/users/jgran/combine/CMSSW_7_1_5/src/HiggsAnalysis/CombinedLimit/test/mt2/cards_selExtendedNJets"
