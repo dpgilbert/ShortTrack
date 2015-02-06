@@ -87,18 +87,25 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   int mt2_LOW = h_sig->GetBinLowEdge(mt2bin);
   int mt2_UP = mt2_LOW + h_sig->GetBinWidth(mt2bin);
 
+  if(nbjets_UP != -1) nbjets_UP--;
+  if(njets_UP != -1) njets_UP--;
+
   std::string ht_str = "HT" + toString(ht_LOW) + "to" + toString(ht_UP);
-  std::string jet_str = ((njets_UP - njets_LOW) == 1) ? "j" + toString(njets_LOW) : "j" + toString(njets_LOW) + "to" + toString(njets_UP);
-  std::string bjet_str = ((nbjets_UP - nbjets_LOW) == 1) ? "b" + toString(nbjets_LOW) : "b" + toString(nbjets_LOW) + "to" + toString(nbjets_UP);
+  std::string jet_str = (njets_UP == njets_LOW) ? "j" + toString(njets_LOW) : "j" + toString(njets_LOW) + "to" + toString(njets_UP);
+  std::string bjet_str = (nbjets_UP == nbjets_LOW) ? "b" + toString(nbjets_LOW) : "b" + toString(nbjets_LOW) + "to" + toString(nbjets_UP);
   std::string mt2_str = "m" + toString(mt2_LOW) + "to" + toString(mt2_UP);
   std::string minMT_str;
   if(lowMT_LOW == 1) minMT_str = "loMT_";
   else if(lowMT_UP == 1) minMT_str = "hiMT_";
   else minMT_str = "";
-  std::string channel = ht_str + "_" + jet_str + "_" + bjet_str + "_" + minMT_str + mt2_str;
   
   //Replace instances of "-1" with "inf" for variables with no upper bound.
-  ReplaceString(channel, "-1", "inf");
+  ReplaceString(ht_str, "-1", "inf");
+  ReplaceString(jet_str, "-1", "inf");
+  ReplaceString(bjet_str, "-1", "inf");
+  ReplaceString(mt2_str, "-1", "inf");
+
+  std::string channel = ht_str + "_" + jet_str + "_" + bjet_str + "_" + minMT_str + mt2_str;
 
   TString cardname = Form("%s/datacard_%s_%s.txt",output_dir.c_str(),channel.c_str(),signal.c_str());
 
@@ -150,7 +157,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   // ----- lost lepton bkg uncertainties
   // uncorrelated across TRs and MT2 bins
   double lostlep_shape = 1.075;
-  TString name_lostlep_shape = Form("LL_SHAPE_%s_m%d",dir.Data(),mt2bin);
+  TString name_lostlep_shape = Form("llep_shape_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
   ++n_syst;
   // correlated for MT2 bins in a TR
   double lostlep_crstat = 1.;
@@ -162,26 +169,28 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
     if (n_lostlep_tr > 0.) lostlep_crstat = 1. + sqrt( pow(0.15,2) + pow(1./sqrt(n_lostlep_tr),2));
     else lostlep_crstat = 1. + sqrt( pow(0.15,2) + 1.);
   }
-  TString name_lostlep_crstat = Form("LL_CRSTAT_%s",dir.Data());
+  TString name_lostlep_crstat = Form("llep_CRstat_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
+/*
   if (iteration1) {
     TString crdir = getCorrelatedSLCRs(dir);
     name_lostlep_crstat = Form("LL_CRSTAT_%s",crdir.Data());
   }
+*/
   ++n_syst;
 
   // ----- zinv bkg uncertainties - depend on signal region, b selection
   // uncorrelated across TRs and MT2 bins
   double zinv_crstat = -1.;
-  TString name_zinv_crstat = Form("ZINV_CRSTAT_%s_m%d",dir.Data(),mt2bin);
+  TString name_zinv_crstat = Form("zinv_CRstat_%s",channel.c_str());
   // correlated for all bins with 0-1b
   double zinv_zgamma = -1.;
-  TString name_zinv_zgamma = "ZINV_ZGAMMA";
+  TString name_zinv_zgamma = "zinv_ZGratio";
   // correlated for MT2 bins in a TR
   double zinv_bratio = -1.;
-  TString name_zinv_bratio = Form("ZINV_BRATIO_%s",dir.Data());
+  TString name_zinv_bratio = Form("zinv_Bratio_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
   // uncorrelated across TRs and MT2 bins
   double zinv_mcsyst = -1.;
-  TString name_zinv_mcsyst = Form("ZINV_MCSYST_%s_m%d",dir.Data(),mt2bin);
+  TString name_zinv_mcsyst = Form("zinv_MC_%s",channel.c_str());
 
   // 2+b: pure MC estimate
   //if (sr == 3 || sr == 4 || sr >= 7) {
@@ -216,7 +225,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
 
   // ----- qcd bkg uncertainties: uncorrelated for all bins
   double qcd_syst = 2.00;
-  TString name_qcd_syst = Form("QCD_SYST_%s_m%d",dir.Data(),mt2bin);
+  TString name_qcd_syst = Form("qcd_syst_%s", channel.c_str());
   ++n_syst;
 
   // ----- sig uncertainties: correlated for all bins
@@ -238,9 +247,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   *ofile <<  "process         0      1        2      3"                                      << endl;
   *ofile <<  Form("rate            %.2f    %.2f     %.2f    %.2f",n_sig,n_lostlep,n_zinv,n_qcd) << endl;
   *ofile <<  "------------"                                                                  << endl;
-  *ofile <<  Form("SIG_SYST              lnN   %.2f    -      -     -     uncertainty on signal",sig_syst)  << endl;
-  *ofile <<  Form("%s     lnN    -   %.3f     -     -     lost lepton shape uncert",name_lostlep_shape.Data(),lostlep_shape)  << endl;
-  *ofile <<  Form("%s       lnN    -   %.3f     -     -     lost lepton CR stats/lep eff",name_lostlep_crstat.Data(),lostlep_crstat)  << endl;
+  *ofile <<  Form("sig_syst              lnN   %.2f    -      -     -     uncertainty on signal",sig_syst)  << endl;
   //if (sr == 1 || sr == 5 || sr == 2 || sr == 6) {
   if (nbjets_UP == 1 || nbjets_UP == 2) {
     *ofile <<  Form("%s  lnN    -      -    %.3f   -     zinv CR stats",name_zinv_crstat.Data(),zinv_crstat)  << endl;
@@ -257,6 +264,8 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   if (nbjets_LOW >= 2) {
     *ofile <<  Form("%s  lnN    -      -    %.2f    -     zinv MC syst",name_zinv_mcsyst.Data(),zinv_mcsyst)  << endl;
   }
+  *ofile <<  Form("%s     lnN    -   %.3f     -     -     lost lepton shape uncert",name_lostlep_shape.Data(),lostlep_shape)  << endl;
+  *ofile <<  Form("%s       lnN    -   %.3f     -     -     lost lepton CR stats/lep eff",name_lostlep_crstat.Data(),lostlep_crstat)  << endl;
   *ofile <<  Form("%s     lnN    -      -       -   %.2f    QCD syst",name_qcd_syst.Data(),qcd_syst)  << endl;
 
   ofile->close();
