@@ -22,7 +22,7 @@ TFile* f_sig = 0;
 
 bool suppressZeroBins = true;
 
-bool iteration1 = true; // Here we try to get realistic statistical errors from control region statistics
+bool iteration1 = false; // Here we try to get realistic statistical errors from control region statistics
                          // To use this option, first run the ZinvMaker.C and lostlepMaker.C
 
 //_______________________________________________________________________________
