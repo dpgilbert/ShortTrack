@@ -2,6 +2,7 @@
 #include <utility>
 #include <vector>
 #include <fstream>
+#include <string>
 
 #include "TROOT.h"
 #include "TLatex.h"
@@ -21,15 +22,15 @@ TFile* f_sig = 0;
 
 bool suppressZeroBins = true;
 
-bool iteration1 = false; // Here we try to get realistic statistical errors from control region statistics
+bool iteration1 = true; // Here we try to get realistic statistical errors from control region statistics
                          // To use this option, first run the ZinvMaker.C and lostlepMaker.C
 
 //_______________________________________________________________________________
-void printCard( string dir , int mt2bin , string signal, string output_dir) {
+void printCard( string dir_str , int mt2bin , string signal, string output_dir) {
 
   // read off yields from h_mt2bins hist in each topological region
 
-  //TString dir = Form("sr%d%s",sr,htbin.c_str());
+  TString dir = TString(dir_str);
   TString fullhistname = dir + "/h_mt2bins";
   TString fullhistnameStat  = fullhistname+"Stat";
 
@@ -128,13 +129,22 @@ void printCard( string dir , int mt2bin , string signal, string output_dir) {
   // uncorrelated across TRs and MT2 bins
   double zinv_mcsyst = -1.;
   TString name_zinv_mcsyst = Form("ZINV_MCSYST_%s_m%d",dir.Data(),mt2bin);
+
+  //get nbjets boundaries for signal region
+  TH1D* h_nbjets_LOW = (TH1D*) f_sig->Get(dir+"/h_nbjets_LOW");
+  TH1D* h_nbjets_UP = (TH1D*) f_sig->Get(dir+"/h_nbjets_UP");
+  int nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
+  int nbjets_UP = h_nbjets_UP->GetBinContent(1);
+
   // 2+b: pure MC estimate
-  if (sr == 3 || sr == 4 || sr >= 7) {
+  //if (sr == 3 || sr == 4 || sr >= 7) {
+  if (nbjets_LOW >= 2) {
     zinv_mcsyst = 2.;
     ++n_syst;
   }
   // 1b: data CR with 0->1b sf
-  else if (sr == 2 || sr == 6) {
+  //else if (sr == 2 || sr == 6) {
+  else if (nbjets_LOW == 1 && nbjets_UP == 2) {
     if (n_zinv > 0.) {
       if (iteration1) zinv_crstat = 1. + 1.*err_zinv_stat;
       else zinv_crstat = 1. + 1./sqrt(20. * n_zinv);
@@ -146,7 +156,8 @@ void printCard( string dir , int mt2bin , string signal, string output_dir) {
     n_syst += 3;
   }
   // 0b: data CR
-  else if (sr == 1 || sr == 5) {
+  //else if (sr == 1 || sr == 5) {
+  else if (nbjets_UP == 1) {
     if (n_zinv > 0.) {
       if (iteration1) zinv_crstat = 1. + 1.*err_zinv_stat;
       else zinv_crstat = 1. + 1./sqrt(2. * n_zinv);
@@ -183,16 +194,20 @@ void printCard( string dir , int mt2bin , string signal, string output_dir) {
   *ofile <<  Form("SIG_SYST              lnN   %.2f    -      -     -     uncertainty on signal",sig_syst)  << endl;
   *ofile <<  Form("%s     lnN    -   %.3f     -     -     lost lepton shape uncert",name_lostlep_shape.Data(),lostlep_shape)  << endl;
   *ofile <<  Form("%s       lnN    -   %.3f     -     -     lost lepton CR stats/lep eff",name_lostlep_crstat.Data(),lostlep_crstat)  << endl;
-  if (sr == 1 || sr == 5 || sr == 2 || sr == 6) {
+  //if (sr == 1 || sr == 5 || sr == 2 || sr == 6) {
+  if (nbjets_UP == 1 || nbjets_UP == 2) {
     *ofile <<  Form("%s  lnN    -      -    %.3f   -     zinv CR stats",name_zinv_crstat.Data(),zinv_crstat)  << endl;
   }
-  if (sr == 1 || sr == 5 || sr == 2 || sr == 6) {
+  //if (sr == 1 || sr == 5 || sr == 2 || sr == 6) {
+  if (nbjets_UP == 1 || nbjets_UP == 2) {
     *ofile <<  Form("%s          lnN    -      -    %.2f    -     zinv Z/gamma ratio",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;
   }
-  if (sr == 2 || sr == 6) {
+  //if (sr == 2 || sr == 6) {
+  else if (nbjets_LOW == 1 && nbjets_UP == 2) {
     *ofile <<  Form("%s     lnN    -      -    %.2f    -     zinv 0/1b ratio",name_zinv_bratio.Data(),zinv_bratio)  << endl;
   }
-  if (sr == 3 || sr == 4 || sr >= 7) {
+  //if (sr == 3 || sr == 4 || sr >= 7) {
+  if (nbjets_LOW >= 2) {
     *ofile <<  Form("%s  lnN    -      -    %.2f    -     zinv MC syst",name_zinv_mcsyst.Data(),zinv_mcsyst)  << endl;
   }
   *ofile <<  Form("%s     lnN    -      -       -   %.2f    QCD syst",name_qcd_syst.Data(),qcd_syst)  << endl;
@@ -207,45 +222,51 @@ void printCard( string dir , int mt2bin , string signal, string output_dir) {
 //_______________________________________________________________________________
 TString getCorrelatedSLCRs(const TString& dir) {
 
-  // combine loMT and hiMT bins for regions split by that
-  if (dir.Contains("3L") || dir.Contains("4L")) {
-    return "sr3L4L";
-  }
-  else if (dir.Contains("3M") || dir.Contains("4M")) {
-    return "sr3M4M";
-  }
-  else if (dir.Contains("3H") || dir.Contains("4H")) {
-    return "sr3H4H";
+  //get minMTBMet boundaries
+  TH1D* h_minMTBMet_LOW = (TH1D*) f_sig->Get(dir+"/h_minMTBMet_LOW");
+  TH1D* h_minMTBMet_UP = (TH1D*) f_sig->Get(dir+"/h_minMTBMet_UP");
+  int minMTBMet_LOW = h_minMTBMet_LOW->GetBinContent(1);
+  int minMTBMet_UP = h_minMTBMet_UP->GetBinContent(1);
+
+  if(minMTBMet_LOW == 0 && minMTBMet_UP == -1) return dir; //this SR is not split by minMTBMet
+
+  char* str = dir; 
+  std::string first;//this piece is just "sr"
+  std::string second;//this piece is the SR number
+  std::string third;//this piece is "L", "M", or "H"
+  bool found_num = false;
+  
+  //find the SR number so we can get the SR before and after this one
+  while (*str){
+    if(!isdigit(*str) && !found_num) first += *str;
+    else if(!isdigit(*str)) third += *str;
+    else {
+      second += *str;
+      found_num = true;
+    }
+    str++;
   }
 
-  // combine loMT and hiMT bins for regions split by that
-  if (dir.Contains("7L") || dir.Contains("8L")) {
-    return "sr7L8L";
-  }
-  else if (dir.Contains("7M") || dir.Contains("8M")) {
-    return "sr7M8M";
-  }
-  else if (dir.Contains("7H") || dir.Contains("8H")) {
-    return "sr7H8H";
-  }
+  std::string srA = second;
+  int sr_before = atoi(second.c_str());
+  int sr_after  = atoi(second.c_str());
 
-  // combine loMT and hiMT bins for regions split by that
-  if (dir.Contains("9L") || dir.Contains("10L")) {
-    return "sr9L10L";
-  }
-  else if (dir.Contains("9M") || dir.Contains("10M")) {
-    return "sr9M10M";
-  }
-  else if (dir.Contains("9H") || dir.Contains("10H")) {
-    return "sr9H10H";
-  }
+  sr_before--;
+  sr_after++;
 
-  // default: use only this TR
-  return dir;
+  //assume that lowMT region comes before highMT region
+  stringstream ss;
+  if(minMTBMet_UP == 200) ss << sr_after;
+  else ss << sr_before;
+
+  std::string srB = ss.str();
+
+  return TString(first + srA + third + srB + third); 
+
 }
 
 //_______________________________________________________________________________
-void new_cardMaker(string signal, string input_dir, string output_dir){
+void cardMaker(string signal, string input_dir, string output_dir){
 
   // ----------------------------------------
   //  samples definition
@@ -268,10 +289,10 @@ void new_cardMaker(string signal, string input_dir, string output_dir){
   //  cards definitions
   // ----------------------------------------
 
-  // root -b -q "new_cardMaker.C(\"T1tttt_1500_100\", \"/home/users/jgran/new_signal_regions_MT2/new/MT2Analysis/MT2looper/output/phys14_status_4fb\", \"testing\")"
-  
   const unsigned int n_mt2bins = 5;
 
+  //Loop through list of every directory in the signal file.
+  //if directory begins with "sr", excluding "srbase", make cards for it.
   TIter it(f_sig->GetListOfKeys());
   TKey* k;
   std::string keep = "sr";
@@ -279,9 +300,9 @@ void new_cardMaker(string signal, string input_dir, string output_dir){
   while (k = (TKey *)it()) {
     if (k->GetTitle() == "srbase") continue;
     if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
-    if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) { //it is a signal region
-      for (unsigned int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {
-        printCard(k->GetTitle(), imt2, signal, output_dir);
+    if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
+      for (unsigned int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {//Make a separate card for each MT2 bin.
+        printCard(k->GetTitle(), imt2, signal, output_dir);   //MT2 bins with no entries are handled by printCard function.
       }
     }
   }
