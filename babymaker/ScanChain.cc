@@ -11,16 +11,26 @@
 #include "TBenchmark.h"
 #include "TLorentzVector.h"
 
-// CMS2
-#include "../MT2CORE/CMS2.h"
-#include "../MT2CORE/tools.h"
-#include "../MT2CORE/selections.h"
-#include "../MT2CORE/hemJet.h"
+// CORE
+#include "../CORE/CMS3.h"
+#include "../CORE/Base.h"
+#include "../CORE/JetSelections.h"
+#include "../CORE/MuonSelections.h"
+#include "../CORE/ElectronSelections.h"
+#include "../CORE/PhotonSelections.h"
+#include "../CORE/TriggerSelections.h"
+#include "../CORE/MCSelections.h"
+#include "../CORE/IsoTrackVeto.h"
+
+// Tools
+#include "../Tools/utils.h"
+#include "../Tools/hemJet.h" 
+#include "../Tools/MT2/MT2.h"
+#include "../Tools/JetCorrector.h"
+#include "../Tools/jetcorr/FactorizedJetCorrector.h"
+
+// MT2CORE
 #include "../MT2CORE/sampleID.h"
-#include "../MT2CORE/genUtils.h"
-#include "../MT2CORE/MT2/MT2.h"
-#include "../MT2CORE/IsoTrackVeto.h"
-#include "../MT2CORE/jetcorr/FactorizedJetCorrector.h"
 
 // header
 #include "ScanChain.h"
@@ -69,7 +79,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     TTree *tree = (TTree*)f.Get("Events");
     TTreeCache::SetLearnEntries(10);
     tree->SetCacheSize(128*1024*1024);
-    cms2.Init(tree);
+    cms3.Init(tree);
     
     // ----------------------------------
     // retrieve JEC from files, if using
@@ -96,66 +106,66 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       // Get Event Content
       tree->LoadTree(event);
-      cms2.GetEntry(event);
+      cms3.GetEntry(event);
       ++nEventsTotal;
     
       // Progress
-      CMS2::progress( nEventsTotal, nEventsChain );
+      CMS3::progress( nEventsTotal, nEventsChain );
 
       InitBabyNtuple();
 
-      run  = cms2.evt_run();
-      lumi = cms2.evt_lumiBlock();
-      evt  = cms2.evt_event();
-      isData = cms2.evt_isRealData();
+      run  = cms3.evt_run();
+      lumi = cms3.evt_lumiBlock();
+      evt  = cms3.evt_event();
+      isData = cms3.evt_isRealData();
 
-      evt_nEvts = cms2.evt_nEvts();
-      evt_scale1fb = cms2.evt_scale1fb();
-      evt_xsec = cms2.evt_xsec_incl();
-      evt_kfactor = cms2.evt_kfactor();
-      evt_filter = cms2.evt_filt_eff();
+      evt_nEvts = cms3.evt_nEvts();
+      evt_scale1fb = cms3.evt_scale1fb();
+      evt_xsec = cms3.evt_xsec_incl();
+      evt_kfactor = cms3.evt_kfactor();
+      evt_filter = cms3.evt_filt_eff();
       puWeight = 1.;
-      nTrueInt = cms2.puInfo_trueNumInteractions().at(0);
-      rho = cms2.evt_fixgridfastjet_all_rho(); //this one is used in JECs
+      nTrueInt = cms3.puInfo_trueNumInteractions().at(0);
+      rho = cms3.evt_fixgridfastjet_all_rho(); //this one is used in JECs
       //rho25 = ;
 
       if (verbose) cout << "before vertices" << endl;
 
       //VERTICES
       nVert = 0;
-      for(unsigned int ivtx=0; ivtx < cms2.evt_nvtxs(); ivtx++){
+      for(unsigned int ivtx=0; ivtx < cms3.evt_nvtxs(); ivtx++){
 
-        if(cms2.vtxs_isFake().at(ivtx)) continue;
-        if(cms2.vtxs_ndof().at(ivtx) <= 4) continue;
-        if(fabs(cms2.vtxs_position().at(ivtx).z()) > 24) continue;
-        if(cms2.vtxs_position().at(ivtx).Rho() > 2) continue;
+        if(cms3.vtxs_isFake().at(ivtx)) continue;
+        if(cms3.vtxs_ndof().at(ivtx) <= 4) continue;
+        if(fabs(cms3.vtxs_position().at(ivtx).z()) > 24) continue;
+        if(cms3.vtxs_position().at(ivtx).Rho() > 2) continue;
 
         nVert++;
   
       }
       
-      met_pt  = cms2.evt_pfmet();
-      met_phi = cms2.evt_pfmetPhi();
-      met_genPt  = cms2.gen_met();
-      met_genPhi = cms2.gen_metPhi();
+      met_pt  = cms3.evt_pfmet();
+      met_phi = cms3.evt_pfmetPhi();
+      met_genPt  = cms3.gen_met();
+      met_genPhi = cms3.gen_metPhi();
 
       // MET FILTERS
-      Flag_EcalDeadCellTriggerPrimitiveFilter       = cms2.filt_ecalTP();
-      Flag_trkPOG_manystripclus53X                  = cms2.filt_trkPOG_manystripclus53X();
-      Flag_ecalLaserCorrFilter                      = cms2.filt_ecalLaser();
-      Flag_trkPOG_toomanystripclus53X               = cms2.filt_trkPOG_toomanystripclus53X();
-      Flag_hcalLaserEventFilter                     = cms2.filt_hcalLaser();
-      Flag_trkPOG_logErrorTooManyClusters           = cms2.filt_trkPOG_logErrorTooManyClusters();
-      Flag_trkPOGFilters                            = cms2.filt_trkPOGFilters();
-      Flag_trackingFailureFilter                    = cms2.filt_trackingFailure();
-      Flag_goodVertices                             = cms2.filt_goodVertices();
-      Flag_eeBadScFilter                            = cms2.filt_eeBadSc();
+      Flag_EcalDeadCellTriggerPrimitiveFilter       = cms3.filt_ecalTP();
+      Flag_trkPOG_manystripclus53X                  = cms3.filt_trkPOG_manystripclus53X();
+      Flag_ecalLaserCorrFilter                      = cms3.filt_ecalLaser();
+      Flag_trkPOG_toomanystripclus53X               = cms3.filt_trkPOG_toomanystripclus53X();
+      Flag_hcalLaserEventFilter                     = cms3.filt_hcalLaser();
+      Flag_trkPOG_logErrorTooManyClusters           = cms3.filt_trkPOG_logErrorTooManyClusters();
+      Flag_trkPOGFilters                            = cms3.filt_trkPOGFilters();
+      Flag_trackingFailureFilter                    = cms3.filt_trackingFailure();
+      Flag_goodVertices                             = cms3.filt_goodVertices();
+      Flag_eeBadScFilter                            = cms3.filt_eeBadSc();
       // note: in CMS3, filt_cscBeamHalo and evt_cscTightHaloId are the same
-      Flag_CSCTightHaloFilter                       = cms2.filt_cscBeamHalo();
+      Flag_CSCTightHaloFilter                       = cms3.filt_cscBeamHalo();
       // note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
-      Flag_HBHENoiseFilter                          = cms2.filt_hbheNoise();
+      Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
       // necessary?
-      Flag_METFilters                               = cms2.filt_metfilter();
+      Flag_METFilters                               = cms3.filt_metfilter();
 
       //TRIGGER
       HLT_HT900        = passHLTTriggerPattern("HLT_PFHT900_v");
@@ -175,29 +185,29 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       ngenLep = 0;
       ngenTau = 0;
       ngenLepFromTau = 0;
-      for(unsigned int iGen = 0; iGen < cms2.genps_p4().size(); iGen++){
+      for(unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++){
 	if (ngenPart >= max_ngenPart) {
           std::cout << "WARNING: attempted to fill more than " << max_ngenPart << " gen particles" << std::endl;
 	  break;
 	}
-        genPart_pt[ngenPart] = cms2.genps_p4().at(iGen).pt();
-        genPart_eta[ngenPart] = cms2.genps_p4().at(iGen).eta();
-        genPart_phi[ngenPart] = cms2.genps_p4().at(iGen).phi();
-        genPart_mass[ngenPart] = cms2.genps_mass().at(iGen);
-        genPart_pdgId[ngenPart] = cms2.genps_id().at(iGen);
-        genPart_status[ngenPart] = cms2.genps_status().at(iGen);
-        genPart_charge[ngenPart] = cms2.genps_charge().at(iGen);
-	genPart_motherId[ngenPart] = cms2.genps_id_simplemother().at(iGen);
-	genPart_grandmaId[ngenPart] = cms2.genps_id_simplegrandma().at(iGen);
+        genPart_pt[ngenPart] = cms3.genps_p4().at(iGen).pt();
+        genPart_eta[ngenPart] = cms3.genps_p4().at(iGen).eta();
+        genPart_phi[ngenPart] = cms3.genps_p4().at(iGen).phi();
+        genPart_mass[ngenPart] = cms3.genps_mass().at(iGen);
+        genPart_pdgId[ngenPart] = cms3.genps_id().at(iGen);
+        genPart_status[ngenPart] = cms3.genps_status().at(iGen);
+        genPart_charge[ngenPart] = cms3.genps_charge().at(iGen);
+	genPart_motherId[ngenPart] = cms3.genps_id_simplemother().at(iGen);
+	genPart_grandmaId[ngenPart] = cms3.genps_id_simplegrandma().at(iGen);
         ngenPart++;
 
 	// save lepton info
-	int pdgId = abs(cms2.genps_id().at(iGen));
+	int pdgId = abs(cms3.genps_id().at(iGen));
 	if ((pdgId != 11) && (pdgId != 13) && (pdgId != 15)) continue;
 
-	int motherId = abs(cms2.genps_id_simplemother().at(iGen));
-	int grandmaId = abs(cms2.genps_id_simplegrandma().at(iGen));
-	int status = cms2.genps_status().at(iGen);
+	int motherId = abs(cms3.genps_id_simplemother().at(iGen));
+	int grandmaId = abs(cms3.genps_id_simplegrandma().at(iGen));
+	int status = cms3.genps_status().at(iGen);
 
 	// reject leptons with direct parents of quarks or hadrons. 
 	//  Allow SUSY parents - not explicitly checking for now though
@@ -211,7 +221,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	// electrons, muons: status 1 or 23 and mother W/Z/H or tau from W/Z/H
 	if ( (pdgId == 11 || pdgId == 13) && (status == 1 || status == 23) ) {
 	  // save leptons pre-FSR: prefer status 23 over status 1
-	  if (status == 1 && motherId == pdgId && (cms2.genps_status().at(cms2.genps_idx_simplemother().at(iGen)) == 23)) {
+	  if (status == 1 && motherId == pdgId && (cms3.genps_status().at(cms3.genps_idx_simplemother().at(iGen)) == 23)) {
 	    // don't save
 	  }
 	  // leptons from taus
@@ -227,7 +237,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	// taus: status 2 or 23, from W/Z/H
 	else if (pdgId == 15 && (status == 2 || status == 23)) {
 	  // save leptons pre-FSR: prefer status 23 over status 2
-	  if (status == 2 && motherId == pdgId && (cms2.genps_status().at(cms2.genps_idx_simplemother().at(iGen)) == 23)) {
+	  if (status == 2 && motherId == pdgId && (cms3.genps_status().at(cms3.genps_idx_simplemother().at(iGen)) == 23)) {
 	    // don't save
 	  }
 	  // leptons from W/Z/H
@@ -242,39 +252,39 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
 	// save gen leptons (e/mu) directly from W/Z/H
 	if (goodLep) {
-	  genLep_pt[ngenLep] = cms2.genps_p4().at(iGen).pt();
-	  genLep_eta[ngenLep] = cms2.genps_p4().at(iGen).eta();
-	  genLep_phi[ngenLep] = cms2.genps_p4().at(iGen).phi();
-	  genLep_mass[ngenLep] = cms2.genps_mass().at(iGen);
-	  genLep_pdgId[ngenLep] = cms2.genps_id().at(iGen);
-	  genLep_status[ngenLep] = cms2.genps_status().at(iGen);
-	  genLep_charge[ngenLep] = cms2.genps_charge().at(iGen);
+	  genLep_pt[ngenLep] = cms3.genps_p4().at(iGen).pt();
+	  genLep_eta[ngenLep] = cms3.genps_p4().at(iGen).eta();
+	  genLep_phi[ngenLep] = cms3.genps_p4().at(iGen).phi();
+	  genLep_mass[ngenLep] = cms3.genps_mass().at(iGen);
+	  genLep_pdgId[ngenLep] = cms3.genps_id().at(iGen);
+	  genLep_status[ngenLep] = cms3.genps_status().at(iGen);
+	  genLep_charge[ngenLep] = cms3.genps_charge().at(iGen);
 	  genLep_sourceId[ngenLep] = sourceId;
 	  ++ngenLep;
 	}
 
 	// save gen taus from W/Z/H
 	if (goodTau) {
-	  genTau_pt[ngenTau] = cms2.genps_p4().at(iGen).pt();
-	  genTau_eta[ngenTau] = cms2.genps_p4().at(iGen).eta();
-	  genTau_phi[ngenTau] = cms2.genps_p4().at(iGen).phi();
-	  genTau_mass[ngenTau] = cms2.genps_mass().at(iGen);
-	  genTau_pdgId[ngenTau] = cms2.genps_id().at(iGen);
-	  genTau_status[ngenTau] = cms2.genps_status().at(iGen);
-	  genTau_charge[ngenTau] = cms2.genps_charge().at(iGen);
+	  genTau_pt[ngenTau] = cms3.genps_p4().at(iGen).pt();
+	  genTau_eta[ngenTau] = cms3.genps_p4().at(iGen).eta();
+	  genTau_phi[ngenTau] = cms3.genps_p4().at(iGen).phi();
+	  genTau_mass[ngenTau] = cms3.genps_mass().at(iGen);
+	  genTau_pdgId[ngenTau] = cms3.genps_id().at(iGen);
+	  genTau_status[ngenTau] = cms3.genps_status().at(iGen);
+	  genTau_charge[ngenTau] = cms3.genps_charge().at(iGen);
 	  genTau_sourceId[ngenTau] = sourceId;
 	  ++ngenTau;
 	}
 
 	// save gen e/mu from taus (which are from W/Z/H)
 	if (goodLepFromTau) {
-	  genLepFromTau_pt[ngenLepFromTau] = cms2.genps_p4().at(iGen).pt();
-	  genLepFromTau_eta[ngenLepFromTau] = cms2.genps_p4().at(iGen).eta();
-	  genLepFromTau_phi[ngenLepFromTau] = cms2.genps_p4().at(iGen).phi();
-	  genLepFromTau_mass[ngenLepFromTau] = cms2.genps_mass().at(iGen);
-	  genLepFromTau_pdgId[ngenLepFromTau] = cms2.genps_id().at(iGen);
-	  genLepFromTau_status[ngenLepFromTau] = cms2.genps_status().at(iGen);
-	  genLepFromTau_charge[ngenLepFromTau] = cms2.genps_charge().at(iGen);
+	  genLepFromTau_pt[ngenLepFromTau] = cms3.genps_p4().at(iGen).pt();
+	  genLepFromTau_eta[ngenLepFromTau] = cms3.genps_p4().at(iGen).eta();
+	  genLepFromTau_phi[ngenLepFromTau] = cms3.genps_p4().at(iGen).phi();
+	  genLepFromTau_mass[ngenLepFromTau] = cms3.genps_mass().at(iGen);
+	  genLepFromTau_pdgId[ngenLepFromTau] = cms3.genps_id().at(iGen);
+	  genLepFromTau_status[ngenLepFromTau] = cms3.genps_status().at(iGen);
+	  genLepFromTau_charge[ngenLepFromTau] = cms3.genps_charge().at(iGen);
 	  genLepFromTau_sourceId[ngenLepFromTau] = sourceId;
 	  ++ngenLepFromTau;
 	}
@@ -315,39 +325,39 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       //ELECTRONS
       nlep = 0;
       nElectrons10 = 0;
-      for(unsigned int iEl = 0; iEl < cms2.els_p4().size(); iEl++){
-        if(cms2.els_p4().at(iEl).pt() < 10.0) continue;
-        if(fabs(cms2.els_p4().at(iEl).eta()) > 2.4) continue;
-        if(!isVetoElectron(iEl)) continue;
+      for(unsigned int iEl = 0; iEl < cms3.els_p4().size(); iEl++){
+        if(cms3.els_p4().at(iEl).pt() < 10.0) continue;
+        if(fabs(cms3.els_p4().at(iEl).eta()) > 2.4) continue;
+        if(!electronID(iEl,id_level_t::HAD_veto_v1)) continue;
         nElectrons10++;
-        lep_pt_ordering[cms2.els_p4().at(iEl).pt()] = nlep;
-        vec_lep_pt.push_back ( cms2.els_p4().at(iEl).pt());
-        vec_lep_eta.push_back ( cms2.els_p4().at(iEl).eta()); //save eta, even though we use SCeta for ID
-        vec_lep_phi.push_back ( cms2.els_p4().at(iEl).phi());
-        vec_lep_mass.push_back ( cms2.els_mass().at(iEl));
-        vec_lep_charge.push_back ( cms2.els_charge().at(iEl));
-        vec_lep_pdgId.push_back ( (-11)*cms2.els_charge().at(iEl));
-        vec_lep_dxy.push_back ( cms2.els_dxyPV().at(iEl));
-        vec_lep_dz.push_back ( cms2.els_dzPV().at(iEl));
-        vec_lep_tightId.push_back ( eleTightID(iEl));
-        vec_lep_relIso03.push_back (  eleRelIso03(iEl));
+        lep_pt_ordering[cms3.els_p4().at(iEl).pt()] = nlep;
+        vec_lep_pt.push_back ( cms3.els_p4().at(iEl).pt());
+        vec_lep_eta.push_back ( cms3.els_p4().at(iEl).eta()); //save eta, even though we use SCeta for ID
+        vec_lep_phi.push_back ( cms3.els_p4().at(iEl).phi());
+        vec_lep_mass.push_back ( cms3.els_mass().at(iEl));
+        vec_lep_charge.push_back ( cms3.els_charge().at(iEl));
+        vec_lep_pdgId.push_back ( (-11)*cms3.els_charge().at(iEl));
+        vec_lep_dxy.push_back ( cms3.els_dxyPV().at(iEl));
+        vec_lep_dz.push_back ( cms3.els_dzPV().at(iEl));
+        vec_lep_tightId.push_back ( eleTightID(iEl,analysis_t::HAD) );
+        vec_lep_relIso03.push_back (  eleRelIso03(iEl,analysis_t::HAD));
         vec_lep_relIso04.push_back ( 0);
-        if (cms2.els_mc3dr().at(iEl) < 0.2 && cms2.els_mc3idx().at(iEl) != -9999 && abs(cms2.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
-          int momid =  abs(genPart_motherId[cms2.els_mc3idx().at(iEl)]);
-          vec_lep_mcMatchId.push_back ( momid != 11 ? momid : genPart_grandmaId[cms2.els_mc3idx().at(iEl)]); // if mother is different store mother, otherwise store grandmother
+        if (cms3.els_mc3dr().at(iEl) < 0.2 && cms3.els_mc3idx().at(iEl) != -9999 && abs(cms3.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
+          int momid =  abs(genPart_motherId[cms3.els_mc3idx().at(iEl)]);
+          vec_lep_mcMatchId.push_back ( momid != 11 ? momid : genPart_grandmaId[cms3.els_mc3idx().at(iEl)]); // if mother is different store mother, otherwise store grandmother
         }
 	else vec_lep_mcMatchId.push_back (0);
 
-        vec_lep_lostHits.push_back ( cms2.els_exp_innerlayers().at(iEl)); //cms2.els_lost_pixelhits().at(iEl);
-        vec_lep_convVeto.push_back ( !cms2.els_conv_vtx_flag().at(iEl));
+        vec_lep_lostHits.push_back ( cms3.els_exp_innerlayers().at(iEl)); //cms3.els_lost_pixelhits().at(iEl);
+        vec_lep_convVeto.push_back ( !cms3.els_conv_vtx_flag().at(iEl));
         vec_lep_tightCharge.push_back ( tightChargeEle(iEl));
 
         nlep++;
 
 	// for mt2 and mht in lepton control region
-	p4sForHems.push_back(cms2.els_p4().at(iEl));
-	p4sForDphi.push_back(cms2.els_p4().at(iEl));
-	p4sLeptonsForJetCleaning.push_back(cms2.els_p4().at(iEl));
+	p4sForHems.push_back(cms3.els_p4().at(iEl));
+	p4sForDphi.push_back(cms3.els_p4().at(iEl));
+	p4sLeptonsForJetCleaning.push_back(cms3.els_p4().at(iEl));
 
       }
 
@@ -355,39 +365,38 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       //MUONS
       nMuons10 = 0;
-      for(unsigned int iMu = 0; iMu < cms2.mus_p4().size(); iMu++){
-        if(cms2.mus_p4().at(iMu).pt() < 10.0) continue;
-        if(fabs(cms2.mus_p4().at(iMu).eta()) > 2.4) continue;
-        if(!isLooseMuon(iMu)) continue;
-        if (muRelIso03(iMu) > 0.15) continue; // to avoid DR(jet,lepton) with leptons from b 
+      for(unsigned int iMu = 0; iMu < cms3.mus_p4().size(); iMu++){
+        if(cms3.mus_p4().at(iMu).pt() < 10.0) continue;
+        if(fabs(cms3.mus_p4().at(iMu).eta()) > 2.4) continue;
+        if(!muonID(iMu,id_level_t::HAD_loose_v1)) continue;
         nMuons10++;
-        lep_pt_ordering[cms2.mus_p4().at(iMu).pt()] = nlep;
-        vec_lep_pt.push_back ( cms2.mus_p4().at(iMu).pt());
-        vec_lep_eta.push_back ( cms2.mus_p4().at(iMu).eta());
-        vec_lep_phi.push_back ( cms2.mus_p4().at(iMu).phi());
-        vec_lep_mass.push_back ( cms2.mus_mass().at(iMu));
-        vec_lep_charge.push_back ( cms2.mus_charge().at(iMu));
-        vec_lep_pdgId.push_back ( (-13)*cms2.mus_charge().at(iMu));
-        vec_lep_dxy.push_back ( cms2.mus_dxyPV().at(iMu)); // this uses the silicon track. should we use best track instead?
-        vec_lep_dz.push_back ( cms2.mus_dzPV().at(iMu)); // this uses the silicon track. should we use best track instead?
-        vec_lep_tightId.push_back ( muTightID(iMu));
-        vec_lep_relIso03.push_back ( muRelIso03(iMu));
-        vec_lep_relIso04.push_back ( muRelIso04(iMu));
-        if (cms2.mus_mc3dr().at(iMu) < 0.2 && cms2.mus_mc3idx().at(iMu) != -9999 && abs(cms2.mus_mc3_id().at(iMu)) == 13) { // matched to a prunedGenParticle electron?
-          int momid =  abs(genPart_motherId[cms2.mus_mc3idx().at(iMu)]);
-          vec_lep_mcMatchId.push_back ( momid != 13 ? momid : genPart_grandmaId[cms2.mus_mc3idx().at(iMu)]); // if mother is different store mother, otherwise store grandmother
+        lep_pt_ordering[cms3.mus_p4().at(iMu).pt()] = nlep;
+        vec_lep_pt.push_back ( cms3.mus_p4().at(iMu).pt());
+        vec_lep_eta.push_back ( cms3.mus_p4().at(iMu).eta());
+        vec_lep_phi.push_back ( cms3.mus_p4().at(iMu).phi());
+        vec_lep_mass.push_back ( cms3.mus_mass().at(iMu));
+        vec_lep_charge.push_back ( cms3.mus_charge().at(iMu));
+        vec_lep_pdgId.push_back ( (-13)*cms3.mus_charge().at(iMu));
+        vec_lep_dxy.push_back ( cms3.mus_dxyPV().at(iMu)); // this uses the silicon track. should we use best track instead?
+        vec_lep_dz.push_back ( cms3.mus_dzPV().at(iMu)); // this uses the silicon track. should we use best track instead?
+        vec_lep_tightId.push_back ( muTightID(iMu,analysis_t::HAD) );
+        vec_lep_relIso03.push_back ( muRelIso03(iMu,analysis_t::HAD) );
+        vec_lep_relIso04.push_back ( muRelIso04(iMu,analysis_t::HAD) );
+        if (cms3.mus_mc3dr().at(iMu) < 0.2 && cms3.mus_mc3idx().at(iMu) != -9999 && abs(cms3.mus_mc3_id().at(iMu)) == 13) { // matched to a prunedGenParticle electron?
+          int momid =  abs(genPart_motherId[cms3.mus_mc3idx().at(iMu)]);
+          vec_lep_mcMatchId.push_back ( momid != 13 ? momid : genPart_grandmaId[cms3.mus_mc3idx().at(iMu)]); // if mother is different store mother, otherwise store grandmother
 	}
 	else vec_lep_mcMatchId.push_back (0);
-        vec_lep_lostHits.push_back ( cms2.mus_exp_innerlayers().at(iMu)); // use defaults as if "good electron"
+        vec_lep_lostHits.push_back ( cms3.mus_exp_innerlayers().at(iMu) ); // use defaults as if "good electron"
         vec_lep_convVeto.push_back ( 1);// use defaults as if "good electron"
-        vec_lep_tightCharge.push_back ( tightChargeMuon(iMu));
+        vec_lep_tightCharge.push_back ( tightChargeMuon(iMu) );
 
         nlep++;
 
 	// for mt2 and mht in lepton control region
-	p4sForHems.push_back(cms2.mus_p4().at(iMu));
-	p4sForDphi.push_back(cms2.mus_p4().at(iMu));
-	p4sLeptonsForJetCleaning.push_back(cms2.mus_p4().at(iMu));
+	p4sForHems.push_back(cms3.mus_p4().at(iMu));
+	p4sForDphi.push_back(cms3.mus_p4().at(iMu));
+	p4sLeptonsForJetCleaning.push_back(cms3.mus_p4().at(iMu));
       }
 
       // Implement pT ordering for leptons (it's irrelevant but easier for us to add than for ETH to remove)
@@ -460,17 +469,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       nPFHad10LowMT = 0;
       for (unsigned int ipf = 0; ipf < pfcands_p4().size(); ipf++) {
  
-        if(cms2.pfcands_charge().at(ipf) == 0) continue;
-        if(fabs(cms2.pfcands_dz().at(ipf)) > 0.1) continue;
+        if(cms3.pfcands_charge().at(ipf) == 0) continue;
+        if(fabs(cms3.pfcands_dz().at(ipf)) > 0.1) continue;
 
-        float cand_pt = cms2.pfcands_p4().at(ipf).pt();
+        float cand_pt = cms3.pfcands_p4().at(ipf).pt();
         if(cand_pt < 5) continue;
  
         float absiso  = TrackIso(ipf);
         if(absiso >= min(0.2*cand_pt, 8.0)) continue;
 
-	float mt = MT(cand_pt,cms2.pfcands_p4().at(ipf).phi(),met_pt,met_phi);
-	int pdgId = abs(cms2.pfcands_particleId().at(ipf));
+	float mt = MT(cand_pt,cms3.pfcands_p4().at(ipf).phi(),met_pt,met_phi);
+	int pdgId = abs(cms3.pfcands_particleId().at(ipf));
 
 	if ((cand_pt > 5.) && (pdgId == 11 || pdgId == 13) && (absiso/cand_pt < 0.2) && (mt < 100.)) {
 	  ++nPFLep5LowMT;
@@ -486,9 +495,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	    }
 	  } // loop over reco leps
 	  if (!overlap) {
-	    p4sForHems.push_back(cms2.pfcands_p4().at(ipf));
-	    p4sForDphi.push_back(cms2.pfcands_p4().at(ipf));
-	    p4sLeptonsForJetCleaning.push_back(cms2.pfcands_p4().at(ipf));
+	    p4sForHems.push_back(cms3.pfcands_p4().at(ipf));
+	    p4sForDphi.push_back(cms3.pfcands_p4().at(ipf));
+	    p4sLeptonsForJetCleaning.push_back(cms3.pfcands_p4().at(ipf));
 	  }
 	} 
 
@@ -497,12 +506,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         pt_ordering[cand_pt] = nisoTrack;
 
         vec_isoTrack_pt.push_back    ( cand_pt                          );
-        vec_isoTrack_eta.push_back   ( cms2.pfcands_p4().at(ipf).eta()  );
-        vec_isoTrack_phi.push_back   ( cms2.pfcands_p4().at(ipf).phi()  );
-        vec_isoTrack_mass.push_back  ( cms2.pfcands_mass().at(ipf)      );
+        vec_isoTrack_eta.push_back   ( cms3.pfcands_p4().at(ipf).eta()  );
+        vec_isoTrack_phi.push_back   ( cms3.pfcands_p4().at(ipf).phi()  );
+        vec_isoTrack_mass.push_back  ( cms3.pfcands_mass().at(ipf)      );
         vec_isoTrack_absIso.push_back( absiso                           );
-        vec_isoTrack_dz.push_back    ( cms2.pfcands_dz().at(ipf)        );
-        vec_isoTrack_pdgId.push_back ( cms2.pfcands_particleId().at(ipf));
+        vec_isoTrack_dz.push_back    ( cms3.pfcands_dz().at(ipf)        );
+        vec_isoTrack_pdgId.push_back ( cms3.pfcands_particleId().at(ipf));
         vec_isoTrack_mcMatchId.push_back ( 0 );
 
         nisoTrack++;
@@ -536,43 +545,43 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       // to recalculate MET adding photons
       float gamma_met_px  = met_pt * cos(met_phi);
       float gamma_met_py  = met_pt * sin(met_phi);
-      for(unsigned int iGamma = 0; iGamma < cms2.photons_p4().size(); iGamma++){
-        if(cms2.photons_p4().at(iGamma).pt() < 20.0) continue;
-        if(fabs(cms2.photons_p4().at(iGamma).eta()) > 2.5) continue;
-	if ( !isLoosePhoton(iGamma) ) continue;
+      for(unsigned int iGamma = 0; iGamma < cms3.photons_p4().size(); iGamma++){
+        if(cms3.photons_p4().at(iGamma).pt() < 20.0) continue;
+        if(fabs(cms3.photons_p4().at(iGamma).eta()) > 2.5) continue;
+	if ( !isLoosePhoton(iGamma,analysis_t::HAD) ) continue;
 
 	if (ngamma >= max_ngamma) {
           std::cout << "WARNING: attempted to fill more than " << max_ngamma << " photons" << std::endl;
 	  break;
 	}
 
-	float pt = cms2.photons_p4().at(iGamma).pt();
-	float eta = cms2.photons_p4().at(iGamma).eta();
-	float phi = cms2.photons_p4().at(iGamma).phi();
+	float pt = cms3.photons_p4().at(iGamma).pt();
+	float eta = cms3.photons_p4().at(iGamma).eta();
+	float phi = cms3.photons_p4().at(iGamma).phi();
         gamma_pt[ngamma]   = pt;
         gamma_eta[ngamma]  = eta;
         gamma_phi[ngamma]  = phi;
-        gamma_mass[ngamma] = cms2.photons_mass().at(iGamma);
-        gamma_sigmaIetaIeta[ngamma] = cms2.photons_full5x5_sigmaIEtaIEta().at(iGamma);
+        gamma_mass[ngamma] = cms3.photons_mass().at(iGamma);
+        gamma_sigmaIetaIeta[ngamma] = cms3.photons_full5x5_sigmaIEtaIEta().at(iGamma);
         gamma_chHadIso[ngamma] = photons_chargedHadronIso().at(iGamma);
         gamma_neuHadIso[ngamma] = photons_neutralHadronIso().at(iGamma);
         gamma_phIso[ngamma] = photons_photonIso().at(iGamma);
         gamma_r9[ngamma] =  photons_full5x5_r9().at(iGamma);
         gamma_hOverE[ngamma] =  photons_full5x5_hOverEtowBC().at(iGamma);
-        gamma_idCutBased[ngamma] =  isTightPhoton(iGamma) ? 1 : 0; 
+        gamma_idCutBased[ngamma] =  isTightPhoton(iGamma,analysis_t::HAD) ? 1 : 0; 
         if(gamma_pt[ngamma] > 20) nGammas20++;
 	
 	// Some work for truth-matching (should be integrated in CMS3 as for the leptons)
 	int bestMatch = -1;
 	float bestDr = 0.1;
-	for(unsigned int iGen = 0; iGen < cms2.genps_p4().size(); iGen++){
-	  if (cms2.genps_id().at(iGen) != 22) continue; 
-	  if (cms2.genps_status().at(iGen) != 1) continue; 
-	  if (fabs(cms2.genps_id_simplemother().at(iGen)) > 22) continue; // pions etc 
-	  if ( fabs(eta - cms2.genps_p4().at(iGen).eta()) > 0.1) continue;
-	  if ( pt > 2*cms2.genps_p4().at(iGen).pt() ) continue;
-	  if ( pt < 0.5*cms2.genps_p4().at(iGen).pt() ) continue;
-          float thisDR = DeltaR( cms2.genps_p4().at(iGen).eta(), eta, cms2.genps_p4().at(iGen).phi(), phi);
+	for(unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++){
+	  if (cms3.genps_id().at(iGen) != 22) continue; 
+	  if (cms3.genps_status().at(iGen) != 1) continue; 
+	  if (fabs(cms3.genps_id_simplemother().at(iGen)) > 22) continue; // pions etc 
+	  if ( fabs(eta - cms3.genps_p4().at(iGen).eta()) > 0.1) continue;
+	  if ( pt > 2*cms3.genps_p4().at(iGen).pt() ) continue;
+	  if ( pt < 0.5*cms3.genps_p4().at(iGen).pt() ) continue;
+          float thisDR = DeltaR( cms3.genps_p4().at(iGen).eta(), eta, cms3.genps_p4().at(iGen).phi(), phi);
 	  if (thisDR < bestDr) {
 	    bestDr = thisDR;
 	    bestMatch = iGen;
@@ -580,8 +589,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	}
 	if (bestMatch != -1) {
 	  // 7 is a special code for photons without a mother. this seems to be due to a miniAOD bug where links are broken.
-	  gamma_mcMatchId[ngamma] = cms2.genps_id_simplemother().at(bestMatch) == 0 ? 7 : 22; 
-	  gamma_genIso[ngamma] = cms2.genps_iso().at(bestMatch);
+	  gamma_mcMatchId[ngamma] = cms3.genps_id_simplemother().at(bestMatch) == 0 ? 7 : 22; 
+	  gamma_genIso[ngamma] = cms3.genps_iso().at(bestMatch);
 	}
 	else {
 	  gamma_mcMatchId[ngamma] = 0;
@@ -590,12 +599,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
    
 	// for photon+jets control regions
 	if (nGammas20==1) { // Only use the leading Loose photon. Otherwise mt2 will be affected by a bunch of tiny photons
-	  gamma_met_px += cms2.photons_p4().at(iGamma).px();
-	  gamma_met_py += cms2.photons_p4().at(iGamma).py();
+	  gamma_met_px += cms3.photons_p4().at(iGamma).px();
+	  gamma_met_py += cms3.photons_p4().at(iGamma).py();
 	}
 	// do not use photon in MT2 or MHT calculations!!
-	//p4sForHemsGamma.push_back(cms2.photons_p4().at(iGamma));
-	//p4sForDphiGamma.push_back(cms2.photons_p4().at(iGamma));
+	//p4sForHemsGamma.push_back(cms3.photons_p4().at(iGamma));
+	//p4sForDphiGamma.push_back(cms3.photons_p4().at(iGamma));
         
         ngamma++;
       }
@@ -610,14 +619,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       //JETS
       //before we start, check that no genGet is matched to multiple recoJets
       //vector<float> pTofMatchedGenJets;
-      //for(unsigned int iJet = 0; iJet < cms2.pfjets_p4().size(); iJet++){
-      //  if(cms2.pfjets_p4().at(iJet).pt() < 10.0) continue;
-      //  if(fabs(cms2.pfjets_p4().at(iJet).eta()) > 5.2) continue;
-      //	float matchedPt = cms2.pfjets_mc_p4().at(iJet).pt();
+      //for(unsigned int iJet = 0; iJet < cms3.pfjets_p4().size(); iJet++){
+      //  if(cms3.pfjets_p4().at(iJet).pt() < 10.0) continue;
+      //  if(fabs(cms3.pfjets_p4().at(iJet).eta()) > 5.2) continue;
+      //	float matchedPt = cms3.pfjets_mc_p4().at(iJet).pt();
       //	if (matchedPt!=0) {
       //	  if ( find( pTofMatchedGenJets.begin(), pTofMatchedGenJets.end(), matchedPt  ) != pTofMatchedGenJets.end() ) {
       //	    cout<<" This genJetPt is identical to one that was already matched to another reco jet of higher pT. Need to find another match"<<endl;
-      //	    cout<<"event"<<evt_event()<<" jet pT: "<<cms2.pfjets_p4().at(iJet).pt()<<" genJetPt: "<<matchedPt<<endl;
+      //	    cout<<"event"<<evt_event()<<" jet pT: "<<cms3.pfjets_p4().at(iJet).pt()<<" genJetPt: "<<matchedPt<<endl;
       //	  }
       //	  else {
       //	    pTofMatchedGenJets.push_back( matchedPt );
@@ -628,18 +637,18 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       //correct jets and check baseline selections
       vector<LorentzVector> p4sCorrJets; // store corrected p4 for ALL jets, so indices match CMS3 ntuple
       vector<int> passJets; //index of jets that pass baseline selections
-      for(unsigned int iJet = 0; iJet < cms2.pfjets_p4().size(); iJet++){
+      for(unsigned int iJet = 0; iJet < cms3.pfjets_p4().size(); iJet++){
 
-	LorentzVector pfjet_p4_cor = cms2.pfjets_p4().at(iJet);
+	LorentzVector pfjet_p4_cor = cms3.pfjets_p4().at(iJet);
 
 	if (applyJECfromFile) {
 
 	  // get uncorrected jet p4 to use as input for corrections
-	  LorentzVector pfjet_p4_uncor = cms2.pfjets_p4().at(iJet) * cms2.pfjets_undoJEC().at(iJet);
+	  LorentzVector pfjet_p4_uncor = cms3.pfjets_p4().at(iJet) * cms3.pfjets_undoJEC().at(iJet);
 
 	  // get L1FastL2L3Residual total correction
-	  jet_corrector_pfL1FastJetL2L3->setRho   ( cms2.evt_fixgridfastjet_all_rho() );
-	  jet_corrector_pfL1FastJetL2L3->setJetA  ( cms2.pfjets_area().at(iJet)       );
+	  jet_corrector_pfL1FastJetL2L3->setRho   ( cms3.evt_fixgridfastjet_all_rho() );
+	  jet_corrector_pfL1FastJetL2L3->setJetA  ( cms3.pfjets_area().at(iJet)       );
 	  jet_corrector_pfL1FastJetL2L3->setJetPt ( pfjet_p4_uncor.pt()               );
 	  jet_corrector_pfL1FastJetL2L3->setJetEta( pfjet_p4_uncor.eta()              );
 	  double corr = jet_corrector_pfL1FastJetL2L3->getCorrection();
@@ -766,13 +775,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         jet_pt[njet]   = p4sCorrJets.at(iJet).pt();
         jet_eta[njet]  = p4sCorrJets.at(iJet).eta();
         jet_phi[njet]  = p4sCorrJets.at(iJet).phi();
-        jet_mass[njet] = cms2.pfjets_mass().at(iJet);
-        jet_btagCSV[njet] = cms2.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet); 
-        jet_mcPt[njet] = cms2.pfjets_mc_p4().at(iJet).pt();
-        jet_mcFlavour[njet] = cms2.pfjets_partonFlavour().at(iJet);
+        jet_mass[njet] = cms3.pfjets_mass().at(iJet);
+        jet_btagCSV[njet] = cms3.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet); 
+        jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
+        jet_mcFlavour[njet] = cms3.pfjets_partonFlavour().at(iJet);
         //jet_quarkGluonID
-        jet_area[njet] = cms2.pfjets_area().at(iJet);
-	jet_rawPt[njet] = cms2.pfjets_p4().at(iJet).pt() * cms2.pfjets_undoJEC().at(iJet);
+        jet_area[njet] = cms3.pfjets_area().at(iJet);
+	jet_rawPt[njet] = cms3.pfjets_p4().at(iJet).pt() * cms3.pfjets_undoJEC().at(iJet);
 
         if(isTightPFJet(iJet))  jet_id[njet] = 3;
         else if(isMediumPFJet(iJet)) jet_id[njet] = 2;
@@ -818,7 +827,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	    p4sForHemsGamma.push_back(p4sCorrJets.at(iJet));
 	    p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
 	    gamma_nJet40++;
-	    if(cms2.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.814) { //CSVv2IVFM
+	    if(cms3.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.814) { //CSVv2IVFM
 	      gamma_nBJet40++; 
 	      float mt = MT( p4sCorrJets.at(iJet).pt(),p4sCorrJets.at(iJet).phi(),gamma_met_pt,gamma_met_phi);
 	      if (mt < gamma_minMTBMet) gamma_minMTBMet = mt;	 
@@ -962,10 +971,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       
       //GEN MT2
       vector<LorentzVector> goodGenJets;
-      for(unsigned int iGenJet=0; iGenJet < cms2.genjets_p4NoMuNoNu().size(); iGenJet++){
-        if(cms2.genjets_p4NoMuNoNu().at(iGenJet).pt() < 40.0) continue;
-        if(fabs(cms2.genjets_p4NoMuNoNu().at(iGenJet).eta()) > 2.5) continue;
-        goodGenJets.push_back(cms2.genjets_p4NoMuNoNu().at(iGenJet));
+      for(unsigned int iGenJet=0; iGenJet < cms3.genjets_p4NoMuNoNu().size(); iGenJet++){
+        if(cms3.genjets_p4NoMuNoNu().at(iGenJet).pt() < 40.0) continue;
+        if(fabs(cms3.genjets_p4NoMuNoNu().at(iGenJet).eta()) > 2.5) continue;
+        goodGenJets.push_back(cms3.genjets_p4NoMuNoNu().at(iGenJet));
       }
       if(goodGenJets.size() > 1){
         hemJets = getHemJets(goodGenJets);  
@@ -978,30 +987,30 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       //TAUS
       ntau = 0;
       nTaus20 = 0;
-      for(unsigned int iTau = 0; iTau < cms2.taus_pf_p4().size(); iTau++){
-        if(cms2.taus_pf_p4().at(iTau).pt() < 20.0) continue; 
-        if(fabs(cms2.taus_pf_p4().at(iTau).eta()) > 2.3) continue; 
-	      if (!cms2.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) continue; // HPS3 hits taus
-	      if (!cms2.taus_pf_againstElectronLoose().at(iTau)) continue; // loose electron rejection 
-	      if (!cms2.taus_pf_againstMuonTight().at(iTau)) continue; // loose muon rejection 
+      for(unsigned int iTau = 0; iTau < cms3.taus_pf_p4().size(); iTau++){
+        if(cms3.taus_pf_p4().at(iTau).pt() < 20.0) continue; 
+        if(fabs(cms3.taus_pf_p4().at(iTau).eta()) > 2.3) continue; 
+	      if (!cms3.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) continue; // HPS3 hits taus
+	      if (!cms3.taus_pf_againstElectronLoose().at(iTau)) continue; // loose electron rejection 
+	      if (!cms3.taus_pf_againstMuonTight().at(iTau)) continue; // loose muon rejection 
         
 	if (ntau >= max_ntau) {
           std::cout << "WARNING: attempted to fill more than " << max_ntau << " taus" << std::endl;
 	  break;
 	}
 
-        tau_pt[ntau]   = cms2.taus_pf_p4().at(iTau).pt();
-        tau_eta[ntau]  = cms2.taus_pf_p4().at(iTau).eta();
-        tau_phi[ntau]  = cms2.taus_pf_p4().at(iTau).phi();
-        tau_mass[ntau] = cms2.taus_pf_mass().at(iTau);
-        tau_charge[ntau] = cms2.taus_pf_charge().at(iTau);
+        tau_pt[ntau]   = cms3.taus_pf_p4().at(iTau).pt();
+        tau_eta[ntau]  = cms3.taus_pf_p4().at(iTau).eta();
+        tau_phi[ntau]  = cms3.taus_pf_p4().at(iTau).phi();
+        tau_mass[ntau] = cms3.taus_pf_mass().at(iTau);
+        tau_charge[ntau] = cms3.taus_pf_charge().at(iTau);
         tau_dxy[ntau] = 0; // could use the tau->dxy() function instead, but not sure what it does
         tau_dz[ntau] = 0; // not sure how to get this. 
-        tau_isoCI3hit[ntau] = cms2.taus_pf_byCombinedIsolationDeltaBetaCorrRaw3Hits().at(iTau);
+        tau_isoCI3hit[ntau] = cms3.taus_pf_byCombinedIsolationDeltaBetaCorrRaw3Hits().at(iTau);
         int temp = 0;
-        if (cms2.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 1;
-        if (cms2.taus_pf_byMediumCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 2;
-        if (cms2.taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 3;
+        if (cms3.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 1;
+        if (cms3.taus_pf_byMediumCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 2;
+        if (cms3.taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 3;
         tau_idCI3hit[ntau] = temp;
         if(tau_pt[ntau] > 20) nTaus20++;
         //tau_mcMatchId[ntau] = ; // Have to do this by hand unless we want to add tau_mc branches in CMS3 through the CandToGenAssMaker

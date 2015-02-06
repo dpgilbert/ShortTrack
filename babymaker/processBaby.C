@@ -51,6 +51,8 @@ void processBaby( TString outfileid = "tt_test", TString infile = "/hadoop/cms/s
 
   // these libraries should be in babymaker dir after build
   gSystem->Load("libMiniFWLite.so");
+  gSystem->Load("libBabymakerCORE.so");
+  gSystem->Load("libBabymakerTools.so");
   gSystem->Load("libBabymakerMT2CORE.so");
   gSystem->Load("libScanChain.so");
 

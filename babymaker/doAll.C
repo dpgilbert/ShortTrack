@@ -1,6 +1,8 @@
 {
 
   gSystem->Load("libMiniFWLite.so");
+  gSystem->Load("libBabymakerCORE.so");
+  gSystem->Load("libBabymakerTools.so");
   gSystem->Load("libBabymakerMT2CORE.so");
   gSystem->Load("libScanChain.so");
 

@@ -10,7 +10,9 @@ cmsrel CMSSW_7_0_6_patch1
 cd CMSSW_7_0_6_patch1/src
 cmsenv
 cd ../..
+git clone git@github.com:cmstas/CORE.git
 git clone git@github.com:cmstas/Tools.git
+git clone git@github.com:cmstas/Software.git
 cd babymaker
 make
 
