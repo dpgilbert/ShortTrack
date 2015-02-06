@@ -25,6 +25,20 @@ bool suppressZeroBins = true;
 bool iteration1 = false; // Here we try to get realistic statistical errors from control region statistics
                          // To use this option, first run the ZinvMaker.C and lostlepMaker.C
 
+std::string toString(int in){
+  stringstream ss;
+  ss << in;
+  return ss.str();
+}
+
+void ReplaceString(std::string& subject, const std::string& search, const std::string& replace) {
+    size_t pos = 0;
+    while((pos = subject.find(search, pos)) != std::string::npos) {
+         subject.replace(pos, search.length(), replace);
+         pos += replace.length();
+    }
+}
+
 //_______________________________________________________________________________
 void printCard( string dir_str , int mt2bin , string signal, string output_dir) {
 
@@ -33,8 +47,6 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   TString dir = TString(dir_str);
   TString fullhistname = dir + "/h_mt2bins";
   TString fullhistnameStat  = fullhistname+"Stat";
-
-  TString cardname = Form("%s/card_%s_m%d_%s.txt",output_dir.c_str(),dir.Data(),mt2bin,signal.c_str());
 
   double n_lostlep(0.);
   double n_lostlep_tr(0.);
@@ -48,6 +60,47 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
 
   TH1D* h_sig = (TH1D*) f_sig->Get(fullhistname);
   if (h_sig != 0) n_sig = h_sig->GetBinContent(mt2bin);
+  else return;
+
+  //Get variable boundaries for signal region.
+  //Used to create datacard name.
+  TH1D* h_ht_LOW = (TH1D*) f_sig->Get(dir+"/h_ht_LOW");
+  TH1D* h_ht_UP = (TH1D*) f_sig->Get(dir+"/h_ht_UP");
+  int ht_LOW = h_ht_LOW->GetBinContent(1);
+  int ht_UP = h_ht_UP->GetBinContent(1);
+  
+  TH1D* h_nbjets_LOW = (TH1D*) f_sig->Get(dir+"/h_nbjets_LOW");
+  TH1D* h_nbjets_UP = (TH1D*) f_sig->Get(dir+"/h_nbjets_UP");
+  int nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
+  int nbjets_UP = h_nbjets_UP->GetBinContent(1);
+
+  TH1D* h_njets_LOW = (TH1D*) f_sig->Get(dir+"/h_njets_LOW");
+  TH1D* h_njets_UP = (TH1D*) f_sig->Get(dir+"/h_njets_UP");
+  int njets_LOW = h_njets_LOW->GetBinContent(1);
+  int njets_UP = h_njets_UP->GetBinContent(1);
+
+  TH1D* h_lowMT_LOW = (TH1D*) f_sig->Get(dir+"/h_lowMT_LOW");
+  TH1D* h_lowMT_UP = (TH1D*) f_sig->Get(dir+"/h_lowMT_UP");
+  int lowMT_LOW = h_lowMT_LOW->GetBinContent(1);
+  int lowMT_UP = h_lowMT_UP->GetBinContent(1);
+
+  int mt2_LOW = h_sig->GetBinLowEdge(mt2bin);
+  int mt2_UP = mt2_LOW + h_sig->GetBinWidth(mt2bin);
+
+  std::string ht_str = "HT" + toString(ht_LOW) + "to" + toString(ht_UP);
+  std::string jet_str = ((njets_UP - njets_LOW) == 1) ? "j" + toString(njets_LOW) : "j" + toString(njets_LOW) + "to" + toString(njets_UP);
+  std::string bjet_str = ((nbjets_UP - nbjets_LOW) == 1) ? "b" + toString(nbjets_LOW) : "b" + toString(nbjets_LOW) + "to" + toString(nbjets_UP);
+  std::string mt2_str = "m" + toString(mt2_LOW) + "to" + toString(mt2_UP);
+  std::string minMT_str;
+  if(lowMT_LOW == 1) minMT_str = "loMT_";
+  else if(lowMT_UP == 1) minMT_str = "hiMT_";
+  else minMT_str = "";
+  std::string channel = ht_str + "_" + jet_str + "_" + bjet_str + "_" + minMT_str + mt2_str;
+  
+  //Replace instances of "-1" with "inf" for variables with no upper bound.
+  ReplaceString(channel, "-1", "inf");
+
+  TString cardname = Form("%s/datacard_%s_%s.txt",output_dir.c_str(),channel.c_str(),signal.c_str());
 
   if (suppressZeroBins && n_sig < 0.01) {
     std::cout << "Zero signal, card not printed: " << cardname << std::endl;
@@ -129,12 +182,6 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   // uncorrelated across TRs and MT2 bins
   double zinv_mcsyst = -1.;
   TString name_zinv_mcsyst = Form("ZINV_MCSYST_%s_m%d",dir.Data(),mt2bin);
-
-  //get nbjets boundaries for signal region
-  TH1D* h_nbjets_LOW = (TH1D*) f_sig->Get(dir+"/h_nbjets_LOW");
-  TH1D* h_nbjets_UP = (TH1D*) f_sig->Get(dir+"/h_nbjets_UP");
-  int nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
-  int nbjets_UP = h_nbjets_UP->GetBinContent(1);
 
   // 2+b: pure MC estimate
   //if (sr == 3 || sr == 4 || sr >= 7) {
@@ -223,12 +270,12 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
 TString getCorrelatedSLCRs(const TString& dir) {
 
   //get minMTBMet boundaries
-  TH1D* h_minMTBMet_LOW = (TH1D*) f_sig->Get(dir+"/h_minMTBMet_LOW");
-  TH1D* h_minMTBMet_UP = (TH1D*) f_sig->Get(dir+"/h_minMTBMet_UP");
-  int minMTBMet_LOW = h_minMTBMet_LOW->GetBinContent(1);
-  int minMTBMet_UP = h_minMTBMet_UP->GetBinContent(1);
+  TH1D* h_lowMT_LOW = (TH1D*) f_sig->Get(dir+"/h_lowMT_LOW");
+  TH1D* h_lowMT_UP = (TH1D*) f_sig->Get(dir+"/h_lowMT_UP");
+  int lowMT_LOW = h_lowMT_LOW->GetBinContent(1);
+  int lowMT_UP = h_lowMT_UP->GetBinContent(1);
 
-  if(minMTBMet_LOW == 0 && minMTBMet_UP == -1) return dir; //this SR is not split by minMTBMet
+  if(lowMT_LOW == 0 && lowMT_UP == -1) return dir; //this SR is not split by minMTBMet
 
   char* str = dir; 
   std::string first;//this piece is just "sr"
@@ -256,7 +303,7 @@ TString getCorrelatedSLCRs(const TString& dir) {
 
   //assume that lowMT region comes before highMT region
   stringstream ss;
-  if(minMTBMet_UP == 200) ss << sr_after;
+  if(lowMT_LOW == 1) ss << sr_after;
   else ss << sr_before;
 
   std::string srB = ss.str();
