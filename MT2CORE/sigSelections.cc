@@ -128,80 +128,70 @@ std::vector<SR> getSignalRegions2015LowLumi(){//used for AN-15-009
   sr.SetName("1");
   sr.SetVar("njets", 2, 4);
   sr.SetVar("nbjets", 0, 1);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("2");
   sr.SetVar("njets", 2, 4);
   sr.SetVar("nbjets", 1, 2);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("3");
   sr.SetVar("njets", 2, 4);
   sr.SetVar("nbjets", 2, 3);
-  sr.SetVar("minMTBMet", 0, 200);
-  sr.SetVar("mt2", 200, 400);
+  sr.SetVar("lowMT", 1, 2);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("4");
   sr.SetVar("njets", 2, 4);
   sr.SetVar("nbjets", 2, 3);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, 1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("5");
   sr.SetVar("njets", 4, -1);
   sr.SetVar("nbjets", 0, 1);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("6");
   sr.SetVar("njets", 4, -1);
   sr.SetVar("nbjets", 1, 2);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("7");
   sr.SetVar("njets", 4, -1);
   sr.SetVar("nbjets", 2, 3);
-  sr.SetVar("minMTBMet", 0, 200);
-  sr.SetVar("mt2", 200, 400);
+  sr.SetVar("lowMT", 1, 2);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("8");
   sr.SetVar("njets", 4, -1);
   sr.SetVar("nbjets", 2, 3);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, 1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("9");
   sr.SetVar("njets", 2, -1);
   sr.SetVar("nbjets", 3, -1);
-  sr.SetVar("minMTBMet", 0, 200);
-  sr.SetVar("mt2", 200, 400);
+  sr.SetVar("lowMT", 1, 2);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("10");
   sr.SetVar("njets", 2, -1);
   sr.SetVar("nbjets", 3, -1);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, 1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
@@ -229,7 +219,7 @@ std::vector<SR> getSignalRegions2015LowLumi(){//used for AN-15-009
   }
 
   //define baseline selections commmon to all signal regions 
-  //baseSR.SetVar("mt2", 200, -1);
+  baseSR.SetVar("mt2", 200, -1);
   baseSR.SetVar("j1pt", 100, -1);
   baseSR.SetVar("j2pt", 100, -1);
   baseSR.SetVar("deltaPhiMin", 0.3, -1);
@@ -261,160 +251,140 @@ std::vector<SR> getSignalRegions2015ExtendedNJets(){
   sr.SetName("1");
   sr.SetVar("njets", 2, 4);
   sr.SetVar("nbjets", 0, 1);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("2");
   sr.SetVar("njets", 2, 4);
   sr.SetVar("nbjets", 1, 2);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("3");
   sr.SetVar("njets", 2, 4);
   sr.SetVar("nbjets", 2, 3);
-  sr.SetVar("minMTBMet", 0, 200);
-  sr.SetVar("mt2", 200, 400);
+  sr.SetVar("lowMT", 1, 2);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("4");
   sr.SetVar("njets", 2, 4);
   sr.SetVar("nbjets", 2, 3);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, 1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("5");
   sr.SetVar("njets", 4, 7);
   sr.SetVar("nbjets", 0, 1);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("6");
   sr.SetVar("njets", 4, 7);
   sr.SetVar("nbjets", 1, 2);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("7");
   sr.SetVar("njets", 4, 7);
   sr.SetVar("nbjets", 2, 3);
-  sr.SetVar("minMTBMet", 0, 200);
-  sr.SetVar("mt2", 200, 400);
+  sr.SetVar("lowMT", 1, 2);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("8");
   sr.SetVar("njets", 4, 7);
   sr.SetVar("nbjets", 2, 3);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, 1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("9");
   sr.SetVar("njets", 7, 8);
   sr.SetVar("nbjets", 0, 1);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("10");
   sr.SetVar("njets", 7, 8);
   sr.SetVar("nbjets", 1, 2);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("11");
   sr.SetVar("njets", 7, 8);
   sr.SetVar("nbjets", 2, 3);
-  sr.SetVar("minMTBMet", 0, 200);
-  sr.SetVar("mt2", 200, 400);
+  sr.SetVar("lowMT", 1, 2);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("12");
   sr.SetVar("njets", 7, 8);
   sr.SetVar("nbjets", 2, 3);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, 1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("13");
   sr.SetVar("njets", 9, -1);
   sr.SetVar("nbjets", 0, 1);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("14");
   sr.SetVar("njets", 9, -1);
   sr.SetVar("nbjets", 1, 2);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("15");
   sr.SetVar("njets", 9, -1);
   sr.SetVar("nbjets", 2, 3);
-  sr.SetVar("minMTBMet", 0, 200);
-  sr.SetVar("mt2", 200, 400);
+  sr.SetVar("lowMT", 1, 2);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("16");
   sr.SetVar("njets", 9, -1);
   sr.SetVar("nbjets", 2, 3);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, 1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("17");
   sr.SetVar("njets", 2, 7);
   sr.SetVar("nbjets", 3, -1);
-  sr.SetVar("minMTBMet", 0, 200);
-  sr.SetVar("mt2", 200, 400);
+  sr.SetVar("lowMT", 1, 2);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("18");
   sr.SetVar("njets", 2, 7);
   sr.SetVar("nbjets", 3, -1);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, 1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("19");
   sr.SetVar("njets", 7, -1);
   sr.SetVar("nbjets", 3, -1);
-  sr.SetVar("minMTBMet", 0, 200);
-  sr.SetVar("mt2", 200, 400);
+  sr.SetVar("lowMT", 1, 2);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("20");
   sr.SetVar("njets", 7, -1);
   sr.SetVar("nbjets", 3, -1);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
+  sr.SetVar("lowMT", 0, 1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
@@ -443,7 +413,7 @@ std::vector<SR> getSignalRegions2015ExtendedNJets(){
   }
 
   //define baseline selections commmon to all signal regions 
-  //baseSR.SetVar("mt2", 200, -1);
+  baseSR.SetVar("mt2", 200, -1);
   baseSR.SetVar("j1pt", 100, -1);
   baseSR.SetVar("j2pt", 100, -1);
   baseSR.SetVar("deltaPhiMin", 0.3, -1);

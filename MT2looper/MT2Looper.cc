@@ -461,7 +461,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
   values["j2pt"]        = t.jet_pt[1];
   values["njets"]       = t.nJet40;
   values["nbjets"]      = t.nBJet40;
-  values["minMTBMet"]   = t.minMTBMet;
+  values["lowMT"]       = (t.minMTBMet < 200. && t.mt2 < 400.);
   values["mt2"]         = t.mt2;
   values["ht"]          = t.ht;
   values["met"]         = t.met_pt;
@@ -491,7 +491,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   values["j2pt"]        = t.jet_pt[1];
   values["njets"]       = t.nJet40;
   values["nbjets"]      = t.nBJet40;
-  values["minMTBMet"]   = t.minMTBMet;
+  values["lowMT"]       = (t.minMTBMet < 200. && t.mt2 < 400.);
   values["mt2"]         = t.mt2;
   values["ht"]          = t.ht;
   values["met"]         = t.met_pt;
@@ -527,7 +527,7 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const int jetIdx0, con
   values["j2pt"]        = t.jet_pt[jetIdx1];
   values["njets"]       = t.gamma_nJet40;
   values["nbjets"]      = t.gamma_nBJet40;
-  values["minMTBMet"]   = t.gamma_minMTBMet;
+  values["lowMT"]       = (t.gamma_minMTBMet < 200. && t.gamma_mt2 < 400.);
   values["mt2"]         = t.gamma_mt2;
   values["ht"]          = t.gamma_ht;
   values["met"]         = t.gamma_met_pt;
@@ -555,7 +555,7 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   values["j2pt"]        = t.jet_pt[1];
   values["njets"]       = t.nJet40;
   values["nbjets"]      = t.nBJet40;
-  values["minMTBMet"]   = t.zll_minMTBMet;
+  values["lowMT"]       = (t.zll_minMTBMet < 200. && t.zll_mt2 < 400.);
   values["mt2"]         = t.zll_mt2;
   values["ht"]          = t.zll_ht;
   values["met"]         = t.zll_met_pt;
