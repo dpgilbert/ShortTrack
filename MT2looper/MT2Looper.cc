@@ -45,129 +45,7 @@ MT2Looper::~MT2Looper(){
 
 void MT2Looper::SetSignalRegions(){
 
-  std::vector<SR> temp_SR_vec;
-  SR sr;
-
-  //first set binning in njet-nbjet plane
-  sr.SetName("1");
-  sr.SetVar("njets", 2, 4);
-  sr.SetVar("nbjets", 0, 1);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("2");
-  sr.SetVar("njets", 2, 4);
-  sr.SetVar("nbjets", 1, 2);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("3");
-  sr.SetVar("njets", 2, 4);
-  sr.SetVar("nbjets", 2, 3);
-  sr.SetVar("minMTBMet", 0, 200);
-  sr.SetVar("mt2", 200, 400);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("4");
-  sr.SetVar("njets", 2, 4);
-  sr.SetVar("nbjets", 2, 3);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("5");
-  sr.SetVar("njets", 4, -1);
-  sr.SetVar("nbjets", 0, 1);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("6");
-  sr.SetVar("njets", 4, -1);
-  sr.SetVar("nbjets", 1, 2);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("7");
-  sr.SetVar("njets", 4, -1);
-  sr.SetVar("nbjets", 2, 3);
-  sr.SetVar("minMTBMet", 0, 200);
-  sr.SetVar("mt2", 200, 400);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("8");
-  sr.SetVar("njets", 4, -1);
-  sr.SetVar("nbjets", 2, 3);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("9");
-  sr.SetVar("njets", 2, -1);
-  sr.SetVar("nbjets", 3, -1);
-  sr.SetVar("minMTBMet", 0, 200);
-  sr.SetVar("mt2", 200, 400);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("10");
-  sr.SetVar("njets", 2, -1);
-  sr.SetVar("nbjets", 3, -1);
-  sr.SetVar("minMTBMet", 0, -1);
-  sr.SetVar("mt2", 200, -1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  //add HT and MET requirements
-  for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
-    SR fullSR = temp_SR_vec.at(iSR);  
-    fullSR.SetName(fullSR.GetName() + "L");
-    fullSR.SetVar("ht", 450, 575);
-    fullSR.SetVar("met", 200, -1);
-    SRVec.push_back(fullSR);
-  }
-  for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
-    SR fullSR = temp_SR_vec.at(iSR);  
-    fullSR.SetName(fullSR.GetName() + "M");
-    fullSR.SetVar("ht", 575, 1000);
-    fullSR.SetVar("met", 200, -1);
-    SRVec.push_back(fullSR);
-  }
-  for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
-    SR fullSR = temp_SR_vec.at(iSR);  
-    fullSR.SetName(fullSR.GetName() + "H");
-    fullSR.SetVar("ht", 1000, -1);
-    fullSR.SetVar("met", 30, -1);
-    SRVec.push_back(fullSR);
-  }
-
-  //define baseline selections commmon to all signal regions 
-  //baseSR.SetVar("mt2", 200, -1);
-  baseSR.SetVar("j1pt", 100, -1);
-  baseSR.SetVar("j2pt", 100, -1);
-  baseSR.SetVar("deltaPhiMin", 0.3, -1);
-  baseSR.SetVar("diffMetMhtOverMet", 0, 0.5);
-  baseSR.SetVar("nlep", 0, 1);
-  //baseSR.SetVar("passesHtMet", 1, 1);
-
-  //add baseline selections to all signal regions 
-  std::vector<std::string> vars = baseSR.GetListOfVariables();
-  for(unsigned int i = 0; i < SRVec.size(); i++){
-    for(unsigned int j = 0; j < vars.size(); j++){
-      SRVec.at(i).SetVar(vars.at(j), baseSR.GetLowerBound(vars.at(j)), baseSR.GetUpperBound(vars.at(j)));
-    }
-  }
+  SRVec = getSignalRegions2015LowLumi();
 
   //store histograms with cut values for all variables
   for(unsigned int i = 0; i < SRVec.size(); i++){
@@ -287,7 +165,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       // basic event selection and cleaning
       //---------------------
 
-      if (!PassesEventSelection(SignalRegionVersion::sel2012, t.nVert)) continue;
+      if (t.nVert == 0) continue;
 
       // remove low pt QCD samples 
       if (t.evt_id >= 100 && t.evt_id < 108) continue;
@@ -608,7 +486,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
-  //values["nlep"]        = nlepveto_; //not needed for this CR
+  values["nlep"]        = 0; //dummy value
   values["j1pt"]        = t.jet_pt[0];
   values["j2pt"]        = t.jet_pt[1];
   values["njets"]       = t.nJet40;

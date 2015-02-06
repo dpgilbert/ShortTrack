@@ -1,3 +1,6 @@
+#ifndef SR_h
+#define SR_h
+
 #include <string>
 #include <map>
 #include <vector>
@@ -40,3 +43,5 @@ class SR {
     std::map<std::string, std::pair<float, float> > bins_;
 
 };
+
+#endif

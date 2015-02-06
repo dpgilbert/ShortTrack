@@ -2,207 +2,141 @@
 
 namespace mt2 {
 
-    //_________________________________________
-    // passes basic event selection, including cleaning cuts
-    bool PassesEventSelection
-    (
-        const SignalRegionVersion::value_type& version,
-        const int nvtx
-    )
-    {
+std::vector<SR> getSignalRegions2012(){
 
-      if (version == SignalRegionVersion::sel2012) {
-	if (nvtx == 0) return false;
-	// need to add: "cleaning cuts against instrumental effects" (section 7.3 of 2012 MT2 AN)
-      }
+}
 
-      else if (version == SignalRegionVersion::sel2015LowLumi) {
-	if (nvtx == 0) return false;
-	// need to add: "cleaning cuts against instrumental effects" (section 7.3 of 2012 MT2 AN)
-      }
+std::vector<SR> getSignalRegions2015LowLumi(){//used for AN-15-009
 
-      return true;
+  std::vector<SR> temp_SR_vec;
+  std::vector<SR> SRVec;
+  SR sr;
+  SR baseSR;
+
+  //first set binning in njet-nbjet plane
+  sr.SetName("1");
+  sr.SetVar("njets", 2, 4);
+  sr.SetVar("nbjets", 0, 1);
+  sr.SetVar("minMTBMet", 0, -1);
+  sr.SetVar("mt2", 200, -1);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("2");
+  sr.SetVar("njets", 2, 4);
+  sr.SetVar("nbjets", 1, 2);
+  sr.SetVar("minMTBMet", 0, -1);
+  sr.SetVar("mt2", 200, -1);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("3");
+  sr.SetVar("njets", 2, 4);
+  sr.SetVar("nbjets", 2, 3);
+  sr.SetVar("minMTBMet", 0, 200);
+  sr.SetVar("mt2", 200, 400);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("4");
+  sr.SetVar("njets", 2, 4);
+  sr.SetVar("nbjets", 2, 3);
+  sr.SetVar("minMTBMet", 0, -1);
+  sr.SetVar("mt2", 200, -1);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("5");
+  sr.SetVar("njets", 4, -1);
+  sr.SetVar("nbjets", 0, 1);
+  sr.SetVar("minMTBMet", 0, -1);
+  sr.SetVar("mt2", 200, -1);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("6");
+  sr.SetVar("njets", 4, -1);
+  sr.SetVar("nbjets", 1, 2);
+  sr.SetVar("minMTBMet", 0, -1);
+  sr.SetVar("mt2", 200, -1);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("7");
+  sr.SetVar("njets", 4, -1);
+  sr.SetVar("nbjets", 2, 3);
+  sr.SetVar("minMTBMet", 0, 200);
+  sr.SetVar("mt2", 200, 400);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("8");
+  sr.SetVar("njets", 4, -1);
+  sr.SetVar("nbjets", 2, 3);
+  sr.SetVar("minMTBMet", 0, -1);
+  sr.SetVar("mt2", 200, -1);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("9");
+  sr.SetVar("njets", 2, -1);
+  sr.SetVar("nbjets", 3, -1);
+  sr.SetVar("minMTBMet", 0, 200);
+  sr.SetVar("mt2", 200, 400);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("10");
+  sr.SetVar("njets", 2, -1);
+  sr.SetVar("nbjets", 3, -1);
+  sr.SetVar("minMTBMet", 0, -1);
+  sr.SetVar("mt2", 200, -1);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  //add HT and MET requirements
+  for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
+    SR fullSR = temp_SR_vec.at(iSR);  
+    fullSR.SetName(fullSR.GetName() + "L");
+    fullSR.SetVar("ht", 450, 575);
+    fullSR.SetVar("met", 200, -1);
+    SRVec.push_back(fullSR);
+  }
+  for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
+    SR fullSR = temp_SR_vec.at(iSR);  
+    fullSR.SetName(fullSR.GetName() + "M");
+    fullSR.SetVar("ht", 575, 1000);
+    fullSR.SetVar("met", 200, -1);
+    SRVec.push_back(fullSR);
+  }
+  for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
+    SR fullSR = temp_SR_vec.at(iSR);  
+    fullSR.SetName(fullSR.GetName() + "H");
+    fullSR.SetVar("ht", 1000, -1);
+    fullSR.SetVar("met", 30, -1);
+    SRVec.push_back(fullSR);
+  }
+
+  //define baseline selections commmon to all signal regions 
+  //baseSR.SetVar("mt2", 200, -1);
+  baseSR.SetVar("j1pt", 100, -1);
+  baseSR.SetVar("j2pt", 100, -1);
+  baseSR.SetVar("deltaPhiMin", 0.3, -1);
+  baseSR.SetVar("diffMetMhtOverMet", 0, 0.5);
+  baseSR.SetVar("nlep", 0, 1);
+  //baseSR.SetVar("passesHtMet", 1, 1);
+
+  //add baseline selections to all signal regions 
+  std::vector<std::string> vars = baseSR.GetListOfVariables();
+  for(unsigned int i = 0; i < SRVec.size(); i++){
+    for(unsigned int j = 0; j < vars.size(); j++){
+      SRVec.at(i).SetVar(vars.at(j), baseSR.GetLowerBound(vars.at(j)), baseSR.GetUpperBound(vars.at(j)));
     }
+  }
 
-    //_________________________________________
-    // passes signal region
-    bool PassesSignalRegion
-    (
-        const SignalRegionVersion::value_type& version,
-        const float mt2,
-        const float met,
-        const float ht,
-        const int njets,
-        const int nbtag,
-        const float deltaPhiMin,
-        const float diffMetMht,
-        const float minMTBMet,
-        const int nlep,
-        const float j1pt,
-        const float j2pt,
-        const SignalRegionJets::value_type& sr_jets,
-        const SignalRegionHtMet::value_type& sr_htmet
-    )
-    {
-      if (!PassesSignalRegionBase(version, mt2, met, ht, njets, deltaPhiMin, diffMetMht, j1pt, j2pt)) return false;
-      if (nlep > 0) return false;
-      if (sr_jets != SignalRegionJets::nocut) {
-	SignalRegionJets::value_type passed_sr_jets = PassesSignalRegionJets(version, njets, nbtag, minMTBMet, mt2);
-	if (sr_jets <= SignalRegionJets::sr10 && passed_sr_jets != sr_jets) return false;
-	// W control region: at least 2 jets (implicit), bveto
-	else if ((sr_jets == SignalRegionJets::crw) && (nbtag > 0)) return false;
-	// ttbar control region: at least 4 jets, at least 1 btag
-	else if ((sr_jets == SignalRegionJets::crtt) && (njets < 4 || nbtag < 1)) return false;
-      }
-      if ((sr_htmet != SignalRegionHtMet::nocut) && (PassesSignalRegionHtMet(version, met, ht) != sr_htmet)) return false;
-      return true;
-    }
+  return SRVec;
 
-    //_________________________________________
-    // passes signal region, no lepton veto applied
-    bool PassesSignalRegionNoLepVeto
-    (
-        const SignalRegionVersion::value_type& version,
-        const float mt2,
-        const float met,
-        const float ht,
-        const int njets,
-        const int nbtag,
-        const float deltaPhiMin,
-        const float diffMetMht,
-        const float minMTBMet,
-        const float j1pt,
-        const float j2pt,
-        const SignalRegionJets::value_type& sr_jets,
-        const SignalRegionHtMet::value_type& sr_htmet
-    )
-    {
-      if (!PassesSignalRegionBase(version, mt2, met, ht, njets, deltaPhiMin, diffMetMht, j1pt, j2pt)) return false;
-      if (sr_jets != SignalRegionJets::nocut) {
-	SignalRegionJets::value_type passed_sr_jets = PassesSignalRegionJets(version, njets, nbtag, minMTBMet, mt2);
-	if (sr_jets <= SignalRegionJets::sr10 && passed_sr_jets != sr_jets) return false;
-	// W control region: at least 2 jets (implicit), bveto
-	else if ((sr_jets == SignalRegionJets::crw) && (nbtag > 0)) return false;
-	// ttbar control region: at least 4 jets, at least 1 btag
-	else if ((sr_jets == SignalRegionJets::crtt) && (njets < 4 || nbtag < 1)) return false;
-      }
-      if ((sr_htmet != SignalRegionHtMet::nocut) && (PassesSignalRegionHtMet(version, met, ht) != sr_htmet)) return false;
-      return true;
-    }
-
-    //_________________________________________
-    // passes signal region: baseline cuts
-    bool PassesSignalRegionBase
-    (
-        const SignalRegionVersion::value_type& version,
-        const float mt2,
-        const float met,
-        const float ht,
-        const int njets,
-        const float deltaPhiMin,
-        const float diffMetMht,
-        const float j1pt,
-        const float j2pt
-    )
-    {
-
-      if (version == SignalRegionVersion::sel2012) {
-	bool ht450 = ht > 450. && met > 200.;
-	bool ht750 = ht > 750. && met > 30.;     
-	bool dijet100 = njets>=2 && j1pt > 100. && j2pt > 100.;
-	bool cleaning = deltaPhiMin > 0.3 && diffMetMht < 70.; 
-	bool baseline = (cleaning && dijet100 && (ht450 || ht750));
-	return baseline;
-      }
-      else if (version == SignalRegionVersion::sel2015LowLumi) {
-	bool mt2_200 = mt2 > 200.;
-	bool ht450 = ht > 450. && met > 200.;
-	bool ht1000 = ht > 1000. && met > 30.;     
-	bool dijet100 = njets>=2 && j1pt > 100. && j2pt > 100.;
-	bool cleaning = deltaPhiMin > 0.3 && diffMetMht/met < 0.5; 
-	bool baseline = (cleaning && dijet100 && (ht450 || ht1000) && mt2_200);
-	return baseline;
-      }
-
-      // shouldn't get here
-      return false;
-    }
-
-    //_________________________________________
-    // passes signal region: jet counting cuts
-    SignalRegionJets::value_type PassesSignalRegionJets
-    (
-        const SignalRegionVersion::value_type& version,
-        const int njets,
-        const int nbtag,
-        const float minMTBMet,
-        const float mt2
-    )
-    {
-
-      if (version == SignalRegionVersion::sel2012) {
-	if (njets==2 && nbtag==0) return SignalRegionJets::sr1; //2j, 0b
-	else if (njets==2 && (nbtag==1 || nbtag==2)) return SignalRegionJets::sr2;//2j, 1-2 b
-	else if (njets>2 && njets<6 && nbtag==0 ) return SignalRegionJets::sr3;//3-5j, 0b
-	else if (njets>2 && njets<6 && nbtag==1 ) return SignalRegionJets::sr4;//3-5j, 1b
-	else if (njets>2 && njets<6 && nbtag==2 ) return SignalRegionJets::sr5;//3-5j, 2b
-	else if (njets>=6 && nbtag==0 ) return SignalRegionJets::sr6;//6j, 0b
-	else if (njets>=6 && nbtag==1 ) return SignalRegionJets::sr7;//6j, 1b
-	else if (njets>=6 && nbtag==2 ) return SignalRegionJets::sr8;//6j, 2b
-	else if (njets>=3 && nbtag>=3 ) return SignalRegionJets::sr9;//3j, 3b                    
-
-      }
-
-      else if (version == SignalRegionVersion::sel2015LowLumi) {
-	if ((njets==2 || njets==3) && nbtag==0) return SignalRegionJets::sr1; //2-3j, 0b
-	else if ((njets==2 || njets==3) && nbtag==1) return SignalRegionJets::sr2;//2-3j, 1b
-	else if ((njets==2 || njets==3) && nbtag==2) { //2-3j, 2b
-	  if (minMTBMet < 200. && mt2 < 400.) return SignalRegionJets::sr3;
-	  else return SignalRegionJets::sr4;
-	}
-	else if (njets>=4 && nbtag==0 ) return SignalRegionJets::sr5;//4+j, 0b
-	else if (njets>=4 && nbtag==1 ) return SignalRegionJets::sr6;//4+j, 1b
-	else if (njets>=4 && nbtag==2 ) {//4+j, 2b
-	  if (minMTBMet < 200. && mt2 < 400.) return SignalRegionJets::sr7;
-	  else return SignalRegionJets::sr8;
-	}
-	else if (njets>=2 && nbtag>=3 ) {//2+j, 3+b
-	  if (minMTBMet < 200. && mt2 < 400.) return SignalRegionJets::sr9;
-	  else return SignalRegionJets::sr10;
-	}
-      }
-
-      // doesn't pass any of the regions above.. shouldn't happen
-      return SignalRegionJets::nocut;
-
-    }
-
-    //_________________________________________
-    // passes signal region: HT and MET cuts
-    SignalRegionHtMet::value_type PassesSignalRegionHtMet
-    (
-        const SignalRegionVersion::value_type& version,
-        const float met,
-        const float ht
-    )
-    {
-      if (version == SignalRegionVersion::sel2012) {
-	if (met < 30. || ht < 450.) return SignalRegionHtMet::nocut;
-	if (ht > 1200.) return SignalRegionHtMet::h_ht;
-	else if (ht > 750.) return SignalRegionHtMet::m_ht;
-	else if (ht > 450. && met > 200.) return SignalRegionHtMet::l_ht;
-      }
-      else if (version == SignalRegionVersion::sel2015LowLumi) {
-	if (met < 30. || ht < 450.) return SignalRegionHtMet::nocut;
-	if (ht > 1000.) return SignalRegionHtMet::h_ht;
-	else if (ht > 575.) return SignalRegionHtMet::m_ht;
-	else if (ht > 450. && met > 200.) return SignalRegionHtMet::l_ht;
-      }
-
-      // doesn't pass any of the regions above.. shouldn't happen
-      return SignalRegionHtMet::nocut;
-    }
-
+}
 
 
 } // namespace mt2
