@@ -87,12 +87,14 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   int mt2_LOW = h_sig->GetBinLowEdge(mt2bin);
   int mt2_UP = mt2_LOW + h_sig->GetBinWidth(mt2bin);
 
-  if(nbjets_UP != -1) nbjets_UP--;
-  if(njets_UP != -1) njets_UP--;
+  int nbjets_UP_mod = nbjets_UP;
+  int njets_UP_mod = njets_UP;
+  if(nbjets_UP != -1) nbjets_UP_mod--;
+  if(njets_UP != -1) njets_UP_mod--;
 
   std::string ht_str = "HT" + toString(ht_LOW) + "to" + toString(ht_UP);
-  std::string jet_str = (njets_UP == njets_LOW) ? "j" + toString(njets_LOW) : "j" + toString(njets_LOW) + "to" + toString(njets_UP);
-  std::string bjet_str = (nbjets_UP == nbjets_LOW) ? "b" + toString(nbjets_LOW) : "b" + toString(nbjets_LOW) + "to" + toString(nbjets_UP);
+  std::string jet_str = (njets_UP_mod == njets_LOW) ? "j" + toString(njets_LOW) : "j" + toString(njets_LOW) + "to" + toString(njets_UP_mod);
+  std::string bjet_str = (nbjets_UP_mod == nbjets_LOW) ? "b" + toString(nbjets_LOW) : "b" + toString(nbjets_LOW) + "to" + toString(nbjets_UP_mod);
   std::string mt2_str = "m" + toString(mt2_LOW) + "to" + toString(mt2_UP);
   std::string minMT_str;
   if(lowMT_LOW == 1) minMT_str = "loMT_";
@@ -193,13 +195,11 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   TString name_zinv_mcsyst = Form("zinv_MC_%s",channel.c_str());
 
   // 2+b: pure MC estimate
-  //if (sr == 3 || sr == 4 || sr >= 7) {
   if (nbjets_LOW >= 2) {
     zinv_mcsyst = 2.;
     ++n_syst;
   }
   // 1b: data CR with 0->1b sf
-  //else if (sr == 2 || sr == 6) {
   else if (nbjets_LOW == 1 && nbjets_UP == 2) {
     if (n_zinv > 0.) {
       if (iteration1) zinv_crstat = 1. + 1.*err_zinv_stat;
@@ -212,7 +212,6 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
     n_syst += 3;
   }
   // 0b: data CR
-  //else if (sr == 1 || sr == 5) {
   else if (nbjets_UP == 1) {
     if (n_zinv > 0.) {
       if (iteration1) zinv_crstat = 1. + 1.*err_zinv_stat;
@@ -248,19 +247,15 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   *ofile <<  Form("rate            %.2f    %.2f     %.2f    %.2f",n_sig,n_lostlep,n_zinv,n_qcd) << endl;
   *ofile <<  "------------"                                                                  << endl;
   *ofile <<  Form("sig_syst              lnN   %.2f    -      -     -     uncertainty on signal",sig_syst)  << endl;
-  //if (sr == 1 || sr == 5 || sr == 2 || sr == 6) {
   if (nbjets_UP == 1 || nbjets_UP == 2) {
     *ofile <<  Form("%s  lnN    -      -    %.3f   -     zinv CR stats",name_zinv_crstat.Data(),zinv_crstat)  << endl;
   }
-  //if (sr == 1 || sr == 5 || sr == 2 || sr == 6) {
   if (nbjets_UP == 1 || nbjets_UP == 2) {
     *ofile <<  Form("%s          lnN    -      -    %.2f    -     zinv Z/gamma ratio",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;
   }
-  //if (sr == 2 || sr == 6) {
-  else if (nbjets_LOW == 1 && nbjets_UP == 2) {
+  if (nbjets_LOW == 1 && nbjets_UP == 2) {
     *ofile <<  Form("%s     lnN    -      -    %.2f    -     zinv 0/1b ratio",name_zinv_bratio.Data(),zinv_bratio)  << endl;
   }
-  //if (sr == 3 || sr == 4 || sr >= 7) {
   if (nbjets_LOW >= 2) {
     *ofile <<  Form("%s  lnN    -      -    %.2f    -     zinv MC syst",name_zinv_mcsyst.Data(),zinv_mcsyst)  << endl;
   }
