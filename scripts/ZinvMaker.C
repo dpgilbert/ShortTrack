@@ -34,15 +34,15 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fQCD, vector<string
 
     TString fullhistname = directory + "/h_mt2bins";
     TString fullhistnameGJ = directoryGJ + "/h_mt2bins";
-    // If Zinv or GJet histograms are not filled, just leave (shouldn't happen when running on full stat MC)
-    if(fGJet->GetDirectory(directoryGJ.Data())->GetKey("h_mt2bins")==0 ||
-       fZinv->GetDirectory(directory.Data())->GetKey("h_mt2bins")==0 ) {
-      cout<<"could not find histogram "<<fullhistname<<endl;
-      continue;
-    }
 
     TH1D* hGJet = (TH1D*) fGJet->Get(fullhistnameGJ);    
     TH1D* hZinv = (TH1D*) fZinv->Get(fullhistname);    
+
+    // If Zinv or GJet histograms are not filled, just leave (shouldn't happen when running on full stat MC)
+    if(!hGJet || !hZinv){
+      cout<<"could not find histogram "<<fullhistname<<endl;
+      continue;
+    }
     
     if (hGJet->GetNbinsX() != hZinv->GetNbinsX() ) {
       cout<<"different binning for histograms "<<fullhistname<<endl;
@@ -116,15 +116,15 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
 
     TString fullhistname = directory + "/h_mt2bins";
     TString fullhistnameDY = directoryDY + "/h_mt2bins";
-    // If Zinv or DY histograms are not filled, just leave (shouldn't happen when running on full stat MC)
-    if(fDY->GetDirectory(directoryDY.Data())->GetKey("h_mt2bins")==0 ||
-       fZinv->GetDirectory(directory.Data())->GetKey("h_mt2bins")==0 ) {
-      cout<<"could not find histogram "<<fullhistname<<endl;
-      continue;
-    }
 
     TH1D* hDY = (TH1D*) fDY->Get(fullhistnameDY);    
     TH1D* hZinv = (TH1D*) fZinv->Get(fullhistname);    
+    
+    // If Zinv or DY histograms are not filled, just leave (shouldn't happen when running on full stat MC)
+    if(!hDY || !hZinv){
+      cout<<"could not find histogram "<<fullhistname<<endl;
+      continue;
+    }
     
     if (hDY->GetNbinsX() != hZinv->GetNbinsX() ) {
       cout<<"different binning for histograms "<<fullhistname<<endl;
@@ -186,7 +186,8 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
 void ZinvMaker(){
 
   //  string input_dir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-00-07_sel2015LowLumi/";
-  string input_dir = "../MT2looper/output/2015LowLumi/";
+  string input_dir = "../MT2looper/output/2015ExtendedNJets/";
+  //string input_dir = "../MT2looper/output/2015LowLumi/";
   string output_name = input_dir+"zinvFromGJ.root";
   // ----------------------------------------
   //  samples definition

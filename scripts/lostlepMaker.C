@@ -38,15 +38,16 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
       fullhistnamesSL.push_back(directoriesSL.at(icr)+"/h_mt2bins");
     }
 
+    TH1D* httbar_sr = (TH1D*) fttbar->Get(fullhistname);
+    TH1D* hwjets_sr = (TH1D*) fwjets->Get(fullhistname);
+    
     // If both ttbar and wjets SR histograms are not filled, just leave (shouldn't happen when running on full stat MC)
-    if(fttbar->GetDirectory(directory.Data())->GetKey("h_mt2bins")==0 &&
-       fwjets->GetDirectory(directory.Data())->GetKey("h_mt2bins")==0 ) {
+    if(!httbar_sr && !hwjets_sr){
       cout<<"could not find histogram "<<fullhistname<<endl;
       continue;
     }
 
-    TH1D* httbar_sr = (TH1D*) fttbar->Get(fullhistname);
-    TH1D* hwjets_sr = (TH1D*) fwjets->Get(fullhistname);
+
     TH1D* hlostlep_sr = (TH1D*) httbar_sr->Clone("h_mt2binsSR");
     hlostlep_sr->Add(hwjets_sr);
 
@@ -170,7 +171,8 @@ vector<TString> getCRsToCombine(const string& dir) {
 //_______________________________________________________________________________
 void lostlepMaker(){
 
-  string input_dir = "../MT2looper/output/2015LowLumi/";
+  string input_dir = "../MT2looper/output/2015ExtendedNJets/";
+  //string input_dir = "../MT2looper/output/2015LowLumi/";
   //  string input_dir = "../MT2looper/output/test/";
   string output_name = input_dir+"lostlepFromCRs.root";
   // ----------------------------------------
