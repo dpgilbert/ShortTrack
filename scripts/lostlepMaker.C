@@ -170,7 +170,7 @@ vector<TString> getCRsToCombine(const string& dir) {
 //_______________________________________________________________________________
 void lostlepMaker(){
 
-  string input_dir = "/home/users/olivito/mt2_babymaker/MT2Analysis/MT2looper/output/V00-00-08_4fb/";
+  string input_dir = "../MT2looper/output/2015LowLumi/";
   //  string input_dir = "../MT2looper/output/test/";
   string output_name = input_dir+"lostlepFromCRs.root";
   // ----------------------------------------
@@ -183,36 +183,22 @@ void lostlepMaker(){
   //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
 
   vector<string> dirs;
-  dirs.push_back("1L");
-  dirs.push_back("2L");
-  dirs.push_back("3L");
-  dirs.push_back("4L");
-  dirs.push_back("5L");
-  dirs.push_back("6L");
-  dirs.push_back("7L");
-  dirs.push_back("8L");
-  dirs.push_back("9L");
-  dirs.push_back("10L");
-  dirs.push_back("1M");
-  dirs.push_back("2M");
-  dirs.push_back("3M");
-  dirs.push_back("4M");
-  dirs.push_back("5M");
-  dirs.push_back("6M");
-  dirs.push_back("7M");
-  dirs.push_back("8M");
-  dirs.push_back("9M");
-  dirs.push_back("10M");
-  dirs.push_back("1H");
-  dirs.push_back("2H");
-  dirs.push_back("3H");
-  dirs.push_back("4H");
-  dirs.push_back("5H");
-  dirs.push_back("6H");
-  dirs.push_back("7H");
-  dirs.push_back("8H");
-  dirs.push_back("9H");
-  dirs.push_back("10H");
+
+  //Loop through list of every directory in the signal file.
+  //if directory begins with "sr", excluding "srbase", add it to vector signal regions.
+  TIter it(f_ttbar->GetListOfKeys());
+  TKey* k;
+  std::string keep = "sr";
+  std::string skip = "srbase";
+  while (k = (TKey *)it()) {
+    if (k->GetTitle() == "srbase") continue;
+    if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
+    if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
+      std::string sr_string = k->GetTitle();
+      sr_string.erase(0, 2);//remove "sr" from front of string
+      dirs.push_back(sr_string);
+    }
+  }
 
   makeLostLepFromCRs( f_ttbar , f_wjets , dirs, output_name, 0 );
 

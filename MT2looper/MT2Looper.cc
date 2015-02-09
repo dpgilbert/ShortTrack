@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <set>
+#include <cmath>
 
 // ROOT
 #include "TDirectory.h"
@@ -29,6 +30,7 @@ using namespace std;
 using namespace mt2;
 
 class mt2tree;
+class SR;
 
 // mt2 binning for results
 const int n_mt2bins = 5;
@@ -36,11 +38,32 @@ const float mt2bins[n_mt2bins+1] = {200., 300., 400., 600., 1000., 1500.};
 const std::string mt2binsname[n_mt2bins+1] = {"200", "300", "400", "600", "1000", "1500"};
 
 MT2Looper::MT2Looper(){
-  // set some stuff here
 }
 MT2Looper::~MT2Looper(){
 
 };
+
+void MT2Looper::SetSignalRegions(){
+
+  SRVec = getSignalRegions2015LowLumi();
+
+  //store histograms with cut values for all variables
+  for(unsigned int i = 0; i < SRVec.size(); i++){
+    std::vector<std::string> vars = SRVec.at(i).GetListOfVariables();
+    TDirectory * dir = (TDirectory*)outfile_->Get(("sr"+SRVec.at(i).GetName()).c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir(("sr"+SRVec.at(i).GetName()).c_str());
+    } 
+    dir->cd();
+    for(unsigned int j = 0; j < vars.size(); j++){
+      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).srHistMap, "", 1, 0, 2);
+      plot1D("h_"+vars.at(j)+"_"+"UP",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).srHistMap, "", 1, 0, 2);
+    }
+    outfile_->cd();
+  }
+
+}
+
 
 void MT2Looper::loop(TChain* chain, std::string output_name){
 
@@ -55,302 +78,28 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
   cout << "[MT2Looper::loop] setting up histos" << endl;
 
-  std::vector< std::string > regions;
-  std::vector< SignalRegionJets::value_type > srJets;
-  std::vector< SignalRegionHtMet::value_type > srHtMet;
-  regions.push_back("1H");  srJets.push_back(SignalRegionJets::sr1);  srHtMet.push_back(SignalRegionHtMet::h_ht);
-  regions.push_back("2H");  srJets.push_back(SignalRegionJets::sr2);  srHtMet.push_back(SignalRegionHtMet::h_ht);
-  regions.push_back("3H");  srJets.push_back(SignalRegionJets::sr3);  srHtMet.push_back(SignalRegionHtMet::h_ht);
-  regions.push_back("4H");  srJets.push_back(SignalRegionJets::sr4);  srHtMet.push_back(SignalRegionHtMet::h_ht);
-  regions.push_back("5H");  srJets.push_back(SignalRegionJets::sr5);  srHtMet.push_back(SignalRegionHtMet::h_ht);
-  regions.push_back("6H");  srJets.push_back(SignalRegionJets::sr6);  srHtMet.push_back(SignalRegionHtMet::h_ht);
-  regions.push_back("7H");  srJets.push_back(SignalRegionJets::sr7);  srHtMet.push_back(SignalRegionHtMet::h_ht);
-  regions.push_back("8H");  srJets.push_back(SignalRegionJets::sr8);  srHtMet.push_back(SignalRegionHtMet::h_ht);
-  regions.push_back("9H");  srJets.push_back(SignalRegionJets::sr9);  srHtMet.push_back(SignalRegionHtMet::h_ht);
-  regions.push_back("10H"); srJets.push_back(SignalRegionJets::sr10); srHtMet.push_back(SignalRegionHtMet::h_ht);
-  regions.push_back("1M");  srJets.push_back(SignalRegionJets::sr1);  srHtMet.push_back(SignalRegionHtMet::m_ht);
-  regions.push_back("2M");  srJets.push_back(SignalRegionJets::sr2);  srHtMet.push_back(SignalRegionHtMet::m_ht);
-  regions.push_back("3M");  srJets.push_back(SignalRegionJets::sr3);  srHtMet.push_back(SignalRegionHtMet::m_ht);
-  regions.push_back("4M");  srJets.push_back(SignalRegionJets::sr4);  srHtMet.push_back(SignalRegionHtMet::m_ht);
-  regions.push_back("5M");  srJets.push_back(SignalRegionJets::sr5);  srHtMet.push_back(SignalRegionHtMet::m_ht);
-  regions.push_back("6M");  srJets.push_back(SignalRegionJets::sr6);  srHtMet.push_back(SignalRegionHtMet::m_ht);
-  regions.push_back("7M");  srJets.push_back(SignalRegionJets::sr7);  srHtMet.push_back(SignalRegionHtMet::m_ht);
-  regions.push_back("8M");  srJets.push_back(SignalRegionJets::sr8);  srHtMet.push_back(SignalRegionHtMet::m_ht);
-  regions.push_back("9M");  srJets.push_back(SignalRegionJets::sr9);  srHtMet.push_back(SignalRegionHtMet::m_ht);
-  regions.push_back("10M"); srJets.push_back(SignalRegionJets::sr10); srHtMet.push_back(SignalRegionHtMet::m_ht);
-  regions.push_back("1L");  srJets.push_back(SignalRegionJets::sr1);  srHtMet.push_back(SignalRegionHtMet::l_ht);
-  regions.push_back("2L");  srJets.push_back(SignalRegionJets::sr2);  srHtMet.push_back(SignalRegionHtMet::l_ht);
-  regions.push_back("3L");  srJets.push_back(SignalRegionJets::sr3);  srHtMet.push_back(SignalRegionHtMet::l_ht);
-  regions.push_back("4L");  srJets.push_back(SignalRegionJets::sr4);  srHtMet.push_back(SignalRegionHtMet::l_ht);
-  regions.push_back("5L");  srJets.push_back(SignalRegionJets::sr5);  srHtMet.push_back(SignalRegionHtMet::l_ht);
-  regions.push_back("6L");  srJets.push_back(SignalRegionJets::sr6);  srHtMet.push_back(SignalRegionHtMet::l_ht);
-  regions.push_back("7L");  srJets.push_back(SignalRegionJets::sr7);  srHtMet.push_back(SignalRegionHtMet::l_ht);
-  regions.push_back("8L");  srJets.push_back(SignalRegionJets::sr8);  srHtMet.push_back(SignalRegionHtMet::l_ht);
-  regions.push_back("9L");  srJets.push_back(SignalRegionJets::sr9);  srHtMet.push_back(SignalRegionHtMet::l_ht);
-  regions.push_back("10L"); srJets.push_back(SignalRegionJets::sr10); srHtMet.push_back(SignalRegionHtMet::l_ht);
-  regions.push_back("H");   srJets.push_back(SignalRegionJets::nocut); srHtMet.push_back(SignalRegionHtMet::h_ht);
-  regions.push_back("M");   srJets.push_back(SignalRegionJets::nocut); srHtMet.push_back(SignalRegionHtMet::m_ht);
-  regions.push_back("L");   srJets.push_back(SignalRegionJets::nocut); srHtMet.push_back(SignalRegionHtMet::l_ht);
+  SetSignalRegions();
 
-
+/*
   std::map<std::string, TH1D*> h_1d_nocut;
   std::map<std::string, TH1D*> h_1d_srbase;
-
-  std::vector< std::map<std::string, TH1D*> > h_1d_sr_v;
-  std::map<std::string, TH1D*> h_1d_sr1H;  h_1d_sr_v.push_back(h_1d_sr1H);  
-  std::map<std::string, TH1D*> h_1d_sr2H;  h_1d_sr_v.push_back(h_1d_sr2H);  
-  std::map<std::string, TH1D*> h_1d_sr3H;  h_1d_sr_v.push_back(h_1d_sr3H);  
-  std::map<std::string, TH1D*> h_1d_sr4H;  h_1d_sr_v.push_back(h_1d_sr4H);  
-  std::map<std::string, TH1D*> h_1d_sr5H;  h_1d_sr_v.push_back(h_1d_sr5H);  
-  std::map<std::string, TH1D*> h_1d_sr6H;  h_1d_sr_v.push_back(h_1d_sr6H);  
-  std::map<std::string, TH1D*> h_1d_sr7H;  h_1d_sr_v.push_back(h_1d_sr7H);  
-  std::map<std::string, TH1D*> h_1d_sr8H;  h_1d_sr_v.push_back(h_1d_sr8H);  
-  std::map<std::string, TH1D*> h_1d_sr9H;  h_1d_sr_v.push_back(h_1d_sr9H);  
-  std::map<std::string, TH1D*> h_1d_sr10H; h_1d_sr_v.push_back(h_1d_sr10H); 
-  std::map<std::string, TH1D*> h_1d_sr1M;  h_1d_sr_v.push_back(h_1d_sr1M);  
-  std::map<std::string, TH1D*> h_1d_sr2M;  h_1d_sr_v.push_back(h_1d_sr2M);  
-  std::map<std::string, TH1D*> h_1d_sr3M;  h_1d_sr_v.push_back(h_1d_sr3M);  
-  std::map<std::string, TH1D*> h_1d_sr4M;  h_1d_sr_v.push_back(h_1d_sr4M);  
-  std::map<std::string, TH1D*> h_1d_sr5M;  h_1d_sr_v.push_back(h_1d_sr5M);  
-  std::map<std::string, TH1D*> h_1d_sr6M;  h_1d_sr_v.push_back(h_1d_sr6M);  
-  std::map<std::string, TH1D*> h_1d_sr7M;  h_1d_sr_v.push_back(h_1d_sr7M);  
-  std::map<std::string, TH1D*> h_1d_sr8M;  h_1d_sr_v.push_back(h_1d_sr8M);  
-  std::map<std::string, TH1D*> h_1d_sr9M;  h_1d_sr_v.push_back(h_1d_sr9M);  
-  std::map<std::string, TH1D*> h_1d_sr10M; h_1d_sr_v.push_back(h_1d_sr10M); 
-  std::map<std::string, TH1D*> h_1d_sr1L;  h_1d_sr_v.push_back(h_1d_sr1L);  
-  std::map<std::string, TH1D*> h_1d_sr2L;  h_1d_sr_v.push_back(h_1d_sr2L);  
-  std::map<std::string, TH1D*> h_1d_sr3L;  h_1d_sr_v.push_back(h_1d_sr3L);  
-  std::map<std::string, TH1D*> h_1d_sr4L;  h_1d_sr_v.push_back(h_1d_sr4L);  
-  std::map<std::string, TH1D*> h_1d_sr5L;  h_1d_sr_v.push_back(h_1d_sr5L);  
-  std::map<std::string, TH1D*> h_1d_sr6L;  h_1d_sr_v.push_back(h_1d_sr6L);  
-  std::map<std::string, TH1D*> h_1d_sr7L;  h_1d_sr_v.push_back(h_1d_sr7L);  
-  std::map<std::string, TH1D*> h_1d_sr8L;  h_1d_sr_v.push_back(h_1d_sr8L);  
-  std::map<std::string, TH1D*> h_1d_sr9L;  h_1d_sr_v.push_back(h_1d_sr9L);  
-  std::map<std::string, TH1D*> h_1d_sr10L; h_1d_sr_v.push_back(h_1d_sr10L); 
-  std::map<std::string, TH1D*> h_1d_srH; h_1d_sr_v.push_back(h_1d_srH); 
-  std::map<std::string, TH1D*> h_1d_srM; h_1d_sr_v.push_back(h_1d_srM); 
-  std::map<std::string, TH1D*> h_1d_srL; h_1d_sr_v.push_back(h_1d_srL); 
-
-
-  std::vector< std::map<std::string, TH1D*> > h_1d_crgj_v;
-  std::map<std::string, TH1D*> h_1d_crgj1H;  h_1d_crgj_v.push_back(h_1d_crgj1H);  
-  std::map<std::string, TH1D*> h_1d_crgj2H;  h_1d_crgj_v.push_back(h_1d_crgj2H);  
-  std::map<std::string, TH1D*> h_1d_crgj3H;  h_1d_crgj_v.push_back(h_1d_crgj3H);  
-  std::map<std::string, TH1D*> h_1d_crgj4H;  h_1d_crgj_v.push_back(h_1d_crgj4H);  
-  std::map<std::string, TH1D*> h_1d_crgj5H;  h_1d_crgj_v.push_back(h_1d_crgj5H);  
-  std::map<std::string, TH1D*> h_1d_crgj6H;  h_1d_crgj_v.push_back(h_1d_crgj6H);  
-  std::map<std::string, TH1D*> h_1d_crgj7H;  h_1d_crgj_v.push_back(h_1d_crgj7H);  
-  std::map<std::string, TH1D*> h_1d_crgj8H;  h_1d_crgj_v.push_back(h_1d_crgj8H);  
-  std::map<std::string, TH1D*> h_1d_crgj9H;  h_1d_crgj_v.push_back(h_1d_crgj9H);  
-  std::map<std::string, TH1D*> h_1d_crgj10H; h_1d_crgj_v.push_back(h_1d_crgj10H); 
-  std::map<std::string, TH1D*> h_1d_crgj1M;  h_1d_crgj_v.push_back(h_1d_crgj1M);  
-  std::map<std::string, TH1D*> h_1d_crgj2M;  h_1d_crgj_v.push_back(h_1d_crgj2M);  
-  std::map<std::string, TH1D*> h_1d_crgj3M;  h_1d_crgj_v.push_back(h_1d_crgj3M);  
-  std::map<std::string, TH1D*> h_1d_crgj4M;  h_1d_crgj_v.push_back(h_1d_crgj4M);  
-  std::map<std::string, TH1D*> h_1d_crgj5M;  h_1d_crgj_v.push_back(h_1d_crgj5M);  
-  std::map<std::string, TH1D*> h_1d_crgj6M;  h_1d_crgj_v.push_back(h_1d_crgj6M);  
-  std::map<std::string, TH1D*> h_1d_crgj7M;  h_1d_crgj_v.push_back(h_1d_crgj7M);  
-  std::map<std::string, TH1D*> h_1d_crgj8M;  h_1d_crgj_v.push_back(h_1d_crgj8M);  
-  std::map<std::string, TH1D*> h_1d_crgj9M;  h_1d_crgj_v.push_back(h_1d_crgj9M);  
-  std::map<std::string, TH1D*> h_1d_crgj10M; h_1d_crgj_v.push_back(h_1d_crgj10M); 
-  std::map<std::string, TH1D*> h_1d_crgj1L;  h_1d_crgj_v.push_back(h_1d_crgj1L);  
-  std::map<std::string, TH1D*> h_1d_crgj2L;  h_1d_crgj_v.push_back(h_1d_crgj2L);  
-  std::map<std::string, TH1D*> h_1d_crgj3L;  h_1d_crgj_v.push_back(h_1d_crgj3L);  
-  std::map<std::string, TH1D*> h_1d_crgj4L;  h_1d_crgj_v.push_back(h_1d_crgj4L);  
-  std::map<std::string, TH1D*> h_1d_crgj5L;  h_1d_crgj_v.push_back(h_1d_crgj5L);  
-  std::map<std::string, TH1D*> h_1d_crgj6L;  h_1d_crgj_v.push_back(h_1d_crgj6L);  
-  std::map<std::string, TH1D*> h_1d_crgj7L;  h_1d_crgj_v.push_back(h_1d_crgj7L);  
-  std::map<std::string, TH1D*> h_1d_crgj8L;  h_1d_crgj_v.push_back(h_1d_crgj8L);  
-  std::map<std::string, TH1D*> h_1d_crgj9L;  h_1d_crgj_v.push_back(h_1d_crgj9L);  
-  std::map<std::string, TH1D*> h_1d_crgj10L; h_1d_crgj_v.push_back(h_1d_crgj10L); 
-  std::map<std::string, TH1D*> h_1d_crgjH; h_1d_crgj_v.push_back(h_1d_crgjH); 
-  std::map<std::string, TH1D*> h_1d_crgjM; h_1d_crgj_v.push_back(h_1d_crgjM); 
-  std::map<std::string, TH1D*> h_1d_crgjL; h_1d_crgj_v.push_back(h_1d_crgjL); 
-
   std::map<std::string, TH1D*> h_1d_crgjbase;
-
-  std::vector< std::map<std::string, TH1D*> > h_1d_crdy_v;
-  std::map<std::string, TH1D*> h_1d_crdy1H;  h_1d_crdy_v.push_back(h_1d_crdy1H);  
-  std::map<std::string, TH1D*> h_1d_crdy2H;  h_1d_crdy_v.push_back(h_1d_crdy2H);  
-  std::map<std::string, TH1D*> h_1d_crdy3H;  h_1d_crdy_v.push_back(h_1d_crdy3H);  
-  std::map<std::string, TH1D*> h_1d_crdy4H;  h_1d_crdy_v.push_back(h_1d_crdy4H);  
-  std::map<std::string, TH1D*> h_1d_crdy5H;  h_1d_crdy_v.push_back(h_1d_crdy5H);  
-  std::map<std::string, TH1D*> h_1d_crdy6H;  h_1d_crdy_v.push_back(h_1d_crdy6H);  
-  std::map<std::string, TH1D*> h_1d_crdy7H;  h_1d_crdy_v.push_back(h_1d_crdy7H);  
-  std::map<std::string, TH1D*> h_1d_crdy8H;  h_1d_crdy_v.push_back(h_1d_crdy8H);  
-  std::map<std::string, TH1D*> h_1d_crdy9H;  h_1d_crdy_v.push_back(h_1d_crdy9H);  
-  std::map<std::string, TH1D*> h_1d_crdy10H; h_1d_crdy_v.push_back(h_1d_crdy10H); 
-  std::map<std::string, TH1D*> h_1d_crdy1M;  h_1d_crdy_v.push_back(h_1d_crdy1M);  
-  std::map<std::string, TH1D*> h_1d_crdy2M;  h_1d_crdy_v.push_back(h_1d_crdy2M);  
-  std::map<std::string, TH1D*> h_1d_crdy3M;  h_1d_crdy_v.push_back(h_1d_crdy3M);  
-  std::map<std::string, TH1D*> h_1d_crdy4M;  h_1d_crdy_v.push_back(h_1d_crdy4M);  
-  std::map<std::string, TH1D*> h_1d_crdy5M;  h_1d_crdy_v.push_back(h_1d_crdy5M);  
-  std::map<std::string, TH1D*> h_1d_crdy6M;  h_1d_crdy_v.push_back(h_1d_crdy6M);  
-  std::map<std::string, TH1D*> h_1d_crdy7M;  h_1d_crdy_v.push_back(h_1d_crdy7M);  
-  std::map<std::string, TH1D*> h_1d_crdy8M;  h_1d_crdy_v.push_back(h_1d_crdy8M);  
-  std::map<std::string, TH1D*> h_1d_crdy9M;  h_1d_crdy_v.push_back(h_1d_crdy9M);  
-  std::map<std::string, TH1D*> h_1d_crdy10M; h_1d_crdy_v.push_back(h_1d_crdy10M); 
-  std::map<std::string, TH1D*> h_1d_crdy1L;  h_1d_crdy_v.push_back(h_1d_crdy1L);  
-  std::map<std::string, TH1D*> h_1d_crdy2L;  h_1d_crdy_v.push_back(h_1d_crdy2L);  
-  std::map<std::string, TH1D*> h_1d_crdy3L;  h_1d_crdy_v.push_back(h_1d_crdy3L);  
-  std::map<std::string, TH1D*> h_1d_crdy4L;  h_1d_crdy_v.push_back(h_1d_crdy4L);  
-  std::map<std::string, TH1D*> h_1d_crdy5L;  h_1d_crdy_v.push_back(h_1d_crdy5L);  
-  std::map<std::string, TH1D*> h_1d_crdy6L;  h_1d_crdy_v.push_back(h_1d_crdy6L);  
-  std::map<std::string, TH1D*> h_1d_crdy7L;  h_1d_crdy_v.push_back(h_1d_crdy7L);  
-  std::map<std::string, TH1D*> h_1d_crdy8L;  h_1d_crdy_v.push_back(h_1d_crdy8L);  
-  std::map<std::string, TH1D*> h_1d_crdy9L;  h_1d_crdy_v.push_back(h_1d_crdy9L);  
-  std::map<std::string, TH1D*> h_1d_crdy10L; h_1d_crdy_v.push_back(h_1d_crdy10L); 
-  std::map<std::string, TH1D*> h_1d_crdyH; h_1d_crdy_v.push_back(h_1d_crdyH); 
-  std::map<std::string, TH1D*> h_1d_crdyM; h_1d_crdy_v.push_back(h_1d_crdyM); 
-  std::map<std::string, TH1D*> h_1d_crdyL; h_1d_crdy_v.push_back(h_1d_crdyL); 
   std::map<std::string, TH1D*> h_1d_crdybase;
-
   std::map<std::string, TH1D*> h_1d_crslbase;
   std::map<std::string, TH1D*> h_1d_crslw;
   std::map<std::string, TH1D*> h_1d_crsltt;
-
-  std::vector< std::map<std::string, TH1D*> > h_1d_crsl_v;
-  std::map<std::string, TH1D*> h_1d_crsl1H;  h_1d_crsl_v.push_back(h_1d_crsl1H);  
-  std::map<std::string, TH1D*> h_1d_crsl2H;  h_1d_crsl_v.push_back(h_1d_crsl2H);  
-  std::map<std::string, TH1D*> h_1d_crsl3H;  h_1d_crsl_v.push_back(h_1d_crsl3H);  
-  std::map<std::string, TH1D*> h_1d_crsl4H;  h_1d_crsl_v.push_back(h_1d_crsl4H);  
-  std::map<std::string, TH1D*> h_1d_crsl5H;  h_1d_crsl_v.push_back(h_1d_crsl5H);  
-  std::map<std::string, TH1D*> h_1d_crsl6H;  h_1d_crsl_v.push_back(h_1d_crsl6H);  
-  std::map<std::string, TH1D*> h_1d_crsl7H;  h_1d_crsl_v.push_back(h_1d_crsl7H);  
-  std::map<std::string, TH1D*> h_1d_crsl8H;  h_1d_crsl_v.push_back(h_1d_crsl8H);  
-  std::map<std::string, TH1D*> h_1d_crsl9H;  h_1d_crsl_v.push_back(h_1d_crsl9H);  
-  std::map<std::string, TH1D*> h_1d_crsl10H; h_1d_crsl_v.push_back(h_1d_crsl10H); 
-  std::map<std::string, TH1D*> h_1d_crsl1M;  h_1d_crsl_v.push_back(h_1d_crsl1M);  
-  std::map<std::string, TH1D*> h_1d_crsl2M;  h_1d_crsl_v.push_back(h_1d_crsl2M);  
-  std::map<std::string, TH1D*> h_1d_crsl3M;  h_1d_crsl_v.push_back(h_1d_crsl3M);  
-  std::map<std::string, TH1D*> h_1d_crsl4M;  h_1d_crsl_v.push_back(h_1d_crsl4M);  
-  std::map<std::string, TH1D*> h_1d_crsl5M;  h_1d_crsl_v.push_back(h_1d_crsl5M);  
-  std::map<std::string, TH1D*> h_1d_crsl6M;  h_1d_crsl_v.push_back(h_1d_crsl6M);  
-  std::map<std::string, TH1D*> h_1d_crsl7M;  h_1d_crsl_v.push_back(h_1d_crsl7M);  
-  std::map<std::string, TH1D*> h_1d_crsl8M;  h_1d_crsl_v.push_back(h_1d_crsl8M);  
-  std::map<std::string, TH1D*> h_1d_crsl9M;  h_1d_crsl_v.push_back(h_1d_crsl9M);  
-  std::map<std::string, TH1D*> h_1d_crsl10M; h_1d_crsl_v.push_back(h_1d_crsl10M); 
-  std::map<std::string, TH1D*> h_1d_crsl1L;  h_1d_crsl_v.push_back(h_1d_crsl1L);  
-  std::map<std::string, TH1D*> h_1d_crsl2L;  h_1d_crsl_v.push_back(h_1d_crsl2L);  
-  std::map<std::string, TH1D*> h_1d_crsl3L;  h_1d_crsl_v.push_back(h_1d_crsl3L);  
-  std::map<std::string, TH1D*> h_1d_crsl4L;  h_1d_crsl_v.push_back(h_1d_crsl4L);  
-  std::map<std::string, TH1D*> h_1d_crsl5L;  h_1d_crsl_v.push_back(h_1d_crsl5L);  
-  std::map<std::string, TH1D*> h_1d_crsl6L;  h_1d_crsl_v.push_back(h_1d_crsl6L);  
-  std::map<std::string, TH1D*> h_1d_crsl7L;  h_1d_crsl_v.push_back(h_1d_crsl7L);  
-  std::map<std::string, TH1D*> h_1d_crsl8L;  h_1d_crsl_v.push_back(h_1d_crsl8L);  
-  std::map<std::string, TH1D*> h_1d_crsl9L;  h_1d_crsl_v.push_back(h_1d_crsl9L);  
-  std::map<std::string, TH1D*> h_1d_crsl10L; h_1d_crsl_v.push_back(h_1d_crsl10L); 
-
   std::map<std::string, TH1D*> h_1d_crslmubase;
   std::map<std::string, TH1D*> h_1d_crslmuw;
   std::map<std::string, TH1D*> h_1d_crslmutt;
-
-  std::vector< std::map<std::string, TH1D*> > h_1d_crslmu_v;
-  std::map<std::string, TH1D*> h_1d_crslmu1H;  h_1d_crslmu_v.push_back(h_1d_crslmu1H);  
-  std::map<std::string, TH1D*> h_1d_crslmu2H;  h_1d_crslmu_v.push_back(h_1d_crslmu2H);  
-  std::map<std::string, TH1D*> h_1d_crslmu3H;  h_1d_crslmu_v.push_back(h_1d_crslmu3H);  
-  std::map<std::string, TH1D*> h_1d_crslmu4H;  h_1d_crslmu_v.push_back(h_1d_crslmu4H);  
-  std::map<std::string, TH1D*> h_1d_crslmu5H;  h_1d_crslmu_v.push_back(h_1d_crslmu5H);  
-  std::map<std::string, TH1D*> h_1d_crslmu6H;  h_1d_crslmu_v.push_back(h_1d_crslmu6H);  
-  std::map<std::string, TH1D*> h_1d_crslmu7H;  h_1d_crslmu_v.push_back(h_1d_crslmu7H);  
-  std::map<std::string, TH1D*> h_1d_crslmu8H;  h_1d_crslmu_v.push_back(h_1d_crslmu8H);  
-  std::map<std::string, TH1D*> h_1d_crslmu9H;  h_1d_crslmu_v.push_back(h_1d_crslmu9H);  
-  std::map<std::string, TH1D*> h_1d_crslmu10H; h_1d_crslmu_v.push_back(h_1d_crslmu10H); 
-  std::map<std::string, TH1D*> h_1d_crslmu1M;  h_1d_crslmu_v.push_back(h_1d_crslmu1M);  
-  std::map<std::string, TH1D*> h_1d_crslmu2M;  h_1d_crslmu_v.push_back(h_1d_crslmu2M);  
-  std::map<std::string, TH1D*> h_1d_crslmu3M;  h_1d_crslmu_v.push_back(h_1d_crslmu3M);  
-  std::map<std::string, TH1D*> h_1d_crslmu4M;  h_1d_crslmu_v.push_back(h_1d_crslmu4M);  
-  std::map<std::string, TH1D*> h_1d_crslmu5M;  h_1d_crslmu_v.push_back(h_1d_crslmu5M);  
-  std::map<std::string, TH1D*> h_1d_crslmu6M;  h_1d_crslmu_v.push_back(h_1d_crslmu6M);  
-  std::map<std::string, TH1D*> h_1d_crslmu7M;  h_1d_crslmu_v.push_back(h_1d_crslmu7M);  
-  std::map<std::string, TH1D*> h_1d_crslmu8M;  h_1d_crslmu_v.push_back(h_1d_crslmu8M);  
-  std::map<std::string, TH1D*> h_1d_crslmu9M;  h_1d_crslmu_v.push_back(h_1d_crslmu9M);  
-  std::map<std::string, TH1D*> h_1d_crslmu10M; h_1d_crslmu_v.push_back(h_1d_crslmu10M); 
-  std::map<std::string, TH1D*> h_1d_crslmu1L;  h_1d_crslmu_v.push_back(h_1d_crslmu1L);  
-  std::map<std::string, TH1D*> h_1d_crslmu2L;  h_1d_crslmu_v.push_back(h_1d_crslmu2L);  
-  std::map<std::string, TH1D*> h_1d_crslmu3L;  h_1d_crslmu_v.push_back(h_1d_crslmu3L);  
-  std::map<std::string, TH1D*> h_1d_crslmu4L;  h_1d_crslmu_v.push_back(h_1d_crslmu4L);  
-  std::map<std::string, TH1D*> h_1d_crslmu5L;  h_1d_crslmu_v.push_back(h_1d_crslmu5L);  
-  std::map<std::string, TH1D*> h_1d_crslmu6L;  h_1d_crslmu_v.push_back(h_1d_crslmu6L);  
-  std::map<std::string, TH1D*> h_1d_crslmu7L;  h_1d_crslmu_v.push_back(h_1d_crslmu7L);  
-  std::map<std::string, TH1D*> h_1d_crslmu8L;  h_1d_crslmu_v.push_back(h_1d_crslmu8L);  
-  std::map<std::string, TH1D*> h_1d_crslmu9L;  h_1d_crslmu_v.push_back(h_1d_crslmu9L);  
-  std::map<std::string, TH1D*> h_1d_crslmu10L; h_1d_crslmu_v.push_back(h_1d_crslmu10L); 
-
   std::map<std::string, TH1D*> h_1d_crslelbase;
   std::map<std::string, TH1D*> h_1d_crslelw;
   std::map<std::string, TH1D*> h_1d_crsleltt;
-
-  std::vector< std::map<std::string, TH1D*> > h_1d_crslel_v;
-  std::map<std::string, TH1D*> h_1d_crslel1H;  h_1d_crslel_v.push_back(h_1d_crslel1H);  
-  std::map<std::string, TH1D*> h_1d_crslel2H;  h_1d_crslel_v.push_back(h_1d_crslel2H);  
-  std::map<std::string, TH1D*> h_1d_crslel3H;  h_1d_crslel_v.push_back(h_1d_crslel3H);  
-  std::map<std::string, TH1D*> h_1d_crslel4H;  h_1d_crslel_v.push_back(h_1d_crslel4H);  
-  std::map<std::string, TH1D*> h_1d_crslel5H;  h_1d_crslel_v.push_back(h_1d_crslel5H);  
-  std::map<std::string, TH1D*> h_1d_crslel6H;  h_1d_crslel_v.push_back(h_1d_crslel6H);  
-  std::map<std::string, TH1D*> h_1d_crslel7H;  h_1d_crslel_v.push_back(h_1d_crslel7H);  
-  std::map<std::string, TH1D*> h_1d_crslel8H;  h_1d_crslel_v.push_back(h_1d_crslel8H);  
-  std::map<std::string, TH1D*> h_1d_crslel9H;  h_1d_crslel_v.push_back(h_1d_crslel9H);  
-  std::map<std::string, TH1D*> h_1d_crslel10H; h_1d_crslel_v.push_back(h_1d_crslel10H); 
-  std::map<std::string, TH1D*> h_1d_crslel1M;  h_1d_crslel_v.push_back(h_1d_crslel1M);  
-  std::map<std::string, TH1D*> h_1d_crslel2M;  h_1d_crslel_v.push_back(h_1d_crslel2M);  
-  std::map<std::string, TH1D*> h_1d_crslel3M;  h_1d_crslel_v.push_back(h_1d_crslel3M);  
-  std::map<std::string, TH1D*> h_1d_crslel4M;  h_1d_crslel_v.push_back(h_1d_crslel4M);  
-  std::map<std::string, TH1D*> h_1d_crslel5M;  h_1d_crslel_v.push_back(h_1d_crslel5M);  
-  std::map<std::string, TH1D*> h_1d_crslel6M;  h_1d_crslel_v.push_back(h_1d_crslel6M);  
-  std::map<std::string, TH1D*> h_1d_crslel7M;  h_1d_crslel_v.push_back(h_1d_crslel7M);  
-  std::map<std::string, TH1D*> h_1d_crslel8M;  h_1d_crslel_v.push_back(h_1d_crslel8M);  
-  std::map<std::string, TH1D*> h_1d_crslel9M;  h_1d_crslel_v.push_back(h_1d_crslel9M);  
-  std::map<std::string, TH1D*> h_1d_crslel10M; h_1d_crslel_v.push_back(h_1d_crslel10M); 
-  std::map<std::string, TH1D*> h_1d_crslel1L;  h_1d_crslel_v.push_back(h_1d_crslel1L);  
-  std::map<std::string, TH1D*> h_1d_crslel2L;  h_1d_crslel_v.push_back(h_1d_crslel2L);  
-  std::map<std::string, TH1D*> h_1d_crslel3L;  h_1d_crslel_v.push_back(h_1d_crslel3L);  
-  std::map<std::string, TH1D*> h_1d_crslel4L;  h_1d_crslel_v.push_back(h_1d_crslel4L);  
-  std::map<std::string, TH1D*> h_1d_crslel5L;  h_1d_crslel_v.push_back(h_1d_crslel5L);  
-  std::map<std::string, TH1D*> h_1d_crslel6L;  h_1d_crslel_v.push_back(h_1d_crslel6L);  
-  std::map<std::string, TH1D*> h_1d_crslel7L;  h_1d_crslel_v.push_back(h_1d_crslel7L);  
-  std::map<std::string, TH1D*> h_1d_crslel8L;  h_1d_crslel_v.push_back(h_1d_crslel8L);  
-  std::map<std::string, TH1D*> h_1d_crslel9L;  h_1d_crslel_v.push_back(h_1d_crslel9L);  
-  std::map<std::string, TH1D*> h_1d_crslel10L; h_1d_crslel_v.push_back(h_1d_crslel10L); 
-
   std::map<std::string, TH1D*> h_1d_crslhadbase;
   std::map<std::string, TH1D*> h_1d_crslhadw;
   std::map<std::string, TH1D*> h_1d_crslhadtt;
-
-  std::vector< std::map<std::string, TH1D*> > h_1d_crslhad_v;
-  std::map<std::string, TH1D*> h_1d_crslhad1H;  h_1d_crslhad_v.push_back(h_1d_crslhad1H);  
-  std::map<std::string, TH1D*> h_1d_crslhad2H;  h_1d_crslhad_v.push_back(h_1d_crslhad2H);  
-  std::map<std::string, TH1D*> h_1d_crslhad3H;  h_1d_crslhad_v.push_back(h_1d_crslhad3H);  
-  std::map<std::string, TH1D*> h_1d_crslhad4H;  h_1d_crslhad_v.push_back(h_1d_crslhad4H);  
-  std::map<std::string, TH1D*> h_1d_crslhad5H;  h_1d_crslhad_v.push_back(h_1d_crslhad5H);  
-  std::map<std::string, TH1D*> h_1d_crslhad6H;  h_1d_crslhad_v.push_back(h_1d_crslhad6H);  
-  std::map<std::string, TH1D*> h_1d_crslhad7H;  h_1d_crslhad_v.push_back(h_1d_crslhad7H);  
-  std::map<std::string, TH1D*> h_1d_crslhad8H;  h_1d_crslhad_v.push_back(h_1d_crslhad8H);  
-  std::map<std::string, TH1D*> h_1d_crslhad9H;  h_1d_crslhad_v.push_back(h_1d_crslhad9H);  
-  std::map<std::string, TH1D*> h_1d_crslhad10H; h_1d_crslhad_v.push_back(h_1d_crslhad10H); 
-  std::map<std::string, TH1D*> h_1d_crslhad1M;  h_1d_crslhad_v.push_back(h_1d_crslhad1M);  
-  std::map<std::string, TH1D*> h_1d_crslhad2M;  h_1d_crslhad_v.push_back(h_1d_crslhad2M);  
-  std::map<std::string, TH1D*> h_1d_crslhad3M;  h_1d_crslhad_v.push_back(h_1d_crslhad3M);  
-  std::map<std::string, TH1D*> h_1d_crslhad4M;  h_1d_crslhad_v.push_back(h_1d_crslhad4M);  
-  std::map<std::string, TH1D*> h_1d_crslhad5M;  h_1d_crslhad_v.push_back(h_1d_crslhad5M);  
-  std::map<std::string, TH1D*> h_1d_crslhad6M;  h_1d_crslhad_v.push_back(h_1d_crslhad6M);  
-  std::map<std::string, TH1D*> h_1d_crslhad7M;  h_1d_crslhad_v.push_back(h_1d_crslhad7M);  
-  std::map<std::string, TH1D*> h_1d_crslhad8M;  h_1d_crslhad_v.push_back(h_1d_crslhad8M);  
-  std::map<std::string, TH1D*> h_1d_crslhad9M;  h_1d_crslhad_v.push_back(h_1d_crslhad9M);  
-  std::map<std::string, TH1D*> h_1d_crslhad10M; h_1d_crslhad_v.push_back(h_1d_crslhad10M); 
-  std::map<std::string, TH1D*> h_1d_crslhad1L;  h_1d_crslhad_v.push_back(h_1d_crslhad1L);  
-  std::map<std::string, TH1D*> h_1d_crslhad2L;  h_1d_crslhad_v.push_back(h_1d_crslhad2L);  
-  std::map<std::string, TH1D*> h_1d_crslhad3L;  h_1d_crslhad_v.push_back(h_1d_crslhad3L);  
-  std::map<std::string, TH1D*> h_1d_crslhad4L;  h_1d_crslhad_v.push_back(h_1d_crslhad4L);  
-  std::map<std::string, TH1D*> h_1d_crslhad5L;  h_1d_crslhad_v.push_back(h_1d_crslhad5L);  
-  std::map<std::string, TH1D*> h_1d_crslhad6L;  h_1d_crslhad_v.push_back(h_1d_crslhad6L);  
-  std::map<std::string, TH1D*> h_1d_crslhad7L;  h_1d_crslhad_v.push_back(h_1d_crslhad7L);  
-  std::map<std::string, TH1D*> h_1d_crslhad8L;  h_1d_crslhad_v.push_back(h_1d_crslhad8L);  
-  std::map<std::string, TH1D*> h_1d_crslhad9L;  h_1d_crslhad_v.push_back(h_1d_crslhad9L);  
-  std::map<std::string, TH1D*> h_1d_crslhad10L; h_1d_crslhad_v.push_back(h_1d_crslhad10L); 
+*/
 
 
-  
   // These will be set to true if any SL GJ or DY control region plots are produced
   bool saveGJplots = false;
   bool saveDYplots = false;
@@ -386,8 +135,6 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
-    //    for( unsigned int event = 0; event < nEventsTree/10.; ++event) {
-    //    for( unsigned int event = 0; event < 100.; ++event) {
       
       t.GetEntry(event);
 
@@ -418,7 +165,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       // basic event selection and cleaning
       //---------------------
 
-      if (!PassesEventSelection(SignalRegionVersion::sel2012, t.nVert)) continue;
+      if (t.nVert == 0) continue;
 
       // remove low pt QCD samples 
       if (t.evt_id >= 100 && t.evt_id < 108) continue;
@@ -579,70 +326,40 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       	} // nlep == 2
       }// evt_id 
 
+      ////////////////////////////////////
+      /// done with overall selection  /// 
+      ////////////////////////////////////
+      ///   time to fill histograms    /// 
+      ////////////////////////////////////
 
+      //fillHistos(h_1d_nocut, "nocut");
 
-      fillHistos(h_1d_nocut, "nocut");
+      //fillHistosSignalRegion(h_1d_srbase, "srbase");
 
-      fillHistosSignalRegion(h_1d_srbase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "srbase");
-
-      for (unsigned int imap = 0; imap < h_1d_sr_v.size(); imap++) {
-	fillHistosSignalRegion(h_1d_sr_v.at(imap), srJets.at(imap), srHtMet.at(imap), "sr"+regions.at(imap));
-      } 
+      fillHistosSignalRegion("sr");
 
       if (doGJplots) {
-      	saveGJplots = true;
-      	fillHistosCRGJ(h_1d_crgjbase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crgjbase","", jetIdx0, jetIdx1);
-
-      	for (unsigned int imap = 0; imap < h_1d_crgj_v.size(); imap++) {
-      	  fillHistosCRGJ(h_1d_crgj_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crgj"+regions.at(imap),"", jetIdx0, jetIdx1);
-      	} 
+        saveGJplots = true;
+        fillHistosCRGJ("crgjbase", jetIdx0, jetIdx1);
       }
-
       if (doDYplots) {
-      	saveDYplots = true;
-      	fillHistosCRDY(h_1d_crdybase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crdybase","");
-      	for (unsigned int imap = 0; imap < h_1d_crdy_v.size(); imap++) {
-      	  fillHistosCRDY(h_1d_crdy_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crdy"+regions.at(imap),"");
-      	} 
+        saveDYplots = true;
+        fillHistosCRDY("crdy");
       }
-
       if (doSLplots) {
-      	saveSLplots = true;
-        fillHistosCRSL(h_1d_crslbase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crslbase");
-        fillHistosCRSL(h_1d_crslw, SignalRegionJets::crw, SignalRegionHtMet::nocut, "crslw");
-        fillHistosCRSL(h_1d_crsltt, SignalRegionJets::crtt, SignalRegionHtMet::nocut, "crsltt");
-      	for (unsigned int imap = 0; imap < h_1d_crsl_v.size(); imap++) {
-      	  fillHistosCRSL(h_1d_crsl_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crsl"+regions.at(imap));
-      	} 
-
-	if (doSLMUplots) {
-	  fillHistosCRSL(h_1d_crslmubase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crslmubase");
-	  fillHistosCRSL(h_1d_crslmuw, SignalRegionJets::crw, SignalRegionHtMet::nocut, "crslmuw");
-	  fillHistosCRSL(h_1d_crslmutt, SignalRegionJets::crtt, SignalRegionHtMet::nocut, "crslmutt");
-	  for (unsigned int imap = 0; imap < h_1d_crslmu_v.size(); imap++) {
-	    fillHistosCRSL(h_1d_crslmu_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crslmu"+regions.at(imap));
-	  } 
-	}
-
-	if (doSLELplots) {
-	  fillHistosCRSL(h_1d_crslelbase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crslelbase");
-	  fillHistosCRSL(h_1d_crslelw, SignalRegionJets::crw, SignalRegionHtMet::nocut, "crslelw");
-	  fillHistosCRSL(h_1d_crsleltt, SignalRegionJets::crtt, SignalRegionHtMet::nocut, "crsleltt");
-	  for (unsigned int imap = 0; imap < h_1d_crslel_v.size(); imap++) {
-	    fillHistosCRSL(h_1d_crslel_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crslel"+regions.at(imap));
-	  } 
-	}
-
-	if (doSLHADplots) {
-	  fillHistosCRSL(h_1d_crslhadbase, SignalRegionJets::nocut, SignalRegionHtMet::nocut, "crslhadbase");
-	  fillHistosCRSL(h_1d_crslhadw, SignalRegionJets::crw, SignalRegionHtMet::nocut, "crslhadw");
-	  fillHistosCRSL(h_1d_crslhadtt, SignalRegionJets::crtt, SignalRegionHtMet::nocut, "crslhadtt");
-	  for (unsigned int imap = 0; imap < h_1d_crslhad_v.size(); imap++) {
-	    fillHistosCRSL(h_1d_crslhad_v.at(imap), srJets.at(imap), srHtMet.at(imap), "crslhad"+regions.at(imap));
-	  } 
-	}
-
+        saveSLplots = true;
+        fillHistosCRSL("crsl");
       }
+      if (doSLMUplots) {
+        fillHistosCRSL("crslmu");
+      }
+      if (doSLELplots) {
+        fillHistosCRSL("crslel");
+      }
+      if (doSLHADplots) {
+        fillHistosCRSL("crslhad");
+      }
+
 
    }//end loop on events in a file
   
@@ -662,61 +379,55 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   //---------------------
 
   outfile_->cd();
-  savePlotsDir(h_1d_global,outfile_,"");
-  savePlotsDir(h_1d_nocut,outfile_,"nocut");
-  savePlotsDir(h_1d_srbase,outfile_,"srbase");
+  //savePlotsDir(h_1d_global,outfile_,"");
+  //savePlotsDir(h_1d_nocut,outfile_,"nocut");
+  //savePlotsDir(h_1d_srbase,outfile_,"srbase");
 
-  for (unsigned int imap = 0; imap < h_1d_sr_v.size(); imap++) {
-    savePlotsDir(h_1d_sr_v.at(imap),outfile_,("sr"+regions.at(imap)).c_str());
-  } 
-
+  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+    if(!SRVec.at(srN).srHistMap.empty()){
+      savePlotsDir(SRVec.at(srN).srHistMap, outfile_, ("sr"+SRVec.at(srN).GetName()).c_str());
+    }
+  }
   if (saveGJplots) {
-    for (unsigned int imap = 0; imap < h_1d_crgj_v.size(); imap++) {
-      savePlotsDir(h_1d_crgj_v.at(imap),outfile_,("crgj"+regions.at(imap)).c_str());
-    } 
-    savePlotsDir(h_1d_crgjbase,outfile_,"crgjbase");
+    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+      if(!SRVec.at(srN).crgjHistMap.empty()){
+        savePlotsDir(SRVec.at(srN).crgjHistMap, outfile_, ("crgj"+SRVec.at(srN).GetName()).c_str());
+      }
+    }
   }
-
   if (saveDYplots) {
-    for (unsigned int imap = 0; imap < h_1d_crdy_v.size(); imap++) {
-      savePlotsDir(h_1d_crdy_v.at(imap),outfile_,("crdy"+regions.at(imap)).c_str());
-    } 
-    savePlotsDir(h_1d_crdybase,outfile_,"crdybase");
+    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+      if(!SRVec.at(srN).crdyHistMap.empty()){
+        savePlotsDir(SRVec.at(srN).crdyHistMap, outfile_, ("crdy"+SRVec.at(srN).GetName()).c_str());
+      }
+    }
   }
-
   if (saveSLplots) {
-    savePlotsDir(h_1d_crslbase,outfile_,"crslbase");
-    savePlotsDir(h_1d_crslw,outfile_,"crslw");
-    savePlotsDir(h_1d_crsltt,outfile_,"crsltt");
-    for (unsigned int imap = 0; imap < h_1d_crsl_v.size(); imap++) {
-      savePlotsDir(h_1d_crsl_v.at(imap),outfile_,("crsl"+regions.at(imap)).c_str());
-    } 
-
-    if (saveSLMUplots) {
-      savePlotsDir(h_1d_crslmubase,outfile_,"crslmubase");
-      savePlotsDir(h_1d_crslmuw,outfile_,"crslmuw");
-      savePlotsDir(h_1d_crslmutt,outfile_,"crslmutt");
-      for (unsigned int imap = 0; imap < h_1d_crslmu_v.size(); imap++) {
-	savePlotsDir(h_1d_crslmu_v.at(imap),outfile_,("crslmu"+regions.at(imap)).c_str());
-      } 
+    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+      if(!SRVec.at(srN).crslHistMap.empty()){
+        savePlotsDir(SRVec.at(srN).crslHistMap, outfile_, ("crsl"+SRVec.at(srN).GetName()).c_str());
+      }
     }
-
-    if (saveSLELplots) {
-      savePlotsDir(h_1d_crslelbase,outfile_,"crslelbase");
-      savePlotsDir(h_1d_crslelw,outfile_,"crslelw");
-      savePlotsDir(h_1d_crsleltt,outfile_,"crsleltt");
-      for (unsigned int imap = 0; imap < h_1d_crslel_v.size(); imap++) {
-	savePlotsDir(h_1d_crslel_v.at(imap),outfile_,("crslel"+regions.at(imap)).c_str());
-      } 
+  }
+  if (saveSLMUplots) {
+    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+      if(!SRVec.at(srN).crslmuHistMap.empty()){
+        savePlotsDir(SRVec.at(srN).crslmuHistMap, outfile_, ("crslmu"+SRVec.at(srN).GetName()).c_str());
+      }
     }
-
-    if (saveSLHADplots) {
-      savePlotsDir(h_1d_crslhadbase,outfile_,"crslhadbase");
-      savePlotsDir(h_1d_crslhadw,outfile_,"crslhadw");
-      savePlotsDir(h_1d_crslhadtt,outfile_,"crslhadtt");
-      for (unsigned int imap = 0; imap < h_1d_crslhad_v.size(); imap++) {
-	savePlotsDir(h_1d_crslhad_v.at(imap),outfile_,("crslhad"+regions.at(imap)).c_str());
-      } 
+  }
+  if (saveSLELplots) {
+    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+      if(!SRVec.at(srN).crslelHistMap.empty()){
+        savePlotsDir(SRVec.at(srN).crslelHistMap, outfile_, ("crslel"+SRVec.at(srN).GetName()).c_str());
+      }
+    }
+  }
+  if (saveSLHADplots) {
+    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+      if(!SRVec.at(srN).crslhadHistMap.empty()){
+        savePlotsDir(SRVec.at(srN).crslhadHistMap, outfile_, ("crslhad"+SRVec.at(srN).GetName()).c_str());
+      }
     }
   }
 
@@ -740,62 +451,122 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   return;
 }
 
-void MT2Looper::fillHistosSignalRegion(std::map<std::string, TH1D*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dirname, const std::string& suffix) {
+void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::string& suffix) {
 
-  if ( !PassesSignalRegion(SignalRegionVersion::sel2015LowLumi, t.mt2, t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht, 
-			   t.minMTBMet, nlepveto_, t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) return;
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = t.deltaPhiMin;
+  values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  values["nlep"]        = nlepveto_;
+  values["j1pt"]        = t.jet_pt[0];
+  values["j2pt"]        = t.jet_pt[1];
+  values["njets"]       = t.nJet40;
+  values["nbjets"]      = t.nBJet40;
+  values["lowMT"]       = (t.minMTBMet < 200. && t.mt2 < 400.);
+  values["mt2"]         = t.mt2;
+  values["ht"]          = t.ht;
+  values["met"]         = t.met_pt;
+  //values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
-  plot1D("h_SignalRegion",  sr_jets+sr_htmet,   evtweight_, h_1d_global, ";Signal Region", 100, 0, 100);
-  fillHistos( h_1d, dirname, suffix);
+
+  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+    if(SRVec.at(srN).PassesSelection(values)){
+      fillHistos(SRVec.at(srN).srHistMap, prefix+SRVec.at(srN).GetName(), suffix);
+      break;//signal regions are orthogonal, event cannot be in more than one
+    }
+  }
+
+  //plot1D("h_SignalRegion",  sr_jets+sr_htmet,   evtweight_, h_1d_global, ";Signal Region", 100, 0, 100);
 
   return;
 }
 
 // hists for single lepton control region
-void MT2Looper::fillHistosCRSL(std::map<std::string, TH1D*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dirname, const std::string& suffix) {
+void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suffix) {
 
-  if ( !PassesSignalRegionNoLepVeto(SignalRegionVersion::sel2015LowLumi, t.mt2, t.met_pt, t.ht, t.nJet40, t.nBJet40, t.deltaPhiMin, t.diffMetMht,
-				    t.minMTBMet, t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) return;
-  //  if (nlepveto_ != 1) return;
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = t.deltaPhiMin;
+  values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  values["nlep"]        = 0; //dummy value
+  values["j1pt"]        = t.jet_pt[0];
+  values["j2pt"]        = t.jet_pt[1];
+  values["njets"]       = t.nJet40;
+  values["nbjets"]      = t.nBJet40;
+  values["lowMT"]       = (t.minMTBMet < 200. && t.mt2 < 400.);
+  values["mt2"]         = t.mt2;
+  values["ht"]          = t.ht;
+  values["met"]         = t.met_pt;
 
-  // fill hists
-  fillHistos( h_1d, dirname, suffix);
-  fillHistosSingleLepton( h_1d, dirname, suffix);
-
-  // // fill CR summary hist
-  // outfile_->cd();
-  // plot1D("h_SingleLeptonControlRegion",  sr_jets+sr_htmet,   evtweight_, h_1d_global, ";Single Lepton Control Region", 100, 0, 100);
+  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+    if(SRVec.at(srN).PassesSelection(values)){
+      if(prefix=="crsl")    fillHistosSingleLepton(SRVec.at(srN).crslHistMap,    prefix+SRVec.at(srN).GetName(), suffix);
+      if(prefix=="crslmu")  fillHistosSingleLepton(SRVec.at(srN).crslmuHistMap,  prefix+SRVec.at(srN).GetName(), suffix);
+      if(prefix=="crslel")  fillHistosSingleLepton(SRVec.at(srN).crslelHistMap,  prefix+SRVec.at(srN).GetName(), suffix);
+      if(prefix=="crslhad") fillHistosSingleLepton(SRVec.at(srN).crslhadHistMap, prefix+SRVec.at(srN).GetName(), suffix);
+      break;//control regions are orthogonal, event cannot be in more than one
+    }
+  }
 
   return;
 }
 
 // hists for Gamma+Jets control region
-void MT2Looper::fillHistosCRGJ(std::map<std::string, TH1D*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dirname, const std::string& suffix, const int jetIdx0, const int jetIdx1) {
+void MT2Looper::fillHistosCRGJ(const std::string& prefix, const int jetIdx0, const int jetIdx1, const std::string& suffix) {
 
   if (t.ngamma==0) return;
-
-
-  if ( !PassesSignalRegion(SignalRegionVersion::sel2015LowLumi, t.gamma_mt2, t.gamma_met_pt, t.gamma_ht, t.gamma_nJet40, t.gamma_nBJet40, t.gamma_deltaPhiMin, t.gamma_diffMetMht,
-				    t.gamma_minMTBMet, nlepveto_, t.jet_pt[jetIdx0], t.jet_pt[jetIdx1], sr_jets, sr_htmet) ) return;
 
   bool passSieie = t.gamma_idCutBased[0] ? true : false; // just deal with the standard case now. Worry later about sideband in sieie
 
   // fill hists
-  if (passSieie) {
-    fillHistosGammaJets( h_1d, dirname, suffix);
+  if (!passSieie) return;
+
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = t.gamma_deltaPhiMin;
+  values["diffMetMhtOverMet"]  = t.gamma_diffMetMht/t.gamma_met_pt;
+  values["nlep"]        = nlepveto_;
+  values["j1pt"]        = t.jet_pt[jetIdx0];
+  values["j2pt"]        = t.jet_pt[jetIdx1];
+  values["njets"]       = t.gamma_nJet40;
+  values["nbjets"]      = t.gamma_nBJet40;
+  values["lowMT"]       = (t.gamma_minMTBMet < 200. && t.gamma_mt2 < 400.);
+  values["mt2"]         = t.gamma_mt2;
+  values["ht"]          = t.gamma_ht;
+  values["met"]         = t.gamma_met_pt;
+
+  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+    if(SRVec.at(srN).PassesSelection(values)){
+      fillHistosGammaJets(SRVec.at(srN).crgjHistMap, prefix+SRVec.at(srN).GetName(), suffix);
+      break;//control regions are orthogonal, event cannot be in more than one
+    }
   }
+
   return;
 }
 
 // hists for Zll control region
-void MT2Looper::fillHistosCRDY(std::map<std::string, TH1D*>& h_1d, const SignalRegionJets::value_type& sr_jets, const SignalRegionHtMet::value_type& sr_htmet, const std::string& dirname, const std::string& suffix) {
+void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suffix) {
 
   if (t.nlep!=2) return;
 
-  if ( !PassesSignalRegion(SignalRegionVersion::sel2015LowLumi, t.zll_mt2, t.zll_met_pt, t.zll_ht, t.nJet40, t.nBJet40, t.zll_deltaPhiMin, t.zll_diffMetMht,
-			   t.zll_minMTBMet, nlepveto_, t.jet_pt[0], t.jet_pt[1], sr_jets, sr_htmet) ) return;
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = t.zll_deltaPhiMin;
+  values["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
+  values["nlep"]        = nlepveto_;
+  values["j1pt"]        = t.jet_pt[0];
+  values["j2pt"]        = t.jet_pt[1];
+  values["njets"]       = t.nJet40;
+  values["nbjets"]      = t.nBJet40;
+  values["lowMT"]       = (t.zll_minMTBMet < 200. && t.zll_mt2 < 400.);
+  values["mt2"]         = t.zll_mt2;
+  values["ht"]          = t.zll_ht;
+  values["met"]         = t.zll_met_pt;
 
-  fillHistosDY( h_1d, dirname, suffix);
+  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+    if(SRVec.at(srN).PassesSelection(values)){
+      fillHistosGammaJets(SRVec.at(srN).crdyHistMap, prefix+SRVec.at(srN).GetName(), suffix);
+      break;//control regions are orthogonal, event cannot be in more than one
+    }
+  }
+
   return;
 }
 
@@ -821,14 +592,8 @@ void MT2Looper::fillHistos(std::map<std::string, TH1D*>& h_1d, const std::string
   plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
   plot1D("h_J0pt"+s,       t.jet_pt[0],   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
   plot1D("h_J1pt"+s,       t.jet_pt[1],   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
-//  for (int i = 0; i < t.njet; i++) {
-//    if (t.jet_pt[i] < 40 || fabs(t.jet_eta[i])>2.5) continue;
-//    if (t.jet_btagCSV[i] < 0.814) continue;
-//    int flav = fabs(t.jet_mcFlavour[i]);
-//    plot1D("h_jetflavor"+s,     flav,   evtweight_, h_1d, ";Jet MC ID", 25, 0, 25);
-//  }
-  
-  plot1D("h_mt2bins"+s, std::min(mt2bins[n_mt2bins-1]-1, t.mt2),   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+
+  plot1D("h_mt2bins"+s,       t.mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
 
   outfile_->cd();
   return;
@@ -845,6 +610,8 @@ void MT2Looper::fillHistosSingleLepton(std::map<std::string, TH1D*>& h_1d, const
   plot1D("h_mt"+s,            mt_,   evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
 
   outfile_->cd();
+
+  fillHistos(h_1d, dirname, s);
   return;
 }
 
@@ -865,8 +632,8 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, const st
   }
 
   if (iso < 10)  {
-    plot1D("h_mt2bins"+s,     std::min(mt2bins[n_mt2bins-1]-1, t.gamma_mt2),   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    if (dirname=="crgjbase" || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH") {
+    plot1D("h_mt2bins"+s,       t.gamma_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  if (dirname=="crgjbase" || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH") {
       plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
       plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
       plot1D("h_mt2"+s,       t.gamma_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
@@ -880,12 +647,6 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, const st
       plot1D("h_minMTBMet"+s,   t.gamma_minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
       plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
     }
-//    for (int i = 0; i < t.njet; i++) {
-//      if (t.jet_pt[i] < 40 || fabs(t.jet_eta[i])>2.5 ) continue;
-//      if (t.jet_btagCSV[i] < 0.814) continue;
-//      int flav = fabs(t.jet_mcFlavour[i]);
-//      plot1D("h_jetflavor"+s,     flav,   evtweight_, h_1d, ";Jet MC ID", 25, 0, 25);
-//    }
     
   }
   outfile_->cd();
@@ -899,7 +660,7 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1D*>& h_1d, const std::stri
   } 
   dir->cd();
 
-  plot1D("h_mt2bins"+s,   std::min(mt2bins[n_mt2bins-1]-1, t.zll_mt2),   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  plot1D("h_mt2bins"+s,       t.zll_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
 
   if (dirname=="crdybase" || dirname=="crdyL" || dirname=="crdyM" || dirname=="crdyH") {
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
@@ -915,13 +676,6 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1D*>& h_1d, const std::stri
     plot1D("h_minMTBMet"+s,   t.zll_minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
     plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
   }
-//  for (int i = 0; i < t.njet; i++) {
-//    if (t.jet_pt[i] < 40 || fabs(t.jet_eta[i])>2.5) continue;
-//    if (t.jet_btagCSV[i] < 0.814) continue;
-//    int flav = fabs(t.jet_mcFlavour[i]);
-//    plot1D("h_jetflavor"+s,     flav,   evtweight_, h_1d, ";Jet MC ID", 25, 0, 25);
-//  }
-  
 
   outfile_->cd();
   return;
