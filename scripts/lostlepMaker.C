@@ -41,8 +41,8 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
     TH1D* httbar_sr = (TH1D*) fttbar->Get(fullhistname);
     TH1D* hwjets_sr = (TH1D*) fwjets->Get(fullhistname);
     
-    // If both ttbar and wjets SR histograms are not filled, just leave (shouldn't happen when running on full stat MC)
-    if(!httbar_sr && !hwjets_sr){
+    // If either ttbar or wjets SR histograms are not filled, just leave (shouldn't happen when running on full stat MC)
+    if(!httbar_sr || !hwjets_sr){
       cout<<"could not find histogram "<<fullhistname<<endl;
       continue;
     }
