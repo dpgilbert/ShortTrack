@@ -39,8 +39,10 @@ MT2Looper::~MT2Looper(){
 
 void MT2Looper::SetSignalRegions(){
 
-  SRVec = getSignalRegions2015LowLumi();
-  //SRVec = getSignalRegions2015ExtendedNJets();
+  //SRVec = getSignalRegions2015LowLumi();
+  SRVec = getSignalRegions2015ExtendedNJets();
+  //SRVec =  getSignalRegions2015ExtendedNJets_UltraHighHT();
+  //SRVec = getSignalRegions2015ExtendedNJets_V2();
 
   //store histograms with cut values for all variables
   for(unsigned int i = 0; i < SRVec.size(); i++){
@@ -56,6 +58,27 @@ void MT2Looper::SetSignalRegions(){
     }
     outfile_->cd();
   }
+
+  SRBase.SetName("srbase");
+  SRBase.SetVar("mt2", 200, -1);
+  SRBase.SetVar("j1pt", 100, -1);
+  SRBase.SetVar("j2pt", 100, -1);
+  SRBase.SetVar("deltaPhiMin", 0.3, -1);
+  SRBase.SetVar("diffMetMhtOverMet", 0, 0.5);
+  SRBase.SetVar("nlep", 0, 1);
+  SRBase.SetVar("passesHtMet", 1, 2);
+
+  std::vector<std::string> vars = SRBase.GetListOfVariables();
+  TDirectory * dir = (TDirectory*)outfile_->Get((SRBase.GetName()).c_str());
+  if (dir == 0) {
+    dir = outfile_->mkdir((SRBase.GetName()).c_str());
+  } 
+  dir->cd();
+  for(unsigned int j = 0; j < vars.size(); j++){
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBase.GetLowerBound(vars.at(j)), SRBase.srHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"UP",   1, SRBase.GetUpperBound(vars.at(j)), SRBase.srHistMap, "", 1, 0, 2);
+  }
+  outfile_->cd();
 
 }
 
@@ -75,8 +98,11 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
   SetSignalRegions();
 
+  SR SRNoCut;
+  SRNoCut.SetName("nocut");
+
+
 /*
-  std::map<std::string, TH1D*> h_1d_nocut;
   std::map<std::string, TH1D*> h_1d_srbase;
   std::map<std::string, TH1D*> h_1d_crgjbase;
   std::map<std::string, TH1D*> h_1d_crdybase;
@@ -328,10 +354,11 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       ////////////////////////////////////
 
       //fillHistos(h_1d_nocut, "nocut");
-
-      //fillHistosSignalRegion(h_1d_srbase, "srbase");
+      fillHistos(SRNoCut.srHistMap, SRNoCut.GetName(), "");
 
       fillHistosSignalRegion("sr");
+
+      fillHistosSRBase();
 
       if (doGJplots) {
         saveGJplots = true;
@@ -374,9 +401,9 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   //---------------------
 
   outfile_->cd();
-  //savePlotsDir(h_1d_global,outfile_,"");
-  //savePlotsDir(h_1d_nocut,outfile_,"nocut");
-  //savePlotsDir(h_1d_srbase,outfile_,"srbase");
+  savePlotsDir(h_1d_global,outfile_,"");
+  savePlotsDir(SRNoCut.srHistMap,outfile_,SRNoCut.GetName().c_str());
+  savePlotsDir(SRBase.srHistMap,outfile_,SRBase.GetName().c_str());
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(!SRVec.at(srN).srHistMap.empty()){
@@ -442,6 +469,22 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   cout << "Real Time:	" << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
   cout << endl;
   delete bmark;
+
+  return;
+}
+
+void MT2Looper::fillHistosSRBase() {
+
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = t.deltaPhiMin;
+  values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  values["nlep"]        = nlepveto_;
+  values["j1pt"]        = t.jet_pt[0];
+  values["j2pt"]        = t.jet_pt[1];
+  values["mt2"]         = t.mt2;
+  values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+
+  if(SRBase.PassesSelection(values)) fillHistos(SRBase.srHistMap, SRBase.GetName(), "");
 
   return;
 }

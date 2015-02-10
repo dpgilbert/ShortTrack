@@ -38,6 +38,7 @@ class MT2Looper {
 
   void SetSignalRegions();
   void loop(TChain* chain, std::string output_name = "test.root");
+  void fillHistosSRBase();
   void fillHistosSignalRegion(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRSL(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRGJ(const std::string& prefix = "", const int jetIdx0 = 0, const int jetIdx1 = 1, const std::string& suffix = "");
@@ -60,7 +61,7 @@ class MT2Looper {
   float mt_;
   std::map<std::string, TH1D*> h_1d_global;
   std::vector<SR> SRVec;
-  SR baseSR;
+  SR SRBase;
 };
 
 #endif
