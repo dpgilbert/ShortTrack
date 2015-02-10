@@ -60,7 +60,7 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
 	cout << "couldn't find CR hist: " << fullhistnamesSL.at(icr) << endl;
       }
       if (icr == 0) {
-	hlostlep_cr = (TH1D*) httbar_cr->Clone("h_mt2binsCR");
+	hlostlep_cr = (TH1D*) httbar_cr->Clone("h_mt2binsCRyield");
       } else {
 	hlostlep_cr->Add(httbar_cr);
       }
@@ -104,7 +104,7 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
     pred->Write();
     Stat->Write();
     Syst->Write();
-
+    hlostlep_cr->Write();
 
   } // loop over signal regions
 
@@ -178,6 +178,8 @@ void lostlepMaker(){
   // ----------------------------------------
   //  samples definition
   // ----------------------------------------
+
+  std::cout << "Writing to file: " << output_name << std::endl;
 
   // get input files
   TFile* f_ttbar = new TFile(Form("%s/ttall_msdecays.root",input_dir.c_str()));

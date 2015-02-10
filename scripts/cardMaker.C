@@ -25,6 +25,8 @@ bool suppressZeroBins = true;
 bool iteration1 = false; // Here we try to get realistic statistical errors from control region statistics
                          // To use this option, first run the ZinvMaker.C and lostlepMaker.C
 
+bool useGammaFunction = false; // use gamma function for CR stat nuisance params in iteration1
+
 std::string toString(int in){
   stringstream ss;
   ss << in;
@@ -39,6 +41,11 @@ void ReplaceString(std::string& subject, const std::string& search, const std::s
     }
 }
 
+double round(double d)
+{
+  return floor(d + 0.5);
+}
+
 //_______________________________________________________________________________
 void printCard( string dir_str , int mt2bin , string signal, string output_dir) {
 
@@ -47,11 +54,14 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   TString dir = TString(dir_str);
   TString fullhistname = dir + "/h_mt2bins";
   TString fullhistnameStat  = fullhistname+"Stat";
+  TString fullhistnameCRyield  = fullhistname+"CRyield";
 
   double n_lostlep(0.);
   double n_lostlep_tr(0.);
+  double n_lostlep_cr(0.);
   double err_lostlep_stat(0.);
   double n_zinv(0.);
+  double n_zinv_cr(0.);
   double err_zinv_stat(0.);
   double n_qcd(0.);
   double n_bkg(0.);
@@ -86,6 +96,8 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
 
   int mt2_LOW = h_sig->GetBinLowEdge(mt2bin);
   int mt2_UP = mt2_LOW + h_sig->GetBinWidth(mt2bin);
+  // hardcode the current edge of our highest bin..
+  if (mt2_UP == 1500) mt2_UP = -1;
 
   int nbjets_UP_mod = nbjets_UP;
   int njets_UP_mod = njets_UP;
@@ -102,10 +114,10 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   else minMT_str = "";
   
   //Replace instances of "-1" with "inf" for variables with no upper bound.
-  ReplaceString(ht_str, "-1", "inf");
-  ReplaceString(jet_str, "-1", "inf");
-  ReplaceString(bjet_str, "-1", "inf");
-  ReplaceString(mt2_str, "-1", "inf");
+  ReplaceString(ht_str, "-1", "Inf");
+  ReplaceString(jet_str, "-1", "Inf");
+  ReplaceString(bjet_str, "-1", "Inf");
+  ReplaceString(mt2_str, "-1", "Inf");
 
   std::string channel = ht_str + "_" + jet_str + "_" + bjet_str + "_" + minMT_str + mt2_str;
 
@@ -130,6 +142,9 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
     TH1D* h_lostlep_stat = (TH1D*) f_lostlep->Get(fullhistnameStat);
     if (h_lostlep_stat != 0 && h_lostlep_stat->GetBinContent(mt2bin) != 0) 
       err_lostlep_stat = h_lostlep_stat->GetBinError(mt2bin)/h_lostlep_stat->GetBinContent(mt2bin);
+    TH1D* h_lostlep_cryield = (TH1D*) f_lostlep->Get(fullhistnameCRyield);
+    if (h_lostlep_cryield != 0) 
+      n_lostlep_cr = round(h_lostlep_cryield->Integral(0,-1));
   }
 
 
@@ -143,6 +158,9 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
     TH1D* h_zinv_stat = (TH1D*) f_zinv->Get(fullhistnameStat);
     if (h_zinv_stat != 0 && h_zinv_stat->GetBinContent(mt2bin) != 0) 
       err_zinv_stat = h_zinv_stat->GetBinError(mt2bin)/h_zinv_stat->GetBinContent(mt2bin);
+    TH1D* h_zinv_cryield = (TH1D*) f_zinv->Get(fullhistnameCRyield);
+    if (h_zinv_cryield != 0 && h_zinv_cryield->GetBinContent(mt2bin) != 0) 
+      n_zinv_cr = round(h_zinv_cryield->GetBinContent(mt2bin));
   }
 
 
@@ -159,26 +177,38 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   // ----- lost lepton bkg uncertainties
   // uncorrelated across TRs and MT2 bins
   double lostlep_shape = 1.075;
-  TString name_lostlep_shape = Form("llep_shape_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
+  TString name_lostlep_shape = Form("llep_shape_%s", channel.c_str());
   ++n_syst;
   // correlated for MT2 bins in a TR
   double lostlep_crstat = 1.;
+  double lostlep_lepeff = 1.;
   if (iteration1) { // iteration1: use CR stats
-    if (err_lostlep_stat > 0.) lostlep_crstat = 1. + sqrt( pow(0.15,2) + pow(err_lostlep_stat,2));
-    else lostlep_crstat = 1. + sqrt( pow(0.15,2) + 1.);
+    if (useGammaFunction) {
+      // set lostlep_crstat to transfer factor from CR to SR
+      if (n_lostlep > 0. && n_lostlep_cr > 0.) lostlep_crstat = n_lostlep / n_lostlep_cr;
+      else lostlep_crstat = 1.;
+      lostlep_lepeff = 1.15;
+      n_syst += 2;
+    }
+    else { // don't use gamma function
+      if (err_lostlep_stat > 0.) lostlep_crstat = 1. + sqrt( pow(0.15,2) + pow(err_lostlep_stat,2));
+      else lostlep_crstat = 1. + sqrt( pow(0.15,2) + 1.);
+      ++n_syst;
+    }
   }
   else { // iteration0: emulate CR stats
     if (n_lostlep_tr > 0.) lostlep_crstat = 1. + sqrt( pow(0.15,2) + pow(1./sqrt(n_lostlep_tr),2));
     else lostlep_crstat = 1. + sqrt( pow(0.15,2) + 1.);
+    ++n_syst;
   }
   TString name_lostlep_crstat = Form("llep_CRstat_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
+  TString name_lostlep_lepeff = Form("llep_lepeff_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
 /*
   if (iteration1) {
     TString crdir = getCorrelatedSLCRs(dir);
     name_lostlep_crstat = Form("LL_CRSTAT_%s",crdir.Data());
   }
 */
-  ++n_syst;
 
   // ----- zinv bkg uncertainties - depend on signal region, b selection
   // uncorrelated across TRs and MT2 bins
@@ -202,19 +232,37 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   // 1b: data CR with 0->1b sf
   else if (nbjets_LOW == 1 && nbjets_UP == 2) {
     if (n_zinv > 0.) {
-      if (iteration1) zinv_crstat = 1. + 1.*err_zinv_stat;
+      if (iteration1) {
+	if (useGammaFunction) {
+	  if (n_zinv_cr > 0.) zinv_crstat =  n_zinv / n_zinv_cr;
+	  else zinv_crstat = 1.;
+	} 
+	else { // iter1, don't use gamma function
+	  zinv_crstat = 1. + 1.*err_zinv_stat;
+	}
+      }
+      // else: iter0
       else zinv_crstat = 1. + 1./sqrt(20. * n_zinv);
     }
     else zinv_crstat = 2.;
     zinv_zgamma = 1.20;
     if (iteration1) zinv_bratio = 1.00;
     else zinv_bratio = 1.30;
-    n_syst += 3;
+    if (iteration1) n_syst += 2;
+    else n_syst += 3;
   }
   // 0b: data CR
   else if (nbjets_UP == 1) {
     if (n_zinv > 0.) {
-      if (iteration1) zinv_crstat = 1. + 1.*err_zinv_stat;
+      if (iteration1) {
+	if (useGammaFunction) {
+	  if (n_zinv_cr > 0.) zinv_crstat = n_zinv / n_zinv_cr ;
+	  else zinv_crstat = 1.;
+	} 
+	else { // iter1, don't use gamma function
+	  zinv_crstat = 1. + 1.*err_zinv_stat;
+	}
+      }
       else zinv_crstat = 1. + 1./sqrt(2. * n_zinv);
     }
     else zinv_crstat = 2.;
@@ -238,30 +286,39 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   *ofile <<  "jmax 3  number of backgrounds"                                                 << endl;
   *ofile <<  Form("kmax %d  number of nuisance parameters",n_syst)                           << endl;
   *ofile <<  "------------"                                                                  << endl;
-  *ofile <<  "bin         1"                                                                 << endl;
+  *ofile <<  Form("bin         %s",channel.c_str())                                          << endl;
   *ofile <<  Form("observation %.0f",n_bkg)                                                  << endl;
   *ofile <<  "------------"                                                                  << endl;
-  *ofile <<  "bin             1      1        1      1"                                      << endl;
-  *ofile <<  "process       signal  lostlep  zinv   qcd"                                     << endl; 
-  *ofile <<  "process         0      1        2      3"                                      << endl;
-  *ofile <<  Form("rate            %.2f    %.2f     %.2f    %.2f",n_sig,n_lostlep,n_zinv,n_qcd) << endl;
+  *ofile <<  Form("bin             %s   %s   %s   %s",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str()) << endl;
+  *ofile <<  "process          sig       zinv        llep      qcd"                                      << endl; 
+  *ofile <<  "process           0         1           2         3"                                      << endl;
+  *ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig,n_zinv,n_lostlep,n_qcd) << endl;
   *ofile <<  "------------"                                                                  << endl;
-  *ofile <<  Form("sig_syst              lnN   %.2f    -      -     -     uncertainty on signal",sig_syst)  << endl;
+  *ofile <<  Form("sig_syst                                            lnN   %.3f    -      -     - ",sig_syst)  << endl;
   if (nbjets_UP == 1 || nbjets_UP == 2) {
-    *ofile <<  Form("%s  lnN    -      -    %.3f   -     zinv CR stats",name_zinv_crstat.Data(),zinv_crstat)  << endl;
+    *ofile <<  Form("%s                                   lnN    -   %.3f    -    - ",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;
   }
   if (nbjets_UP == 1 || nbjets_UP == 2) {
-    *ofile <<  Form("%s          lnN    -      -    %.2f    -     zinv Z/gamma ratio",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;
+    if (iteration1 && useGammaFunction) {
+      *ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr,zinv_crstat)  << endl;
+    } else {
+      *ofile <<  Form("%s     lnN    -   %.3f   -   - ",name_zinv_crstat.Data(),zinv_crstat)  << endl;
+    }
   }
-  if (nbjets_LOW == 1 && nbjets_UP == 2) {
-    *ofile <<  Form("%s     lnN    -      -    %.2f    -     zinv 0/1b ratio",name_zinv_bratio.Data(),zinv_bratio)  << endl;
+  if (!iteration1 && nbjets_LOW == 1 && nbjets_UP == 2) {
+    *ofile <<  Form("%s               lnN    -     %.3f   -    - ",name_zinv_bratio.Data(),zinv_bratio)  << endl;
   }
   if (nbjets_LOW >= 2) {
-    *ofile <<  Form("%s  lnN    -      -    %.2f    -     zinv MC syst",name_zinv_mcsyst.Data(),zinv_mcsyst)  << endl;
+    *ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_mcsyst.Data(),zinv_mcsyst)  << endl;
   }
-  *ofile <<  Form("%s     lnN    -   %.3f     -     -     lost lepton shape uncert",name_lostlep_shape.Data(),lostlep_shape)  << endl;
-  *ofile <<  Form("%s       lnN    -   %.3f     -     -     lost lepton CR stats/lep eff",name_lostlep_crstat.Data(),lostlep_crstat)  << endl;
-  *ofile <<  Form("%s     lnN    -      -       -   %.2f    QCD syst",name_qcd_syst.Data(),qcd_syst)  << endl;
+  *ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_shape.Data(),lostlep_shape)  << endl;
+  if (iteration1 && useGammaFunction) {
+    *ofile <<  Form("%s                 gmN %.0f    -    -    %.5f     - ",name_lostlep_crstat.Data(),n_lostlep_cr,lostlep_crstat)  << endl;
+    *ofile <<  Form("%s                 lnN    -    -    %.3f    - ",name_lostlep_lepeff.Data(),lostlep_lepeff)  << endl;
+  } else {
+    *ofile <<  Form("%s                 lnN    -    -    %.3f    - ",name_lostlep_crstat.Data(),lostlep_crstat)  << endl;
+  }
+  *ofile <<  Form("%s     lnN    -      -       -   %.3f ",name_qcd_syst.Data(),qcd_syst)  << endl;
 
   ofile->close();
 

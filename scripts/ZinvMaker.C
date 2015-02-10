@@ -87,10 +87,12 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fQCD, vector<string
     }
     //pred->Print("all");
 
+    TH1D* CRyield = hGJet->Clone("h_mt2binsCRyield");
+
     pred->Write();
     Stat->Write();
     Syst->Write();
-
+    CRyield->Write();
 
   } // loop over signal regions
 
@@ -192,6 +194,8 @@ void ZinvMaker(){
   // ----------------------------------------
   //  samples definition
   // ----------------------------------------
+
+  std::cout << "Writing to file: " << output_name << std::endl;
 
   // get input files
   TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
