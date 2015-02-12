@@ -22,10 +22,10 @@ TFile* f_sig = 0;
 
 bool suppressZeroBins = true;
 
-bool iteration1 = false; // Here we try to get realistic statistical errors from control region statistics
+bool iteration1 = true; // Here we try to get realistic statistical errors from control region statistics
                          // To use this option, first run the ZinvMaker.C and lostlepMaker.C
 
-bool useGammaFunction = false; // use gamma function for CR stat nuisance params in iteration1
+bool useGammaFunction = true; // use gamma function for CR stat nuisance params in iteration1
 
 std::string toString(int in){
   stringstream ss;
@@ -183,10 +183,15 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   double lostlep_crstat = 1.;
   double lostlep_lepeff = 1.;
   if (iteration1) { // iteration1: use CR stats
+
     if (useGammaFunction) {
       // set lostlep_crstat to transfer factor from CR to SR
       if (n_lostlep > 0. && n_lostlep_cr > 0.) lostlep_crstat = n_lostlep / n_lostlep_cr;
-      else lostlep_crstat = 1.;
+      //else lostlep_crstat = 1.;
+      else{ 
+        lostlep_crstat = n_lostlep;
+        n_lostlep_cr = 1;
+      }
       lostlep_lepeff = 1.15;
       n_syst += 2;
     }
