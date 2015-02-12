@@ -9,4 +9,6 @@ void mergeHadoopFiles(const TString& indir, const TString& outpath) {
 
   chain->Add(indir + "/*.root");
   chain->Merge(outpath, "fast");
+
+  std::cout << "Total events merged: " << chain->GetEntries() << std::endl;
 }
