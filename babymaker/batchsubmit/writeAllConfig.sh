@@ -38,10 +38,10 @@ TAG="V00-00-09"
 # DY+JETS
 #
 
-./writeConfig.sh /hadoop/cms/store/group/snt/phys14_old/DYJetsToLL_M-50_HT-100to200_Tune4C_13TeV-madgraph-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/CMS3_V07-02-02/ ${TAG}_dyjetsll_ht100to200
-./writeConfig.sh /hadoop/cms/store/group/snt/phys14_old/DYJetsToLL_M-50_HT-200to400_Tune4C_13TeV-madgraph-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/CMS3_V07-02-02/ ${TAG}_dyjetsll_ht200to400
-./writeConfig.sh /hadoop/cms/store/group/snt/phys14_old/DYJetsToLL_M-50_HT-400to600_Tune4C_13TeV-madgraph-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/CMS3_V07-02-02/ ${TAG}_dyjetsll_ht400to600
-./writeConfig.sh /hadoop/cms/store/group/snt/phys14_old/DYJetsToLL_M-50_HT-600toInf_Tune4C_13TeV-madgraph-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/CMS3_V07-02-02/ ${TAG}_dyjetsll_ht600toInf
+./writeConfig.sh /hadoop/cms/store/group/snt/phys14/DYJetsToLL_M-50_HT-100to200_Tune4C_13TeV-madgraph-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-03/ ${TAG}_dyjetsll_ht100to200
+./writeConfig.sh /hadoop/cms/store/group/snt/phys14/DYJetsToLL_M-50_HT-200to400_Tune4C_13TeV-madgraph-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-03/ ${TAG}_dyjetsll_ht200to400
+./writeConfig.sh /hadoop/cms/store/group/snt/phys14/DYJetsToLL_M-50_HT-400to600_Tune4C_13TeV-madgraph-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-03/ ${TAG}_dyjetsll_ht400to600
+./writeConfig.sh /hadoop/cms/store/group/snt/phys14/DYJetsToLL_M-50_HT-600toInf_Tune4C_13TeV-madgraph-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-03/ ${TAG}_dyjetsll_ht600toInf
 
 
 #
