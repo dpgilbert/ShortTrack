@@ -119,10 +119,13 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
     }
     //pred->Print("all");
 
+    TH1D* MCStat = (TH1D*) hlostlep_sr->Clone("h_mt2binsMCStat");
+
     pred->Write();
     Stat->Write();
     Syst->Write();
     hlostlep_cr->Write();
+    MCStat->Write();
 
   } // loop over signal regions
 
@@ -194,8 +197,7 @@ vector<TString> getCRsToCombine(TFile* f, const TString& dir) {
 //_______________________________________________________________________________
 void lostlepMaker(){
 
-  //string input_dir = "../MT2looper/output/2015ExtendedNJets/";
-  string input_dir = "../MT2looper/output/2015ExtendedNJets_UltraHighHT/";
+  string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
   //string input_dir = "../MT2looper/output/2015LowLumi/";
   //  string input_dir = "../MT2looper/output/test/";
   string output_name = input_dir+"lostlepFromCRs.root";

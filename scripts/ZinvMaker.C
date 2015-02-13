@@ -21,7 +21,6 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fQCD, vector<string
 
   // Generate histogram file with Zinv prediction based on GJetsData * R(Zinv/GJ)
   // Method 0.  Just Poisson from GJet: Zinv +/- Zinv/sqrt(GJet)
-  // Method 1.  also MC stats on ratio: ( GJet +/- sqrt(GJet) ) * ( R(Zinv/GJet) +/- MCstat ) 
   // Method 2.  Same as method 0, add +/- QCD (100% systematic uncertainty based on QCD)
 
   TFile * outfile = new TFile(output_name.c_str(),"RECREATE") ; 
@@ -67,15 +66,14 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fQCD, vector<string
       }
     }
 
-    if (method==1) { // --- More advanced: ( GJet +/- sqrt(GJet) ) * ( R(Zinv/GJet) +/- MCstat ) 
-      // Poisson uncertainty on GJet, then MC statistical uncertainty on R 
-      TH1D* ratio = hZinv->Clone("ratio");
-      ratio->Divide(hGJet);
-      Stat = (TH1D*) hGJet->Clone("h_mt2binsStat");
-      for ( unsigned int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { // Set Poisson errors
-	Stat->SetBinError(ibin, sqrt( hGJet->GetBinContent(ibin) ));
-      }
-      Stat->Multiply(ratio);
+    // Zgamma ratio in each MT2bin -> to get MC stat error on ratio
+    TH1D* ratio = hZinv->Clone("ratio");
+    ratio->Divide(hGJet);
+
+    // MCStat: use relative bin error from ratio hist, normalized to Zinv MC prediction
+    TH1D* MCStat = (TH1D*) hZinv->Clone("h_mt2binsMCStat");
+    for ( unsigned int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
+      MCStat->SetBinError(ibin, MCStat->GetBinContent(ibin) * ratio->GetBinError(ibin) / ratio->GetBinContent(ibin) );
     }
 
     TH1D* Syst = Stat->Clone("h_mt2binsSyst");
@@ -93,6 +91,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fQCD, vector<string
     Stat->Write();
     Syst->Write();
     CRyield->Write();
+    MCStat->Write();
 
   } // loop over signal regions
 
@@ -106,7 +105,6 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
 
   // Generate histogram file with Zinv prediction based on DYData * R(Zinv/DY)
   // Method 0.  Just Poisson from DY: Zinv +/- Zinv/sqrt(DY)
-  // Method 1.  also MC stats on ratio: ( DY +/- sqrt(DY) ) * ( R(Zinv/DY) +/- MCstat ) 
 
   TFile * outfile = new TFile(output_name.c_str(),"RECREATE") ; 
   outfile->cd();
@@ -151,16 +149,15 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
       }
     }
 
-    if (method==1) { // --- More advanced: ( DY +/- sqrt(DY) ) * ( R(Zinv/GJet) +/- MCstat ) 
-      // Poisson uncertainty on DY, MC statistical uncertainty on R 
-      TH1D* ratio = hZinv->Clone("ratio");
-      ratio->Divide(hDY);
-      Stat = (TH1D*) hDY->Clone("h_mt2binsStat");
-      for ( unsigned int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { // Set Poisson errors
-	Stat->SetBinError(ibin, sqrt( hDY->GetBinContent(ibin) ));
-      }
-      Stat->Multiply(ratio);
+    TH1D* ratio = hZinv->Clone("ratio");
+    ratio->Divide(hDY);
+
+    // MCStat: use relative bin error from ratio hist, normalized to Zinv MC prediction
+    TH1D* MCStat = (TH1D*) hZinv->Clone("h_mt2binsMCStat");
+    for ( unsigned int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
+      MCStat->SetBinError(ibin, MCStat->GetBinContent(ibin) * ratio->GetBinError(ibin) / ratio->GetBinContent(ibin) );
     }
+
 
     TH1D* Syst = Stat->Clone("h_mt2binsSyst");
     TH1D* pred = Stat->Clone("h_mt2bins");
@@ -171,9 +168,13 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
     }
     //pred->Print("all");
 
+    TH1D* CRyield = hDY->Clone("h_mt2binsCRyield");
+
     pred->Write();
     Stat->Write();
     Syst->Write();
+    CRyield->Write();
+    MCStat->Write();
 
 
   } // loop over signal regions
@@ -187,8 +188,8 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
 //_______________________________________________________________________________
 void ZinvMaker(){
 
-  //  string input_dir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-00-07_sel2015LowLumi/";
-  string input_dir = "../MT2looper/output/2015ExtendedNJets/";
+  string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
+  //  string input_dir = "../MT2looper/output/2015ExtendedNJets/";
   //string input_dir = "../MT2looper/output/2015LowLumi/";
   string output_name = input_dir+"zinvFromGJ.root";
   // ----------------------------------------
