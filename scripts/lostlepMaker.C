@@ -44,12 +44,21 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
     // If either ttbar or wjets SR histograms are not filled, just leave (shouldn't happen when running on full stat MC)
     if(!httbar_sr || !hwjets_sr){
       cout<<"could not find histogram "<<fullhistname<<endl;
-      continue;
+      //continue; //Actually, don't skip. Still need CR yields even if SR yields are 0.
     }
 
+    const int n_mt2bins = 5;
+    const float mt2bins[n_mt2bins+1] = {200., 300., 400., 600., 1000., 1500.};
 
-    TH1D* hlostlep_sr = (TH1D*) httbar_sr->Clone("h_mt2binsSR");
-    hlostlep_sr->Add(hwjets_sr);
+    TH1D* hlostlep_sr = 0;
+    if(httbar_sr) {
+      hlostlep_sr = (TH1D*) httbar_sr->Clone("h_mt2binsSR");
+      if(hwjets_sr) hlostlep_sr->Add(hwjets_sr);
+    } else if(hwjets_sr) {
+      hlostlep_sr = (TH1D*) hwjets_sr->Clone("h_mt2binsSR");
+    } else {
+      hlostlep_sr = new TH1D("h_mt2binsSR", "h_mt2binsSR", n_mt2bins, mt2bins);
+    }
 
     TH1D* hlostlep_cr = 0;
     for (unsigned int icr = 0; icr < fullhistnamesSL.size(); ++icr) {
@@ -57,18 +66,24 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
       TH1D* hwjets_cr = (TH1D*) fwjets->Get(fullhistnamesSL.at(icr));
       // check that histograms exist
       if (!httbar_cr) {
-	cout << "couldn't find ttbar CR hist: " << fullhistnamesSL.at(icr) << endl;
+        cout << "couldn't find ttbar CR hist: " << fullhistnamesSL.at(icr) << endl;
       }
       if (!hwjets_cr) {
-	cout << "couldn't find wjets CR hist: " << fullhistnamesSL.at(icr) << endl;
+        cout << "couldn't find wjets CR hist: " << fullhistnamesSL.at(icr) << endl;
       }
       if (!hlostlep_cr && httbar_cr) {
-	hlostlep_cr = (TH1D*) httbar_cr->Clone("h_mt2binsCRyield");
+        hlostlep_cr = (TH1D*) httbar_cr->Clone("h_mt2binsCRyield");
       } else if (httbar_cr) {
-	hlostlep_cr->Add(httbar_cr);
+        hlostlep_cr->Add(httbar_cr);
       }
-      if(hwjets_cr) hlostlep_cr->Add(hwjets_cr);
+      if (!hlostlep_cr && hwjets_cr) {
+        hlostlep_cr = (TH1D*) hwjets_cr->Clone("h_mt2binsCRyield");
+      } else if (hwjets_cr) {
+        hlostlep_cr->Add(hwjets_cr);
+      }
     }
+
+    if(!hlostlep_cr) hlostlep_cr = new TH1D("h_mt2binsCRyield", "h_mt2binsCRyield", n_mt2bins, mt2bins);
 
     if (hlostlep_sr->GetNbinsX() != hlostlep_cr->GetNbinsX() ) {
       cout<<"different binning for histograms "<<fullhistname<<endl;
