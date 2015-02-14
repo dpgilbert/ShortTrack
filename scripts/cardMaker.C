@@ -186,9 +186,10 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
 
   // ----- lost lepton bkg uncertainties
   // uncorrelated across TRs and MT2 bins
+  //  for iter1+gamma, only apply if n_lostlep > 0.
   double lostlep_shape = 1.075;
   TString name_lostlep_shape = Form("llep_shape_%s", channel.c_str());
-  ++n_syst;
+  if (n_lostlep > 0. || (!iteration1 && !useGammaFunction))  ++n_syst;
   // correlated for MT2 bins in a TR
   double lostlep_crstat = 1.;
   bool lostlep_decorrelate_bin = false;
@@ -414,7 +415,9 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   } else {
     *ofile <<  Form("%s                 lnN    -    -    %.3f    - ",name_lostlep_crstat.Data(),lostlep_crstat)  << endl;
   }
-  *ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_shape.Data(),lostlep_shape)  << endl;
+  if (n_lostlep > 0. || (!iteration1 && !useGammaFunction)) {
+    *ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_shape.Data(),lostlep_shape)  << endl;
+  }
   if (n_qcd > 0.) *ofile <<  Form("%s     lnN    -      -       -   %.3f ",name_qcd_syst.Data(),qcd_syst)  << endl;
 
   ofile->close();
