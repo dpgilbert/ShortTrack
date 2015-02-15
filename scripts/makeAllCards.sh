@@ -1,7 +1,9 @@
 #!/bin/bash
 
-INDIR=/home/users/jgran/MT2_phys14_status/MT2Analysis/MT2looper/output/phys14_status_4fb
-OUTDIR=cards
+#INDIR=/home/users/jgran/temp/MT2Analysis/MT2looper/output/2015ExtendedNJets
+
+#OUTDIR=cards_2015ExtendedNJets
+OUTDIR=cards_test
 
 if [ ! -d "$OUTDIR" ]; then
   mkdir -p $OUTDIR
@@ -11,5 +13,5 @@ declare -a samples=("T1tttt_1500_100" "T1tttt_1200_800" "T1bbbb_1500_100" "T1bbb
 
 for i in "${samples[@]}"
 do
-  root -b -q "cardMaker.C(\"$i\",\"${INDIR}\",\"${OUTDIR}\")"
+  nohup root -b -q "cardMaker.C(\"$i\",\"${INDIR}\",\"${OUTDIR}\")" > make_cards_$i.log 2>&1 &
 done
