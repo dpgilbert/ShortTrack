@@ -493,6 +493,11 @@ void cardMaker(string signal, string input_dir, string output_dir){
 
   f_sig = new TFile(Form("%s/%s.root",input_dir.c_str(),signal.c_str()));
 
+  if( f_lostlep->IsZombie() || f_zinv->IsZombie() || f_qcd->IsZombie() || f_sig->IsZombie()) {
+    std::cout << "Input file does not exist" << std::endl;
+    return;
+  }
+
   // ----------------------------------------
   //  cards definitions
   // ----------------------------------------

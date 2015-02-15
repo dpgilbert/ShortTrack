@@ -203,6 +203,11 @@ void ZinvMaker(){
   TFile* f_gjet = new TFile(Form("%s/gjet_ht.root",input_dir.c_str()));
   //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
 
+  if(f_zinv->IsZombie() || f_gjet->IsZombie()) {
+    std::cout << "Input file does not exist" << std::endl;
+    return;
+  }
+
   vector<string> dirs;
 
   //Loop through list of every directory in the signal file.

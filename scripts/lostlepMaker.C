@@ -211,6 +211,11 @@ void lostlepMaker(){
   TFile* f_ttbar = new TFile(Form("%s/ttall_msdecays.root",input_dir.c_str()));
   TFile* f_wjets = new TFile(Form("%s/wjets_ht.root",input_dir.c_str()));
   //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
+  
+  if(f_ttbar->IsZombie() || f_wjets->IsZombie()) {
+    std::cout << "Input file does not exist" << std::endl;
+    return;
+  }
 
   vector<string> dirs;
 
