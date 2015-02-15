@@ -606,7 +606,7 @@ std::vector<SR> getSignalRegions2015ExtendedNJets_UltraHighHT(){
   }
   for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
     SR fullSR = temp_SR_vec.at(iSR);  
-    fullSR.SetName(fullSR.GetName() + "H");
+    fullSR.SetName(fullSR.GetName() + "UH");
     fullSR.SetVar("ht", 1500, -1);
     fullSR.SetVar("met", 30, -1);
     SRVec.push_back(fullSR);
