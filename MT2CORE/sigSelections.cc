@@ -305,28 +305,28 @@ std::vector<SR> getSignalRegions2015ExtendedNJets(){
   sr.Clear();
 
   sr.SetName("9");
-  sr.SetVar("njets", 7, 8);
+  sr.SetVar("njets", 7, 9);
   sr.SetVar("nbjets", 0, 1);
   sr.SetVar("lowMT", 0, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("10");
-  sr.SetVar("njets", 7, 8);
+  sr.SetVar("njets", 7, 9);
   sr.SetVar("nbjets", 1, 2);
   sr.SetVar("lowMT", 0, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("11");
-  sr.SetVar("njets", 7, 8);
+  sr.SetVar("njets", 7, 9);
   sr.SetVar("nbjets", 2, 3);
   sr.SetVar("lowMT", 1, 2);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("12");
-  sr.SetVar("njets", 7, 8);
+  sr.SetVar("njets", 7, 9);
   sr.SetVar("nbjets", 2, 3);
   sr.SetVar("lowMT", 0, 1);
   temp_SR_vec.push_back(sr);
