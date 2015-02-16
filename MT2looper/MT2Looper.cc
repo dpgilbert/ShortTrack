@@ -311,7 +311,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       int jetIdx1 = 1;
       if (t.evt_id < 300 && t.evt_id!=120) { // remove lowest qcd_ht sample
       	if (t.ngamma > 0) {
-      	  if ( (t.evt_id < 200 && t.gamma_mcMatchId[0]>0  /*&& t.gamma_genIso[0]<5*/)    // Reject true photons from QCD (iso is always 0 for now)
+      	  if ( (t.evt_id < 200 && t.gamma_mcMatchId[0]>0  && t.gamma_genIso[0]<5)    // Reject true photons from QCD (iso is always 0 for now)
       	       || (t.evt_id >=200 && t.gamma_mcMatchId[0]==0 )                           // Reject unmatched photons from Gamma+Jets
       	       || (t.evt_id >=200 && t.gamma_mcMatchId[0] >0 && t.gamma_genIso[0]>5) )   // Reject non-iso photons from Gamma+Jets
       	    { doGJplots = false; }
@@ -660,7 +660,7 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, const st
     dir = outfile_->mkdir(dirname.c_str());
   } 
   dir->cd();
-  float iso = t.gamma_chHadIso[0] + t.gamma_neuHadIso[0];
+  float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
 
   plot1D("h_iso"+s,      iso,   evtweight_, h_1d, ";iso [GeV]", 100, 0, 50);
 
@@ -669,7 +669,7 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, const st
       plot1D("h_iso_mt2bin"+mt2binsname[i]+s,  iso,  evtweight_, h_1d, "; iso", 100, 0, 50);
   }
 
-  if (iso < 10)  {
+  if (iso < 4)  {
     plot1D("h_mt2bins"+s,       t.gamma_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   if (dirname=="crgjbase" || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH") {
       plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
