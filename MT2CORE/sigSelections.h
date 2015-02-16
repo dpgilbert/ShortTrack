@@ -11,6 +11,7 @@ namespace mt2
 std::vector<SR> getSignalRegions2012();
 std::vector<SR> getSignalRegions2015LowLumi();
 std::vector<SR> getSignalRegions2015ExtendedNJets();
+std::vector<SR> getSignalRegions2015ExtendedNJets_UltraHighHT();
 
 } // namespace mt2
 

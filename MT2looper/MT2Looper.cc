@@ -362,7 +362,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
       if (doGJplots) {
         saveGJplots = true;
-        fillHistosCRGJ("crgjbase", jetIdx0, jetIdx1);
+        fillHistosCRGJ("crgj", jetIdx0, jetIdx1);
       }
       if (doDYplots) {
         saveDYplots = true;
