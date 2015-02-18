@@ -75,6 +75,11 @@ class babyMaker {
   Float_t         mt2;
   Float_t         mt2_gen;
 
+  Float_t         jet1_pt;
+  Float_t         jet2_pt;
+  Float_t         gamma_jet1_pt;
+  Float_t         gamma_jet2_pt;
+
   Float_t         pseudoJet1_pt;
   Float_t         pseudoJet1_eta;
   Float_t         pseudoJet1_phi;

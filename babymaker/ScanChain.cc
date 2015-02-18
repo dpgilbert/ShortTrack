@@ -643,7 +643,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       //correct jets and check baseline selections
       vector<LorentzVector> p4sCorrJets; // store corrected p4 for ALL jets, so indices match CMS3 ntuple
-      vector<int> passJets; //index of jets that pass baseline selections
+      vector<std::pair<int,float> > passJets; //index of jets that pass baseline selections with their corrected pt
       for(unsigned int iJet = 0; iJet < cms3.pfjets_p4().size(); iJet++){
 
 	LorentzVector pfjet_p4_cor = cms3.pfjets_p4().at(iJet);
@@ -672,9 +672,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	//  chance for small discrepancies if JEC changes direction slightly..
         if(!isLoosePFJet(iJet)) continue;
 
-        passJets.push_back(iJet);
+        passJets.push_back( std::pair<int,float>(iJet, pfjet_p4_cor.pt()) );
 
       }
+
+      // sort passing jets by corrected pt
+      std::sort(passJets.begin(), passJets.end(), sortByValue);
 
       if (verbose) cout << "before jet/lepton overlap" << endl;
 
@@ -687,7 +690,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         int minIndex = -1;
         for(unsigned int passIdx = 0; passIdx < passJets.size(); passIdx++){ //loop through jets that passed baseline selections
 
-          int iJet = passJets.at(passIdx);
+          int iJet = passJets.at(passIdx).first;
 
           if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
           if(fabs(p4sCorrJets.at(iJet).eta()) > 5.2) continue;
@@ -723,7 +726,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         int minIndex = -1;
         for(unsigned int passIdx = 0; passIdx < passJets.size(); passIdx++){ //loop through jets that passed baseline selections
 
-          int iJet = passJets.at(passIdx);
+          int iJet = passJets.at(passIdx).first;
 
           if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
           if(fabs(p4sCorrJets.at(iJet).eta()) > 5.2) continue;
@@ -751,10 +754,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       nJet40 = 0;
       nBJet40 = 0;
       minMTBMet = 999999.;
+      jet1_pt = 0.;
+      jet2_pt = 0.;
 
       gamma_nJet40 = 0;
       gamma_nBJet40 = 0;
       gamma_minMTBMet = 999999.;
+      gamma_jet1_pt = 0.;
+      gamma_jet2_pt = 0.;
       zll_minMTBMet = 999999.;
 
       if (verbose) cout << "before main jet loop" << endl;
@@ -762,7 +769,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       //now fill variables for jets that pass baseline selections and don't overlap with a lepton
       for(unsigned int passIdx = 0; passIdx < passJets.size(); passIdx++){
 
-        int iJet = passJets.at(passIdx);
+        int iJet = passJets.at(passIdx).first;
 
         //check against list of jets that overlap with a lepton
         bool isOverlapJet = false;
@@ -797,6 +804,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
 
         if( (jet_pt[njet] > 40.0) && (fabs(jet_eta[njet]) < 2.5) ){ 
+	  // store leading/subleading central jet pt.
+	  //  jets should be pt-ordered before entering this loop
+	  if (jet1_pt < 0.1) jet1_pt = p4sCorrJets.at(iJet).pt();
+	  else if (jet2_pt < 0.1) jet2_pt = p4sCorrJets.at(iJet).pt();
           p4sForHems.push_back(p4sCorrJets.at(iJet));
           p4sForDphi.push_back(p4sCorrJets.at(iJet));
           p4sForHemsZll.push_back(p4sCorrJets.at(iJet));
@@ -831,6 +842,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  }
 
 	  if(!isOverlapJetGamma) {
+	    // store leading/subleading central jet pt.
+	    //  jets should be pt-ordered before entering this loop
+	    if (gamma_jet1_pt < 0.1) gamma_jet1_pt = p4sCorrJets.at(iJet).pt();
+	    else if (gamma_jet2_pt < 0.1) gamma_jet2_pt = p4sCorrJets.at(iJet).pt();
 	    p4sForHemsGamma.push_back(p4sCorrJets.at(iJet));
 	    p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
 	    gamma_nJet40++;
@@ -1092,6 +1107,10 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("ht", &ht );
   BabyTree_->Branch("mt2", &mt2 );
   BabyTree_->Branch("mt2_gen", &mt2_gen );
+  BabyTree_->Branch("jet1_pt", &jet1_pt );
+  BabyTree_->Branch("jet2_pt", &jet2_pt );
+  BabyTree_->Branch("gamma_jet1_pt", &gamma_jet1_pt );
+  BabyTree_->Branch("gamma_jet2_pt", &gamma_jet2_pt );
   BabyTree_->Branch("pseudoJet1_pt", &pseudoJet1_pt );
   BabyTree_->Branch("pseudoJet1_eta", &pseudoJet1_eta );
   BabyTree_->Branch("pseudoJet1_phi", &pseudoJet1_phi );
@@ -1292,6 +1311,10 @@ void babyMaker::InitBabyNtuple () {
   ht = -999.0;
   mt2 = -999.0;
   mt2_gen = -999.0;
+  jet1_pt = 0.0;
+  jet2_pt = 0.0;
+  gamma_jet1_pt = 0.0;
+  gamma_jet2_pt = 0.0;
   pseudoJet1_pt = 0.0;
   pseudoJet1_eta = 0.0;
   pseudoJet1_phi = 0.0;
