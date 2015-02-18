@@ -55,10 +55,24 @@ void MT2Looper::SetSignalRegions(){
     for(unsigned int j = 0; j < vars.size(); j++){
       plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).srHistMap, "", 1, 0, 2);
       plot1D("h_"+vars.at(j)+"_"+"UP",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).srHistMap, "", 1, 0, 2);
+    }
 
+    dir = (TDirectory*)outfile_->Get(("crsl"+SRVec.at(i).GetName()).c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir(("crsl"+SRVec.at(i).GetName()).c_str());
+    } 
+    dir->cd();
+    for(unsigned int j = 0; j < vars.size(); j++){
       plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).crslHistMap, "", 1, 0, 2);
       plot1D("h_"+vars.at(j)+"_"+"UP",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).crslHistMap, "", 1, 0, 2);
+    }
 
+    dir = (TDirectory*)outfile_->Get(("crgj"+SRVec.at(i).GetName()).c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir(("crgj"+SRVec.at(i).GetName()).c_str());
+    } 
+    dir->cd();
+    for(unsigned int j = 0; j < vars.size(); j++){
       plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).crgjHistMap, "", 1, 0, 2);
       plot1D("h_"+vars.at(j)+"_"+"UP",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).crgjHistMap, "", 1, 0, 2);
     }
