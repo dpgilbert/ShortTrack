@@ -62,6 +62,7 @@ class MT2Looper {
   std::map<std::string, TH1D*> h_1d_global;
   std::vector<SR> SRVec;
   SR SRBase;
+  SR SRNoCut;
 };
 
 #endif

@@ -39,8 +39,8 @@ MT2Looper::~MT2Looper(){
 
 void MT2Looper::SetSignalRegions(){
 
-  //SRVec = getSignalRegions2015LowLumi();
-  SRVec = getSignalRegions2015ExtendedNJets();
+  SRVec = getSignalRegions2015LowLumi();
+  //SRVec = getSignalRegions2015ExtendedNJets();
   //SRVec =  getSignalRegions2015ExtendedNJets_UltraHighHT();
   //SRVec = getSignalRegions2015ExtendedNJets_V2();
 
@@ -118,7 +118,6 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
   SetSignalRegions();
 
-  SR SRNoCut;
   SRNoCut.SetName("nocut");
 
 
@@ -333,7 +332,22 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       	if (t.ngamma > 0) {
       	  if ( (t.evt_id < 200 && t.gamma_mcMatchId[0]>0  && t.gamma_genIso[0]<5)    // Reject true photons from QCD (iso is always 0 for now)
       	       || (t.evt_id >=200 && t.gamma_mcMatchId[0]==0 )                           // Reject unmatched photons from Gamma+Jets
-      	       || (t.evt_id >=200 && t.gamma_mcMatchId[0] >0 && t.gamma_genIso[0]>5) )   // Reject non-iso photons from Gamma+Jets
+      	       || (t.evt_id >=200 && t.gamma_mcMatchId[0] >0 && t.gamma_genIso[0]>5)    // Reject non-iso photons from Gamma+Jets
+               || (t.evt_id ==105 && t.gamma_pt[0]>50*1.2)                                   //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
+               || (t.evt_id ==106 && t.gamma_pt[0]>80*1.2)                                   //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
+	       || (t.evt_id ==107 && t.gamma_pt[0]>120*1.2)                                  //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
+               || (t.evt_id ==108 && t.gamma_pt[0]>170*1.2)                                  //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
+               || (t.evt_id ==109 && t.gamma_pt[0]>300*1.2)                                  //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
+	       || (t.evt_id ==110 && t.gamma_pt[0]>470*1.2)                                  //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
+               || (t.evt_id ==111 && t.gamma_pt[0]>600*1.2)                                  //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
+               || (t.evt_id ==112 && t.gamma_pt[0]>800*1.2)                                  //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
+	       || (t.evt_id ==113 && t.gamma_pt[0]>1000*1.2)                                 //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
+               || (t.evt_id ==114 && t.gamma_pt[0]>1400*1.2)                                 //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
+               || (t.evt_id ==115 && t.gamma_pt[0]>1800*1.2)                                 //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
+               //|| (t.evt_id ==116 && t.gamma_pt[0]>50*1.2)                                 //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
+               || (t.evt_id ==117 && t.gamma_pt[0]>3200*1.2)                                 //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
+               //|| (t.evt_id ==118 && t.gamma_pt[0]>50*1.2)                                 //reject photons in qcd_ptAAAtoBBB samples with pt>BBB     
+	       )
       	    { doGJplots = false; }
       	  else {
       	    // Redefine leading two jets after jet/photon overlap
@@ -424,6 +438,8 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   savePlotsDir(h_1d_global,outfile_,"");
   savePlotsDir(SRNoCut.srHistMap,outfile_,SRNoCut.GetName().c_str());
   savePlotsDir(SRBase.srHistMap,outfile_,SRBase.GetName().c_str());
+  savePlotsDir(SRNoCut.crgjHistMap,outfile_,"crgjnocut");
+  savePlotsDir(SRBase.crgjHistMap,outfile_,"crgjbase");
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(!SRVec.at(srN).srHistMap.empty()){
@@ -576,6 +592,8 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const int jetIdx0, con
 
   // fill hists
   if (!passSieie) return;
+  if (t.met_pt > 100.) return; // remove overlap with signal region
+  if (t.gamma_pt[0]<150.) return;
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.gamma_deltaPhiMin;
@@ -589,10 +607,27 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const int jetIdx0, con
   values["mt2"]         = t.gamma_mt2;
   values["ht"]          = t.gamma_ht;
   values["met"]         = t.gamma_met_pt;
+  
+  // Separate list for SRBASE
+  std::map<std::string, float> valuesBase;
+  valuesBase["deltaPhiMin"] = t.gamma_deltaPhiMin;
+  valuesBase["diffMetMhtOverMet"]  = t.gamma_diffMetMht/t.gamma_met_pt;
+  valuesBase["nlep"]        = nlepveto_;
+  valuesBase["j1pt"]        = t.jet_pt[jetIdx0];
+  valuesBase["j2pt"]        = t.jet_pt[jetIdx1];
+  valuesBase["mt2"]         = t.gamma_mt2;
+  valuesBase["passesHtMet"] = ( (t.gamma_ht > 450. && t.gamma_met_pt > 200.) || (t.gamma_ht > 1000. && t.gamma_met_pt > 30.) );
 
+  float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
+  std::string add="";
+  if (iso>4 && iso < 60) add = "LooseNotTight";
+  if (iso>60) add = "NotLoose";
+  fillHistosGammaJets(SRNoCut.crgjHistMap, prefix+SRNoCut.GetName(), suffix+add);
+  if(SRBase.PassesSelection(valuesBase)) fillHistosGammaJets(SRBase.crgjHistMap, "crgjbase", suffix+add);
+  
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelection(values)){
-      fillHistosGammaJets(SRVec.at(srN).crgjHistMap, prefix+SRVec.at(srN).GetName(), suffix);
+      fillHistosGammaJets(SRVec.at(srN).crgjHistMap, prefix+SRVec.at(srN).GetName(), suffix+add);
       break;//control regions are orthogonal, event cannot be in more than one
     }
   }
@@ -617,6 +652,7 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   values["mt2"]         = t.zll_mt2;
   values["ht"]          = t.zll_ht;
   values["met"]         = t.zll_met_pt;
+
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelection(values)){
@@ -681,7 +717,6 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, const st
   } 
   dir->cd();
   float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
-
   plot1D("h_iso"+s,      iso,   evtweight_, h_1d, ";iso [GeV]", 100, 0, 50);
 
   for (unsigned int i = 0; i < n_mt2bins; i++) {
@@ -689,24 +724,25 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, const st
       plot1D("h_iso_mt2bin"+mt2binsname[i]+s,  iso,  evtweight_, h_1d, "; iso", 100, 0, 50);
   }
 
-  if (iso < 4)  {
-    plot1D("h_mt2bins"+s,       t.gamma_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-  if (dirname=="crgjbase" || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH") {
-      plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
-      plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
-      plot1D("h_mt2"+s,       t.gamma_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
-      plot1D("h_met"+s,       t.gamma_met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
-      plot1D("h_ht"+s,       t.gamma_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
-      plot1D("h_nJet40"+s,       t.gamma_nJet40,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
-      plot1D("h_nBJet40"+s,      t.gamma_nBJet40,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
-      plot1D("h_deltaPhiMin"+s,  t.gamma_deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
-      plot1D("h_diffMetMht"+s,   t.gamma_diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
-      plot1D("h_diffMetMhtOverMet"+s,   t.gamma_diffMetMht/t.gamma_met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
-      plot1D("h_minMTBMet"+s,   t.gamma_minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
-      plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
-    }
-    
+  //cout<<"Event "<<t.evt<<" with weight "<< evtweight_ <<" is in sr "<<dirname<<endl;
+  plot1D("h_mt2bins"+s,       t.gamma_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  if (dirname=="crgjnocut" || dirname=="crgjbase" || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH") {
+    plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
+    plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
+    plot1D("h_mt2"+s,       t.gamma_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
+    plot1D("h_met"+s,       t.gamma_met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
+    plot1D("h_gammaPt"+s,       t.gamma_pt[0],   evtweight_, h_1d, ";gamma p_{T} [GeV]", 150, 0, 1500);
+    plot1D("h_ht"+s,       t.gamma_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
+    plot1D("h_mt2"+s,  ht, t.gamma_mt2,   evtweight_, h_1d, ";H_{T} [GeV] ; M_{T2} [GeV]", 10, 0, 3000, 10, 0, 2000); 
+    plot1D("h_nJet40"+s,       t.gamma_nJet40,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
+    plot1D("h_nBJet40"+s,      t.gamma_nBJet40,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
+    plot1D("h_deltaPhiMin"+s,  t.gamma_deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
+    plot1D("h_diffMetMht"+s,   t.gamma_diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
+    plot1D("h_diffMetMhtOverMet"+s,   t.gamma_diffMetMht/t.gamma_met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
+    plot1D("h_minMTBMet"+s,   t.gamma_minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
+    plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
   }
+
   outfile_->cd();
   return;
 }
