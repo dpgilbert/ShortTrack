@@ -39,8 +39,8 @@ MT2Looper::~MT2Looper(){
 
 void MT2Looper::SetSignalRegions(){
 
-  SRVec = getSignalRegions2015LowLumi();
-  //SRVec = getSignalRegions2015ExtendedNJets();
+  //SRVec = getSignalRegions2015LowLumi();
+  SRVec = getSignalRegions2015ExtendedNJets();
   //SRVec =  getSignalRegions2015ExtendedNJets_UltraHighHT();
   //SRVec = getSignalRegions2015ExtendedNJets_V2();
 
@@ -717,6 +717,7 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, const st
   } 
   dir->cd();
   float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
+
   plot1D("h_iso"+s,      iso,   evtweight_, h_1d, ";iso [GeV]", 100, 0, 50);
 
   for (unsigned int i = 0; i < n_mt2bins; i++) {
