@@ -50,6 +50,11 @@ inline bool sortByPt(const LorentzVector &vec1, const LorentzVector &vec2 ) {
     return vec1.pt() > vec2.pt();
 }
 
+// This is meant to be passed as the third argument, the predicate, of the standard library sort algorithm
+inline bool sortByValue(const std::pair<int,float>& pair1, const std::pair<int,float>& pair2 ) {
+    return pair1.second > pair2.second;
+}
+
 //--------------------------------------------------------------------
 
 void babyMaker::ScanChain(TChain* chain, std::string baby_name){
@@ -293,7 +298,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
 
       //LEPTONS
-      std::map<float, int> lep_pt_ordering;
+      std::vector<std::pair<int, float> > lep_pt_ordering;
       vector<float>vec_lep_pt;
       vector<float>vec_lep_eta;
       vector<float>vec_lep_phi;
@@ -330,7 +335,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         if(fabs(cms3.els_p4().at(iEl).eta()) > 2.4) continue;
         if(!electronID(iEl,id_level_t::HAD_veto_v1)) continue;
         nElectrons10++;
-        lep_pt_ordering[cms3.els_p4().at(iEl).pt()] = nlep;
+        lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.els_p4().at(iEl).pt()) );
         vec_lep_pt.push_back ( cms3.els_p4().at(iEl).pt());
         vec_lep_eta.push_back ( cms3.els_p4().at(iEl).eta()); //save eta, even though we use SCeta for ID
         vec_lep_phi.push_back ( cms3.els_p4().at(iEl).phi());
@@ -370,7 +375,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         if(fabs(cms3.mus_p4().at(iMu).eta()) > 2.4) continue;
         if(!muonID(iMu,id_level_t::HAD_loose_v1)) continue;
         nMuons10++;
-        lep_pt_ordering[cms3.mus_p4().at(iMu).pt()] = nlep;
+        lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.mus_p4().at(iMu).pt()) );
         vec_lep_pt.push_back ( cms3.mus_p4().at(iMu).pt());
         vec_lep_eta.push_back ( cms3.mus_p4().at(iMu).eta());
         vec_lep_phi.push_back ( cms3.mus_p4().at(iMu).phi());
@@ -402,28 +407,29 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       // Implement pT ordering for leptons (it's irrelevant but easier for us to add than for ETH to remove)
       //now fill arrays from vectors, isotracks with largest pt first
       int i = 0;
-      for(std::map<float, int>::reverse_iterator it = lep_pt_ordering.rbegin(); it!= lep_pt_ordering.rend(); ++it){
+      std::sort(lep_pt_ordering.begin(), lep_pt_ordering.end(), sortByValue);
+      for(std::vector<std::pair<int, float> >::iterator it = lep_pt_ordering.begin(); it!= lep_pt_ordering.end(); ++it){
 
 	if (i >= max_nlep) {
           std::cout << "WARNING: attempted to fill more than " << max_nlep << " leptons" << std::endl;
 	  break;
 	}
 
-        lep_pt[i]     = vec_lep_pt.at(it->second);
-        lep_eta[i]    = vec_lep_eta.at(it->second);
-        lep_phi[i]    = vec_lep_phi.at(it->second);
-        lep_mass[i]   = vec_lep_mass.at(it->second);
-        lep_charge[i] = vec_lep_charge.at(it->second);
-        lep_pdgId[i]  = vec_lep_pdgId.at(it->second);
-        lep_dz[i]     = vec_lep_dz.at(it->second);
-        lep_dxy[i]    = vec_lep_dxy.at(it->second);
-        lep_tightId[i]     = vec_lep_tightId.at(it->second);
-        lep_relIso03[i]    = vec_lep_relIso03.at(it->second);
-        lep_relIso04[i]    = vec_lep_relIso04.at(it->second);
-        lep_mcMatchId[i]   = vec_lep_mcMatchId.at(it->second);
-        lep_lostHits[i]    = vec_lep_lostHits.at(it->second);
-        lep_convVeto[i]    = vec_lep_convVeto.at(it->second);
-        lep_tightCharge[i] = vec_lep_tightCharge.at(it->second);
+        lep_pt[i]     = vec_lep_pt.at(it->first);
+        lep_eta[i]    = vec_lep_eta.at(it->first);
+        lep_phi[i]    = vec_lep_phi.at(it->first);
+        lep_mass[i]   = vec_lep_mass.at(it->first);
+        lep_charge[i] = vec_lep_charge.at(it->first);
+        lep_pdgId[i]  = vec_lep_pdgId.at(it->first);
+        lep_dz[i]     = vec_lep_dz.at(it->first);
+        lep_dxy[i]    = vec_lep_dxy.at(it->first);
+        lep_tightId[i]     = vec_lep_tightId.at(it->first);
+        lep_relIso03[i]    = vec_lep_relIso03.at(it->first);
+        lep_relIso04[i]    = vec_lep_relIso04.at(it->first);
+        lep_mcMatchId[i]   = vec_lep_mcMatchId.at(it->first);
+        lep_lostHits[i]    = vec_lep_lostHits.at(it->first);
+        lep_convVeto[i]    = vec_lep_convVeto.at(it->first);
+        lep_tightCharge[i] = vec_lep_tightCharge.at(it->first);
         i++;
       }
 
@@ -454,7 +460,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       if (verbose) cout << "before isotracks" << endl;
 
       //ISOTRACK
-      std::map<float, int> pt_ordering;
+      std::vector<std::pair<int, float> > pt_ordering;
       vector<float>vec_isoTrack_pt;
       vector<float>vec_isoTrack_eta;
       vector<float>vec_isoTrack_phi;
@@ -503,7 +509,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
 	if ((cand_pt > 10.) && (pdgId == 211) && (absiso/cand_pt < 0.1) && (mt < 100.)) ++nPFHad10LowMT;
 
-        pt_ordering[cand_pt] = nisoTrack;
+        pt_ordering.push_back(std::pair<int,float>(nisoTrack,cand_pt));
 
         vec_isoTrack_pt.push_back    ( cand_pt                          );
         vec_isoTrack_eta.push_back   ( cms3.pfcands_p4().at(ipf).eta()  );
@@ -518,22 +524,23 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       }  
 
       //now fill arrays from vectors, isotracks with largest pt first
-       i = 0;
-      for(std::map<float, int>::reverse_iterator it = pt_ordering.rbegin(); it!= pt_ordering.rend(); ++it){
+      i = 0;
+      std::sort(pt_ordering.begin(), pt_ordering.end(), sortByValue);
+      for(std::vector<std::pair<int, float> >::iterator it = pt_ordering.begin(); it!= pt_ordering.end(); ++it){
 
 	if (i >= max_nisoTrack) {
           std::cout << "WARNING: attempted to fill more than " << max_nisoTrack << " iso tracks" << std::endl;
 	  break;
 	}
 
-        isoTrack_pt[i]     = vec_isoTrack_pt.at(it->second);
-        isoTrack_eta[i]    = vec_isoTrack_eta.at(it->second);
-        isoTrack_phi[i]    = vec_isoTrack_phi.at(it->second);
-        isoTrack_mass[i]   = vec_isoTrack_mass.at(it->second);
-        isoTrack_absIso[i] = vec_isoTrack_absIso.at(it->second);
-        isoTrack_dz[i]     = vec_isoTrack_dz.at(it->second);
-        isoTrack_pdgId[i]  = vec_isoTrack_pdgId.at(it->second);
-        isoTrack_mcMatchId[i]  = vec_isoTrack_mcMatchId.at(it->second);
+        isoTrack_pt[i]     = vec_isoTrack_pt.at(it->first);
+        isoTrack_eta[i]    = vec_isoTrack_eta.at(it->first);
+        isoTrack_phi[i]    = vec_isoTrack_phi.at(it->first);
+        isoTrack_mass[i]   = vec_isoTrack_mass.at(it->first);
+        isoTrack_absIso[i] = vec_isoTrack_absIso.at(it->first);
+        isoTrack_dz[i]     = vec_isoTrack_dz.at(it->first);
+        isoTrack_pdgId[i]  = vec_isoTrack_pdgId.at(it->first);
+        isoTrack_mcMatchId[i]  = vec_isoTrack_mcMatchId.at(it->first);
         i++;
       }
         
