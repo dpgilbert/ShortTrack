@@ -297,6 +297,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
       else { // iter1, don't use gamma function
 	if (n_zinv > 0.) zinv_crstat = 1. + 1.*err_zinv_stat;
 	else zinv_crstat = 2.;
+	  ++n_syst;
       }
     }
     // else: iter0
@@ -340,12 +341,14 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
       else { // iter1, don't use gamma function
 	if (n_zinv > 0.) zinv_crstat = 1. + 1.*err_zinv_stat;
 	else zinv_crstat = 2.;
+  ++n_syst;
       }
     }
     // else: iter0
     else {
       if (n_zinv > 0.) zinv_crstat = 1. + 1./sqrt(2. * n_zinv);
       else zinv_crstat = 2.;
+      ++n_syst;
     }
     zinv_zgamma = 1.20;
     ++n_syst;
