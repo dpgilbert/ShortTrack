@@ -39,8 +39,8 @@ MT2Looper::~MT2Looper(){
 
 void MT2Looper::SetSignalRegions(){
 
-  //SRVec = getSignalRegions2015LowLumi();
-  SRVec = getSignalRegions2015ExtendedNJets();
+  SRVec = getSignalRegions2015LowLumi();
+  //SRVec = getSignalRegions2015ExtendedNJets();
   //SRVec =  getSignalRegions2015ExtendedNJets_UltraHighHT();
   //SRVec = getSignalRegions2015ExtendedNJets_V2();
 
@@ -631,6 +631,17 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const int jetIdx0, con
       break;//control regions are orthogonal, event cannot be in more than one
     }
   }
+  // Remake everything again to get "Loose"
+  if (iso<60) add = "Loose";
+  fillHistosGammaJets(SRNoCut.crgjHistMap, prefix+SRNoCut.GetName(), suffix+add);
+  if(SRBase.PassesSelection(valuesBase)) fillHistosGammaJets(SRBase.crgjHistMap, "crgjbase", suffix+add);
+  
+  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+    if(SRVec.at(srN).PassesSelection(values)){
+      fillHistosGammaJets(SRVec.at(srN).crgjHistMap, prefix+SRVec.at(srN).GetName(), suffix+add);
+      break;//control regions are orthogonal, event cannot be in more than one
+    }
+  }
 
   return;
 }
@@ -734,7 +745,6 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, const st
     plot1D("h_met"+s,       t.gamma_met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
     plot1D("h_gammaPt"+s,       t.gamma_pt[0],   evtweight_, h_1d, ";gamma p_{T} [GeV]", 150, 0, 1500);
     plot1D("h_ht"+s,       t.gamma_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
-    plot1D("h_mt2"+s,  ht, t.gamma_mt2,   evtweight_, h_1d, ";H_{T} [GeV] ; M_{T2} [GeV]", 10, 0, 3000, 10, 0, 2000); 
     plot1D("h_nJet40"+s,       t.gamma_nJet40,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
     plot1D("h_nBJet40"+s,      t.gamma_nBJet40,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
     plot1D("h_deltaPhiMin"+s,  t.gamma_deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
