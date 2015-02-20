@@ -793,7 +793,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         jet_btagCSV[njet] = cms3.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet); 
         jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
         jet_mcFlavour[njet] = cms3.pfjets_partonFlavour().at(iJet);
-        //jet_quarkGluonID
+        //jet_qgl
         jet_area[njet] = cms3.pfjets_area().at(iJet);
 	jet_rawPt[njet] = cms3.pfjets_p4().at(iJet).pt() * cms3.pfjets_undoJEC().at(iJet);
 
@@ -1272,7 +1272,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("jet_rawPt", jet_rawPt, "jet_rawPt[njet]/F" );
   BabyTree_->Branch("jet_mcPt", jet_mcPt, "jet_mcPt[njet]/F" );
   BabyTree_->Branch("jet_mcFlavour", jet_mcFlavour, "jet_mcFlavour[njet]/I" );
-  BabyTree_->Branch("jet_quarkGluonID", jet_quarkGluonID, "jet_quarkGluonID[njet]/F" );
+  BabyTree_->Branch("jet_qgl", jet_qgl, "jet_qgl[njet]/F" );
   BabyTree_->Branch("jet_area", jet_area, "jet_area[njet]/F" );
   BabyTree_->Branch("jet_id", jet_id, "jet_id[njet]/I" );
   BabyTree_->Branch("jet_puId", jet_puId, "jet_puId[njet]/I" );
