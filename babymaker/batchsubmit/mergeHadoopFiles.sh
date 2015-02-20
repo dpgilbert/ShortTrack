@@ -84,8 +84,8 @@ run zinv_ht600toInf
 # TTV
 #
 
-run ttw
-run ttz
+run ttwjets
+run ttzjets
 
 #
 # QCD
