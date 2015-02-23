@@ -14,7 +14,7 @@ TAG="V00-00-10"
 # TTBAR
 #
 
-./writeConfig.sh /hadoop/cms/store/group/snt/phys14/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-05/ ${TAG}_ttall_msdecays
+./writeConfig.sh /hadoop/cms/store/group/snt/phys14/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-06/ ${TAG}_ttall_msdecays
 
 #
 # ALTERNATIVE TTBAR
