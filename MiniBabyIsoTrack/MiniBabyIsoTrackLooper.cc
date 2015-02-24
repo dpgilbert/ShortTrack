@@ -11,12 +11,7 @@
 #include "TBenchmark.h"
 
 // CMS2
-//#include "../MT2CORE/CMS2.h"
-#include "../MT2CORE/tools.h"
-//#include "../MT2CORE/selections.h"
-//#include "../MT2CORE/hemJet.h"
-//#include "../MT2CORE/MT2/MT2.h"
-//#include "../MT2CORE/IsoTrackVeto.h"
+#include "../Tools/utils.h"
 
 // header
 #include "MiniBabyIsoTrackLooper.h"
@@ -33,6 +28,19 @@ MiniBabyIsoTrackLooper::~MiniBabyIsoTrackLooper(){
 
 };
 
+void MiniBabyIsoTrackLooper::SetSignalRegions(){
+
+  SRBase.SetName("srbase");
+  SRBase.SetVar("mt2", 200, -1);
+  SRBase.SetVar("j1pt", 100, -1);
+  SRBase.SetVar("j2pt", 100, -1);
+  SRBase.SetVar("deltaPhiMin", 0.3, -1);
+  SRBase.SetVar("diffMetMhtOverMet", 0, 0.5);
+  SRBase.SetVar("nlep", 0, 1);
+  SRBase.SetVar("passesHtMet", 1, 2);
+
+}
+
 void MiniBabyIsoTrackLooper::loop(TChain* chain, std::string output_name){
 
   // Benchmark
@@ -45,6 +53,7 @@ void MiniBabyIsoTrackLooper::loop(TChain* chain, std::string output_name){
   outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
   makeTree(chain);
 
+  SetSignalRegions();
 
   // File Loop
   int nDuplicates = 0;
@@ -108,247 +117,156 @@ void MiniBabyIsoTrackLooper::loop(TChain* chain, std::string output_name){
       const float lumi = 1.;
       weight_ = t.evt_scale1fb * lumi;
 
-      passevt_ = (int)PassesEventSelection(t.nVert);
-      int nlepveto = t.nMuons10 + t.nElectrons10 + t.nTaus20;
-      sigbase_ = (int) PassesSignalRegionBase(t.met_pt, t.ht, t.nJet40, t.deltaPhiMin, t.diffMetMht, 
-					      nlepveto, t.jet_pt[0], t.jet_pt[1]);
-      sigbase_nolepveto_ = (int) PassesSignalRegionBase(t.met_pt, t.ht, t.nJet40, t.deltaPhiMin, t.diffMetMht, 
-					      0, t.jet_pt[0], t.jet_pt[1]);
-      sigjets_ = (int) PassesSignalRegionJets(t.nJet40, t.nBJet40);
-      sightmet_ = (int) PassesSignalRegionHtMet(t.met_pt, t.ht);
+      passevt_ = (int)(t.nVert > 0);
+      int nlepveto = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
+
+      std::map<std::string, float> values;
+      values["deltaPhiMin"] = t.deltaPhiMin;
+      values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+      values["nlep"]        = nlepveto;
+      values["j1pt"]        = t.jet_pt[0];
+      values["j2pt"]        = t.jet_pt[1];
+      values["mt2"]         = t.mt2;
+      values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+
+      sigbase_ = (int) SRBase.PassesSelection(values);
+
+      // set nlep to 0 to check SRbase without lepton veto
+      values["nlep"]        = 0;
+      sigbase_nolepveto_ = (int) SRBase.PassesSelection(values);
 
       // need to save: 
       //  - gen match for iso tracks?
-
-      // loop over isolated tracks to find the most isolated for each category
-      int isoTrackLepPt5_mostiso_idx = -1;
-      float isoTrackLepPt5_mostiso_iso = 99.;
-      int isoTrackLepPt10_mostiso_idx = -1;
-      float isoTrackLepPt10_mostiso_iso = 99.;
-
-      int isoTrackHadPt5_mostiso_idx = -1;
-      float isoTrackHadPt5_mostiso_iso = 99.;
-      int isoTrackHadPt10_mostiso_idx = -1;
-      float isoTrackHadPt10_mostiso_iso = 99.;
-      int isoTrackHadPt15_mostiso_idx = -1;
-      float isoTrackHadPt15_mostiso_iso = 99.;
-      int isoTrackHadPt20_mostiso_idx = -1;
-      float isoTrackHadPt20_mostiso_iso = 99.;
-
 
       for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
 	int pdgId = abs(t.isoTrack_pdgId[itrk]);
 	float pt = t.isoTrack_pt[itrk];
 	float absIso = t.isoTrack_absIso[itrk];
 	float relIso = absIso/pt;
+	float mt = MT(pt, t.isoTrack_phi[itrk], t.met_pt, t.met_phi);
 
 	// pf leptons
 	if (pdgId == 11 || pdgId == 13) {
-	  if (pt > 5. && relIso < isoTrackLepPt5_mostiso_iso) {
-	    isoTrackLepPt5_mostiso_idx = itrk;
-	    isoTrackLepPt5_mostiso_iso = absIso;
+
+	  if (pdgId == 11) {
+	    if (pt > 5. && relIso < 0.20) veto_pfel5reliso20_++;
+	    if (pt > 5. && relIso < 0.15) veto_pfel5reliso15_++;
+	    if (pt > 5. && relIso < 0.10) veto_pfel5reliso10_++;
+	    if (pt > 5. && relIso < 0.20 && mt < 100.) veto_pfel5reliso20mt100_++;
+	    if (pt > 5. && relIso < 0.15 && mt < 100.) veto_pfel5reliso15mt100_++;
+	    if (pt > 5. && relIso < 0.10 && mt < 100.) veto_pfel5reliso10mt100_++;
+
+	    if (pt > 5. && absIso < 10.) veto_pfel5absiso10_++;
+	    if (pt > 5. && absIso < 5.) veto_pfel5absiso5_++;
+	    if (pt > 5. && absIso < 3.) veto_pfel5absiso3_++;
+	    if (pt > 5. && absIso < 10. && mt < 100.) veto_pfel5absiso10mt100_++;
+	    if (pt > 5. && absIso < 5. && mt < 100.) veto_pfel5absiso5mt100_++;
+	    if (pt > 5. && absIso < 3. && mt < 100.) veto_pfel5absiso3mt100_++;
+
 	  }
-	  if (pt > 10. && relIso < isoTrackLepPt10_mostiso_iso) {
-	    isoTrackLepPt10_mostiso_idx = itrk;
-	    isoTrackLepPt10_mostiso_iso = absIso;
+	  else if (pdgId == 13) {
+	    if (pt > 5. && relIso < 0.20) veto_pfmu5reliso20_++;
+	    if (pt > 5. && relIso < 0.15) veto_pfmu5reliso15_++;
+	    if (pt > 5. && relIso < 0.10) veto_pfmu5reliso10_++;
+	    if (pt > 5. && relIso < 0.20 && mt < 100.) veto_pfmu5reliso20mt100_++;
+	    if (pt > 5. && relIso < 0.15 && mt < 100.) veto_pfmu5reliso15mt100_++;
+	    if (pt > 5. && relIso < 0.10 && mt < 100.) veto_pfmu5reliso10mt100_++;
+
+	    if (pt > 5. && absIso < 10.) veto_pfmu5absiso10_++;
+	    if (pt > 5. && absIso < 5.) veto_pfmu5absiso5_++;
+	    if (pt > 5. && absIso < 3.) veto_pfmu5absiso3_++;
+	    if (pt > 5. && absIso < 10. && mt < 100.) veto_pfmu5absiso10mt100_++;
+	    if (pt > 5. && absIso < 5. && mt < 100.) veto_pfmu5absiso5mt100_++;
+	    if (pt > 5. && absIso < 3. && mt < 100.) veto_pfmu5absiso3mt100_++;
+
 	  }
+
 	} // pf leptons
 
 	// pf hadrons
 	else if (pdgId == 211) {
-	  if (pt > 5. && relIso < isoTrackHadPt5_mostiso_iso) {
-	    isoTrackHadPt5_mostiso_idx = itrk;
-	    isoTrackHadPt5_mostiso_iso = absIso;
-	  }
-	  if (pt > 10. && relIso < isoTrackHadPt10_mostiso_iso) {
-	    isoTrackHadPt10_mostiso_idx = itrk;
-	    isoTrackHadPt10_mostiso_iso = absIso;
-	  }
-	  if (pt > 15. && relIso < isoTrackHadPt15_mostiso_iso) {
-	    isoTrackHadPt15_mostiso_idx = itrk;
-	    isoTrackHadPt15_mostiso_iso = absIso;
-	  }
-	  if (pt > 20. && relIso < isoTrackHadPt20_mostiso_iso) {
-	    isoTrackHadPt20_mostiso_idx = itrk;
-	    isoTrackHadPt20_mostiso_iso = absIso;
-	  }
+
+	  if (pt > 5. && relIso < 0.20) veto_pfhad5reliso20_++;
+	  if (pt > 5. && relIso < 0.15) veto_pfhad5reliso15_++;
+	  if (pt > 5. && relIso < 0.10) veto_pfhad5reliso10_++;
+	  if (pt > 5. && relIso < 0.20 && mt < 100.) veto_pfhad5reliso20mt100_++;
+	  if (pt > 5. && relIso < 0.15 && mt < 100.) veto_pfhad5reliso15mt100_++;
+	  if (pt > 5. && relIso < 0.10 && mt < 100.) veto_pfhad5reliso10mt100_++;
+
+	  if (pt > 5. && absIso < 10.) veto_pfhad5absiso10_++;
+	  if (pt > 5. && absIso < 5.) veto_pfhad5absiso5_++;
+	  if (pt > 5. && absIso < 3.) veto_pfhad5absiso3_++;
+	  if (pt > 5. && absIso < 10. && mt < 100.) veto_pfhad5absiso10mt100_++;
+	  if (pt > 5. && absIso < 5. && mt < 100.) veto_pfhad5absiso5mt100_++;
+	  if (pt > 5. && absIso < 3. && mt < 100.) veto_pfhad5absiso3mt100_++;
+
+	  if (pt > 10. && relIso < 0.20) veto_pfhad10reliso20_++;
+	  if (pt > 10. && relIso < 0.15) veto_pfhad10reliso15_++;
+	  if (pt > 10. && relIso < 0.10) veto_pfhad10reliso10_++;
+	  if (pt > 10. && relIso < 0.20 && mt < 100.) veto_pfhad10reliso20mt100_++;
+	  if (pt > 10. && relIso < 0.15 && mt < 100.) veto_pfhad10reliso15mt100_++;
+	  if (pt > 10. && relIso < 0.10 && mt < 100.) veto_pfhad10reliso10mt100_++;
+
+	  if (pt > 10. && absIso < 10.) veto_pfhad10absiso10_++;
+	  if (pt > 10. && absIso < 5.) veto_pfhad10absiso5_++;
+	  if (pt > 10. && absIso < 3.) veto_pfhad10absiso3_++;
+	  if (pt > 10. && absIso < 10. && mt < 100.) veto_pfhad10absiso10mt100_++;
+	  if (pt > 10. && absIso < 5. && mt < 100.) veto_pfhad10absiso5mt100_++;
+	  if (pt > 10. && absIso < 3. && mt < 100.) veto_pfhad10absiso3mt100_++;
+
 	} // pf hadrons
 
       } // isoTrack loop
-
-      // store isolated tracks
-      if (isoTrackLepPt5_mostiso_idx >= 0) {
-	isoTrackLepPt5_pt_ = t.isoTrack_pt[isoTrackLepPt5_mostiso_idx];
-	isoTrackLepPt5_eta_ = t.isoTrack_eta[isoTrackLepPt5_mostiso_idx];
-	isoTrackLepPt5_phi_ = t.isoTrack_phi[isoTrackLepPt5_mostiso_idx];
-	isoTrackLepPt5_absIso_ = t.isoTrack_absIso[isoTrackLepPt5_mostiso_idx];
-	isoTrackLepPt5_dz_ = t.isoTrack_dz[isoTrackLepPt5_mostiso_idx];
-	isoTrackLepPt5_pdgId_ = t.isoTrack_pdgId[isoTrackLepPt5_mostiso_idx];
-      }
-      if (isoTrackLepPt10_mostiso_idx >= 0) {
-	isoTrackLepPt10_pt_ = t.isoTrack_pt[isoTrackLepPt10_mostiso_idx];
-	isoTrackLepPt10_eta_ = t.isoTrack_eta[isoTrackLepPt10_mostiso_idx];
-	isoTrackLepPt10_phi_ = t.isoTrack_phi[isoTrackLepPt10_mostiso_idx];
-	isoTrackLepPt10_absIso_ = t.isoTrack_absIso[isoTrackLepPt10_mostiso_idx];
-	isoTrackLepPt10_dz_ = t.isoTrack_dz[isoTrackLepPt10_mostiso_idx];
-	isoTrackLepPt10_pdgId_ = t.isoTrack_pdgId[isoTrackLepPt10_mostiso_idx];
-      }
-      if (isoTrackHadPt5_mostiso_idx >= 0) {
-	isoTrackHadPt5_pt_ = t.isoTrack_pt[isoTrackHadPt5_mostiso_idx];
-	isoTrackHadPt5_eta_ = t.isoTrack_eta[isoTrackHadPt5_mostiso_idx];
-	isoTrackHadPt5_phi_ = t.isoTrack_phi[isoTrackHadPt5_mostiso_idx];
-	isoTrackHadPt5_absIso_ = t.isoTrack_absIso[isoTrackHadPt5_mostiso_idx];
-	isoTrackHadPt5_dz_ = t.isoTrack_dz[isoTrackHadPt5_mostiso_idx];
-      }
-      if (isoTrackHadPt10_mostiso_idx >= 0) {
-	isoTrackHadPt10_pt_ = t.isoTrack_pt[isoTrackHadPt10_mostiso_idx];
-	isoTrackHadPt10_eta_ = t.isoTrack_eta[isoTrackHadPt10_mostiso_idx];
-	isoTrackHadPt10_phi_ = t.isoTrack_phi[isoTrackHadPt10_mostiso_idx];
-	isoTrackHadPt10_absIso_ = t.isoTrack_absIso[isoTrackHadPt10_mostiso_idx];
-	isoTrackHadPt10_dz_ = t.isoTrack_dz[isoTrackHadPt10_mostiso_idx];
-      }
-      if (isoTrackHadPt15_mostiso_idx >= 0) {
-	isoTrackHadPt15_pt_ = t.isoTrack_pt[isoTrackHadPt15_mostiso_idx];
-	isoTrackHadPt15_eta_ = t.isoTrack_eta[isoTrackHadPt15_mostiso_idx];
-	isoTrackHadPt15_phi_ = t.isoTrack_phi[isoTrackHadPt15_mostiso_idx];
-	isoTrackHadPt15_absIso_ = t.isoTrack_absIso[isoTrackHadPt15_mostiso_idx];
-	isoTrackHadPt15_dz_ = t.isoTrack_dz[isoTrackHadPt15_mostiso_idx];
-      }
-      if (isoTrackHadPt20_mostiso_idx >= 0) {
-	isoTrackHadPt20_pt_ = t.isoTrack_pt[isoTrackHadPt20_mostiso_idx];
-	isoTrackHadPt20_eta_ = t.isoTrack_eta[isoTrackHadPt20_mostiso_idx];
-	isoTrackHadPt20_phi_ = t.isoTrack_phi[isoTrackHadPt20_mostiso_idx];
-	isoTrackHadPt20_absIso_ = t.isoTrack_absIso[isoTrackHadPt20_mostiso_idx];
-	isoTrackHadPt20_dz_ = t.isoTrack_dz[isoTrackHadPt20_mostiso_idx];
-      }
 
       // leading reco lepton
       if (t.nlep > 0) {
 	lep1_pt_ = t.lep_pt[0];
 	lep1_eta_ = t.lep_eta[0];
 	lep1_phi_ = t.lep_phi[0];
+	lep1_mt_ = MT(lep1_pt_, lep1_phi_, t.met_pt, t.met_phi);
       }
+
+      // loop over reco leptons
+      for (int ilep = 0; ilep < t.nlep; ++ilep) {
+	float pt = t.lep_pt[ilep];
+	float mt = MT(pt, t.lep_phi[ilep], t.met_pt, t.met_phi);
+	// electrons
+	if (abs(t.lep_pdgId[ilep]) == 11) {
+
+	  // apply some isolation cut here..
+
+	  // electron passes sel - save decision
+	  if (pt > 10.) veto_el10_++;
+	  if (pt > 15.) veto_el15_++;
+	  if (pt > 20.) veto_el20_++;
+	  if (pt > 10. && mt < 100.) veto_el10mt100_++;
+	  if (pt > 15. && mt < 100.) veto_el15mt100_++;
+	  if (pt > 20. && mt < 100.) veto_el20mt100_++;
+	}
+
+	// muons
+	else if (abs(t.lep_pdgId[ilep]) == 13) {
+
+	  // apply some isolation cut here..
+
+	  if (pt > 10.) veto_mu10_++;
+	  if (pt > 15.) veto_mu15_++;
+	  if (pt > 20.) veto_mu20_++;
+	  if (pt > 10. && mt < 100.) veto_mu10mt100_++;
+	  if (pt > 15. && mt < 100.) veto_mu15mt100_++;
+	  if (pt > 20. && mt < 100.) veto_mu20mt100_++;
+	}
+
+      } // loop on reco leps
+
 
       // leading reco tau
       if (t.ntau > 0) {
 	tau1_pt_ = t.tau_pt[0];
 	tau1_eta_ = t.tau_eta[0];
 	tau1_phi_ = t.tau_phi[0];
+	lep1_mt_ = MT(tau1_pt_, tau1_phi_, t.met_pt, t.met_phi);
       }
-
-      ngenel_ = 0;
-      ngenmu_ = 0;
-      ngentaulep_ = 0;
-      ngentauhad_ = 0;
-      int ngentau = 0;
-      std::vector<int> gen_idx_save;
-
-      // loop over gen particles to store lepton info
-      for (int igen = 0; igen < t.ngenPart; ++igen) {
-	// only care about leptons for now
-	int pdgId = abs(t.genPart_pdgId[igen]);
-	if ((pdgId != 11) && (pdgId != 13) && (pdgId != 15)) continue;
-
-	int motherId = abs(t.genPart_motherId[igen]);
-	int grandmaId = abs(t.genPart_grandmaId[igen]);
-
-	// reject leptons with direct parents of quarks or hadrons. Allow SUSY parents
-	if (motherId <= 5 || (motherId > 100 && motherId < 1000000)) continue;
-
-	// need to reject parents: 111 (pi0), quarks 1-6, 
-	bool save = false;
-	// electrons, muons: status 1 and mother or grandmother W/Z or tau from W/Z
-	if (((pdgId == 11) || (pdgId == 13)) && (t.genPart_status[igen] == 1)) {
-	  // leptons from taus
-	  if (motherId == 15 && (grandmaId == 24 || grandmaId == 23 || grandmaId == 15)) {
-	    ++ngentaulep_;
-	    if (pdgId == 11) ++ngenel_;
-	    if (pdgId == 13) ++ngenmu_;
-	    save = true;
-	  } 
-	  // leptons from W/Z
-	  else if (motherId == 24 || motherId == 23 || ( motherId == pdgId && (grandmaId == 24 || grandmaId == 23) ) ) {
-	    if (pdgId == 11) ++ngenel_;
-	    if (pdgId == 13) ++ngenmu_;
-	    save = true;
-	  }
-	}
-
-	// taus: status 2. just count leptonic taus for now and infer number of hadronic taus.  Would need daughter info to separate
-	//  one and three prong taus - could do in babyMaker if needed.
-	if (pdgId == 15 && t.genPart_status[igen] == 2) {
-	  if (motherId == 24 || grandmaId == 24 || motherId == 23 || grandmaId == 23) {
-	    // look for decay products.. double loop is not optimal..
-	    int lep = 0;
-	    //	    int had = 0;
-	    for (int jgen = 0; jgen < t.ngenPart; ++jgen) {
-	      if (t.genPart_status[jgen] != 1) continue;
-	      if ((abs(t.genPart_pdgId[jgen]) == 11 || abs(t.genPart_pdgId[jgen]) == 13) && (abs(t.genPart_motherId[jgen]) == 15)) {
-		// check dR
-		float dr = DeltaR(t.genPart_eta[igen], t.genPart_eta[jgen], t.genPart_phi[igen], t.genPart_phi[jgen]);
-		// cout << "- found tau lepton, id: " << t.genPart_pdgId[jgen] << ", pt: " << t.genPart_pt[jgen] 
-		//      << ", dr: " << dr << endl;
-		if (dr > 0.5) continue;
-		++lep;
-		break;
-	      }
-	      // // hadronic taus: pion or kaon decays
-	      // else if ((abs(t.genPart_pdgId[jgen]) == 211 || abs(t.genPart_pdgId[jgen]) == 321) && (abs(t.genPart_motherId[jgen]) == 15 || abs(t.genPart_grandmaId[jgen]) == 15)) {
-	      // 	// check dR
-	      // 	float dr = DeltaR(t.genPart_eta[igen], t.genPart_eta[jgen], t.genPart_phi[igen], t.genPart_phi[jgen]);
-	      // 	if (dr > 0.5) continue;
-	      // 	++had;
-	      // 	if (had == 3) break;
-	      // }
-	    } // 2nd loop on genPart
-	    // if (lep == 0 && had == 0) cout << "WARNING: couldn't classify tau decays, event: " << t.evt << endl;
-	    //	    if (lep > 0) ++ngentaulep_;
-	    if (lep == 0) {
-	      //	      ++ngentauhad_;
-	      save = true;
-	    }
-	    ++ngentau;
-	  }
-	}
-
-	// good gen lepton
-	if (save) {
-	  // compare to leading gen lep
-	  if (t.genPart_pt[igen] > genlep1_pt_) {
-	    genlep2_pt_ = genlep1_pt_;
-	    genlep2_eta_ = genlep1_eta_;
-	    genlep2_phi_ = genlep1_phi_;
-	    genlep2_pdgId_ = genlep1_pdgId_;
-
-	    genlep1_pt_ = t.genPart_pt[igen];
-	    genlep1_eta_ = t.genPart_eta[igen];
-	    genlep1_phi_ = t.genPart_phi[igen];
-	    genlep1_pdgId_ = t.genPart_pdgId[igen];
-	  } else if (t.genPart_pt[igen] > genlep2_pt_) {
-	    genlep2_pt_ = t.genPart_pt[igen];
-	    genlep2_eta_ = t.genPart_eta[igen];
-	    genlep2_phi_ = t.genPart_phi[igen];
-	    genlep2_pdgId_ = t.genPart_pdgId[igen];
-	  }
-	}// if save
-
-      } // loop over genPart
-
-      ngentauhad_ = ngentau - ngentaulep_;
-      ngenlep_ = ngentauhad_ + ngenel_ + ngenmu_;
-
-      // if (ngentaulep_ != ngentaulep_daughters) {
-      // 	cout << "WARNING: disagree on leptonic taus! from leps: " << ngentaulep_ << ", from taus: " << ngentaulep_daughters << endl;
-      // }
-
-      // if (ngentauhad_ != ngentauhad_daughters) {
-      // 	cout << "WARNING: disagree on hadronic taus! from leps: " << ngentauhad_ << ", from taus: " << ngentauhad_daughters << endl;
-      // }
-
-      // // save some gen lepton info
-      // if (ngenlep_ > 0) {
-      // 	// only save hadronically decaying taus: 
-      // }
 
       // fill output tree
       outtree_->Fill();
@@ -400,74 +318,89 @@ void MiniBabyIsoTrackLooper::makeTree(TChain* chain){
 
   // define minibaby-specific branches
   outtree_->Branch("mini_weight"        , &weight_        ,  "mini_weight/F"	 );
-  outtree_->Branch("mini_ngenlep"       , &ngenlep_       ,  "mini_ngenlep/I"	 );
   outtree_->Branch("mini_passevt"       , &passevt_       ,  "mini_passevt/I"	 );
   outtree_->Branch("mini_sigbase"       , &sigbase_       ,  "mini_sigbase/I"	 );
   outtree_->Branch("mini_sigbase_nolepveto"       , &sigbase_nolepveto_       ,  "mini_sigbase_nolepveto/I"	 );
-  outtree_->Branch("mini_sigjets"       , &sigjets_       ,  "mini_sigjets/I"	 );
-  outtree_->Branch("mini_sightmet"      , &sightmet_      ,  "mini_sightmet/I"	 );
 
-  outtree_->Branch("mini_isoTrackLepPt5_pt"        , &isoTrackLepPt5_pt_        ,  "mini_isoTrackLepPt5_pt/F"	 );
-  outtree_->Branch("mini_isoTrackLepPt5_eta"        , &isoTrackLepPt5_eta_        ,  "mini_isoTrackLepPt5_eta/F"	 );
-  outtree_->Branch("mini_isoTrackLepPt5_phi"        , &isoTrackLepPt5_phi_        ,  "mini_isoTrackLepPt5_phi/F"	 );
-  outtree_->Branch("mini_isoTrackLepPt5_absIso"        , &isoTrackLepPt5_absIso_        ,  "mini_isoTrackLepPt5_absIso/F"	 );
-  outtree_->Branch("mini_isoTrackLepPt5_dz"        , &isoTrackLepPt5_dz_        ,  "mini_isoTrackLepPt5_dz/F"	 );
-  outtree_->Branch("mini_isoTrackLepPt5_pdgId"        , &isoTrackLepPt5_pdgId_        ,  "mini_isoTrackLepPt5_pdgId/I"	 );
+  outtree_->Branch("mini_veto_mu10"      , &veto_mu10_      ,  "mini_veto_mu10/I"	 );
+  outtree_->Branch("mini_veto_mu15"      , &veto_mu15_      ,  "mini_veto_mu15/I"	 );
+  outtree_->Branch("mini_veto_mu20"      , &veto_mu20_      ,  "mini_veto_mu20/I"	 );
+  outtree_->Branch("mini_veto_mu10mt100"      , &veto_mu10mt100_      ,  "mini_veto_mu10mt100/I"	 );
+  outtree_->Branch("mini_veto_mu15mt100"      , &veto_mu15mt100_      ,  "mini_veto_mu15mt100/I"	 );
+  outtree_->Branch("mini_veto_mu20mt100"      , &veto_mu20mt100_      ,  "mini_veto_mu20mt100/I"	 );
 
-  outtree_->Branch("mini_isoTrackLepPt10_pt"        , &isoTrackLepPt10_pt_        ,  "mini_isoTrackLepPt10_pt/F"	 );
-  outtree_->Branch("mini_isoTrackLepPt10_eta"        , &isoTrackLepPt10_eta_        ,  "mini_isoTrackLepPt10_eta/F"	 );
-  outtree_->Branch("mini_isoTrackLepPt10_phi"        , &isoTrackLepPt10_phi_        ,  "mini_isoTrackLepPt10_phi/F"	 );
-  outtree_->Branch("mini_isoTrackLepPt10_absIso"        , &isoTrackLepPt10_absIso_        ,  "mini_isoTrackLepPt10_absIso/F"	 );
-  outtree_->Branch("mini_isoTrackLepPt10_dz"        , &isoTrackLepPt10_dz_        ,  "mini_isoTrackLepPt10_dz/F"	 );
-  outtree_->Branch("mini_isoTrackLepPt10_pdgId"        , &isoTrackLepPt10_pdgId_        ,  "mini_isoTrackLepPt10_pdgId/I"	 );
+  outtree_->Branch("mini_veto_el10"      , &veto_el10_      ,  "mini_veto_el10/I"	 );
+  outtree_->Branch("mini_veto_el15"      , &veto_el15_      ,  "mini_veto_el15/I"	 );
+  outtree_->Branch("mini_veto_el20"      , &veto_el20_      ,  "mini_veto_el20/I"	 );
+  outtree_->Branch("mini_veto_el10mt100"      , &veto_el10mt100_      ,  "mini_veto_el10mt100/I"	 );
+  outtree_->Branch("mini_veto_el15mt100"      , &veto_el15mt100_      ,  "mini_veto_el15mt100/I"	 );
+  outtree_->Branch("mini_veto_el20mt100"      , &veto_el20mt100_      ,  "mini_veto_el20mt100/I"	 );
 
-  outtree_->Branch("mini_isoTrackHadPt5_pt"        , &isoTrackHadPt5_pt_        ,  "mini_isoTrackHadPt5_pt/F"	 );
-  outtree_->Branch("mini_isoTrackHadPt5_eta"        , &isoTrackHadPt5_eta_        ,  "mini_isoTrackHadPt5_eta/F"	 );
-  outtree_->Branch("mini_isoTrackHadPt5_phi"        , &isoTrackHadPt5_phi_        ,  "mini_isoTrackHadPt5_phi/F"	 );
-  outtree_->Branch("mini_isoTrackHadPt5_absIso"        , &isoTrackHadPt5_absIso_        ,  "mini_isoTrackHadPt5_absIso/F"	 );
-  outtree_->Branch("mini_isoTrackHadPt5_dz"        , &isoTrackHadPt5_dz_        ,  "mini_isoTrackHadPt5_dz/F"	 );
+  outtree_->Branch("mini_veto_pfmu5reliso20"      , &veto_pfmu5reliso20_      ,  "mini_veto_pfmu5reliso20/I"	 );
+  outtree_->Branch("mini_veto_pfmu5reliso15"      , &veto_pfmu5reliso15_      ,  "mini_veto_pfmu5reliso15/I"	 );
+  outtree_->Branch("mini_veto_pfmu5reliso10"      , &veto_pfmu5reliso10_      ,  "mini_veto_pfmu5reliso10/I"	 );
+  outtree_->Branch("mini_veto_pfmu5reliso20mt100"      , &veto_pfmu5reliso20mt100_      ,  "mini_veto_pfmu5reliso20mt100/I"	 );
+  outtree_->Branch("mini_veto_pfmu5reliso15mt100"      , &veto_pfmu5reliso15mt100_      ,  "mini_veto_pfmu5reliso15mt100/I"	 );
+  outtree_->Branch("mini_veto_pfmu5reliso10mt100"      , &veto_pfmu5reliso10mt100_      ,  "mini_veto_pfmu5reliso10mt100/I"	 );
 
-  outtree_->Branch("mini_isoTrackHadPt10_pt"        , &isoTrackHadPt10_pt_        ,  "mini_isoTrackHadPt10_pt/F"	 );
-  outtree_->Branch("mini_isoTrackHadPt10_eta"        , &isoTrackHadPt10_eta_        ,  "mini_isoTrackHadPt10_eta/F"	 );
-  outtree_->Branch("mini_isoTrackHadPt10_phi"        , &isoTrackHadPt10_phi_        ,  "mini_isoTrackHadPt10_phi/F"	 );
-  outtree_->Branch("mini_isoTrackHadPt10_absIso"        , &isoTrackHadPt10_absIso_        ,  "mini_isoTrackHadPt10_absIso/F"	 );
-  outtree_->Branch("mini_isoTrackHadPt10_dz"        , &isoTrackHadPt10_dz_        ,  "mini_isoTrackHadPt10_dz/F"	 );
+  outtree_->Branch("mini_veto_pfmu5absiso10"      , &veto_pfmu5absiso10_      ,  "mini_veto_pfmu5absiso10/I"	 );
+  outtree_->Branch("mini_veto_pfmu5absiso5"      , &veto_pfmu5absiso5_      ,  "mini_veto_pfmu5absiso5/I"	 );
+  outtree_->Branch("mini_veto_pfmu5absiso3"      , &veto_pfmu5absiso3_      ,  "mini_veto_pfmu5absiso3/I"	 );
+  outtree_->Branch("mini_veto_pfmu5absiso10mt100"      , &veto_pfmu5absiso10mt100_      ,  "mini_veto_pfmu5absiso10mt100/I"	 );
+  outtree_->Branch("mini_veto_pfmu5absiso5mt100"      , &veto_pfmu5absiso5mt100_      ,  "mini_veto_pfmu5absiso5mt100/I"	 );
+  outtree_->Branch("mini_veto_pfmu5absiso3mt100"      , &veto_pfmu5absiso3mt100_      ,  "mini_veto_pfmu5absiso3mt100/I"	 );
 
-  outtree_->Branch("mini_isoTrackHadPt15_pt"        , &isoTrackHadPt15_pt_        ,  "mini_isoTrackHadPt15_pt/F"	 );
-  outtree_->Branch("mini_isoTrackHadPt15_eta"        , &isoTrackHadPt15_eta_        ,  "mini_isoTrackHadPt15_eta/F"	 );
-  outtree_->Branch("mini_isoTrackHadPt15_phi"        , &isoTrackHadPt15_phi_        ,  "mini_isoTrackHadPt15_phi/F"	 );
-  outtree_->Branch("mini_isoTrackHadPt15_absIso"        , &isoTrackHadPt15_absIso_        ,  "mini_isoTrackHadPt15_absIso/F"	 );
-  outtree_->Branch("mini_isoTrackHadPt15_dz"        , &isoTrackHadPt15_dz_        ,  "mini_isoTrackHadPt15_dz/F"	 );
+  outtree_->Branch("mini_veto_pfel5reliso20"      , &veto_pfel5reliso20_      ,  "mini_veto_pfel5reliso20/I"	 );
+  outtree_->Branch("mini_veto_pfel5reliso15"      , &veto_pfel5reliso15_      ,  "mini_veto_pfel5reliso15/I"	 );
+  outtree_->Branch("mini_veto_pfel5reliso10"      , &veto_pfel5reliso10_      ,  "mini_veto_pfel5reliso10/I"	 );
+  outtree_->Branch("mini_veto_pfel5reliso20mt100"      , &veto_pfel5reliso20mt100_      ,  "mini_veto_pfel5reliso20mt100/I"	 );
+  outtree_->Branch("mini_veto_pfel5reliso15mt100"      , &veto_pfel5reliso15mt100_      ,  "mini_veto_pfel5reliso15mt100/I"	 );
+  outtree_->Branch("mini_veto_pfel5reliso10mt100"      , &veto_pfel5reliso10mt100_      ,  "mini_veto_pfel5reliso10mt100/I"	 );
 
-  outtree_->Branch("mini_isoTrackHadPt20_pt"        , &isoTrackHadPt20_pt_        ,  "mini_isoTrackHadPt20_pt/F"	 );
-  outtree_->Branch("mini_isoTrackHadPt20_eta"        , &isoTrackHadPt20_eta_        ,  "mini_isoTrackHadPt20_eta/F"	 );
-  outtree_->Branch("mini_isoTrackHadPt20_phi"        , &isoTrackHadPt20_phi_        ,  "mini_isoTrackHadPt20_phi/F"	 );
-  outtree_->Branch("mini_isoTrackHadPt20_absIso"        , &isoTrackHadPt20_absIso_        ,  "mini_isoTrackHadPt20_absIso/F"	 );
-  outtree_->Branch("mini_isoTrackHadPt20_dz"        , &isoTrackHadPt20_dz_        ,  "mini_isoTrackHadPt20_dz/F"	 );
+  outtree_->Branch("mini_veto_pfel5absiso10"      , &veto_pfel5absiso10_      ,  "mini_veto_pfel5absiso10/I"	 );
+  outtree_->Branch("mini_veto_pfel5absiso5"      , &veto_pfel5absiso5_      ,  "mini_veto_pfel5absiso5/I"	 );
+  outtree_->Branch("mini_veto_pfel5absiso3"      , &veto_pfel5absiso3_      ,  "mini_veto_pfel5absiso3/I"	 );
+  outtree_->Branch("mini_veto_pfel5absiso10mt100"      , &veto_pfel5absiso10mt100_      ,  "mini_veto_pfel5absiso10mt100/I"	 );
+  outtree_->Branch("mini_veto_pfel5absiso5mt100"      , &veto_pfel5absiso5mt100_      ,  "mini_veto_pfel5absiso5mt100/I"	 );
+  outtree_->Branch("mini_veto_pfel5absiso3mt100"      , &veto_pfel5absiso3mt100_      ,  "mini_veto_pfel5absiso3mt100/I"	 );
+
+  outtree_->Branch("mini_veto_pfhad5reliso20"      , &veto_pfhad5reliso20_      ,  "mini_veto_pfhad5reliso20/I"	 );
+  outtree_->Branch("mini_veto_pfhad5reliso15"      , &veto_pfhad5reliso15_      ,  "mini_veto_pfhad5reliso15/I"	 );
+  outtree_->Branch("mini_veto_pfhad5reliso10"      , &veto_pfhad5reliso10_      ,  "mini_veto_pfhad5reliso10/I"	 );
+  outtree_->Branch("mini_veto_pfhad5reliso20mt100"      , &veto_pfhad5reliso20mt100_      ,  "mini_veto_pfhad5reliso20mt100/I"	 );
+  outtree_->Branch("mini_veto_pfhad5reliso15mt100"      , &veto_pfhad5reliso15mt100_      ,  "mini_veto_pfhad5reliso15mt100/I"	 );
+  outtree_->Branch("mini_veto_pfhad5reliso10mt100"      , &veto_pfhad5reliso10mt100_      ,  "mini_veto_pfhad5reliso10mt100/I"	 );
+
+  outtree_->Branch("mini_veto_pfhad5absiso10"      , &veto_pfhad5absiso10_      ,  "mini_veto_pfhad5absiso10/I"	 );
+  outtree_->Branch("mini_veto_pfhad5absiso5"      , &veto_pfhad5absiso5_      ,  "mini_veto_pfhad5absiso5/I"	 );
+  outtree_->Branch("mini_veto_pfhad5absiso3"      , &veto_pfhad5absiso3_      ,  "mini_veto_pfhad5absiso3/I"	 );
+  outtree_->Branch("mini_veto_pfhad5absiso10mt100"      , &veto_pfhad5absiso10mt100_      ,  "mini_veto_pfhad5absiso10mt100/I"	 );
+  outtree_->Branch("mini_veto_pfhad5absiso5mt100"      , &veto_pfhad5absiso5mt100_      ,  "mini_veto_pfhad5absiso5mt100/I"	 );
+  outtree_->Branch("mini_veto_pfhad5absiso3mt100"      , &veto_pfhad5absiso3mt100_      ,  "mini_veto_pfhad5absiso3mt100/I"	 );
+
+  outtree_->Branch("mini_veto_pfhad10reliso20"      , &veto_pfhad10reliso20_      ,  "mini_veto_pfhad10reliso20/I"	 );
+  outtree_->Branch("mini_veto_pfhad10reliso15"      , &veto_pfhad10reliso15_      ,  "mini_veto_pfhad10reliso15/I"	 );
+  outtree_->Branch("mini_veto_pfhad10reliso10"      , &veto_pfhad10reliso10_      ,  "mini_veto_pfhad10reliso10/I"	 );
+  outtree_->Branch("mini_veto_pfhad10reliso20mt100"      , &veto_pfhad10reliso20mt100_      ,  "mini_veto_pfhad10reliso20mt100/I"	 );
+  outtree_->Branch("mini_veto_pfhad10reliso15mt100"      , &veto_pfhad10reliso15mt100_      ,  "mini_veto_pfhad10reliso15mt100/I"	 );
+  outtree_->Branch("mini_veto_pfhad10reliso10mt100"      , &veto_pfhad10reliso10mt100_      ,  "mini_veto_pfhad10reliso10mt100/I"	 );
+
+  outtree_->Branch("mini_veto_pfhad10absiso10"      , &veto_pfhad10absiso10_      ,  "mini_veto_pfhad10absiso10/I"	 );
+  outtree_->Branch("mini_veto_pfhad10absiso5"      , &veto_pfhad10absiso5_      ,  "mini_veto_pfhad10absiso5/I"	 );
+  outtree_->Branch("mini_veto_pfhad10absiso3"      , &veto_pfhad10absiso3_      ,  "mini_veto_pfhad10absiso3/I"	 );
+  outtree_->Branch("mini_veto_pfhad10absiso10mt100"      , &veto_pfhad10absiso10mt100_      ,  "mini_veto_pfhad10absiso10mt100/I"	 );
+  outtree_->Branch("mini_veto_pfhad10absiso5mt100"      , &veto_pfhad10absiso5mt100_      ,  "mini_veto_pfhad10absiso5mt100/I"	 );
+  outtree_->Branch("mini_veto_pfhad10absiso3mt100"      , &veto_pfhad10absiso3mt100_      ,  "mini_veto_pfhad10absiso3mt100/I"	 );
 
   outtree_->Branch("mini_lep1_pt"        , &lep1_pt_        ,  "mini_lep1_pt/F"	 );
   outtree_->Branch("mini_lep1_eta"        , &lep1_eta_        ,  "mini_lep1_eta/F"	 );
   outtree_->Branch("mini_lep1_phi"        , &lep1_phi_        ,  "mini_lep1_phi/F"	 );
+  outtree_->Branch("mini_lep1_mt"        , &lep1_mt_        ,  "mini_lep1_mt/F"	 );
 
   outtree_->Branch("mini_tau1_pt"        , &tau1_pt_        ,  "mini_tau1_pt/F"	 );
   outtree_->Branch("mini_tau1_eta"        , &tau1_eta_        ,  "mini_tau1_eta/F"	 );
   outtree_->Branch("mini_tau1_phi"        , &tau1_phi_        ,  "mini_tau1_phi/F"	 );
-
-  outtree_->Branch("mini_genlep1_pt"        , &genlep1_pt_        ,  "mini_genlep1_pt/F"	 );
-  outtree_->Branch("mini_genlep1_eta"        , &genlep1_eta_        ,  "mini_genlep1_eta/F"	 );
-  outtree_->Branch("mini_genlep1_phi"        , &genlep1_phi_        ,  "mini_genlep1_phi/F"	 );
-  outtree_->Branch("mini_genlep1_pdgId"        , &genlep1_pdgId_        ,  "mini_genlep1_pdgId/I"	 );
-
-  outtree_->Branch("mini_genlep2_pt"        , &genlep2_pt_        ,  "mini_genlep2_pt/F"	 );
-  outtree_->Branch("mini_genlep2_eta"        , &genlep2_eta_        ,  "mini_genlep2_eta/F"	 );
-  outtree_->Branch("mini_genlep2_phi"        , &genlep2_phi_        ,  "mini_genlep2_phi/F"	 );
-  outtree_->Branch("mini_genlep2_pdgId"        , &genlep2_pdgId_        ,  "mini_genlep2_pdgId/I"	 );
-
-  outtree_->Branch("mini_ngenel"      , &ngenel_      ,  "mini_ngenel/I"	 );
-  outtree_->Branch("mini_ngenmu"      , &ngenmu_      ,  "mini_ngenmu/I"	 );
-  outtree_->Branch("mini_ngentaulep"      , &ngentaulep_      ,  "mini_ngentaulep/I"	 );
-  outtree_->Branch("mini_ngentauhad"      , &ngentauhad_      ,  "mini_ngentauhad/I"	 );
-  outtree_->Branch("mini_ngenlep"      , &ngenlep_      ,  "mini_ngenlep/I"	 );
+  outtree_->Branch("mini_tau1_mt"        , &tau1_mt_        ,  "mini_tau1_mt/F"	 );
 
   cout << "Removing all branches and only storing the needed ones" << endl;
 
@@ -487,18 +420,23 @@ void MiniBabyIsoTrackLooper::makeTree(TChain* chain){
   outtree_->SetBranchStatus("nMuons10",1); 
   outtree_->SetBranchStatus("nElectrons10",1); 
   outtree_->SetBranchStatus("nTaus20",1); 
+  outtree_->SetBranchStatus("nPFLep5LowMT",1); 
+  outtree_->SetBranchStatus("nPFHad10LowMT",1); 
   outtree_->SetBranchStatus("deltaPhiMin",1); 
   outtree_->SetBranchStatus("diffMetMht",1); 
   outtree_->SetBranchStatus("ht",1); 
   outtree_->SetBranchStatus("mt2",1); 
   outtree_->SetBranchStatus("met_pt",1); 
   outtree_->SetBranchStatus("met_phi",1); 
-  outtree_->SetBranchStatus("HLT_HT650",1); 
-  outtree_->SetBranchStatus("HLT_MET150",1); 
-  outtree_->SetBranchStatus("HLT_ht350met100",1); 
+  outtree_->SetBranchStatus("HLT_HT900",1); 
+  outtree_->SetBranchStatus("HLT_MET170",1); 
+  outtree_->SetBranchStatus("HLT_ht350met120",1); 
   outtree_->SetBranchStatus("nlep",1); 
   outtree_->SetBranchStatus("nisoTrack",1); 
   outtree_->SetBranchStatus("ntau",1); 
+  outtree_->SetBranchStatus("ngenLep",1); 
+  outtree_->SetBranchStatus("ngenTau",1); 
+  outtree_->SetBranchStatus("ngenLepFromTau",1); 
 
   // enable mini branches
   outtree_->SetBranchStatus("mini_*",1); 
@@ -508,74 +446,91 @@ void MiniBabyIsoTrackLooper::makeTree(TChain* chain){
 void MiniBabyIsoTrackLooper::initBaby(){
 
   weight_     = 1.;
-  ngenlep_    = -1;
 
   passevt_    = -1;
   sigbase_    = -1;
   sigbase_nolepveto_    = -1;
-  sigjets_    = -1;
-  sightmet_   = -1;
 
-  isoTrackLepPt5_pt_ = -1.;
-  isoTrackLepPt5_eta_ = -1.;
-  isoTrackLepPt5_phi_ = -1.;
-  isoTrackLepPt5_absIso_ = -1.;
-  isoTrackLepPt5_dz_ = -1.;
-  isoTrackLepPt5_pdgId_ = -99;
+  // veto bits are 0 by default
+  veto_mu10_ = 0;
+  veto_mu15_ = 0;
+  veto_mu20_ = 0;
+  veto_mu10mt100_ = 0;
+  veto_mu15mt100_ = 0;
+  veto_mu20mt100_ = 0;
 
-  isoTrackLepPt10_pt_ = -1.;
-  isoTrackLepPt10_eta_ = -1.;
-  isoTrackLepPt10_phi_ = -1.;
-  isoTrackLepPt10_absIso_ = -1.;
-  isoTrackLepPt10_dz_ = -1.;
-  isoTrackLepPt10_pdgId_ = -99;
+  veto_el10_ = 0;
+  veto_el15_ = 0;
+  veto_el20_ = 0;
+  veto_el10mt100_ = 0;
+  veto_el15mt100_ = 0;
+  veto_el20mt100_ = 0;
 
-  isoTrackHadPt5_pt_ = -1.;
-  isoTrackHadPt5_eta_ = -1.;
-  isoTrackHadPt5_phi_ = -1.;
-  isoTrackHadPt5_absIso_ = -1.;
-  isoTrackHadPt5_dz_ = -1.;
+  veto_pfmu5reliso20_ = 0;
+  veto_pfmu5reliso15_ = 0;
+  veto_pfmu5reliso10_ = 0;
+  veto_pfmu5reliso20mt100_ = 0;
+  veto_pfmu5reliso15mt100_ = 0;
+  veto_pfmu5reliso10mt100_ = 0;
 
-  isoTrackHadPt10_pt_ = -1.;
-  isoTrackHadPt10_eta_ = -1.;
-  isoTrackHadPt10_phi_ = -1.;
-  isoTrackHadPt10_absIso_ = -1.;
-  isoTrackHadPt10_dz_ = -1.;
+  veto_pfmu5absiso10_ = 0;
+  veto_pfmu5absiso5_ = 0;
+  veto_pfmu5absiso3_ = 0;
+  veto_pfmu5absiso10mt100_ = 0;
+  veto_pfmu5absiso5mt100_ = 0;
+  veto_pfmu5absiso3mt100_ = 0;
 
-  isoTrackHadPt15_pt_ = -1.;
-  isoTrackHadPt15_eta_ = -1.;
-  isoTrackHadPt15_phi_ = -1.;
-  isoTrackHadPt15_absIso_ = -1.;
-  isoTrackHadPt15_dz_ = -1.;
+  veto_pfel5reliso20_ = 0;
+  veto_pfel5reliso15_ = 0;
+  veto_pfel5reliso10_ = 0;
+  veto_pfel5reliso20mt100_ = 0;
+  veto_pfel5reliso15mt100_ = 0;
+  veto_pfel5reliso10mt100_ = 0;
 
-  isoTrackHadPt20_pt_ = -1.;
-  isoTrackHadPt20_eta_ = -1.;
-  isoTrackHadPt20_phi_ = -1.;
-  isoTrackHadPt20_absIso_ = -1.;
-  isoTrackHadPt20_dz_ = -1.;
+  veto_pfel5absiso10_ = 0;
+  veto_pfel5absiso5_ = 0;
+  veto_pfel5absiso3_ = 0;
+  veto_pfel5absiso10mt100_ = 0;
+  veto_pfel5absiso5mt100_ = 0;
+  veto_pfel5absiso3mt100_ = 0;
+
+  veto_pfhad5reliso20_ = 0;
+  veto_pfhad5reliso15_ = 0;
+  veto_pfhad5reliso10_ = 0;
+  veto_pfhad5reliso20mt100_ = 0;
+  veto_pfhad5reliso15mt100_ = 0;
+  veto_pfhad5reliso10mt100_ = 0;
+
+  veto_pfhad5absiso10_ = 0;
+  veto_pfhad5absiso5_ = 0;
+  veto_pfhad5absiso3_ = 0;
+  veto_pfhad5absiso10mt100_ = 0;
+  veto_pfhad5absiso5mt100_ = 0;
+  veto_pfhad5absiso3mt100_ = 0;
+
+  veto_pfhad10reliso20_ = 0;
+  veto_pfhad10reliso15_ = 0;
+  veto_pfhad10reliso10_ = 0;
+  veto_pfhad10reliso20mt100_ = 0;
+  veto_pfhad10reliso15mt100_ = 0;
+  veto_pfhad10reliso10mt100_ = 0;
+
+  veto_pfhad10absiso10_ = 0;
+  veto_pfhad10absiso5_ = 0;
+  veto_pfhad10absiso3_ = 0;
+  veto_pfhad10absiso10mt100_ = 0;
+  veto_pfhad10absiso5mt100_ = 0;
+  veto_pfhad10absiso3mt100_ = 0;
 
   lep1_pt_ = -1.;
   lep1_eta_ = -1.;
   lep1_phi_ = -1.;
+  lep1_mt_ = -1.;
 
   tau1_pt_ = -1.;
   tau1_eta_ = -1.;
   tau1_phi_ = -1.;
+  tau1_mt_ = -1.;
 
-  genlep1_pt_ = -1.;
-  genlep1_eta_ = -1.;
-  genlep1_phi_ = -1.;
-  genlep1_pdgId_ = -99;
-
-  genlep2_pt_ = -1.;
-  genlep2_eta_ = -1.;
-  genlep2_phi_ = -1.;
-  genlep2_pdgId_ = -99;
-
-  ngenel_ = -1;
-  ngenmu_ = -1;
-  ngentaulep_ = -1;
-  ngentauhad_ = -1;
-  ngenlep_ = -1;
 }
 

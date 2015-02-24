@@ -7,6 +7,7 @@ void doAll(std::string input_dir = "/nfs-6/userdata/mt2/V00-00-03", std::string 
   //  gSystem->Load("libMiniFWLite.so");
   gSystem->Load("libMiniBabyIsoTrackCORE.so");
   gSystem->Load("libMiniBabyIsoTrack.so");
+  gSystem->Load("libMiniBabyIsoTrackTools.so");
 
   TChain *ch = new TChain("mt2"); 
  

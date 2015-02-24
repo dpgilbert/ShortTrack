@@ -16,6 +16,7 @@
 //MT2
 #include "../MT2CORE/mt2tree.h"
 #include "../MT2CORE/sigSelections.h"
+#include "../MT2CORE/SR.h"
 
 
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
@@ -28,6 +29,7 @@ class MiniBabyIsoTrackLooper {
   ~MiniBabyIsoTrackLooper();
 
   void loop(TChain* chain, std::string output_name = "test.root");
+  void SetSignalRegions();
 
   void initBaby();
   void makeTree(TChain *chain);
@@ -38,62 +40,99 @@ class MiniBabyIsoTrackLooper {
   TTree * outtree_;
   mt2tree t;
 
+  SR SRBase;
+
   // minibaby vars
   float weight_;
 
   int passevt_;
   int sigbase_;
   int sigbase_nolepveto_;
-  int sigjets_;
-  int sightmet_;
 
-  // isoTrack vars
-  float isoTrackLepPt5_pt_;
-  float isoTrackLepPt5_eta_;
-  float isoTrackLepPt5_phi_;
-  float isoTrackLepPt5_absIso_;
-  float isoTrackLepPt5_dz_;
-  int isoTrackLepPt5_pdgId_;
+  // veto decisions: reco leptons
+  int veto_mu10_ ;
+  int veto_mu15_ ;
+  int veto_mu20_ ;
+  int veto_mu10mt100_ ;
+  int veto_mu15mt100_ ;
+  int veto_mu20mt100_ ;
 
-  float isoTrackLepPt10_pt_;
-  float isoTrackLepPt10_eta_;
-  float isoTrackLepPt10_phi_;
-  float isoTrackLepPt10_absIso_;
-  float isoTrackLepPt10_dz_;
-  int isoTrackLepPt10_pdgId_;
+  int veto_el10_ ;
+  int veto_el15_ ;
+  int veto_el20_ ;
+  int veto_el10mt100_ ;
+  int veto_el15mt100_ ;
+  int veto_el20mt100_ ;
 
-  float isoTrackHadPt5_pt_;
-  float isoTrackHadPt5_eta_;
-  float isoTrackHadPt5_phi_;
-  float isoTrackHadPt5_absIso_;
-  float isoTrackHadPt5_dz_;
+  // veto decisions: pfmuon
+  int veto_pfmu5reliso20_;
+  int veto_pfmu5reliso15_;
+  int veto_pfmu5reliso10_;
+  int veto_pfmu5reliso20mt100_;
+  int veto_pfmu5reliso15mt100_;
+  int veto_pfmu5reliso10mt100_;
 
-  float isoTrackHadPt10_pt_;
-  float isoTrackHadPt10_eta_;
-  float isoTrackHadPt10_phi_;
-  float isoTrackHadPt10_absIso_;
-  float isoTrackHadPt10_dz_;
+  int veto_pfmu5absiso10_;
+  int veto_pfmu5absiso5_;
+  int veto_pfmu5absiso3_;
+  int veto_pfmu5absiso10mt100_;
+  int veto_pfmu5absiso5mt100_;
+  int veto_pfmu5absiso3mt100_;
 
-  float isoTrackHadPt15_pt_;
-  float isoTrackHadPt15_eta_;
-  float isoTrackHadPt15_phi_;
-  float isoTrackHadPt15_absIso_;
-  float isoTrackHadPt15_dz_;
+  // veto decisions: pfelectron
+  int veto_pfel5reliso20_;
+  int veto_pfel5reliso15_;
+  int veto_pfel5reliso10_;
+  int veto_pfel5reliso20mt100_;
+  int veto_pfel5reliso15mt100_;
+  int veto_pfel5reliso10mt100_;
 
-  float isoTrackHadPt20_pt_;
-  float isoTrackHadPt20_eta_;
-  float isoTrackHadPt20_phi_;
-  float isoTrackHadPt20_absIso_;
-  float isoTrackHadPt20_dz_;
+  int veto_pfel5absiso10_;
+  int veto_pfel5absiso5_;
+  int veto_pfel5absiso3_;
+  int veto_pfel5absiso10mt100_;
+  int veto_pfel5absiso5mt100_;
+  int veto_pfel5absiso3mt100_;
+
+  // veto decisions: pfhadron
+  int veto_pfhad5reliso20_;
+  int veto_pfhad5reliso15_;
+  int veto_pfhad5reliso10_;
+  int veto_pfhad5reliso20mt100_;
+  int veto_pfhad5reliso15mt100_;
+  int veto_pfhad5reliso10mt100_;
+
+  int veto_pfhad5absiso10_;
+  int veto_pfhad5absiso5_;
+  int veto_pfhad5absiso3_;
+  int veto_pfhad5absiso10mt100_;
+  int veto_pfhad5absiso5mt100_;
+  int veto_pfhad5absiso3mt100_;
+
+  int veto_pfhad10reliso20_;
+  int veto_pfhad10reliso15_;
+  int veto_pfhad10reliso10_;
+  int veto_pfhad10reliso20mt100_;
+  int veto_pfhad10reliso15mt100_;
+  int veto_pfhad10reliso10mt100_;
+
+  int veto_pfhad10absiso10_;
+  int veto_pfhad10absiso5_;
+  int veto_pfhad10absiso3_;
+  int veto_pfhad10absiso10mt100_;
+  int veto_pfhad10absiso5mt100_;
+  int veto_pfhad10absiso3mt100_;
 
   // reco lep vars
   float lep1_pt_;
   float lep1_eta_;
   float lep1_phi_;
+  float lep1_mt_;
 
   float tau1_pt_;
   float tau1_eta_;
   float tau1_phi_;
+  float tau1_mt_;
 
   // gen vars
   float genlep1_pt_;
@@ -108,9 +147,6 @@ class MiniBabyIsoTrackLooper {
 
   int ngenel_;
   int ngenmu_;
-  int ngentaulep_;
-  int ngentauhad_;
-  int ngenlep_;
 
 };
 
