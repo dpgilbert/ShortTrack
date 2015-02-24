@@ -351,7 +351,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       	    { doGJplots = false; }
       	  else {
       	    // Redefine leading two jets after jet/photon overlap
-      	    float minDR = 0.4;
+      	    float minDR = 0.8;
       	    int gammaJet = -1;
       	    for (int i = 0; i < t.njet; i++) {
       	      float thisDR = DeltaR(t.jet_eta[i], t.gamma_eta[0], t.jet_phi[i], t.gamma_phi[0]);
@@ -360,9 +360,11 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       		gammaJet = i;
       	      }
       	    } 
-      	    if (gammaJet==0) { jetIdx0++; jetIdx1++;}
-      	    if (gammaJet==1) { jetIdx1++;} 
+      	    if (gammaJet==0 && minDR<0.4) { jetIdx0++; jetIdx1++;}
+      	    if (gammaJet==1 && minDR<0.4) { jetIdx1++;} 
       	    doGJplots = true;
+	    plot1D("h_minDRjetGamma",       minDR,   evtweight_, SRNoCut.crgjHistMap, "DR", 50, -1, 1);
+	    //if (minDR>0.7) cout<<"Event "<<t.evt<<endl; 
       	  }
       	} // ngamma > 0
       }// evt_id < 300
@@ -592,8 +594,8 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const int jetIdx0, con
 
   // fill hists
   if (!passSieie) return;
-  if (t.met_pt > 100.) return; // remove overlap with signal region
-  if (t.gamma_pt[0]<150.) return;
+  //  if (t.met_pt > 100.) return; // remove overlap with signal region
+  //  if (t.gamma_pt[0]<150.) return;
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.gamma_deltaPhiMin;
