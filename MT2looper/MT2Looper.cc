@@ -209,6 +209,8 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
       // remove low pt QCD samples 
       if (t.evt_id >= 100 && t.evt_id < 108) continue;
+      // remove low HT QCD samples 
+      if (t.evt_id >= 120 && t.evt_id < 123) continue;
 
       //---------------------
       // set weights and start making plots
@@ -517,8 +519,8 @@ void MT2Looper::fillHistosSRBase() {
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
   values["nlep"]        = nlepveto_;
-  values["j1pt"]        = t.jet_pt[0];
-  values["j2pt"]        = t.jet_pt[1];
+  values["j1pt"]        = t.jet1_pt;
+  values["j2pt"]        = t.jet2_pt;
   values["mt2"]         = t.mt2;
   values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
@@ -533,8 +535,8 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
   values["nlep"]        = nlepveto_;
-  values["j1pt"]        = t.jet_pt[0];
-  values["j2pt"]        = t.jet_pt[1];
+  values["j1pt"]        = t.jet1_pt;
+  values["j2pt"]        = t.jet2_pt;
   values["njets"]       = t.nJet40;
   values["nbjets"]      = t.nBJet40;
   values["lowMT"]       = (t.minMTBMet < 200. && t.mt2 < 400.);
@@ -563,8 +565,8 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
   values["nlep"]        = 0; //dummy value
-  values["j1pt"]        = t.jet_pt[0];
-  values["j2pt"]        = t.jet_pt[1];
+  values["j1pt"]        = t.jet1_pt;
+  values["j2pt"]        = t.jet2_pt;
   values["njets"]       = t.nJet40;
   values["nbjets"]      = t.nBJet40;
   values["lowMT"]       = (t.minMTBMet < 200. && t.mt2 < 400.);
@@ -657,8 +659,8 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   values["deltaPhiMin"] = t.zll_deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
   values["nlep"]        = nlepveto_;
-  values["j1pt"]        = t.jet_pt[0];
-  values["j2pt"]        = t.jet_pt[1];
+  values["j1pt"]        = t.jet1_pt;
+  values["j2pt"]        = t.jet2_pt;
   values["njets"]       = t.nJet40;
   values["nbjets"]      = t.nBJet40;
   values["lowMT"]       = (t.zll_minMTBMet < 200. && t.zll_mt2 < 400.);
@@ -697,8 +699,8 @@ void MT2Looper::fillHistos(std::map<std::string, TH1D*>& h_1d, const std::string
   plot1D("h_diffMetMhtOverMet"+s,   t.diffMetMht/t.met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
   plot1D("h_minMTBMet"+s,   t.minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
   plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
-  plot1D("h_J0pt"+s,       t.jet_pt[0],   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
-  plot1D("h_J1pt"+s,       t.jet_pt[1],   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
+  plot1D("h_J0pt"+s,       t.jet1_pt,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
+  plot1D("h_J1pt"+s,       t.jet2_pt,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
 
   plot1D("h_mt2bins"+s,       t.mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
 
