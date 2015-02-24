@@ -328,8 +328,6 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
       // Variables for gamma+jets control region
       bool doGJplots = false;
-      int jetIdx0 = 0;
-      int jetIdx1 = 1;
       if (t.evt_id < 300 && t.evt_id!=120) { // remove lowest qcd_ht sample
       	if (t.ngamma > 0) {
       	  if ( (t.evt_id < 200 && t.gamma_mcMatchId[0]>0  && t.gamma_genIso[0]<5)    // Reject true photons from QCD (iso is always 0 for now)
@@ -352,21 +350,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 	       )
       	    { doGJplots = false; }
       	  else {
-      	    // Redefine leading two jets after jet/photon overlap
-      	    float minDR = 0.8;
-      	    int gammaJet = -1;
-      	    for (int i = 0; i < t.njet; i++) {
-      	      float thisDR = DeltaR(t.jet_eta[i], t.gamma_eta[0], t.jet_phi[i], t.gamma_phi[0]);
-      	      if(thisDR < minDR){
-      		minDR = thisDR; 
-      		gammaJet = i;
-      	      }
-      	    } 
-      	    if (gammaJet==0 && minDR<0.4) { jetIdx0++; jetIdx1++;}
-      	    if (gammaJet==1 && minDR<0.4) { jetIdx1++;} 
       	    doGJplots = true;
-	    plot1D("h_minDRjetGamma",       minDR,   evtweight_, SRNoCut.crgjHistMap, "DR", 50, -1, 1);
-	    //if (minDR>0.7) cout<<"Event "<<t.evt<<endl; 
       	  }
       	} // ngamma > 0
       }// evt_id < 300
@@ -400,7 +384,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
       if (doGJplots) {
         saveGJplots = true;
-        fillHistosCRGJ("crgj", jetIdx0, jetIdx1);
+        fillHistosCRGJ("crgj");
       }
       if (doDYplots) {
         saveDYplots = true;
@@ -588,7 +572,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
 }
 
 // hists for Gamma+Jets control region
-void MT2Looper::fillHistosCRGJ(const std::string& prefix, const int jetIdx0, const int jetIdx1, const std::string& suffix) {
+void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suffix) {
 
   if (t.ngamma==0) return;
 
@@ -603,8 +587,8 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const int jetIdx0, con
   values["deltaPhiMin"] = t.gamma_deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.gamma_diffMetMht/t.gamma_met_pt;
   values["nlep"]        = nlepveto_;
-  values["j1pt"]        = t.jet_pt[jetIdx0];
-  values["j2pt"]        = t.jet_pt[jetIdx1];
+  values["j1pt"]        = t.gamma_jet1_pt;
+  values["j2pt"]        = t.gamma_jet2_pt;
   values["njets"]       = t.gamma_nJet40;
   values["nbjets"]      = t.gamma_nBJet40;
   values["lowMT"]       = (t.gamma_minMTBMet < 200. && t.gamma_mt2 < 400.);
@@ -617,8 +601,8 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const int jetIdx0, con
   valuesBase["deltaPhiMin"] = t.gamma_deltaPhiMin;
   valuesBase["diffMetMhtOverMet"]  = t.gamma_diffMetMht/t.gamma_met_pt;
   valuesBase["nlep"]        = nlepveto_;
-  valuesBase["j1pt"]        = t.jet_pt[jetIdx0];
-  valuesBase["j2pt"]        = t.jet_pt[jetIdx1];
+  valuesBase["j1pt"]        = t.gamma_jet1_pt;
+  valuesBase["j2pt"]        = t.gamma_jet2_pt;
   valuesBase["mt2"]         = t.gamma_mt2;
   valuesBase["passesHtMet"] = ( (t.gamma_ht > 450. && t.gamma_met_pt > 200.) || (t.gamma_ht > 1000. && t.gamma_met_pt > 30.) );
 
