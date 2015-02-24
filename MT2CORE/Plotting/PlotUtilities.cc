@@ -296,6 +296,25 @@ TH1D* getHist1D(string title, std::map<string, TH1D*> &allhistos,
   return currentHisto;
 }
 
+void insertHist1D(TH1D* hist, std::map<string, TH1D*> &allhistos)
+{
+
+  string title(hist->GetName());
+
+  std::map<string, TH1D*>::iterator iter= allhistos.find(title);
+  if(iter == allhistos.end()) //no histo for this yet, insert into map
+    {
+      allhistos.insert(std::pair<string, TH1D*> (title,hist) );
+    }
+  else // exists already, give warning and overwrite
+    {
+      printf("[PlotUtilities::insertHist1D] WARNING: overwriting histogram %s\n", title.c_str());
+      (*iter).second = hist;
+    }
+  
+  return;
+}
+
 void savePlots(std::map<string, TH1D*> &h_1d, const char* outfilename){
   TFile outfile(outfilename,"RECREATE") ;
 
@@ -355,7 +374,7 @@ void savePlotsDir(std::map<string, TH1D*> &h_1d, TFile* outfile, const char* dir
 
 void savePlots2Dir(std::map<string, TH2D*> &h_2d, TFile* outfile, const char* dirname){
 
-  printf("[StopTreeLooper::loop] Saving 2d histograms to dir: %s\n", dirname);
+  printf("[PlotUtilities::savePlots2Dir] Saving 2d histograms to dir: %s\n", dirname);
 
   TDirectory* dir = 0;
 
@@ -382,7 +401,7 @@ void savePlots2Dir(std::map<string, TH2D*> &h_2d, TFile* outfile, const char* di
 void savePlots12(std::map<string, TH1D*> &h_1d, std::map<string, TH2D*> &h_2d, const char* outfilename){
   TFile outfile(outfilename,"RECREATE") ;
 
-  printf("[StopTreeLooper::loop] Saving histograms to %s\n", outfilename);
+  printf("[PlotUtilities::savePlots12] Saving histograms to %s\n", outfilename);
 
   std::map<std::string, TH1D*>::iterator it1d;
   for(it1d=h_1d.begin(); it1d!=h_1d.end(); it1d++) {

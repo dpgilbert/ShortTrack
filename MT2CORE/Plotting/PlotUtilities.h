@@ -29,6 +29,7 @@ void plot1D(string name, float xval, double weight, std::map<string, TH1D*> &all
 	    string title, int numbinsx, const float * xbins);
 TH1D* getHist1D(string title, std::map<string, TH1D*> &allhistos, 
 	    int numbinsx, float xmin, float xmax);
+void insertHist1D(TH1D* hist, std::map<string, TH1D*> &allhistos);
 void plot2D(string name, float xval, float yval, double weight, std::map<string, TH2D*> &allhistos, 
 	    string title, int numbinsx, float xmin, float xmax, int numbinsy, float ymin, float ymax);
 void plot2D(string name, float xval, float yval, double weight, std::map<string, TH2D*> &allhistos, 
