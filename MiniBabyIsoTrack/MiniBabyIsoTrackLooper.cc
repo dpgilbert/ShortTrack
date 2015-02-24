@@ -265,7 +265,7 @@ void MiniBabyIsoTrackLooper::loop(TChain* chain, std::string output_name){
 	tau1_pt_ = t.tau_pt[0];
 	tau1_eta_ = t.tau_eta[0];
 	tau1_phi_ = t.tau_phi[0];
-	lep1_mt_ = MT(tau1_pt_, tau1_phi_, t.met_pt, t.met_phi);
+	tau1_mt_ = MT(tau1_pt_, tau1_phi_, t.met_pt, t.met_phi);
       }
 
       // fill output tree
