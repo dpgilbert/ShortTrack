@@ -22,7 +22,7 @@ Submits all the condor*.cmd condor configurations created above.
 5. Wait for condor jobs to finish...
 
 6. ./merge_grid.sh
-Modify the INDIR and OUTDIR variables appropriately. This script merges all the grid points for a signal into a single root file that's used in the final step to acutally compute the limit.
+Modify the INDIR and OUTDIR variables appropriately. This script merges all the grid points for a signal into a single root file that's used in the final step to actually compute the limit.
 
 7. ./doLimits.sh
 Modify the CARD_DIR and GRID_DIR variables appropriately. This script does the limit calculation and stores the result in a txt file.
