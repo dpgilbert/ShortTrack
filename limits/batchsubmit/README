@@ -1,0 +1,38 @@
+This README explains how to compute limits using the higgs combine tool with condor. See twiki entry:
+https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideHiggsAnalysisCombinedLimit#Computing_the_expected_limit_hyb
+
+There are two parts to computing limits using toys. The first part is to throw toys using various values of
+signal strength, creating a "grid". This first step is done with condor. The second step uses the toys to
+actually calculate the expected limit.
+
+NOTE: The libHiggsAnalysisCombinedLimit.so file was created with modifications to the source in order to
+suppress very large log files that get sent to /tmp by combine. These log files now get sent to /dev/null.
+
+Follow these steps to compute expected limits:
+
+1. source setup.sh
+   This sets up the environment
+
+2. ./prepareCondor.sh
+   Modify the INDIR and OUTDIR variables appropriately. This script creates a directory containing everything
+   necessary to submit condor jobs. This script calls do_one.sh which runs asymptotic limits to get the
+   +/- 1 sigma bands to use as bounds for the signal strength grid. getGridPoints.C creates a txt file containing
+   a list of signal strengths for each signal point. The default is 10 signal strength points, modify 
+   getGridPoints.C to change this.
+
+3. cd to directory created in step2, then do ./writeAllConfig.sh
+   Modify the VERSION variable in writeAllConfig.sh appropriately.
+   nJobsPerGridPoint, nToysPerJob, nIterationsPerJob control the statistics and run time of the jobs.
+
+4. ./submitAll.sh
+   Submits all the condor*.cmd condor configurations created above.
+
+5. Wait for condor jobs to finish...
+
+6. ./merge_grid.sh
+   Modify the INDIR and OUTDIR variables appropriately. This script merges all the grid points for a signal into
+   a single root file that's used in the final step to acutally compute the limit.
+
+7. ./doLimits.sh
+   Modify the CARD_DIR and GRID_DIR variables appropriately. This script does the limit calculation and stores
+   the result in a txt file.
