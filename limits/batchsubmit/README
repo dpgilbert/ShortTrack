@@ -14,7 +14,7 @@ Follow these steps to compute expected limits:
 Modify the INDIR and OUTDIR variables appropriately. This script creates a directory containing everything necessary to submit condor jobs. This script calls do_one.sh which runs asymptotic limits to get the +/- 1 sigma bands to use as bounds for the signal strength grid. getGridPoints.C creates a txt file containing a list of signal strengths for each signal point. The default is 10 signal strength points, modify getGridPoints.C to change this.
 
 3. cd to directory created in step2, then do ./writeAllConfig.sh
-Modify the VERSION variable in writeAllConfig.sh appropriately. nJobsPerGridPoint, nToysPerJob, nIterationsPerJob control the statistics and run time of the jobs.
+Modify the VERSION variable in writeAllConfig.sh appropriately. nJobsPerGridPoint, nToysPerJob, nIterationsPerJob control the statistics and run time of the jobs. By default jobs are submitted to T2_US_UCSD,T2_US_Nebraska,T2_US_Wisconsin,T2_US_MIT,T2_US_FLORIDA, modify writeConfig.sh to change this.
 
 4. ./submitAll.sh
 Submits all the condor*.cmd condor configurations created above.
