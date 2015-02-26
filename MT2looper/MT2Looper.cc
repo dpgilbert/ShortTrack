@@ -664,7 +664,7 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
 }
 
 
-void MT2Looper::fillHistos(std::map<std::string, TH1D*>& h_1d, const std::string& dirname, const std::string& s) {
+void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
     dir = outfile_->mkdir(dirname.c_str());
@@ -692,7 +692,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1D*>& h_1d, const std::string
   return;
 }
 
-void MT2Looper::fillHistosSingleLepton(std::map<std::string, TH1D*>& h_1d, const std::string& dirname, const std::string& s) {
+void MT2Looper::fillHistosSingleLepton(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
     dir = outfile_->mkdir(dirname.c_str());
@@ -709,7 +709,7 @@ void MT2Looper::fillHistosSingleLepton(std::map<std::string, TH1D*>& h_1d, const
 }
 
 
-void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, const std::string& dirname, const std::string& s) {
+void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
     dir = outfile_->mkdir(dirname.c_str());
@@ -731,6 +731,7 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, const st
     plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
     plot1D("h_mt2"+s,       t.gamma_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
     plot1D("h_met"+s,       t.gamma_met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
+    plot1D("h_simplemet"+s,       t.met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
     plot1D("h_gammaPt"+s,       t.gamma_pt[0],   evtweight_, h_1d, ";gamma p_{T} [GeV]", 150, 0, 1500);
     plot1D("h_ht"+s,       t.gamma_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
     plot1D("h_nJet40"+s,       t.gamma_nJet40,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
@@ -740,13 +741,22 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, const st
     plot1D("h_diffMetMhtOverMet"+s,   t.gamma_diffMetMht/t.gamma_met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
     plot1D("h_minMTBMet"+s,   t.gamma_minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
     plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
+    if (s=="") { // Don't make these for Loose, LooseNotTight, NotLoose
+      plot2D("h_gammaht_met"+s,       t.gamma_ht, t.met_pt ,  evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 1500, 30, 0, 1500);
+      plot2D("h_gammaht_gammamt2"+s,       t.gamma_ht, t.gamma_mt2 ,  evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 3000, 30, 0, 1500);
+      plot2D("h_ht_met"+s,       t.gamma_ht, t.met_pt ,  evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 3000, 30, 0, 1500);
+      if (t.gamma_pt[0]>160.) plot2D("h_gammaht_gammamt2_pt160"+s,       t.gamma_ht, t.gamma_mt2  , evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 3000, 30, 0, 1500);
+      if (t.met_pt<100.) plot2D("h_gammaht_gammamt2_met100"+s,       t.gamma_ht, t.gamma_mt2 ,  evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 3000, 30, 0, 1500);
+      if (t.gamma_pt[0]>160. && t.met_pt<100.) plot2D("h_gammaht_gammamt2_pt160met100"+s,       t.gamma_ht, t.gamma_mt2 ,  evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 3000, 30, 0, 1500);
+    }
+
   }
 
   outfile_->cd();
   return;
 }
 
-void MT2Looper::fillHistosDY(std::map<std::string, TH1D*>& h_1d, const std::string& dirname, const std::string& s) {
+void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
     dir = outfile_->mkdir(dirname.c_str());

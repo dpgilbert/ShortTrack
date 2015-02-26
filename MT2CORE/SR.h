@@ -29,13 +29,13 @@ class SR {
     void Clear();
 
     //used for plotting
-    std::map<std::string, TH1D*> srHistMap;
-    std::map<std::string, TH1D*> crslHistMap;
-    std::map<std::string, TH1D*> crslmuHistMap;
-    std::map<std::string, TH1D*> crslelHistMap;
-    std::map<std::string, TH1D*> crslhadHistMap;
-    std::map<std::string, TH1D*> crgjHistMap;
-    std::map<std::string, TH1D*> crdyHistMap;
+    std::map<std::string, TH1*> srHistMap;
+    std::map<std::string, TH1*> crslHistMap;
+    std::map<std::string, TH1*> crslmuHistMap;
+    std::map<std::string, TH1*> crslelHistMap;
+    std::map<std::string, TH1*> crslhadHistMap;
+    std::map<std::string, TH1*> crgjHistMap;
+    std::map<std::string, TH1*> crdyHistMap;
 
   private:
 

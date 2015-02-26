@@ -216,11 +216,11 @@ TGraph GetEff(TFile *f, const char *hist1, bool increasing)
 }
 
 
-void plot1D(string name, float xval, double weight, std::map<string, TH1D*> &allhistos, 
+void plot1D(string name, float xval, double weight, std::map<string, TH1*> &allhistos, 
 	    string title, int numbinsx, float xmin, float xmax)  
 {
   if (title=="") title=name; 
-  std::map<string, TH1D*>::iterator iter= allhistos.find(name);
+  std::map<string, TH1*>::iterator iter= allhistos.find(name);
   if(iter == allhistos.end()) //no histo for this yet, so make a new one
     {
       TH1D* currentHisto= new TH1D(name.c_str(), title.c_str(), numbinsx, xmin, xmax);
@@ -235,11 +235,11 @@ void plot1D(string name, float xval, double weight, std::map<string, TH1D*> &all
   
 }
 
-void plot1D(string name, float xval, double weight, std::map<string, TH1D*> &allhistos, 
+void plot1D(string name, float xval, double weight, std::map<string, TH1*> &allhistos, 
 	    string title, int numbinsx, const float * xbins)  
 {
   if (title=="") title=name; 
-  std::map<string, TH1D*>::iterator iter= allhistos.find(name);
+  std::map<string, TH1*>::iterator iter= allhistos.find(name);
   if(iter == allhistos.end()) //no histo for this yet, so make a new one
     {
       TH1D* currentHisto= new TH1D(name.c_str(), title.c_str(), numbinsx, xbins);
@@ -254,13 +254,13 @@ void plot1D(string name, float xval, double weight, std::map<string, TH1D*> &all
   
 }
 
-void plot1DUnderOverFlow(string title, double xval, double weight, std::map<string, TH1D*> &allhistos, 
+void plot1DUnderOverFlow(string title, double xval, double weight, std::map<string, TH1*> &allhistos, 
       int numbinsx, double xmin, double xmax)  
 {
   if (xval >= xmax) xval = xmax - (xmax-xmin)/double(numbinsx)/1000.;
   if (xval <= xmin) xval = xmin + (xmax-xmin)/double(numbinsx)/1000.;
 
-  std::map<string, TH1D*>::iterator iter= allhistos.find(title);
+  std::map<string, TH1*>::iterator iter= allhistos.find(title);
   if(iter == allhistos.end()) //no histo for this yet, so make a new one
     {
       TH1D* currentHisto= new TH1D(title.c_str(), title.c_str(), numbinsx, xmin, xmax);
@@ -275,13 +275,13 @@ void plot1DUnderOverFlow(string title, double xval, double weight, std::map<stri
   
 }
 
-TH1D* getHist1D(string title, std::map<string, TH1D*> &allhistos, 
+TH1D* getHist1D(string title, std::map<string, TH1*> &allhistos, 
 	    int numbinsx, float xmin, float xmax)  
 {
 
   TH1D* currentHisto = 0;
 
-  std::map<string, TH1D*>::iterator iter= allhistos.find(title);
+  std::map<string, TH1*>::iterator iter= allhistos.find(title);
   if(iter == allhistos.end()) //no histo for this yet, so make a new one
     {
       currentHisto= new TH1D(title.c_str(), title.c_str(), numbinsx, xmin, xmax);
@@ -290,18 +290,18 @@ TH1D* getHist1D(string title, std::map<string, TH1D*> &allhistos,
     }
   else // exists already, so just fill it
     {
-      currentHisto = (*iter).second;
+      currentHisto = (TH1D*) (*iter).second;
     }
   
   return currentHisto;
 }
 
-void insertHist1D(TH1D* hist, std::map<string, TH1D*> &allhistos)
+void insertHist1D(TH1D* hist, std::map<string, TH1*> &allhistos)
 {
 
   string title(hist->GetName());
 
-  std::map<string, TH1D*>::iterator iter= allhistos.find(title);
+  std::map<string, TH1*>::iterator iter= allhistos.find(title);
   if(iter == allhistos.end()) //no histo for this yet, insert into map
     {
       allhistos.insert(std::pair<string, TH1D*> (title,hist) );
@@ -315,12 +315,12 @@ void insertHist1D(TH1D* hist, std::map<string, TH1D*> &allhistos)
   return;
 }
 
-void savePlots(std::map<string, TH1D*> &h_1d, const char* outfilename){
+void savePlots(std::map<string, TH1*> &h_1d, const char* outfilename){
   TFile outfile(outfilename,"RECREATE") ;
 
   printf("[PlotUtilities::savePlots] Saving histograms to %s\n", outfilename);
 
-  std::map<std::string, TH1D*>::iterator it1d;
+  std::map<std::string, TH1*>::iterator it1d;
   for(it1d=h_1d.begin(); it1d!=h_1d.end(); it1d++) {
     it1d->second->Write();
     delete it1d->second;
@@ -346,7 +346,7 @@ void savePlots2(std::map<string, TH2D*> &h_1d, const char* outfilename){
 }
 
 
-void savePlotsDir(std::map<string, TH1D*> &h_1d, TFile* outfile, const char* dirname){
+void savePlotsDir(std::map<string, TH1*> &h_1d, TFile* outfile, const char* dirname){
 
   printf("[PlotUtilities::savePlots] Saving 1d histograms to dir: %s\n", dirname);
 
@@ -364,7 +364,7 @@ void savePlotsDir(std::map<string, TH1D*> &h_1d, TFile* outfile, const char* dir
     dir->cd();
   }
 
-  std::map<std::string, TH1D*>::iterator it1d;
+  std::map<std::string, TH1*>::iterator it1d;
   for(it1d=h_1d.begin(); it1d!=h_1d.end(); it1d++) {
     it1d->second->Write();
     delete it1d->second;
@@ -420,6 +420,45 @@ void savePlots12(std::map<string, TH1D*> &h_1d, std::map<string, TH2D*> &h_2d, c
 }
 
 
+void plot2D(string name, float xval, float yval, double weight, std::map<string, TH1*> &allhistos, 
+	    string title, int numbinsx, float xmin, float xmax, int numbinsy, float ymin, float ymax){
+
+  if (title=="") title=name; 
+  std::map<string, TH1*>::iterator iter= allhistos.find(name);
+  if(iter == allhistos.end()) //no histo for this yet, so make a new one
+    {
+      TH2D* currentHisto= new TH2D(name.c_str(), title.c_str(), numbinsx, xmin, xmax, numbinsy, ymin, ymax);
+      currentHisto->Fill(xval, yval, weight);
+      allhistos.insert(std::pair<string, TH1*> (name,currentHisto) );
+    }
+  else // exists already, so just fill it
+    {
+      ((TH2D*) (*iter).second)->Fill(xval, yval, weight);
+    }
+
+  return;
+
+}
+
+void plot2D(string name, float xval, float yval, double weight, std::map<string, TH1*> &allhistos, 
+	    string title, int numbinsx, const float * xbins, int numbinsy, const float * ybins){
+
+  if (title=="") title=name; 
+  std::map<string, TH1*>::iterator iter= allhistos.find(name);
+  if(iter == allhistos.end()) //no histo for this yet, so make a new one
+    {
+      TH2D* currentHisto= new TH2D(name.c_str(), title.c_str(), numbinsx, xbins, numbinsy, ybins);
+      currentHisto->Fill(xval, yval, weight);
+      allhistos.insert(std::pair<string, TH1*> (name,currentHisto) );
+    }
+  else // exists already, so just fill it
+    {
+      ((TH2D*) (*iter).second)->Fill(xval, yval, weight);
+    }
+
+  return;
+
+}
 void plot2D(string name, float xval, float yval, double weight, std::map<string, TH2D*> &allhistos, 
 	    string title, int numbinsx, float xmin, float xmax, int numbinsy, float ymin, float ymax){
 

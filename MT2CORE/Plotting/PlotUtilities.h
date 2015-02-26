@@ -23,26 +23,31 @@ TCanvas *ComparePlots(TFile *f, const char *hist1, const char *hist2, const char
 TGraph GetROC(TFile *f, const char *hist1, const char *hist2, bool increasing);
 TGraph GetEff(TFile *f, const char *hist1, bool increasing);
 
-void plot1D(string name, float xval, double weight, std::map<string, TH1D*> &allhistos, 
+void plot1D(string name, float xval, double weight, std::map<string, TH1*> &allhistos, 
 	    string title, int numbinsx, float xmin, float xmax);
-void plot1D(string name, float xval, double weight, std::map<string, TH1D*> &allhistos, 
+void plot1D(string name, float xval, double weight, std::map<string, TH1*> &allhistos, 
 	    string title, int numbinsx, const float * xbins);
-TH1D* getHist1D(string title, std::map<string, TH1D*> &allhistos, 
+TH1D* getHist1D(string title, std::map<string, TH1*> &allhistos, 
 	    int numbinsx, float xmin, float xmax);
-void insertHist1D(TH1D* hist, std::map<string, TH1D*> &allhistos);
+void insertHist1D(TH1D* hist, std::map<string, TH1*> &allhistos);
+void plot2D(string name, float xval, float yval, double weight, std::map<string, TH1*> &allhistos, 
+	    string title, int numbinsx, float xmin, float xmax, int numbinsy, float ymin, float ymax);
+void plot2D(string name, float xval, float yval, double weight, std::map<string, TH1*> &allhistos, 
+	    string title, int numbinsx, const float * xbins, int numbinsy, const float * ybins);
+// Old plot2D, with TH2D map
 void plot2D(string name, float xval, float yval, double weight, std::map<string, TH2D*> &allhistos, 
 	    string title, int numbinsx, float xmin, float xmax, int numbinsy, float ymin, float ymax);
 void plot2D(string name, float xval, float yval, double weight, std::map<string, TH2D*> &allhistos, 
 	    string title, int numbinsx, const float * xbins, int numbinsy, const float * ybins);
 
-void plot1DUnderOverFlow(string title, double xval, double weight, std::map<string, TH1D*> &allhistos, 
+void plot1DUnderOverFlow(string title, double xval, double weight, std::map<string, TH1*> &allhistos, 
 	    int numbinsx, double xmin, double xmax);
 void plot2DUnderOverFlow(string title, double xval, double yval, double weight, std::map<string, TH2D*> &allhistos, 
 	    int numbinsx, double xmin, double xmax, int numbinsy, double ymin, double ymax);
 
-void savePlots(std::map<string, TH1D*>&, const char* );
+void savePlots(std::map<string, TH1*>&, const char* );
 void savePlots2(std::map<string, TH2D*>&, const char* );
-void savePlotsDir(std::map<string, TH1D*>& h_1d, TFile* outfile, const char* outdir = "");
+void savePlotsDir(std::map<string, TH1*>& h_1d, TFile* outfile, const char* outdir = "");
 void savePlots2Dir(std::map<string, TH2D*>& h_2d, TFile* outfile, const char* outdir = "");
 void savePlots12(std::map<string, TH1D*>&, std::map<string, TH2D*>&, const char* );
 

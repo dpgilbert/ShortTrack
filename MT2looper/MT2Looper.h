@@ -43,13 +43,13 @@ class MT2Looper {
   void fillHistosCRSL(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRGJ(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRDY(const std::string& prefix = "", const std::string& suffix = "");
-  void fillHistos(std::map<std::string, TH1D*>& h_1d, 
+  void fillHistos(std::map<std::string, TH1*>& h_1d, 
 		  const std::string& dir = "", const std::string& suffix = ""); 
-  void fillHistosSingleLepton(std::map<std::string, TH1D*>& h_1d, 
+  void fillHistosSingleLepton(std::map<std::string, TH1*>& h_1d, 
 			      const std::string& dir = "", const std::string& suffix = ""); 
-  void fillHistosGammaJets(std::map<std::string, TH1D*>& h_1d, 
+  void fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, 
 			      const std::string& dir = "", const std::string& suffix = ""); 
-  void fillHistosDY(std::map<std::string, TH1D*>& h_1d, 
+  void fillHistosDY(std::map<std::string, TH1*>& h_1d, 
 			      const std::string& dir = "", const std::string& suffix = ""); 
  private:
 
@@ -59,7 +59,7 @@ class MT2Looper {
   int nlepveto_;
   float leppt_;
   float mt_;
-  std::map<std::string, TH1D*> h_1d_global;
+  std::map<std::string, TH1*> h_1d_global;
   std::vector<SR> SRVec;
   SR SRBase;
   SR SRNoCut;
