@@ -9,6 +9,10 @@ declare -a samples=("T1tttt_1500_100" "T1tttt_1200_800" "T1bbbb_1500_100" "T1bbb
 #declare -a samples=("T1bbbb_1500_100" "T1qqqq_1400_100")
 #declare -a samples=("T1tttt_1500_100")
 
+nJobsPerGridPoint="2"
+nToysPerJob="250"
+nIterationsPerJob="5"
+
 OFF1=0 
 for i in "${samples[@]}"
 do
@@ -19,8 +23,7 @@ do
     seedBegin=$(((${OFF1}*10000)+(${OFF2}*100)))
     echo ${seed}
     #first two arguments control output location: /hadoop/cms/store/user/${USERNAME}/combine/limits/${VERSION}/${i}
-    #other arguments are: number of jobs, toys per job, iterations per job, signal strength grid point, offset for random seed
-    ./writeConfig.sh ${VERSION} $i 2 250 5 $j ${seedBegin}
+    ./writeConfig.sh ${VERSION} $i ${nJobsPerGridPoint} ${nToysPerJob} ${nIterationsPerJob} $j ${seedBegin}
     let OFF2+=1
   done
   let OFF1+=1
