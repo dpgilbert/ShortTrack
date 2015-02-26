@@ -31,6 +31,7 @@ cp getGridPoints.C "$OUTDIR"
 cp writeAllConfig.sh "$OUTDIR"
 cp writeConfig.sh "$OUTDIR"
 cp wrapper.sh "$OUTDIR"
+cp submitAll.sh "$OUTDIR"
 cd "$OUTDIR"
 
 for i in "${samples[@]}"
