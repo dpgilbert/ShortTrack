@@ -18,6 +18,8 @@ do
   do
     seedBegin=$(((${OFF1}*10000)+(${OFF2}*100)))
     echo ${seed}
+    #first two arguments control output location: /hadoop/cms/store/user/${USERNAME}/combine/limits/${VERSION}/${i}
+    #other arguments are: number of jobs, toys per job, iterations per job, signal strength grid point, offset for random seed
     ./writeConfig.sh ${VERSION} $i 2 250 5 $j ${seedBegin}
     let OFF2+=1
   done
