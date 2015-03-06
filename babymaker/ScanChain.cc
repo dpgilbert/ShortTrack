@@ -42,6 +42,8 @@ using namespace tas;
 const bool verbose = false;
 // turn on to apply JEC from text files
 const bool applyJECfromFile = true;
+// turn on to save prunedGenParticle collection
+const bool saveGenParticles = false;
 
 //--------------------------------------------------------------------
 
@@ -153,6 +155,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       met_phi = cms3.evt_pfmetPhi();
       met_genPt  = cms3.gen_met();
       met_genPhi = cms3.gen_metPhi();
+      // met_rawPt  = cms3.evt_pfmet_raw();
+      // met_rawPhi = cms3.evt_pfmetPhi_raw();
 
       // MET FILTERS
       Flag_EcalDeadCellTriggerPrimitiveFilter       = cms3.filt_ecalTP();
@@ -666,7 +670,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
 	p4sCorrJets.push_back(pfjet_p4_cor);
 
-        if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
+        if(p4sCorrJets.at(iJet).pt() < 25.0) continue;
         if(fabs(p4sCorrJets.at(iJet).eta()) > 5.2) continue;
 	// note this uses the eta of the jet as stored in CMS3
 	//  chance for small discrepancies if JEC changes direction slightly..
@@ -692,7 +696,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
           int iJet = passJets.at(passIdx).first;
 
-          if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
+          if(p4sCorrJets.at(iJet).pt() < 25.0) continue;
           if(fabs(p4sCorrJets.at(iJet).eta()) > 5.2) continue;
           if(!isLoosePFJet(iJet)) continue;
 
@@ -728,7 +732,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
           int iJet = passJets.at(passIdx).first;
 
-          if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
+          if(p4sCorrJets.at(iJet).pt() < 25.0) continue;
           if(fabs(p4sCorrJets.at(iJet).eta()) > 5.2) continue;
           if(!isLoosePFJet(iJet)) continue;
 
@@ -1226,16 +1230,18 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("zll_eta", &zll_eta );
   BabyTree_->Branch("zll_phi", &zll_phi );
   BabyTree_->Branch("zll_ht", &zll_ht );
-  BabyTree_->Branch("ngenPart", &ngenPart, "ngenPart/I" );
-  BabyTree_->Branch("genPart_pt", genPart_pt, "genPart_pt[ngenPart]/F" );
-  BabyTree_->Branch("genPart_eta", genPart_eta, "genPart_eta[ngenPart]/F" );
-  BabyTree_->Branch("genPart_phi", genPart_phi, "genPart_phi[ngenPart]/F" );
-  BabyTree_->Branch("genPart_mass", genPart_mass, "genPart_mass[ngenPart]/F" );
-  BabyTree_->Branch("genPart_pdgId", genPart_pdgId, "genPart_pdgId[ngenPart]/I" );
-  BabyTree_->Branch("genPart_status", genPart_status, "genPart_status[ngenPart]/I" );
-  BabyTree_->Branch("genPart_charge", genPart_charge, "genPart_charge[ngenPart]/F" );
-  BabyTree_->Branch("genPart_motherId", genPart_motherId, "genPart_motherId[ngenPart]/I" );
-  BabyTree_->Branch("genPart_grandmaId", genPart_grandmaId, "genPart_grandmaId[ngenPart]/I" );
+  if (saveGenParticles) {
+    BabyTree_->Branch("ngenPart", &ngenPart, "ngenPart/I" );
+    BabyTree_->Branch("genPart_pt", genPart_pt, "genPart_pt[ngenPart]/F" );
+    BabyTree_->Branch("genPart_eta", genPart_eta, "genPart_eta[ngenPart]/F" );
+    BabyTree_->Branch("genPart_phi", genPart_phi, "genPart_phi[ngenPart]/F" );
+    BabyTree_->Branch("genPart_mass", genPart_mass, "genPart_mass[ngenPart]/F" );
+    BabyTree_->Branch("genPart_pdgId", genPart_pdgId, "genPart_pdgId[ngenPart]/I" );
+    BabyTree_->Branch("genPart_status", genPart_status, "genPart_status[ngenPart]/I" );
+    BabyTree_->Branch("genPart_charge", genPart_charge, "genPart_charge[ngenPart]/F" );
+    BabyTree_->Branch("genPart_motherId", genPart_motherId, "genPart_motherId[ngenPart]/I" );
+    BabyTree_->Branch("genPart_grandmaId", genPart_grandmaId, "genPart_grandmaId[ngenPart]/I" );
+  }
   BabyTree_->Branch("ngenLep", &ngenLep, "ngenLep/I" );
   BabyTree_->Branch("genLep_pt", genLep_pt, "genLep_pt[ngenLep]/F" );
   BabyTree_->Branch("genLep_eta", genLep_eta, "genLep_eta[ngenLep]/F" );
