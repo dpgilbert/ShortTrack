@@ -36,12 +36,12 @@ run wjets_ht600toInf
 # SINGLE TOP
 #
 
-run tbarschan_l
-run tbartchan_l
-run tschan_l
-run ttchan_l
-run tWchan
-run tbarWchan
+run singletop_tbarschan_l
+run singletop_tbartchan_l
+run singletop_tschan_l
+run singletop_ttchan_l
+run singletop_tWchan
+run singletop_tbarWchan
 
 #
 # DY+JETS
