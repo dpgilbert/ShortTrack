@@ -115,6 +115,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       tree->LoadTree(event);
       cms3.GetEntry(event);
       ++nEventsTotal;
+      count_hist_->Fill(1);
     
       // Progress
       CMS3::progress( nEventsTotal, nEventsChain );
@@ -134,7 +135,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       puWeight = 1.;
       nTrueInt = cms3.puInfo_trueNumInteractions().at(0);
       rho = cms3.evt_fixgridfastjet_all_rho(); //this one is used in JECs
-      //rho25 = ;
 
       if (verbose) cout << "before vertices" << endl;
 
@@ -155,8 +155,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       met_phi = cms3.evt_pfmetPhi();
       met_genPt  = cms3.gen_met();
       met_genPhi = cms3.gen_metPhi();
-      // met_rawPt  = cms3.evt_pfmet_raw();
-      // met_rawPhi = cms3.evt_pfmetPhi_raw();
+      met_rawPt  = cms3.evt_pfmet_raw();
+      met_rawPhi = cms3.evt_pfmetPhi_raw();
 
       // MET FILTERS
       Flag_EcalDeadCellTriggerPrimitiveFilter       = cms3.filt_ecalTP();
@@ -1096,7 +1096,6 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("nVert", &nVert );
   BabyTree_->Branch("nTrueInt", &nTrueInt );
   BabyTree_->Branch("rho", &rho );
-  BabyTree_->Branch("rho25", &rho25 );
   BabyTree_->Branch("nJet40", &nJet40 );
   BabyTree_->Branch("nBJet40", &nBJet40 );
   BabyTree_->Branch("nMuons10", &nMuons10 );
@@ -1189,10 +1188,8 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("tau_charge", tau_charge, "tau_charge[ntau]/I" );
   BabyTree_->Branch("tau_dxy", tau_dxy, "tau_dxy[ntau]/F" );
   BabyTree_->Branch("tau_dz", tau_dz, "tau_dz[ntau]/F" );
-  BabyTree_->Branch("tau_isoMVA2", tau_isoMVA2, "tau_isoMVA2[ntau]/F" );
   BabyTree_->Branch("tau_idCI3hit", tau_idCI3hit, "tau_idCI3hit[ntau]/I" );
   BabyTree_->Branch("tau_isoCI3hit", tau_isoCI3hit, "tau_isoCI3hit[ntau]/F" );
-  BabyTree_->Branch("tau_idMVA2", tau_idMVA2, "tau_idMVA2[ntau]/I" );
   BabyTree_->Branch("tau_mcMatchId", tau_mcMatchId, "tau_mcMatchId[ntau]/I" );
   BabyTree_->Branch("ngamma", &ngamma, "ngamma/I" );
   BabyTree_->Branch("gamma_pt", gamma_pt, "gamma_pt[ngamma]/F" );
@@ -1283,6 +1280,9 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("jet_id", jet_id, "jet_id[njet]/I" );
   BabyTree_->Branch("jet_puId", jet_puId, "jet_puId[njet]/I" );
 
+  // also make counter histogram
+  count_hist_ = new TH1D("Count","Count",1,0,2);
+
   return;
 }
 
@@ -1302,7 +1302,6 @@ void babyMaker::InitBabyNtuple () {
   nVert = -999;
   nTrueInt = -999;
   rho = -999.0;
-  rho25 = -999.0;
   nJet40 = -999;
   nBJet40 = -999;
   nMuons10 = -999;
@@ -1404,6 +1403,7 @@ void babyMaker::FillBabyNtuple(){
 void babyMaker::CloseBabyNtuple(){
   BabyFile_->cd();
   BabyTree_->Write();
+  count_hist_->Write();
   BabyFile_->Close();
   return;
 }

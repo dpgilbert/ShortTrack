@@ -10,7 +10,7 @@
 #include "TFile.h"
 #include "TChain.h"
 #include "TTree.h"
-//#include "TH1F.h"
+#include "TH1D.h"
 #include "Math/LorentzVector.h"
 #include "Math/GenVector/LorentzVector.h"
 
@@ -38,6 +38,7 @@ class babyMaker {
   TFile *BabyFile_;
   TTree *BabyTree_;
 
+  TH1D* count_hist_;
 
   //baby ntuple variables
 
@@ -56,7 +57,6 @@ class babyMaker {
   Int_t           nVert;
   Int_t           nTrueInt;
   Float_t         rho;
-  Float_t         rho25;
 
   Int_t           nJet40;
   Int_t           nBJet40;
@@ -169,10 +169,8 @@ class babyMaker {
   Int_t           tau_charge[max_ntau];   //[ntau]
   Float_t         tau_dxy[max_ntau];   //[ntau]
   Float_t         tau_dz[max_ntau];   //[ntau]
-  Float_t         tau_isoMVA2[max_ntau];   //[ntau]
   Int_t           tau_idCI3hit[max_ntau];   //[ntau]
   Float_t         tau_isoCI3hit[max_ntau];   //[ntau]
-  Int_t           tau_idMVA2[max_ntau];   //[ntau]
   Int_t           tau_mcMatchId[max_ntau];   //[ntau]
 
 //----- PHOTONS
