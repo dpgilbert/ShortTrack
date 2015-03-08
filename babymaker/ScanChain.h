@@ -227,7 +227,7 @@ class babyMaker {
   Int_t           genPart_status[max_ngenPart];   //[ngenPart]
   Float_t         genPart_charge[max_ngenPart];   //[ngenPart]
   Int_t           genPart_motherId[max_ngenPart];   //[ngenPart]
-  Int_t           genPart_grandmaId[max_ngenPart];   //[ngenPart]
+  Int_t           genPart_grandmotherId[max_ngenPart];   //[ngenPart]
 
 //----- GEN LEPTONS (ELECTRONS/MUONS)
   static const int max_ngenLep = 10;

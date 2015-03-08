@@ -207,7 +207,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         genPart_status[ngenPart] = cms3.genps_status().at(iGen);
         genPart_charge[ngenPart] = cms3.genps_charge().at(iGen);
 	genPart_motherId[ngenPart] = cms3.genps_id_simplemother().at(iGen);
-	genPart_grandmaId[ngenPart] = cms3.genps_id_simplegrandma().at(iGen);
+	genPart_grandmotherId[ngenPart] = cms3.genps_id_simplegrandma().at(iGen);
         ngenPart++;
 
 	// save lepton info
@@ -215,7 +215,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	if ((pdgId != 11) && (pdgId != 13) && (pdgId != 15)) continue;
 
 	int motherId = abs(cms3.genps_id_simplemother().at(iGen));
-	int grandmaId = abs(cms3.genps_id_simplegrandma().at(iGen));
+	int grandmotherId = abs(cms3.genps_id_simplegrandma().at(iGen));
 	int status = cms3.genps_status().at(iGen);
 
 	// reject leptons with direct parents of quarks or hadrons. 
@@ -234,7 +234,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	    // don't save
 	  }
 	  // leptons from taus
-	  else if (motherId == 15 && (grandmaId == 25 || grandmaId == 24 || grandmaId == 23 || grandmaId == 15)) {
+	  else if (motherId == 15 && (grandmotherId == 25 || grandmotherId == 24 || grandmotherId == 23 || grandmotherId == 15)) {
 	    goodLepFromTau = true;
 	  } 
 	  // leptons from W/Z/H
@@ -353,7 +353,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         vec_lep_relIso04.push_back ( 0);
         if (cms3.els_mc3dr().at(iEl) < 0.2 && cms3.els_mc3idx().at(iEl) != -9999 && abs(cms3.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.els_mc3idx().at(iEl)]);
-          vec_lep_mcMatchId.push_back ( momid != 11 ? momid : genPart_grandmaId[cms3.els_mc3idx().at(iEl)]); // if mother is different store mother, otherwise store grandmother
+          vec_lep_mcMatchId.push_back ( momid != 11 ? momid : genPart_grandmotherId[cms3.els_mc3idx().at(iEl)]); // if mother is different store mother, otherwise store grandmother
         }
 	else vec_lep_mcMatchId.push_back (0);
 
@@ -393,7 +393,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         vec_lep_relIso04.push_back ( muRelIso04(iMu,analysis_t::HAD) );
         if (cms3.mus_mc3dr().at(iMu) < 0.2 && cms3.mus_mc3idx().at(iMu) != -9999 && abs(cms3.mus_mc3_id().at(iMu)) == 13) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.mus_mc3idx().at(iMu)]);
-          vec_lep_mcMatchId.push_back ( momid != 13 ? momid : genPart_grandmaId[cms3.mus_mc3idx().at(iMu)]); // if mother is different store mother, otherwise store grandmother
+          vec_lep_mcMatchId.push_back ( momid != 13 ? momid : genPart_grandmotherId[cms3.mus_mc3idx().at(iMu)]); // if mother is different store mother, otherwise store grandmother
 	}
 	else vec_lep_mcMatchId.push_back (0);
         vec_lep_lostHits.push_back ( cms3.mus_exp_innerlayers().at(iMu) ); // use defaults as if "good electron"
@@ -1237,7 +1237,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
     BabyTree_->Branch("genPart_status", genPart_status, "genPart_status[ngenPart]/I" );
     BabyTree_->Branch("genPart_charge", genPart_charge, "genPart_charge[ngenPart]/F" );
     BabyTree_->Branch("genPart_motherId", genPart_motherId, "genPart_motherId[ngenPart]/I" );
-    BabyTree_->Branch("genPart_grandmaId", genPart_grandmaId, "genPart_grandmaId[ngenPart]/I" );
+    BabyTree_->Branch("genPart_grandmotherId", genPart_grandmotherId, "genPart_grandmotherId[ngenPart]/I" );
   }
   BabyTree_->Branch("ngenLep", &ngenLep, "ngenLep/I" );
   BabyTree_->Branch("genLep_pt", genLep_pt, "genLep_pt[ngenLep]/F" );
