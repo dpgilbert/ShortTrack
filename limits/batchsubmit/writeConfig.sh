@@ -55,6 +55,7 @@ when_to_transfer_output = ON_EXIT
 #the actual executable to run is not transfered by its name.
 #In fact, some sites may do weird things like renaming it and such.
 transfer_input_files=${INPUT}
+transfer_output_files = /dev/null
 +DESIRED_Sites=\"${SITE}\"
 +Owner = undefined
 log=${LOG}
