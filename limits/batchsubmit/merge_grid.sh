@@ -4,7 +4,7 @@
 #VERSION=ExtendedNJets_UltraHighHT_GAMMA
 #VERSION=SevenJets_UltraHighHT_GAMMA
 VERSION=ExtendedNJets_UltraHighHT_9JetsHTIntegrated_GAMMA
-INDIR=/hadoop/cms/store/user/jgran/combine/limits/${VERSION}
+INDIR=/hadoop/cms/store/user/$USER/combine/limits/${VERSION}
 OUTDIR=Grid_${VERSION}
 
 if [ ! -d "$OUTDIR" ]; then
