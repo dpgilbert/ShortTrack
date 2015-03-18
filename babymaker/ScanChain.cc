@@ -186,6 +186,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       HLT_MuEG         = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v") || passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v"); 
       HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") || passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
       HLT_Photons      = passHLTTriggerPattern("HLT_Photon155_v"); 
+
+      if (verbose) cout << "before sparm values" << endl;
+
+      TString filename(currentFile->GetTitle());
+      if (filename.Contains("T1tttt") || filename.Contains("T1bbbb") || filename.Contains("T1qqqq")) {
+	for (unsigned int i=0; i<sparm_values().size(); ++i) {
+	  if (sparm_names().at(i).Contains("mGluino")) GenSusyMScan1 = sparm_values().at(i);
+	  if (sparm_names().at(i).Contains("mLSP")) GenSusyMScan2 = sparm_values().at(i);
+	}
+      }
+      else if (filename.Contains("T2tt") || filename.Contains("T2bb") || filename.Contains("T2qq")) {
+	for (unsigned int i=0; i<sparm_values().size(); ++i) {
+	  if (sparm_names().at(i).Contains("mStop")) GenSusyMScan1 = sparm_values().at(i);
+	  if (sparm_names().at(i).Contains("mLSP")) GenSusyMScan2 = sparm_values().at(i);
+	}
+      }
       
       if (verbose) cout << "before gen particles" << endl;
 
@@ -1279,6 +1295,10 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("jet_area", jet_area, "jet_area[njet]/F" );
   BabyTree_->Branch("jet_id", jet_id, "jet_id[njet]/I" );
   BabyTree_->Branch("jet_puId", jet_puId, "jet_puId[njet]/I" );
+  BabyTree_->Branch("GenSusyMScan1", &GenSusyMScan1 );
+  BabyTree_->Branch("GenSusyMScan2", &GenSusyMScan2 );
+  BabyTree_->Branch("GenSusyMScan3", &GenSusyMScan3 );
+  BabyTree_->Branch("GenSusyMScan4", &GenSusyMScan4 );
 
   // also make counter histogram
   count_hist_ = new TH1D("Count","Count",1,0,2);
@@ -1389,6 +1409,10 @@ void babyMaker::InitBabyNtuple () {
   zll_eta = -999.0;
   zll_phi = -999.0;
   zll_ht = -999.0;
+  GenSusyMScan1 = 0;
+  GenSusyMScan2 = 0;
+  GenSusyMScan3 = 0;
+  GenSusyMScan4 = 0;
 
 
   
