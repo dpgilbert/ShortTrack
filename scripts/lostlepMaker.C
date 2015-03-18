@@ -30,13 +30,7 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
     TString directory = "sr"+dirs.at(idir);
     TString fullhistname = directory + "/h_mt2bins";
 
-    vector<TString> directoriesSL_temp = getCRsToCombine(fttbar, TString(dirs.at(idir)));
-    vector<TString> directoriesSL;
-    vector<TString> fullhistnamesSL;
-    for (unsigned int icr = 0; icr < directoriesSL_temp.size(); ++icr) {
-      directoriesSL.push_back("crsl"+directoriesSL_temp.at(icr));
-      fullhistnamesSL.push_back(directoriesSL.at(icr)+"/h_mt2bins");
-    }
+    TString fullhistnameSL = "crsl"+TString(dirs.at(idir))+"/h_mt2bins";
 
     TH1D* httbar_sr = (TH1D*) fttbar->Get(fullhistname);
     TH1D* hwjets_sr = (TH1D*) fwjets->Get(fullhistname);
@@ -61,26 +55,24 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
     }
 
     TH1D* hlostlep_cr = 0;
-    for (unsigned int icr = 0; icr < fullhistnamesSL.size(); ++icr) {
-      TH1D* httbar_cr = (TH1D*) fttbar->Get(fullhistnamesSL.at(icr));
-      TH1D* hwjets_cr = (TH1D*) fwjets->Get(fullhistnamesSL.at(icr));
-      // check that histograms exist
-      if (!httbar_cr) {
-        cout << "couldn't find ttbar CR hist: " << fullhistnamesSL.at(icr) << endl;
-      }
-      if (!hwjets_cr) {
-        cout << "couldn't find wjets CR hist: " << fullhistnamesSL.at(icr) << endl;
-      }
-      if (!hlostlep_cr && httbar_cr) {
-        hlostlep_cr = (TH1D*) httbar_cr->Clone("h_mt2binsCRyield");
-      } else if (httbar_cr) {
-        hlostlep_cr->Add(httbar_cr);
-      }
-      if (!hlostlep_cr && hwjets_cr) {
-        hlostlep_cr = (TH1D*) hwjets_cr->Clone("h_mt2binsCRyield");
-      } else if (hwjets_cr) {
-        hlostlep_cr->Add(hwjets_cr);
-      }
+    TH1D* httbar_cr = (TH1D*) fttbar->Get(fullhistnameSL);
+    TH1D* hwjets_cr = (TH1D*) fwjets->Get(fullhistnameSL);
+    // check that histograms exist
+    if (!httbar_cr) {
+      cout << "couldn't find ttbar CR hist: " << fullhistnameSL << endl;
+    }
+    if (!hwjets_cr) {
+      cout << "couldn't find wjets CR hist: " << fullhistnameSL << endl;
+    }
+    if (!hlostlep_cr && httbar_cr) {
+      hlostlep_cr = (TH1D*) httbar_cr->Clone("h_mt2binsCRyield");
+    } else if (httbar_cr) {
+      hlostlep_cr->Add(httbar_cr);
+    }
+    if (!hlostlep_cr && hwjets_cr) {
+      hlostlep_cr = (TH1D*) hwjets_cr->Clone("h_mt2binsCRyield");
+    } else if (hwjets_cr) {
+      hlostlep_cr->Add(hwjets_cr);
     }
 
     if(!hlostlep_cr) hlostlep_cr = new TH1D("h_mt2binsCRyield", "h_mt2binsCRyield", n_mt2bins, mt2bins);
@@ -134,70 +126,10 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
 }
 
 //_______________________________________________________________________________
-vector<TString> getCRsToCombine(TFile* f, const TString& dir) {
-
-  vector<TString> crs;  
-
-  //get minMTBMet boundaries
-  TH1D* h_lowMT_LOW = (TH1D*) f->Get("sr"+dir+"/h_lowMT_LOW");
-  TH1D* h_lowMT_UP = (TH1D*) f->Get("sr"+dir+"/h_lowMT_UP");
-  int lowMT_LOW;
-  int lowMT_UP;
-
-  if(h_lowMT_LOW) lowMT_LOW = h_lowMT_LOW->GetBinContent(1);
-  else std::cout << "Bad Pointer" << std::endl;
-
-  if(h_lowMT_UP)  lowMT_UP = h_lowMT_UP->GetBinContent(1);
-  else std::cout << "Bad Pointer" << std::endl;
-
-  if(lowMT_LOW == 0 && lowMT_UP == -1){//this SR is not split by minMTBMet
-    crs.push_back(dir);
-    return crs;
-  }
-
-  char* str = dir; 
-  std::string first;//this piece is just "sr"
-  std::string second;//this piece is the SR number
-  std::string third;//this piece is "L", "M", or "H"
-  bool found_num = false;
-  
-  //find the SR number so we can get the SR before and after this one
-  while (*str){
-    if(!isdigit(*str) && !found_num) first += *str;
-    else if(!isdigit(*str)) third += *str;
-    else {
-      second += *str;
-      found_num = true;
-    }
-    str++;
-  }
-
-  std::string srA = second;
-  int sr_before = atoi(second.c_str());
-  int sr_after  = atoi(second.c_str());
-
-  sr_before--;
-  sr_after++;
-
-  //assume that lowMT region comes before highMT region
-  stringstream ss;
-  if(lowMT_LOW == 1) ss << sr_after;
-  else ss << sr_before;
-
-  std::string srB = ss.str();
-
-  crs.push_back(TString(srA + third));
-  crs.push_back(TString(srB + third));
-
-  return crs;
-
-}
-
-
-//_______________________________________________________________________________
 void lostlepMaker(){
 
-  string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
+  //string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
+  string input_dir = "/home/users/jgran/temp/jet_pt_cuts/MT2Analysis/MT2looper/output/removed_minMT/";
   //string input_dir = "../MT2looper/output/2015LowLumi/";
   //  string input_dir = "../MT2looper/output/test/";
   string output_name = input_dir+"lostlepFromCRs.root";

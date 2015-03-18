@@ -94,11 +94,6 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   int njets_LOW = h_njets_LOW->GetBinContent(1);
   int njets_UP = h_njets_UP->GetBinContent(1);
 
-  TH1D* h_lowMT_LOW = (TH1D*) f_sig->Get(dir+"/h_lowMT_LOW");
-  TH1D* h_lowMT_UP = (TH1D*) f_sig->Get(dir+"/h_lowMT_UP");
-  int lowMT_LOW = h_lowMT_LOW->GetBinContent(1);
-  int lowMT_UP = h_lowMT_UP->GetBinContent(1);
-
   int mt2_LOW = h_sig->GetBinLowEdge(mt2bin);
   int mt2_UP = mt2_LOW + h_sig->GetBinWidth(mt2bin);
   // hardcode the current edge of our highest bin..
@@ -113,10 +108,6 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   std::string jet_str = (njets_UP_mod == njets_LOW) ? "j" + toString(njets_LOW) : "j" + toString(njets_LOW) + "to" + toString(njets_UP_mod);
   std::string bjet_str = (nbjets_UP_mod == nbjets_LOW) ? "b" + toString(nbjets_LOW) : "b" + toString(nbjets_LOW) + "to" + toString(nbjets_UP_mod);
   std::string mt2_str = "m" + toString(mt2_LOW) + "to" + toString(mt2_UP);
-  std::string minMT_str;
-  if(lowMT_LOW == 1) minMT_str = "loMT_";
-  else if(lowMT_UP == 1) minMT_str = "hiMT_";
-  else minMT_str = "";
   
   //Replace instances of "-1" with "inf" for variables with no upper bound.
   ReplaceString(ht_str, "-1", "Inf");
@@ -124,11 +115,11 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   ReplaceString(bjet_str, "-1", "Inf");
   ReplaceString(mt2_str, "-1", "Inf");
 
-  std::string channel = ht_str + "_" + jet_str + "_" + bjet_str + "_" + minMT_str + mt2_str;
+  std::string channel = ht_str + "_" + jet_str + "_" + bjet_str + "_" + mt2_str;
 
   TString cardname = Form("%s/datacard_%s_%s.txt",output_dir.c_str(),channel.c_str(),signal.c_str());
 
-  if (suppressZeroBins && n_sig < 0.01) {
+  if (suppressZeroBins && n_sig < 0.1) {
     std::cout << "Zero signal, card not printed: " << cardname << std::endl;
     return;
   }
@@ -241,12 +232,6 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   if (lostlep_decorrelate_bin) name_lostlep_crstat = Form("llep_CRstat_%s", channel.c_str());
   TString name_lostlep_lepeff = Form("llep_lepeff_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
   TString name_lostlep_mcstat = Form("llep_MCstat_%s", channel.c_str());
-/*
-  if (iteration1) {
-    TString crdir = getCorrelatedSLCRs(dir);
-    name_lostlep_crstat = Form("LL_CRSTAT_%s",crdir.Data());
-  }
-*/
 
   // ----- zinv bkg uncertainties - depend on signal region, b selection
   // uncorrelated across TRs and MT2 bins
@@ -428,52 +413,6 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   std::cout << "Wrote card: " << cardname << std::endl;
 
   return;
-}
-
-//_______________________________________________________________________________
-TString getCorrelatedSLCRs(const TString& dir) {
-
-  //get minMTBMet boundaries
-  TH1D* h_lowMT_LOW = (TH1D*) f_sig->Get(dir+"/h_lowMT_LOW");
-  TH1D* h_lowMT_UP = (TH1D*) f_sig->Get(dir+"/h_lowMT_UP");
-  int lowMT_LOW = h_lowMT_LOW->GetBinContent(1);
-  int lowMT_UP = h_lowMT_UP->GetBinContent(1);
-
-  if(lowMT_LOW == 0 && lowMT_UP == -1) return dir; //this SR is not split by minMTBMet
-
-  char* str = dir; 
-  std::string first;//this piece is just "sr"
-  std::string second;//this piece is the SR number
-  std::string third;//this piece is "L", "M", or "H"
-  bool found_num = false;
-  
-  //find the SR number so we can get the SR before and after this one
-  while (*str){
-    if(!isdigit(*str) && !found_num) first += *str;
-    else if(!isdigit(*str)) third += *str;
-    else {
-      second += *str;
-      found_num = true;
-    }
-    str++;
-  }
-
-  std::string srA = second;
-  int sr_before = atoi(second.c_str());
-  int sr_after  = atoi(second.c_str());
-
-  sr_before--;
-  sr_after++;
-
-  //assume that lowMT region comes before highMT region
-  stringstream ss;
-  if(lowMT_LOW == 1) ss << sr_after;
-  else ss << sr_before;
-
-  std::string srB = ss.str();
-
-  return TString(first + srA + third + srB + third); 
-
 }
 
 //_______________________________________________________________________________
