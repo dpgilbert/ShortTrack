@@ -39,10 +39,8 @@ MT2Looper::~MT2Looper(){
 
 void MT2Looper::SetSignalRegions(){
 
-  SRVec = getSignalRegions2015LowLumi();
-  //SRVec = getSignalRegions2015ExtendedNJets();
-  //SRVec =  getSignalRegions2015ExtendedNJets_UltraHighHT();
-  //SRVec = getSignalRegions2015ExtendedNJets_V2();
+  //SRVec = getSignalRegions2015LowLumi(); //Phys14 AN selection
+  SRVec =  getSignalRegions2015SevenJets_UltraHighHT(); //new selection with additional njet boundary at 7 jets, 4th ht bin
 
   //store histograms with cut values for all variables
   for(unsigned int i = 0; i < SRVec.size(); i++){
