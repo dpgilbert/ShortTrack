@@ -44,14 +44,14 @@ class babyMaker {
 
   Int_t           run;
   Int_t           lumi;
-  Int_t           evt;
+  ULong64_t       evt;
   Int_t           isData;
 
   Float_t         evt_scale1fb;
   Float_t         evt_xsec;
   Float_t         evt_kfactor;
   Float_t         evt_filter;
-  Int_t           evt_nEvts;
+  ULong64_t       evt_nEvts;
   Int_t           evt_id;
   Float_t         puWeight;
   Int_t           nVert;

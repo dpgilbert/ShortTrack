@@ -1100,13 +1100,13 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
 
   BabyTree_->Branch("run", &run );
   BabyTree_->Branch("lumi", &lumi );
-  BabyTree_->Branch("evt", &evt );
+  BabyTree_->Branch("evt", &evt, "evt/l" );
   BabyTree_->Branch("isData", &isData );
   BabyTree_->Branch("evt_scale1fb", &evt_scale1fb);
   BabyTree_->Branch("evt_xsec", &evt_xsec );
   BabyTree_->Branch("evt_kfactor", &evt_kfactor );
   BabyTree_->Branch("evt_filter", &evt_filter );
-  BabyTree_->Branch("evt_nEvts", &evt_nEvts );
+  BabyTree_->Branch("evt_nEvts", &evt_nEvts, "evt_nEvts/l" );
   BabyTree_->Branch("evt_id", &evt_id );
   BabyTree_->Branch("puWeight", &puWeight );
   BabyTree_->Branch("nVert", &nVert );
