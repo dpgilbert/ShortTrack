@@ -1443,7 +1443,128 @@ void babyMaker::InitBabyNtuple () {
   weight_scales_DN = 1.;
   weight_pdfs_UP = 1.;
   weight_pdfs_DN = 1.;
-  
+
+  for(int i=0; i < nlep; i++){
+    lep_pt[i] = -999;
+    lep_eta[i] = -999;
+    lep_phi[i] = -999;
+    lep_mass[i] = -999;
+    lep_charge[i] = -999;
+    lep_pdgId[i] = -999;
+    lep_dxy[i] = -999;
+    lep_dz[i] = -999;
+    lep_tightId[i] = -999;
+    lep_relIso03[i] = -999;
+    lep_relIso04[i] = -999;
+    lep_mcMatchId[i] = -999;
+    lep_lostHits[i] = -999;
+    lep_convVeto[i] = -999;
+    lep_tightCharge[i] = -999;
+  }
+
+  for(int i=0; i < nisoTrack; i++){
+    isoTrack_pt[i] = -999;
+    isoTrack_eta[i] = -999;
+    isoTrack_phi[i] = -999;
+    isoTrack_mass[i] = -999;
+    isoTrack_absIso[i] = -999;
+    isoTrack_dz[i] = -999;
+    isoTrack_pdgId[i] = -999;
+    isoTrack_mcMatchId[i] = -999;
+  }
+
+  for(int i=0; i < ntau; i++){
+    tau_pt[i] = -999;
+    tau_eta[i] = -999;
+    tau_phi[i] = -999;
+    tau_mass[i] = -999;
+    tau_charge[i] = -999;
+    tau_dxy[i] = -999;
+    tau_dz[i] = -999;
+    tau_idCI3hit[i] = -999;
+    tau_isoCI3hit[i] = -999;
+    tau_mcMatchId[i] = -999;
+  }
+
+  for(int i=0; i < ngamma; i++){
+    gamma_pt[i] = -999;
+    gamma_eta[i] = -999;
+    gamma_phi[i] = -999;
+    gamma_mass[i] = -999;
+    gamma_mcMatchId[i] = -999;
+    gamma_genIso[i] = -999;
+    gamma_chHadIso[i] = -999;
+    gamma_neuHadIso[i] = -999;
+    gamma_phIso[i] = -999;
+    gamma_sigmaIetaIeta[i] = -999;
+    gamma_r9[i] = -999;
+    gamma_hOverE[i] = -999;
+    gamma_idCutBased[i] = -999;
+  }
+
+  if (saveGenParticles) {
+    for(int i=0; i < ngenPart; i++){
+      genPart_pt[i] = -999;
+      genPart_eta[i] = -999;
+      genPart_phi[i] = -999;
+      genPart_mass[i] = -999;
+      genPart_pdgId[i] = -999;
+      genPart_status[i] = -999;
+      genPart_charge[i] = -999;
+      genPart_motherId[i] = -999;
+      genPart_grandmotherId[i] = -999;
+    }
+  }
+
+  for(int i=0; i < ngenLep; i++){
+    genLep_pt[i] = -999;
+    genLep_eta[i] = -999;
+    genLep_phi[i] = -999;
+    genLep_mass[i] = -999;
+    genLep_pdgId[i] = -999;
+    genLep_status[i] = -999;
+    genLep_charge[i] = -999;
+    genLep_sourceId[i] = -999;
+  }
+
+  for(int i=0; i < ngenTau; i++){
+    genTau_pt[i] = -999;
+    genTau_eta[i] = -999;
+    genTau_phi[i] = -999;
+    genTau_mass[i] = -999;
+    genTau_pdgId[i] = -999;
+    genTau_status[i] = -999;
+    genTau_charge[i] = -999;
+    genTau_sourceId[i] = -999;
+  }
+
+  for(int i=0; i < ngenLepFromTau; i++){
+      genLepFromTau_pt[i] = -999;
+      genLepFromTau_eta[i] = -999;
+      genLepFromTau_phi[i] = -999;
+      genLepFromTau_mass[i] = -999;
+      genLepFromTau_pdgId[i] = -999;
+      genLepFromTau_status[i] = -999;
+      genLepFromTau_charge[i] = -999;
+      genLepFromTau_sourceId[i] = -999;
+  }
+
+  for(int i=0; i < njet; i++){
+    jet_pt[i] = -999;
+    jet_eta[i] = -999;
+    jet_phi[i] = -999;
+    jet_mass[i] = -999;
+    jet_btagCSV[i] = -999;
+    jet_rawPt[i] = -999;
+    jet_mcPt[i] = -999;
+    jet_mcFlavour[i] = -999;
+    jet_qgl[i] = -999;
+    jet_area[i] = -999;
+    jet_id[i] = -999;
+    jet_puId[i] = -999;
+  }
+
+
   return;
 }
 
