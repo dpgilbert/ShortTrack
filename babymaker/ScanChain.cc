@@ -1299,6 +1299,21 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("GenSusyMScan2", &GenSusyMScan2 );
   BabyTree_->Branch("GenSusyMScan3", &GenSusyMScan3 );
   BabyTree_->Branch("GenSusyMScan4", &GenSusyMScan4 );
+  BabyTree_->Branch("weight_lepsf", &weight_lepsf );
+  BabyTree_->Branch("weight_lepsf_UP", &weight_lepsf_UP );
+  BabyTree_->Branch("weight_lepsf_DN", &weight_lepsf_DN );
+  BabyTree_->Branch("weight_btagsf", &weight_btagsf );
+  BabyTree_->Branch("weight_btagsf_UP", &weight_btagsf_UP );
+  BabyTree_->Branch("weight_btagsf_DN", &weight_btagsf_DN );
+  BabyTree_->Branch("weight_sigtrigsf", &weight_sigtrigsf );
+  BabyTree_->Branch("weight_dileptrigsf", &weight_dileptrigsf );
+  BabyTree_->Branch("weight_phottrigsf", &weight_phottrigsf );
+  BabyTree_->Branch("weight_pu", &weight_pu );
+  BabyTree_->Branch("weight_isr", &weight_isr );
+  BabyTree_->Branch("weight_scales_UP", &weight_scales_UP );
+  BabyTree_->Branch("weight_scales_DN", &weight_scales_DN );
+  BabyTree_->Branch("weight_pdfs_UP", &weight_pdfs_UP );
+  BabyTree_->Branch("weight_pdfs_DN", &weight_pdfs_DN );
 
   // also make counter histogram
   count_hist_ = new TH1D("Count","Count",1,0,2);
@@ -1413,8 +1428,21 @@ void babyMaker::InitBabyNtuple () {
   GenSusyMScan2 = 0;
   GenSusyMScan3 = 0;
   GenSusyMScan4 = 0;
-
-
+  weight_lepsf = 1.;
+  weight_lepsf_UP = 1.;
+  weight_lepsf_DN = 1.;
+  weight_btagsf = 1.;
+  weight_btagsf_UP = 1.;
+  weight_btagsf_DN = 1.;
+  weight_sigtrigsf = 1.;
+  weight_dileptrigsf = 1.;
+  weight_phottrigsf = 1.;
+  weight_pu = 1.;
+  weight_isr = 1.;
+  weight_scales_UP = 1.;
+  weight_scales_DN = 1.;
+  weight_pdfs_UP = 1.;
+  weight_pdfs_DN = 1.;
   
   return;
 }

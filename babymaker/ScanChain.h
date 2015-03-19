@@ -287,6 +287,22 @@ class babyMaker {
   Int_t           GenSusyMScan3;
   Int_t           GenSusyMScan4;
 
+//----- WEIGHTS AND VARIATIONS
+  Float_t         weight_lepsf;
+  Float_t         weight_lepsf_UP;
+  Float_t         weight_lepsf_DN;
+  Float_t         weight_btagsf;
+  Float_t         weight_btagsf_UP;
+  Float_t         weight_btagsf_DN;
+  Float_t         weight_sigtrigsf;
+  Float_t         weight_dileptrigsf;
+  Float_t         weight_phottrigsf;
+  Float_t         weight_pu;
+  Float_t         weight_isr;
+  Float_t         weight_scales_UP;
+  Float_t         weight_scales_DN;
+  Float_t         weight_pdfs_UP;
+  Float_t         weight_pdfs_DN;
 
 };
 
