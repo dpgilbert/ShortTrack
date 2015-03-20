@@ -601,13 +601,14 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   valuesBase["j2pt"]        = t.gamma_jet2_pt;
   valuesBase["mt2"]         = t.gamma_mt2;
   valuesBase["passesHtMet"] = ( (t.gamma_ht > 450. && t.gamma_met_pt > 200.) || (t.gamma_ht > 1000. && t.gamma_met_pt > 30.) );
+  bool passBase = SRBase.PassesSelection(valuesBase);
 
   float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
   std::string add="";
   if (iso>4 && iso < 60) add = "LooseNotTight";
   if (iso>60) add = "NotLoose";
   fillHistosGammaJets(SRNoCut.crgjHistMap, prefix+SRNoCut.GetName(), suffix+add);
-  if(SRBase.PassesSelection(valuesBase)) fillHistosGammaJets(SRBase.crgjHistMap, "crgjbase", suffix+add);
+  if(passBase) fillHistosGammaJets(SRBase.crgjHistMap, "crgjbase", suffix+add);
   
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelection(values)){
@@ -616,14 +617,16 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
     }
   }
   // Remake everything again to get "Loose"
-  if (iso<60) add = "Loose";
-  fillHistosGammaJets(SRNoCut.crgjHistMap, prefix+SRNoCut.GetName(), suffix+add);
-  if(SRBase.PassesSelection(valuesBase)) fillHistosGammaJets(SRBase.crgjHistMap, "crgjbase", suffix+add);
-  
-  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
-    if(SRVec.at(srN).PassesSelection(values)){
-      fillHistosGammaJets(SRVec.at(srN).crgjHistMap, prefix+SRVec.at(srN).GetName(), suffix+add);
-      break;//control regions are orthogonal, event cannot be in more than one
+  if (iso<60) {
+    add = "Loose";
+    fillHistosGammaJets(SRNoCut.crgjHistMap, prefix+SRNoCut.GetName(), suffix+add);
+    if(passBase) fillHistosGammaJets(SRBase.crgjHistMap, "crgjbase", suffix+add);
+    
+    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+      if(SRVec.at(srN).PassesSelection(values)){
+	fillHistosGammaJets(SRVec.at(srN).crgjHistMap, prefix+SRVec.at(srN).GetName(), suffix+add);
+	break;//control regions are orthogonal, event cannot be in more than one
+      }
     }
   }
 
@@ -647,10 +650,22 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   values["ht"]          = t.zll_ht;
   values["met"]         = t.zll_met_pt;
 
-
+ // Separate list for SRBASE
+  std::map<std::string, float> valuesBase;
+  valuesBase["deltaPhiMin"] = t.zll_deltaPhiMin;
+  valuesBase["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
+  valuesBase["nlep"]        = nlepveto_;
+  valuesBase["j1pt"]        = t.jet1_pt;
+  valuesBase["j2pt"]        = t.jet1_pt;
+  valuesBase["mt2"]         = t.zll_mt2;
+  valuesBase["passesHtMet"] = ( (t.zll_ht > 450. && t.zll_met_pt > 200.) || (t.zll_ht > 1000. && t.zll_met_pt > 30.) );
+  bool passBase = SRBase.PassesSelection(valuesBase);
+  
+  fillHistosDY(SRNoCut.crdyHistMap, prefix+SRNoCut.GetName(), suffix);
+  if(passBase) fillHistosDY(SRBase.crdyHistMap, "crdybase", suffix);
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelection(values)){
-      fillHistosGammaJets(SRVec.at(srN).crdyHistMap, prefix+SRVec.at(srN).GetName(), suffix);
+      fillHistosDY(SRVec.at(srN).crdyHistMap, prefix+SRVec.at(srN).GetName(), suffix);
       break;//control regions are orthogonal, event cannot be in more than one
     }
   }
@@ -710,6 +725,14 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, const std
     dir = outfile_->mkdir(dirname.c_str());
   } 
   dir->cd();
+
+  const int n_htbins = 5;
+  const float htbins[n_htbins+1] = {450., 575., 600., 1000., 1500., 3000.};
+  const int n_njbins = 3;
+  const float njbins[n_njbins+1] = {2, 4, 7, 12};
+  const int n_nbjbins = 4;
+  const float nbjbins[n_nbjbins+1] = {0, 1, 2, 3, 6};
+
   float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
 
   plot1D("h_iso"+s,      iso,   evtweight_, h_1d, ";iso [GeV]", 100, 0, 50);
@@ -736,13 +759,16 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, const std
     plot1D("h_diffMetMhtOverMet"+s,   t.gamma_diffMetMht/t.gamma_met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
     plot1D("h_minMTBMet"+s,   t.gamma_minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
     plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
+    plot1D("h_htbins"+s,       t.gamma_ht,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins, htbins);
+    plot1D("h_njbins"+s,       t.gamma_nJet40,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
+    plot1D("h_nbjbins"+s,       t.gamma_nBJet40,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
     if (s=="") { // Don't make these for Loose, LooseNotTight, NotLoose
-      plot2D("h_gammaht_met"+s,       t.gamma_ht, t.met_pt ,  evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 1500, 30, 0, 1500);
-      plot2D("h_gammaht_gammamt2"+s,       t.gamma_ht, t.gamma_mt2 ,  evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 3000, 30, 0, 1500);
-      plot2D("h_ht_met"+s,       t.gamma_ht, t.met_pt ,  evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 3000, 30, 0, 1500);
-      if (t.gamma_pt[0]>160.) plot2D("h_gammaht_gammamt2_pt160"+s,       t.gamma_ht, t.gamma_mt2  , evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 3000, 30, 0, 1500);
-      if (t.met_pt<100.) plot2D("h_gammaht_gammamt2_met100"+s,       t.gamma_ht, t.gamma_mt2 ,  evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 3000, 30, 0, 1500);
-      if (t.gamma_pt[0]>160. && t.met_pt<100.) plot2D("h_gammaht_gammamt2_pt160met100"+s,       t.gamma_ht, t.gamma_mt2 ,  evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 3000, 30, 0, 1500);
+      //plot2D("h_gammaht_met"+s,       t.gamma_ht, t.met_pt ,  evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 1500, 30, 0, 1500);
+      //plot2D("h_gammaht_gammamt2"+s,       t.gamma_ht, t.gamma_mt2 ,  evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 3000, 30, 0, 1500);
+      //plot2D("h_ht_met"+s,       t.gamma_ht, t.met_pt ,  evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 3000, 30, 0, 1500);
+      //if (t.gamma_pt[0]>160.) plot2D("h_gammaht_gammamt2_pt160"+s,       t.gamma_ht, t.gamma_mt2  , evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 3000, 30, 0, 1500);
+      //if (t.met_pt<100.) plot2D("h_gammaht_gammamt2_met100"+s,       t.gamma_ht, t.gamma_mt2 ,  evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 3000, 30, 0, 1500);
+      //if (t.gamma_pt[0]>160. && t.met_pt<100.) plot2D("h_gammaht_gammamt2_pt160met100"+s,       t.gamma_ht, t.gamma_mt2 ,  evtweight_, h_1d, ";H_{T} [GeV]; MET [GeV]", 30, 0, 3000, 30, 0, 1500);
     }
 
   }
@@ -760,6 +786,13 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, const std::strin
 
   plot1D("h_mt2bins"+s,       t.zll_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
 
+  const int n_htbins = 5;
+  const float htbins[n_htbins+1] = {450., 575., 600., 1000., 1500., 3000.};
+  const int n_njbins = 3;
+  const float njbins[n_njbins+1] = {2, 4, 7, 12};
+  const int n_nbjbins = 4;
+  const float nbjbins[n_nbjbins+1] = {0, 1, 2, 3, 6};
+  
   if (dirname=="crdybase" || dirname=="crdyL" || dirname=="crdyM" || dirname=="crdyH") {
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
     plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
@@ -773,6 +806,10 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, const std::strin
     plot1D("h_diffMetMhtOverMet"+s,   t.zll_diffMetMht/t.zll_met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
     plot1D("h_minMTBMet"+s,   t.zll_minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
     plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
+    plot1D("h_htbins"+s,       t.zll_ht,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins, htbins);
+    plot1D("h_njbins"+s,       t.nJet40,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
+    plot1D("h_nbjbins"+s,       t.nBJet40,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
+
   }
 
   outfile_->cd();
