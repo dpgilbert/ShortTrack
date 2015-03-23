@@ -81,8 +81,8 @@ void MT2Looper::SetSignalRegions(){
 
   SRBase.SetName("srbase");
   SRBase.SetVar("mt2", 200, -1);
-  SRBase.SetVar("j1pt", 100, -1);
-  SRBase.SetVar("j2pt", 100, -1);
+  SRBase.SetVar("j1pt", 75, -1);
+  SRBase.SetVar("j2pt", 75, -1);
   SRBase.SetVar("deltaPhiMin", 0.3, -1);
   SRBase.SetVar("diffMetMhtOverMet", 0, 0.5);
   SRBase.SetVar("nlep", 0, 1);
