@@ -21,7 +21,7 @@ eval `scramv1 runtime -sh`
 popd
 pwd
 
-tar -xzvf input.tar.gz
+tar -xzvf input.tar.gz > /dev/null
 
 ls -lrth
 
@@ -32,7 +32,12 @@ NITERS=$4
 POINT=$5
 COPYDIR=$6
 
-./combine -M HybridNew --frequentist ${CARD} --saveToys --fullBToys --saveHybridResult --singlePoint ${POINT} -T ${NTOYS} -i ${NITERS} -s ${SEED} --clsAcc 0 -v -1
+echo "Start Time is `date`"
+
+./combine -M GenerateOnly ${CARD} -t -1 --expectSignal 0 --saveToys -s 12345
+./combine -M HybridNew --frequentist ${CARD} --saveToys --fullBToys --saveHybridResult --singlePoint ${POINT} -T ${NTOYS} -i ${NITERS} -s ${SEED} --clsAcc 0 -v -1 --toysFile higgsCombineTest.GenerateOnly.mH120.12345.root -t -1
+
+echo "Finish Time is `date`"
 
 ls -lrth
 
