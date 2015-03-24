@@ -120,25 +120,6 @@ string getTableName(const string& sample) {
   return sample;
 }
 
-//_______________________________________________________________________________
-string getRegionPlotLabel(const string& dir) {
-  if (dir.find("sr10") != string::npos) return "#geq 2j, #geq 3b";
-  if (dir.find("sr1") != string::npos) return "2-3j, 0b";
-  if (dir.find("sr2") != string::npos) return "2-3j, 1b";
-  if (dir.find("sr3") != string::npos) return "2-3j, 2b";
-  if (dir.find("sr4") != string::npos) return "2-3j, 2b";
-  if (dir.find("sr5") != string::npos) return "#geq 4j, 0b";
-  if (dir.find("sr6") != string::npos) return "#geq 4j, 1b";
-  if (dir.find("sr7") != string::npos) return "#geq 4j, 2b";
-  if (dir.find("sr8") != string::npos) return "#geq 4j, 2b";
-  if (dir.find("sr9") != string::npos) return "#geq 2j, #geq 3b";
-  if (dir.find("srbase") != string::npos) return "#geq 2j";
-  //  if (dir.find("crsl") != string::npos) return "CRSL";
-
-  cout << "getRegionPlotLabel: WARNING: didn't recognize dir: " << dir << endl;
-  return dir;
-}
-
 string getJetBJetPlotLabel(const TFile* f, std::string dir_str) {
 
   TString dir= TString(dir_str);
@@ -206,83 +187,22 @@ string getHTPlotLabel(const TFile* f, std::string dir_str) {
 
 }
 
-string getMT2MinMTPlotLabel(const TFile* f, std::string dir_str) {
+string getMT2PlotLabel(const TFile* f, std::string dir_str) {
 
   TString dir= TString(dir_str);
 
-  TH1D* h_lowMT_LOW = (TH1D*) f->Get(dir+"/h_lowMT_LOW");
-  TH1D* h_lowMT_UP = (TH1D*) f->Get(dir+"/h_lowMT_UP");
-  int lowMT_LOW;
-  int lowMT_UP;
-  if(h_lowMT_LOW && h_lowMT_UP){
-    lowMT_LOW = h_lowMT_LOW->GetBinContent(1);
-    lowMT_UP = h_lowMT_UP->GetBinContent(1);
+  TH1D* h_mt2_LOW = (TH1D*) f->Get(dir+"/h_mt2_LOW");
+  TH1D* h_mt2_UP = (TH1D*) f->Get(dir+"/h_mt2_UP");
+  int mt2_LOW;
+  int mt2_UP;
+  if(h_mt2_LOW && h_mt2_UP){
+    mt2_LOW = h_mt2_LOW->GetBinContent(1);
+    mt2_UP = h_mt2_UP->GetBinContent(1);
   }
-  else return "";
-
-  if(lowMT_LOW == 1) return "minM_{T} < 200 GeV && M_{T2} < 400 GeV";
-  else if(lowMT_UP == 1) return "minM_{T} > 200 GeV || M_{T2} > 400 GeV";
   else return "M_{T2} > 200 GeV";
 
-}
+  return "M_{T2} > " + toString(mt2_LOW);
 
-//_______________________________________________________________________________
-string getRegionPlotLabelLine2(const string& dir) {
-  if (dir.find("sr10") != string::npos) return "minM_{T} > 200 GeV ||";
-  if (dir.find("sr3") != string::npos) return "minM_{T} < 200 GeV &&";
-  if (dir.find("sr4") != string::npos) return "minM_{T} > 200 GeV ||";
-  if (dir.find("sr7") != string::npos) return "minM_{T} < 200 GeV &&";
-  if (dir.find("sr8") != string::npos) return "minM_{T} > 200 GeV ||";
-  if (dir.find("sr9") != string::npos) return "minM_{T} < 200 GeV &&";
-  //  if (dir.find("crsl") != string::npos) return "CRSL";
-
-  //  cout << "getRegionPlotLabelLine2: WARNING: didn't recognize dir: " << dir << endl;
-  return "";
-}
-
-//_______________________________________________________________________________
-string getRegionPlotLabelLine3(const string& dir) {
-  if (dir.find("sr10") != string::npos) return "M_{T2} > 400 GeV";
-  if (dir.find("sr3") != string::npos) return "M_{T2} < 400 GeV";
-  if (dir.find("sr4") != string::npos) return "M_{T2} > 400 GeV";
-  if (dir.find("sr7") != string::npos) return "M_{T2} < 400 GeV";
-  if (dir.find("sr8") != string::npos) return "M_{T2} > 400 GeV";
-  if (dir.find("sr9") != string::npos) return "M_{T2} < 400 GeV";
-  //  if (dir.find("crsl") != string::npos) return "CRSL";
-
-  //  cout << "getRegionPlotLabelLine2: WARNING: didn't recognize dir: " << dir << endl;
-  return "";
-}
-
-//_______________________________________________________________________________
-string getHTPlotLabel(const string& dir) {
-  if (dir.find("H") != string::npos) return "H_{T} > 1000 GeV";
-  if (dir.find("M") != string::npos) return "575 < H_{T} < 1000 GeV";
-  if (dir.find("L") != string::npos) return "450 < H_{T} < 575 GeV";
-  if (dir.find("srbase") != string::npos) return "H_{T} > 450 GeV";
-
-  cout << "getHTPlotLabel: WARNING: didn't recognize dir: " << dir << endl;
-  return dir;
-}
-
-//_______________________________________________________________________________
-string getRegionName(const string& dir) {
-  if (dir.find("sr10") != string::npos) return "$\\geq$2j, $\\geq$3b, high minMT,MT2";
-  if (dir.find("sr1") != string::npos) return "2-3j, 0b";
-  if (dir.find("sr2") != string::npos) return "2-3j, 1b";
-  if (dir.find("sr3") != string::npos) return "2-3j, 2b, low minMT,MT2";
-  if (dir.find("sr4") != string::npos) return "2-3j, 2b, high minMT,MT2";
-  if (dir.find("sr5") != string::npos) return "$\\geq$4j, 0b";
-  if (dir.find("sr6") != string::npos) return "$\\geq$4j, 1b";
-  if (dir.find("sr7") != string::npos) return "$\\geq$4j, 2b, low minMT,MT2";
-  if (dir.find("sr8") != string::npos) return "$\\geq$4j, 2b, high minMT,MT2";
-  if (dir.find("sr9") != string::npos) return "$\\geq$2j, $\\geq$3b, low minMT,MT2";
-  if (dir.find("sr") != string::npos) return "Signal";
-  if (dir.find("nomt") != string::npos) return "CRSL, No $M_{T}$ Cut";
-  if (dir.find("crsl") != string::npos) return "CRSL";
-
-  cout << "getRegionName: WARNING: didn't recognize dir: " << dir << endl;
-  return dir;
 }
 
 string getJetBJetTableLabel(const TFile* f, std::string dir_str) {
@@ -329,28 +249,7 @@ string getJetBJetTableLabel(const TFile* f, std::string dir_str) {
   else if( nbjets_UP != -1) bjet_string = toString(nbjets_LOW) + "-" + toString(nbjets_UP) + "b";
   else bjet_string = "$\\geq$" + toString(nbjets_LOW) + "b";
 
-
-  //check if bin is split by minMT
-  bool splitByMinMT = false;
-  std::string minMT_string;
-  TH1D* h_lowMT_LOW = (TH1D*) f->Get(dir+"/h_lowMT_LOW");
-  TH1D* h_lowMT_UP = (TH1D*) f->Get(dir+"/h_lowMT_UP");
-  int lowMT_LOW = h_lowMT_LOW->GetBinContent(1);
-  int lowMT_UP = h_lowMT_UP->GetBinContent(1);
-
-  if(lowMT_LOW == 0 && lowMT_UP == 1){
-    splitByMinMT = true; 
-    minMT_string = "hiMT";
-  }
-
-  if(lowMT_LOW == 1 && lowMT_UP == 2){
-    splitByMinMT = true; 
-    minMT_string = "loMT";
-  }
-
-
-  if(!splitByMinMT) return jet_string + ", " + bjet_string;
-  else return jet_string + ", " + bjet_string + " " + minMT_string;
+  return jet_string + ", " + bjet_string;
 
 }
 
@@ -460,7 +359,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   //TString ht_label = getHTPlotLabel(histdir);
   TString ht_label = getHTPlotLabel(samples.at(0), histdir);
   TString region_label = getJetBJetPlotLabel(samples.at(0), histdir);
-  TString region_label_line2 = getMT2MinMTPlotLabel(samples.at(0), histdir);
+  TString region_label_line2 = getMT2PlotLabel(samples.at(0), histdir);
   label.DrawLatex(0.2,0.85,ht_label);
   // minMT plot always requires at least 2 bjets
   if ((histdir.find("srbase") != std::string::npos) && (histname.find("minMTBMet") != std::string::npos)) region_label = "#geq 2j, #geq 2b";
@@ -705,28 +604,28 @@ void plotMaker(){
   //bool printplots = false;
   bool printplots = true;
 
-/*
-  TIter it(f_ttbar->GetListOfKeys());
-  TKey* k;
-  std::string cr_skip = "cr";
-  std::string sr_skip = "sr";
-  while (k = (TKey *)it()) {
-    if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
-    //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
-    std::string dir_name = k->GetTitle();
-    if(dir_name == "") continue;
-    //if(dir_name != "srbase") continue; //to do only srbase
-    //if(dir_name != "sr1H") continue; //for testing
-    //makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , true, printplots );
-    //makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
-    //makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
-    //makePlot( samples , names , dir_name , "h_nlepveto" , "N(leptons)" , "Events" , 0 , 10 , 1 , false, printplots );
-    //makePlot( samples , names , dir_name , "h_nJet40" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots );
-    //makePlot( samples , names , dir_name , "h_nBJet40" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots );
-    //makePlot( samples , names , dir_name , "h_minMTBMet"  , "min M_{T}(b,MET) [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
-    //makePlot( samples , names , dir_name , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig );
+  if(printplots){
+    TIter it(f_ttbar->GetListOfKeys());
+    TKey* k;
+    std::string cr_skip = "cr";
+    std::string sr_skip = "sr";
+    while (k = (TKey *)it()) {
+      if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
+      //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
+      std::string dir_name = k->GetTitle();
+      if(dir_name == "") continue;
+      //if(dir_name != "srbase") continue; //to do only srbase
+      if(dir_name != "sr1H") continue; //for testing
+      makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , true, printplots );
+      makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
+      makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
+      makePlot( samples , names , dir_name , "h_nlepveto" , "N(leptons)" , "Events" , 0 , 10 , 1 , false, printplots );
+      makePlot( samples , names , dir_name , "h_nJet40" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots );
+      makePlot( samples , names , dir_name , "h_nBJet40" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots );
+      makePlot( samples , names , dir_name , "h_minMTBMet"  , "min M_{T}(b,MET) [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
+      makePlot( samples , names , dir_name , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig );
+    }
   }
-*/
 
   std::cout << "\\documentclass[landscape, 10pt]{article}" << std::endl;
   std::cout << "\\usepackage{amsmath}" << std::endl;
@@ -747,22 +646,8 @@ void plotMaker(){
   dirsH.push_back("sr9H");
   dirsH.push_back("sr10H");
   printTable(samples, names, dirsH);
-
   dirsH.clear();
-  dirsH.push_back("sr11H");
-  dirsH.push_back("sr12H");
-  dirsH.push_back("sr13H");
-  dirsH.push_back("sr14H");
-  dirsH.push_back("sr15H");
-  dirsH.push_back("sr16H");
-  dirsH.push_back("sr17H");
-  dirsH.push_back("sr18H");
-  dirsH.push_back("sr19H");
-  dirsH.push_back("sr20H");
-  printTable(samples, names, dirsH);
 
-/*
-  vector<string> dirsH;
   dirsH.push_back("sr1UH");
   dirsH.push_back("sr2UH");
   dirsH.push_back("sr3UH");
@@ -774,134 +659,7 @@ void plotMaker(){
   dirsH.push_back("sr9UH");
   dirsH.push_back("sr10UH");
   printTable(samples, names, dirsH);
-
   dirsH.clear();
-  dirsH.push_back("sr11UH");
-  dirsH.push_back("sr12UH");
-  dirsH.push_back("sr13UH");
-  dirsH.push_back("sr14UH");
-  dirsH.push_back("sr15UH");
-  dirsH.push_back("sr16UH");
-  dirsH.push_back("sr17UH");
-  dirsH.push_back("sr18UH");
-  dirsH.push_back("sr19UH");
-  dirsH.push_back("sr20UH");
-  printTable(samples, names, dirsH);
-*/
-
-/*
-  vector<string> dirsH;
-  dirsH.push_back("crsl1H");
-  dirsH.push_back("crsl2H");
-  dirsH.push_back("crsl3H");
-  dirsH.push_back("crsl4H");
-  dirsH.push_back("crsl5H");
-  dirsH.push_back("crsl6H");
-  dirsH.push_back("crsl7H");
-  dirsH.push_back("crsl8H");
-  dirsH.push_back("crsl9H");
-  dirsH.push_back("crsl10H");
-  printTable(samples, names, dirsH);
-
-  dirsH.clear();
-  dirsH.push_back("crsl11H");
-  dirsH.push_back("crsl12H");
-  dirsH.push_back("crsl13H");
-  dirsH.push_back("crsl14H");
-  dirsH.push_back("crsl15H");
-  dirsH.push_back("crsl16H");
-  dirsH.push_back("crsl17H");
-  dirsH.push_back("crsl18H");
-  dirsH.push_back("crsl19H");
-  dirsH.push_back("crsl20H");
-  printTable(samples, names, dirsH);
-*/
-
-/*
-  vector<string> dirsH;
-  dirsH.push_back("crsl1UH");
-  dirsH.push_back("crsl2UH");
-  dirsH.push_back("crsl3UH");
-  dirsH.push_back("crsl4UH");
-  dirsH.push_back("crsl5UH");
-  dirsH.push_back("crsl6UH");
-  dirsH.push_back("crsl7UH");
-  dirsH.push_back("crsl8UH");
-  dirsH.push_back("crsl9UH");
-  dirsH.push_back("crsl10UH");
-  printTable(samples, names, dirsH);
-
-  dirsH.clear();
-  dirsH.push_back("crsl11UH");
-  dirsH.push_back("crsl12UH");
-  dirsH.push_back("crsl13UH");
-  dirsH.push_back("crsl14UH");
-  dirsH.push_back("crsl15UH");
-  dirsH.push_back("crsl16UH");
-  dirsH.push_back("crsl17UH");
-  dirsH.push_back("crsl18UH");
-  dirsH.push_back("crsl19UH");
-  dirsH.push_back("crsl20UH");
-  printTable(samples, names, dirsH);
-*/
-
-/*
-  vector<string> dirsH;
-  dirsH.push_back("crgj1H");
-  dirsH.push_back("crgj2H");
-  dirsH.push_back("crgj3H");
-  dirsH.push_back("crgj4H");
-  dirsH.push_back("crgj5H");
-  dirsH.push_back("crgj6H");
-  dirsH.push_back("crgj7H");
-  dirsH.push_back("crgj8H");
-  dirsH.push_back("crgj9H");
-  dirsH.push_back("crgj10H");
-  printTable(samples, names, dirsH);
-
-  dirsH.clear();
-  dirsH.push_back("crgj11H");
-  dirsH.push_back("crgj12H");
-  dirsH.push_back("crgj13H");
-  dirsH.push_back("crgj14H");
-  dirsH.push_back("crgj15H");
-  dirsH.push_back("crgj16H");
-  dirsH.push_back("crgj17H");
-  dirsH.push_back("crgj18H");
-  dirsH.push_back("crgj19H");
-  dirsH.push_back("crgj20H");
-  printTable(samples, names, dirsH);
-
-*/
-
-/*
-  vector<string> dirsH;
-  dirsH.clear();
-  dirsH.push_back("crgj1UH");
-  dirsH.push_back("crgj2UH");
-  dirsH.push_back("crgj3UH");
-  dirsH.push_back("crgj4UH");
-  dirsH.push_back("crgj5UH");
-  dirsH.push_back("crgj6UH");
-  dirsH.push_back("crgj7UH");
-  dirsH.push_back("crgj8UH");
-  dirsH.push_back("crgj9UH");
-  dirsH.push_back("crgj10UH");
-  printTable(samples, names, dirsH);
-
-  dirsH.clear();
-  dirsH.push_back("crgj11UH");
-  dirsH.push_back("crgj12UH");
-  dirsH.push_back("crgj13UH");
-  dirsH.push_back("crgj14UH");
-  dirsH.push_back("crgj15UH");
-  dirsH.push_back("crgj16UH");
-  dirsH.push_back("crgj17UH");
-  dirsH.push_back("crgj18UH");
-  dirsH.push_back("crgj19UH");
-  dirsH.push_back("crgj20UH");
-  printTable(samples, names, dirsH);
-*/
 
   std::cout << "\\end{document}" << std::endl;
 
