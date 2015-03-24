@@ -42,8 +42,8 @@ void plot2D(string name, float xval, float yval, double weight, std::map<string,
 
 void plot1DUnderOverFlow(string title, double xval, double weight, std::map<string, TH1*> &allhistos, 
 	    int numbinsx, double xmin, double xmax);
-void plot2DUnderOverFlow(string title, double xval, double yval, double weight, std::map<string, TH2D*> &allhistos, 
-	    int numbinsx, double xmin, double xmax, int numbinsy, double ymin, double ymax);
+void plot2DUnderOverFlow(string name, double xval, double yval, double weight, std::map<string, TH1*> &allhistos, 
+	    string title, int numbinsx, double xmin, double xmax, int numbinsy, double ymin, double ymax);
 
 void savePlots(std::map<string, TH1*>&, const char* );
 void savePlots2(std::map<string, TH2D*>&, const char* );
