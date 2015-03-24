@@ -14,7 +14,7 @@ std::vector<SR> getSignalRegions2015ExtendedNJets();
 std::vector<SR> getSignalRegions2015ExtendedNJets_UltraHighHT();
 std::vector<SR> getSignalRegions2015SevenJets_UltraHighHT();
 std::vector<SR> getSignalRegionsZurich();
-std::vector<SR> getSignalRegionsZurich_jetpt75();
+std::vector<SR> getSignalRegionsZurich_jetpt40();
 
 } // namespace mt2
 

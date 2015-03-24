@@ -932,16 +932,16 @@ std::vector<SR> getSignalRegionsZurich(){
 
 }
 
-std::vector<SR> getSignalRegionsZurich_jetpt75(){
+std::vector<SR> getSignalRegionsZurich_jetpt40(){
 
   std::vector<SR> SRVec = getSignalRegionsZurich();
 
-  //change j1pt and j2pt cuts to 75 GeV
+  //change j1pt and j2pt cuts to 40 GeV
   for(unsigned int i = 0; i < SRVec.size(); i++){
     SRVec.at(i).RemoveVar("j1pt");
     SRVec.at(i).RemoveVar("j2pt");
-    SRVec.at(i).SetVar("j1pt", 75, -1);
-    SRVec.at(i).SetVar("j2pt", 75, -1);
+    SRVec.at(i).SetVar("j1pt", 40, -1);
+    SRVec.at(i).SetVar("j2pt", 40, -1);
   }
 
   return SRVec;
