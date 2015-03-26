@@ -39,6 +39,7 @@ class MT2Looper {
   void SetSignalRegions();
   void loop(TChain* chain, std::string output_name = "test.root");
   void fillHistosSRBase();
+  void fillHistosInclusive();
   void fillHistosSignalRegion(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRSL(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRGJ(const std::string& prefix = "", const std::string& suffix = "");
@@ -61,6 +62,7 @@ class MT2Looper {
   float mt_;
   std::map<std::string, TH1*> h_1d_global;
   std::vector<SR> SRVec;
+  std::vector<SR> InclusiveRegions;
   SR SRBase;
   SR SRNoCut;
 };

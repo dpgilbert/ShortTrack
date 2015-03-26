@@ -100,6 +100,69 @@ void MT2Looper::SetSignalRegions(){
   }
   outfile_->cd();
 
+  //setup inclusive regions
+  SR InclusiveHT450to575 = SRBase;
+  InclusiveHT450to575.SetName("InclusiveHT450to575");
+  InclusiveHT450to575.SetVar("ht", 450, 575);
+  InclusiveRegions.push_back(InclusiveHT450to575);
+
+  SR InclusiveHT575to1000 = SRBase;
+  InclusiveHT575to1000.SetName("InclusiveHT575to1000");
+  InclusiveHT575to1000.SetVar("ht", 575, 1000);
+  InclusiveRegions.push_back(InclusiveHT575to1000);
+
+  SR InclusiveHT1000to1500 = SRBase;
+  InclusiveHT1000to1500.SetName("InclusiveHT1000to1500");
+  InclusiveHT1000to1500.SetVar("ht", 1000, 1500);
+  InclusiveRegions.push_back(InclusiveHT1000to1500);
+
+  SR InclusiveHT1500toInf = SRBase;
+  InclusiveHT1500toInf.SetName("InclusiveHT1500toInf");
+  InclusiveHT1500toInf.SetVar("ht", 1500, -1);
+  InclusiveRegions.push_back(InclusiveHT1500toInf);
+
+  SR InclusiveNJets2to3 = SRBase;
+  InclusiveNJets2to3.SetName("InclusiveNJets2to3");
+  InclusiveNJets2to3.SetVar("njets", 2, 4);
+  InclusiveRegions.push_back(InclusiveNJets2to3);
+
+  SR InclusiveNJets4to6 = SRBase;
+  InclusiveNJets4to6.SetName("InclusiveNJets4to6");
+  InclusiveNJets4to6.SetVar("njets", 4, 7);
+  InclusiveRegions.push_back(InclusiveNJets4to6);
+
+  SR InclusiveNJets7toInf = SRBase;
+  InclusiveNJets7toInf.SetName("InclusiveNJets7toInf");
+  InclusiveNJets7toInf.SetVar("njets", 7, -1);
+  InclusiveRegions.push_back(InclusiveNJets7toInf);
+
+  SR InclusiveNBJets0 = SRBase;
+  InclusiveNBJets0.SetName("InclusiveNBJets0");
+  InclusiveNBJets0.SetVar("nbjets", 0, 1);
+  InclusiveRegions.push_back(InclusiveNBJets0);
+
+  SR InclusiveNBJets1 = SRBase;
+  InclusiveNBJets1.SetName("InclusiveNBJets1");
+  InclusiveNBJets1.SetVar("nbjets", 1, 2);
+  InclusiveRegions.push_back(InclusiveNBJets1);
+
+  SR InclusiveNBJets2 = SRBase;
+  InclusiveNBJets2.SetName("InclusiveNBJets2");
+  InclusiveNBJets2.SetVar("nbjets", 2, 3);
+  InclusiveRegions.push_back(InclusiveNBJets2);
+
+  SR InclusiveNBJets3toInf = SRBase;
+  InclusiveNBJets3toInf.SetName("InclusiveNBJets3toInf");
+  InclusiveNBJets3toInf.SetVar("nbjets", 3, -1);
+  InclusiveRegions.push_back(InclusiveNBJets3toInf);
+
+  for(unsigned int i=0; i<InclusiveRegions.size(); i++){
+    TDirectory * dir = (TDirectory*)outfile_->Get((InclusiveRegions.at(i).GetName()).c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir((InclusiveRegions.at(i).GetName()).c_str());
+    } 
+  }
+
 }
 
 
@@ -381,6 +444,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       fillHistosSignalRegion("sr");
 
       fillHistosSRBase();
+      fillHistosInclusive();
 
       if (doGJplots) {
         saveGJplots = true;
@@ -509,6 +573,33 @@ void MT2Looper::fillHistosSRBase() {
   values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   if(SRBase.PassesSelection(values)) fillHistos(SRBase.srHistMap, SRBase.GetName(), "");
+
+  return;
+}
+
+void MT2Looper::fillHistosInclusive() {
+
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = t.deltaPhiMin;
+  values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  values["nlep"]        = nlepveto_;
+  values["j1pt"]        = t.jet1_pt;
+  values["j2pt"]        = t.jet2_pt;
+  values["mt2"]         = t.mt2;
+  values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+
+  for(unsigned int srN = 0; srN < InclusiveRegions.size(); srN++){
+    std::map<std::string, float> values_temp = values;
+    std::vector<std::string> vars = InclusiveRegions.at(srN).GetListOfVariables();
+    for(unsigned int iVar=0; iVar<vars.size(); iVar++){
+      if(vars.at(iVar) == "ht") values_temp["ht"] = t.ht;
+      else if(vars.at(iVar) == "njets") values_temp["njets"] = t.nJet40;
+      else if(vars.at(iVar) == "nbjets") values_temp["nbjets"] = t.nBJet40;
+    }
+    if(InclusiveRegions.at(srN).PassesSelection(values_temp)){
+      fillHistos(InclusiveRegions.at(srN).srHistMap, InclusiveRegions.at(srN).GetName(), "");
+    }
+  }
 
   return;
 }
@@ -696,7 +787,6 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, const std::string&
   plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
   plot1D("h_J0pt"+s,       t.jet1_pt,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
   plot1D("h_J1pt"+s,       t.jet2_pt,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
-
   plot1D("h_mt2bins"+s,       t.mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
 
   outfile_->cd();
