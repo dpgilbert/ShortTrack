@@ -110,7 +110,10 @@ void processBaby( TString outfileid = "tt_test", TString infile = "/hadoop/cms/s
   else if (infile.Contains("QCD_Pt-800to1000"))                      sample = Form("qcd_pt800to1000_%s",  outfileid.Data());
   else if (infile.Contains("QCD_Pt-1000to1400"))                     sample = Form("qcd_pt1000to1400_%s",  outfileid.Data());
   else if (infile.Contains("QCD_Pt-1400to1800"))                     sample = Form("qcd_pt1400to1800_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-1800to2400"))                     sample = Form("qcd_pt1800to2400_%s",  outfileid.Data());
   else if (infile.Contains("QCD_Pt-1800"))                           sample = Form("qcd_pt1800_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-2400to3200"))                     sample = Form("qcd_pt2400to3200_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-3200"))                           sample = Form("qcd_pt3200_%s",  outfileid.Data());
   else if (infile.Contains("GJet_Pt-15to3000"))                      sample = Form("gjet_pt15to3000_%s",  outfileid.Data());
   else if (infile.Contains("GJets_HT-100to200"))                      sample = Form("gjet_ht100to200_%s",  outfileid.Data());
   else if (infile.Contains("GJets_HT-200to400"))                      sample = Form("gjet_ht200to400_%s",  outfileid.Data());
@@ -152,6 +155,7 @@ void processBaby( TString outfileid = "tt_test", TString infile = "/hadoop/cms/s
   else if (infile.Contains("TTWJets"))                               sample = Form("ttwjets_%s",         outfileid.Data());
   else if (infile.Contains("TTGJets"))                               sample = Form("ttgjets_%s",         outfileid.Data());
   else if (infile.Contains("TTWWJets"))                              sample = Form("ttwwjets_%s",        outfileid.Data());
+  else if (infile.Contains("TTbarH"))                                sample = Form("tth_%s",             outfileid.Data());
   else if (infile.Contains("TTJets_scaleup_TuneZ2star_8TeV"))        sample = Form("tt_scaleup_%s",      outfileid.Data());
   else if (infile.Contains("TTJets_scaledown_TuneZ2star_8TeV"))      sample = Form("tt_scaledw_%s",      outfileid.Data());
   else if (infile.Contains("TTJets_matchingup_TuneZ2star_8TeV"))     sample = Form("tt_matchup_%s",      outfileid.Data());
@@ -167,8 +171,17 @@ void processBaby( TString outfileid = "tt_test", TString infile = "/hadoop/cms/s
   else if (infile.Contains("SMS-T1tttt_2J_mGl-1500_mLSP-100"))       sample = Form("T1tttt_1500_100_%s", outfileid.Data());
   else if (infile.Contains("SMS-T1tttt_2J_mGl-1200_mLSP-800"))       sample = Form("T1tttt_1200_800_%s", outfileid.Data());
   else if (infile.Contains("SMS-T1qqqq_2J_mGl-1400_mLSP-100"))       sample = Form("T1qqqq_1400_100_%s", outfileid.Data());
+  else if (infile.Contains("SMS-T1qqqq_2J_mGl-1000_mLSP-800"))       sample = Form("T1qqqq_1000_800_%s", outfileid.Data());
   else if (infile.Contains("SMS-T1bbbb_2J_mGl-1000_mLSP-900"))       sample = Form("T1bbbb_1000_900_%s", outfileid.Data());
   else if (infile.Contains("SMS-T1bbbb_2J_mGl-1500_mLSP-100"))       sample = Form("T1bbbb_1500_100_%s", outfileid.Data());
+  else if (infile.Contains("SMS-T2tt_2J_mStop-850_mLSP-100"))        sample = Form("T2tt_850_100_%s", outfileid.Data());
+  else if (infile.Contains("SMS-T2tt_2J_mStop-650_mLSP-325"))        sample = Form("T2tt_650_325_%s", outfileid.Data());
+  else if (infile.Contains("SMS-T2tt_2J_mStop-500_mLSP-325"))        sample = Form("T2tt_500_325_%s", outfileid.Data());
+  else if (infile.Contains("SMS-T2tt_2J_mStop-425_mLSP-325"))        sample = Form("T2tt_425_325_%s", outfileid.Data());
+  else if (infile.Contains("SMS-T2bb_2J_mStop-900_mLSP-100"))        sample = Form("T2bb_900_100_%s", outfileid.Data());
+  else if (infile.Contains("SMS-T2bb_2J_mStop-600_mLSP-580"))        sample = Form("T2bb_600_580_%s", outfileid.Data());
+  else if (infile.Contains("SMS-T2qq_2J_mStop-1200_mLSP-100"))       sample = Form("T2qq_1200_100_%s", outfileid.Data());
+  else if (infile.Contains("SMS-T2qq_2J_mStop-600_mLSP-550"))        sample = Form("T2qq_600_550_%s", outfileid.Data());
   else if (infile.Contains("SMS-T1tttt"))                            sample = Form("T1tttt_%s",          outfileid.Data());
   else if (infile.Contains("SMS-T1qqqq"))                            sample = Form("T1qqqq_%s",          outfileid.Data());
   else if (infile.Contains("SMS-T1bbbb"))                            sample = Form("T1bbbb_%s",          outfileid.Data());
