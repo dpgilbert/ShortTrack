@@ -30,7 +30,7 @@ class SR;
 const int n_mt2bins = 5;
 const float mt2bins[n_mt2bins+1] = {200., 300., 400., 600., 1000., 1500.};
 const std::string mt2binsname[n_mt2bins+1] = {"200", "300", "400", "600", "1000", "1500"};
-bool useDRforGammaQCDMixing = true; // requires GenParticles
+bool useDRforGammaQCDMixing = false; // requires GenParticles
 
 MT2Looper::MT2Looper(){
 }
