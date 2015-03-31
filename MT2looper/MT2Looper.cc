@@ -445,8 +445,8 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 		if (drtrue < minDRtrue) minDRtrue = drtrue;
 	      }
 	    }
-	    if ( (t.evt_id < 200 && minDR > 0.4)                     // reject DR>0.4 photons from QCD
-		 || (t.evt_id >=200 && t.gamma_mcMatchId[0]==0 )     // Reject unmatched photons from Gamma+Jets (should be small)    
+	    if ( (t.evt_id < 200 && t.gamma_mcMatchId[0]>0 && minDR > 0.4)   // reject DR>0.4 photons from QCD
+		 || (t.evt_id >=200 && t.gamma_mcMatchId[0]==0 )             // Reject unmatched photons from Gamma+Jets (should be small)    
 		 )
 	      { doGJplots = false; }
 	    else {
