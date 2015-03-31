@@ -735,7 +735,8 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   valuesBase["passesHtMet"] = ( (t.gamma_ht > 450. && t.gamma_met_pt > 200.) || (t.gamma_ht > 1000. && t.gamma_met_pt > 30.) );
   bool passBase = SRBase.PassesSelection(valuesBase);
 
-  float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
+  //float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
+  float iso = t.gamma_chHadIso[0];
   fillHistosGammaJets(SRNoCut.crgjHistMap, prefix+SRNoCut.GetName(), suffix+"All");
   std::string add="";
   if (iso>2.5 && iso < 60) add = "LooseNotTight";
