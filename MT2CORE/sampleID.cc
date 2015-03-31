@@ -30,10 +30,14 @@ int sampleID (const string& name) {
     else if (name.find("QCD_Pt-2400to3200") != string::npos) return 117;
     else if (name.find("QCD_Pt-3200") != string::npos) return 118;
 
-    else if (name.find("QCD_HT-100To250") != string::npos) return 120;
-    else if (name.find("QCD_HT_250To500") != string::npos) return 121;
-    else if (name.find("QCD_HT-500To1000") != string::npos) return 122;
-    else if (name.find("QCD_HT_1000") != string::npos) return 123;
+    else if ((name.find("QCD_HT_250To500") != string::npos) && (name.find("ext1") != string::npos)) return 162;
+    else if ((name.find("QCD_HT_500To1000") != string::npos) && (name.find("ext1") != string::npos)) return 163;
+    else if ((name.find("QCD_HT_1000") != string::npos) && (name.find("ext1") != string::npos)) return 164;
+
+    else if (name.find("QCD_HT-100To250") != string::npos) return 151;
+    else if (name.find("QCD_HT_250To500") != string::npos) return 152;
+    else if (name.find("QCD_HT-500To1000") != string::npos) return 153;
+    else if (name.find("QCD_HT_1000") != string::npos) return 154;
   }
 
   else if (name.find("GJet") != string::npos) {
@@ -48,7 +52,16 @@ int sampleID (const string& name) {
     if (name.find("TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola") != string::npos) return 300;
   }
 
-  // 400 block: single top
+  // 400 block: single top, ttV
+  else if (name.find("TToLeptons_s-channel") != string::npos) return 400;
+  else if (name.find("TToLeptons_t-channel") != string::npos) return 401;
+  else if (name.find("T_tW-channel") != string::npos) return 402;
+  else if (name.find("TBarToLeptons_s-channel") != string::npos) return 403;
+  else if (name.find("TBarToLeptons_t-channel") != string::npos) return 404;
+  else if (name.find("Tbar_tW-channel") != string::npos) return 405;
+  else if (name.find("TTWJets") != string::npos) return 410;
+  else if (name.find("TTZJets") != string::npos) return 412;
+  else if (name.find("TTbarH") != string::npos) return 412;
 
   else if (name.find("WJets") != string::npos) {
     if (name.find("WJetsToLNu_HT-100to200") != string::npos) return 502;
@@ -77,8 +90,18 @@ int sampleID (const string& name) {
     if (name.find("SMS-T1tttt_2J_mGl-1500_mLSP-100") != string::npos) return 1001;
     else if (name.find("SMS-T1tttt_2J_mGl-1200_mLSP-800") != string::npos) return 1002;
     else if (name.find("SMS-T1qqqq_2J_mGl-1400_mLSP-100") != string::npos) return 1010;
+    else if (name.find("SMS-T1qqqq_2J_mGl-1000_mLSP-800") != string::npos) return 1011;
     else if (name.find("SMS-T1bbbb_2J_mGl-1000_mLSP-900") != string::npos) return 1020;
     else if (name.find("SMS-T1bbbb_2J_mGl-1500_mLSP-100") != string::npos) return 1021;
+
+    else if (name.find("SMS-T2tt_2J_mStop-425_mLSP-325") != string::npos) return 1101;
+    else if (name.find("SMS-T2tt_2J_mStop-500_mLSP-325") != string::npos) return 1102;
+    else if (name.find("SMS-T2tt_2J_mStop-650_mLSP-325") != string::npos) return 1103;
+    else if (name.find("SMS-T2tt_2J_mStop-850_mLSP-100") != string::npos) return 1104;
+    else if (name.find("SMS-T2qq_2J_mStop-600_mLSP-550") != string::npos) return 1110;
+    else if (name.find("SMS-T2qq_2J_mStop-1200_mLSP-100") != string::npos) return 1111;
+    else if (name.find("SMS-T2bb_2J_mStop-600_mLSP-580") != string::npos) return 1120;
+    else if (name.find("SMS-T2bb_2J_mStop-900_mLSP-100") != string::npos) return 1121;
   }
 
   cout << "sampleID: WARNING: sample not recognized!  " << name << endl;
