@@ -563,6 +563,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         isoTrack_mcMatchId[i]  = vec_isoTrack_mcMatchId.at(it->first);
         i++;
       }
+
+      // count number of unique lowMT leptons (e/mu)
+      //  same collection as those used for jet/lepton overlap, but require MT < 100 explicitly
+      nLepLowMT = 0;
+      for (unsigned int ilep = 0; ilep < p4sLeptonsForJetCleaning.size(); ++ilep) {
+	float mt = MT(p4sLeptonsForJetCleaning.at(ilep).pt(),p4sLeptonsForJetCleaning.at(ilep).phi(),met_pt,met_phi);
+	if (mt < 100.) ++nLepLowMT;
+      }
         
       if (verbose) cout << "before photons" << endl;
 
@@ -1138,6 +1146,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("nBJet40", &nBJet40 );
   BabyTree_->Branch("nMuons10", &nMuons10 );
   BabyTree_->Branch("nElectrons10", &nElectrons10 );
+  BabyTree_->Branch("nLepLowMT", &nLepLowMT );
   BabyTree_->Branch("nTaus20", &nTaus20 );
   BabyTree_->Branch("nGammas20", &nGammas20 );
   BabyTree_->Branch("deltaPhiMin", &deltaPhiMin );
@@ -1365,6 +1374,7 @@ void babyMaker::InitBabyNtuple () {
   nBJet40 = -999;
   nMuons10 = -999;
   nElectrons10 = -999;
+  nLepLowMT = -999;
   nTaus20 = -999;
   nGammas20 = -999;
   deltaPhiMin = -999.0;
