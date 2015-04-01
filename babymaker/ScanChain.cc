@@ -772,12 +772,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       njet = 0;
       nJet40 = 0;
+      nBJet25 = 0;
       nBJet40 = 0;
       minMTBMet = 999999.;
       jet1_pt = 0.;
       jet2_pt = 0.;
 
       gamma_nJet40 = 0;
+      gamma_nBJet25 = 0;
       gamma_nBJet40 = 0;
       gamma_minMTBMet = 999999.;
       gamma_jet1_pt = 0.;
@@ -823,27 +825,33 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
         jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
 
-        if( (jet_pt[njet] > 40.0) && (fabs(jet_eta[njet]) < 2.5) ){ 
-	  // store leading/subleading central jet pt.
-	  //  jets should be pt-ordered before entering this loop
-	  if (jet1_pt < 0.1) jet1_pt = p4sCorrJets.at(iJet).pt();
-	  else if (jet2_pt < 0.1) jet2_pt = p4sCorrJets.at(iJet).pt();
-          p4sForHems.push_back(p4sCorrJets.at(iJet));
-          p4sForDphi.push_back(p4sCorrJets.at(iJet));
-          p4sForHemsZll.push_back(p4sCorrJets.at(iJet));
-          p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
-          nJet40++;
+	// use pt25 for bjet counting, pt40 for everything else
+        if( (jet_pt[njet] > 25.0) && (fabs(jet_eta[njet]) < 2.5) ){ 
+	  if (jet_pt[njet] > 40.0) {
+	    // store leading/subleading central jet pt.
+	    //  jets should be pt-ordered before entering this loop
+	    if (jet1_pt < 0.1) jet1_pt = p4sCorrJets.at(iJet).pt();
+	    else if (jet2_pt < 0.1) jet2_pt = p4sCorrJets.at(iJet).pt();
+	    p4sForHems.push_back(p4sCorrJets.at(iJet));
+	    p4sForDphi.push_back(p4sCorrJets.at(iJet));
+	    p4sForHemsZll.push_back(p4sCorrJets.at(iJet));
+	    p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
+	    nJet40++;
+	  } // pt40
 	  //CSVv2IVFM
           if(jet_btagCSV[njet] >= 0.814) {
-	    nBJet40++; 
-	    float mt = MT(jet_pt[njet],jet_phi[njet],met_pt,met_phi);
-	    if (mt < minMTBMet) minMTBMet = mt;
-	    if (nlep == 2) {
-	      float zllmt = MT(jet_pt[njet],jet_phi[njet],zll_met_pt,zll_met_phi);
-	      if (zllmt < zll_minMTBMet) zll_minMTBMet = zllmt;
-	    }
-	  }
-        } // pt 40 eta 2.5
+	    nBJet25++; 
+	    if (jet_pt[njet] > 40.0) {
+	      nBJet40++; 
+	      float mt = MT(jet_pt[njet],jet_phi[njet],met_pt,met_phi);
+	      if (mt < minMTBMet) minMTBMet = mt;
+	      if (nlep == 2) {
+		float zllmt = MT(jet_pt[njet],jet_phi[njet],zll_met_pt,zll_met_phi);
+		if (zllmt < zll_minMTBMet) zll_minMTBMet = zllmt;
+	      }
+	    } // pt 40
+	  } // pass med btag
+        } // pt 25 eta 2.5
 	// accept jets out to eta 5.2 for dphi
 	else if ( (jet_pt[njet] > 40.0) && (fabs(jet_eta[njet]) < 5.2) ) {
           p4sForDphi.push_back(p4sCorrJets.at(iJet));
@@ -851,7 +859,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	}
 
 	// fill gamma_XXX variables before checking for lepton overlap. Why? Let's keep them consistent with the lepton-overlapped jets
-        if( ( p4sCorrJets.at(iJet).pt() > 40.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ){ 
+        if( ( p4sCorrJets.at(iJet).pt() > 25.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ){ 
 	  //check against list of jets that overlap with a photon
 	  bool isOverlapJetGamma = false;
 	  for(unsigned int j=0; j<removedJetsGamma.size(); j++){
@@ -862,20 +870,26 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  }
 
 	  if(!isOverlapJetGamma) {
-	    // store leading/subleading central jet pt.
-	    //  jets should be pt-ordered before entering this loop
-	    if (gamma_jet1_pt < 0.1) gamma_jet1_pt = p4sCorrJets.at(iJet).pt();
-	    else if (gamma_jet2_pt < 0.1) gamma_jet2_pt = p4sCorrJets.at(iJet).pt();
-	    p4sForHemsGamma.push_back(p4sCorrJets.at(iJet));
-	    p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
-	    gamma_nJet40++;
+	    if (p4sCorrJets.at(iJet).pt() > 40.0) {
+	      // store leading/subleading central jet pt.
+	      //  jets should be pt-ordered before entering this loop
+	      if (gamma_jet1_pt < 0.1) gamma_jet1_pt = p4sCorrJets.at(iJet).pt();
+	      else if (gamma_jet2_pt < 0.1) gamma_jet2_pt = p4sCorrJets.at(iJet).pt();
+	      p4sForHemsGamma.push_back(p4sCorrJets.at(iJet));
+	      p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
+	      gamma_nJet40++;
+	    } // pt40
 	    if(cms3.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.814) { //CSVv2IVFM
-	      gamma_nBJet40++; 
-	      float mt = MT( p4sCorrJets.at(iJet).pt(),p4sCorrJets.at(iJet).phi(),gamma_met_pt,gamma_met_phi);
-	      if (mt < gamma_minMTBMet) gamma_minMTBMet = mt;	 
-	    }   
-	  } 
-        } // accept jets out to eta 5.2 for dphi
+	      gamma_nBJet25++; 
+	      if (p4sCorrJets.at(iJet).pt() > 40.0) {
+		gamma_nBJet40++; 
+		float mt = MT( p4sCorrJets.at(iJet).pt(),p4sCorrJets.at(iJet).phi(),gamma_met_pt,gamma_met_phi);
+		if (mt < gamma_minMTBMet) gamma_minMTBMet = mt;	 
+	      } // pt40
+	    } // pass med btag  
+	  } // not overlap with photon
+        } // pt 25 eta 2.5 
+	// accept jets out to eta 5.2 for dphi
 	else if ( (p4sCorrJets.at(iJet).pt() > 40.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 5.2) ) {
           p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
 	}
@@ -1120,6 +1134,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("nTrueInt", &nTrueInt );
   BabyTree_->Branch("rho", &rho );
   BabyTree_->Branch("nJet40", &nJet40 );
+  BabyTree_->Branch("nBJet25", &nBJet25 );
   BabyTree_->Branch("nBJet40", &nBJet40 );
   BabyTree_->Branch("nMuons10", &nMuons10 );
   BabyTree_->Branch("nElectrons10", &nElectrons10 );
@@ -1230,6 +1245,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("gamma_idCutBased", gamma_idCutBased, "gamma_idCutBased[ngamma]/I" );
   BabyTree_->Branch("gamma_mt2", &gamma_mt2 );
   BabyTree_->Branch("gamma_nJet40", &gamma_nJet40 );
+  BabyTree_->Branch("gamma_nBJet25", &gamma_nBJet25 );
   BabyTree_->Branch("gamma_nBJet40", &gamma_nBJet40 );
   BabyTree_->Branch("gamma_ht", &gamma_ht );
   BabyTree_->Branch("gamma_deltaPhiMin", &gamma_deltaPhiMin );
@@ -1345,6 +1361,7 @@ void babyMaker::InitBabyNtuple () {
   nTrueInt = -999;
   rho = -999.0;
   nJet40 = -999;
+  nBJet25 = -999;
   nBJet40 = -999;
   nMuons10 = -999;
   nElectrons10 = -999;
@@ -1411,6 +1428,7 @@ void babyMaker::InitBabyNtuple () {
   njet = -999;
   gamma_mt2 = -999.0;
   gamma_nJet40 = -999;
+  gamma_nBJet25 = -999;
   gamma_nBJet40 = -999;
   gamma_ht = -999.0;
   gamma_deltaPhiMin = -999.0;
