@@ -141,6 +141,7 @@ class babyMaker {
   Int_t           lep_tightId[max_nlep];   //[nlep]
   Float_t         lep_relIso03[max_nlep];   //[nlep]
   Float_t         lep_relIso04[max_nlep];   //[nlep]
+  Float_t         lep_miniRelIso[max_nlep];   //[nlep]
   Int_t           lep_mcMatchId[max_nlep];   //[nlep]
   Int_t           lep_lostHits[max_nlep];   //[nlep]
   Int_t           lep_convVeto[max_nlep];   //[nlep]
