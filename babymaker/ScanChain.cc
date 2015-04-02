@@ -330,6 +330,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       vector<int>  vec_lep_tightId;
       vector<float>vec_lep_relIso03;
       vector<float>vec_lep_relIso04;
+      vector<float>vec_lep_miniRelIso;
       vector<int>  vec_lep_mcMatchId;
       vector<int>  vec_lep_lostHits;
       vector<int>  vec_lep_convVeto;
@@ -353,7 +354,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       for(unsigned int iEl = 0; iEl < cms3.els_p4().size(); iEl++){
         if(cms3.els_p4().at(iEl).pt() < 10.0) continue;
         if(fabs(cms3.els_p4().at(iEl).eta()) > 2.4) continue;
-        if(!electronID(iEl,id_level_t::HAD_veto_v1)) continue;
+        if(!electronID(iEl,id_level_t::HAD_veto_v2)) continue;
         nElectrons10++;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.els_p4().at(iEl).pt()) );
         vec_lep_pt.push_back ( cms3.els_p4().at(iEl).pt());
@@ -364,9 +365,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         vec_lep_pdgId.push_back ( (-11)*cms3.els_charge().at(iEl));
         vec_lep_dxy.push_back ( cms3.els_dxyPV().at(iEl));
         vec_lep_dz.push_back ( cms3.els_dzPV().at(iEl));
-        vec_lep_tightId.push_back ( eleTightID(iEl,analysis_t::HAD) );
-        vec_lep_relIso03.push_back (  eleRelIso03(iEl,analysis_t::HAD));
+        vec_lep_tightId.push_back ( eleTightID(iEl,analysis_t::HADv2) );
+        vec_lep_relIso03.push_back (  eleRelIso03(iEl,analysis_t::HADv2));
         vec_lep_relIso04.push_back ( 0);
+        vec_lep_miniRelIso.push_back ( elMiniRelIso(iEl) );
         if (cms3.els_mc3dr().at(iEl) < 0.2 && cms3.els_mc3idx().at(iEl) != -9999 && abs(cms3.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.els_mc3idx().at(iEl)]);
           vec_lep_mcMatchId.push_back ( momid != 11 ? momid : genPart_grandmotherId[cms3.els_mc3idx().at(iEl)]); // if mother is different store mother, otherwise store grandmother
@@ -393,7 +395,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       for(unsigned int iMu = 0; iMu < cms3.mus_p4().size(); iMu++){
         if(cms3.mus_p4().at(iMu).pt() < 10.0) continue;
         if(fabs(cms3.mus_p4().at(iMu).eta()) > 2.4) continue;
-        if(!muonID(iMu,id_level_t::HAD_loose_v1)) continue;
+        if(!muonID(iMu,id_level_t::HAD_loose_v2)) continue;
         nMuons10++;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.mus_p4().at(iMu).pt()) );
         vec_lep_pt.push_back ( cms3.mus_p4().at(iMu).pt());
@@ -404,9 +406,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         vec_lep_pdgId.push_back ( (-13)*cms3.mus_charge().at(iMu));
         vec_lep_dxy.push_back ( cms3.mus_dxyPV().at(iMu)); // this uses the silicon track. should we use best track instead?
         vec_lep_dz.push_back ( cms3.mus_dzPV().at(iMu)); // this uses the silicon track. should we use best track instead?
-        vec_lep_tightId.push_back ( muTightID(iMu,analysis_t::HAD) );
-        vec_lep_relIso03.push_back ( muRelIso03(iMu,analysis_t::HAD) );
-        vec_lep_relIso04.push_back ( muRelIso04(iMu,analysis_t::HAD) );
+        vec_lep_tightId.push_back ( muTightID(iMu,analysis_t::HADv2) );
+        vec_lep_relIso03.push_back ( muRelIso03(iMu,analysis_t::HADv2) );
+        vec_lep_relIso04.push_back ( muRelIso04(iMu,analysis_t::HADv2) );
+        vec_lep_miniRelIso.push_back ( muMiniRelIso(iMu) );
         if (cms3.mus_mc3dr().at(iMu) < 0.2 && cms3.mus_mc3idx().at(iMu) != -9999 && abs(cms3.mus_mc3_id().at(iMu)) == 13) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.mus_mc3idx().at(iMu)]);
           vec_lep_mcMatchId.push_back ( momid != 13 ? momid : genPart_grandmotherId[cms3.mus_mc3idx().at(iMu)]); // if mother is different store mother, otherwise store grandmother
@@ -446,6 +449,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         lep_tightId[i]     = vec_lep_tightId.at(it->first);
         lep_relIso03[i]    = vec_lep_relIso03.at(it->first);
         lep_relIso04[i]    = vec_lep_relIso04.at(it->first);
+        lep_miniRelIso[i]  = vec_lep_miniRelIso.at(it->first);
         lep_mcMatchId[i]   = vec_lep_mcMatchId.at(it->first);
         lep_lostHits[i]    = vec_lep_lostHits.at(it->first);
         lep_convVeto[i]    = vec_lep_convVeto.at(it->first);
@@ -687,6 +691,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  jet_corrector_pfL1FastJetL2L3->setJetPt ( pfjet_p4_uncor.pt()               );
 	  jet_corrector_pfL1FastJetL2L3->setJetEta( pfjet_p4_uncor.eta()              );
 	  double corr = jet_corrector_pfL1FastJetL2L3->getCorrection();
+
+	  // check for negative correction
+	  if (corr < 0.) {
+	    std::cout << "ScanChain::Looper: WARNING: negative jet correction: " << corr
+		      << ", raw jet pt: " << pfjet_p4_uncor.pt() << ", eta: " << pfjet_p4_uncor.eta() << std::endl;
+	  }
 
 	  // apply new JEC to p4
 	  pfjet_p4_cor = pfjet_p4_uncor * corr;
@@ -1212,6 +1222,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lep_tightId", lep_tightId, "lep_tightId[nlep]/I" );
   BabyTree_->Branch("lep_relIso03", lep_relIso03, "lep_relIso03[nlep]/F" );
   BabyTree_->Branch("lep_relIso04", lep_relIso04, "lep_relIso04[nlep]/F" );
+  BabyTree_->Branch("lep_miniRelIso", lep_miniRelIso, "lep_miniRelIso[nlep]/F" );
   BabyTree_->Branch("lep_mcMatchId", lep_mcMatchId, "lep_mcMatchId[nlep]/I" );
   BabyTree_->Branch("lep_lostHits", lep_lostHits, "lep_lostHits[nlep]/I" );
   BabyTree_->Branch("lep_convVeto", lep_convVeto, "lep_convVeto[nlep]/I" );
@@ -1491,6 +1502,7 @@ void babyMaker::InitBabyNtuple () {
     lep_tightId[i] = -999;
     lep_relIso03[i] = -999;
     lep_relIso04[i] = -999;
+    lep_miniRelIso[i] = -999;
     lep_mcMatchId[i] = -999;
     lep_lostHits[i] = -999;
     lep_convVeto[i] = -999;
