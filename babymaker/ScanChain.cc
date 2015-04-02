@@ -583,7 +583,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       for(unsigned int iGamma = 0; iGamma < cms3.photons_p4().size(); iGamma++){
         if(cms3.photons_p4().at(iGamma).pt() < 20.0) continue;
         if(fabs(cms3.photons_p4().at(iGamma).eta()) > 2.5) continue;
-	if ( !isLoosePhoton(iGamma,analysis_t::HAD) ) continue;
+	if ( !isLoosePhoton(iGamma,analysis_t::HADv2) ) continue;
 
 	if (ngamma >= max_ngamma) {
           std::cout << "WARNING: attempted to fill more than " << max_ngamma << " photons" << std::endl;
@@ -603,12 +603,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         gamma_phIso[ngamma] = photons_recoPhotonIso().at(iGamma);
         gamma_r9[ngamma] =  photons_full5x5_r9().at(iGamma);
         gamma_hOverE[ngamma] =  photons_full5x5_hOverEtowBC().at(iGamma);
-        gamma_idCutBased[ngamma] =  isTightPhoton(iGamma,analysis_t::HAD) ? 1 : 0; 
+        gamma_idCutBased[ngamma] =  isTightPhoton(iGamma,analysis_t::HADv2) ? 1 : 0; 
         if(gamma_pt[ngamma] > 20) nGammas20++;
 	
 	// Some work for truth-matching (should be integrated in CMS3 as for the leptons)
 	int bestMatch = -1;
 	float bestDr = 0.1;
+	float bestMatchEta = 999;
+	float bestMatchPhi = 999;
 	for(unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++){
 	  if (cms3.genps_id().at(iGen) != 22) continue; 
 	  if (cms3.genps_status().at(iGen) != 1) continue; 
@@ -620,16 +622,28 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  if (thisDR < bestDr) {
 	    bestDr = thisDR;
 	    bestMatch = iGen;
+	    bestMatchEta = cms3.genps_p4().at(iGen).eta();
+	    bestMatchPhi = cms3.genps_p4().at(iGen).phi();
 	  }
 	}
 	if (bestMatch != -1) {
 	  // 7 is a special code for photons without a mother. this seems to be due to a miniAOD bug where links are broken.
 	  gamma_mcMatchId[ngamma] = cms3.genps_id_simplemother().at(bestMatch) == 0 ? 7 : 22; 
-	  gamma_genIso[ngamma] = cms3.genps_iso().at(bestMatch);
+	  gamma_genIso04[ngamma] = cms3.genps_iso().at(bestMatch);
+	  // Now want to look at DR between photon and parton
+	  float minDR = 999.; 
+	  for(unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++){
+	    if (cms3.genps_status().at(iGen) != 22 && cms3.genps_status().at(iGen) != 23) continue;
+	    if (fabs(cms3.genps_id().at(iGen)) > 21) continue;
+	    float dr = DeltaR( cms3.genps_p4().at(iGen).eta(), bestMatchEta, cms3.genps_p4().at(iGen).phi(), bestMatchPhi);
+	    if (dr < minDR) minDR = dr;
+	  }
+	  gamma_drMinParton[ngamma] = minDR;
 	}
 	else {
-	  gamma_mcMatchId[ngamma] = 0;
-	  gamma_genIso[ngamma] = -1;
+	  gamma_mcMatchId[ngamma]    = 0;
+	  gamma_genIso04[ngamma]     = -1;
+	  gamma_drMinParton[ngamma]  = -1;
 	}
    
 	// for photon+jets control regions
@@ -1244,7 +1258,8 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("gamma_phi", gamma_phi, "gamma_phi[ngamma]/F" );
   BabyTree_->Branch("gamma_mass", gamma_mass, "gamma_mass[ngamma]/F" );
   BabyTree_->Branch("gamma_mcMatchId", gamma_mcMatchId, "gamma_mcMatchId[ngamma]/I" );
-  BabyTree_->Branch("gamma_genIso", gamma_genIso, "gamma_genIso[ngamma]/F" );
+  BabyTree_->Branch("gamma_genIso04", gamma_genIso04, "gamma_genIso04[ngamma]/F" );
+  BabyTree_->Branch("gamma_drMinParton", gamma_drMinParton, "gamma_drMinParton[ngamma]/F" );
   BabyTree_->Branch("gamma_chHadIso", gamma_chHadIso, "gamma_chHadIso[ngamma]/F" );
   BabyTree_->Branch("gamma_neuHadIso", gamma_neuHadIso, "gamma_neuHadIso[ngamma]/F" );
   BabyTree_->Branch("gamma_phIso", gamma_phIso, "gamma_phIso[ngamma]/F" );
@@ -1527,7 +1542,8 @@ void babyMaker::InitBabyNtuple () {
     gamma_phi[i] = -999;
     gamma_mass[i] = -999;
     gamma_mcMatchId[i] = -999;
-    gamma_genIso[i] = -999;
+    gamma_genIso04[i] = -999;
+    gamma_drMinParton[i] = -999;
     gamma_chHadIso[i] = -999;
     gamma_neuHadIso[i] = -999;
     gamma_phIso[i] = -999;
