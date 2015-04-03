@@ -24,13 +24,13 @@ public :
    // Declaration of leaf types
    Int_t           run;
    Int_t           lumi;
-   Int_t           evt;
+   ULong64_t       evt;
    Int_t           isData;
    Float_t         evt_scale1fb;
    Float_t         evt_xsec;
    Float_t         evt_kfactor;
    Float_t         evt_filter;
-   Int_t           evt_nEvts;
+   ULong64_t       evt_nEvts;
    Int_t           evt_id;
    Float_t         puWeight;
    Int_t           nVert;
@@ -38,9 +38,11 @@ public :
    Float_t         rho;
    Float_t         rho25;
    Int_t           nJet40;
+   Int_t           nBJet25;
    Int_t           nBJet40;
    Int_t           nMuons10;
    Int_t           nElectrons10;
+   Int_t           nLepLowMT;
    Int_t           nTaus20;
    Int_t           nGammas20;
    Float_t         deltaPhiMin;
@@ -104,6 +106,7 @@ public :
    Int_t           lep_tightId[50];   //[nlep]
    Float_t         lep_relIso03[50];   //[nlep]
    Float_t         lep_relIso04[50];   //[nlep]
+   Float_t         lep_miniRelIso[50];   //[nlep]
    Int_t           lep_mcMatchId[50];   //[nlep]
    Int_t           lep_lostHits[50];   //[nlep]
    Int_t           lep_convVeto[50];   //[nlep]
@@ -139,6 +142,8 @@ public :
    Float_t         gamma_mass[50];   //[ngamma]
    Int_t           gamma_mcMatchId[50];   //[ngamma]
    Float_t         gamma_genIso[50];   //[ngamma]
+   Float_t         gamma_genIso04[50];   //[ngamma]
+   Float_t         gamma_drMinParton[50];   //[ngamma]
    Float_t         gamma_chHadIso[50];   //[ngamma]
    Float_t         gamma_neuHadIso[50];   //[ngamma]
    Float_t         gamma_phIso[50];   //[ngamma]
@@ -148,6 +153,7 @@ public :
    Int_t           gamma_idCutBased[50];   //[ngamma]
    Float_t         gamma_mt2;
    Int_t           gamma_nJet40;
+   Int_t           gamma_nBJet25;
    Int_t           gamma_nBJet40;
    Float_t         gamma_ht;
    Float_t         gamma_minMTBMet;
@@ -220,6 +226,25 @@ public :
    Float_t         jet_area[100];   //[njet]
    Int_t           jet_id[100];   //[njet]
    Int_t           jet_puId[100];   //[njet]
+   Int_t           GenSusyMScan1;
+   Int_t           GenSusyMScan2;
+   Int_t           GenSusyMScan3;
+   Int_t           GenSusyMScan4;
+   Float_t         weight_lepsf;
+   Float_t         weight_lepsf_UP;
+   Float_t         weight_lepsf_DN;
+   Float_t         weight_btagsf;
+   Float_t         weight_btagsf_UP;
+   Float_t         weight_btagsf_DN;
+   Float_t         weight_sigtrigsf;
+   Float_t         weight_dileptrigsf;
+   Float_t         weight_phottrigsf;
+   Float_t         weight_pu;
+   Float_t         weight_isr;
+   Float_t         weight_scales_UP;
+   Float_t         weight_scales_DN;
+   Float_t         weight_pdfs_UP;
+   Float_t         weight_pdfs_DN;
 
    // List of branches
    TBranch        *b_run;   //!
@@ -238,9 +263,11 @@ public :
    TBranch        *b_rho;   //!
    TBranch        *b_rho25;   //!
    TBranch        *b_nJet40;   //!
+   TBranch        *b_nBJet25;   //!
    TBranch        *b_nBJet40;   //!
    TBranch        *b_nMuons10;   //!
    TBranch        *b_nElectrons10;   //!
+   TBranch        *b_nLepLowMT;   //!
    TBranch        *b_nTaus20;   //!
    TBranch        *b_nGammas20;   //!
    TBranch        *b_deltaPhiMin;   //!
@@ -304,6 +331,7 @@ public :
    TBranch        *b_lep_tightId;   //!
    TBranch        *b_lep_relIso03;   //!
    TBranch        *b_lep_relIso04;   //!
+   TBranch        *b_lep_miniRelIso;   //!
    TBranch        *b_lep_mcMatchId;   //!
    TBranch        *b_lep_lostHits;   //!
    TBranch        *b_lep_convVeto;   //!
@@ -339,6 +367,8 @@ public :
    TBranch        *b_gamma_mass;   //!
    TBranch        *b_gamma_mcMatchId;   //!
    TBranch        *b_gamma_genIso;   //!
+   TBranch        *b_gamma_genIso04;   //!
+   TBranch        *b_gamma_drMinParton;   //!
    TBranch        *b_gamma_chHadIso;   //!
    TBranch        *b_gamma_neuHadIso;   //!
    TBranch        *b_gamma_phIso;   //!
@@ -348,6 +378,7 @@ public :
    TBranch        *b_gamma_idCutBased;   //!
    TBranch        *b_gamma_mt2;
    TBranch        *b_gamma_nJet40;
+   TBranch        *b_gamma_nBJet25;
    TBranch        *b_gamma_nBJet40;
    TBranch        *b_gamma_ht;
    TBranch        *b_gamma_minMTBMet;
@@ -420,6 +451,25 @@ public :
    TBranch        *b_jet_area;   //!
    TBranch        *b_jet_id;   //!
    TBranch        *b_jet_puId;   //!
+   TBranch        *b_GenSusyMScan1;   //!
+   TBranch        *b_GenSusyMScan2;   //!
+   TBranch        *b_GenSusyMScan3;   //!
+   TBranch        *b_GenSusyMScan4;   //!
+   TBranch        *b_weight_lepsf;   //!
+   TBranch        *b_weight_lepsf_UP;   //!
+   TBranch        *b_weight_lepsf_DN;   //!
+   TBranch        *b_weight_btagsf;   //!
+   TBranch        *b_weight_btagsf_UP;   //!
+   TBranch        *b_weight_btagsf_DN;   //!
+   TBranch        *b_weight_sigtrigsf;   //!
+   TBranch        *b_weight_dileptrigsf;   //!
+   TBranch        *b_weight_phottrigsf;   //!
+   TBranch        *b_weight_pu;   //!
+   TBranch        *b_weight_isr;   //!
+   TBranch        *b_weight_scales_UP;   //!
+   TBranch        *b_weight_scales_DN;   //!
+   TBranch        *b_weight_pdfs_UP;   //!
+   TBranch        *b_weight_pdfs_DN;   //!
 
    mt2tree(TTree *tree=0);
    virtual ~mt2tree();
@@ -497,6 +547,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("rho", &rho, &b_rho);
    fChain->SetBranchAddress("rho25", &rho25, &b_rho25);
    fChain->SetBranchAddress("nJet40", &nJet40, &b_nJet40);
+   fChain->SetBranchAddress("nBJet25", &nBJet25, &b_nBJet25);
    fChain->SetBranchAddress("nBJet40", &nBJet40, &b_nBJet40);
    fChain->SetBranchAddress("nMuons10", &nMuons10, &b_nMuons10);
    fChain->SetBranchAddress("nElectrons10", &nElectrons10, &b_nElectrons10);
@@ -563,6 +614,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("lep_tightId", lep_tightId, &b_lep_tightId);
    fChain->SetBranchAddress("lep_relIso03", lep_relIso03, &b_lep_relIso03);
    fChain->SetBranchAddress("lep_relIso04", lep_relIso04, &b_lep_relIso04);
+   fChain->SetBranchAddress("lep_miniRelIso", lep_miniRelIso, &b_lep_miniRelIso);
    fChain->SetBranchAddress("lep_mcMatchId", lep_mcMatchId, &b_lep_mcMatchId);
    fChain->SetBranchAddress("lep_lostHits", lep_lostHits, &b_lep_lostHits);
    fChain->SetBranchAddress("lep_convVeto", lep_convVeto, &b_lep_convVeto);
@@ -598,6 +650,8 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("gamma_mass", gamma_mass, &b_gamma_mass);
    fChain->SetBranchAddress("gamma_mcMatchId", gamma_mcMatchId, &b_gamma_mcMatchId);
    fChain->SetBranchAddress("gamma_genIso", gamma_genIso, &b_gamma_genIso);
+   fChain->SetBranchAddress("gamma_genIso04", gamma_genIso04, &b_gamma_genIso04);
+   fChain->SetBranchAddress("gamma_drMinParton", gamma_drMinParton, &b_gamma_drMinParton);
    fChain->SetBranchAddress("gamma_chHadIso", gamma_chHadIso, &b_gamma_chHadIso);
    fChain->SetBranchAddress("gamma_neuHadIso", gamma_neuHadIso, &b_gamma_neuHadIso);
    fChain->SetBranchAddress("gamma_phIso", gamma_phIso, &b_gamma_phIso);
@@ -607,6 +661,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("gamma_idCutBased", gamma_idCutBased, &b_gamma_idCutBased);
    fChain->SetBranchAddress("gamma_mt2", &gamma_mt2, &b_gamma_mt2);
    fChain->SetBranchAddress("gamma_nJet40", &gamma_nJet40, &b_gamma_nJet40);
+   fChain->SetBranchAddress("gamma_nBJet25", &gamma_nBJet25, &b_gamma_nBJet25);
    fChain->SetBranchAddress("gamma_nBJet40", &gamma_nBJet40, &b_gamma_nBJet40);
    fChain->SetBranchAddress("gamma_ht", &gamma_ht, &b_gamma_ht);
    fChain->SetBranchAddress("gamma_minMTBMet", &gamma_minMTBMet, &b_gamma_minMTBMet);
@@ -679,6 +734,25 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("jet_area", jet_area, &b_jet_area);
    fChain->SetBranchAddress("jet_id", jet_id, &b_jet_id);
    fChain->SetBranchAddress("jet_puId", jet_puId, &b_jet_puId);
+   fChain->SetBranchAddress("GenSusyMScan1", &GenSusyMScan1, &b_GenSusyMScan1);
+   fChain->SetBranchAddress("GenSusyMScan2", &GenSusyMScan2, &b_GenSusyMScan2);
+   fChain->SetBranchAddress("GenSusyMScan3", &GenSusyMScan3, &b_GenSusyMScan3);
+   fChain->SetBranchAddress("GenSusyMScan4", &GenSusyMScan4, &b_GenSusyMScan4);
+   fChain->SetBranchAddress("weight_lepsf", &weight_lepsf, &b_weight_lepsf);
+   fChain->SetBranchAddress("weight_lepsf_UP", &weight_lepsf_UP, &b_weight_lepsf_UP);
+   fChain->SetBranchAddress("weight_lepsf_DN", &weight_lepsf_DN, &b_weight_lepsf_DN);
+   fChain->SetBranchAddress("weight_btagsf", &weight_btagsf, &b_weight_btagsf);
+   fChain->SetBranchAddress("weight_btagsf_UP", &weight_btagsf_UP, &b_weight_btagsf_UP);
+   fChain->SetBranchAddress("weight_btagsf_DN", &weight_btagsf_DN, &b_weight_btagsf_DN);
+   fChain->SetBranchAddress("weight_sigtrigsf", &weight_sigtrigsf, &b_weight_sigtrigsf);
+   fChain->SetBranchAddress("weight_dileptrigsf", &weight_dileptrigsf, &b_weight_dileptrigsf);
+   fChain->SetBranchAddress("weight_phottrigsf", &weight_phottrigsf, &b_weight_phottrigsf);
+   fChain->SetBranchAddress("weight_pu", &weight_pu, &b_weight_pu);
+   fChain->SetBranchAddress("weight_isr", &weight_isr, &b_weight_isr);
+   fChain->SetBranchAddress("weight_scales_UP", &weight_scales_UP, &b_weight_scales_UP);
+   fChain->SetBranchAddress("weight_scales_DN", &weight_scales_DN, &b_weight_scales_DN);
+   fChain->SetBranchAddress("weight_pdfs_UP", &weight_pdfs_UP, &b_weight_pdfs_UP);
+   fChain->SetBranchAddress("weight_pdfs_DN", &weight_pdfs_DN, &b_weight_pdfs_DN);
    Notify();
 }
 
