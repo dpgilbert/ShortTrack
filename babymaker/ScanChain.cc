@@ -674,7 +674,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       //vector<float> pTofMatchedGenJets;
       //for(unsigned int iJet = 0; iJet < cms3.pfjets_p4().size(); iJet++){
       //  if(cms3.pfjets_p4().at(iJet).pt() < 10.0) continue;
-      //  if(fabs(cms3.pfjets_p4().at(iJet).eta()) > 5.2) continue;
+      //  if(fabs(cms3.pfjets_p4().at(iJet).eta()) > 4.7) continue;
       //	float matchedPt = cms3.pfjets_mc_p4().at(iJet).pt();
       //	if (matchedPt!=0) {
       //	  if ( find( pTofMatchedGenJets.begin(), pTofMatchedGenJets.end(), matchedPt  ) != pTofMatchedGenJets.end() ) {
@@ -707,7 +707,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  double corr = jet_corrector_pfL1FastJetL2L3->getCorrection();
 
 	  // check for negative correction
-	  if (corr < 0.) {
+	  if (corr < 0. && fabs(pfjet_p4_uncor.eta()) < 4.7) {
 	    std::cout << "ScanChain::Looper: WARNING: negative jet correction: " << corr
 		      << ", raw jet pt: " << pfjet_p4_uncor.pt() << ", eta: " << pfjet_p4_uncor.eta() << std::endl;
 	  }
@@ -718,8 +718,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
 	p4sCorrJets.push_back(pfjet_p4_cor);
 
-        if(p4sCorrJets.at(iJet).pt() < 25.0) continue;
-        if(fabs(p4sCorrJets.at(iJet).eta()) > 5.2) continue;
+        if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
+        if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
 	// note this uses the eta of the jet as stored in CMS3
 	//  chance for small discrepancies if JEC changes direction slightly..
         if(!isLoosePFJet(iJet)) continue;
@@ -744,8 +744,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
           int iJet = passJets.at(passIdx).first;
 
-          if(p4sCorrJets.at(iJet).pt() < 25.0) continue;
-          if(fabs(p4sCorrJets.at(iJet).eta()) > 5.2) continue;
+          if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
+          if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
           if(!isLoosePFJet(iJet)) continue;
 
           bool alreadyRemoved = false;
@@ -780,8 +780,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
           int iJet = passJets.at(passIdx).first;
 
-          if(p4sCorrJets.at(iJet).pt() < 25.0) continue;
-          if(fabs(p4sCorrJets.at(iJet).eta()) > 5.2) continue;
+          if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
+          if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
           if(!isLoosePFJet(iJet)) continue;
 
           bool alreadyRemoved = false;
@@ -840,94 +840,97 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  break;
 	}
 
-        jet_pt[njet]   = p4sCorrJets.at(iJet).pt();
-        jet_eta[njet]  = p4sCorrJets.at(iJet).eta();
-        jet_phi[njet]  = p4sCorrJets.at(iJet).phi();
-        jet_mass[njet] = cms3.pfjets_mass().at(iJet);
-        jet_btagCSV[njet] = cms3.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet); 
-        jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
-        jet_mcFlavour[njet] = cms3.pfjets_partonFlavour().at(iJet);
-        //jet_qgl
-        jet_area[njet] = cms3.pfjets_area().at(iJet);
-	jet_rawPt[njet] = cms3.pfjets_p4().at(iJet).pt() * cms3.pfjets_undoJEC().at(iJet);
+	// only save jets with pt 25 eta 4.7
+        if( (p4sCorrJets.at(iJet).pt() > 25.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ){ 
+	  jet_pt[njet]   = p4sCorrJets.at(iJet).pt();
+	  jet_eta[njet]  = p4sCorrJets.at(iJet).eta();
+	  jet_phi[njet]  = p4sCorrJets.at(iJet).phi();
+	  jet_mass[njet] = cms3.pfjets_mass().at(iJet);
+	  jet_btagCSV[njet] = cms3.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet); 
+	  jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
+	  jet_mcFlavour[njet] = cms3.pfjets_partonFlavour().at(iJet);
+	  //jet_qgl
+	  jet_area[njet] = cms3.pfjets_area().at(iJet);
+	  jet_rawPt[njet] = cms3.pfjets_p4().at(iJet).pt() * cms3.pfjets_undoJEC().at(iJet);
 
-        if(isTightPFJet(iJet))  jet_id[njet] = 3;
-        else if(isMediumPFJet(iJet)) jet_id[njet] = 2;
-        else jet_id[njet] = 1; //required to be loose above
+	  if(isTightPFJet(iJet))  jet_id[njet] = 3;
+	  else if(isMediumPFJet(iJet)) jet_id[njet] = 2;
+	  else jet_id[njet] = 1; //required to be loose above
 
-        jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
+	  jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
 
-	// use pt25 for bjet counting, pt40 for everything else
-        if( (jet_pt[njet] > 25.0) && (fabs(jet_eta[njet]) < 2.5) ){ 
-	  if (jet_pt[njet] > 40.0) {
-	    // store leading/subleading central jet pt.
-	    //  jets should be pt-ordered before entering this loop
-	    if (jet1_pt < 0.1) jet1_pt = p4sCorrJets.at(iJet).pt();
-	    else if (jet2_pt < 0.1) jet2_pt = p4sCorrJets.at(iJet).pt();
-	    p4sForHems.push_back(p4sCorrJets.at(iJet));
-	    p4sForDphi.push_back(p4sCorrJets.at(iJet));
-	    p4sForHemsZll.push_back(p4sCorrJets.at(iJet));
-	    p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
-	    nJet40++;
-	  } // pt40
-	  //CSVv2IVFM
-          if(jet_btagCSV[njet] >= 0.814) {
-	    nBJet25++; 
+	  // use pt25 for bjet counting, pt40 for everything else
+	  if( (jet_pt[njet] > 25.0) && (fabs(jet_eta[njet]) < 2.5) ){ 
 	    if (jet_pt[njet] > 40.0) {
-	      nBJet40++; 
-	      float mt = MT(jet_pt[njet],jet_phi[njet],met_pt,met_phi);
-	      if (mt < minMTBMet) minMTBMet = mt;
-	      if (nlep == 2) {
-		float zllmt = MT(jet_pt[njet],jet_phi[njet],zll_met_pt,zll_met_phi);
-		if (zllmt < zll_minMTBMet) zll_minMTBMet = zllmt;
-	      }
-	    } // pt 40
-	  } // pass med btag
-        } // pt 25 eta 2.5
-	// accept jets out to eta 5.2 for dphi
-	else if ( (jet_pt[njet] > 40.0) && (fabs(jet_eta[njet]) < 5.2) ) {
-          p4sForDphi.push_back(p4sCorrJets.at(iJet));
-          p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
-	}
-
-	// fill gamma_XXX variables before checking for lepton overlap. Why? Let's keep them consistent with the lepton-overlapped jets
-        if( ( p4sCorrJets.at(iJet).pt() > 25.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ){ 
-	  //check against list of jets that overlap with a photon
-	  bool isOverlapJetGamma = false;
-	  for(unsigned int j=0; j<removedJetsGamma.size(); j++){
-	    if(iJet == removedJetsGamma.at(j)){
-	      isOverlapJetGamma = true;
-	      break;
-	    }
-	  }
-
-	  if(!isOverlapJetGamma) {
-	    if (p4sCorrJets.at(iJet).pt() > 40.0) {
 	      // store leading/subleading central jet pt.
 	      //  jets should be pt-ordered before entering this loop
-	      if (gamma_jet1_pt < 0.1) gamma_jet1_pt = p4sCorrJets.at(iJet).pt();
-	      else if (gamma_jet2_pt < 0.1) gamma_jet2_pt = p4sCorrJets.at(iJet).pt();
-	      p4sForHemsGamma.push_back(p4sCorrJets.at(iJet));
-	      p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
-	      gamma_nJet40++;
+	      if (jet1_pt < 0.1) jet1_pt = p4sCorrJets.at(iJet).pt();
+	      else if (jet2_pt < 0.1) jet2_pt = p4sCorrJets.at(iJet).pt();
+	      p4sForHems.push_back(p4sCorrJets.at(iJet));
+	      p4sForDphi.push_back(p4sCorrJets.at(iJet));
+	      p4sForHemsZll.push_back(p4sCorrJets.at(iJet));
+	      p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
+	      nJet40++;
 	    } // pt40
-	    if(cms3.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.814) { //CSVv2IVFM
-	      gamma_nBJet25++; 
+	    //CSVv2IVFM
+	    if(jet_btagCSV[njet] >= 0.814) {
+	      nBJet25++; 
+	      if (jet_pt[njet] > 40.0) {
+		nBJet40++; 
+		float mt = MT(jet_pt[njet],jet_phi[njet],met_pt,met_phi);
+		if (mt < minMTBMet) minMTBMet = mt;
+		if (nlep == 2) {
+		  float zllmt = MT(jet_pt[njet],jet_phi[njet],zll_met_pt,zll_met_phi);
+		  if (zllmt < zll_minMTBMet) zll_minMTBMet = zllmt;
+		}
+	      } // pt 40
+	    } // pass med btag
+	  } // pt 25 eta 2.5
+	  // accept jets out to eta 4.7 for dphi
+	  else if ( (jet_pt[njet] > 40.0) && (fabs(jet_eta[njet]) < 4.7) ) {
+	    p4sForDphi.push_back(p4sCorrJets.at(iJet));
+	    p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
+	  }
+
+	  // fill gamma_XXX variables before checking for lepton overlap. Why? Let's keep them consistent with the lepton-overlapped jets
+	  if( ( p4sCorrJets.at(iJet).pt() > 25.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ){ 
+	    //check against list of jets that overlap with a photon
+	    bool isOverlapJetGamma = false;
+	    for(unsigned int j=0; j<removedJetsGamma.size(); j++){
+	      if(iJet == removedJetsGamma.at(j)){
+		isOverlapJetGamma = true;
+		break;
+	      }
+	    }
+
+	    if(!isOverlapJetGamma) {
 	      if (p4sCorrJets.at(iJet).pt() > 40.0) {
-		gamma_nBJet40++; 
-		float mt = MT( p4sCorrJets.at(iJet).pt(),p4sCorrJets.at(iJet).phi(),gamma_met_pt,gamma_met_phi);
-		if (mt < gamma_minMTBMet) gamma_minMTBMet = mt;	 
+		// store leading/subleading central jet pt.
+		//  jets should be pt-ordered before entering this loop
+		if (gamma_jet1_pt < 0.1) gamma_jet1_pt = p4sCorrJets.at(iJet).pt();
+		else if (gamma_jet2_pt < 0.1) gamma_jet2_pt = p4sCorrJets.at(iJet).pt();
+		p4sForHemsGamma.push_back(p4sCorrJets.at(iJet));
+		p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
+		gamma_nJet40++;
 	      } // pt40
-	    } // pass med btag  
-	  } // not overlap with photon
-        } // pt 25 eta 2.5 
-	// accept jets out to eta 5.2 for dphi
-	else if ( (p4sCorrJets.at(iJet).pt() > 40.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 5.2) ) {
-          p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
-	}
+	      if(cms3.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.814) { //CSVv2IVFM
+		gamma_nBJet25++; 
+		if (p4sCorrJets.at(iJet).pt() > 40.0) {
+		  gamma_nBJet40++; 
+		  float mt = MT( p4sCorrJets.at(iJet).pt(),p4sCorrJets.at(iJet).phi(),gamma_met_pt,gamma_met_phi);
+		  if (mt < gamma_minMTBMet) gamma_minMTBMet = mt;	 
+		} // pt40
+	      } // pass med btag  
+	    } // not overlap with photon
+	  } // pt 25 eta 2.5 
+	  // accept jets out to eta 4.7 for dphi
+	  else if ( (p4sCorrJets.at(iJet).pt() > 40.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {
+	    p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
+	  }
 
 
-        njet++;
+	  njet++;
+	} // pt 25 eta 4.7
       }
 
       if (verbose) cout << "before hemispheres" << endl;
