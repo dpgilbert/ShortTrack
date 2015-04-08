@@ -1508,7 +1508,7 @@ void babyMaker::InitBabyNtuple () {
   weight_pdfs_UP = 1.;
   weight_pdfs_DN = 1.;
 
-  for(int i=0; i < nlep; i++){
+  for(int i=0; i < max_nlep; i++){
     lep_pt[i] = -999;
     lep_eta[i] = -999;
     lep_phi[i] = -999;
@@ -1527,7 +1527,7 @@ void babyMaker::InitBabyNtuple () {
     lep_tightCharge[i] = -999;
   }
 
-  for(int i=0; i < nisoTrack; i++){
+  for(int i=0; i < max_nisoTrack; i++){
     isoTrack_pt[i] = -999;
     isoTrack_eta[i] = -999;
     isoTrack_phi[i] = -999;
@@ -1538,7 +1538,7 @@ void babyMaker::InitBabyNtuple () {
     isoTrack_mcMatchId[i] = -999;
   }
 
-  for(int i=0; i < ntau; i++){
+  for(int i=0; i < max_ntau; i++){
     tau_pt[i] = -999;
     tau_eta[i] = -999;
     tau_phi[i] = -999;
@@ -1551,7 +1551,7 @@ void babyMaker::InitBabyNtuple () {
     tau_mcMatchId[i] = -999;
   }
 
-  for(int i=0; i < ngamma; i++){
+  for(int i=0; i < max_ngamma; i++){
     gamma_pt[i] = -999;
     gamma_eta[i] = -999;
     gamma_phi[i] = -999;
@@ -1569,7 +1569,7 @@ void babyMaker::InitBabyNtuple () {
   }
 
   if (saveGenParticles) {
-    for(int i=0; i < ngenPart; i++){
+    for(int i=0; i < max_ngenPart; i++){
       genPart_pt[i] = -999;
       genPart_eta[i] = -999;
       genPart_phi[i] = -999;
@@ -1582,7 +1582,7 @@ void babyMaker::InitBabyNtuple () {
     }
   }
 
-  for(int i=0; i < ngenLep; i++){
+  for(int i=0; i < max_ngenLep; i++){
     genLep_pt[i] = -999;
     genLep_eta[i] = -999;
     genLep_phi[i] = -999;
@@ -1593,7 +1593,7 @@ void babyMaker::InitBabyNtuple () {
     genLep_sourceId[i] = -999;
   }
 
-  for(int i=0; i < ngenTau; i++){
+  for(int i=0; i < max_ngenTau; i++){
     genTau_pt[i] = -999;
     genTau_eta[i] = -999;
     genTau_phi[i] = -999;
@@ -1604,7 +1604,7 @@ void babyMaker::InitBabyNtuple () {
     genTau_sourceId[i] = -999;
   }
 
-  for(int i=0; i < ngenLepFromTau; i++){
+  for(int i=0; i < max_ngenLepFromTau; i++){
       genLepFromTau_pt[i] = -999;
       genLepFromTau_eta[i] = -999;
       genLepFromTau_phi[i] = -999;
@@ -1615,7 +1615,7 @@ void babyMaker::InitBabyNtuple () {
       genLepFromTau_sourceId[i] = -999;
   }
 
-  for(int i=0; i < njet; i++){
+  for(int i=0; i < max_njet; i++){
     jet_pt[i] = -999;
     jet_eta[i] = -999;
     jet_phi[i] = -999;
