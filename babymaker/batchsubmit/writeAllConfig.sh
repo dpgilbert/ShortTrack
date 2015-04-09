@@ -4,7 +4,7 @@
 # All MT2 related datasets available on hadoop
 #
 
-TAG="V00-00-10"
+TAG="V00-00-11"
 
 #
 # DATA
@@ -34,12 +34,12 @@ TAG="V00-00-10"
 # SINGLE TOP
 #
 
-./writeConfig.sh /hadoop/cms/store/group/snt/phys14/TBarToLeptons_s-channel-CSA14_Tune4C_13TeV-aMCatNLO-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-08/ ${TAG}_singletop_tbarschan_l
-./writeConfig.sh /hadoop/cms/store/group/snt/phys14/TBarToLeptons_t-channel_Tune4C_CSA14_13TeV-aMCatNLO-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-08/ ${TAG}_singletop_tbartchan_l
-./writeConfig.sh /hadoop/cms/store/group/snt/phys14/TToLeptons_s-channel-CSA14_Tune4C_13TeV-aMCatNLO-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-08/ ${TAG}_singletop_tschan_l
-./writeConfig.sh /hadoop/cms/store/group/snt/phys14/TToLeptons_t-channel-CSA14_Tune4C_13TeV-aMCatNLO-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-08/ ${TAG}_singletop_ttchan_l
-./writeConfig.sh /hadoop/cms/store/group/snt/phys14/T_tW-channel-DR_Tune4C_13TeV-CSA14-powheg-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-08/ ${TAG}_singletop_tWchan
-./writeConfig.sh /hadoop/cms/store/group/snt/phys14/Tbar_tW-channel-DR_Tune4C_13TeV-CSA14-powheg-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-08/ ${TAG}_singletop_tbarWchan
+./writeConfig.sh /hadoop/cms/store/group/snt/phys14/TBarToLeptons_s-channel-CSA14_Tune4C_13TeV-aMCatNLO-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-06/ ${TAG}_singletop_tbarschan_l
+./writeConfig.sh /hadoop/cms/store/group/snt/phys14/TBarToLeptons_t-channel_Tune4C_CSA14_13TeV-aMCatNLO-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-06/ ${TAG}_singletop_tbartchan_l
+./writeConfig.sh /hadoop/cms/store/group/snt/phys14/TToLeptons_s-channel-CSA14_Tune4C_13TeV-aMCatNLO-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-06/ ${TAG}_singletop_tschan_l
+./writeConfig.sh /hadoop/cms/store/group/snt/phys14/TToLeptons_t-channel-CSA14_Tune4C_13TeV-aMCatNLO-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-06/ ${TAG}_singletop_ttchan_l
+./writeConfig.sh /hadoop/cms/store/group/snt/phys14/T_tW-channel-DR_Tune4C_13TeV-CSA14-powheg-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-03/ ${TAG}_singletop_tWchan
+./writeConfig.sh /hadoop/cms/store/group/snt/phys14/Tbar_tW-channel-DR_Tune4C_13TeV-CSA14-powheg-tauola_Phys14DR-PU20bx25_PHYS14_25_V1-v1/V07-02-03/ ${TAG}_singletop_tbarWchan
 
 #
 # DY+JETS
