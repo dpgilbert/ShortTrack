@@ -211,7 +211,6 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   bool saveSLplots = false;
   bool saveSLMUplots = false;
   bool saveSLELplots = false;
-  bool saveSLHADplots = false;
 
   // File Loop
   int nDuplicates = 0;
@@ -277,7 +276,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       if (t.nVert == 0) continue;
 
       // remove low pt QCD samples 
-      if (t.evt_id >= 100 && t.evt_id < 108) continue;
+      if (t.evt_id >= 100 && t.evt_id < 109) continue;
       // remove low HT QCD samples 
       if (t.evt_id >= 120 && t.evt_id < 123) continue;
 
@@ -293,105 +292,76 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
       // note: this will double count some leptons, since reco leptons can appear as PFcands
       nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
-      int nlep_unique = nlepveto_;
 
       // variables for single lep control region
       bool doSLplots = false;
       bool doSLMUplots = false;
       bool doSLELplots = false;
-      bool doSLHADplots = false;
       leppt_ = -1.;
       mt_ = -1.;
-      // do lepton overlap removal and 1L CR selections
-      if (nlepveto_ >= 1) {
-	std::vector<MT2Looper::lepcand> all_cands;
-	std::vector<MT2Looper::lepcand> unique_cands;
-	// check reco leptons - apply MT cut later
-	// do overlap with PFcands below
-	if ( t.nMuons10 > 0 || t.nElectrons10 > 0) {
-	  for (int ilep = 0; ilep < t.nlep; ++ilep) {
-	    MT2Looper::lepcand cand;
-	    cand.pt = t.lep_pt[ilep];
-	    cand.phi = t.lep_phi[ilep];
-	    cand.mt = sqrt( 2 * t.met_pt * cand.pt * ( 1 - cos( t.met_phi - cand.phi) ) );
-	    cand.eta = t.lep_eta[ilep];
-	    cand.pdgId = t.lep_pdgId[ilep];
-	    cand.isPFCand = false;
 
-	    // add cand to vector
-	    all_cands.push_back(cand);
-	  } // loop over reco leps
-	} 
-	// pf leptons: need to find cands passing selection. 
-	else if (t.nPFLep5LowMT > 0) {
-	  for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
-	    MT2Looper::lepcand cand;
-	    cand.pt = t.isoTrack_pt[itrk];
-	    cand.phi = t.isoTrack_phi[itrk];
-	    cand.pdgId = t.isoTrack_pdgId[itrk];
-	    if (cand.pt < 5.) continue;
-	    if (abs(cand.pdgId) != 11 && abs(cand.pdgId) != 13) continue;
-	    float absiso = t.isoTrack_absIso[itrk];
-	    if (absiso/cand.pt > 0.2) continue;
-	    cand.mt = sqrt( 2 * t.met_pt * cand.pt * ( 1 - cos( t.met_phi - cand.phi) ) );
-	    cand.eta = t.isoTrack_eta[itrk];
-	    cand.isPFCand = true;
+      // simple counter to check for 1L CR
+      if (t.nLepLowMT == 1) {
+	doSLplots = true;
 
-	    // cand passes cuts: add to vector
-	    if (cand.mt > 100.) continue;
-	    all_cands.push_back(cand);
-	  } // loop on isoTracks
-	}
-	// pf hadrons: need to find cands passing selection. 
-	else if (t.nPFHad10LowMT > 0) {
-	  for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
-	    MT2Looper::lepcand cand;
-	    cand.pt = t.isoTrack_pt[itrk];
-	    cand.phi = t.isoTrack_phi[itrk];
-	    cand.pdgId = t.isoTrack_pdgId[itrk];
-	    if (cand.pt < 10.) continue;
-	    if (abs(cand.pdgId) != 211) continue;
-	    float absiso = t.isoTrack_absIso[itrk];
-	    if (absiso/cand.pt > 0.1) continue;
-	    cand.mt = sqrt( 2 * t.met_pt * cand.pt * ( 1 - cos( t.met_phi - cand.phi) ) );
-	    cand.eta = t.isoTrack_eta[itrk];
-	    cand.isPFCand = true;
+	// find unique lepton to plot pt,MT and get flavor
+	bool foundlep = false;
+	int cand_pdgId = 0;
 
-	    // cand passes cuts: add to vector
-	    if (cand.mt > 100.) continue;
-	    all_cands.push_back(cand);
-	  } // loop on isoTracks
-	}
+	// if reco leps, check those
+	if (t.nlep > 0) {
+      	  for (int ilep = 0; ilep < t.nlep; ++ilep) {
+      	    float mt = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
+	    if (mt > 100.) continue;
 
-	// check all_cands for overlaps
-	for (unsigned int icand = 0; icand < all_cands.size(); ++icand) {
-	  bool keep = true;
-	  for (unsigned int jcand = 0; jcand < all_cands.size(); ++jcand) {
-	    float dr = DeltaR(all_cands.at(icand).eta, all_cands.at(jcand).eta, all_cands.at(icand).phi, all_cands.at(jcand).phi);
-	    if (dr < 0.1) {
-	      // if overlap, check whether the cands have the same pdgId
-	      // keep the reco lepton in case of overlap with PF lepton
-	      if (all_cands.at(icand).pdgId == all_cands.at(jcand).pdgId && 
-		  all_cands.at(icand).isPFCand && !all_cands.at(jcand).isPFCand) 
-		keep = false;
-	    }
+	    // good candidate: save
+	    leppt_ = t.lep_pt[ilep];
+	    mt_ = mt;
+	    cand_pdgId = t.lep_pdgId[ilep];
+	    foundlep = true;
+	    break;
 	  }
-	  if (keep) unique_cands.push_back(all_cands.at(icand));
-	}
-	
-	nlep_unique = unique_cands.size() ; // useful counter (for DYCR)
+	} // t.nlep > 0
 
-	// check size of unique cands. if size == 1 and MT < 100, fill 1L CR plots
-	if (unique_cands.size() == 1) {
-	  leppt_ = unique_cands.at(0).pt;
-	  mt_ = unique_cands.at(0).mt;
-	  if (mt_ < 100.) {
-	    doSLplots = true;
-	    if (abs(unique_cands.at(0).pdgId) == 13) doSLMUplots = true;
-	    else if (abs(unique_cands.at(0).pdgId) == 11) doSLELplots = true;
-	    else if (abs(unique_cands.at(0).pdgId) == 211) doSLHADplots = true;
-	  } // mt < 100
-	} // 1 unique cand
+	// otherwise check PF leps that don't overlap with a reco lepton
+	if (!foundlep && t.nPFLep5LowMT > 0) {
+      	  for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
+	    float pt = t.isoTrack_pt[itrk];
+	    if (pt < 5.) continue;
+      	    int pdgId = t.isoTrack_pdgId[itrk];
+	    if ((abs(pdgId) != 11) && (abs(pdgId) != 13)) continue;
+      	    if (t.isoTrack_absIso[itrk]/pt > 0.2) continue;
+      	    float mt = sqrt( 2 * t.met_pt * pt * ( 1 - cos( t.met_phi - t.isoTrack_phi[itrk]) ) );
+	    if (mt > 100.) continue;
+
+	    // check overlap with reco leptons
+	    bool overlap = false;
+	    for(int ilep = 0; ilep < t.nlep; ilep++){
+	      float thisDR = DeltaR(t.isoTrack_eta[itrk], t.lep_eta[ilep], t.isoTrack_phi[itrk], t.lep_phi[ilep]);
+	      if (thisDR < 0.1) {
+		overlap = true;
+		break;
+	      }
+	    } // loop over reco leps
+	    if (overlap) continue;
+
+	    // good candidate: save
+	    leppt_ = pt;
+	    mt_ = mt;
+	    cand_pdgId = pdgId;
+	    foundlep = true;
+	    break;
+	  } // loop on isotracks
+	}
+
+	if (!foundlep) {
+	  std::cout << "MT2Looper::Loop: WARNING! didn't find a lowMT candidate when expected: evt: " << t.evt
+		    << ", nMuons10: " << t.nMuons10 << ", nElectrons10: " << t.nElectrons10 
+		    << ", nPFLep5LowMT: " << t.nPFLep5LowMT << ", nLepLowMT: " << t.nLepLowMT << std::endl;
+	}
+
+	if (abs(cand_pdgId) == 11) doSLELplots = true;
+	else if (abs(cand_pdgId) == 13) doSLMUplots = true;
 
       } // for 1L control region
 
@@ -464,9 +434,11 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       	       && (abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1]) )
       	       && (fabs(t.zll_mass - 90) < 20 ) 
 	       && t.lep_pt[0] > 20 && t.lep_pt[1] > 20) {
-      		 nlepveto_ = nlep_unique - 2;
-      		 doDYplots = true;
-      	       }
+	    // no additional explicit lepton veto
+	    // i.e. implicitly allow 3rd PF lepton or hadron
+	    nlepveto_ = 0; 
+	    doDYplots = true;
+	  }
       	} // nlep == 2
       }// evt_id 
 
@@ -503,9 +475,6 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       }
       if (doSLELplots) {
         fillHistosCRSL("crslel");
-      }
-      if (doSLHADplots) {
-        fillHistosCRSL("crslhad");
       }
 
 
@@ -570,13 +539,6 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(!SRVec.at(srN).crslelHistMap.empty()){
         savePlotsDir(SRVec.at(srN).crslelHistMap, outfile_, ("crslel"+SRVec.at(srN).GetName()).c_str());
-      }
-    }
-  }
-  if (saveSLHADplots) {
-    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
-      if(!SRVec.at(srN).crslhadHistMap.empty()){
-        savePlotsDir(SRVec.at(srN).crslhadHistMap, outfile_, ("crslhad"+SRVec.at(srN).GetName()).c_str());
       }
     }
   }
@@ -692,7 +654,6 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
       if(prefix=="crsl")    fillHistosSingleLepton(SRVec.at(srN).crslHistMap,    prefix+SRVec.at(srN).GetName(), suffix);
       if(prefix=="crslmu")  fillHistosSingleLepton(SRVec.at(srN).crslmuHistMap,  prefix+SRVec.at(srN).GetName(), suffix);
       if(prefix=="crslel")  fillHistosSingleLepton(SRVec.at(srN).crslelHistMap,  prefix+SRVec.at(srN).GetName(), suffix);
-      if(prefix=="crslhad") fillHistosSingleLepton(SRVec.at(srN).crslhadHistMap, prefix+SRVec.at(srN).GetName(), suffix);
       break;//control regions are orthogonal, event cannot be in more than one
     }
   }
