@@ -551,6 +551,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("nBJet40", &nBJet40, &b_nBJet40);
    fChain->SetBranchAddress("nMuons10", &nMuons10, &b_nMuons10);
    fChain->SetBranchAddress("nElectrons10", &nElectrons10, &b_nElectrons10);
+   fChain->SetBranchAddress("nLepLowMT", &nLepLowMT, &b_nLepLowMT);
    fChain->SetBranchAddress("nTaus20", &nTaus20, &b_nTaus20);
    fChain->SetBranchAddress("nGammas20", &nGammas20, &b_nGammas20);
    fChain->SetBranchAddress("deltaPhiMin", &deltaPhiMin, &b_deltaPhiMin);
