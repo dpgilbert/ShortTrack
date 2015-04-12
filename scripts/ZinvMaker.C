@@ -21,6 +21,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fQCD, vector<string
 
   // Generate histogram file with Zinv prediction based on GJetsData * R(Zinv/GJ)
   // Method 0.  Just Poisson from GJet: Zinv +/- Zinv/sqrt(GJet)
+  // Method 1. If GJet expected yield below 5, extrapolate from previous bin using MC
   // Method 2.  Same as method 0, add +/- QCD (100% systematic uncertainty based on QCD)
 
   TFile * outfile = new TFile(output_name.c_str(),"RECREATE") ; 
@@ -87,11 +88,25 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fQCD, vector<string
 
     TH1D* CRyield = hGJet->Clone("h_mt2binsCRyield");
 
+    // Extrapolation to next bin: just a ratio of GJet_i/GJet_i-1, so that we can later obtain bin i prediction from bin i-1 yield
+    // Instead of : GJet_i * R(Zinv_i/GJet_i), we will do GJet_i-1 * R(GJet_i/GJet_i-1) * R(Zinv_i/GJet_i)
+    TH1D* PreviousBinRatio = hGJet->Clone("h_mt2binsPreviousBinRatio");
+    for ( unsigned int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
+      if (ibin<=1) PreviousBinRatio->SetBinContent(ibin, 1.);
+      else {
+	PreviousBinRatio->SetBinContent(ibin, hGJet->GetBinContent(ibin)/hGJet->GetBinContent(ibin-1));
+	PreviousBinRatio->SetBinContent(ibin, hGJet->GetBinContent(ibin)/hGJet->GetBinContent(ibin-1));
+      }
+      PreviousBinRatio->SetBinError(ibin, 0.); // Ignore uncertainty (just MC anyway)
+    }
+    
+
     pred->Write();
     Stat->Write();
     Syst->Write();
     CRyield->Write();
     MCStat->Write();
+    PreviousBinRatio->Write();
 
   } // loop over signal regions
 
@@ -188,7 +203,8 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
 //_______________________________________________________________________________
 void ZinvMaker(){
 
-  string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
+  //  string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
+  string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/";
   //  string input_dir = "../MT2looper/output/2015ExtendedNJets/";
   //string input_dir = "../MT2looper/output/2015LowLumi/";
   string output_name = input_dir+"zinvFromGJ.root";

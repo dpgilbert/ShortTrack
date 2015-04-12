@@ -29,6 +29,10 @@ bool useGammaFunction = true; // use gamma function for CR stat nuisance params 
 
 const float dummy_alpha = 1.; // dummy value for gmN when there are no SR events
 
+bool uncorrelatedZGratio = false; // treat ZGratio uncertainty as fully uncorrelated
+bool previousBinZGprediction = false; // Get prediction from previous bin if nGJ < previousBinZGprediction_min
+float previousBinZGprediction_min = 5.;
+
 std::string toString(int in){
   stringstream ss;
   ss << in;
@@ -58,6 +62,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   TString fullhistnameStat  = fullhistname+"Stat";
   TString fullhistnameMCStat  = fullhistname+"MCStat";
   TString fullhistnameCRyield  = fullhistname+"CRyield";
+  TString fullhistnamePreviousBinRatio  = fullhistname+"PreviousBinRatio";
 
   double n_lostlep(0.);
   double n_lostlep_tr(0.);
@@ -66,6 +71,8 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   double err_lostlep_stat(0.);
   double n_zinv(0.);
   double n_zinv_cr(0.);
+  double n_zinv_cr_prevBin(0.);
+  double zinv_prevBinRatio(0.);
   double err_zinv_stat(0.);
   double err_zinv_mcstat(0.);
   double n_qcd(0.);
@@ -161,8 +168,30 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
     if (h_zinv_mcstat != 0 && h_zinv_mcstat->GetBinContent(mt2bin) != 0) 
       err_zinv_mcstat = h_zinv_mcstat->GetBinError(mt2bin)/h_zinv_mcstat->GetBinContent(mt2bin);
     TH1D* h_zinv_cryield = (TH1D*) f_zinv->Get(fullhistnameCRyield);
-    if (h_zinv_cryield != 0 && h_zinv_cryield->GetBinContent(mt2bin) != 0) 
+    if (h_zinv_cryield != 0 && h_zinv_cryield->GetBinContent(mt2bin) != 0) {
       n_zinv_cr = round(h_zinv_cryield->GetBinContent(mt2bin));
+      // Use previousBinZGprediction:
+      // Extrapolate from earlier bin if "yield(bin i) < min" while "yield(earlier bin) >= min". Otherwise it's not worth it. 
+      if (previousBinZGprediction && mt2bin > 2 && h_zinv_cryield->GetBinContent(mt2bin) < previousBinZGprediction_min) {
+	TH1D* h_zinv_prevbinratio = (TH1D*) f_zinv->Get(fullhistnamePreviousBinRatio);
+	zinv_prevBinRatio = h_zinv_prevbinratio->GetBinContent(mt2bin);
+	n_zinv_cr = h_zinv_cryield->GetBinContent(mt2bin); // remove rounding from n_zinv_cr
+	if ( h_zinv_cryield->GetBinContent(mt2bin-1) >= previousBinZGprediction_min ) { // extrapolate from one bin back
+	  n_zinv_cr_prevBin = round(h_zinv_cryield->GetBinContent(mt2bin-1));
+	}
+	else if ( mt2bin > 3 && h_zinv_cryield->GetBinContent(mt2bin-2) >= previousBinZGprediction_min) { // extrapolate from two bin back
+	  zinv_prevBinRatio *= h_zinv_prevbinratio->GetBinContent(mt2bin-1);
+	  n_zinv_cr_prevBin = round(h_zinv_cryield->GetBinContent(mt2bin-2));
+	}
+	else if ( mt2bin > 4 && h_zinv_cryield->GetBinContent(mt2bin-3) >= previousBinZGprediction_min) { // extrapolate from three bin back
+	  zinv_prevBinRatio *= h_zinv_prevbinratio->GetBinContent(mt2bin-1)*h_zinv_prevbinratio->GetBinContent(mt2bin-2);
+	  n_zinv_cr_prevBin = round(h_zinv_cryield->GetBinContent(mt2bin-3));
+	}
+	else { // give up and just put everything back the way it was
+	  n_zinv_cr = round(h_zinv_cryield->GetBinContent(mt2bin));
+	}
+      }
+    }
   }
 
 
@@ -242,6 +271,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   // correlated for all bins with 0-1b
   double zinv_zgamma = -1.;
   TString name_zinv_zgamma = "zinv_ZGratio";
+  if (uncorrelatedZGratio) name_zinv_zgamma = Form("zinv_ZGratio_%s",channel.c_str());
   // correlated for MT2 bins in a TR
   double zinv_bratio = -1.;
   TString name_zinv_bratio = Form("zinv_Bratio_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
@@ -373,7 +403,12 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
 	// taking MC directly - use lnN uncertainty
 	*ofile <<  Form("%s     lnN    -   %.3f   -   - ",name_zinv_crstat.Data(),zinv_crstat)  << endl;
       } else {
-	*ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr,zinv_crstat)  << endl;
+	if (previousBinZGprediction && n_zinv_cr_prevBin > 0.) {
+	  *ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr_prevBin,zinv_crstat * zinv_prevBinRatio)  << endl;
+	  cout <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr_prevBin,zinv_crstat * zinv_prevBinRatio)  << endl;
+	}
+	else 
+	  *ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr,zinv_crstat)  << endl;
       }
       if (n_zinv > 0. && n_zinv_cr > 0.) {
 	// MC stats for Z/g ratio, if both samples have events
