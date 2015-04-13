@@ -50,12 +50,12 @@ void LepEffLooper::SetSignalRegions(){
 
   // SR base, NO LEPTON VETO
   SRBase.SetName("srbase");
-   SRBase.SetVar("mt2", 200, -1);
-  SRBase.SetVar("j1pt", 100, -1);
-  SRBase.SetVar("j2pt", 100, -1);
+  SRBase.SetVar("mt2", 200, -1);
+  SRBase.SetVar("j1pt", 40, -1);
+  SRBase.SetVar("j2pt", 40, -1);
   SRBase.SetVar("deltaPhiMin", 0.3, -1);
   SRBase.SetVar("diffMetMhtOverMet", 0, 0.5);
-   SRBase.SetVar("passesHtMet", 1, 2);
+  SRBase.SetVar("passesHtMet", 1, 2);
   // SRBase.SetVar("nJet40", 2, -1);
   // SRBase.SetVar("ht", 450, -1);
 
@@ -229,9 +229,9 @@ void LepEffLooper::loop(TChain* chain, std::string output_name){
 	  if (!recomatch) {
 	    // match: plot gen quantities again to get eff
 	    fillHistosGen(h_1d_global,"",genlep,"_recomatch");
-	    plot2D("h_met_genmet_recomatch", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	    plot2D("h_mt2_genpt_recomatch", genlep.pt, t.mt2, evtweight_, h_2d_global, ";pt(gen lep) [GeV]; MT2 [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	    if (genlep.pt > 200.) plot2D("h_met_genmet_recomatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    plot2D("h_met_genmet_recomatch", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    plot2D("h_mt2_genpt_recomatch", genlep.pt, t.mt2, evtweight_, h_1d_global, ";pt(gen lep) [GeV]; MT2 [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    if (genlep.pt > 200.) plot2D("h_met_genmet_recomatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	    // by lepton flavor
 	    if (abs(genlep.pdgId) == 11) fillHistosGen(h_1d_global,"",genlep,"_recomatch_el");
 	    else if (abs(genlep.pdgId) == 13) fillHistosGen(h_1d_global,"",genlep,"_recomatch_mu");
@@ -244,9 +244,9 @@ void LepEffLooper::loop(TChain* chain, std::string output_name){
 	  if (!recoisomatch) {
 	    // match: plot gen quantities again to get eff
 	    fillHistosGen(h_1d_global,"",genlep,"_recoisomatch");
-	    plot2D("h_met_genmet_recoisomatch", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	    plot2D("h_mt2_genpt_recoisomatch", genlep.pt, t.mt2, evtweight_, h_2d_global, ";pt(gen lep) [GeV]; MT2 [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	    if (genlep.pt > 200.) plot2D("h_met_genmet_recoisomatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    plot2D("h_met_genmet_recoisomatch", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    plot2D("h_mt2_genpt_recoisomatch", genlep.pt, t.mt2, evtweight_, h_1d_global, ";pt(gen lep) [GeV]; MT2 [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    if (genlep.pt > 200.) plot2D("h_met_genmet_recoisomatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	    // by lepton flavor
 	    if (abs(genlep.pdgId) == 11) fillHistosGen(h_1d_global,"",genlep,"_recoisomatch_el");
 	    else if (abs(genlep.pdgId) == 13) fillHistosGen(h_1d_global,"",genlep,"_recoisomatch_mu");
@@ -259,14 +259,14 @@ void LepEffLooper::loop(TChain* chain, std::string output_name){
 	if (!recomatch) {
 	  // no match: plot gen quantities again
 	  fillHistosGen(h_1d_global,"",genlep,"_NOrecomatch");
-	  plot2D("h_met_genmet_NOrecomatch", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	  plot2D("h_mt2_genpt_NOrecomatch", genlep.pt, t.mt2, evtweight_, h_2d_global, ";pt(gen lep) [GeV]; MT2 [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	  plot2D("h_met_genmet_NOrecomatch", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	  plot2D("h_mt2_genpt_NOrecomatch", genlep.pt, t.mt2, evtweight_, h_1d_global, ";pt(gen lep) [GeV]; MT2 [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	  // by lepton flavor
 	  if (abs(genlep.pdgId) == 11) fillHistosGen(h_1d_global,"",genlep,"_NOrecomatch_el");
 	  else if (abs(genlep.pdgId) == 13) fillHistosGen(h_1d_global,"",genlep,"_NOrecomatch_mu");
 	  if (genlep.pt > 200.) {
 	    fillHistosGen(h_1d_global,"",genlep,"_NOrecomatch_pt200");
-	    plot2D("h_met_genmet_NOrecomatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    plot2D("h_met_genmet_NOrecomatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	    if (abs(genlep.pdgId) == 11) fillHistosGen(h_1d_global,"",genlep,"_NOrecomatch_pt200_el");
 	    else if (abs(genlep.pdgId) == 13) fillHistosGen(h_1d_global,"",genlep,"_NOrecomatch_pt200_mu");
 	  }
@@ -276,14 +276,14 @@ void LepEffLooper::loop(TChain* chain, std::string output_name){
 	if (recomatch && !recoisomatch) {
 	  // no match: plot gen quantities again
 	  fillHistosGen(h_1d_global,"",genlep,"_recoNOiso");
-	  plot2D("h_met_genmet_recoNOiso", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	  plot2D("h_mt2_genpt_recoNOiso", genlep.pt, t.mt2, evtweight_, h_2d_global, ";pt(gen lep) [GeV]; MT2 [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	  plot2D("h_met_genmet_recoNOiso", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	  plot2D("h_mt2_genpt_recoNOiso", genlep.pt, t.mt2, evtweight_, h_1d_global, ";pt(gen lep) [GeV]; MT2 [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	  // by lepton flavor
 	  if (abs(genlep.pdgId) == 11) fillHistosGen(h_1d_global,"",genlep,"_recoNOiso_el");
 	  else if (abs(genlep.pdgId) == 13) fillHistosGen(h_1d_global,"",genlep,"_recoNOiso_mu");
 	  if (genlep.pt > 200.) {
 	    fillHistosGen(h_1d_global,"",genlep,"_recoNOiso_pt200");
-	    plot2D("h_met_genmet_recoNOiso_pt200", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    plot2D("h_met_genmet_recoNOiso_pt200", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	    if (abs(genlep.pdgId) == 11) fillHistosGen(h_1d_global,"",genlep,"_recoNOiso_pt200_el");
 	    else if (abs(genlep.pdgId) == 13) fillHistosGen(h_1d_global,"",genlep,"_recoNOiso_pt200_mu");
 	  }
@@ -308,8 +308,8 @@ void LepEffLooper::loop(TChain* chain, std::string output_name){
 	  if (!pfmatch) {
 	    // match: plot gen quantities again to get eff
 	    fillHistosGen(h_1d_global,"",genlep,"_pfmatch");
-	    plot2D("h_met_genmet_pfmatch", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	    if (genlep.pt > 200.) plot2D("h_met_genmet_pfmatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    plot2D("h_met_genmet_pfmatch", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    if (genlep.pt > 200.) plot2D("h_met_genmet_pfmatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	    // by lepton flavor
 	    if (abs(genlep.pdgId) == 11) fillHistosGen(h_1d_global,"",genlep,"_pfmatch_el");
 	    else if (abs(genlep.pdgId) == 13) fillHistosGen(h_1d_global,"",genlep,"_pfmatch_mu");
@@ -322,8 +322,8 @@ void LepEffLooper::loop(TChain* chain, std::string output_name){
 	  if (!pfisomatch) {
 	    // match: plot gen quantities again to get eff
 	    fillHistosGen(h_1d_global,"",genlep,"_pfisomatch");
-	    plot2D("h_met_genmet_pfisomatch", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	    if (genlep.pt > 200.) plot2D("h_met_genmet_pfisomatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    plot2D("h_met_genmet_pfisomatch", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    if (genlep.pt > 200.) plot2D("h_met_genmet_pfisomatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	    // by lepton flavor
 	    if (abs(genlep.pdgId) == 11) fillHistosGen(h_1d_global,"",genlep,"_pfisomatch_el");
 	    else if (abs(genlep.pdgId) == 13) fillHistosGen(h_1d_global,"",genlep,"_pfisomatch_mu");
@@ -336,8 +336,8 @@ void LepEffLooper::loop(TChain* chain, std::string output_name){
 	if (!pfmatch) {
 	  // no match: plot gen quantities again
 	  fillHistosGen(h_1d_global,"",genlep,"_NOpfmatch");
-	  plot2D("h_met_genmet_NOpfmatch", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	  if (genlep.pt > 200.) plot2D("h_met_genmet_NOpfmatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	  plot2D("h_met_genmet_NOpfmatch", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	  if (genlep.pt > 200.) plot2D("h_met_genmet_NOpfmatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	  // by lepton flavor
 	  if (abs(genlep.pdgId) == 11) fillHistosGen(h_1d_global,"",genlep,"_NOpfmatch_el");
 	  else if (abs(genlep.pdgId) == 13) fillHistosGen(h_1d_global,"",genlep,"_NOpfmatch_mu");
@@ -347,8 +347,8 @@ void LepEffLooper::loop(TChain* chain, std::string output_name){
 	if (pfmatch && !pfisomatch) {
 	  // no match: plot gen quantities again
 	  fillHistosGen(h_1d_global,"",genlep,"_pfNOiso");
-	  plot2D("h_met_genmet_pfNOiso", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	  if (genlep.pt > 200.) plot2D("h_met_genmet_pfNOiso_pt200", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	  plot2D("h_met_genmet_pfNOiso", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	  if (genlep.pt > 200.) plot2D("h_met_genmet_pfNOiso_pt200", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	  // by lepton flavor
 	  if (abs(genlep.pdgId) == 11) fillHistosGen(h_1d_global,"",genlep,"_pfNOiso_el");
 	  else if (abs(genlep.pdgId) == 13) fillHistosGen(h_1d_global,"",genlep,"_pfNOiso_mu");
@@ -357,9 +357,9 @@ void LepEffLooper::loop(TChain* chain, std::string output_name){
 	// plots for gen leptons in NOT-vetoed events
 	if (t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT == 0) {
 	  fillHistosGen(h_1d_global,"",genlep,"_NOTvetoed");
-	  plot2D("h_met_genmet_NOTvetoed", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	  plot2D("h_mt2_genpt_NOTvetoed", genlep.pt, t.mt2, evtweight_, h_2d_global, ";pt(gen lep) [GeV]; MT2 [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	  if (genlep.pt > 200.) plot2D("h_met_genmet_NOTvetoed_pt200", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	  plot2D("h_met_genmet_NOTvetoed", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	  plot2D("h_mt2_genpt_NOTvetoed", genlep.pt, t.mt2, evtweight_, h_1d_global, ";pt(gen lep) [GeV]; MT2 [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	  if (genlep.pt > 200.) plot2D("h_met_genmet_NOTvetoed_pt200", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	  // by lepton flavor
 	  if (abs(genlep.pdgId) == 11) fillHistosGen(h_1d_global,"",genlep,"_NOTvetoed_el");
 	  else if (abs(genlep.pdgId) == 13) fillHistosGen(h_1d_global,"",genlep,"_NOTvetoed_mu");
@@ -367,8 +367,8 @@ void LepEffLooper::loop(TChain* chain, std::string output_name){
 	// plots for gen leptons in vetoed events
 	else {
 	  fillHistosGen(h_1d_global,"",genlep,"_vetoed");
-	  plot2D("h_met_genmet_vetoed", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	  if (genlep.pt > 200.) plot2D("h_met_genmet_vetoed_pt200", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	  plot2D("h_met_genmet_vetoed", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	  if (genlep.pt > 200.) plot2D("h_met_genmet_vetoed_pt200", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	  // by lepton flavor
 	  if (abs(genlep.pdgId) == 11) fillHistosGen(h_1d_global,"",genlep,"_vetoed_el");
 	  else if (abs(genlep.pdgId) == 13) fillHistosGen(h_1d_global,"",genlep,"_vetoed_mu");
@@ -501,9 +501,9 @@ void LepEffLooper::loop(TChain* chain, std::string output_name){
 	    if (!pfmatch) {
 	      // match: plot gen quantities again to get eff
 	      fillHistosGen(h_1d_global,"",genlep,"_tau_pfmatch");
-	      plot2D("h_met_genmet_tau_pfmatch", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	      plot2D("h_recopt_genpt_tau_pfmatch", genlep.pt, t.isoTrack_pt[ipf], evtweight_, h_2d_global, ";gen tau pT [GeV]; reco PF cand pT [GeV]", 200, 0., 200., 200., 0., 200.);
-	      if (genlep.pt > 200.) plot2D("h_met_genmet_tau_pfmatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	      plot2D("h_met_genmet_tau_pfmatch", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	      plot2D("h_recopt_genpt_tau_pfmatch", genlep.pt, t.isoTrack_pt[ipf], evtweight_, h_1d_global, ";gen tau pT [GeV]; reco PF cand pT [GeV]", 200, 0., 200., 200., 0., 200.);
+	      if (genlep.pt > 200.) plot2D("h_met_genmet_tau_pfmatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	      pfmatch = true;
 	    }
 
@@ -513,9 +513,9 @@ void LepEffLooper::loop(TChain* chain, std::string output_name){
 	    if (!pfisomatch) {
 	      // match: plot gen quantities again to get eff
 	      fillHistosGen(h_1d_global,"",genlep,"_tau_pfisomatch");
-	      plot2D("h_met_genmet_tau_pfisomatch", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	      plot2D("h_recopt_genpt_tau_pfisomatch", genlep.pt, t.isoTrack_pt[ipf], evtweight_, h_2d_global, ";gen tau pT [GeV]; reco PF cand pT [GeV]", 200, 0., 200., 200., 0., 200.);
-	      if (genlep.pt > 200.) plot2D("h_met_genmet_tau_pfisomatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	      plot2D("h_met_genmet_tau_pfisomatch", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	      plot2D("h_recopt_genpt_tau_pfisomatch", genlep.pt, t.isoTrack_pt[ipf], evtweight_, h_1d_global, ";gen tau pT [GeV]; reco PF cand pT [GeV]", 200, 0., 200., 200., 0., 200.);
+	      if (genlep.pt > 200.) plot2D("h_met_genmet_tau_pfisomatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	      pfisomatch = true;
 	    }
 
@@ -525,30 +525,30 @@ void LepEffLooper::loop(TChain* chain, std::string output_name){
 	  if (!pfmatch) {
 	    // no match: plot gen quantities again
 	    fillHistosGen(h_1d_global,"",genlep,"_tau_NOpfmatch");
-	    plot2D("h_met_genmet_tau_NOpfmatch", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	    if (genlep.pt > 200.) plot2D("h_met_genmet_tau_NOpfmatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    plot2D("h_met_genmet_tau_NOpfmatch", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    if (genlep.pt > 200.) plot2D("h_met_genmet_tau_NOpfmatch_pt200", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	  }
 
 	  // plots for gen leptons with pf match but failing iso
 	  if (pfmatch && !pfisomatch) {
 	    // no match: plot gen quantities again
 	    fillHistosGen(h_1d_global,"",genlep,"_tau_pfNOiso");
-	    plot2D("h_met_genmet_tau_pfNOiso", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	    if (genlep.pt > 200.) plot2D("h_met_genmet_tau_pfNOiso_pt200", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    plot2D("h_met_genmet_tau_pfNOiso", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    if (genlep.pt > 200.) plot2D("h_met_genmet_tau_pfNOiso_pt200", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	  }
 
 	  // plots for gen leptons in NOT-vetoed events
 	  if (t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT == 0) {
 	    fillHistosGen(h_1d_global,"",genlep,"_tau_NOTvetoed");
-	    plot2D("h_met_genmet_tau_NOTvetoed", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	    plot2D("h_mt2_genpt_tau_NOTvetoed", genlep.pt, t.mt2, evtweight_, h_2d_global, ";pt(gen lep) [GeV]; MT2 [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	    if (genlep.pt > 200.) plot2D("h_met_genmet_tau_NOTvetoed_pt200", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    plot2D("h_met_genmet_tau_NOTvetoed", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    plot2D("h_mt2_genpt_tau_NOTvetoed", genlep.pt, t.mt2, evtweight_, h_1d_global, ";pt(gen lep) [GeV]; MT2 [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    if (genlep.pt > 200.) plot2D("h_met_genmet_tau_NOTvetoed_pt200", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	  }
 	  // plots for gen leptons in vetoed events
 	  else {
 	    fillHistosGen(h_1d_global,"",genlep,"_tau_vetoed");
-	    plot2D("h_met_genmet_tau_vetoed", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
-	    if (genlep.pt > 200.) plot2D("h_met_genmet_tau_vetoed_pt200", t.met_genPt, t.met_pt, evtweight_, h_2d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    plot2D("h_met_genmet_tau_vetoed", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
+	    if (genlep.pt > 200.) plot2D("h_met_genmet_tau_vetoed_pt200", t.met_genPt, t.met_pt, evtweight_, h_1d_global, ";gen MET [GeV]; MET [GeV]", 50, 0., 1000., 50., 0., 1000.);
 	  }
 
 
@@ -728,7 +728,6 @@ void LepEffLooper::loop(TChain* chain, std::string output_name){
 
   outfile_->cd();
   savePlotsDir(h_1d_global,outfile_,"");
-  savePlots2Dir(h_2d_global,outfile_,"");
 
   //---------------------
   // Write and Close file
@@ -749,7 +748,7 @@ void LepEffLooper::loop(TChain* chain, std::string output_name){
   return;
 }
 
-void LepEffLooper::fillHistosGen(std::map<std::string, TH1D*>& h_1d, const std::string& dirname, const genlepcand& genlep, const std::string& s) {
+void LepEffLooper::fillHistosGen(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const genlepcand& genlep, const std::string& s) {
 
   if (dirname.size()) {
     TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
@@ -775,7 +774,7 @@ void LepEffLooper::fillHistosGen(std::map<std::string, TH1D*>& h_1d, const std::
   return;
 }
 
-void LepEffLooper::fillHistosReco(std::map<std::string, TH1D*>& h_1d, const std::string& dirname, const unsigned int& ilep, const std::string& s) {
+void LepEffLooper::fillHistosReco(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const unsigned int& ilep, const std::string& s) {
 
   if (dirname.size()) {
     TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
@@ -792,8 +791,8 @@ void LepEffLooper::fillHistosReco(std::map<std::string, TH1D*>& h_1d, const std:
   // plot1D("h_reco_phi"+s,      t.lep_phi[ilep],  evtweight_, h_1d, ";#phi(reco lep)", 68, -3.2, 3.2);
   plot1D("h_reco_relIso"+s,      t.lep_relIso03[ilep],  evtweight_, h_1d, ";Rel PFIso", 200, 0., 2.);
   plot1D("h_reco_absIso"+s,      t.lep_relIso03[ilep]*t.lep_pt[ilep],  evtweight_, h_1d, ";Abs PFIso [GeV]", 200, 0., 10.);
-  // plot1D("h_reco_miniRelIso"+s,      t.lep_miniRelIso[ilep],  evtweight_, h_1d, ";Mini Rel PFIso", 200, 0., 2.);
-  // plot1D("h_reco_miniAbsIso"+s,      t.lep_miniRelIso[ilep]*t.lep_pt[ilep],  evtweight_, h_1d, ";Mini Abs PFIso [GeV]", 200, 0., 10.);
+  plot1D("h_reco_miniRelIso"+s,      t.lep_miniRelIso[ilep],  evtweight_, h_1d, ";Mini Rel PFIso", 200, 0., 2.);
+  plot1D("h_reco_miniAbsIso"+s,      t.lep_miniRelIso[ilep]*t.lep_pt[ilep],  evtweight_, h_1d, ";Mini Abs PFIso [GeV]", 200, 0., 10.);
   // plot1D("h_reco_ptRelv0"+s,      t.lep_ptRelv0[ilep],  evtweight_, h_1d, ";p_{T}Rel v0 [GeV]", 200, 0., 20.);
   // plot1D("h_reco_ptRelv1"+s,      t.lep_ptRelv1[ilep],  evtweight_, h_1d, ";p_{T}Rel v1 [GeV]", 200, 0., 20.);
 
@@ -801,7 +800,7 @@ void LepEffLooper::fillHistosReco(std::map<std::string, TH1D*>& h_1d, const std:
   return;
 }
 
-void LepEffLooper::fillHistosPF(std::map<std::string, TH1D*>& h_1d, const std::string& dirname, const unsigned int& ipf, const std::string& s) {
+void LepEffLooper::fillHistosPF(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const unsigned int& ipf, const std::string& s) {
 
   if (dirname.size()) {
     TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
@@ -829,7 +828,7 @@ void LepEffLooper::fillHistosPF(std::map<std::string, TH1D*>& h_1d, const std::s
   return;
 }
 
-void LepEffLooper::makeEfficiencyHist(std::map<std::string, TH1D*>& h_1d, const std::string& dirname, const std::string& num_name, const std::string& denom_name, const std::string& eff_name) {
+void LepEffLooper::makeEfficiencyHist(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& num_name, const std::string& denom_name, const std::string& eff_name) {
 
   TH1D* num = getHist1D(num_name,h_1d,1,0,1);
   TH1D* denom = getHist1D(denom_name,h_1d,1,0,1);
@@ -838,7 +837,7 @@ void LepEffLooper::makeEfficiencyHist(std::map<std::string, TH1D*>& h_1d, const 
 
 }
 
-void LepEffLooper::makeEfficiencyHist(std::map<std::string, TH1D*>& h_1d, const std::string& dirname, TH1D* num, TH1D* denom, const std::string& eff_name) {
+void LepEffLooper::makeEfficiencyHist(std::map<std::string, TH1*>& h_1d, const std::string& dirname, TH1D* num, TH1D* denom, const std::string& eff_name) {
 
   // protect against empty hists
   if (num->GetEntries() == 0 || denom->GetEntries() == 0) return;
