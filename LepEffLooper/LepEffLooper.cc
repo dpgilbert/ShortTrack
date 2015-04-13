@@ -238,7 +238,9 @@ void LepEffLooper::loop(TChain* chain, std::string output_name){
 	    recomatch = true;
 	  }
 
-	  if (t.lep_relIso03[ilep] > 0.15) continue;
+	  // reco leptons: mini iso cut
+	  if ((abs(genlep.pdgId) == 11 && t.lep_miniRelIso[ilep] > 0.10) || 
+	      (abs(genlep.pdgId) == 13 && t.lep_miniRelIso[ilep] > 0.20) ) continue;
 
 	  // only fill hists once, in case there are multiple reco matches
 	  if (!recoisomatch) {
