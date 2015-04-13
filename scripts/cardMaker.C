@@ -126,11 +126,6 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
 
   TString cardname = Form("%s/datacard_%s_%s.txt",output_dir.c_str(),channel.c_str(),signal.c_str());
 
-  if (suppressZeroBins && n_sig < 0.1) {
-    std::cout << "Zero signal, card not printed: " << cardname << std::endl;
-    return;
-  }
-
   // get yields for each sample
   // !!!!! HACK: set zero bins to 0.01 for now to make combine happy
   TH1D* h_lostlep = (TH1D*) f_lostlep->Get(fullhistname);
@@ -201,6 +196,11 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
 
   n_bkg = n_lostlep+n_zinv+n_qcd;
   if (n_bkg < 0.001) n_qcd = 0.01;
+
+  if (suppressZeroBins && ((n_sig < 0.1) || (n_sig/n_bkg < 0.02))) {
+    std::cout << "Zero signal, card not printed: " << cardname << std::endl;
+    return;
+  }
 
   int n_syst = 0;
 
