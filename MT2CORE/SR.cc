@@ -20,6 +20,11 @@ void SR::SetVar(std::string var_name, float lower_bound, float upper_bound){
  bins_[var_name] = std::pair<float, float>(lower_bound, upper_bound);
 }
 
+void SR::SetMT2Bins(int nbins, float* bins){
+  n_mt2bins_ = nbins;
+  mt2bins_ = bins;
+}
+
 std::string SR::GetName(){
   return srName_;
 }
@@ -42,6 +47,14 @@ std::vector<std::string> SR::GetListOfVariables(){
     vars.push_back(it->first);
   }
   return (vars);
+}
+
+float* SR::GetMT2Bins(){
+  return mt2bins_;
+}
+
+int SR::GetNumberOfMT2Bins(){
+  return n_mt2bins_;
 }
 
 bool SR::PassesSelection(std::map<std::string, float> values){
