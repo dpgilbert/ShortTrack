@@ -101,6 +101,8 @@ string getTableName(const string& sample) {
   if (sample.find("zinv") != string::npos) return "Z+jets";
   if (sample.find("gjet") != string::npos) return "Gamma+jets";
   if (sample.find("qcd") != string::npos) return "QCD";
+  if (sample.find("singletop") != string::npos) return "Single Top";
+  if (sample.find("ttv") != string::npos) return "ttV";
   if (sample.find("T1tttt_1500_100") != string::npos) return "T1tttt 1500, 100";
   if (sample.find("T1tttt_1200_800") != string::npos) return "T1tttt 1200, 800";
   if (sample.find("T1bbbb_1000_900") != string::npos) return "T1bbbb 1000, 900";
@@ -395,8 +397,9 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
 std::cout << "\\begin{table}[!ht]" << std::endl;
 std::cout << "\\scriptsize" << std::endl;
 std::cout << "\\centering" << std::endl;
-//std::cout << "\\begin{tabular}{r|c|c|c|c|c|c}" << std::endl;
-std::cout << "\\begin{tabular}{r|c|c|c|c|c|c|c|c|c|c|c}" << std::endl;
+std::cout << "\\begin{tabular}{r";
+for (unsigned int idir=0; idir < ndirs; ++idir) std::cout << "|c";
+std::cout << "}" << std::endl;
 std::cout << "\\hline" << std::endl;
 
   cout << endl << "\\hline" << endl
@@ -645,6 +648,7 @@ void plotMaker(){
   dirsH.push_back("sr8H");
   dirsH.push_back("sr9H");
   dirsH.push_back("sr10H");
+  dirsH.push_back("sr11H");
   printTable(samples, names, dirsH);
   dirsH.clear();
 
@@ -658,6 +662,7 @@ void plotMaker(){
   dirsH.push_back("sr8UH");
   dirsH.push_back("sr9UH");
   dirsH.push_back("sr10UH");
+  dirsH.push_back("sr11UH");
   printTable(samples, names, dirsH);
   dirsH.clear();
 
