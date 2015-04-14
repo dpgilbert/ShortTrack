@@ -842,9 +842,14 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, const std
   plot1D("h_isoW1"+s,      iso,   1, h_1d, ";iso [GeV]", 100, 0, 50);
   plot1D("h_chisoW1"+s,      chiso,   1, h_1d, ";ch iso [GeV]", 100, 0, 50);
 
+  //for FR calculation
+  plot2D("h2d_gammaht_gammapt"+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",120,0,3000,150,0,1500);
+
   for (unsigned int i = 0; i < n_mt2bins; i++) {
-    if ( t.gamma_mt2 > mt2bins[i] &&  t.gamma_mt2 < mt2bins[i+1]) 
+    if ( t.gamma_mt2 > mt2bins[i] &&  t.gamma_mt2 < mt2bins[i+1]) {
       plot1D("h_chiso_mt2bin"+mt2binsname[i]+s,  iso,  evtweight_, h_1d, "; iso", 100, 0, 50);
+      plot2D("h2d_gammaht_gammapt"+mt2binsname[i]+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",120,0,3000,150,0,1500);
+    }
   }
 
   //cout<<"Event "<<t.evt<<" with weight "<< evtweight_ <<" is in sr "<<dirname<<endl;
@@ -871,7 +876,7 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, const std
     plot1D("h_njbins"+s,       t.gamma_nJet40,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
     plot1D("h_nbjbins"+s,       t.gamma_nBJet40,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
     }
-  
+
   outfile_->cd();
   return;
 }
