@@ -38,6 +38,7 @@ public :
    Float_t         rho;
    Float_t         rho25;
    Int_t           nJet40;
+   Int_t           nBJet20;
    Int_t           nBJet25;
    Int_t           nBJet40;
    Int_t           nMuons10;
@@ -153,6 +154,7 @@ public :
    Int_t           gamma_idCutBased[50];   //[ngamma]
    Float_t         gamma_mt2;
    Int_t           gamma_nJet40;
+   Int_t           gamma_nBJet20;
    Int_t           gamma_nBJet25;
    Int_t           gamma_nBJet40;
    Float_t         gamma_ht;
@@ -263,6 +265,7 @@ public :
    TBranch        *b_rho;   //!
    TBranch        *b_rho25;   //!
    TBranch        *b_nJet40;   //!
+   TBranch        *b_nBJet20;   //!
    TBranch        *b_nBJet25;   //!
    TBranch        *b_nBJet40;   //!
    TBranch        *b_nMuons10;   //!
@@ -378,6 +381,7 @@ public :
    TBranch        *b_gamma_idCutBased;   //!
    TBranch        *b_gamma_mt2;
    TBranch        *b_gamma_nJet40;
+   TBranch        *b_gamma_nBJet20;
    TBranch        *b_gamma_nBJet25;
    TBranch        *b_gamma_nBJet40;
    TBranch        *b_gamma_ht;
@@ -547,6 +551,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("rho", &rho, &b_rho);
    fChain->SetBranchAddress("rho25", &rho25, &b_rho25);
    fChain->SetBranchAddress("nJet40", &nJet40, &b_nJet40);
+   fChain->SetBranchAddress("nBJet20", &nBJet20, &b_nBJet20);
    fChain->SetBranchAddress("nBJet25", &nBJet25, &b_nBJet25);
    fChain->SetBranchAddress("nBJet40", &nBJet40, &b_nBJet40);
    fChain->SetBranchAddress("nMuons10", &nMuons10, &b_nMuons10);
@@ -662,6 +667,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("gamma_idCutBased", gamma_idCutBased, &b_gamma_idCutBased);
    fChain->SetBranchAddress("gamma_mt2", &gamma_mt2, &b_gamma_mt2);
    fChain->SetBranchAddress("gamma_nJet40", &gamma_nJet40, &b_gamma_nJet40);
+   fChain->SetBranchAddress("gamma_nBJet20", &gamma_nBJet20, &b_gamma_nBJet20);
    fChain->SetBranchAddress("gamma_nBJet25", &gamma_nBJet25, &b_gamma_nBJet25);
    fChain->SetBranchAddress("gamma_nBJet40", &gamma_nBJet40, &b_gamma_nBJet40);
    fChain->SetBranchAddress("gamma_ht", &gamma_ht, &b_gamma_ht);

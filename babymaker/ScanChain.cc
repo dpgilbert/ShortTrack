@@ -804,6 +804,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       njet = 0;
       nJet40 = 0;
+      nBJet20 = 0;
       nBJet25 = 0;
       nBJet40 = 0;
       minMTBMet = 999999.;
@@ -811,6 +812,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       jet2_pt = 0.;
 
       gamma_nJet40 = 0;
+      gamma_nBJet20 = 0;
       gamma_nBJet25 = 0;
       gamma_nBJet40 = 0;
       gamma_minMTBMet = 999999.;
@@ -840,8 +842,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  break;
 	}
 
-	// only save jets with pt 25 eta 4.7
-        if( (p4sCorrJets.at(iJet).pt() > 25.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ){ 
+	// only save jets with pt 20 eta 4.7
+        if( (p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ){ 
 	  jet_pt[njet]   = p4sCorrJets.at(iJet).pt();
 	  jet_eta[njet]  = p4sCorrJets.at(iJet).eta();
 	  jet_phi[njet]  = p4sCorrJets.at(iJet).phi();
@@ -859,8 +861,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
 	  jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
 
-	  // use pt25 for bjet counting, pt40 for everything else
-	  if( (jet_pt[njet] > 25.0) && (fabs(jet_eta[njet]) < 2.5) ){ 
+	  // use pt20 for bjet counting, pt40 for everything else
+	  if( (jet_pt[njet] > 20.0) && (fabs(jet_eta[njet]) < 2.5) ){ 
 	    if (jet_pt[njet] > 40.0) {
 	      // store leading/subleading central jet pt.
 	      //  jets should be pt-ordered before entering this loop
@@ -874,7 +876,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	    } // pt40
 	    //CSVv2IVFM
 	    if(jet_btagCSV[njet] >= 0.814) {
-	      nBJet25++; 
+	      nBJet20++; 
+	      if (jet_pt[njet] > 25.0) nBJet25++; 
 	      if (jet_pt[njet] > 40.0) {
 		nBJet40++; 
 		float mt = MT(jet_pt[njet],jet_phi[njet],met_pt,met_phi);
@@ -885,7 +888,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 		}
 	      } // pt 40
 	    } // pass med btag
-	  } // pt 25 eta 2.5
+	  } // pt 20 eta 2.5
 	  // accept jets out to eta 4.7 for dphi
 	  else if ( (jet_pt[njet] > 40.0) && (fabs(jet_eta[njet]) < 4.7) ) {
 	    p4sForDphi.push_back(p4sCorrJets.at(iJet));
@@ -893,7 +896,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  }
 
 	  // fill gamma_XXX variables before checking for lepton overlap. Why? Let's keep them consistent with the lepton-overlapped jets
-	  if( ( p4sCorrJets.at(iJet).pt() > 25.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ){ 
+	  if( ( p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ){ 
 	    //check against list of jets that overlap with a photon
 	    bool isOverlapJetGamma = false;
 	    for(unsigned int j=0; j<removedJetsGamma.size(); j++){
@@ -914,7 +917,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 		gamma_nJet40++;
 	      } // pt40
 	      if(cms3.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.814) { //CSVv2IVFM
-		gamma_nBJet25++; 
+		gamma_nBJet20++; 
+		if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++; 
 		if (p4sCorrJets.at(iJet).pt() > 40.0) {
 		  gamma_nBJet40++; 
 		  float mt = MT( p4sCorrJets.at(iJet).pt(),p4sCorrJets.at(iJet).phi(),gamma_met_pt,gamma_met_phi);
@@ -922,7 +926,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 		} // pt40
 	      } // pass med btag  
 	    } // not overlap with photon
-	  } // pt 25 eta 2.5 
+	  } // pt 20 eta 2.5 
 	  // accept jets out to eta 4.7 for dphi
 	  else if ( (p4sCorrJets.at(iJet).pt() > 40.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {
 	    p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
@@ -930,7 +934,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
 
 	  njet++;
-	} // pt 25 eta 4.7
+	} // pt 20 eta 4.7
       }
 
       if (verbose) cout << "before hemispheres" << endl;
@@ -1081,12 +1085,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       for(unsigned int iTau = 0; iTau < cms3.taus_pf_p4().size(); iTau++){
         if(cms3.taus_pf_p4().at(iTau).pt() < 20.0) continue; 
         if(fabs(cms3.taus_pf_p4().at(iTau).eta()) > 2.3) continue; 
-	      if (!cms3.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) continue; // HPS3 hits taus
-	      if (!cms3.taus_pf_againstElectronLoose().at(iTau)) continue; // loose electron rejection 
-	      if (!cms3.taus_pf_againstMuonTight().at(iTau)) continue; // loose muon rejection 
-	      // Needed in future //if (!cms3.passTauID("byLooseCombinedIsolationDeltaBetaCorr3Hits", iTau)) continue; // HPS3 hits taus
-	      // Needed in future //if (!cms3.passTauID("againstElectronLoose", iTau)) continue; // loose electron rejection 
-	      // Needed in future //if (!cms3.passTauID("againstMuonTight", iTau)) continue; // loose muon rejection 
+	      //if (!cms3.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) continue; // HPS3 hits taus
+	      //if (!cms3.taus_pf_againstElectronLoose().at(iTau)) continue; // loose electron rejection 
+	      //if (!cms3.taus_pf_againstMuonTight().at(iTau)) continue; // loose muon rejection 
+	      if (!cms3.passTauID("byLooseCombinedIsolationDeltaBetaCorr3Hits", iTau)) continue; // HPS3 hits taus
+	      if (!cms3.passTauID("againstElectronLoose", iTau)) continue; // loose electron rejection 
+	      if (!cms3.passTauID("againstMuonTight", iTau)) continue; // loose muon rejection 
         
 	if (ntau >= max_ntau) {
           std::cout << "WARNING: attempted to fill more than " << max_ntau << " taus" << std::endl;
@@ -1100,15 +1104,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         tau_charge[ntau] = cms3.taus_pf_charge().at(iTau);
         tau_dxy[ntau] = 0; // could use the tau->dxy() function instead, but not sure what it does
         tau_dz[ntau] = 0; // not sure how to get this. 
-        tau_isoCI3hit[ntau] = cms3.taus_pf_byCombinedIsolationDeltaBetaCorrRaw3Hits().at(iTau);
-	// Needed in future //tau_isoCI3hit[ntau] = cms3.passTauID("byCombinedIsolationDeltaBetaCorrRaw3Hits", iTau);
+        //tau_isoCI3hit[ntau] = cms3.taus_pf_byCombinedIsolationDeltaBetaCorrRaw3Hits().at(iTau);
+	      tau_isoCI3hit[ntau] = cms3.passTauID("byCombinedIsolationDeltaBetaCorrRaw3Hits", iTau);
         int temp = 0;
-        if (cms3.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 1;
-        if (cms3.taus_pf_byMediumCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 2;
-	if (cms3.taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 3;
-        // Needed in future //if (cms3.passTauID("byLooseCombinedIsolationDeltaBetaCorr3Hits", iTau)) temp = 1;
-        // Needed in future //if (cms3.passTauID("byMediumCombinedIsolationDeltaBetaCorr3Hits", iTau)) temp = 2;
-	// Needed in future //if (cms3.passTauID("byTightCombinedIsolationDeltaBetaCorr3Hits", iTau)) temp = 3;
+        //if (cms3.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 1;
+        //if (cms3.taus_pf_byMediumCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 2;
+	      //if (cms3.taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 3;
+        if (cms3.passTauID("byLooseCombinedIsolationDeltaBetaCorr3Hits", iTau)) temp = 1;
+        if (cms3.passTauID("byMediumCombinedIsolationDeltaBetaCorr3Hits", iTau)) temp = 2;
+	      if (cms3.passTauID("byTightCombinedIsolationDeltaBetaCorr3Hits", iTau)) temp = 3;
         tau_idCI3hit[ntau] = temp;
         if(tau_pt[ntau] > 20) nTaus20++;
         //tau_mcMatchId[ntau] = ; // Have to do this by hand unless we want to add tau_mc branches in CMS3 through the CandToGenAssMaker
@@ -1169,6 +1173,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("nTrueInt", &nTrueInt );
   BabyTree_->Branch("rho", &rho );
   BabyTree_->Branch("nJet40", &nJet40 );
+  BabyTree_->Branch("nBJet20", &nBJet20 );
   BabyTree_->Branch("nBJet25", &nBJet25 );
   BabyTree_->Branch("nBJet40", &nBJet40 );
   BabyTree_->Branch("nMuons10", &nMuons10 );
@@ -1283,6 +1288,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("gamma_idCutBased", gamma_idCutBased, "gamma_idCutBased[ngamma]/I" );
   BabyTree_->Branch("gamma_mt2", &gamma_mt2 );
   BabyTree_->Branch("gamma_nJet40", &gamma_nJet40 );
+  BabyTree_->Branch("gamma_nBJet20", &gamma_nBJet20 );
   BabyTree_->Branch("gamma_nBJet25", &gamma_nBJet25 );
   BabyTree_->Branch("gamma_nBJet40", &gamma_nBJet40 );
   BabyTree_->Branch("gamma_ht", &gamma_ht );
@@ -1399,6 +1405,7 @@ void babyMaker::InitBabyNtuple () {
   nTrueInt = -999;
   rho = -999.0;
   nJet40 = -999;
+  nBJet20 = -999;
   nBJet25 = -999;
   nBJet40 = -999;
   nMuons10 = -999;
@@ -1467,6 +1474,7 @@ void babyMaker::InitBabyNtuple () {
   njet = -999;
   gamma_mt2 = -999.0;
   gamma_nJet40 = -999;
+  gamma_nBJet20 = -999;
   gamma_nBJet25 = -999;
   gamma_nBJet40 = -999;
   gamma_ht = -999.0;

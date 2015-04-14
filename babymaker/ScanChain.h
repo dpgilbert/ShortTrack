@@ -59,6 +59,7 @@ class babyMaker {
   Float_t         rho;
 
   Int_t           nJet40;
+  Int_t           nBJet20;
   Int_t           nBJet25;
   Int_t           nBJet40;
   Int_t           nMuons10;
@@ -197,6 +198,7 @@ class babyMaker {
   // event level vars recalculated for photon+jets control region
   Float_t         gamma_mt2;
   Int_t           gamma_nJet40;
+  Int_t           gamma_nBJet20;
   Int_t           gamma_nBJet25;
   Int_t           gamma_nBJet40;
   Float_t         gamma_ht;
