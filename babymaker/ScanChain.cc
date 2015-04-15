@@ -44,6 +44,8 @@ const bool verbose = false;
 const bool applyJECfromFile = true;
 // turn on to save prunedGenParticle collection
 const bool saveGenParticles = false;
+// turn on to apply trigger cuts to ntuples -> OR of all triggers used
+const bool applyTriggerCuts = false;
 
 //--------------------------------------------------------------------
 
@@ -122,6 +124,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       InitBabyNtuple();
 
+      if (verbose) cout << "before trigger" << endl;
+
+      //TRIGGER - check first to enable cuts
+      HLT_HT900        = passHLTTriggerPattern("HLT_PFHT900_v");
+      HLT_MET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v"); 
+      HLT_ht350met120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v"); 
+
+      HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu20_eta2p1_IterTrk02_v") || passHLTTriggerPattern("HLT_IsoTkMu20_eta2p1_IterTrk02_v"); 
+      HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloId_TrackId_Iso_v"); 
+      HLT_MuEG         = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v") || passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v"); 
+      HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") || passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
+      HLT_Photons      = passHLTTriggerPattern("HLT_Photon155_v"); 
+
+      if (applyTriggerCuts && !(HLT_HT900 || HLT_ht350met120 || HLT_Photons || HLT_SingleMu 
+				|| HLT_DoubleMu || HLT_DoubleEl || HLT_MuEG)) continue;
+
       run  = cms3.evt_run();
       lumi = cms3.evt_lumiBlock();
       evt  = cms3.evt_event();
@@ -175,17 +193,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
       // necessary?
       Flag_METFilters                               = cms3.filt_metfilter();
-
-      //TRIGGER
-      HLT_HT900        = passHLTTriggerPattern("HLT_PFHT900_v");
-      HLT_MET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v"); 
-      HLT_ht350met120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v"); 
-
-      HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu20_eta2p1_IterTrk02_v") || passHLTTriggerPattern("HLT_IsoTkMu20_eta2p1_IterTrk02_v"); 
-      HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloId_TrackId_Iso_v"); 
-      HLT_MuEG         = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v") || passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v"); 
-      HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") || passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
-      HLT_Photons      = passHLTTriggerPattern("HLT_Photon155_v"); 
 
       if (verbose) cout << "before sparm values" << endl;
 
@@ -1085,12 +1092,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       for(unsigned int iTau = 0; iTau < cms3.taus_pf_p4().size(); iTau++){
         if(cms3.taus_pf_p4().at(iTau).pt() < 20.0) continue; 
         if(fabs(cms3.taus_pf_p4().at(iTau).eta()) > 2.3) continue; 
-	      //if (!cms3.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) continue; // HPS3 hits taus
-	      //if (!cms3.taus_pf_againstElectronLoose().at(iTau)) continue; // loose electron rejection 
-	      //if (!cms3.taus_pf_againstMuonTight().at(iTau)) continue; // loose muon rejection 
-	      if (!cms3.passTauID("byLooseCombinedIsolationDeltaBetaCorr3Hits", iTau)) continue; // HPS3 hits taus
-	      if (!cms3.passTauID("againstElectronLoose", iTau)) continue; // loose electron rejection 
-	      if (!cms3.passTauID("againstMuonTight", iTau)) continue; // loose muon rejection 
+	if (!cms3.passTauID("byLooseCombinedIsolationDeltaBetaCorr3Hits", iTau)) continue; // HPS3 hits taus
+	if (!cms3.passTauID("againstElectronLoose", iTau)) continue; // loose electron rejection 
+	if (!cms3.passTauID("againstMuonTight", iTau)) continue; // loose muon rejection 
         
 	if (ntau >= max_ntau) {
           std::cout << "WARNING: attempted to fill more than " << max_ntau << " taus" << std::endl;
@@ -1104,15 +1108,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         tau_charge[ntau] = cms3.taus_pf_charge().at(iTau);
         tau_dxy[ntau] = 0; // could use the tau->dxy() function instead, but not sure what it does
         tau_dz[ntau] = 0; // not sure how to get this. 
-        //tau_isoCI3hit[ntau] = cms3.taus_pf_byCombinedIsolationDeltaBetaCorrRaw3Hits().at(iTau);
-	      tau_isoCI3hit[ntau] = cms3.passTauID("byCombinedIsolationDeltaBetaCorrRaw3Hits", iTau);
+	tau_isoCI3hit[ntau] = cms3.passTauID("byCombinedIsolationDeltaBetaCorrRaw3Hits", iTau);
         int temp = 0;
-        //if (cms3.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 1;
-        //if (cms3.taus_pf_byMediumCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 2;
-	      //if (cms3.taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 3;
         if (cms3.passTauID("byLooseCombinedIsolationDeltaBetaCorr3Hits", iTau)) temp = 1;
         if (cms3.passTauID("byMediumCombinedIsolationDeltaBetaCorr3Hits", iTau)) temp = 2;
-	      if (cms3.passTauID("byTightCombinedIsolationDeltaBetaCorr3Hits", iTau)) temp = 3;
+	if (cms3.passTauID("byTightCombinedIsolationDeltaBetaCorr3Hits", iTau)) temp = 3;
         tau_idCI3hit[ntau] = temp;
         if(tau_pt[ntau] > 20) nTaus20++;
         //tau_mcMatchId[ntau] = ; // Have to do this by hand unless we want to add tau_mc branches in CMS3 through the CandToGenAssMaker
