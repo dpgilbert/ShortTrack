@@ -29,6 +29,7 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
     TString directory = "sr"+dirs.at(idir);
     TString fullhistname = directory + "/h_mt2bins";
+    TString n_mt2bins_name = directory + "/h_n_mt2bins";
 
     TString fullhistnameSL = "crsl"+TString(dirs.at(idir))+"/h_mt2bins";
 
@@ -41,8 +42,17 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
       //continue; //Actually, don't skip. Still need CR yields even if SR yields are 0.
     }
 
-    const int n_mt2bins = 5;
-    const float mt2bins[n_mt2bins+1] = {200., 300., 400., 600., 1000., 1500.};
+    //const int n_mt2bins = 5;
+    //const float mt2bins[n_mt2bins+1] = {200., 300., 400., 600., 1000., 1500.};
+    TH1D* h_n_mt2bins = (TH1D*) fttbar->Get(n_mt2bins_name);
+    int n_mt2bins = h_n_mt2bins->GetBinContent(1);
+    TH1D* h_n_mt2bins = (TH1D*) fttbar->Get(n_mt2bins_name);
+    const int n_mt2bins = h_n_mt2bins->GetBinContent(1);
+    float* mt2bins = new float[n_mt2bins+1];
+    for(int i=0; i<=(n_mt2bins); i++){
+      //std::cout << "bin edge = " << httbar_sr->GetBinLowEdge(i+1) << std::endl;
+      mt2bins[i] = httbar_sr->GetBinLowEdge(i+1);  
+    }
 
     TH1D* hlostlep_sr = 0;
     if(httbar_sr) {
@@ -75,7 +85,17 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
       hlostlep_cr->Add(hwjets_cr);
     }
 
+    //std::cout << "n_mt2bins = " << n_mt2bins << std::endl;
+    //std::cout << "Binning =" << std::endl;
+    //for(int i=0; i<=(n_mt2bins); i++){
+      //std::cout << mt2bins[i] << std::endl;
+    //}
+    //std::cout << "Binning has been shown" << std::endl;
+
+    //std::cout << "It should mess up just below this" << std::endl;
     if(!hlostlep_cr) hlostlep_cr = new TH1D("h_mt2binsCRyield", "h_mt2binsCRyield", n_mt2bins, mt2bins);
+    //std::cout << "Did it mess up?" << std::endl;
+    delete mt2bins;
 
     if (hlostlep_sr->GetNbinsX() != hlostlep_cr->GetNbinsX() ) {
       cout<<"different binning for histograms "<<fullhistname<<endl;
@@ -129,7 +149,7 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
 void lostlepMaker(){
 
   //string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
-  string input_dir = "/home/users/jgran/temp/jet_pt_cuts/MT2Analysis/MT2looper/output/removed_minMT/";
+  string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/test/";
   //string input_dir = "../MT2looper/output/2015LowLumi/";
   //  string input_dir = "../MT2looper/output/test/";
   string output_name = input_dir+"lostlepFromCRs.root";

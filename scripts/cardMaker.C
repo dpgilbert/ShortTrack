@@ -479,8 +479,7 @@ void cardMaker(string signal, string input_dir, string output_dir){
   //  cards definitions
   // ----------------------------------------
 
-  const unsigned int n_mt2bins = 5;
-
+  
   //Loop through list of every directory in the signal file.
   //if directory begins with "sr", excluding "srbase", make cards for it.
   TIter it(f_sig->GetListOfKeys());
@@ -491,6 +490,10 @@ void cardMaker(string signal, string input_dir, string output_dir){
     if (k->GetTitle() == "srbase") continue;
     if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
+      std::string mt2_hist_name = (k->GetTitle());
+      mt2_hist_name += "/h_n_mt2bins";
+      TH1D* h_n_mt2bins = (TH1D*) f_sig->Get(TString(mt2_hist_name));
+      int n_mt2bins = h_n_mt2bins->GetBinContent(1);
       for (unsigned int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {//Make a separate card for each MT2 bin.
         printCard(k->GetTitle(), imt2, signal, output_dir);   //MT2 bins with no entries are handled by printCard function.
       }
