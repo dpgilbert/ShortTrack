@@ -22,7 +22,10 @@ void SR::SetVar(std::string var_name, float lower_bound, float upper_bound){
 
 void SR::SetMT2Bins(int nbins, float* bins){
   n_mt2bins_ = nbins;
-  mt2bins_ = bins;
+  mt2bins_ = new float [n_mt2bins_+1];
+  for(int i=0; i<=nbins; i++){
+    mt2bins_[i] = bins[i];
+  }
 }
 
 std::string SR::GetName(){
