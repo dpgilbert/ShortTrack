@@ -1092,12 +1092,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       for(unsigned int iTau = 0; iTau < cms3.taus_pf_p4().size(); iTau++){
         if(cms3.taus_pf_p4().at(iTau).pt() < 20.0) continue; 
         if(fabs(cms3.taus_pf_p4().at(iTau).eta()) > 2.3) continue; 
-	      //if (!cms3.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) continue; // HPS3 hits taus
-	      //if (!cms3.taus_pf_againstElectronLoose().at(iTau)) continue; // loose electron rejection 
-	      //if (!cms3.taus_pf_againstMuonTight().at(iTau)) continue; // loose muon rejection 
-	      if (!cms3.passTauID("byLooseCombinedIsolationDeltaBetaCorr3Hits", iTau)) continue; // HPS3 hits taus
-	      if (!cms3.passTauID("againstElectronLoose", iTau)) continue; // loose electron rejection 
-	      if (!cms3.passTauID("againstMuonTight", iTau)) continue; // loose muon rejection 
+	if (!cms3.passTauID("byLooseCombinedIsolationDeltaBetaCorr3Hits", iTau)) continue; // HPS3 hits taus
+	if (!cms3.passTauID("againstElectronLoose", iTau)) continue; // loose electron rejection 
+	if (!cms3.passTauID("againstMuonTight", iTau)) continue; // loose muon rejection 
         
 	if (ntau >= max_ntau) {
           std::cout << "WARNING: attempted to fill more than " << max_ntau << " taus" << std::endl;
@@ -1111,15 +1108,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         tau_charge[ntau] = cms3.taus_pf_charge().at(iTau);
         tau_dxy[ntau] = 0; // could use the tau->dxy() function instead, but not sure what it does
         tau_dz[ntau] = 0; // not sure how to get this. 
-        //tau_isoCI3hit[ntau] = cms3.taus_pf_byCombinedIsolationDeltaBetaCorrRaw3Hits().at(iTau);
-	      tau_isoCI3hit[ntau] = cms3.passTauID("byCombinedIsolationDeltaBetaCorrRaw3Hits", iTau);
+	tau_isoCI3hit[ntau] = cms3.passTauID("byCombinedIsolationDeltaBetaCorrRaw3Hits", iTau);
         int temp = 0;
-        //if (cms3.taus_pf_byLooseCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 1;
-        //if (cms3.taus_pf_byMediumCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 2;
-	      //if (cms3.taus_pf_byTightCombinedIsolationDeltaBetaCorr3Hits().at(iTau)) temp = 3;
         if (cms3.passTauID("byLooseCombinedIsolationDeltaBetaCorr3Hits", iTau)) temp = 1;
         if (cms3.passTauID("byMediumCombinedIsolationDeltaBetaCorr3Hits", iTau)) temp = 2;
-	      if (cms3.passTauID("byTightCombinedIsolationDeltaBetaCorr3Hits", iTau)) temp = 3;
+	if (cms3.passTauID("byTightCombinedIsolationDeltaBetaCorr3Hits", iTau)) temp = 3;
         tau_idCI3hit[ntau] = temp;
         if(tau_pt[ntau] > 20) nTaus20++;
         //tau_mcMatchId[ntau] = ; // Have to do this by hand unless we want to add tau_mc branches in CMS3 through the CandToGenAssMaker
