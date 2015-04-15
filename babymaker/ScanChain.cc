@@ -44,6 +44,8 @@ const bool verbose = false;
 const bool applyJECfromFile = true;
 // turn on to save prunedGenParticle collection
 const bool saveGenParticles = false;
+// turn on to apply trigger cuts to ntuples -> OR of all triggers used
+const bool applyTriggerCuts = false;
 
 //--------------------------------------------------------------------
 
@@ -122,6 +124,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       InitBabyNtuple();
 
+      if (verbose) cout << "before trigger" << endl;
+
+      //TRIGGER - check first to enable cuts
+      HLT_HT900        = passHLTTriggerPattern("HLT_PFHT900_v");
+      HLT_MET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v"); 
+      HLT_ht350met120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v"); 
+
+      HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu20_eta2p1_IterTrk02_v") || passHLTTriggerPattern("HLT_IsoTkMu20_eta2p1_IterTrk02_v"); 
+      HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloId_TrackId_Iso_v"); 
+      HLT_MuEG         = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v") || passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v"); 
+      HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") || passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
+      HLT_Photons      = passHLTTriggerPattern("HLT_Photon155_v"); 
+
+      if (applyTriggerCuts && !(HLT_HT900 || HLT_ht350met120 || HLT_Photons || HLT_SingleMu 
+				|| HLT_DoubleMu || HLT_DoubleEl || HLT_MuEG)) continue;
+
       run  = cms3.evt_run();
       lumi = cms3.evt_lumiBlock();
       evt  = cms3.evt_event();
@@ -175,17 +193,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
       // necessary?
       Flag_METFilters                               = cms3.filt_metfilter();
-
-      //TRIGGER
-      HLT_HT900        = passHLTTriggerPattern("HLT_PFHT900_v");
-      HLT_MET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v"); 
-      HLT_ht350met120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v"); 
-
-      HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu20_eta2p1_IterTrk02_v") || passHLTTriggerPattern("HLT_IsoTkMu20_eta2p1_IterTrk02_v"); 
-      HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloId_TrackId_Iso_v"); 
-      HLT_MuEG         = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v") || passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v"); 
-      HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") || passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
-      HLT_Photons      = passHLTTriggerPattern("HLT_Photon155_v"); 
 
       if (verbose) cout << "before sparm values" << endl;
 
