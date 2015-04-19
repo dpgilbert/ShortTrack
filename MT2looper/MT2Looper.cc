@@ -693,10 +693,6 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   valuesBase["passesHtMet"] = ( (t.gamma_ht > 450. && t.gamma_met_pt > 200.) || (t.gamma_ht > 1000. && t.gamma_met_pt > 30.) );
   bool passBase = SRBase.PassesSelection(valuesBase);
 
-  //for debugging
-  if (passBase) cout << "SRBase.PassesSelection true" << endl;
-  if (passPtMT2) cout << "passPtMT2 true" << endl;
-
   //float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
   float iso = t.gamma_chHadIso[0];
   float isoCutTight = 2.5;
@@ -708,7 +704,6 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   if (!passSieie) add += "SieieSB"; // Keep Sigma IEta IEta sideband
   fillHistosGammaJets(SRNoCut.crgjHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), prefix+SRNoCut.GetName(), suffix+add);
   if(passBase && passPtMT2) {
-    cout << "test" << endl;
     fillHistosGammaJets(SRBase.crgjHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crgjbase", suffix+add);
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(SRVec.at(srN).PassesSelection(values)){
