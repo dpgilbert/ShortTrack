@@ -666,7 +666,6 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
 
   // fill hists
   std::string add="";
-  if (!passSieie) add = "SieieSB"; // Keep Sigma IEta IEta sideband
 
   float passPtMT2 = false;
   if (t.mt2 < 200 && t.gamma_pt[0]>160.) passPtMT2 = true;
@@ -694,6 +693,10 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   valuesBase["passesHtMet"] = ( (t.gamma_ht > 450. && t.gamma_met_pt > 200.) || (t.gamma_ht > 1000. && t.gamma_met_pt > 30.) );
   bool passBase = SRBase.PassesSelection(valuesBase);
 
+  //for debugging
+  if (passBase) cout << "SRBase.PassesSelection true" << endl;
+  if (passPtMT2) cout << "passPtMT2 true" << endl;
+
   //float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
   float iso = t.gamma_chHadIso[0];
   float isoCutTight = 2.5;
@@ -702,8 +705,10 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
 
   if (iso>isoCutTight && iso < isoCutLoose) add += "LooseNotTight";
   if (iso>isoCutLoose) add += "NotLoose";
+  if (!passSieie) add += "SieieSB"; // Keep Sigma IEta IEta sideband
   fillHistosGammaJets(SRNoCut.crgjHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), prefix+SRNoCut.GetName(), suffix+add);
   if(passBase && passPtMT2) {
+    cout << "test" << endl;
     fillHistosGammaJets(SRBase.crgjHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crgjbase", suffix+add);
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(SRVec.at(srN).PassesSelection(values)){
@@ -714,7 +719,8 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   }
   // Remake everything again to get "Loose"
   if (iso<isoCutLoose) {
-    add += "Loose";
+    add = "Loose";
+    if (!passSieie) add += "SieieSB"; // Keep Sigma IEta IEta sideband
     fillHistosGammaJets(SRNoCut.crgjHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), prefix+SRNoCut.GetName(), suffix+add);
     if(passBase && passPtMT2) {
       fillHistosGammaJets(SRBase.crgjHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crgjbase", suffix+add);
@@ -830,6 +836,12 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, int n_mt2
   const int n_nbjbins = 4;
   const float nbjbins[n_nbjbins+1] = {0, 1, 2, 3, 6};
 
+  //bins for FR
+  const int n_FRhtbins = 6;
+  const int n_FRptbins = 5;
+  const float FRhtbins[n_FRhtbins+1] = {0,200,450,1000,1500,2000,3000};
+  const float FRptbins[n_FRptbins+1] = {0,150,300,450,600,1500};
+
   float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
   float chiso = t.gamma_chHadIso[0];
 
@@ -839,12 +851,26 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, int n_mt2
   plot1D("h_chisoW1"+s,      chiso,   1, h_1d, ";ch iso [GeV]", 100, 0, 50);
 
   //for FR calculation
-  plot2D("h2d_gammaht_gammapt"+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",120,0,3000,150,0,1500);
-
+  if(t.gamma_idCutBased[0]){
+    plot2D("h2d_gammaht_gammapt"+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",n_FRhtbins,FRhtbins,n_FRptbins,FRptbins);
+    plot2D("h2d_gammaht_gammaptW1"+s, t.gamma_ht, t.gamma_pt[0], 1, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",n_FRhtbins,FRhtbins,n_FRptbins,FRptbins);
+  }
+  if(!t.gamma_idCutBased[0]){
+    plot2D("h2d_gammaht_gammapt"+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",1,0,3000,1,0,1500);
+    plot2D("h2d_gammaht_gammaptW1"+s, t.gamma_ht, t.gamma_pt[0], 1, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",1,0,3000,1,0,1500);
+  }
+  
   for (int i = 0; i < SRBase.GetNumberOfMT2Bins(); i++) {
     if ( t.gamma_mt2 > SRBase.GetMT2Bins()[i] &&  t.gamma_mt2 < SRBase.GetMT2Bins()[i+1]) {
       plot1D("h_chiso_mt2bin"+toString(SRBase.GetMT2Bins()[i])+s,  iso,  evtweight_, h_1d, "; iso", 100, 0, 50);
-      plot2D("h2d_gammaht_gammapt"+toString(SRBase.GetMT2Bins()[i])+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",120,0,3000,150,0,1500);
+      if(t.gamma_idCutBased[0]){
+	plot2D("h2d_gammaht_gammapt"+toString(SRBase.GetMT2Bins()[i])+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",n_FRhtbins,FRhtbins,n_FRptbins,FRptbins);
+	plot2D("h2d_gammaht_gammaptW1"+toString(SRBase.GetMT2Bins()[i])+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",n_FRhtbins,FRhtbins,n_FRptbins,FRptbins);
+      }
+      if(!t.gamma_idCutBased[0]){
+	plot2D("h2d_gammaht_gammapt"+toString(SRBase.GetMT2Bins()[i])+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",1,0,3000,1,0,1500);
+	plot2D("h2d_gammaht_gammaptW1"+toString(SRBase.GetMT2Bins()[i])+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",1,0,3000,1,0,1500);
+      }
     }
   }
 
