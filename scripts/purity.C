@@ -93,7 +93,7 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, SR sr, TH2D* h_FR, const 
 
       //if "Poisson", undo sumw2() errors
       if(s.Contains("Poisson")){
-	if(h_sidebandqcdPrompt) h_sidebandqcdPrompt->GetSumw2()->Set(0);
+	//if(h_sidebandqcdPrompt) h_sidebandqcdPrompt->GetSumw2()->Set(0); //Prompt contamination always come from MC anyway, so weights are fine
 	if(h_sideband) h_sideband->GetSumw2()->Set(0);
       }
 	
@@ -192,6 +192,8 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   TH1D* h_predSieieSB = (TH1D*) f_out->Get("h_pred"+sr+"FailSieie");
   TH1D* h_predFragPlus50 = (TH1D*) f_out->Get("h_pred"+sr+"plus50");
   TH1D* h_predFragMinus50 = (TH1D*) f_out->Get("h_pred"+sr+"minus50");
+  TH1D* h_predFRpoisson = (TH1D*) f_out->Get("h_pred"+sr+"Poisson");
+  TH1D* h_predSieieSBpoisson = (TH1D*) f_out->Get("h_pred"+sr+"FailSieiePoisson");
 
   //check existence
   if(!h_gjet) return;
@@ -200,22 +202,30 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   bool doSieieSB = false;
   bool doFragPlus50 = false;
   bool doFragMinus50 = false;
+  bool doFRpoisson = false;
+  bool doSieieSBpoisson = false;
   if(h_qcdFake) doTrue = true;
   if(h_predFR) doFR = true;
   if(h_predSieieSB) doSieieSB = true;
   if(h_predFragPlus50) doFragPlus50 = true;
   if(h_predFragMinus50) doFragMinus50 = true;
+  if(h_predFRpoisson) doFRpoisson = true;
+  if(h_predSieieSBpoisson) doSieieSBpoisson = true;
 
   //initialize numerator, den, and purity hists
   TH1D* h_num = sameBin(h_gjet);
   TH1D* h_denTrue = sameBin(h_gjet);
   TH1D* h_denFR = sameBin(h_gjet);
+  TH1D* h_denFRpoisson = sameBin(h_gjet);
   TH1D* h_denSieieSB = sameBin(h_gjet);
+  TH1D* h_denSieieSBpoisson = sameBin(h_gjet);
   TH1D* h_denFragPlus50 = sameBin(h_gjet);
   TH1D* h_denFragMinus50 = sameBin(h_gjet);
   TH1D* h_purityTrue = sameBin(h_gjet);
   TH1D* h_purityFR = sameBin(h_gjet);
+  TH1D* h_purityFRpoisson = sameBin(h_gjet);
   TH1D* h_puritySieieSB = sameBin(h_gjet);
+  TH1D* h_puritySieieSBpoisson = sameBin(h_gjet);
   TH1D* h_purityFragPlus50 = sameBin(h_gjet);
   TH1D* h_purityFragMinus50 = sameBin(h_gjet);
 
@@ -227,14 +237,18 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   if (h_qcd){ //if there are qcdPrompt, add to gjetPrompt
     h_denTrue->Add(h_gjet, h_qcd);
     h_denFR->Add(h_gjet, h_qcd);
+    h_denFRpoisson->Add(h_gjet, h_qcd);
     h_denSieieSB->Add(h_gjet, h_qcd);
+    h_denSieieSBpoisson->Add(h_gjet, h_qcd);
     h_denFragPlus50->Add(h_gjet, h_qcd);
     h_denFragMinus50->Add(h_gjet, h_qcd);
   }
   else { //otherwise numerator is just gjet prompt
     h_denTrue->Add(h_gjet);
     h_denFR->Add(h_gjet);
+    h_denFRpoisson->Add(h_gjet);
     h_denSieieSB->Add(h_gjet);
+    h_denSieieSBpoisson->Add(h_gjet);
     h_denFragPlus50->Add(h_gjet);
     h_denFragMinus50->Add(h_gjet);
   }
@@ -253,11 +267,34 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
     h_purityFR->SetName("h_purity"+sr+"FR");
   }
 
+  //do FR purity with poisson errors on yields
+  if(doFRpoisson){
+    TH1D* h_numP =  (TH1D*) h_num->Clone("numPoisson");
+    h_numP->GetSumw2()->Set(0); h_numP->Sumw2(); // reset sumw2
+    h_denFRpoisson->GetSumw2()->Set(0); h_denFRpoisson->Sumw2(); // reset sumw2
+    h_denFRpoisson->Add(h_predFRpoisson);
+    h_purityFRpoisson->Divide(h_numP,h_denFRpoisson,1,1,"B");
+    h_purityFRpoisson->SetName("h_purity"+sr+"FRpoisson");
+  }
+
   //do SieieSB purity
   if(doSieieSB){
     h_denSieieSB->Add(h_predSieieSB);
     h_puritySieieSB->Divide(h_num,h_denSieieSB,1,1,"B");
     h_puritySieieSB->SetName("h_purity"+sr+"SieieSB");
+  }
+
+ //do SieieSB purity with poisson errors on yields
+  if(doSieieSB){
+    TH1D* h_numP2 = (TH1D*) h_num->Clone("numPoisson2");
+    h_numP2->GetSumw2()->Set(0); h_numP2->Sumw2(); // reset sumw2
+    h_denSieieSBpoisson->GetSumw2()->Set(0); h_denSieieSBpoisson->Sumw2(); // reset sumw2
+    h_denSieieSBpoisson->Add(h_predSieieSBpoisson);
+    h_puritySieieSBpoisson->Divide(h_numP2,h_denSieieSBpoisson,1,1,"B");
+    h_puritySieieSBpoisson->SetName("h_purity"+sr+"SieieSBpoisson");
+    // Dump everything!
+    //cout<<"h_purity"<<sr<<"SieieSBpoisson"<<endl;
+    //h_puritySieieSBpoisson->Print("all");
   }
 
   //do FragPlus50 purity
@@ -282,6 +319,8 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   if(doSieieSB) h_puritySieieSB->Write();
   if(doFragPlus50) h_purityFragPlus50->Write();
   if(doFragMinus50) h_purityFragMinus50->Write();
+  if(doFRpoisson) h_purityFRpoisson->Write();
+  if(doSieieSBpoisson) h_puritySieieSBpoisson->Write();
   
   return;
 }
@@ -291,12 +330,15 @@ void purity()
   
   //load signal regions
   vector<SR> SRVec =  getSignalRegionsZurich_jetpt40();
-  
-  //open files
-  TFile* f_g = new TFile("$CMSSW_BASE/../MT2looper/output/V00-00-12_skim_trig_nj2_ht450_met30_mt2gt200_Zinv/gjet_ht.root"); //gjet file
-  TFile* f_q = new TFile("$CMSSW_BASE/../MT2looper/output/V00-00-12_skim_trig_nj2_ht450_met30_mt2gt200_Zinv/qcd_pt.root"); //qcd file
-  TFile* f_QCDpluGJET = new TFile("$CMSSW_BASE/../MT2looper/output/V00-00-12_skim_trig_nj2_ht450_met30_mt2gt200_Zinv/qcdplugjet.root"); //qcd+gjets file
+  string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/";
 
+  //open files
+  //TFile* f_g = new TFile("$CMSSW_BASE/../MT2looper/output/V00-00-12_skim_trig_nj2_ht450_met30_mt2gt200_Zinv/gjet_ht.root"); //gjet file
+  //TFile* f_q = new TFile("$CMSSW_BASE/../MT2looper/output/V00-00-12_skim_trig_nj2_ht450_met30_mt2gt200_Zinv/qcd_pt.root"); //qcd file
+  //TFile* f_QCDpluGJET = new TFile("$CMSSW_BASE/../MT2looper/output/V00-00-12_skim_trig_nj2_ht450_met30_mt2gt200_Zinv/qcdplugjet.root"); //qcd+gjets file
+  TFile* f_g = new TFile(Form("%s/gjet_ht.root",input_dir.c_str())); //gjet file
+  TFile* f_q = new TFile(Form("%s/qcd_pt.root",input_dir.c_str())); //qcd file
+  TFile* f_QCDpluGJET = new TFile(Form("%s/qcdplugjet.root",input_dir.c_str())); //qcd+gjets file
   cout << "Making Fake-Rate Histograms..." << endl;
   
   //get hists for FR calc
@@ -312,7 +354,8 @@ void purity()
   h_qcdLooseFailSieie->SetName("h_qcdLooseFailSieie");
     
   //instantiate output file here
-  TFile* f_out = new TFile("$CMSSW_BASE/../scripts/purity.root","RECREATE");
+  //TFile* f_out = new TFile("$CMSSW_BASE/../scripts/purity.root","RECREATE");
+  TFile* f_out = new TFile(Form("%s/purity.root",input_dir.c_str()),"RECREATE");
 
   //FR histograms
   TH2D* h_FR = (TH2D*) h_qcdTight->Clone();
@@ -340,6 +383,7 @@ void purity()
     makePred(f_out, f_QCDpluGJET, f_q, SRVec[i], h_FR, -0.5, "minus50"); //FR using passSieie, LooseNotTight Fakes + -50% qcdPrompt 
     makePred(f_out, f_QCDpluGJET, f_q, SRVec[i], h_FRFailSieie, 0, "FailSieie"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt
     makePred(f_out, f_QCDpluGJET, f_q, SRVec[i], h_FRFailSieie, 0, "FailSieiePoisson"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Poisson errors
+    makePred(f_out, f_QCDpluGJET, f_q, SRVec[i], h_FR, 0, "Poisson"); //FR using passSieie, LooseNotTight Fakes + 0 qcdPrompt, Poisson errors
   }
 
   //make purity plots
