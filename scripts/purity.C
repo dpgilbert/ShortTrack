@@ -48,6 +48,10 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, SR sr, TH2D* h_FR, const 
   //sr name
   TString srName = sr.GetName();
 
+  //Single bin or not
+  TString bin = "";
+  if(s.Contains("FailSieie")) bin = "SingleBin";
+  
   //get LooseNotTight hist
   TH1D* h_FakeLooseNotTight = (TH1D*) f_in->Get("crgj"+srName+"/h_mt2binsFakeLooseNotTight");
   
@@ -84,8 +88,8 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, SR sr, TH2D* h_FR, const 
       Float_t pred_error_total = 0.0;
   
       //get FR binned hists for this mt2 bin
-      TH2D* h_sidebandqcdPrompt = (TH2D*) f_qcd->Get("crgj"+srName+"/h2d_gammaht_gammapt"+mt2binsname[xbin]+"LooseNotTight"); //qcdPrompt
-      TH2D* h_sideband = (TH2D*) f_qcd->Get("crgj"+srName+"/h2d_gammaht_gammapt"+mt2binsname[xbin]+"FakeLooseNotTight"); //qcdFake
+      TH2D* h_sidebandqcdPrompt = (TH2D*) f_qcd->Get("crgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"LooseNotTight"); //qcdPrompt
+      TH2D* h_sideband = (TH2D*) f_qcd->Get("crgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"FakeLooseNotTight"); //qcdFake
 
       //if "Poisson", undo sumw2() errors
       if(s.Contains("Poisson")){
@@ -302,8 +306,8 @@ void purity()
   h_qcdLoose->SetName("h_qcdLoose");
   
   //get hists for FR calc, Sieie Sideband
-  TH2D* h_qcdTightFailSieie = (TH2D*) f_q->Get("crgjbase/h2d_gammaht_gammaptFakeSieieSB");
-  TH2D* h_qcdLooseFailSieie = (TH2D*) f_q->Get("crgjbase/h2d_gammaht_gammaptFakeLooseSieieSB");
+  TH2D* h_qcdTightFailSieie = (TH2D*) f_q->Get("crgjbase/h2d_gammaht_gammaptSingleBinFakeSieieSB");
+  TH2D* h_qcdLooseFailSieie = (TH2D*) f_q->Get("crgjbase/h2d_gammaht_gammaptSingleBinFakeLooseSieieSB");
   h_qcdTightFailSieie->SetName("h_qcdTightFailSieie");
   h_qcdLooseFailSieie->SetName("h_qcdLooseFailSieie");
     
