@@ -68,7 +68,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fQCD, vector<string
     }
 
     // Zgamma ratio in each MT2bin -> to get MC stat error on ratio
-    TH1D* ratio = hZinv->Clone("ratio");
+    TH1D* ratio = hZinv->Clone("h_mt2binsRatio");
     ratio->Divide(hGJet);
 
     // MCStat: use relative bin error from ratio hist, normalized to Zinv MC prediction
@@ -107,7 +107,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fQCD, vector<string
     CRyield->Write();
     MCStat->Write();
     PreviousBinRatio->Write();
-
+    ratio->Write();
   } // loop over signal regions
 
 
