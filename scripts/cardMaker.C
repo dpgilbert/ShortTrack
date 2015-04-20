@@ -33,6 +33,8 @@ bool uncorrelatedZGratio = false; // treat ZGratio uncertainty as fully uncorrel
 bool previousBinZGprediction = false; // Get prediction from previous bin if nGJ < previousBinZGprediction_min
 float previousBinZGprediction_min = 5.;
 
+bool iteration2 = false;
+
 std::string toString(int in){
   stringstream ss;
   ss << in;
@@ -63,6 +65,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   TString fullhistnameMCStat  = fullhistname+"MCStat";
   TString fullhistnameCRyield  = fullhistname+"CRyield";
   TString fullhistnamePreviousBinRatio  = fullhistname+"PreviousBinRatio";
+  TString fullhistnameRatio  = fullhistname+"Ratio";
 
   double n_lostlep(0.);
   double n_lostlep_tr(0.);
@@ -70,11 +73,13 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   double err_lostlep_mcstat(0.);
   double err_lostlep_stat(0.);
   double n_zinv(0.);
+  double n_zinv_gj(0.);
   double n_zinv_cr(0.);
   double n_zinv_cr_prevBin(0.);
   double zinv_prevBinRatio(0.);
   double err_zinv_stat(0.);
   double err_zinv_mcstat(0.);
+  double zinv_ratio_zg(0.);
   double n_qcd(0.);
   double n_bkg(0.);
 
@@ -152,7 +157,25 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   TH1D* h_zinv = (TH1D*) f_zinv->Get(fullhistname);
   if (h_zinv != 0) n_zinv = h_zinv->GetBinContent(mt2bin);
   if (n_zinv < 0.01 && !useGammaFunction) n_zinv = 0.01;
-  if (iteration1) {
+  if ( iteration2 ) {
+    n_zinv = h_zinv->GetBinContent(mt2bin);
+    // MC stat unc based on #Z/#g
+    TH1D* h_zinv_mcstat1 = (TH1D*) f_zinv->Get(fullhistnameRatio);
+    if (h_zinv_mcstat != 0 && h_zinv_mcstat->GetBinContent(mt2bin) != 0) {
+      err_zinv_mcstat = h_zinv_mcstat->GetBinError(mt2bin)/h_zinv_mcstat->GetBinContent(mt2bin);
+      zinv_ratio_zg = h_zinv_mcstat->GetBinContent(mt2bin);
+    }
+    else { // nothing found, or ratio = 0 (if num or den are 0)
+      err_zinv_mcstat = 1.;
+      zinv_ratio_zg = 0.4;
+    }
+    TH1D* h_zinv_cryield = (TH1D*) f_zinv->Get(fullhistnameCRyield);
+    if (h_zinv_cryield != 0 && h_zinv_cryield->GetBinContent(mt2bin) != 0) 
+      n_zinv_cr = round(h_zinv_cryield->GetBinContent(mt2bin));
+    // Will have to add purity and f to multiply them by ratio.
+    
+  }
+  else if (iteration1) {
     // For 1b regions, use the statistical uncertainty from corresponding 0b region
     // if (sr == 2) fullhistnameStat.ReplaceAll("sr2", "sr1");
     // if (sr == 6) fullhistnameStat.ReplaceAll("sr6", "sr5");
@@ -266,6 +289,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   // uncorrelated across TRs and MT2 bins
   double zinv_crstat = -1.;
   TString name_zinv_crstat = Form("zinv_CRstat_%s",channel.c_str());
+  double zinv_alpha = 1.;
   double zinv_alphaerr = 1. + err_zinv_mcstat;
   TString name_zinv_alphaerr = Form("zinv_alphaErr_%s",channel.c_str());
   // correlated for all bins with 0-1b
@@ -279,6 +303,21 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   double zinv_mcsyst = -1.;
   TString name_zinv_mcsyst = Form("zinv_MC_%s",channel.c_str());
 
+  if (iteration2) {
+    // 2+b: pure MC estimate
+    if (nbjets_LOW >= 2) {
+     zinv_mcsyst = 2.;
+     ++n_syst;
+   }
+   else { // 0-1b. always use gamma function
+     // err_zinv_mcstat, zinv_ratio_zg, n_zinv_cr
+     zinv_alpha =  zinv_ratio_zg;
+     n_zinv = n_zinv_cr * zinv_alpha; // don't use Zinv as central value any more!
+     zinv_zgamma = 1.20;
+     n_syst += 3; // 1: zinv_alphaerr (stat on ratio). 2: zinv_zgamma. 3: gamma function
+   }
+  }
+  else {
   // 2+b: pure MC estimate
   if (nbjets_LOW >= 2) {
     zinv_mcsyst = 2.;
@@ -312,7 +351,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
       else { // iter1, don't use gamma function
 	if (n_zinv > 0.) zinv_crstat = 1. + 1.*err_zinv_stat;
 	else zinv_crstat = 2.;
-	  ++n_syst;
+	++n_syst;
       }
     }
     // else: iter0
@@ -356,7 +395,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
       else { // iter1, don't use gamma function
 	if (n_zinv > 0.) zinv_crstat = 1. + 1.*err_zinv_stat;
 	else zinv_crstat = 2.;
-  ++n_syst;
+	++n_syst;
       }
     }
     // else: iter0
@@ -367,8 +406,8 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
     }
     zinv_zgamma = 1.20;
     ++n_syst;
-  }
-
+  } // end of 0b
+  } // !iteration2
   // ----- qcd bkg uncertainties: uncorrelated for all bins
   double qcd_syst = 2.00;
   TString name_qcd_syst = Form("qcd_syst_%s", channel.c_str());
@@ -394,10 +433,19 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   *ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig,n_zinv,n_lostlep,n_qcd) << endl;
   *ofile <<  "------------"                                                                  << endl;
   *ofile <<  Form("sig_syst                                            lnN   %.3f    -      -     - ",sig_syst)  << endl;
+  if (iteration2) {
+    if (nbjets_UP == 1 || nbjets_UP == 2) {
+      *ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr,zinv_alpha)  << endl;
+      *ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_alphaerr.Data(),zinv_alphaerr)  << endl;
+      *ofile <<  Form("%s                                   lnN    -   %.3f    -    - ",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;     
+    }
+    if (nbjets_LOW >= 2) {
+      *ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_mcsyst.Data(),zinv_mcsyst)  << endl;
+    }
+  }
+  else {
   if (nbjets_UP == 1 || nbjets_UP == 2) {
     *ofile <<  Form("%s                                   lnN    -   %.3f    -    - ",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;
-  }
-  if (nbjets_UP == 1 || nbjets_UP == 2) {
     if (iteration1 && useGammaFunction) {
       if (n_zinv > 0. && n_zinv_cr == 0.) {
 	// taking MC directly - use lnN uncertainty
@@ -405,7 +453,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
       } else {
 	if (previousBinZGprediction && n_zinv_cr_prevBin > 0.) {
 	  *ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr_prevBin,zinv_crstat * zinv_prevBinRatio)  << endl;
-	  cout <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr_prevBin,zinv_crstat * zinv_prevBinRatio)  << endl;
+	  //cout <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr_prevBin,zinv_crstat * zinv_prevBinRatio)  << endl;
 	}
 	else 
 	  *ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr,zinv_crstat)  << endl;
@@ -417,13 +465,14 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
     } else {
       *ofile <<  Form("%s     lnN    -   %.3f   -   - ",name_zinv_crstat.Data(),zinv_crstat)  << endl;
     }
-  }
-  if (!iteration1 && nbjets_LOW == 1 && nbjets_UP == 2) {
-    *ofile <<  Form("%s               lnN    -     %.3f   -    - ",name_zinv_bratio.Data(),zinv_bratio)  << endl;
+    if (!iteration1 && nbjets_LOW == 1 && nbjets_UP == 2) {
+      *ofile <<  Form("%s               lnN    -     %.3f   -    - ",name_zinv_bratio.Data(),zinv_bratio)  << endl;
+    }
   }
   if (nbjets_LOW >= 2) {
     *ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_mcsyst.Data(),zinv_mcsyst)  << endl;
   }
+  }// !iteration2
   if (iteration1 && useGammaFunction) {
     if (lostlep_decorrelate_bin && n_lostlep > 0.) {
       // taking MC directly - use lnN uncertainty
