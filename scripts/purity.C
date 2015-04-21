@@ -171,6 +171,14 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, SR sr, TH2D* h_FR, const 
 
   //make and fill prediction histogram
   f_out->cd();
+  TString directory = "sr"+srName;
+  TDirectory* dir = 0;
+  dir = (TDirectory*)f_out->Get(directory.Data());
+  if (dir == 0) {
+    dir = f_out->mkdir(directory.Data());
+  } 
+  dir->cd();
+  srName="";
 
   TH1D* h_pred = (TH1D*) h_FakeLooseNotTight->Clone();
   h_pred->Reset();
@@ -189,12 +197,12 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   TH1D* h_gjet = (TH1D*) f_gjet->Get("crgj"+sr+"/h_mt2bins");
   TH1D* h_qcd = (TH1D*) f_qcd->Get("crgj"+sr+"/h_mt2bins");
   TH1D* h_qcdFake = (TH1D*) f_qcd->Get("crgj"+sr+"/h_mt2binsFake");
-  TH1D* h_predFR = (TH1D*) f_out->Get("h_pred"+sr);
-  TH1D* h_predSieieSB = (TH1D*) f_out->Get("h_pred"+sr+"FailSieie");
-  TH1D* h_predFragPlus50 = (TH1D*) f_out->Get("h_pred"+sr+"plus50");
-  TH1D* h_predFragMinus50 = (TH1D*) f_out->Get("h_pred"+sr+"minus50");
-  TH1D* h_predFRpoisson = (TH1D*) f_out->Get("h_pred"+sr+"Poisson");
-  TH1D* h_predSieieSBpoisson = (TH1D*) f_out->Get("h_pred"+sr+"FailSieiePoisson");
+  TH1D* h_predFR = (TH1D*) f_out->Get("sr"+sr+"/h_pred");
+  TH1D* h_predSieieSB = (TH1D*) f_out->Get("sr"+sr+"/h_pred"+"FailSieie");
+  TH1D* h_predFragPlus50 = (TH1D*) f_out->Get("sr"+sr+"/h_pred"+"plus50");
+  TH1D* h_predFragMinus50 = (TH1D*) f_out->Get("sr"+sr+"/h_pred"+"minus50");
+  TH1D* h_predFRpoisson = (TH1D*) f_out->Get("sr"+sr+"/h_pred"+"Poisson");
+  TH1D* h_predSieieSBpoisson = (TH1D*) f_out->Get("sr"+sr+"/h_pred"+"FailSieiePoisson");
 
   //check existence
   if(!h_gjet) return;
@@ -212,6 +220,17 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   if(h_predFragMinus50) doFragMinus50 = true;
   if(h_predFRpoisson) doFRpoisson = true;
   if(h_predSieieSBpoisson) doSieieSBpoisson = true;
+  //cout<<doTrue <<" "<<doFR <<" "<<doSieieSB <<" "<<doFragPlus50 <<" "<<doFragMinus50 <<" "<<doFRpoisson <<" "<<doSieieSBpoisson<<endl;
+
+  f_out->cd();
+  TString directory = "sr"+sr;
+  TDirectory* dir = 0;
+  dir = (TDirectory*)f_out->Get(directory.Data());
+  if (dir == 0) {
+    dir = f_out->mkdir(directory.Data());
+  } 
+  dir->cd();
+  sr="";
 
   //initialize numerator, den, and purity hists
   TH1D* h_num = sameBin(h_gjet);
@@ -260,6 +279,7 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
     h_purityTrue->Divide(h_num,h_denTrue,1,1,"B");
     h_purityTrue->SetName("h_purity"+sr+"True");
   }
+  h_denTrue->SetName("h_mt2bins");
 
   //do FR purity
   if(doFR){
@@ -316,7 +336,8 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
     h_purityFragMinus50->SetName("h_purity"+sr+"FragMinus50");
   }
    
-  f_out->cd();
+  //f_out->cd();
+  dir->cd();
 
   //write hists to output file
   if(doTrue) h_purityTrue->Write();
@@ -326,7 +347,9 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   if(doFragMinus50) h_purityFragMinus50->Write();
   if(doFRpoisson) h_purityFRpoisson->Write();
   if(doSieieSBpoisson) h_puritySieieSBpoisson->Write();
-  
+  h_denTrue->Write();
+
+  f_out->cd();
   return;
 }
 
