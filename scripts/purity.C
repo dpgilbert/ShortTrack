@@ -52,8 +52,9 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, SR sr, TH2D* h_FR, const 
   TString bin = "";
   if(s.Contains("FailSieie")) bin = "SingleBin";
   
-  //get LooseNotTight hist
+  //get LooseNotTight hist (this only contains Fakes, there are no Prompts, so no subtraction is needed for MC)
   TH1D* h_FakeLooseNotTight = (TH1D*) f_in->Get("crgj"+srName+"/h_mt2binsFakeLooseNotTight");
+  // For data, will have to get h_mt2binsLooseNotTight and subtract the prompt based on MC
   
   //check for empty hists
   if(!h_FR){
@@ -161,8 +162,8 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, SR sr, TH2D* h_FR, const 
 	}//exit FR bin loop
   
       //fill the pred array with new pred and errors
-      preds[xbin]=pred_total;
-      predErrors[xbin]=sqrt(pred_error_total);
+      preds[xbin+1]=pred_total;
+      predErrors[xbin+1]=sqrt(pred_error_total);
 
       //cleanup
       h_sideband->Delete();
@@ -294,6 +295,10 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
     h_puritySieieSBpoisson->SetName("h_purity"+sr+"SieieSBpoisson");
     // Dump everything!
     //cout<<"h_purity"<<sr<<"SieieSBpoisson"<<endl;
+    //h_gjet->Print("all");
+    //h_numP2->Print("all");
+    //if (doTrue) h_qcdFake->Print("all");
+    //h_predSieieSBpoisson->Print("all");
     //h_puritySieieSBpoisson->Print("all");
   }
 
