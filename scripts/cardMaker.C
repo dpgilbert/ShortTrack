@@ -17,6 +17,7 @@ using namespace std;
 
 TFile* f_lostlep = 0;
 TFile* f_zinv = 0;
+TFile* f_purity = 0;
 TFile* f_qcd = 0;
 TFile* f_sig = 0;
 
@@ -66,6 +67,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   TString fullhistnameCRyield  = fullhistname+"CRyield";
   TString fullhistnamePreviousBinRatio  = fullhistname+"PreviousBinRatio";
   TString fullhistnameRatio  = fullhistname+"Ratio";
+  TString fullhistnamePurity = dir + "/h_puritySieieSBpoisson";
 
   double n_lostlep(0.);
   double n_lostlep_tr(0.);
@@ -80,6 +82,8 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   double err_zinv_stat(0.);
   double err_zinv_mcstat(0.);
   double zinv_ratio_zg(0.);
+  double zinv_purity(0.);
+  double err_zinv_purity(0.);
   double n_qcd(0.);
   double n_bkg(0.);
 
@@ -158,22 +162,28 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   if (h_zinv != 0) n_zinv = h_zinv->GetBinContent(mt2bin);
   if (n_zinv < 0.01 && !useGammaFunction) n_zinv = 0.01;
   if ( iteration2 ) {
-    n_zinv = h_zinv->GetBinContent(mt2bin);
+    n_zinv = h_zinv->GetBinContent(mt2bin); // just a starting point, no QCD.
     // MC stat unc based on #Z/#g
-    TH1D* h_zinv_mcstat1 = (TH1D*) f_zinv->Get(fullhistnameRatio);
+    TH1D* h_zinv_mcstat = (TH1D*) f_zinv->Get(fullhistnameRatio);
     if (h_zinv_mcstat != 0 && h_zinv_mcstat->GetBinContent(mt2bin) != 0) {
       err_zinv_mcstat = h_zinv_mcstat->GetBinError(mt2bin)/h_zinv_mcstat->GetBinContent(mt2bin);
       zinv_ratio_zg = h_zinv_mcstat->GetBinContent(mt2bin);
     }
-    else { // nothing found, or ratio = 0 (if num or den are 0)
+    else { // catch zeroes (there shouldn't be any)
       err_zinv_mcstat = 1.;
       zinv_ratio_zg = 0.4;
     }
-    TH1D* h_zinv_cryield = (TH1D*) f_zinv->Get(fullhistnameCRyield);
-    if (h_zinv_cryield != 0 && h_zinv_cryield->GetBinContent(mt2bin) != 0) 
+    // Photon yield (includes GJetPrompt+QCDPrompt+QCDFake)
+    TH1D* h_zinv_cryield = (TH1D*) f_purity->Get(fullhistname);
+    if (h_zinv_cryield != 0 && h_zinv_cryield->GetBinContent(mt2bin) != 0)
       n_zinv_cr = round(h_zinv_cryield->GetBinContent(mt2bin));
-    // Will have to add purity and f to multiply them by ratio.
-    
+    // Purity and uncertainty
+    TH1D* h_zinv_purity = (TH1D*) f_purity->Get(fullhistnamePurity);
+    zinv_purity = 1.;
+    if (h_zinv_purity != 0 && h_zinv_purity->GetBinContent(mt2bin) != 0) {
+      zinv_purity *= h_zinv_purity->GetBinContent(mt2bin);
+      err_zinv_purity = h_zinv_purity->GetBinError(mt2bin)/h_zinv_purity->GetBinContent(mt2bin);
+    }
   }
   else if (iteration1) {
     // For 1b regions, use the statistical uncertainty from corresponding 0b region
@@ -292,6 +302,8 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   double zinv_alpha = 1.;
   double zinv_alphaerr = 1. + err_zinv_mcstat;
   TString name_zinv_alphaerr = Form("zinv_alphaErr_%s",channel.c_str());
+  double zinv_purityerr = 1. + err_zinv_purity;
+  TString name_zinv_purityerr = Form("zinv_purity_%s",channel.c_str());
   // correlated for all bins with 0-1b
   double zinv_zgamma = -1.;
   TString name_zinv_zgamma = "zinv_ZGratio";
@@ -311,10 +323,10 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
    }
    else { // 0-1b. always use gamma function
      // err_zinv_mcstat, zinv_ratio_zg, n_zinv_cr
-     zinv_alpha =  zinv_ratio_zg;
+     zinv_alpha =  zinv_ratio_zg * zinv_purity * 0.92; // 0.92 is a fixed factor for "f = GJetPrompt / (GJetPrompt+QCDPrompt)"
      n_zinv = n_zinv_cr * zinv_alpha; // don't use Zinv as central value any more!
      zinv_zgamma = 1.20;
-     n_syst += 3; // 1: zinv_alphaerr (stat on ratio). 2: zinv_zgamma. 3: gamma function
+     n_syst += 4; // 1: zinv_alphaerr (stat on ratio). 2: zinv_zgamma (R, p, f) 3: gamma function. 4: purity stat unc.
    }
   }
   else {
@@ -438,6 +450,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
       *ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr,zinv_alpha)  << endl;
       *ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_alphaerr.Data(),zinv_alphaerr)  << endl;
       *ofile <<  Form("%s                                   lnN    -   %.3f    -    - ",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;     
+      *ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_purityerr.Data(),zinv_purityerr)  << endl;
     }
     if (nbjets_LOW >= 2) {
       *ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_mcsyst.Data(),zinv_mcsyst)  << endl;
@@ -508,7 +521,11 @@ void cardMaker(string signal, string input_dir, string output_dir){
 
   // set input files
 
-  if (iteration1) {
+  if (iteration2) {
+    f_lostlep = new TFile(Form("%s/lostlepFromCRs.root",input_dir.c_str()));
+    f_zinv = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str()));
+    f_purity = new TFile(Form("%s/purity.root",input_dir.c_str()));
+  } else if (iteration1) {
     f_lostlep = new TFile(Form("%s/lostlepFromCRs.root",input_dir.c_str()));
     f_zinv = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str()));
   } else { 
