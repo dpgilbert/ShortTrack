@@ -201,10 +201,9 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
 
 
 //_______________________________________________________________________________
-void ZinvMaker(){
+void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/"){
 
   //  string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
-  string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/";
   //  string input_dir = "../MT2looper/output/2015ExtendedNJets/";
   //string input_dir = "../MT2looper/output/2015LowLumi/";
   string output_name = input_dir+"zinvFromGJ.root";
@@ -220,7 +219,7 @@ void ZinvMaker(){
   //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
 
   if(f_zinv->IsZombie() || f_gjet->IsZombie()) {
-    std::cout << "Input file does not exist" << std::endl;
+    std::cerr << "Input file does not exist" << std::endl;
     return;
   }
 

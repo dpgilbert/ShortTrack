@@ -146,12 +146,13 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
 }
 
 //_______________________________________________________________________________
-void lostlepMaker(){
+void lostlepMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/"){
 
   //string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
-  string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/test/";
+  //  string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/test/";
   //string input_dir = "../MT2looper/output/2015LowLumi/";
   //  string input_dir = "../MT2looper/output/test/";
+
   string output_name = input_dir+"lostlepFromCRs.root";
   // ----------------------------------------
   //  samples definition
@@ -165,7 +166,7 @@ void lostlepMaker(){
   //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
   
   if(f_ttbar->IsZombie() || f_wjets->IsZombie()) {
-    std::cout << "Input file does not exist" << std::endl;
+    std::cerr << "Input file does not exist" << std::endl;
     return;
   }
 

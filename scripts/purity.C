@@ -330,12 +330,11 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   return;
 }
 
-void purity()
+void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/")
 {
   
   //load signal regions
   vector<SR> SRVec =  getSignalRegionsZurich_jetpt40();
-  string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/";
 
   //open files
   //TFile* f_g = new TFile("$CMSSW_BASE/../MT2looper/output/V00-00-12_skim_trig_nj2_ht450_met30_mt2gt200_Zinv/gjet_ht.root"); //gjet file
@@ -343,7 +342,12 @@ void purity()
   //TFile* f_QCDpluGJET = new TFile("$CMSSW_BASE/../MT2looper/output/V00-00-12_skim_trig_nj2_ht450_met30_mt2gt200_Zinv/qcdplugjet.root"); //qcd+gjets file
   TFile* f_g = new TFile(Form("%s/gjet_ht.root",input_dir.c_str())); //gjet file
   TFile* f_q = new TFile(Form("%s/qcd_pt.root",input_dir.c_str())); //qcd file
-  TFile* f_QCDpluGJET = new TFile(Form("%s/qcdplugjet.root",input_dir.c_str())); //qcd+gjets file
+  TFile* f_QCDpluGJET = new TFile(Form("%s/qcdplusgjet.root",input_dir.c_str())); //qcd+gjets file
+  if(f_g->IsZombie() || f_q->IsZombie() || f_QCDpluGJET->IsZombie()) {
+    std::cerr << "Input file does not exist" << std::endl;
+    return;
+  }
+
   cout << "Making Fake-Rate Histograms..." << endl;
   
   //get hists for FR calc
