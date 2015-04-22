@@ -162,7 +162,6 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   if (h_zinv != 0) n_zinv = h_zinv->GetBinContent(mt2bin);
   if (n_zinv < 0.01 && !useGammaFunction) n_zinv = 0.01;
   if ( iteration2 ) {
-    n_zinv = h_zinv->GetBinContent(mt2bin); // just a starting point, no QCD.
     // MC stat unc based on #Z/#g
     TH1D* h_zinv_mcstat = (TH1D*) f_zinv->Get(fullhistnameRatio);
     if (h_zinv_mcstat != 0 && h_zinv_mcstat->GetBinContent(mt2bin) != 0) {
