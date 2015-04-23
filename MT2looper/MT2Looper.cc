@@ -593,7 +593,7 @@ void MT2Looper::fillHistosInclusive() {
     for(unsigned int iVar=0; iVar<vars.size(); iVar++){
       if(vars.at(iVar) == "ht") values_temp["ht"] = t.ht;
       else if(vars.at(iVar) == "njets") values_temp["njets"] = t.nJet40;
-      else if(vars.at(iVar) == "nbjets") values_temp["nbjets"] = t.nBJet40;
+      else if(vars.at(iVar) == "nbjets") values_temp["nbjets"] = t.nBJet20;
     }
     if(InclusiveRegions.at(srN).PassesSelection(values_temp)){
       fillHistos(InclusiveRegions.at(srN).srHistMap, InclusiveRegions.at(srN).GetNumberOfMT2Bins(), InclusiveRegions.at(srN).GetMT2Bins(), InclusiveRegions.at(srN).GetName(), "");
@@ -612,7 +612,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["njets"]       = t.nJet40;
-  values["nbjets"]      = t.nBJet40;
+  values["nbjets"]      = t.nBJet20;
   values["mt2"]         = t.mt2;
   values["ht"]          = t.ht;
   values["met"]         = t.met_pt;
@@ -641,7 +641,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["njets"]       = t.nJet40;
-  values["nbjets"]      = t.nBJet40;
+  values["nbjets"]      = t.nBJet20;
   values["mt2"]         = t.mt2;
   values["ht"]          = t.ht;
   values["met"]         = t.met_pt;
@@ -678,7 +678,7 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   values["j1pt"]        = t.gamma_jet1_pt;
   values["j2pt"]        = t.gamma_jet2_pt;
   values["njets"]       = t.gamma_nJet40;
-  values["nbjets"]      = t.gamma_nBJet40;
+  values["nbjets"]      = t.gamma_nBJet20;
   values["mt2"]         = t.gamma_mt2;
   values["ht"]          = t.gamma_ht;
   values["met"]         = t.gamma_met_pt;
@@ -745,7 +745,7 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["njets"]       = t.nJet40;
-  values["nbjets"]      = t.nBJet40;
+  values["nbjets"]      = t.nBJet20;
   values["mt2"]         = t.zll_mt2;
   values["ht"]          = t.zll_ht;
   values["met"]         = t.zll_met_pt;
@@ -787,7 +787,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
   plot1D("h_ht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
   plot1D("h_nJet40"+s,       t.nJet40,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
-  plot1D("h_nBJet40"+s,      t.nBJet40,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
+  plot1D("h_nBJet20"+s,      t.nBJet20,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
   plot1D("h_deltaPhiMin"+s,  t.deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
   plot1D("h_diffMetMht"+s,   t.diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
   plot1D("h_diffMetMhtOverMet"+s,   t.diffMetMht/t.met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
@@ -882,7 +882,7 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, int n_mt2
     if (t.HLT_Photons) plot1D("h_gammaPt_HLT"+s,       t.gamma_pt[0],   evtweight_, h_1d, ";gamma p_{T} [GeV]", 300, 0, 1500);
     plot1D("h_ht"+s,       t.gamma_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
     plot1D("h_nJet40"+s,       t.gamma_nJet40,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
-    plot1D("h_nBJet40"+s,      t.gamma_nBJet40,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
+    plot1D("h_nBJet20"+s,      t.gamma_nBJet20,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
     plot1D("h_deltaPhiMin"+s,  t.gamma_deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
     plot1D("h_diffMetMht"+s,   t.gamma_diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
     plot1D("h_diffMetMhtOverMet"+s,   t.gamma_diffMetMht/t.gamma_met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
@@ -890,7 +890,7 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, int n_mt2
     plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
     plot1D("h_htbins"+s,       t.gamma_ht,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins, htbins);
     plot1D("h_njbins"+s,       t.gamma_nJet40,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
-    plot1D("h_nbjbins"+s,       t.gamma_nBJet40,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
+    plot1D("h_nbjbins"+s,       t.gamma_nBJet20,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
     }
 
   outfile_->cd();
@@ -920,7 +920,7 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     plot1D("h_met"+s,       t.zll_met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
     plot1D("h_ht"+s,       t.zll_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
     plot1D("h_nJet40"+s,       t.nJet40,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
-    plot1D("h_nBJet40"+s,      t.nBJet40,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
+    plot1D("h_nBJet20"+s,      t.nBJet20,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
     plot1D("h_deltaPhiMin"+s,  t.zll_deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
     plot1D("h_diffMetMht"+s,   t.zll_diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
     plot1D("h_diffMetMhtOverMet"+s,   t.zll_diffMetMht/t.zll_met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
@@ -928,7 +928,7 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
     plot1D("h_htbins"+s,       t.zll_ht,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins, htbins);
     plot1D("h_njbins"+s,       t.nJet40,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
-    plot1D("h_nbjbins"+s,       t.nBJet40,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
+    plot1D("h_nbjbins"+s,       t.nBJet20,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
 
   }
 
