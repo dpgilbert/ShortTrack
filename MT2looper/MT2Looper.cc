@@ -496,6 +496,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   savePlotsDir(h_1d_global,outfile_,"");
   savePlotsDir(SRNoCut.srHistMap,outfile_,SRNoCut.GetName().c_str());
   savePlotsDir(SRBase.srHistMap,outfile_,SRBase.GetName().c_str());
+  savePlotsDir(SRBase.crslHistMap,outfile_,"crslbase");
   savePlotsDir(SRNoCut.crgjHistMap,outfile_,"crgjnocut");
   savePlotsDir(SRBase.crgjHistMap,outfile_,"crgjbase");
 
@@ -634,6 +635,21 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 // hists for single lepton control region
 void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suffix) {
 
+  // first fill base region
+  std::map<std::string, float> valuesBase;
+  valuesBase["deltaPhiMin"] = t.deltaPhiMin;
+  valuesBase["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  valuesBase["nlep"]        = 0; // dummy value
+  valuesBase["j1pt"]        = t.jet1_pt;
+  valuesBase["j2pt"]        = t.jet2_pt;
+  valuesBase["mt2"]         = t.mt2;
+  valuesBase["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+
+  if (SRBase.PassesSelection(valuesBase)) {
+    fillHistosSingleLepton(SRBase.crslHistMap, "crslbase", suffix);
+  }
+
+  // topological regions
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
