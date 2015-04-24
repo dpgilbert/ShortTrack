@@ -646,7 +646,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   valuesBase["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   if (SRBase.PassesSelection(valuesBase)) {
-    fillHistosSingleLepton(SRBase.crslHistMap, "crslbase", suffix);
+    fillHistosSingleLepton(SRBase.crslHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbase", suffix);
   }
 
   // topological regions
