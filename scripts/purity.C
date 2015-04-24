@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <map>
 #include <sstream>
+#include <iostream>
+#include <fstream>
 
 #include "TFile.h"
 #include "TStyle.h"
@@ -77,7 +79,7 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, SR sr, TH2D* h_FR, const 
 
   //mt2bin names
   vector<TString> mt2binsname;
-  for(int i=0; i<n_mt2bins; i++){
+  for(int i=0; i<=n_mt2bins; i++){
     mt2binsname.push_back(toString(sr.GetMT2Bins()[i]));
   }
   
@@ -178,15 +180,14 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, SR sr, TH2D* h_FR, const 
     dir = f_out->mkdir(directory.Data());
   } 
   dir->cd();
-  srName="";
 
   TH1D* h_pred = (TH1D*) h_FakeLooseNotTight->Clone();
   h_pred->Reset();
-  h_pred->SetName("h_pred"+srName+s);
+  h_pred->SetName("h_pred"+s);
   h_pred->SetContent(preds);
   h_pred->SetError(predErrors);
   h_pred->Write();
-
+  
   return;
   
 }
@@ -197,6 +198,7 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   TH1D* h_gjet = (TH1D*) f_gjet->Get("crgj"+sr+"/h_mt2bins");
   TH1D* h_qcd = (TH1D*) f_qcd->Get("crgj"+sr+"/h_mt2bins");
   TH1D* h_qcdFake = (TH1D*) f_qcd->Get("crgj"+sr+"/h_mt2binsFake");
+  TH1D* h_qcdFakeLooseNotTight = (TH1D*) f_qcd->Get("crgj"+sr+"/h_mt2binsFakeLooseNotTight");
   TH1D* h_predFR = (TH1D*) f_out->Get("sr"+sr+"/h_pred");
   TH1D* h_predSieieSB = (TH1D*) f_out->Get("sr"+sr+"/h_pred"+"FailSieie");
   TH1D* h_predFragPlus50 = (TH1D*) f_out->Get("sr"+sr+"/h_pred"+"plus50");
@@ -230,7 +232,6 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
     dir = f_out->mkdir(directory.Data());
   } 
   dir->cd();
-  sr="";
 
   //initialize numerator, den, and purity hists
   TH1D* h_num = sameBin(h_gjet);
@@ -277,7 +278,7 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   if(doTrue){
     h_denTrue->Add(h_qcdFake);
     h_purityTrue->Divide(h_num,h_denTrue,1,1,"B");
-    h_purityTrue->SetName("h_purity"+sr+"True");
+    h_purityTrue->SetName("h_purityTrue");
   }
   h_denTrue->SetName("h_mt2bins");
 
@@ -285,7 +286,7 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   if(doFR){
     h_denFR->Add(h_predFR);
     h_purityFR->Divide(h_num,h_denFR,1,1,"B");
-    h_purityFR->SetName("h_purity"+sr+"FR");
+    h_purityFR->SetName("h_purityFR");
   }
 
   //do FR purity with poisson errors on yields
@@ -295,14 +296,14 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
     h_denFRpoisson->GetSumw2()->Set(0); h_denFRpoisson->Sumw2(); // reset sumw2
     h_denFRpoisson->Add(h_predFRpoisson);
     h_purityFRpoisson->Divide(h_numP,h_denFRpoisson,1,1,"B");
-    h_purityFRpoisson->SetName("h_purity"+sr+"FRpoisson");
+    h_purityFRpoisson->SetName("h_purityFRpoisson");
   }
 
   //do SieieSB purity
   if(doSieieSB){
     h_denSieieSB->Add(h_predSieieSB);
     h_puritySieieSB->Divide(h_num,h_denSieieSB,1,1,"B");
-    h_puritySieieSB->SetName("h_purity"+sr+"SieieSB");
+    h_puritySieieSB->SetName("h_puritySieieSB");
   }
 
  //do SieieSB purity with poisson errors on yields
@@ -312,7 +313,7 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
     h_denSieieSBpoisson->GetSumw2()->Set(0); h_denSieieSBpoisson->Sumw2(); // reset sumw2
     h_denSieieSBpoisson->Add(h_predSieieSBpoisson);
     h_puritySieieSBpoisson->Divide(h_numP2,h_denSieieSBpoisson,1,1,"B");
-    h_puritySieieSBpoisson->SetName("h_purity"+sr+"SieieSBpoisson");
+    h_puritySieieSBpoisson->SetName("h_puritySieieSBpoisson");
     // Dump everything!
     //cout<<"h_purity"<<sr<<"SieieSBpoisson"<<endl;
     //h_gjet->Print("all");
@@ -326,14 +327,14 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   if(doFragPlus50){
     h_denFragPlus50->Add(h_predFragPlus50);
     h_purityFragPlus50->Divide(h_num,h_denFragPlus50,1,1,"B");
-    h_purityFragPlus50->SetName("h_purity"+sr+"FragPlus50");
+    h_purityFragPlus50->SetName("h_purityFragPlus50");
   }
 
   //do FragMinus50 purity
   if(doFragMinus50){
     h_denFragMinus50->Add(h_predFragMinus50);
     h_purityFragMinus50->Divide(h_num,h_denFragMinus50,1,1,"B");
-    h_purityFragMinus50->SetName("h_purity"+sr+"FragMinus50");
+    h_purityFragMinus50->SetName("h_purityFragMinus50");
   }
    
   //f_out->cd();
@@ -349,6 +350,21 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   if(doSieieSBpoisson) h_puritySieieSBpoisson->Write();
   h_denTrue->Write();
 
+  //write raw numbers to output file
+  ofstream purityLog;
+  purityLog.open("purity.log", ios::app);
+  purityLog << "------------------------------" << endl;
+  purityLog << "Signal Region " << sr << endl;
+  for (int i = 1; i<= h_gjet->GetNbinsX(); i++){
+    purityLog << h_gjet->GetBinLowEdge(i) << " < MT2 < " << h_gjet->GetBinLowEdge(i+1) << endl;
+    if(h_qcdFake) purityLog << "Ngamma (tight): " << h_qcdFake->GetBinContent(i) << endl;
+    if(h_qcdFakeLooseNotTight) purityLog << "Ngamma (loose not tight): " << h_qcdFakeLooseNotTight->GetBinContent(i) << endl;
+    if(doFR) purityLog << "Purity: " << h_purityFR->GetBinContent(i) << " +/- " << h_purityFR->GetBinError(i) << endl;
+    purityLog << endl;
+  }
+  purityLog << "------------------------------" << endl;
+  purityLog.close();
+  
   f_out->cd();
   return;
 }
@@ -419,6 +435,11 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   }
 
   //make purity plots
+  //first delete log file in case it already exists
+  if( remove( "purity.log" ) != 0 )
+    perror( "Error deleting purity.log" );
+  else
+    puts( "Deleting old log file..." );
   cout << "Making purity histograms..." << endl;
   for(int i = 0; i< (int) SRVec.size(); i++){
     purityPlots(f_out, f_g, f_q, SRVec[i].GetName());
