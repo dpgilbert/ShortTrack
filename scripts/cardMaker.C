@@ -34,7 +34,7 @@ bool uncorrelatedZGratio = false; // treat ZGratio uncertainty as fully uncorrel
 bool previousBinZGprediction = false; // Get prediction from previous bin if nGJ < previousBinZGprediction_min
 float previousBinZGprediction_min = 5.;
 
-bool iteration2 = false;
+bool iteration2 = true;
 
 std::string toString(int in){
   stringstream ss;
@@ -67,7 +67,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   TString fullhistnameCRyield  = fullhistname+"CRyield";
   TString fullhistnamePreviousBinRatio  = fullhistname+"PreviousBinRatio";
   TString fullhistnameRatio  = fullhistname+"Ratio";
-  TString fullhistnamePurity = dir + "/h_puritySieieSBpoisson";
+  TString fullhistnamePurity = dir + "/h_puritySieieSB";
 
   double n_lostlep(0.);
   double n_lostlep_tr(0.);
