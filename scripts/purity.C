@@ -18,6 +18,7 @@
 #include "TString.h"
 #include "TLegend.h"
 #include "TKey.h"
+#include "TEfficiency.h"
 
 #include "../MT2CORE/mt2tree.h"
 #include "../MT2CORE/sigSelections.h"
@@ -64,7 +65,7 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, SR sr, TH2D* h_FR, const 
     return;
   }
   if(!h_FakeLooseNotTight){
-    //cout << "SR" << srName << " FakeLooseNotTight hist is null! Skipping signal region..." << endl;
+    cout << "SR" << srName << " FakeLooseNotTight hist is null! Skipping signal region..." << endl;
     return;
   }
 
@@ -246,6 +247,8 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   TH1D* h_purityFR = sameBin(h_gjet);
   TH1D* h_purityFRpoisson = sameBin(h_gjet);
   TH1D* h_puritySieieSB = sameBin(h_gjet);
+  TH1D* h_estimateSieieSB = sameBin(h_gjet);
+  TH1D* h_estimateSieieSBpoisson = sameBin(h_gjet);
   TH1D* h_puritySieieSBpoisson = sameBin(h_gjet);
   TH1D* h_purityFragPlus50 = sameBin(h_gjet);
   TH1D* h_purityFragMinus50 = sameBin(h_gjet);
@@ -275,79 +278,103 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   }
 
   //do True purity
-  if(doTrue){
-    h_denTrue->Add(h_qcdFake);
-    h_purityTrue->Divide(h_num,h_denTrue,1,1,"B");
-    h_purityTrue->SetName("h_purityTrue");
-  }
+  if(doTrue) h_denTrue->Add(h_qcdFake);
+  h_purityTrue->Divide(h_num,h_denTrue,1,1,"B");
+  h_purityTrue->SetName("h_purityTrue");
   h_denTrue->SetName("h_mt2bins");
 
   //do FR purity
-  if(doFR){
-    h_denFR->Add(h_predFR);
-    h_purityFR->Divide(h_num,h_denFR,1,1,"B");
-    h_purityFR->SetName("h_purityFR");
-  }
+  if(doFR) h_denFR->Add(h_predFR);
+  h_purityFR->Divide(h_num,h_denFR,1,1,"B");
+  h_purityFR->SetName("h_purityFR");
 
   //do FR purity with poisson errors on yields
-  if(doFRpoisson){
-    TH1D* h_numP =  (TH1D*) h_num->Clone("numPoisson");
-    h_numP->GetSumw2()->Set(0); h_numP->Sumw2(); // reset sumw2
-    h_denFRpoisson->GetSumw2()->Set(0); h_denFRpoisson->Sumw2(); // reset sumw2
-    h_denFRpoisson->Add(h_predFRpoisson);
-    h_purityFRpoisson->Divide(h_numP,h_denFRpoisson,1,1,"B");
-    h_purityFRpoisson->SetName("h_purityFRpoisson");
-  }
+  TH1D* h_numP =  (TH1D*) h_num->Clone("numPoisson");
+  h_numP->GetSumw2()->Set(0); h_numP->Sumw2(); // reset sumw2
+  h_denFRpoisson->GetSumw2()->Set(0); h_denFRpoisson->Sumw2(); // reset sumw2
+  if(doFRpoisson) h_denFRpoisson->Add(h_predFRpoisson);
+  h_purityFRpoisson->Divide(h_numP,h_denFRpoisson,1,1,"B");
+  h_purityFRpoisson->SetName("h_purityFRpoisson");
+
 
   //do SieieSB purity
-  if(doSieieSB){
-    h_denSieieSB->Add(h_predSieieSB);
-    h_puritySieieSB->Divide(h_num,h_denSieieSB,1,1,"B");
-    h_puritySieieSB->SetName("h_puritySieieSB");
-  }
-
- //do SieieSB purity with poisson errors on yields
-  if(doSieieSB){
-    TH1D* h_numP2 = (TH1D*) h_num->Clone("numPoisson2");
-    h_numP2->GetSumw2()->Set(0); h_numP2->Sumw2(); // reset sumw2
-    h_denSieieSBpoisson->GetSumw2()->Set(0); h_denSieieSBpoisson->Sumw2(); // reset sumw2
-    h_denSieieSBpoisson->Add(h_predSieieSBpoisson);
-    h_puritySieieSBpoisson->Divide(h_numP2,h_denSieieSBpoisson,1,1,"B");
-    h_puritySieieSBpoisson->SetName("h_puritySieieSBpoisson");
-    // Dump everything!
-    //cout<<"h_purity"<<sr<<"SieieSBpoisson"<<endl;
-    //h_gjet->Print("all");
-    //h_numP2->Print("all");
-    //if (doTrue) h_qcdFake->Print("all");
-    //h_predSieieSBpoisson->Print("all");
-    //h_puritySieieSBpoisson->Print("all");
-  }
-
+  if(doSieieSB) h_denSieieSB->Add(h_predSieieSB);
+  h_puritySieieSB->Divide(h_num,h_denSieieSB,1,1,"B");
+  h_puritySieieSB->SetName("h_puritySieieSB");
+  // want to also save: (DenTrue (total of all tight events) - prediction) *0.92, which is our actual gjet prediction
+  h_estimateSieieSB->Add(h_denTrue);
+  if(doSieieSB) h_estimateSieieSB->Add(h_predSieieSB, -1);
+  h_estimateSieieSB->Scale(0.92);
+  h_estimateSieieSB->SetName("h_estimateSieieSB");
+  //h_estimateSieieSB->Print("all");
+  //h_gjet->Print("all");
+  
+  //TEfficiency * pEff = new TEfficiency((const TH1*) h_num, (const TH1*) h_denSieieSB);
+  
+  // Dump everything!
+  //if (sr == "1M") {
+  //  cout<<"h_purity"<<sr<<"SieieSB"<<endl;
+  //  TEfficiency * pEff = new TEfficiency(*h_num,*h_denSieieSB);
+  //  pEff->SetStatisticOption(TEfficiency::EStatOption::kBBayesian); //kBayesian
+  //  h_gjet->Print("all");
+  //  h_num->Print("all");
+  //  if (doTrue) h_qcdFake->Print("all");
+  //  if(doSieieSB) h_predSieieSB->Print("all");
+  //  h_denSieieSB->Print("all");
+  //  h_puritySieieSB->Print("all");
+  //  for ( int i = 1; i <= h_puritySieieSB->GetNbinsX(); i++)
+  //	cout<<"Bin "<<i<<" has eff "<<pEff->GetEfficiency(i)<<" +"<<pEff->GetEfficiencyErrorUp(i)<<"/-"<<pEff->GetEfficiencyErrorLow(i)<<endl;;
+  //}
+  
+  //do SieieSB purity with poisson errors on yields
+  TH1D* h_numP2 = (TH1D*) h_num->Clone("numPoisson2");
+  h_numP2->GetSumw2()->Set(0); h_numP2->Sumw2(); // reset sumw2
+  h_denSieieSBpoisson->GetSumw2()->Set(0); h_denSieieSBpoisson->Sumw2(); // reset sumw2
+  if(doSieieSBpoisson) h_denSieieSBpoisson->Add(h_predSieieSBpoisson);
+  h_puritySieieSBpoisson->Divide(h_numP2,h_denSieieSBpoisson,1,1,"B");
+  h_puritySieieSBpoisson->SetName("h_puritySieieSBpoisson");
+  h_estimateSieieSBpoisson->Add(h_denTrue);
+  h_estimateSieieSBpoisson->GetSumw2()->Set(0); h_estimateSieieSBpoisson->Sumw2();
+  if(doSieieSBpoisson) h_estimateSieieSBpoisson->Add(h_predSieieSBpoisson, -1);
+  h_estimateSieieSBpoisson->Scale(0.92);
+  h_estimateSieieSBpoisson->SetName("h_estimateSieieSBpoisson");
+  // Dump everything!
+  //if (sr == "1M") {
+  //  cout<<"h_purity"<<sr<<"SieieSBpoisson"<<endl;
+  //  TEfficiency * pEff = new TEfficiency(*h_numP2,*h_denSieieSBpoisson);
+  //  pEff->SetStatisticOption(TEfficiency::EStatOption::kBBayesian); //kBayesian
+  //  h_numP2->Print("all");
+  //  if(doSieieSBpoisson) h_predSieieSBpoisson->Print("all");
+  //  h_denSieieSBpoisson->Print("all");
+  //  h_puritySieieSBpoisson->Print("all");
+  //  for ( int i = 1; i <= h_puritySieieSB->GetNbinsX(); i++)
+  //	cout<<"Bin "<<i<<" has eff "<<pEff->GetEfficiency(i)<<" +"<<pEff->GetEfficiencyErrorUp(i)<<"/-"<<pEff->GetEfficiencyErrorLow(i)<<endl;;
+  //}
+  
+  
   //do FragPlus50 purity
-  if(doFragPlus50){
-    h_denFragPlus50->Add(h_predFragPlus50);
-    h_purityFragPlus50->Divide(h_num,h_denFragPlus50,1,1,"B");
-    h_purityFragPlus50->SetName("h_purityFragPlus50");
-  }
+  if(doFragPlus50) h_denFragPlus50->Add(h_predFragPlus50);
+  h_purityFragPlus50->Divide(h_num,h_denFragPlus50,1,1,"B");
+  h_purityFragPlus50->SetName("h_purityFragPlus50");
 
   //do FragMinus50 purity
-  if(doFragMinus50){
-    h_denFragMinus50->Add(h_predFragMinus50);
-    h_purityFragMinus50->Divide(h_num,h_denFragMinus50,1,1,"B");
-    h_purityFragMinus50->SetName("h_purityFragMinus50");
-  }
+  if(doFragMinus50) h_denFragMinus50->Add(h_predFragMinus50);
+  h_purityFragMinus50->Divide(h_num,h_denFragMinus50,1,1,"B");
+  h_purityFragMinus50->SetName("h_purityFragMinus50");
    
   //f_out->cd();
   dir->cd();
 
   //write hists to output file
-  if(doTrue) h_purityTrue->Write();
-  if(doFR) h_purityFR->Write();
-  if(doSieieSB) h_puritySieieSB->Write();
-  if(doFragPlus50) h_purityFragPlus50->Write();
-  if(doFragMinus50) h_purityFragMinus50->Write();
-  if(doFRpoisson) h_purityFRpoisson->Write();
-  if(doSieieSBpoisson) h_puritySieieSBpoisson->Write();
+  h_purityTrue->Write();
+  h_purityFR->Write();
+  h_puritySieieSB->Write();
+  h_estimateSieieSB->Write();
+  h_purityFragPlus50->Write();
+  h_purityFragMinus50->Write();
+  h_purityFRpoisson->Write();
+  h_puritySieieSBpoisson->Write();
+  h_estimateSieieSBpoisson->Write();
   h_denTrue->Write();
 
   //write raw numbers to output file
