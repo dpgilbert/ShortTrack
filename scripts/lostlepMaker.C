@@ -17,7 +17,7 @@ using namespace std;
 
 
 //_______________________________________________________________________________
-void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, string output_name, int method = 0 ) {
+void makeLostLepFromCRs( TFile* ftop , TFile* fwjets , vector<string> dirs, string output_name, int method = 0 ) {
 
   // Generate histogram file with lostlep prediction based on 1L CRs
   // Method 0.  Central value from SRs, Gaussian stat err from 1L CRs
@@ -33,30 +33,30 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
 
     TString fullhistnameSL = "crsl"+TString(dirs.at(idir))+"/h_mt2bins";
 
-    TH1D* httbar_sr = (TH1D*) fttbar->Get(fullhistname);
+    TH1D* htop_sr = (TH1D*) ftop->Get(fullhistname);
     TH1D* hwjets_sr = (TH1D*) fwjets->Get(fullhistname);
     
-    // If either ttbar or wjets SR histograms are not filled, just leave (shouldn't happen when running on full stat MC)
-    if(!httbar_sr || !hwjets_sr){
+    // If either top or wjets SR histograms are not filled, just leave (shouldn't happen when running on full stat MC)
+    if(!htop_sr || !hwjets_sr){
       cout<<"could not find histogram "<<fullhistname<<endl;
       //continue; //Actually, don't skip. Still need CR yields even if SR yields are 0.
     }
 
     //const int n_mt2bins = 5;
     //const float mt2bins[n_mt2bins+1] = {200., 300., 400., 600., 1000., 1500.};
-    TH1D* h_n_mt2bins = (TH1D*) fttbar->Get(n_mt2bins_name);
+    TH1D* h_n_mt2bins = (TH1D*) ftop->Get(n_mt2bins_name);
     int n_mt2bins = h_n_mt2bins->GetBinContent(1);
-    TH1D* h_n_mt2bins = (TH1D*) fttbar->Get(n_mt2bins_name);
+    TH1D* h_n_mt2bins = (TH1D*) ftop->Get(n_mt2bins_name);
     const int n_mt2bins = h_n_mt2bins->GetBinContent(1);
     float* mt2bins = new float[n_mt2bins+1];
     for(int i=0; i<=(n_mt2bins); i++){
-      //std::cout << "bin edge = " << httbar_sr->GetBinLowEdge(i+1) << std::endl;
-      mt2bins[i] = httbar_sr->GetBinLowEdge(i+1);  
+      //std::cout << "bin edge = " << htop_sr->GetBinLowEdge(i+1) << std::endl;
+      mt2bins[i] = htop_sr->GetBinLowEdge(i+1);  
     }
 
     TH1D* hlostlep_sr = 0;
-    if(httbar_sr) {
-      hlostlep_sr = (TH1D*) httbar_sr->Clone("h_mt2binsSR");
+    if(htop_sr) {
+      hlostlep_sr = (TH1D*) htop_sr->Clone("h_mt2binsSR");
       if(hwjets_sr) hlostlep_sr->Add(hwjets_sr);
     } else if(hwjets_sr) {
       hlostlep_sr = (TH1D*) hwjets_sr->Clone("h_mt2binsSR");
@@ -65,19 +65,19 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
     }
 
     TH1D* hlostlep_cr = 0;
-    TH1D* httbar_cr = (TH1D*) fttbar->Get(fullhistnameSL);
+    TH1D* htop_cr = (TH1D*) ftop->Get(fullhistnameSL);
     TH1D* hwjets_cr = (TH1D*) fwjets->Get(fullhistnameSL);
     // check that histograms exist
-    if (!httbar_cr) {
-      cout << "couldn't find ttbar CR hist: " << fullhistnameSL << endl;
+    if (!htop_cr) {
+      cout << "couldn't find top CR hist: " << fullhistnameSL << endl;
     }
     if (!hwjets_cr) {
       cout << "couldn't find wjets CR hist: " << fullhistnameSL << endl;
     }
-    if (!hlostlep_cr && httbar_cr) {
-      hlostlep_cr = (TH1D*) httbar_cr->Clone("h_mt2binsCRyield");
-    } else if (httbar_cr) {
-      hlostlep_cr->Add(httbar_cr);
+    if (!hlostlep_cr && htop_cr) {
+      hlostlep_cr = (TH1D*) htop_cr->Clone("h_mt2binsCRyield");
+    } else if (htop_cr) {
+      hlostlep_cr->Add(htop_cr);
     }
     if (!hlostlep_cr && hwjets_cr) {
       hlostlep_cr = (TH1D*) hwjets_cr->Clone("h_mt2binsCRyield");
@@ -146,7 +146,7 @@ void makeLostLepFromCRs( TFile* fttbar , TFile* fwjets , vector<string> dirs, st
 }
 
 //_______________________________________________________________________________
-void lostlepMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/"){
+void lostlepMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/V00-00-12/"){
 
   //string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
   //  string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/test/";
@@ -161,11 +161,11 @@ void lostlepMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2loope
   std::cout << "Writing to file: " << output_name << std::endl;
 
   // get input files
-  TFile* f_ttbar = new TFile(Form("%s/ttall_msdecays.root",input_dir.c_str()));
+  TFile* f_top = new TFile(Form("%s/top.root",input_dir.c_str()));
   TFile* f_wjets = new TFile(Form("%s/wjets_ht.root",input_dir.c_str()));
   //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
   
-  if(f_ttbar->IsZombie() || f_wjets->IsZombie()) {
+  if(f_top->IsZombie() || f_wjets->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
     return;
   }
@@ -174,7 +174,7 @@ void lostlepMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2loope
 
   //Loop through list of every directory in the signal file.
   //if directory begins with "sr", excluding "srbase", add it to vector signal regions.
-  TIter it(f_ttbar->GetListOfKeys());
+  TIter it(f_top->GetListOfKeys());
   TKey* k;
   std::string keep = "sr";
   std::string skip = "srbase";
@@ -188,6 +188,6 @@ void lostlepMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2loope
     }
   }
 
-  makeLostLepFromCRs( f_ttbar , f_wjets , dirs, output_name, 0 );
+  makeLostLepFromCRs( f_top , f_wjets , dirs, output_name, 0 );
 
 }
