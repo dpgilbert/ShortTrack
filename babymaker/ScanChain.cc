@@ -372,8 +372,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         vec_lep_pdgId.push_back ( (-11)*cms3.els_charge().at(iEl));
         vec_lep_dxy.push_back ( cms3.els_dxyPV().at(iEl));
         vec_lep_dz.push_back ( cms3.els_dzPV().at(iEl));
-        vec_lep_tightId.push_back ( eleTightID(iEl,analysis_t::HADv2) );
-        vec_lep_relIso03.push_back (  eleRelIso03(iEl,analysis_t::HADv2));
+        vec_lep_tightId.push_back ( eleTightID(iEl,analysis_t::HAD,2) );
+        vec_lep_relIso03.push_back (  eleRelIso03(iEl,analysis_t::HAD));
         vec_lep_relIso04.push_back ( 0);
         vec_lep_miniRelIso.push_back ( elMiniRelIso(iEl) );
         if (cms3.els_mc3dr().at(iEl) < 0.2 && cms3.els_mc3idx().at(iEl) != -9999 && abs(cms3.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
@@ -413,9 +413,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         vec_lep_pdgId.push_back ( (-13)*cms3.mus_charge().at(iMu));
         vec_lep_dxy.push_back ( cms3.mus_dxyPV().at(iMu)); // this uses the silicon track. should we use best track instead?
         vec_lep_dz.push_back ( cms3.mus_dzPV().at(iMu)); // this uses the silicon track. should we use best track instead?
-        vec_lep_tightId.push_back ( muTightID(iMu,analysis_t::HADv2) );
-        vec_lep_relIso03.push_back ( muRelIso03(iMu,analysis_t::HADv2) );
-        vec_lep_relIso04.push_back ( muRelIso04(iMu,analysis_t::HADv2) );
+        vec_lep_tightId.push_back ( muTightID(iMu,analysis_t::HAD,2) );
+        vec_lep_relIso03.push_back ( muRelIso03(iMu,analysis_t::HAD) );
+        vec_lep_relIso04.push_back ( muRelIso04(iMu,analysis_t::HAD) );
         vec_lep_miniRelIso.push_back ( muMiniRelIso(iMu) );
         if (cms3.mus_mc3dr().at(iMu) < 0.2 && cms3.mus_mc3idx().at(iMu) != -9999 && abs(cms3.mus_mc3_id().at(iMu)) == 13) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.mus_mc3idx().at(iMu)]);
@@ -594,7 +594,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       for(unsigned int iGamma = 0; iGamma < cms3.photons_p4().size(); iGamma++){
         if(cms3.photons_p4().at(iGamma).pt() < 20.0) continue;
         if(fabs(cms3.photons_p4().at(iGamma).eta()) > 2.5) continue;
-	if ( !isLoosePhoton(iGamma,analysis_t::HADv2) ) continue;
+	if ( !isLoosePhoton(iGamma,analysis_t::HAD,2) ) continue;
 
 	if (ngamma >= max_ngamma) {
           std::cout << "WARNING: attempted to fill more than " << max_ngamma << " photons" << std::endl;
@@ -614,7 +614,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         gamma_phIso[ngamma] = photons_recoPhotonIso().at(iGamma);
         gamma_r9[ngamma] =  photons_full5x5_r9().at(iGamma);
         gamma_hOverE[ngamma] =  photons_full5x5_hOverEtowBC().at(iGamma);
-        gamma_idCutBased[ngamma] =  isTightPhoton(iGamma,analysis_t::HADv2) ? 1 : 0; 
+        gamma_idCutBased[ngamma] =  isTightPhoton(iGamma,analysis_t::HAD,2) ? 1 : 0; 
         if(gamma_pt[ngamma] > 20) nGammas20++;
 	
 	// Some work for truth-matching (should be integrated in CMS3 as for the leptons)
