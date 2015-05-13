@@ -21,6 +21,7 @@
 #include "../CORE/TriggerSelections.h"
 #include "../CORE/MCSelections.h"
 #include "../CORE/IsoTrackVeto.h"
+#include "../CORE/IsolationTools.h"
 
 // Tools
 #include "../Tools/utils.h"
