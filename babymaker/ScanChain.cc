@@ -488,6 +488,29 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	zll_eta = ll.Eta();
 	zll_phi = ll.Phi();
       }
+      //--overload zll variables for single lepton events (w->lnu)
+      if (nlep == 1) {
+	float zll_met_px  = met_pt * cos(met_phi);
+	float zll_met_py  = met_pt * sin(met_phi);	
+	zll_met_px += lep_pt[0] * cos(lep_phi[0]);
+	zll_met_py += lep_pt[0] * sin(lep_phi[0]);
+	// recalculated MET with photons added
+	TVector2 zll_met_vec(zll_met_px, zll_met_py);
+	zll_met_pt = zll_met_vec.Mod();
+	zll_met_phi = TVector2::Phi_mpi_pi(zll_met_vec.Phi());      
+	// TLorentzVector l0(0,0,0,0);
+	// TLorentzVector l1(0,0,0,0);
+	// l0.SetPtEtaPhiM(lep_pt[0], lep_eta[0], lep_phi[0], lep_mass[0]);
+	// TLorentzVector ll = l0;
+	// zll_mass = ll.M();
+	// zll_pt = ll.Pt();
+	// zll_eta = ll.Eta();
+	// zll_phi = ll.Phi();
+	zll_mass = 0;
+	zll_pt = 0;
+	zll_eta = 0;
+	zll_phi = 0;
+      }
 
       if (verbose) cout << "before isotracks" << endl;
 
@@ -890,7 +913,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 		nBJet40++; 
 		float mt = MT(jet_pt[njet],jet_phi[njet],met_pt,met_phi);
 		if (mt < minMTBMet) minMTBMet = mt;
-		if (nlep == 2) {
+		if (nlep == 2 || nlep == 1) {
 		  float zllmt = MT(jet_pt[njet],jet_phi[njet],zll_met_pt,zll_met_phi);
 		  if (zllmt < zll_minMTBMet) zll_minMTBMet = zllmt;
 		}
@@ -1039,8 +1062,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       gamma_diffMetMht = (mhtVectorGamma - metVectorGamma).Mod();
 
       // MT2, MHT for Z-->ll control region
+      //overloaded for single lepton events
       zll_ht = 0;
-      if (nlep == 2) {
+      if (nlep == 2 || nlep == 1) {
         zll_deltaPhiMin = 999;
         LorentzVector sumMhtp4Zll = LorentzVector(0,0,0,0);
 
