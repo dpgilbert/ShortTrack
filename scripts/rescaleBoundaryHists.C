@@ -22,7 +22,7 @@ void rescaleBoundaryHists(std::string indir, int numSamples){
     TKey* hist_k;
     while (hist_k = (TKey *)hist_it()) {
       std::string hist_name = (hist_k->GetTitle());
-      if (hist_name.find("_UP") != std::string::npos || hist_name.find("_LOW") != std::string::npos) {
+      if (hist_name.find("_HI") != std::string::npos || hist_name.find("_LOW") != std::string::npos) {
         TH1* h = (TH1*)hist_k->ReadObj();
         h->Scale(1.0/numSamples);
         dir->cd();

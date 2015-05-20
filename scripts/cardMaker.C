@@ -96,34 +96,34 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   //Get variable boundaries for signal region.
   //Used to create datacard name.
   TH1D* h_ht_LOW = (TH1D*) f_sig->Get(dir+"/h_ht_LOW");
-  TH1D* h_ht_UP = (TH1D*) f_sig->Get(dir+"/h_ht_UP");
+  TH1D* h_ht_HI = (TH1D*) f_sig->Get(dir+"/h_ht_HI");
   int ht_LOW = h_ht_LOW->GetBinContent(1);
-  int ht_UP = h_ht_UP->GetBinContent(1);
+  int ht_HI = h_ht_HI->GetBinContent(1);
   
   TH1D* h_nbjets_LOW = (TH1D*) f_sig->Get(dir+"/h_nbjets_LOW");
-  TH1D* h_nbjets_UP = (TH1D*) f_sig->Get(dir+"/h_nbjets_UP");
+  TH1D* h_nbjets_HI = (TH1D*) f_sig->Get(dir+"/h_nbjets_HI");
   int nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
-  int nbjets_UP = h_nbjets_UP->GetBinContent(1);
+  int nbjets_HI = h_nbjets_HI->GetBinContent(1);
 
   TH1D* h_njets_LOW = (TH1D*) f_sig->Get(dir+"/h_njets_LOW");
-  TH1D* h_njets_UP = (TH1D*) f_sig->Get(dir+"/h_njets_UP");
+  TH1D* h_njets_HI = (TH1D*) f_sig->Get(dir+"/h_njets_HI");
   int njets_LOW = h_njets_LOW->GetBinContent(1);
-  int njets_UP = h_njets_UP->GetBinContent(1);
+  int njets_HI = h_njets_HI->GetBinContent(1);
 
   int mt2_LOW = h_sig->GetBinLowEdge(mt2bin);
-  int mt2_UP = mt2_LOW + h_sig->GetBinWidth(mt2bin);
+  int mt2_HI = mt2_LOW + h_sig->GetBinWidth(mt2bin);
   // hardcode the current edge of our highest bin..
-  if (mt2_UP == 1500) mt2_UP = -1;
+  if (mt2_HI == 1500) mt2_HI = -1;
 
-  int nbjets_UP_mod = nbjets_UP;
-  int njets_UP_mod = njets_UP;
-  if(nbjets_UP != -1) nbjets_UP_mod--;
-  if(njets_UP != -1) njets_UP_mod--;
+  int nbjets_HI_mod = nbjets_HI;
+  int njets_HI_mod = njets_HI;
+  if(nbjets_HI != -1) nbjets_HI_mod--;
+  if(njets_HI != -1) njets_HI_mod--;
 
-  std::string ht_str = "HT" + toString(ht_LOW) + "to" + toString(ht_UP);
-  std::string jet_str = (njets_UP_mod == njets_LOW) ? "j" + toString(njets_LOW) : "j" + toString(njets_LOW) + "to" + toString(njets_UP_mod);
-  std::string bjet_str = (nbjets_UP_mod == nbjets_LOW) ? "b" + toString(nbjets_LOW) : "b" + toString(nbjets_LOW) + "to" + toString(nbjets_UP_mod);
-  std::string mt2_str = "m" + toString(mt2_LOW) + "to" + toString(mt2_UP);
+  std::string ht_str = "HT" + toString(ht_LOW) + "to" + toString(ht_HI);
+  std::string jet_str = (njets_HI_mod == njets_LOW) ? "j" + toString(njets_LOW) : "j" + toString(njets_LOW) + "to" + toString(njets_HI_mod);
+  std::string bjet_str = (nbjets_HI_mod == nbjets_LOW) ? "b" + toString(nbjets_LOW) : "b" + toString(nbjets_LOW) + "to" + toString(nbjets_HI_mod);
+  std::string mt2_str = "m" + toString(mt2_LOW) + "to" + toString(mt2_HI);
   
   //Replace instances of "-1" with "inf" for variables with no upper bound.
   ReplaceString(ht_str, "-1", "Inf");
@@ -335,7 +335,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
     ++n_syst;
   }
   // 1b: data CR with 0->1b sf
-  else if (nbjets_LOW == 1 && nbjets_UP == 2) {
+  else if (nbjets_LOW == 1 && nbjets_HI == 2) {
     if (iteration1) {
       if (useGammaFunction) {
 	if (n_zinv_cr > 0. && n_zinv > 0.) {
@@ -379,7 +379,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
     }
   } // end of 1b
   // 0b: data CR
-  else if (nbjets_UP == 1) {
+  else if (nbjets_HI == 1) {
     if (iteration1) {
       if (useGammaFunction) {
 	if (n_zinv_cr > 0. && n_zinv > 0.) {
@@ -445,7 +445,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   *ofile <<  "------------"                                                                  << endl;
   *ofile <<  Form("sig_syst                                            lnN   %.3f    -      -     - ",sig_syst)  << endl;
   if (iteration2) {
-    if (nbjets_UP == 1 || nbjets_UP == 2) {
+    if (nbjets_HI == 1 || nbjets_HI == 2) {
       *ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr,zinv_alpha)  << endl;
       *ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_alphaerr.Data(),zinv_alphaerr)  << endl;
       *ofile <<  Form("%s                                   lnN    -   %.3f    -    - ",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;     
@@ -456,7 +456,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
     }
   }
   else {
-  if (nbjets_UP == 1 || nbjets_UP == 2) {
+  if (nbjets_HI == 1 || nbjets_HI == 2) {
     *ofile <<  Form("%s                                   lnN    -   %.3f    -    - ",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;
     if (iteration1 && useGammaFunction) {
       if (n_zinv > 0. && n_zinv_cr == 0.) {
@@ -477,7 +477,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
     } else {
       *ofile <<  Form("%s     lnN    -   %.3f   -   - ",name_zinv_crstat.Data(),zinv_crstat)  << endl;
     }
-    if (!iteration1 && nbjets_LOW == 1 && nbjets_UP == 2) {
+    if (!iteration1 && nbjets_LOW == 1 && nbjets_HI == 2) {
       *ofile <<  Form("%s               lnN    -     %.3f   -    - ",name_zinv_bratio.Data(),zinv_bratio)  << endl;
     }
   }

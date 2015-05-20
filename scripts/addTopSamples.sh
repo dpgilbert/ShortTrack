@@ -16,5 +16,5 @@ cd $INDIR
 hadd top.root ttall_msdecays.root tth.root ttzjets.root ttwjets.root singletop.root
 popd
 
-#this script scales the UP and LOW boundary histograms by 1/numSamples since we don't want these hadd'ed
+#this script scales the HI and LOW boundary histograms by 1/numSamples since we don't want these hadd'ed
 root -b -q "rescaleBoundaryHists.C(\"${INDIR}\",5)";

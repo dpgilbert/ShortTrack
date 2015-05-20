@@ -134,43 +134,43 @@ string getJetBJetPlotLabel(const TFile* f, std::string dir_str) {
   TString dir= TString(dir_str);
 
   TH1D* h_njets_LOW = (TH1D*) f->Get(dir+"/h_njets_LOW");
-  TH1D* h_njets_UP = (TH1D*) f->Get(dir+"/h_njets_UP");
+  TH1D* h_njets_HI = (TH1D*) f->Get(dir+"/h_njets_HI");
   int njets_LOW;
-  int njets_UP;
-  if(h_njets_LOW && h_njets_UP){
+  int njets_HI;
+  if(h_njets_LOW && h_njets_HI){
     njets_LOW = h_njets_LOW->GetBinContent(1);
-    njets_UP = h_njets_UP->GetBinContent(1);
+    njets_HI = h_njets_HI->GetBinContent(1);
   }
   else{
     njets_LOW = 0;
-    njets_UP = -1;
+    njets_HI = -1;
   }
 
   TH1D* h_nbjets_LOW = (TH1D*) f->Get(dir+"/h_nbjets_LOW");
-  TH1D* h_nbjets_UP = (TH1D*) f->Get(dir+"/h_nbjets_UP");
+  TH1D* h_nbjets_HI = (TH1D*) f->Get(dir+"/h_nbjets_HI");
   int nbjets_LOW;
-  int nbjets_UP;
-  if(h_nbjets_LOW && h_nbjets_UP){
+  int nbjets_HI;
+  if(h_nbjets_LOW && h_nbjets_HI){
     nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
-    nbjets_UP = h_nbjets_UP->GetBinContent(1);
+    nbjets_HI = h_nbjets_HI->GetBinContent(1);
   }
   else{
     nbjets_LOW = 0;
-    nbjets_UP = -1;
+    nbjets_HI = -1;
   }
 
-  if(njets_UP != -1) njets_UP--;
-  if(nbjets_UP != -1) nbjets_UP--;
+  if(njets_HI != -1) njets_HI--;
+  if(nbjets_HI != -1) nbjets_HI--;
 
   std::string jet_string; 
   std::string bjet_string; 
 
-  if( (njets_UP - njets_LOW) == 0) jet_string = toString(njets_LOW) + "j";
-  else if( njets_UP != -1) jet_string = toString(njets_LOW) + "-" + toString(njets_UP) + "j";
+  if( (njets_HI - njets_LOW) == 0) jet_string = toString(njets_LOW) + "j";
+  else if( njets_HI != -1) jet_string = toString(njets_LOW) + "-" + toString(njets_HI) + "j";
   else jet_string = "#geq " + toString(njets_LOW) + "j";
 
-  if( (nbjets_UP - nbjets_LOW) == 0) bjet_string = toString(nbjets_LOW) + "b";
-  else if( nbjets_UP != -1) bjet_string = toString(nbjets_LOW) + "-" + toString(nbjets_UP) + "b";
+  if( (nbjets_HI - nbjets_LOW) == 0) bjet_string = toString(nbjets_LOW) + "b";
+  else if( nbjets_HI != -1) bjet_string = toString(nbjets_LOW) + "-" + toString(nbjets_HI) + "b";
   else bjet_string = "#geq " + toString(nbjets_LOW) + "b";
 
   return jet_string + ", " + bjet_string;
@@ -182,16 +182,16 @@ string getHTPlotLabel(const TFile* f, std::string dir_str) {
   TString dir= TString(dir_str);
 
   TH1D* h_ht_LOW = (TH1D*) f->Get(dir+"/h_ht_LOW");
-  TH1D* h_ht_UP = (TH1D*) f->Get(dir+"/h_ht_UP");
+  TH1D* h_ht_HI = (TH1D*) f->Get(dir+"/h_ht_HI");
   int ht_LOW;
-  int ht_UP;
-  if(h_ht_LOW && h_ht_UP){
+  int ht_HI;
+  if(h_ht_LOW && h_ht_HI){
     ht_LOW = h_ht_LOW->GetBinContent(1);
-    ht_UP = h_ht_UP->GetBinContent(1);
+    ht_HI = h_ht_HI->GetBinContent(1);
   }
   else return "H_{T} > 450 GeV";
 
-  if(ht_UP != -1) return toString(ht_LOW) + " < H_{T} < " + toString(ht_UP) + " GeV"; 
+  if(ht_HI != -1) return toString(ht_LOW) + " < H_{T} < " + toString(ht_HI) + " GeV"; 
   else  return "H_{T} > " + toString(ht_LOW) + " GeV";
 
 }
@@ -201,16 +201,16 @@ string getHTTableLabel(const TFile* f, std::string dir_str) {
   TString dir= TString(dir_str);
 
   TH1D* h_ht_LOW = (TH1D*) f->Get(dir+"/h_ht_LOW");
-  TH1D* h_ht_UP = (TH1D*) f->Get(dir+"/h_ht_UP");
+  TH1D* h_ht_HI = (TH1D*) f->Get(dir+"/h_ht_HI");
   int ht_LOW;
-  int ht_UP;
-  if(h_ht_LOW && h_ht_UP){
+  int ht_HI;
+  if(h_ht_LOW && h_ht_HI){
     ht_LOW = h_ht_LOW->GetBinContent(1);
-    ht_UP = h_ht_UP->GetBinContent(1);
+    ht_HI = h_ht_HI->GetBinContent(1);
   }
   else return "$H_{T} > 450$~GeV";
 
-  if(ht_UP != -1) return "$" + toString(ht_LOW) + " < H_{T} < " + toString(ht_UP) + "$~GeV"; 
+  if(ht_HI != -1) return "$" + toString(ht_LOW) + " < H_{T} < " + toString(ht_HI) + "$~GeV"; 
   else  return "$H_{T} > " + toString(ht_LOW) + "$~GeV";
 
 }
@@ -234,12 +234,12 @@ string getMT2PlotLabel(const TFile* f, std::string dir_str) {
   TString dir= TString(dir_str);
 
   TH1D* h_mt2_LOW = (TH1D*) f->Get(dir+"/h_mt2_LOW");
-  TH1D* h_mt2_UP = (TH1D*) f->Get(dir+"/h_mt2_UP");
+  TH1D* h_mt2_HI = (TH1D*) f->Get(dir+"/h_mt2_HI");
   int mt2_LOW;
-  int mt2_UP;
-  if(h_mt2_LOW && h_mt2_UP){
+  int mt2_HI;
+  if(h_mt2_LOW && h_mt2_HI){
     mt2_LOW = h_mt2_LOW->GetBinContent(1);
-    mt2_UP = h_mt2_UP->GetBinContent(1);
+    mt2_HI = h_mt2_HI->GetBinContent(1);
   }
   else return "M_{T2} > 200 GeV";
 
@@ -253,12 +253,12 @@ string getMT2PlotLabel(const TFile* f, std::string dir_str) {
   TString dir= TString(dir_str);
 
   TH1D* h_mt2_LOW = (TH1D*) f->Get(dir+"/h_mt2_LOW");
-  TH1D* h_mt2_UP = (TH1D*) f->Get(dir+"/h_mt2_UP");
+  TH1D* h_mt2_HI = (TH1D*) f->Get(dir+"/h_mt2_HI");
   int mt2_LOW;
-  int mt2_UP;
-  if(h_mt2_LOW && h_mt2_UP){
+  int mt2_HI;
+  if(h_mt2_LOW && h_mt2_HI){
     mt2_LOW = h_mt2_LOW->GetBinContent(1);
-    mt2_UP = h_mt2_UP->GetBinContent(1);
+    mt2_HI = h_mt2_HI->GetBinContent(1);
   }
   else return "M_{T2} > 200 GeV";
 
@@ -271,43 +271,43 @@ string getJetBJetTableLabel(const TFile* f, std::string dir_str) {
   TString dir= TString(dir_str);
 
   TH1D* h_njets_LOW = (TH1D*) f->Get(dir+"/h_njets_LOW");
-  TH1D* h_njets_UP = (TH1D*) f->Get(dir+"/h_njets_UP");
+  TH1D* h_njets_HI = (TH1D*) f->Get(dir+"/h_njets_HI");
   int njets_LOW;
-  int njets_UP;
-  if(h_njets_LOW && h_njets_UP){
+  int njets_HI;
+  if(h_njets_LOW && h_njets_HI){
     njets_LOW = h_njets_LOW->GetBinContent(1);
-    njets_UP = h_njets_UP->GetBinContent(1);
+    njets_HI = h_njets_HI->GetBinContent(1);
   }
   else{
     njets_LOW = 0;
-    njets_UP = -1;
+    njets_HI = -1;
   }
 
   TH1D* h_nbjets_LOW = (TH1D*) f->Get(dir+"/h_nbjets_LOW");
-  TH1D* h_nbjets_UP = (TH1D*) f->Get(dir+"/h_nbjets_UP");
+  TH1D* h_nbjets_HI = (TH1D*) f->Get(dir+"/h_nbjets_HI");
   int nbjets_LOW;
-  int nbjets_UP;
-  if(h_nbjets_LOW && h_nbjets_UP){
+  int nbjets_HI;
+  if(h_nbjets_LOW && h_nbjets_HI){
     nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
-    nbjets_UP = h_nbjets_UP->GetBinContent(1);
+    nbjets_HI = h_nbjets_HI->GetBinContent(1);
   }
   else{
     nbjets_LOW = 0;
-    nbjets_UP = -1;
+    nbjets_HI = -1;
   }
 
-  if(njets_UP != -1) njets_UP--;
-  if(nbjets_UP != -1) nbjets_UP--;
+  if(njets_HI != -1) njets_HI--;
+  if(nbjets_HI != -1) nbjets_HI--;
 
   std::string jet_string; 
   std::string bjet_string; 
 
-  if( (njets_UP - njets_LOW) == 0) jet_string = toString(njets_LOW) + "j";
-  else if( njets_UP != -1) jet_string = toString(njets_LOW) + "-" + toString(njets_UP) + "j";
+  if( (njets_HI - njets_LOW) == 0) jet_string = toString(njets_LOW) + "j";
+  else if( njets_HI != -1) jet_string = toString(njets_LOW) + "-" + toString(njets_HI) + "j";
   else jet_string = "$\\geq$" + toString(njets_LOW) + "j";
 
-  if( (nbjets_UP - nbjets_LOW) == 0) bjet_string = toString(nbjets_LOW) + "b";
-  else if( nbjets_UP != -1) bjet_string = toString(nbjets_LOW) + "-" + toString(nbjets_UP) + "b";
+  if( (nbjets_HI - nbjets_LOW) == 0) bjet_string = toString(nbjets_LOW) + "b";
+  else if( nbjets_HI != -1) bjet_string = toString(nbjets_LOW) + "-" + toString(nbjets_HI) + "b";
   else bjet_string = "$\\geq$" + toString(nbjets_LOW) + "b";
 
   return jet_string + ", " + bjet_string;
