@@ -35,13 +35,25 @@ std::string toString(float in){
   return ss.str();
 }
 
-// mt2 binning for results
-//const int n_mt2bins = 5;
-//const float mt2bins[n_mt2bins+1] = {200., 300., 400., 600., 1000., 1500.};
-//const std::string mt2binsname[n_mt2bins+1] = {"200", "300", "400", "600", "1000", "1500"};
+// generic binning for signal scans - need arrays since mt2 dimension will be variable
+//   assuming here: 50 GeV binning, m1 from 400-2000, m2 from 0-1600
+const int n_m1bins = 33;
+float m1bins[n_m1bins+1];
+const int n_m2bins = 33;
+float m2bins[n_m2bins+1];
+
 bool useDRforGammaQCDMixing = true; // requires GenParticles
 
 MT2Looper::MT2Looper(){
+
+  // set up signal binning
+  for (int i = 0; i <= n_m1bins; ++i) {
+    m1bins[i] = 375. + i*50.;
+  }
+  for (int i = 0; i <= n_m2bins; ++i) {
+    m2bins[i] = -25. + i*50.;
+  }
+
 }
 MT2Looper::~MT2Looper(){
 
@@ -276,6 +288,10 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       if (t.evt_id >= 100 && t.evt_id < 109) continue;
       // remove low HT QCD samples 
       if (t.evt_id >= 120 && t.evt_id < 123) continue;
+
+      // flag signal samples
+      if (t.evt_id >= 1000) isSignal_ = true;
+      else isSignal_ = false; 
 
       //---------------------
       // set weights and start making plots
@@ -812,6 +828,10 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   plot1D("h_J0pt"+s,       t.jet1_pt,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
   plot1D("h_J1pt"+s,       t.jet2_pt,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
   plot1D("h_mt2bins"+s,       t.mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+
+  if (isSignal_) {
+    plot3D("h_mt2bins_sigscan"+s, t.GenSusyMScan1, t.GenSusyMScan2, t.mt2, evtweight_, h_1d, "mass1 [GeV];mass2 [GeV];M_{T2} [GeV]", n_m1bins, m1bins, n_m2bins, m2bins, n_mt2bins, mt2bins);
+  }
 
   outfile_->cd();
   return;
