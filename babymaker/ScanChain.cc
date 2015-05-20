@@ -32,6 +32,7 @@
 
 // MT2CORE
 #include "../MT2CORE/sampleID.h"
+#include "../MT2CORE/applyWeights.h"
 
 // header
 #include "ScanChain.h"
@@ -47,6 +48,8 @@ const bool applyJECfromFile = true;
 const bool saveGenParticles = false;
 // turn on to apply trigger cuts to ntuples -> OR of all triggers used
 const bool applyTriggerCuts = false;
+// turn on to apply dummy weights for lepton SFs, btag SFs, etc
+const bool applyDummyWeights = true;
 
 //--------------------------------------------------------------------
 
@@ -218,6 +221,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       ngenLep = 0;
       ngenTau = 0;
       ngenLepFromTau = 0;
+      LorentzVector recoil(0,0,0,0);
+      int nHardScatter = 0;
       for(unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++){
 	if (ngenPart >= max_ngenPart) {
           std::cout << "WARNING: attempted to fill more than " << max_ngenPart << " gen particles" << std::endl;
@@ -234,13 +239,64 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	genPart_grandmotherId[ngenPart] = cms3.genps_id_simplegrandma().at(iGen);
         ngenPart++;
 
-	// save lepton info
 	int pdgId = abs(cms3.genps_id().at(iGen));
+	int status = cms3.genps_status().at(iGen);
+
+	// find hard scatter products to get recoil pt
+	if (evt_id == 300) {
+	  // ttbar
+	  if (status == 22 && pdgId == 6) {
+	    recoil += cms3.genps_p4().at(iGen);
+	    ++nHardScatter;
+	  }
+	  if (nHardScatter > 2) std::cout << "WARNING: found too many tops in ttbar MC!" << std::endl;
+	}
+	else if (evt_id >= 500 && evt_id < 600) {
+	  // W+jets
+	  if (status == 22 && pdgId == 24) {
+	    recoil += cms3.genps_p4().at(iGen);
+	    ++nHardScatter;
+	  }
+	  if (nHardScatter > 1) std::cout << "WARNING: found too many Ws in Wjets MC!" << std::endl;
+	}
+	else if (evt_id >= 1000 && evt_id < 1100) {
+	  // SMS T1 models - gluinos
+	  if (status == 22 && pdgId == 1000021) {
+	    recoil += cms3.genps_p4().at(iGen);
+	    ++nHardScatter;
+	  }
+	  if (nHardScatter > 2) std::cout << "WARNING: found too many gluinos in T1 MC!" << std::endl;
+	}
+	else if (evt_id >= 1100 && evt_id < 1110) {
+	  // SMS T2tt - stops
+	  if (status == 22 && pdgId == 1000006) {
+	    recoil += cms3.genps_p4().at(iGen);
+	    ++nHardScatter;
+	  }
+	  if (nHardScatter > 2) std::cout << "WARNING: found too many stops in T2tt MC!" << std::endl;
+	}
+	else if (evt_id >= 1110 && evt_id < 1120) {
+	  // SMS T2qq - squarks
+	  if (status == 22 && ( (pdgId >= 1000001 && pdgId <= 1000004) || (pdgId >= 2000001 && pdgId <= 2000004) ) ) {
+	    recoil += cms3.genps_p4().at(iGen);
+	    ++nHardScatter;
+	  }
+	  if (nHardScatter > 2) std::cout << "WARNING: found too many squarks in T2qq MC!" << std::endl;
+	}
+	else if (evt_id >= 1120 && evt_id < 1130) {
+	  // SMS T2bb - sbottoms
+	  if (status == 22 && pdgId == 1000005) {
+	    recoil += cms3.genps_p4().at(iGen);
+	    ++nHardScatter;
+	  }
+	  if (nHardScatter > 2) std::cout << "WARNING: found too many sbottoms in T2bb MC!" << std::endl;
+	}
+
+	// save lepton info
 	if ((pdgId != 11) && (pdgId != 13) && (pdgId != 15)) continue;
 
 	int motherId = abs(cms3.genps_id_simplemother().at(iGen));
 	int grandmotherId = abs(cms3.genps_id_simplegrandma().at(iGen));
-	int status = cms3.genps_status().at(iGen);
 
 	// reject leptons with direct parents of quarks or hadrons. 
 	//  Allow SUSY parents - not explicitly checking for now though
@@ -324,6 +380,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       } // loop over genPart
 
+      // recoil "ISR" weight
+      if (applyDummyWeights) {
+	float recoil_pt = recoil.pt();
+	weight_isr = 1.;
+	if (recoil_pt > 120. && recoil_pt < 150.)      weight_isr = 0.95;
+	else if (recoil_pt > 150. && recoil_pt < 250.) weight_isr = 0.90;
+	else if (recoil_pt > 250.)                     weight_isr = 0.80;
+      }
 
       //LEPTONS
       std::vector<std::pair<int, float> > lep_pt_ordering;
@@ -394,6 +458,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	p4sForDphi.push_back(cms3.els_p4().at(iEl));
 	p4sLeptonsForJetCleaning.push_back(cms3.els_p4().at(iEl));
 
+	if (applyDummyWeights) {
+	  weightStruct weights = getLepSF(cms3.els_p4().at(iEl).pt(), cms3.els_p4().at(iEl).eta(), 11);
+	  weight_lepsf *= weights.cent;
+	  weight_lepsf_UP *= weights.up;
+	  weight_lepsf_DN *= weights.dn;
+	}
+
       }
 
       if (verbose) cout << "before muons" << endl;
@@ -433,6 +504,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	p4sForHems.push_back(cms3.mus_p4().at(iMu));
 	p4sForDphi.push_back(cms3.mus_p4().at(iMu));
 	p4sLeptonsForJetCleaning.push_back(cms3.mus_p4().at(iMu));
+
+	if (applyDummyWeights) {
+	  weightStruct weights = getLepSF(cms3.mus_p4().at(iMu).pt(), cms3.mus_p4().at(iMu).eta(), 13);
+	  weight_lepsf *= weights.cent;
+	  weight_lepsf_UP *= weights.up;
+	  weight_lepsf_DN *= weights.dn;
+	}
+
       }
 
       // Implement pT ordering for leptons (it's irrelevant but easier for us to add than for ETH to remove)
@@ -851,6 +930,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       gamma_jet2_pt = 0.;
       zll_minMTBMet = 999999.;
 
+      // for applying btagging SFs, using Method 1a from the twiki below:
+      //   https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
+      //   https://twiki.cern.ch/twiki/pub/CMS/BTagSFMethods/Method1aExampleCode_CSVM.cc.txt
+      float btagprob_data = 1.;
+      float btagprob_err_heavy_UP = 0.;
+      float btagprob_err_heavy_DN = 0.;
+      float btagprob_err_light_UP = 0.;
+      float btagprob_err_light_DN = 0.;
+      float btagprob_mc = 1.;
+
       if (verbose) cout << "before main jet loop" << endl;
 
       //now fill variables for jets that pass baseline selections and don't overlap with a lepton
@@ -908,6 +997,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	    //CSVv2IVFM
 	    if(jet_btagCSV[njet] >= 0.814) {
 	      nBJet20++; 
+	      // dummy btag SF
+	      if (applyDummyWeights) {
+		float eff = getBtagEff(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet]);
+		weightStruct weights = getBtagSF(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet]);
+		btagprob_data *= weights.cent * eff;
+		btagprob_mc *= eff;
+		float abserr_UP = weights.up - weights.cent;
+		float abserr_DN = weights.cent - weights.dn;
+		if (abs(jet_mcFlavour[njet]) == 5 || abs(jet_mcFlavour[njet]) == 4) {
+		  btagprob_err_heavy_UP += abserr_UP/weights.cent;
+		  btagprob_err_heavy_DN += abserr_DN/weights.cent;
+		} else {
+		  btagprob_err_light_UP += abserr_UP/weights.cent;
+		  btagprob_err_light_DN += abserr_DN/weights.cent;
+		}
+	      }
 	      if (jet_pt[njet] > 25.0) nBJet25++; 
 	      if (jet_pt[njet] > 40.0) {
 		nBJet40++; 
@@ -919,6 +1024,21 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 		}
 	      } // pt 40
 	    } // pass med btag
+	    else { // fail med btag -- needed for SF event weights
+	      float eff = getBtagEff(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet]);
+	      weightStruct weights = getBtagSF(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet]);
+	      btagprob_data *= (1. - weights.cent * eff);
+	      btagprob_mc *= (1. - eff);
+	      float abserr_UP = weights.up - weights.cent;
+	      float abserr_DN = weights.cent - weights.dn;
+	      if (abs(jet_mcFlavour[njet]) == 5 || abs(jet_mcFlavour[njet]) == 4) {
+		btagprob_err_heavy_UP += (-eff * abserr_UP)/(1 - eff * weights.cent);
+		btagprob_err_heavy_DN += (-eff * abserr_DN)/(1 - eff * weights.cent);
+	      } else {
+		btagprob_err_light_UP += (-eff * abserr_UP)/(1 - eff * weights.cent);
+		btagprob_err_light_DN += (-eff * abserr_DN)/(1 - eff * weights.cent);
+	      }
+	    } // fail med btag
 	  } // pt 20 eta 2.5
 	  // accept jets out to eta 4.7 for dphi
 	  else if ( (jet_pt[njet] > 40.0) && (fabs(jet_eta[njet]) < 4.7) ) {
@@ -967,6 +1087,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  njet++;
 	} // pt 20 eta 4.7
       }
+
+      // compute event level btag weights
+      weight_btagsf = btagprob_data / btagprob_mc;
+      weight_btagsf_UP = weight_btagsf + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf);
+      weight_btagsf_DN = weight_btagsf - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf);
 
       if (verbose) cout << "before hemispheres" << endl;
 
@@ -1143,6 +1268,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         //tau_mcMatchId[ntau] = ; // Have to do this by hand unless we want to add tau_mc branches in CMS3 through the CandToGenAssMaker
 
         ntau++;
+      }
+
+      if (applyDummyWeights) {
+	// dummy version of generator scales variation
+	if (mt2 < 600.) {
+	  weight_scales_UP = 1.05;
+	  weight_scales_DN = 0.95;
+	}
+	else if (mt2 > 600. && mt2 < 1000.) {
+	  weight_scales_UP = 1.10;
+	  weight_scales_DN = 0.90;
+	}
+	else if (mt2 > 1000.) {
+	  weight_scales_UP = 1.30;
+	  weight_scales_DN = 0.70;
+	}
       }
 
       FillBabyNtuple();
