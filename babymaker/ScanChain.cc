@@ -1317,9 +1317,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
 void babyMaker::MakeBabyNtuple(const char *BabyFilename){
 
-  //
-  TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
-  rootdir->cd();
   BabyFile_ = new TFile(Form("%s", BabyFilename), "RECREATE");
   BabyFile_->cd();
   BabyTree_ = new TTree("mt2", "A Baby Ntuple");

@@ -1,14 +1,11 @@
-
-#ifndef __CINT__
 #include "TChain.h"
 #include "TROOT.h"
-#include "TStyle.h"
 #include "TSystem.h"
+#include "TString.h"
 
-#include "scanChain.h"
+#include "ScanChain.h"
 
 #include <iostream>
-#endif
 
 void loadChain( TChain *ch, const std::string& base )
 {
@@ -33,28 +30,15 @@ void loadChain( TChain *ch, const std::string& base )
   return;
 }
 
-void processBaby( TString outfileid = "tt_test", TString infile = "/hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/merged/merged_ntuple_190.root" )
-{
+int main(int argc, char **argv) {
 
-  //---------------------------------------------------------------
-  // choose version, output will be written to output/[version]
-  //---------------------------------------------------------------
-  
-  // Load Everything -- do we need these?
-  gSystem->Load("libTree.so");
-  gSystem->Load("libPhysics.so");
-  gSystem->Load("libEG.so");
-  gSystem->Load("libMathCore.so");
+  if (argc < 2) {
+    std::cout << "USAGE: processBaby <tag> <filename>" << std::endl;
+    return 1;
+  }
 
-  // definitely need these, at least for batch running
-  gSystem->Load("libGenVector.so");
-
-  // these libraries should be in babymaker dir after build
-  gSystem->Load("libMiniFWLite.so");
-  gSystem->Load("libBabymakerCORE.so");
-  gSystem->Load("libBabymakerTools.so");
-  gSystem->Load("libBabymakerMT2CORE.so");
-  gSystem->Load("libScanChain.so");
+  TString outfileid(argv[1]); 
+  TString infile(argv[2]); 
 
   TChain *chain = new TChain("Events");
   loadChain(chain, infile.Data());
@@ -227,7 +211,7 @@ void processBaby( TString outfileid = "tt_test", TString infile = "/hadoop/cms/s
   //otherwise
   else sample = Form("unknown_%s", outfileid.Data());
 
-  cout<<"sample is "<<sample<<endl;
+  std::cout<<"sample is "<<sample<<std::endl;
 
   //--------------------------------
   // run
@@ -235,5 +219,5 @@ void processBaby( TString outfileid = "tt_test", TString infile = "/hadoop/cms/s
   
   babyMaker *looper = new babyMaker();
   looper->ScanChain(chain, sample); 
-
+  return 0;
 }
