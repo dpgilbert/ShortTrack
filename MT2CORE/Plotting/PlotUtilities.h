@@ -3,6 +3,7 @@
 
 #include "TH1.h" 
 #include "TH2.h" 
+#include "TH3.h" 
 #include "TGraph.h"
 #include "TCanvas.h" 
 #include "TFile.h"
@@ -39,6 +40,12 @@ void plot2D(string name, float xval, float yval, double weight, std::map<string,
 	    string title, int numbinsx, float xmin, float xmax, int numbinsy, float ymin, float ymax);
 void plot2D(string name, float xval, float yval, double weight, std::map<string, TH2D*> &allhistos, 
 	    string title, int numbinsx, const float * xbins, int numbinsy, const float * ybins);
+void plot3D(string name, float xval, float yval, float zval, double weight, std::map<string, TH1*> &allhistos, 
+	    string title, int numbinsx, float xmin, float xmax, int numbinsy, float ymin, float ymax,
+	    int numbinsz, float zmin, float zmax);
+void plot3D(string name, float xval, float yval, float zval, double weight, std::map<string, TH1*> &allhistos, 
+	    string title, int numbinsx, const float * xbins, int numbinsy, const float * ybins,
+	    int numbinsz, const float * zbins);
 
 void plot1DUnderOverFlow(string title, double xval, double weight, std::map<string, TH1*> &allhistos, 
 	    int numbinsx, double xmin, double xmax);

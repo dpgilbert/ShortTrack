@@ -529,3 +529,46 @@ void plot2DUnderOverFlow(string name, double xval, double yval, double weight, s
   return;
 
 }
+
+void plot3D(string name, float xval, float yval, float zval, double weight, std::map<string, TH1*> &allhistos, 
+	    string title, int numbinsx, float xmin, float xmax, int numbinsy, float ymin, float ymax,
+	    int numbinsz, float zmin, float zmax){
+
+  if (title=="") title=name; 
+  std::map<string, TH1*>::iterator iter= allhistos.find(name);
+  if(iter == allhistos.end()) //no histo for this yet, so make a new one
+    {
+      TH3D* currentHisto= new TH3D(name.c_str(), title.c_str(), numbinsx, xmin, xmax, numbinsy, ymin, ymax, numbinsz, zmin, zmax);
+      currentHisto->Sumw2();
+      currentHisto->Fill(xval, yval, zval, weight);
+      allhistos.insert(std::pair<string, TH1*> (name,currentHisto) );
+    }
+  else // exists already, so just fill it
+    {
+      ((TH3D*) (*iter).second)->Fill(xval, yval, zval, weight);
+    }
+
+  return;
+
+}
+
+void plot3D(string name, float xval, float yval, float zval, double weight, std::map<string, TH1*> &allhistos, 
+	    string title, int numbinsx, const float * xbins, int numbinsy, const float * ybins, int numbinsz, const float * zbins){
+
+  if (title=="") title=name; 
+  std::map<string, TH1*>::iterator iter= allhistos.find(name);
+  if(iter == allhistos.end()) //no histo for this yet, so make a new one
+    {
+      TH3D* currentHisto= new TH3D(name.c_str(), title.c_str(), numbinsx, xbins, numbinsy, ybins, numbinsz, zbins);
+      currentHisto->Sumw2();
+      currentHisto->Fill(xval, yval, zval, weight);
+      allhistos.insert(std::pair<string, TH1*> (name,currentHisto) );
+    }
+  else // exists already, so just fill it
+    {
+      ((TH3D*) (*iter).second)->Fill(xval, yval, zval, weight);
+    }
+
+  return;
+
+}
