@@ -7,32 +7,9 @@
 
 #include <iostream>
 
-void loadChain( TChain *ch, const std::string& base )
-{
-  TChain *dummy = new TChain("Events");
-
-  int nFiles = 0;
-  if (dummy->Add(base.c_str())) {
-    nFiles = ch->Add(base.c_str());
-    std::cout << "Main " <<base.c_str() << " exists: use it. Loaded " 
-              << nFiles << " files" << std::endl;
-  } else
-    std::cout << "Couldn't find " << base << std::endl;
-
-  // be paranoid
-  if (nFiles == 0) {
-    std::cout << "ERROR: expected to read files " 
-              << base.c_str() << "  but found none" << std::endl;
-    //assert(0);
-    exit(0);
-  }
-
-  return;
-}
-
 int main(int argc, char **argv) {
 
-  if (argc < 2) {
+  if (argc < 3) {
     std::cout << "USAGE: processBaby <tag> <filename>" << std::endl;
     return 1;
   }
@@ -41,7 +18,11 @@ int main(int argc, char **argv) {
   TString infile(argv[2]); 
 
   TChain *chain = new TChain("Events");
-  loadChain(chain, infile.Data());
+  chain->Add(infile.Data());
+  if (chain->GetEntries() == 0) {
+    std::cout << "ERROR: no entries in chain. filename was: " << infile << std::endl;
+    return 2;
+  }
 
   //-------------------------------------
   //set name to get comprehensible output -- will need to update these!
