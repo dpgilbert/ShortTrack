@@ -832,7 +832,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
 	// note this uses the eta of the jet as stored in CMS3
 	//  chance for small discrepancies if JEC changes direction slightly..
-        if(!isLoosePFJet(iJet)) continue;
+        if(!isLoosePFJetV2(iJet)) continue;
 
         passJets.push_back( std::pair<int,float>(iJet, pfjet_p4_cor.pt()) );
 
@@ -856,7 +856,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
           if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
           if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
-          if(!isLoosePFJet(iJet)) continue;
+          if(!isLoosePFJetV2(iJet)) continue;
 
           bool alreadyRemoved = false;
           for(unsigned int j=0; j<removedJets.size(); j++){
@@ -892,7 +892,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
           if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
           if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
-          if(!isLoosePFJet(iJet)) continue;
+          if(!isLoosePFJetV2(iJet)) continue;
 
           bool alreadyRemoved = false;
           for(unsigned int j=0; j<removedJetsGamma.size(); j++){
