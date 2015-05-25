@@ -2,7 +2,8 @@
 #include <utility>
 #include <vector>
 #include <string>
-
+#include <sstream>
+#include <cmath>
 
 #include "TROOT.h"
 #include "TLatex.h"
@@ -14,6 +15,8 @@
 #include "TFile.h"
 #include "TH1.h"
 #include "TPaveText.h"
+#include "TStyle.h"
+#include "TKey.h"
 
 using namespace std;
 
@@ -129,7 +132,7 @@ string getTableName(const string& sample) {
   return sample;
 }
 
-string getJetBJetPlotLabel(const TFile* f, std::string dir_str) {
+string getJetBJetPlotLabel(TFile* f, std::string dir_str) {
 
   TString dir= TString(dir_str);
 
@@ -177,7 +180,7 @@ string getJetBJetPlotLabel(const TFile* f, std::string dir_str) {
 
 }
 
-string getHTPlotLabel(const TFile* f, std::string dir_str) {
+string getHTPlotLabel(TFile* f, std::string dir_str) {
 
   TString dir= TString(dir_str);
 
@@ -196,7 +199,7 @@ string getHTPlotLabel(const TFile* f, std::string dir_str) {
 
 }
 
-string getHTTableLabel(const TFile* f, std::string dir_str) {
+string getHTTableLabel(TFile* f, std::string dir_str) {
 
   TString dir= TString(dir_str);
 
@@ -215,7 +218,7 @@ string getHTTableLabel(const TFile* f, std::string dir_str) {
 
 }
 
-string getMETTableLabel(const TFile* f, std::string dir_str) {
+string getMETTableLabel(TFile* f, std::string dir_str) {
 
   TString dir= TString(dir_str);
 
@@ -229,7 +232,7 @@ string getMETTableLabel(const TFile* f, std::string dir_str) {
 
 }
 
-string getMT2PlotLabel(const TFile* f, std::string dir_str) {
+string getMT2PlotLabel(TFile* f, std::string dir_str) {
 
   TString dir= TString(dir_str);
 
@@ -248,25 +251,7 @@ string getMT2PlotLabel(const TFile* f, std::string dir_str) {
 }
 
 
-string getMT2PlotLabel(const TFile* f, std::string dir_str) {
-
-  TString dir= TString(dir_str);
-
-  TH1D* h_mt2_LOW = (TH1D*) f->Get(dir+"/h_mt2_LOW");
-  TH1D* h_mt2_HI = (TH1D*) f->Get(dir+"/h_mt2_HI");
-  int mt2_LOW;
-  int mt2_HI;
-  if(h_mt2_LOW && h_mt2_HI){
-    mt2_LOW = h_mt2_LOW->GetBinContent(1);
-    mt2_HI = h_mt2_HI->GetBinContent(1);
-  }
-  else return "M_{T2} > 200 GeV";
-
-  return "M_{T2} > " + toString(mt2_LOW);
-
-}
-
-string getJetBJetTableLabel(const TFile* f, std::string dir_str) {
+string getJetBJetTableLabel(TFile* f, std::string dir_str) {
 
   TString dir= TString(dir_str);
 
@@ -510,20 +495,20 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
         if (mt2bin < 0) {
           yield = h->IntegralAndError(0,-1,err);
           bgtot.at(idir) += yield;
-          bgerr.at(idir) = sqrt(bgerr.at(idir)**2 + err**2);
+          bgerr.at(idir) = sqrt(pow(bgerr.at(idir),2) + pow(err,2));
         }
         // last bin: include overflow
         else if (mt2bin == h->GetXaxis()->GetNbins()) {
           yield = h->IntegralAndError(mt2bin,-1,err);
           bgtot.at(idir) += yield;
-          bgerr.at(idir) = sqrt(bgerr.at(idir)**2 + err**2);
+          bgerr.at(idir) = sqrt(pow(bgerr.at(idir),2) + pow(err,2));
         }
         // single bin, not last bin
         else {
           yield = h->GetBinContent(mt2bin);
           err = h->GetBinError(mt2bin);
           bgtot.at(idir) += yield;
-          bgerr.at(idir) = sqrt(bgerr.at(idir)**2 + err**2);
+          bgerr.at(idir) = sqrt(pow(bgerr.at(idir),2) + pow(err,2));
         }
       }
       if (yield > 10.) {
@@ -619,8 +604,9 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
   vector<double> bgerr(n_mt2bins,0.);
 
   TString binshistname = Form("%s/h_mt2bins",dir.c_str());
+  TH1D* h_mt2bins(0);
   for(int i=0; i<samples.size(); i++){//need to find a sample that has this hist filled
-    TH1D* h_mt2bins = (TH1D*) samples.at(i)->Get(binshistname);
+    h_mt2bins = (TH1D*) samples.at(i)->Get(binshistname);
     if(h_mt2bins) break;
   }
   
@@ -670,13 +656,13 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
           yield = h->GetBinContent(ibin);
           err = h->GetBinError(ibin);
           bgtot.at(ibin-1) += yield;
-          bgerr.at(ibin-1) = sqrt(bgerr.at(ibin-1)**2 + err**2);
+          bgerr.at(ibin-1) = sqrt(pow(bgerr.at(ibin-1),2) + pow(err,2));
         }
         // last bin: include overflow
         else if (ibin == h->GetXaxis()->GetNbins()) {
           yield = h->IntegralAndError(ibin,-1,err);
           bgtot.at(ibin-1) += yield;
-          bgerr.at(ibin-1) = sqrt(bgerr.at(ibin-1)**2 + err**2);
+          bgerr.at(ibin-1) = sqrt(pow(bgerr.at(ibin-1),2) + pow(err,2));
         }
         else {
           std::cout << "Shouldn't get here" << std::endl;
@@ -859,7 +845,7 @@ void plotMaker(){
     TKey* k;
     std::string cr_skip = "cr";
     std::string sr_skip = "sr";
-    while (k = (TKey *)it()) {
+    while ((k = (TKey *)it())) {
       if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
       //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();

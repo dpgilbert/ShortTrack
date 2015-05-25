@@ -12,6 +12,7 @@
 #include "TFile.h"
 #include "TH1.h"
 #include "TPaveText.h"
+#include "TKey.h"
 
 using namespace std;
 
@@ -44,8 +45,6 @@ void makeLostLepFromCRs( TFile* ftop , TFile* fwjets , vector<string> dirs, stri
 
     //const int n_mt2bins = 5;
     //const float mt2bins[n_mt2bins+1] = {200., 300., 400., 600., 1000., 1500.};
-    TH1D* h_n_mt2bins = (TH1D*) ftop->Get(n_mt2bins_name);
-    int n_mt2bins = h_n_mt2bins->GetBinContent(1);
     TH1D* h_n_mt2bins = (TH1D*) ftop->Get(n_mt2bins_name);
     const int n_mt2bins = h_n_mt2bins->GetBinContent(1);
     float* mt2bins = new float[n_mt2bins+1];
@@ -115,7 +114,7 @@ void makeLostLepFromCRs( TFile* ftop , TFile* fwjets , vector<string> dirs, stri
     if (method==0) { // --- Simple: lostlep_sr +/- lostlep_sr/sqrt(lostlep_cr)
       // use full CR stats integrated over MT2
       double n_cr = hlostlep_cr->Integral(0,-1);
-      for ( unsigned int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { // "<=" to deal with overflow bin
+      for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { // "<=" to deal with overflow bin
 	if (n_cr > 0)
 	  Stat->SetBinError(ibin, hlostlep_sr->GetBinContent(ibin)/sqrt(n_cr));
 	else Stat->SetBinError(ibin, hlostlep_sr->GetBinContent(ibin));
@@ -124,7 +123,7 @@ void makeLostLepFromCRs( TFile* ftop , TFile* fwjets , vector<string> dirs, stri
 
     TH1D* Syst = (TH1D*) Stat->Clone("h_mt2binsSyst");
     TH1D* pred = (TH1D*) Stat->Clone("h_mt2bins");
-    for ( unsigned int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
+    for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
       Syst->SetBinError(ibin, 0.);
       double quadrature = Stat->GetBinError(ibin)*Stat->GetBinError(ibin) + Syst->GetBinError(ibin)*Syst->GetBinError(ibin);
       pred->SetBinError(ibin, sqrt(quadrature));
@@ -178,8 +177,7 @@ void lostlepMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/
   TKey* k;
   std::string keep = "sr";
   std::string skip = "srbase";
-  while (k = (TKey *)it()) {
-    if (k->GetTitle() == "srbase") continue;
+  while ((k = (TKey *)it())) {
     if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
       std::string sr_string = k->GetTitle();

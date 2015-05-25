@@ -12,6 +12,7 @@
 #include "TFile.h"
 #include "TH1.h"
 #include "TPaveText.h"
+#include "TKey.h"
 
 using namespace std;
 
@@ -57,10 +58,10 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fQCD, vector<string
     } 
     dir->cd();
 
-    TH1D* Stat = hZinv->Clone("h_mt2binsStat");
+    TH1D* Stat = (TH1D*) hZinv->Clone("h_mt2binsStat");
     cout<<"Looking at histo "<<fullhistname<<endl;
     if (method==0) { // --- Simple: Zinv +/- Zinv/sqrt(GJet)
-      for ( unsigned int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { // "<=" to deal with overflow bin
+      for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { // "<=" to deal with overflow bin
 	if (hGJet->GetBinContent(ibin) > 0)
 	  Stat->SetBinError(ibin, hZinv->GetBinContent(ibin)/sqrt( hGJet->GetBinContent(ibin) ));
 	else Stat->SetBinError(ibin, hZinv->GetBinContent(ibin));
@@ -68,30 +69,30 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fQCD, vector<string
     }
 
     // Zgamma ratio in each MT2bin -> to get MC stat error on ratio
-    TH1D* ratio = hZinv->Clone("h_mt2binsRatio");
+    TH1D* ratio = (TH1D*) hZinv->Clone("h_mt2binsRatio");
     ratio->Divide(hGJet);
 
     // MCStat: use relative bin error from ratio hist, normalized to Zinv MC prediction
     TH1D* MCStat = (TH1D*) hZinv->Clone("h_mt2binsMCStat");
-    for ( unsigned int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
+    for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
       MCStat->SetBinError(ibin, MCStat->GetBinContent(ibin) * ratio->GetBinError(ibin) / ratio->GetBinContent(ibin) );
     }
 
-    TH1D* Syst = Stat->Clone("h_mt2binsSyst");
-    TH1D* pred = Stat->Clone("h_mt2bins");
-    for ( unsigned int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
+    TH1D* Syst = (TH1D*) Stat->Clone("h_mt2binsSyst");
+    TH1D* pred = (TH1D*) Stat->Clone("h_mt2bins");
+    for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
       Syst->SetBinError(ibin, 0.);
       double quadrature = Stat->GetBinError(ibin)*Stat->GetBinError(ibin) + Syst->GetBinError(ibin)*Syst->GetBinError(ibin);
       pred->SetBinError(ibin, sqrt(quadrature));
     }
     //pred->Print("all");
 
-    TH1D* CRyield = hGJet->Clone("h_mt2binsCRyield");
+    TH1D* CRyield = (TH1D*) hGJet->Clone("h_mt2binsCRyield");
 
     // Extrapolation to next bin: just a ratio of GJet_i/GJet_i-1, so that we can later obtain bin i prediction from bin i-1 yield
     // Instead of : GJet_i * R(Zinv_i/GJet_i), we will do GJet_i-1 * R(GJet_i/GJet_i-1) * R(Zinv_i/GJet_i)
-    TH1D* PreviousBinRatio = hGJet->Clone("h_mt2binsPreviousBinRatio");
-    for ( unsigned int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
+    TH1D* PreviousBinRatio = (TH1D*) hGJet->Clone("h_mt2binsPreviousBinRatio");
+    for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
       if (ibin<=1) PreviousBinRatio->SetBinContent(ibin, 1.);
       else {
 	PreviousBinRatio->SetBinContent(ibin, hGJet->GetBinContent(ibin)/hGJet->GetBinContent(ibin-1));
@@ -154,36 +155,36 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
     } 
     dir->cd();
 
-    TH1D* Stat = hZinv->Clone("h_mt2binsStat");
+    TH1D* Stat = (TH1D*) hZinv->Clone("h_mt2binsStat");
     cout<<"Looking at histo "<<fullhistname<<endl;
     if (method==0) { // --- Simple: Zinv +/- Zinv/sqrt(DY)
-      for ( unsigned int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { // "<=" to deal with overflow bin
+      for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { // "<=" to deal with overflow bin
 	if (hDY->GetBinContent(ibin) > 0)
 	  Stat->SetBinError(ibin, hZinv->GetBinContent(ibin)/sqrt( hDY->GetBinContent(ibin) ));
 	else Stat->SetBinError(ibin, hZinv->GetBinContent(ibin));
       }
     }
 
-    TH1D* ratio = hZinv->Clone("ratio");
+    TH1D* ratio = (TH1D*) hZinv->Clone("ratio");
     ratio->Divide(hDY);
 
     // MCStat: use relative bin error from ratio hist, normalized to Zinv MC prediction
     TH1D* MCStat = (TH1D*) hZinv->Clone("h_mt2binsMCStat");
-    for ( unsigned int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
+    for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
       MCStat->SetBinError(ibin, MCStat->GetBinContent(ibin) * ratio->GetBinError(ibin) / ratio->GetBinContent(ibin) );
     }
 
 
-    TH1D* Syst = Stat->Clone("h_mt2binsSyst");
-    TH1D* pred = Stat->Clone("h_mt2bins");
-    for ( unsigned int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
+    TH1D* Syst = (TH1D*) Stat->Clone("h_mt2binsSyst");
+    TH1D* pred = (TH1D*) Stat->Clone("h_mt2bins");
+    for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
       Syst->SetBinError(ibin, 0.);
       double quadrature = Stat->GetBinError(ibin)*Stat->GetBinError(ibin) + Syst->GetBinError(ibin)*Syst->GetBinError(ibin);
       pred->SetBinError(ibin, sqrt(quadrature));
     }
     //pred->Print("all");
 
-    TH1D* CRyield = hDY->Clone("h_mt2binsCRyield");
+    TH1D* CRyield = (TH1D*) hDY->Clone("h_mt2binsCRyield");
 
     pred->Write();
     Stat->Write();
@@ -231,8 +232,7 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
   TKey* k;
   std::string keep = "sr";
   std::string skip = "srbase";
-  while (k = (TKey *)it()) {
-    if (k->GetTitle() == "srbase") continue;
+  while ((k = (TKey *)it())) {
     if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
       std::string sr_string = k->GetTitle();
