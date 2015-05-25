@@ -839,7 +839,7 @@ void plotMaker(){
 
   float scalesig = -1.;
   //float scalesig = 50.;
-  bool printplots = true;
+  bool printplots = false;
   //bool printplots = true;
 
   if(printplots){
