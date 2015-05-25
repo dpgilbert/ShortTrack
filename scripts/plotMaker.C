@@ -18,7 +18,7 @@
 #include "TStyle.h"
 #include "TKey.h"
 
-#include "CMS_lumi.h"
+#include "CMS_lumi.C"
 
 using namespace std;
 
@@ -747,7 +747,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
 //_______________________________________________________________________________
 void plotMaker(){
 
-  gROOT->LoadMacro("CMS_lumi.C");
+  //  gROOT->LoadMacro("CMS_lumi.C");
   cmsText = "CMS Simulation";
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
