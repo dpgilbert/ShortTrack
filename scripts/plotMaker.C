@@ -18,6 +18,8 @@
 #include "TStyle.h"
 #include "TKey.h"
 
+#include "CMS_lumi.h"
+
 using namespace std;
 
 // -- for CMS_lumi label
@@ -223,7 +225,7 @@ string getMETTableLabel(TFile* f, std::string dir_str) {
   TString dir= TString(dir_str);
 
   TH1D* h_met_LOW = (TH1D*) f->Get(dir+"/h_met_LOW");
-  int met_LOW;
+  int met_LOW(0);
   if(h_met_LOW){
     met_LOW = h_met_LOW->GetBinContent(1);
   }
@@ -238,8 +240,8 @@ string getMT2PlotLabel(TFile* f, std::string dir_str) {
 
   TH1D* h_mt2_LOW = (TH1D*) f->Get(dir+"/h_mt2_LOW");
   TH1D* h_mt2_HI = (TH1D*) f->Get(dir+"/h_mt2_HI");
-  int mt2_LOW;
-  int mt2_HI;
+  int mt2_LOW(0);
+  int mt2_HI(0);
   if(h_mt2_LOW && h_mt2_HI){
     mt2_LOW = h_mt2_LOW->GetBinContent(1);
     mt2_HI = h_mt2_HI->GetBinContent(1);
@@ -539,7 +541,7 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
   cout << " \\\\" << endl;
   cout << "\\hline" << endl;
 
-  for( int i = 0 ; i < n ; i++ ){
+  for( unsigned int i = 0 ; i < n ; i++ ){
     if( !TString(names.at(i)).Contains("sig") ) continue;
     cout << getTableName(names.at(i));
     for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
@@ -605,7 +607,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
 
   TString binshistname = Form("%s/h_mt2bins",dir.c_str());
   TH1D* h_mt2bins(0);
-  for(int i=0; i<samples.size(); i++){//need to find a sample that has this hist filled
+  for(unsigned int i=0; i<samples.size(); i++){//need to find a sample that has this hist filled
     h_mt2bins = (TH1D*) samples.at(i)->Get(binshistname);
     if(h_mt2bins) break;
   }
@@ -621,7 +623,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
   std::cout << "\\centering" << std::endl;
   std::cout << "\\makebox[\\textwidth][c]{" << std::endl;
   std::cout << "\\begin{tabular}{r";
-  for (unsigned int ibin=0; ibin < n_mt2bins; ++ibin) std::cout << "|c";
+  for (int ibin=0; ibin < n_mt2bins; ++ibin) std::cout << "|c";
   std::cout << "}" << std::endl;
   std::cout << "\\hline" << std::endl;
   std::cout << "\\multicolumn{" << n_mt2bins+1 << "}{c}{";
@@ -634,7 +636,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
     << "Sample";
 
   // header
-  for (unsigned int ibin = 1; ibin < n_mt2bins; ++ibin) {
+  for (int ibin = 1; ibin < n_mt2bins; ++ibin) {
     cout << " & " << h_mt2bins->GetXaxis()->GetBinLowEdge(ibin) << " $<$ \\mttwo $<$ " << h_mt2bins->GetXaxis()->GetBinLowEdge(ibin+1) << " GeV";
   }
   cout << " & \\mttwo $>$ " << h_mt2bins->GetXaxis()->GetBinLowEdge(n_mt2bins) << " GeV";
@@ -642,12 +644,12 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
     << "\\hline\\hline" << endl;
 
   // backgrounds first -- loop backwards
-  for( int i = n-1 ; i >= 0 ; --i ){
-    if( TString(names.at(i)).Contains("sig")  ) continue;
-    cout << getTableName(names.at(i));
-    for (unsigned int ibin = 1; ibin <= n_mt2bins; ++ibin) {
+  for( int isamp = n-1 ; isamp >= 0 ; --isamp ){
+    if( TString(names.at(isamp)).Contains("sig")  ) continue;
+    cout << getTableName(names.at(isamp));
+    for (int ibin = 1; ibin <= n_mt2bins; ++ibin) {
       TString fullhistname = Form("%s/h_mt2bins",dir.c_str());
-      TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
+      TH1D* h = (TH1D*) samples.at(isamp)->Get(fullhistname);
       double yield = 0.;
       double err = 0.;
       if (h) {
@@ -683,7 +685,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
   // print bg totals
   cout << "\\hline" << endl;
   cout << "Total SM";
-  for ( unsigned int ibin = 0; ibin < n_mt2bins; ++ibin ) {
+  for ( int ibin = 0; ibin < n_mt2bins; ++ibin ) {
     double yield = bgtot.at(ibin);
     double err = bgerr.at(ibin);
     if (yield > 10.) {
@@ -697,12 +699,12 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
   cout << " \\\\" << endl;
   cout << "\\hline" << endl;
 
-  for( int i = 0 ; i < n ; i++ ){
-    if( !TString(names.at(i)).Contains("sig") ) continue;
-    cout << getTableName(names.at(i));
-    for (unsigned int ibin = 1; ibin <= n_mt2bins; ++ibin) {
+  for( unsigned int jsamp = 0 ; jsamp < n ; jsamp++ ){
+    if( !TString(names.at(jsamp)).Contains("sig") ) continue;
+    cout << getTableName(names.at(jsamp));
+    for (int ibin = 1; ibin <= n_mt2bins; ++ibin) {
       TString fullhistname = Form("%s/h_mt2bins",dir.c_str());
-      TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
+      TH1D* h = (TH1D*) samples.at(jsamp)->Get(fullhistname);
       double yield = 0.;
       double err = 0.;
       if (h) {
@@ -752,7 +754,7 @@ void plotMaker(){
   writeExtraText = false;
   lumi_13TeV = "4 fb^{-1}";
 
-  //string input_dir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-00-08_4fb/";
+  //string input_dir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-00-12_test/";
   string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/V00-00-12/";
 
   // ----------------------------------------
@@ -837,7 +839,7 @@ void plotMaker(){
 
   float scalesig = -1.;
   //float scalesig = 50.;
-  bool printplots = false;
+  bool printplots = true;
   //bool printplots = true;
 
   if(printplots){
@@ -872,51 +874,51 @@ void plotMaker(){
 
   vector<string> dirs;
   dirs.push_back("sr1L");
-  dirs.push_back("sr2L");
-  dirs.push_back("sr3L");
-  dirs.push_back("sr4L");
-  dirs.push_back("sr5L");
-  dirs.push_back("sr6L");
-  dirs.push_back("sr7L");
-  dirs.push_back("sr8L");
-  dirs.push_back("sr9L");
-  dirs.push_back("sr10L");
-  dirs.push_back("sr11L");
-  dirs.push_back("sr1M");
-  dirs.push_back("sr2M");
-  dirs.push_back("sr3M");
-  dirs.push_back("sr4M");
-  dirs.push_back("sr5M");
-  dirs.push_back("sr6M");
-  dirs.push_back("sr7M");
-  dirs.push_back("sr8M");
-  dirs.push_back("sr9M");
-  dirs.push_back("sr10M");
-  dirs.push_back("sr11M");
-  dirs.push_back("sr1H");
-  dirs.push_back("sr2H");
-  dirs.push_back("sr3H");
-  dirs.push_back("sr4H");
-  dirs.push_back("sr5H");
-  dirs.push_back("sr6H");
-  dirs.push_back("sr7H");
-  dirs.push_back("sr8H");
-  dirs.push_back("sr9H");
-  dirs.push_back("sr10H");
-  dirs.push_back("sr11H");
-  dirs.push_back("sr1UH");
-  dirs.push_back("sr2UH");
-  dirs.push_back("sr3UH");
-  dirs.push_back("sr4UH");
-  dirs.push_back("sr5UH");
-  dirs.push_back("sr6UH");
-  dirs.push_back("sr7UH");
-  dirs.push_back("sr8UH");
-  dirs.push_back("sr9UH");
-  dirs.push_back("sr10UH");
-  dirs.push_back("sr11UH");
+  // dirs.push_back("sr2L");
+  // dirs.push_back("sr3L");
+  // dirs.push_back("sr4L");
+  // dirs.push_back("sr5L");
+  // dirs.push_back("sr6L");
+  // dirs.push_back("sr7L");
+  // dirs.push_back("sr8L");
+  // dirs.push_back("sr9L");
+  // dirs.push_back("sr10L");
+  // dirs.push_back("sr11L");
+  // dirs.push_back("sr1M");
+  // dirs.push_back("sr2M");
+  // dirs.push_back("sr3M");
+  // dirs.push_back("sr4M");
+  // dirs.push_back("sr5M");
+  // dirs.push_back("sr6M");
+  // dirs.push_back("sr7M");
+  // dirs.push_back("sr8M");
+  // dirs.push_back("sr9M");
+  // dirs.push_back("sr10M");
+  // dirs.push_back("sr11M");
+  // dirs.push_back("sr1H");
+  // dirs.push_back("sr2H");
+  // dirs.push_back("sr3H");
+  // dirs.push_back("sr4H");
+  // dirs.push_back("sr5H");
+  // dirs.push_back("sr6H");
+  // dirs.push_back("sr7H");
+  // dirs.push_back("sr8H");
+  // dirs.push_back("sr9H");
+  // dirs.push_back("sr10H");
+  // dirs.push_back("sr11H");
+  // dirs.push_back("sr1UH");
+  // dirs.push_back("sr2UH");
+  // dirs.push_back("sr3UH");
+  // dirs.push_back("sr4UH");
+  // dirs.push_back("sr5UH");
+  // dirs.push_back("sr6UH");
+  // dirs.push_back("sr7UH");
+  // dirs.push_back("sr8UH");
+  // dirs.push_back("sr9UH");
+  // dirs.push_back("sr10UH");
+  // dirs.push_back("sr11UH");
 
-  for(int i=0; i<dirs.size(); i++){
+  for(unsigned int i=0; i<dirs.size(); i++){
     printDetailedTable(samples, names, dirs.at(i));
     if(i % 2 != 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
   }
