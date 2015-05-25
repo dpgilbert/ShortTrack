@@ -1,6 +1,7 @@
 #include <iostream>
 #include <utility>
 #include <string>
+#include <sstream>
 
 #include "TROOT.h"
 #include "TString.h"

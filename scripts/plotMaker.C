@@ -2,7 +2,6 @@
 #include <utility>
 #include <vector>
 #include <string>
-#include <sstream>
 #include <cmath>
 
 #include "TROOT.h"
