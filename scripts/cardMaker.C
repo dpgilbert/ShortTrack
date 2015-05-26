@@ -10,9 +10,11 @@
 #include "TString.h"
 #include "TFile.h"
 #include "TH1.h"
+#include "TH3.h"
 #include "TList.h"
 #include "TCollection.h"
 #include "TKey.h"
+#include "TBenchmark.h"
 
 using namespace std;
 
@@ -22,11 +24,13 @@ TFile* f_purity = 0;
 TFile* f_qcd = 0;
 TFile* f_sig = 0;
 
-bool suppressZeroBins = true;
+const bool verbose = false;
+
+const bool suppressZeroBins = true;
 
 const float dummy_alpha = 1.; // dummy value for gmN when there are no SR events
 
-bool uncorrelatedZGratio = false; // treat ZGratio uncertainty as fully uncorrelated
+const bool uncorrelatedZGratio = false; // treat ZGratio uncertainty as fully uncorrelated
 
 //_______________________________________________________________________________
 std::string toString(int in){
@@ -51,17 +55,23 @@ double round(double d)
 }
 
 //_______________________________________________________________________________
-void printCard( string dir_str , int mt2bin , string signal, string output_dir) {
+void printCard( string dir_str , int mt2bin , string signal, string output_dir, int scanM1 = -1, int scanM2 = -1) {
 
   // read off yields from h_mt2bins hist in each topological region
 
   TString dir = TString(dir_str);
   TString fullhistname = dir + "/h_mt2bins";
+  TString fullhistnameScan  = fullhistname+"_sigscan";
   //  TString fullhistnameStat  = fullhistname+"Stat";
   TString fullhistnameMCStat  = fullhistname+"MCStat";
   TString fullhistnameCRyield  = fullhistname+"CRyield";
   TString fullhistnameRatio  = fullhistname+"Ratio";
   TString fullhistnamePurity = dir + "/h_puritySieieSB";
+
+  TString signame(signal);
+  if (scanM1 >= 0 && scanM2 >= 0) {
+    signame = Form("%s_%d_%d",signal.c_str(),scanM1,scanM2);
+  }
 
   double n_lostlep(0.);
   double n_lostlep_cr(0.);
@@ -77,10 +87,23 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
 
   double n_sig(0.);
 
-  TH1D* h_sig = (TH1D*) f_sig->Get(fullhistname);
-  if (h_sig != 0) n_sig = h_sig->GetBinContent(mt2bin);
-  else return;
+  TH1D* h_sig(0);
+  // pick point out of signal scan
+  if (scanM1 >= 0 && scanM2 >= 0) {
+    TH3D* h_sigscan = (TH3D*) f_sig->Get(fullhistnameScan);
+    if (!h_sigscan) return;
+    int binx = h_sigscan->GetXaxis()->FindBin(scanM1);
+    int biny = h_sigscan->GetYaxis()->FindBin(scanM2);
+    h_sig = h_sigscan->ProjectionZ(Form("h_mt2bins_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),binx,binx,biny,biny);
+  }
+  // single point sample
+  else {
+    h_sig = (TH1D*) f_sig->Get(fullhistname);
+  }
 
+  if (!h_sig) return;
+  n_sig = h_sig->GetBinContent(mt2bin);
+  
   //Get variable boundaries for signal region.
   //Used to create datacard name.
   TH1D* h_ht_LOW = (TH1D*) f_sig->Get(dir+"/h_ht_LOW");
@@ -121,7 +144,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
 
   std::string channel = ht_str + "_" + jet_str + "_" + bjet_str + "_" + mt2_str;
 
-  TString cardname = Form("%s/datacard_%s_%s.txt",output_dir.c_str(),channel.c_str(),signal.c_str());
+  TString cardname = Form("%s/datacard_%s_%s.txt",output_dir.c_str(),channel.c_str(),signame.Data());
 
   // get yields for each sample
   // !!!!! HACK: set zero bins to 0.01 for now to make combine happy
@@ -170,7 +193,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
   if (n_bkg < 0.001) n_qcd = 0.01;
 
   if (suppressZeroBins && ((n_sig < 0.1) || (n_sig/n_bkg < 0.02))) {
-    std::cout << "Zero signal, card not printed: " << cardname << std::endl;
+    if (verbose) std::cout << "Zero signal, card not printed: " << cardname << std::endl;
     return;
   }
 
@@ -305,13 +328,17 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir) 
 
   ofile->close();
 
-  std::cout << "Wrote card: " << cardname << std::endl;
+  if (verbose) std::cout << "Wrote card: " << cardname << std::endl;
 
   return;
 }
 
 //_______________________________________________________________________________
-void cardMaker(string signal, string input_dir, string output_dir){
+void cardMaker(string signal, string input_dir, string output_dir, bool isScan = false){
+
+  // Benchmark
+  TBenchmark *bmark = new TBenchmark();
+  bmark->Start("benchmark");
 
   // ----------------------------------------
   //  samples definition
@@ -350,9 +377,26 @@ void cardMaker(string signal, string input_dir, string output_dir){
       TH1D* h_n_mt2bins = (TH1D*) f_sig->Get(TString(mt2_hist_name));
       int n_mt2bins = h_n_mt2bins->GetBinContent(1);
       for (int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {//Make a separate card for each MT2 bin.
-        printCard(k->GetTitle(), imt2, signal, output_dir);   //MT2 bins with no entries are handled by printCard function.
+	if (isScan) {
+	  for (int im1 = 400; im1 <= 2000; im1 += 50) {
+	    for (int im2 = 0; im2 <= 1600; im2 += 50) {
+	      printCard(k->GetTitle(), imt2, signal, output_dir, im1, im2);   //MT2 and scan bins with no entries are handled by printCard function.
+	    } // scanM2 loop
+	  } // scanM1 loop
+	} // if isScan
+        else {
+	  printCard(k->GetTitle(), imt2, signal, output_dir);   //MT2 bins with no entries are handled by printCard function.
+	}
       }
     }
   }
+
+  bmark->Stop("benchmark");
+  cout << endl;
+  cout << "------------------------------" << endl;
+  cout << "CPU  Time:	" << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
+  cout << "Real Time:	" << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
+  cout << endl;
+  delete bmark;
 
 }
