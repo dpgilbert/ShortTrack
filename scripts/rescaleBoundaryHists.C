@@ -6,9 +6,9 @@
 
 #include <iostream>
 
-void rescaleBoundaryHists(std::string indir, int numSamples){
+void rescaleBoundaryHists(std::string infile, int numSamples){
 
-  TFile* f = new TFile(Form("%s/top.root", indir.c_str()), "UPDATE");
+  TFile* f = new TFile(infile.c_str(), "UPDATE");
   TDirectory* dir = 0;
 
   TIter dir_it(f->GetListOfKeys());
