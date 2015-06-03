@@ -6,21 +6,21 @@
 
 #include <iostream>
 
-void rescaleBoundaryHists(std::string indir, int numSamples){
+void rescaleBoundaryHists(std::string infile, int numSamples){
 
-  TFile* f = new TFile(Form("%s/top.root", indir.c_str()), "UPDATE");
+  TFile* f = new TFile(infile.c_str(), "UPDATE");
   TDirectory* dir = 0;
 
   TIter dir_it(f->GetListOfKeys());
   TKey* dir_k;
-  while (dir_k = (TKey *)dir_it()) {
+  while ((dir_k = (TKey *)dir_it())) {
     std::string dir_name = (dir_k->GetTitle());
     if(dir_name == "") continue;
     dir = (TDirectory*)dir_k->ReadObj();
     if(dir == 0) continue;
     TIter hist_it(dir->GetListOfKeys(), kIterBackward);
     TKey* hist_k;
-    while (hist_k = (TKey *)hist_it()) {
+    while ((hist_k = (TKey *)hist_it())) {
       std::string hist_name = (hist_k->GetTitle());
       if (hist_name.find("_HI") != std::string::npos || hist_name.find("_LOW") != std::string::npos) {
         TH1* h = (TH1*)hist_k->ReadObj();

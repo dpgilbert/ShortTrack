@@ -2,7 +2,7 @@
 #include <utility>
 #include <vector>
 #include <string>
-
+#include <cmath>
 
 #include "TROOT.h"
 #include "TLatex.h"
@@ -14,6 +14,11 @@
 #include "TFile.h"
 #include "TH1.h"
 #include "TPaveText.h"
+#include "TStyle.h"
+#include "TKey.h"
+
+#include "plotUtilities.C"
+#include "CMS_lumi.C"
 
 using namespace std;
 
@@ -28,291 +33,6 @@ const int iPeriod = 4; // 13 tev
 // mode generally : 
 //   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
 const int iPos = 11; 
-
-std::string toString(int in){
-  stringstream ss;
-  ss << in;
-  return ss.str();
-}
-
-void ReplaceString(std::string& subject, const std::string& search, const std::string& replace) {
-  size_t pos = 0;
-  while((pos = subject.find(search, pos)) != std::string::npos) {
-    subject.replace(pos, search.length(), replace);
-    pos += replace.length();
-  }
-}
-
-
-//_______________________________________________________________________________
-int getColor(const string& sample) {
-  if (sample.find("ttbar") != string::npos) return kBlue;
-  if (sample.find("top") != string::npos) return kBlue;
-  if (sample.find("wjets") != string::npos) return kGreen+1;
-  if (sample.find("zinv") != string::npos) return kGreen-1;
-  if (sample.find("qcd") != string::npos) return kYellow+1;
-  if (sample.find("T1tttt") != string::npos) return kRed;
-  if (sample.find("T1bbbb") != string::npos) return kMagenta;
-  if (sample.find("T1qqqq") != string::npos) return kOrange;
-  if (sample.find("T2tt") != string::npos) return kCyan;
-  if (sample.find("T2bb") != string::npos) return kMagenta+3;
-
-  cout << "getColor: WARNING: didn't recognize sample: " << sample << endl;
-  return kBlack;
-}
-
-//_______________________________________________________________________________
-string getLegendName(const string& sample) {
-  if (sample.find("ttbar") != string::npos) return "Top";
-  if (sample.find("top") != string::npos) return "Top";
-  if (sample.find("wjets") != string::npos) return "W+jets";
-  if (sample.find("zinv") != string::npos) return "Z+jets";
-  if (sample.find("gjet") != string::npos) return "Gamma+jets";
-  if (sample.find("qcd") != string::npos) return "QCD";
-  if (sample.find("T1tttt_1500_100") != string::npos) return "T1tttt 1500, 100";
-  if (sample.find("T1tttt_1200_800") != string::npos) return "T1tttt 1200, 800";
-  if (sample.find("T1bbbb_1000_900") != string::npos) return "T1bbbb 1000, 900";
-  if (sample.find("T1bbbb_1500_100") != string::npos) return "T1bbbb 1500, 100";
-  if (sample.find("T1qqqq_1400_100") != string::npos) return "T1qqqq 1400, 100";
-  if (sample.find("T1qqqq_1000_800") != string::npos) return "T1qqqq 1000, 800";
-  if (sample.find("T2tt_425_325") != string::npos) return "T2tt 425, 325";
-  if (sample.find("T2tt_500_325") != string::npos) return "T2tt 500, 325";
-  if (sample.find("T2tt_650_325") != string::npos) return "T2tt 650, 325";
-  if (sample.find("T2tt_850_100") != string::npos) return "T2tt 850, 100";
-  if (sample.find("T2bb_900_100") != string::npos) return "T2bb 900, 100";
-  if (sample.find("T2bb_600_580") != string::npos) return "T2bb 600, 580";
-  if (sample.find("T2qq_1200_100") != string::npos) return "T2qq 1200, 100";
-  if (sample.find("T2qq_600_550") != string::npos) return "T2qq 600, 550";
-
-  cout << "getLegendName: WARNING: didn't recognize sample: " << sample << endl;
-  return sample;
-}
-
-//_______________________________________________________________________________
-string getTableName(const string& sample) {
-  if (sample.find("ttbar") != string::npos) return "ttbar";
-  if (sample.find("ttw") != string::npos) return "ttw";
-  if (sample.find("ttz") != string::npos) return "ttz";
-  if (sample.find("tth") != string::npos) return "tth";
-  if (sample.find("singletop") != string::npos) return "single top";
-  if (sample.find("top") != string::npos) return "Top";
-  if (sample.find("wjets_ht100to200") != string::npos) return "W+jets HT100to200";
-  if (sample.find("wjets_ht200to400") != string::npos) return "W+jets HT200to400";
-  if (sample.find("wjets_ht400to600") != string::npos) return "W+jets HT400to600";
-  if (sample.find("wjets_ht600toInf") != string::npos) return "W+jets HT600toInf";
-  if (sample.find("wjets") != string::npos) return "W+jets";
-  if (sample.find("zinv_ht100to200") != string::npos) return "Z+jets HT100to200";
-  if (sample.find("zinv_ht200to400") != string::npos) return "Z+jets HT200to400";
-  if (sample.find("zinv_ht400to600") != string::npos) return "Z+jets HT400to600";
-  if (sample.find("zinv_ht600toInf") != string::npos) return "Z+jets HT600toInf";
-  if (sample.find("zinv") != string::npos) return "Z+jets";
-  if (sample.find("gjet") != string::npos) return "Gamma+jets";
-  if (sample.find("qcd") != string::npos) return "QCD";
-  if (sample.find("singletop") != string::npos) return "Single Top";
-  if (sample.find("ttv") != string::npos) return "ttV";
-  if (sample.find("T1tttt_1500_100") != string::npos) return "T1tttt 1500, 100";
-  if (sample.find("T1tttt_1200_800") != string::npos) return "T1tttt 1200, 800";
-  if (sample.find("T1bbbb_1000_900") != string::npos) return "T1bbbb 1000, 900";
-  if (sample.find("T1bbbb_1500_100") != string::npos) return "T1bbbb 1500, 100";
-  if (sample.find("T1qqqq_1400_100") != string::npos) return "T1qqqq 1400, 100";
-  if (sample.find("T1qqqq_1000_800") != string::npos) return "T1qqqq 1000, 800";
-  if (sample.find("T2tt_425_325") != string::npos) return "T2tt 425, 325";
-  if (sample.find("T2tt_500_325") != string::npos) return "T2tt 500, 325";
-  if (sample.find("T2tt_650_325") != string::npos) return "T2tt 650, 325";
-  if (sample.find("T2tt_850_100") != string::npos) return "T2tt 850, 100";
-  if (sample.find("T2bb_900_100") != string::npos) return "T2bb 900, 100";
-  if (sample.find("T2bb_600_580") != string::npos) return "T2bb 600, 580";
-  if (sample.find("T2qq_1200_100") != string::npos) return "T2qq 1200, 100";
-  if (sample.find("T2qq_600_550") != string::npos) return "T2qq 600, 550";
-
-  cout << "getTableName: WARNING: didn't recognize sample: " << sample << endl;
-  return sample;
-}
-
-string getJetBJetPlotLabel(const TFile* f, std::string dir_str) {
-
-  TString dir= TString(dir_str);
-
-  TH1D* h_njets_LOW = (TH1D*) f->Get(dir+"/h_njets_LOW");
-  TH1D* h_njets_HI = (TH1D*) f->Get(dir+"/h_njets_HI");
-  int njets_LOW;
-  int njets_HI;
-  if(h_njets_LOW && h_njets_HI){
-    njets_LOW = h_njets_LOW->GetBinContent(1);
-    njets_HI = h_njets_HI->GetBinContent(1);
-  }
-  else{
-    njets_LOW = 0;
-    njets_HI = -1;
-  }
-
-  TH1D* h_nbjets_LOW = (TH1D*) f->Get(dir+"/h_nbjets_LOW");
-  TH1D* h_nbjets_HI = (TH1D*) f->Get(dir+"/h_nbjets_HI");
-  int nbjets_LOW;
-  int nbjets_HI;
-  if(h_nbjets_LOW && h_nbjets_HI){
-    nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
-    nbjets_HI = h_nbjets_HI->GetBinContent(1);
-  }
-  else{
-    nbjets_LOW = 0;
-    nbjets_HI = -1;
-  }
-
-  if(njets_HI != -1) njets_HI--;
-  if(nbjets_HI != -1) nbjets_HI--;
-
-  std::string jet_string; 
-  std::string bjet_string; 
-
-  if( (njets_HI - njets_LOW) == 0) jet_string = toString(njets_LOW) + "j";
-  else if( njets_HI != -1) jet_string = toString(njets_LOW) + "-" + toString(njets_HI) + "j";
-  else jet_string = "#geq " + toString(njets_LOW) + "j";
-
-  if( (nbjets_HI - nbjets_LOW) == 0) bjet_string = toString(nbjets_LOW) + "b";
-  else if( nbjets_HI != -1) bjet_string = toString(nbjets_LOW) + "-" + toString(nbjets_HI) + "b";
-  else bjet_string = "#geq " + toString(nbjets_LOW) + "b";
-
-  return jet_string + ", " + bjet_string;
-
-}
-
-string getHTPlotLabel(const TFile* f, std::string dir_str) {
-
-  TString dir= TString(dir_str);
-
-  TH1D* h_ht_LOW = (TH1D*) f->Get(dir+"/h_ht_LOW");
-  TH1D* h_ht_HI = (TH1D*) f->Get(dir+"/h_ht_HI");
-  int ht_LOW;
-  int ht_HI;
-  if(h_ht_LOW && h_ht_HI){
-    ht_LOW = h_ht_LOW->GetBinContent(1);
-    ht_HI = h_ht_HI->GetBinContent(1);
-  }
-  else return "H_{T} > 450 GeV";
-
-  if(ht_HI != -1) return toString(ht_LOW) + " < H_{T} < " + toString(ht_HI) + " GeV"; 
-  else  return "H_{T} > " + toString(ht_LOW) + " GeV";
-
-}
-
-string getHTTableLabel(const TFile* f, std::string dir_str) {
-
-  TString dir= TString(dir_str);
-
-  TH1D* h_ht_LOW = (TH1D*) f->Get(dir+"/h_ht_LOW");
-  TH1D* h_ht_HI = (TH1D*) f->Get(dir+"/h_ht_HI");
-  int ht_LOW;
-  int ht_HI;
-  if(h_ht_LOW && h_ht_HI){
-    ht_LOW = h_ht_LOW->GetBinContent(1);
-    ht_HI = h_ht_HI->GetBinContent(1);
-  }
-  else return "$H_{T} > 450$~GeV";
-
-  if(ht_HI != -1) return "$" + toString(ht_LOW) + " < H_{T} < " + toString(ht_HI) + "$~GeV"; 
-  else  return "$H_{T} > " + toString(ht_LOW) + "$~GeV";
-
-}
-
-string getMETTableLabel(const TFile* f, std::string dir_str) {
-
-  TString dir= TString(dir_str);
-
-  TH1D* h_met_LOW = (TH1D*) f->Get(dir+"/h_met_LOW");
-  int met_LOW;
-  if(h_met_LOW){
-    met_LOW = h_met_LOW->GetBinContent(1);
-  }
-
-  return "$\\MET > " + toString(met_LOW) + " $~GeV ";
-
-}
-
-string getMT2PlotLabel(const TFile* f, std::string dir_str) {
-
-  TString dir= TString(dir_str);
-
-  TH1D* h_mt2_LOW = (TH1D*) f->Get(dir+"/h_mt2_LOW");
-  TH1D* h_mt2_HI = (TH1D*) f->Get(dir+"/h_mt2_HI");
-  int mt2_LOW;
-  int mt2_HI;
-  if(h_mt2_LOW && h_mt2_HI){
-    mt2_LOW = h_mt2_LOW->GetBinContent(1);
-    mt2_HI = h_mt2_HI->GetBinContent(1);
-  }
-  else return "M_{T2} > 200 GeV";
-
-  return "M_{T2} > " + toString(mt2_LOW);
-
-}
-
-
-string getMT2PlotLabel(const TFile* f, std::string dir_str) {
-
-  TString dir= TString(dir_str);
-
-  TH1D* h_mt2_LOW = (TH1D*) f->Get(dir+"/h_mt2_LOW");
-  TH1D* h_mt2_HI = (TH1D*) f->Get(dir+"/h_mt2_HI");
-  int mt2_LOW;
-  int mt2_HI;
-  if(h_mt2_LOW && h_mt2_HI){
-    mt2_LOW = h_mt2_LOW->GetBinContent(1);
-    mt2_HI = h_mt2_HI->GetBinContent(1);
-  }
-  else return "M_{T2} > 200 GeV";
-
-  return "M_{T2} > " + toString(mt2_LOW);
-
-}
-
-string getJetBJetTableLabel(const TFile* f, std::string dir_str) {
-
-  TString dir= TString(dir_str);
-
-  TH1D* h_njets_LOW = (TH1D*) f->Get(dir+"/h_njets_LOW");
-  TH1D* h_njets_HI = (TH1D*) f->Get(dir+"/h_njets_HI");
-  int njets_LOW;
-  int njets_HI;
-  if(h_njets_LOW && h_njets_HI){
-    njets_LOW = h_njets_LOW->GetBinContent(1);
-    njets_HI = h_njets_HI->GetBinContent(1);
-  }
-  else{
-    njets_LOW = 0;
-    njets_HI = -1;
-  }
-
-  TH1D* h_nbjets_LOW = (TH1D*) f->Get(dir+"/h_nbjets_LOW");
-  TH1D* h_nbjets_HI = (TH1D*) f->Get(dir+"/h_nbjets_HI");
-  int nbjets_LOW;
-  int nbjets_HI;
-  if(h_nbjets_LOW && h_nbjets_HI){
-    nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
-    nbjets_HI = h_nbjets_HI->GetBinContent(1);
-  }
-  else{
-    nbjets_LOW = 0;
-    nbjets_HI = -1;
-  }
-
-  if(njets_HI != -1) njets_HI--;
-  if(nbjets_HI != -1) nbjets_HI--;
-
-  std::string jet_string; 
-  std::string bjet_string; 
-
-  if( (njets_HI - njets_LOW) == 0) jet_string = toString(njets_LOW) + "j";
-  else if( njets_HI != -1) jet_string = toString(njets_LOW) + "-" + toString(njets_HI) + "j";
-  else jet_string = "$\\geq$" + toString(njets_LOW) + "j";
-
-  if( (nbjets_HI - nbjets_LOW) == 0) bjet_string = toString(nbjets_LOW) + "b";
-  else if( nbjets_HI != -1) bjet_string = toString(nbjets_LOW) + "-" + toString(nbjets_HI) + "b";
-  else bjet_string = "$\\geq$" + toString(nbjets_LOW) + "b";
-
-  return jet_string + ", " + bjet_string;
-
-}
 
 //_______________________________________________________________________________
 TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names , const string& histdir , const string& histname , const string& xtitle , const string& ytitle , float xmin , float xmax , int rebin = 1 , bool logplot = true, bool printplot = false, float scalesig = -1. ) {
@@ -510,20 +230,20 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
         if (mt2bin < 0) {
           yield = h->IntegralAndError(0,-1,err);
           bgtot.at(idir) += yield;
-          bgerr.at(idir) = sqrt(bgerr.at(idir)**2 + err**2);
+          bgerr.at(idir) = sqrt(pow(bgerr.at(idir),2) + pow(err,2));
         }
         // last bin: include overflow
         else if (mt2bin == h->GetXaxis()->GetNbins()) {
           yield = h->IntegralAndError(mt2bin,-1,err);
           bgtot.at(idir) += yield;
-          bgerr.at(idir) = sqrt(bgerr.at(idir)**2 + err**2);
+          bgerr.at(idir) = sqrt(pow(bgerr.at(idir),2) + pow(err,2));
         }
         // single bin, not last bin
         else {
           yield = h->GetBinContent(mt2bin);
           err = h->GetBinError(mt2bin);
           bgtot.at(idir) += yield;
-          bgerr.at(idir) = sqrt(bgerr.at(idir)**2 + err**2);
+          bgerr.at(idir) = sqrt(pow(bgerr.at(idir),2) + pow(err,2));
         }
       }
       if (yield > 10.) {
@@ -554,7 +274,7 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
   cout << " \\\\" << endl;
   cout << "\\hline" << endl;
 
-  for( int i = 0 ; i < n ; i++ ){
+  for( unsigned int i = 0 ; i < n ; i++ ){
     if( !TString(names.at(i)).Contains("sig") ) continue;
     cout << getTableName(names.at(i));
     for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
@@ -596,7 +316,7 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
   return;
 }
 
-
+//_______________________________________________________________________________
 void printDetailedTable( vector<TFile*> samples , vector<string> names , string dir) {
 
   // read off yields from h_mt2bins hist in each topological region
@@ -619,8 +339,9 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
   vector<double> bgerr(n_mt2bins,0.);
 
   TString binshistname = Form("%s/h_mt2bins",dir.c_str());
-  for(int i=0; i<samples.size(); i++){//need to find a sample that has this hist filled
-    TH1D* h_mt2bins = (TH1D*) samples.at(i)->Get(binshistname);
+  TH1D* h_mt2bins(0);
+  for(unsigned int i=0; i<samples.size(); i++){//need to find a sample that has this hist filled
+    h_mt2bins = (TH1D*) samples.at(i)->Get(binshistname);
     if(h_mt2bins) break;
   }
   
@@ -635,7 +356,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
   std::cout << "\\centering" << std::endl;
   std::cout << "\\makebox[\\textwidth][c]{" << std::endl;
   std::cout << "\\begin{tabular}{r";
-  for (unsigned int ibin=0; ibin < n_mt2bins; ++ibin) std::cout << "|c";
+  for (int ibin=0; ibin < n_mt2bins; ++ibin) std::cout << "|c";
   std::cout << "}" << std::endl;
   std::cout << "\\hline" << std::endl;
   std::cout << "\\multicolumn{" << n_mt2bins+1 << "}{c}{";
@@ -648,7 +369,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
     << "Sample";
 
   // header
-  for (unsigned int ibin = 1; ibin < n_mt2bins; ++ibin) {
+  for (int ibin = 1; ibin < n_mt2bins; ++ibin) {
     cout << " & " << h_mt2bins->GetXaxis()->GetBinLowEdge(ibin) << " $<$ \\mttwo $<$ " << h_mt2bins->GetXaxis()->GetBinLowEdge(ibin+1) << " GeV";
   }
   cout << " & \\mttwo $>$ " << h_mt2bins->GetXaxis()->GetBinLowEdge(n_mt2bins) << " GeV";
@@ -656,12 +377,12 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
     << "\\hline\\hline" << endl;
 
   // backgrounds first -- loop backwards
-  for( int i = n-1 ; i >= 0 ; --i ){
-    if( TString(names.at(i)).Contains("sig")  ) continue;
-    cout << getTableName(names.at(i));
-    for (unsigned int ibin = 1; ibin <= n_mt2bins; ++ibin) {
+  for( int isamp = n-1 ; isamp >= 0 ; --isamp ){
+    if( TString(names.at(isamp)).Contains("sig")  ) continue;
+    cout << getTableName(names.at(isamp));
+    for (int ibin = 1; ibin <= n_mt2bins; ++ibin) {
       TString fullhistname = Form("%s/h_mt2bins",dir.c_str());
-      TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
+      TH1D* h = (TH1D*) samples.at(isamp)->Get(fullhistname);
       double yield = 0.;
       double err = 0.;
       if (h) {
@@ -670,13 +391,13 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
           yield = h->GetBinContent(ibin);
           err = h->GetBinError(ibin);
           bgtot.at(ibin-1) += yield;
-          bgerr.at(ibin-1) = sqrt(bgerr.at(ibin-1)**2 + err**2);
+          bgerr.at(ibin-1) = sqrt(pow(bgerr.at(ibin-1),2) + pow(err,2));
         }
         // last bin: include overflow
         else if (ibin == h->GetXaxis()->GetNbins()) {
           yield = h->IntegralAndError(ibin,-1,err);
           bgtot.at(ibin-1) += yield;
-          bgerr.at(ibin-1) = sqrt(bgerr.at(ibin-1)**2 + err**2);
+          bgerr.at(ibin-1) = sqrt(pow(bgerr.at(ibin-1),2) + pow(err,2));
         }
         else {
           std::cout << "Shouldn't get here" << std::endl;
@@ -697,7 +418,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
   // print bg totals
   cout << "\\hline" << endl;
   cout << "Total SM";
-  for ( unsigned int ibin = 0; ibin < n_mt2bins; ++ibin ) {
+  for ( int ibin = 0; ibin < n_mt2bins; ++ibin ) {
     double yield = bgtot.at(ibin);
     double err = bgerr.at(ibin);
     if (yield > 10.) {
@@ -711,12 +432,12 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
   cout << " \\\\" << endl;
   cout << "\\hline" << endl;
 
-  for( int i = 0 ; i < n ; i++ ){
-    if( !TString(names.at(i)).Contains("sig") ) continue;
-    cout << getTableName(names.at(i));
-    for (unsigned int ibin = 1; ibin <= n_mt2bins; ++ibin) {
+  for( unsigned int jsamp = 0 ; jsamp < n ; jsamp++ ){
+    if( !TString(names.at(jsamp)).Contains("sig") ) continue;
+    cout << getTableName(names.at(jsamp));
+    for (int ibin = 1; ibin <= n_mt2bins; ++ibin) {
       TString fullhistname = Form("%s/h_mt2bins",dir.c_str());
-      TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
+      TH1D* h = (TH1D*) samples.at(jsamp)->Get(fullhistname);
       double yield = 0.;
       double err = 0.;
       if (h) {
@@ -759,14 +480,14 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
 //_______________________________________________________________________________
 void plotMaker(){
 
-  gROOT->LoadMacro("CMS_lumi.C");
+  //  gROOT->LoadMacro("CMS_lumi.C");
   cmsText = "CMS Simulation";
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
   lumi_13TeV = "4 fb^{-1}";
 
-  //string input_dir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-00-08_4fb/";
+  //string input_dir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-00-12_test/";
   string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/V00-00-12/";
 
   // ----------------------------------------
@@ -859,7 +580,7 @@ void plotMaker(){
     TKey* k;
     std::string cr_skip = "cr";
     std::string sr_skip = "sr";
-    while (k = (TKey *)it()) {
+    while ((k = (TKey *)it())) {
       if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
       //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
@@ -886,51 +607,51 @@ void plotMaker(){
 
   vector<string> dirs;
   dirs.push_back("sr1L");
-  dirs.push_back("sr2L");
-  dirs.push_back("sr3L");
-  dirs.push_back("sr4L");
-  dirs.push_back("sr5L");
-  dirs.push_back("sr6L");
-  dirs.push_back("sr7L");
-  dirs.push_back("sr8L");
-  dirs.push_back("sr9L");
-  dirs.push_back("sr10L");
-  dirs.push_back("sr11L");
-  dirs.push_back("sr1M");
-  dirs.push_back("sr2M");
-  dirs.push_back("sr3M");
-  dirs.push_back("sr4M");
-  dirs.push_back("sr5M");
-  dirs.push_back("sr6M");
-  dirs.push_back("sr7M");
-  dirs.push_back("sr8M");
-  dirs.push_back("sr9M");
-  dirs.push_back("sr10M");
-  dirs.push_back("sr11M");
-  dirs.push_back("sr1H");
-  dirs.push_back("sr2H");
-  dirs.push_back("sr3H");
-  dirs.push_back("sr4H");
-  dirs.push_back("sr5H");
-  dirs.push_back("sr6H");
-  dirs.push_back("sr7H");
-  dirs.push_back("sr8H");
-  dirs.push_back("sr9H");
-  dirs.push_back("sr10H");
-  dirs.push_back("sr11H");
-  dirs.push_back("sr1UH");
-  dirs.push_back("sr2UH");
-  dirs.push_back("sr3UH");
-  dirs.push_back("sr4UH");
-  dirs.push_back("sr5UH");
-  dirs.push_back("sr6UH");
-  dirs.push_back("sr7UH");
-  dirs.push_back("sr8UH");
-  dirs.push_back("sr9UH");
-  dirs.push_back("sr10UH");
-  dirs.push_back("sr11UH");
+  // dirs.push_back("sr2L");
+  // dirs.push_back("sr3L");
+  // dirs.push_back("sr4L");
+  // dirs.push_back("sr5L");
+  // dirs.push_back("sr6L");
+  // dirs.push_back("sr7L");
+  // dirs.push_back("sr8L");
+  // dirs.push_back("sr9L");
+  // dirs.push_back("sr10L");
+  // dirs.push_back("sr11L");
+  // dirs.push_back("sr1M");
+  // dirs.push_back("sr2M");
+  // dirs.push_back("sr3M");
+  // dirs.push_back("sr4M");
+  // dirs.push_back("sr5M");
+  // dirs.push_back("sr6M");
+  // dirs.push_back("sr7M");
+  // dirs.push_back("sr8M");
+  // dirs.push_back("sr9M");
+  // dirs.push_back("sr10M");
+  // dirs.push_back("sr11M");
+  // dirs.push_back("sr1H");
+  // dirs.push_back("sr2H");
+  // dirs.push_back("sr3H");
+  // dirs.push_back("sr4H");
+  // dirs.push_back("sr5H");
+  // dirs.push_back("sr6H");
+  // dirs.push_back("sr7H");
+  // dirs.push_back("sr8H");
+  // dirs.push_back("sr9H");
+  // dirs.push_back("sr10H");
+  // dirs.push_back("sr11H");
+  // dirs.push_back("sr1UH");
+  // dirs.push_back("sr2UH");
+  // dirs.push_back("sr3UH");
+  // dirs.push_back("sr4UH");
+  // dirs.push_back("sr5UH");
+  // dirs.push_back("sr6UH");
+  // dirs.push_back("sr7UH");
+  // dirs.push_back("sr8UH");
+  // dirs.push_back("sr9UH");
+  // dirs.push_back("sr10UH");
+  // dirs.push_back("sr11UH");
 
-  for(int i=0; i<dirs.size(); i++){
+  for(unsigned int i=0; i<dirs.size(); i++){
     printDetailedTable(samples, names, dirs.at(i));
     if(i % 2 != 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
   }
