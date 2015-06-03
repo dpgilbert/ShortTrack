@@ -11,6 +11,9 @@ cd CMSSW_7_4_1_patch1/src
 cmsenv
 cd ../..
 git clone git@github.com:cmstas/CORE.git
+cd CORE
+git checkout cmssw74x
+cd ..
 git clone git@github.com:cmstas/Tools.git
 cd babymaker
 make -j 8

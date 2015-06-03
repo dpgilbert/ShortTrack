@@ -976,7 +976,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  jet_eta[njet]  = p4sCorrJets.at(iJet).eta();
 	  jet_phi[njet]  = p4sCorrJets.at(iJet).phi();
 	  jet_mass[njet] = cms3.pfjets_mass().at(iJet);
-	  jet_btagCSV[njet] = cms3.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet); 
+	  jet_btagCSV[njet] = cms3.pfjets_pfCombinedInclusiveSecondaryVertexV2BJetTag().at(iJet); 
 	  if (!isData) {
 	    jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
 	    jet_mcFlavour[njet] = cms3.pfjets_partonFlavour().at(iJet);
@@ -1080,7 +1080,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 		p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
 		gamma_nJet40++;
 	      } // pt40
-	      if(cms3.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.814) { //CSVv2IVFM
+	      if(cms3.pfjets_pfCombinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.814) { //CSVv2IVFM
 		gamma_nBJet20++; 
 		if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++; 
 		if (p4sCorrJets.at(iJet).pt() > 40.0) {
