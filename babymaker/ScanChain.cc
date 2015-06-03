@@ -156,7 +156,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       evt_kfactor = cms3.evt_kfactor();
       evt_filter = cms3.evt_filt_eff();
       puWeight = 1.;
-      nTrueInt = cms3.puInfo_trueNumInteractions().at(0);
+      if (!isData) nTrueInt = cms3.puInfo_trueNumInteractions().at(0);
       rho = cms3.evt_fixgridfastjet_all_rho(); //this one is used in JECs
 
       if (verbose) cout << "before vertices" << endl;
@@ -202,6 +202,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       Flag_METFilters                               = cms3.filt_metfilter();
 
       // gen block -- for MC only
+      ngenPart = 0;
+      ngenLep = 0;
+      ngenTau = 0;
+      ngenLepFromTau = 0;
       if (!isData) {
 	if (verbose) cout << "before sparm values" << endl;
 
@@ -222,10 +226,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	if (verbose) cout << "before gen particles" << endl;
 
 	//GEN PARTICLES
-	ngenPart = 0;
-	ngenLep = 0;
-	ngenTau = 0;
-	ngenLepFromTau = 0;
 	LorentzVector recoil(0,0,0,0);
 	int nHardScatter = 0;
 	for(unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++){
@@ -977,8 +977,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  jet_phi[njet]  = p4sCorrJets.at(iJet).phi();
 	  jet_mass[njet] = cms3.pfjets_mass().at(iJet);
 	  jet_btagCSV[njet] = cms3.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet); 
-	  jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
-	  jet_mcFlavour[njet] = cms3.pfjets_partonFlavour().at(iJet);
+	  if (!isData) {
+	    jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
+	    jet_mcFlavour[njet] = cms3.pfjets_partonFlavour().at(iJet);
+	  } else {
+	    jet_mcPt[njet] = -999.;
+	    jet_mcFlavour[njet] = -999;
+	  }
 	  //jet_qgl
 	  jet_area[njet] = cms3.pfjets_area().at(iJet);
 	  jet_rawPt[njet] = cms3.pfjets_p4().at(iJet).pt() * cms3.pfjets_undoJEC().at(iJet);
@@ -1296,6 +1301,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  weight_scales_DN = 0.70;
 	}
       }
+
+      if (verbose) cout << "before fill" << endl;
 
       FillBabyNtuple();
 
