@@ -220,6 +220,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   // These will be set to true if any SL GJ or DY control region plots are produced
   bool saveGJplots = false;
   bool saveDYplots = false;
+  bool saveRLplots = false;
   bool saveSLplots = false;
   bool saveSLMUplots = false;
   bool saveSLELplots = false;
@@ -459,7 +460,30 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 	    doDYplots = true;
 	  }
       	} // nlep == 2
-      }// evt_id 
+      }// evt_id
+
+      // Variables for Removed single lepton (RL) region
+      bool doRLplots = false;
+      if (!(t.evt_id >= 700 && t.evt_id < 800)) {
+      	if (t.nlep == 1) {
+      	  if ( t.lep_pt[0] > 20 //lepton above 20GeV
+	       && fabs(t.lep_eta[0])<2.5 //lepton eta < 2.5
+	       // reduce electron FR in endcap to barrel level
+	       //- Barrel: MT2 selection (vetoID + miniRelIso<0.1) + medium ID + relIso03 < 0.1
+	       //- Endcap: MT2 selection (vetoID + miniRelIso<0.1) + tight ID + relIso03 < 0.1
+	       && ((t.lep_miniRelIso[0]<0.1) && t.lep_relIso03[0]<0.1)
+	       && ((abs(t.lep_pdgId[0])==11 //for electrons, pass ID above
+		    && ((fabs(t.lep_eta[0])<1.4442 && t.lep_tightId[0]>1) || (fabs(t.lep_eta[0])>1.4442 && t.lep_tightId[0]>2) ))
+		   || (abs(t.lep_pdgId[0])==13)) //for muons, just veto ID
+	       ) {
+	    // no additional explicit lepton veto
+	    // i.e. implicitly allow 3rd PF lepton or hadron
+	    nlepveto_ = 0; 
+	    doRLplots = true;
+	  }
+      	} // nlep == 1
+      }// evt_id
+      
 
       ////////////////////////////////////
       /// done with overall selection  /// 
@@ -483,6 +507,10 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       if (doDYplots) {
         saveDYplots = true;
         fillHistosCRDY("crdy");
+      }
+      if (doRLplots) {
+        saveRLplots = true;
+        fillHistosCRRL("crrl");
       }
       if (doSLplots) {
         saveSLplots = true;
@@ -537,6 +565,13 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(!SRVec.at(srN).crdyHistMap.empty()){
         savePlotsDir(SRVec.at(srN).crdyHistMap, outfile_, ("crdy"+SRVec.at(srN).GetName()).c_str());
+      }
+    }
+  }
+  if (saveRLplots) {
+    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+      if(!SRVec.at(srN).crrlHistMap.empty()){
+        savePlotsDir(SRVec.at(srN).crrlHistMap, outfile_, ("crrl"+SRVec.at(srN).GetName()).c_str());
       }
     }
   }
@@ -810,6 +845,46 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   return;
 }
 
+// hists for removed single lepton control region
+void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suffix) {
+
+  if (t.nlep!=1) return;
+
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = t.zll_deltaPhiMin;
+  values["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
+  values["nlep"]        = nlepveto_;
+  values["j1pt"]        = t.jet1_pt;
+  values["j2pt"]        = t.jet2_pt;
+  values["njets"]       = t.nJet40;
+  values["nbjets"]      = t.nBJet20;
+  values["mt2"]         = t.zll_mt2;
+  values["ht"]          = t.zll_ht;
+  values["met"]         = t.zll_met_pt;
+
+ // Separate list for SRBASE
+  std::map<std::string, float> valuesBase;
+  valuesBase["deltaPhiMin"] = t.zll_deltaPhiMin;
+  valuesBase["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
+  valuesBase["nlep"]        = nlepveto_;
+  valuesBase["j1pt"]        = t.jet1_pt;
+  valuesBase["j2pt"]        = t.jet2_pt;
+  valuesBase["mt2"]         = t.zll_mt2;
+  valuesBase["passesHtMet"] = ( (t.zll_ht > 450. && t.zll_met_pt > 200.) || (t.zll_ht > 1000. && t.zll_met_pt > 30.) );
+  bool passBase = SRBase.PassesSelection(valuesBase);
+  
+  fillHistosRemovedLepton(SRNoCut.crrlHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), prefix+SRNoCut.GetName(), suffix);
+  
+  if(passBase) fillHistosRemovedLepton(SRBase.crrlHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlbase", suffix);
+  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+    if(SRVec.at(srN).PassesSelection(values)){
+      fillHistosRemovedLepton(SRVec.at(srN).crrlHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
+      break;//control regions are orthogonal, event cannot be in more than one
+    }
+  }
+
+  return;
+}
 
 void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
@@ -987,6 +1062,46 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     plot1D("h_njbins"+s,       t.nJet40,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
     plot1D("h_nbjbins"+s,       t.nBJet20,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
 
+  }
+
+  outfile_->cd();
+  return;
+}
+
+void MT2Looper::fillHistosRemovedLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
+  TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
+  if (dir == 0) {
+    dir = outfile_->mkdir(dirname.c_str());
+  } 
+  dir->cd();
+
+  plot1D("h_mt2bins"+s,       t.zll_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+
+  const int n_htbins = 4;
+  const float htbins[n_htbins+1] = {450., 575., 1000., 1500., 3000.};
+  const int n_njbins = 3;
+  const float njbins[n_njbins+1] = {2, 4, 7, 12};
+  const int n_nbjbins = 4;
+  const float nbjbins[n_nbjbins+1] = {0, 1, 2, 3, 6};
+  
+  if (dirname=="crrlbase" || dirname=="crrlL" || dirname=="crrlM" || dirname=="crrlH") {
+    plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
+    plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
+    plot1D("h_mt2"+s,       t.zll_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
+    plot1D("h_met"+s,       t.zll_met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
+    plot1D("h_ht"+s,       t.zll_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
+    plot1D("h_nJet40"+s,       t.nJet40,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
+    plot1D("h_nBJet20"+s,      t.nBJet20,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
+    plot1D("h_deltaPhiMin"+s,  t.zll_deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
+    plot1D("h_diffMetMht"+s,   t.zll_diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
+    plot1D("h_diffMetMhtOverMet"+s,   t.zll_diffMetMht/t.zll_met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
+    plot1D("h_minMTBMet"+s,   t.zll_minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
+    plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
+    plot1D("h_htbins"+s,       t.zll_ht,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins, htbins);
+    plot1D("h_njbins"+s,       t.nJet40,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
+    plot1D("h_nbjbins"+s,       t.nBJet20,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
+    plot1D("h_leppt"+s,      t.lep_pt[0],   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
+    plot1D("h_nupt"+s,      t.met_pt,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
   }
 
   outfile_->cd();

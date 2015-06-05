@@ -39,6 +39,7 @@ class SR {
     std::map<std::string, TH1*> crslhadHistMap;
     std::map<std::string, TH1*> crgjHistMap;
     std::map<std::string, TH1*> crdyHistMap;
+    std::map<std::string, TH1*> crrlHistMap;
 
   private:
 
