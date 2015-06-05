@@ -43,7 +43,7 @@ using namespace tas;
 // turn on to add debugging statements
 const bool verbose = false;
 // turn on to apply JEC from text files
-const bool applyJECfromFile = true;
+const bool applyJECfromFile = false;
 // turn on to save prunedGenParticle collection
 const bool saveGenParticles = false;
 // turn on to apply trigger cuts to ntuples -> OR of all triggers used
