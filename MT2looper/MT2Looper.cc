@@ -89,9 +89,10 @@ void MT2Looper::SetSignalRegions(){
       dir = outfile_->mkdir(("crsl"+SRVec.at(i).GetName()).c_str());
     } 
     dir->cd();
-    for(unsigned int j = 0; j < vars.size(); j++){
-      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).crslHistMap, "", 1, 0, 2);
-      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).crslHistMap, "", 1, 0, 2);
+    std::vector<std::string> varsCRSL = SRVec.at(i).GetListOfVariablesCRSL();
+    for(unsigned int j = 0; j < varsCRSL.size(); j++){
+      plot1D("h_"+varsCRSL.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBoundCRSL(varsCRSL.at(j)), SRVec.at(i).crslHistMap, "", 1, 0, 2);
+      plot1D("h_"+varsCRSL.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBoundCRSL(varsCRSL.at(j)), SRVec.at(i).crslHistMap, "", 1, 0, 2);
     }
     plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).crslHistMap, "", 1, 0, 2);
 
@@ -116,6 +117,13 @@ void MT2Looper::SetSignalRegions(){
   SRBase.SetVar("diffMetMhtOverMet", 0, 0.5);
   SRBase.SetVar("nlep", 0, 1);
   SRBase.SetVar("passesHtMet", 1, 2);
+  SRBase.SetVarCRSL("mt2", 200, -1);
+  SRBase.SetVarCRSL("j1pt", 40, -1);
+  SRBase.SetVarCRSL("j2pt", 40, -1);
+  SRBase.SetVarCRSL("deltaPhiMin", 0.3, -1);
+  SRBase.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
+  SRBase.SetVarCRSL("nlep", 1, 2);
+  SRBase.SetVarCRSL("passesHtMet", 1, 2);
   float SRBase_mt2bins[6] = {200, 300, 400, 600, 1000, 1500}; 
   SRBase.SetMT2Bins(5, SRBase_mt2bins);
 
@@ -695,13 +703,13 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   std::map<std::string, float> valuesBase;
   valuesBase["deltaPhiMin"] = t.deltaPhiMin;
   valuesBase["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
-  valuesBase["nlep"]        = 0; // dummy value
+  valuesBase["nlep"]        = t.nLepLowMT;
   valuesBase["j1pt"]        = t.jet1_pt;
   valuesBase["j2pt"]        = t.jet2_pt;
   valuesBase["mt2"]         = t.mt2;
   valuesBase["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
-  if (SRBase.PassesSelection(valuesBase)) {
+  if (SRBase.PassesSelectionCRSL(valuesBase)) {
     fillHistosSingleLepton(SRBase.crslHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbase", suffix);
   }
 
@@ -709,7 +717,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
-  values["nlep"]        = 0; //dummy value
+  values["nlep"]        = t.nLepLowMT;
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["njets"]       = t.nJet40;
@@ -719,11 +727,11 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   values["met"]         = t.met_pt;
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
-    if(SRVec.at(srN).PassesSelection(values)){
+    if(SRVec.at(srN).PassesSelectionCRSL(values)){
       if(prefix=="crsl")    fillHistosSingleLepton(SRVec.at(srN).crslHistMap,    SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
       if(prefix=="crslmu")  fillHistosSingleLepton(SRVec.at(srN).crslmuHistMap,  SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
       if(prefix=="crslel")  fillHistosSingleLepton(SRVec.at(srN).crslelHistMap,  SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
-      break;//control regions are orthogonal, event cannot be in more than one
+      //      break;//control regions are not necessarily orthogonal
     }
   }
 
