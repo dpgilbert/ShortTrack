@@ -276,7 +276,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       //---------------------
       // skip duplicates -- will need this eventually
       //---------------------
-      //if( isData ) {
+      //if( t.isData ) {
       //  DorkyEventIdentifier id = {stopt.run(), stopt.event(), stopt.lumi() };
       //  if (is_duplicate(id, already_seen) ){
       //    continue;
@@ -304,7 +304,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       outfile_->cd();
       const float lumi = 4.;
       evtweight_ = t.evt_scale1fb * lumi;
-      if (applyWeights) evtweight_ *= t.weight_lepsf * t.weight_btagsf * t.weight_isr * t.weight_pu;
+      if (!t.isData && applyWeights) evtweight_ *= t.weight_lepsf * t.weight_btagsf * t.weight_isr * t.weight_pu;
 
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
       plot1D("h_mt2",       t.mt2,       evtweight_, h_1d_global, ";M_{T2} [GeV]", 80, 0, 800);
@@ -913,7 +913,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot3D("h_mt2bins_sigscan"+s, t.GenSusyMScan1, t.GenSusyMScan2, t.mt2, evtweight_, h_1d, "mass1 [GeV];mass2 [GeV];M_{T2} [GeV]", n_m1bins, m1bins, n_m2bins, m2bins, n_mt2bins, mt2bins);
   }
 
-  if (doSystVariationPlots) {
+  if (!t.isData && applyWeights && doSystVariationPlots) {
     // assume weights are already applied to central value: lepsf, btagsf, isr 
     plot1D("h_mt2bins_lepsf_UP"+s,       t.mt2,   evtweight_ / t.weight_lepsf * t.weight_lepsf_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_lepsf_DN"+s,       t.mt2,   evtweight_ / t.weight_lepsf * t.weight_lepsf_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
