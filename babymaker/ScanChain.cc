@@ -1104,7 +1104,18 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  } // pt 20 eta 2.5 
 	  // accept jets out to eta 4.7 for dphi
 	  else if ( (p4sCorrJets.at(iJet).pt() > 40.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {
-	    p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
+	    //check against list of jets that overlap with a photon
+	    bool isOverlapJetGamma = false;
+	    for(unsigned int j=0; j<removedJetsGamma.size(); j++){
+	      if(iJet == removedJetsGamma.at(j)){
+		isOverlapJetGamma = true;
+		break;
+	      }
+	    }
+	    
+	    if(!isOverlapJetGamma) {
+	      p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
+	    }
 	  }
 
 
