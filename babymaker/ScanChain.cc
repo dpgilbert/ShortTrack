@@ -999,8 +999,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  jet_area[njet] = cms3.pfjets_area().at(iJet);
 	  jet_rawPt[njet] = cms3.pfjets_p4().at(iJet).pt() * cms3.pfjets_undoJEC().at(iJet);
 
-	  if(isTightPFJet(iJet))  jet_id[njet] = 3;
-	  else if(isMediumPFJet(iJet)) jet_id[njet] = 2;
+	  if(isTightPFJetV2(iJet))  jet_id[njet] = 3;
 	  else jet_id[njet] = 1; //required to be loose above
 
 	  jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
