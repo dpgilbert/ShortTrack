@@ -29,6 +29,7 @@
 #include "../Tools/MT2/MT2.h"
 #include "../Tools/JetCorrector.h"
 #include "../Tools/jetcorr/FactorizedJetCorrector.h"
+#include "../Tools/goodrun.h"
 
 // MT2CORE
 #include "../MT2CORE/sampleID.h"
@@ -43,13 +44,15 @@ using namespace tas;
 // turn on to add debugging statements
 const bool verbose = false;
 // turn on to apply JEC from text files
-const bool applyJECfromFile = true;
+const bool applyJECfromFile = false;
 // turn on to save prunedGenParticle collection
 const bool saveGenParticles = false;
 // turn on to apply trigger cuts to ntuples -> OR of all triggers used
 const bool applyTriggerCuts = false;
 // turn on to apply dummy weights for lepton SFs, btag SFs, etc
 const bool applyDummyWeights = true;
+// turn on to apply json file to data
+const bool applyJSON = false;
 
 //--------------------------------------------------------------------
 
@@ -72,6 +75,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
   bmark->Start("benchmark");
 
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
+
+  const char* json_file = "jsons/Cert_Run2012ABCD_22Jan2013ReReco_JSON_goodruns.txt";
+  if (applyJSON) {
+    cout << "Loading json file: " << json_file << endl;
+    set_goodrun_file(json_file);
+  }
 
   // File Loop
   int nDuplicates = 0;
@@ -149,6 +158,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       run  = cms3.evt_run();
       lumi = cms3.evt_lumiBlock();
       evt  = cms3.evt_event();
+
+      if( applyJSON && isData && !goodrun(run, lumi) ) continue;
 
       evt_nEvts = cms3.evt_nEvts();
       evt_scale1fb = cms3.evt_scale1fb();

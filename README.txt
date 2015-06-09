@@ -6,6 +6,7 @@ source /nfs-7/cmssoft/cms.cern.ch/cmssw/cmsset_default.sh
 
 git clone git@github.com:cmstas/MT2Analysis.git
 cd MT2Analysis
+git checkout root6_741patch1
 cmsrel CMSSW_7_4_1_patch1
 cd CMSSW_7_4_1_patch1/src
 cmsenv
