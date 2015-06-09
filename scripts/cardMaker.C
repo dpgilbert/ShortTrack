@@ -144,6 +144,38 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
 
   std::string channel = ht_str + "_" + jet_str + "_" + bjet_str + "_" + mt2_str;
 
+  
+  // bin boundaries for CRSL, for lostlep systematic correlations
+  TH1D* h_ht_LOW_crsl = (TH1D*) f_lostlep->Get(dir+"/h_ht_LOW");
+  TH1D* h_ht_HI_crsl = (TH1D*) f_lostlep->Get(dir+"/h_ht_HI");
+  int ht_LOW_crsl = h_ht_LOW_crsl->GetBinContent(1);
+  int ht_HI_crsl = h_ht_HI_crsl->GetBinContent(1);
+  
+  TH1D* h_nbjets_LOW_crsl = (TH1D*) f_lostlep->Get(dir+"/h_nbjets_LOW");
+  TH1D* h_nbjets_HI_crsl = (TH1D*) f_lostlep->Get(dir+"/h_nbjets_HI");
+  int nbjets_LOW_crsl = h_nbjets_LOW_crsl->GetBinContent(1);
+  int nbjets_HI_crsl = h_nbjets_HI_crsl->GetBinContent(1);
+
+  TH1D* h_njets_LOW_crsl = (TH1D*) f_lostlep->Get(dir+"/h_njets_LOW");
+  TH1D* h_njets_HI_crsl = (TH1D*) f_lostlep->Get(dir+"/h_njets_HI");
+  int njets_LOW_crsl = h_njets_LOW_crsl->GetBinContent(1);
+  int njets_HI_crsl = h_njets_HI_crsl->GetBinContent(1);
+
+  int nbjets_HI_crsl_mod = nbjets_HI_crsl;
+  int njets_HI_crsl_mod = njets_HI_crsl;
+  if(nbjets_HI_crsl != -1) nbjets_HI_crsl_mod--;
+  if(njets_HI_crsl != -1) njets_HI_crsl_mod--;
+
+  std::string ht_str_crsl = "HT" + toString(ht_LOW_crsl) + "to" + toString(ht_HI_crsl);
+  std::string jet_str_crsl = (njets_HI_crsl_mod == njets_LOW_crsl) ? "j" + toString(njets_LOW_crsl) : "j" + toString(njets_LOW_crsl) + "to" + toString(njets_HI_crsl_mod);
+  std::string bjet_str_crsl = (nbjets_HI_crsl_mod == nbjets_LOW_crsl) ? "b" + toString(nbjets_LOW_crsl) : "b" + toString(nbjets_LOW_crsl) + "to" + toString(nbjets_HI_crsl_mod);
+  
+  //Replace instances of "-1" with "inf" for variables with no upper bound.
+  ReplaceString(ht_str_crsl, "-1", "Inf");
+  ReplaceString(jet_str_crsl, "-1", "Inf");
+  ReplaceString(bjet_str_crsl, "-1", "Inf");
+
+
   TString cardname = Form("%s/datacard_%s_%s.txt",output_dir.c_str(),channel.c_str(),signame.Data());
 
   // get yields for each sample
@@ -203,7 +235,8 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
   // uncorrelated across TRs and MT2 bins
   //  for iter1+gamma, only apply if n_lostlep > 0.
   double lostlep_shape = 1.075;
-  TString name_lostlep_shape = Form("llep_shape_%s", channel.c_str());
+  // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
+  TString name_lostlep_shape = Form("llep_shape_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   if (n_lostlep > 0.)  ++n_syst;
   // correlated for MT2 bins in a TR
   double lostlep_crstat = 1.;
@@ -237,9 +270,10 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
     lostlep_crstat = dummy_alpha;
     n_syst += 2;
   }
-  TString name_lostlep_crstat = Form("llep_CRstat_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
+  // crstat and lepeff are correlated for all SR bins that share a CR bin -> use crsl binning for correlations
+  TString name_lostlep_crstat = Form("llep_CRstat_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   if (lostlep_decorrelate_bin) name_lostlep_crstat = Form("llep_CRstat_%s", channel.c_str());
-  TString name_lostlep_lepeff = Form("llep_lepeff_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
+  TString name_lostlep_lepeff = Form("llep_lepeff_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   TString name_lostlep_mcstat = Form("llep_MCstat_%s", channel.c_str());
 
   // ----- zinv bkg uncertainties - depend on signal region, b selection

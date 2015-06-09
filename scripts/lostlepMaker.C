@@ -29,7 +29,8 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     TString directory = "sr"+dirs.at(idir);
     TString fullhistname = directory + "/h_mt2bins";
     TString n_mt2bins_name = directory + "/h_n_mt2bins";
-    TString fullhistnameSL = "crsl"+TString(dirs.at(idir))+"/h_mt2bins";
+    TString crdir = "crsl"+TString(dirs.at(idir));
+    TString fullhistnameSL = crdir+"/h_mt2bins";
 
     TH1D* h_lostlepMC_sr = (TH1D*) f_lostlep->Get(fullhistname);
     
@@ -108,6 +109,21 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     h_lostlepDD_cr->Write();
     MCStat->Write();
 
+    // also save bin boundary hists for CR
+    TH1D* h_ht_LOW = (TH1D*) f_lostlep->Get(crdir+"/h_ht_LOW");
+    TH1D* h_ht_HI = (TH1D*) f_lostlep->Get(crdir+"/h_ht_HI");
+    TH1D* h_nbjets_LOW = (TH1D*) f_lostlep->Get(crdir+"/h_nbjets_LOW");
+    TH1D* h_nbjets_HI = (TH1D*) f_lostlep->Get(crdir+"/h_nbjets_HI");
+    TH1D* h_njets_LOW = (TH1D*) f_lostlep->Get(crdir+"/h_njets_LOW");
+    TH1D* h_njets_HI = (TH1D*) f_lostlep->Get(crdir+"/h_njets_HI");
+
+    h_ht_LOW->Write();
+    h_ht_HI->Write();
+    h_nbjets_LOW->Write();
+    h_nbjets_HI->Write();
+    h_njets_LOW->Write();
+    h_njets_HI->Write();
+    
   } // loop over signal regions
 
 
