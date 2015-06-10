@@ -22,6 +22,7 @@
 #include "../CORE/MCSelections.h"
 #include "../CORE/IsoTrackVeto.h"
 #include "../CORE/IsolationTools.h"
+#include "../CORE/MetSelections.h"
 
 // Tools
 #include "../Tools/utils.h"
@@ -146,11 +147,18 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       HLT_MET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v"); 
       HLT_ht350met120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v"); 
 
-      HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu20_eta2p1_IterTrk02_v") || passHLTTriggerPattern("HLT_IsoTkMu20_eta2p1_IterTrk02_v"); 
-      HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloId_TrackId_Iso_v"); 
-      HLT_MuEG         = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v") || passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v"); 
-      HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") || passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
-      HLT_Photons      = passHLTTriggerPattern("HLT_Photon155_v"); 
+      HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu20_v") || passHLTTriggerPattern("HLT_IsoTkMu20_v") ||
+	passHLTTriggerPattern("HLT_IsoMu24_eta2p1_v") || passHLTTriggerPattern("HLT_IsoTkMu24_eta2p1_v"); 
+      HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
+	passHLTTriggerPattern("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"); 
+      HLT_MuEG         = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
+	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
+	passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v")  ||
+	passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
+      HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") ||
+	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
+      HLT_Photons      = passHLTTriggerPattern("HLT_Photon165_HE10_v"); 
+      HLT_ht350prescale  = passHLTTriggerPattern("HLT_PFHT350_v"); 
 
       if (!isData && applyTriggerCuts && !(HLT_HT900 || HLT_ht350met120 || HLT_Photons || HLT_SingleMu 
 					   || HLT_DoubleMu || HLT_DoubleEl || HLT_MuEG)) continue;
@@ -193,7 +201,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       }
       met_rawPt  = cms3.evt_pfmet_raw();
       met_rawPhi = cms3.evt_pfmetPhi_raw();
-
+      met_caloPt  = cms3.evt_calomet();
+      met_caloPhi = cms3.evt_calometPhi();
+      metStruct trkmet = trackerMET(0.1);
+      met_trkPt = trkmet.met;
+      met_trkPhi = trkmet.metphi;
+      
       // MET FILTERS
       Flag_EcalDeadCellTriggerPrimitiveFilter       = cms3.filt_ecalTP();
       Flag_trkPOG_manystripclus53X                  = cms3.filt_trkPOG_manystripclus53X();
@@ -1411,6 +1424,8 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("met_rawPhi", &met_rawPhi );
   BabyTree_->Branch("met_caloPt",  &met_caloPt );
   BabyTree_->Branch("met_caloPhi", &met_caloPhi );
+  BabyTree_->Branch("met_trkPt",  &met_trkPt );
+  BabyTree_->Branch("met_trkPhi", &met_trkPhi );
   BabyTree_->Branch("met_genPt",  &met_genPt );
   BabyTree_->Branch("met_genPhi", &met_genPhi );
   BabyTree_->Branch("Flag_EcalDeadCellTriggerPrimitiveFilter", &Flag_EcalDeadCellTriggerPrimitiveFilter );
@@ -1434,6 +1449,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("HLT_MuEG", &HLT_MuEG );
   BabyTree_->Branch("HLT_DoubleMu", &HLT_DoubleMu );
   BabyTree_->Branch("HLT_Photons", &HLT_Photons );
+  BabyTree_->Branch("HLT_ht350prescale", &HLT_ht350prescale );
   BabyTree_->Branch("nlep", &nlep, "nlep/I" );
   BabyTree_->Branch("lep_pt", lep_pt, "lep_pt[nlep]/F");
   BabyTree_->Branch("lep_eta", lep_eta, "lep_eta[nlep]/F" );
@@ -1643,6 +1659,8 @@ void babyMaker::InitBabyNtuple () {
   met_rawPhi = -999.0;
   met_caloPt = -999.0;
   met_caloPhi = -999.0;
+  met_trkPt = -999.0;
+  met_trkPhi = -999.0;
   met_genPt = -999.0;
   met_genPhi = -999.0;
   Flag_EcalDeadCellTriggerPrimitiveFilter = -999;
@@ -1666,6 +1684,7 @@ void babyMaker::InitBabyNtuple () {
   HLT_MuEG = -999;   
   HLT_DoubleMu = -999;   
   HLT_Photons = -999;   
+  HLT_ht350prescale = -999;
   nlep = -999;
   nisoTrack = -999;
   nPFLep5LowMT = -999;

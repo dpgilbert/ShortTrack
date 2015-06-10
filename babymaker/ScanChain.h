@@ -100,6 +100,8 @@ class babyMaker {
   Float_t         met_rawPhi;
   Float_t         met_caloPt;
   Float_t         met_caloPhi;
+  Float_t         met_trkPt;
+  Float_t         met_trkPhi;
   Float_t         met_genPt;
   Float_t         met_genPhi;
 
@@ -127,6 +129,7 @@ class babyMaker {
   Int_t           HLT_MuEG;   
   Int_t           HLT_DoubleMu;   
   Int_t           HLT_Photons;   
+  Int_t           HLT_ht350prescale;   
 
 //----- LEPTONS
   static const int max_nlep = 50;
