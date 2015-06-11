@@ -464,7 +464,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 	       && t.lep_pt[0] > 20 && t.lep_pt[1] > 20) {
 	    // no additional explicit lepton veto
 	    // i.e. implicitly allow 3rd PF lepton or hadron
-	    nlepveto_ = 0; 
+	    //nlepveto_ = 0; 
 	    doDYplots = true;
 	  }
       	} // nlep == 2
@@ -486,7 +486,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 	       ) {
 	    // no additional explicit lepton veto
 	    // i.e. implicitly allow 3rd PF lepton or hadron
-	    nlepveto_ = 0; 
+	    //nlepveto_ = 0; 
 	    doRLplots = true;
 	  }
       	} // nlep == 1
@@ -821,7 +821,7 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.zll_deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
-  values["nlep"]        = nlepveto_;
+  values["nlep"]        = 0; // dummy value
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["njets"]       = t.nJet40;
@@ -834,7 +834,7 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   std::map<std::string, float> valuesBase;
   valuesBase["deltaPhiMin"] = t.zll_deltaPhiMin;
   valuesBase["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
-  valuesBase["nlep"]        = nlepveto_;
+  valuesBase["nlep"]        = 0; // dummy value
   valuesBase["j1pt"]        = t.jet1_pt;
   valuesBase["j2pt"]        = t.jet2_pt;
   valuesBase["mt2"]         = t.zll_mt2;
@@ -861,7 +861,7 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.zll_deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
-  values["nlep"]        = nlepveto_;
+  values["nlep"]        = 0; // dummy value
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["njets"]       = t.nJet40;
@@ -874,7 +874,7 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
   std::map<std::string, float> valuesBase;
   valuesBase["deltaPhiMin"] = t.zll_deltaPhiMin;
   valuesBase["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
-  valuesBase["nlep"]        = nlepveto_;
+  valuesBase["nlep"]        = 0; // dummy value
   valuesBase["j1pt"]        = t.jet1_pt;
   valuesBase["j2pt"]        = t.jet2_pt;
   valuesBase["mt2"]         = t.zll_mt2;
