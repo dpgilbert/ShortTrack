@@ -60,16 +60,44 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   gPad->SetRightMargin(0.05);
   gPad->Modified();
 
-
-
-  THStack* t = new THStack(Form("stack_%s_%s",histdir.c_str(),histname.c_str()),Form("stack_%s_%s",histdir.c_str(),histname.c_str()));
-  TH1D* h_bgtot = 0;
-
   //TLegend* leg = new TLegend(0.55,0.6,0.85,0.92);
   TLegend* leg = new TLegend(0.55,0.6,0.85,0.90);
   leg->SetFillColor(0);
   leg->SetBorderSize(0);
   leg->SetTextSize(0.032);
+
+  const unsigned int n = samples.size();
+  TH1D* data_hist(0);
+  string data_name;
+  for( unsigned int i = 0 ; i < n ; ++i ) {
+    if( !TString(names.at(i)).Contains("data")  ) continue;
+    TString fullhistname = Form("%s/%s",histdir.c_str(),histname.c_str());
+    if (histdir.size() == 0) fullhistname = TString(histname);
+    TString newhistname = Form("%s_%s_%s",histname.c_str(),histdir.c_str(),names.at(i).c_str());
+    TH1D* h_temp = (TH1D*) samples.at(i)->Get(fullhistname);
+    if (h_temp == 0) continue;
+    data_hist = (TH1D*) h_temp->Clone(newhistname);
+    data_name = names.at(i);
+    //    h->Sumw2();
+    data_hist->SetLineColor(kBlack);
+    data_hist->SetMarkerColor(kBlack);
+    if (rebin > 1) data_hist->Rebin(rebin);
+
+    // fake data -> set error bars to correspond to data stats
+    if (TString(data_name).Contains("fakedata")) {
+      for (int ibin = 0; ibin <= data_hist->GetNbinsX(); ++ibin) {
+	data_hist->SetBinError( ibin, sqrt(data_hist->GetBinContent(ibin)) );
+      }
+    } // if fakedata
+    
+    // expect to only find 1 data hist
+    break;
+  }
+
+  if (data_hist) leg->AddEntry(data_hist,getLegendName(data_name).c_str(),"pe");
+  
+  THStack* t = new THStack(Form("stack_%s_%s",histdir.c_str(),histname.c_str()),Form("stack_%s_%s",histdir.c_str(),histname.c_str()));
+  TH1D* h_bgtot = 0;
 
   // to make legend and find max yvalue
   vector<TH1D*> bg_hists;
@@ -77,9 +105,9 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   vector<TH1D*> sig_hists;
   vector<string> sig_names;
 
-  const unsigned int n = samples.size();
   // background hists
   for( unsigned int i = 0 ; i < n ; ++i ) {
+    if( TString(names.at(i)).Contains("data")  ) continue;
     if( TString(names.at(i)).Contains("sig")  ) continue;
     TString fullhistname = Form("%s/%s",histdir.c_str(),histname.c_str());
     if (histdir.size() == 0) fullhistname = TString(histname);
@@ -130,7 +158,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   for (unsigned int isig = 0; isig < sig_hists.size(); ++isig) {
     if (sig_hists.at(isig)->GetMaximum() > ymax) ymax = sig_hists.at(isig)->GetMaximum();
   }
-  if( logplot ) ymax*=15;
+  if( logplot ) ymax*=30;
   else          ymax*=1.5;
   float ymin = 0.1;
 
@@ -154,6 +182,8 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     leg->AddEntry(sig_hists.at(isig),legend_name,"l");
   }
 
+  if (data_hist) data_hist->Draw("pe same");
+
   TLatex label;
   label.SetNDC();
   label.SetTextSize(0.032);
@@ -163,14 +193,19 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   TString region_label_line2 = getMT2PlotLabel(samples.at(0), histdir);
   //label.DrawLatex(0.2,0.85,ht_label);
   label.DrawLatex(0.187,0.82,ht_label);
+  // base region plots all have at least 2 jets
+  if ((histdir.find("base") != std::string::npos)) region_label = "#geq 2j";
   // minMT plot always requires at least 2 bjets
   if ((histdir.find("srbase") != std::string::npos) && (histname.find("minMTBMet") != std::string::npos)) region_label = "#geq 2j, #geq 2b";
+  // lostlepton CR
+  if ((histdir.find("crsl") != std::string::npos)) region_label += ", 1 lepton";
+
   //if (region_label.Length() > 0) label.DrawLatex(0.2,0.81,region_label);
   if (region_label.Length() > 0) label.DrawLatex(0.187,0.78,region_label);
   //if (region_label.Length() > 0) label.DrawLatex(0.187,0.78,"#geq 2j");//hack for srbase for now
   //if (region_label_line2.Length() > 0) label.DrawLatex(0.2,0.77,region_label_line2);
   if (region_label_line2.Length() > 0) label.DrawLatex(0.187,0.74,region_label_line2);
-
+  
   leg->Draw();
   h_axes->Draw("axissame");
 
@@ -218,6 +253,7 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
 
   // backgrounds first -- loop backwards
   for( int i = n-1 ; i >= 0 ; --i ){
+    if( TString(names.at(i)).Contains("data")  ) continue;
     if( TString(names.at(i)).Contains("sig")  ) continue;
     cout << getTableName(names.at(i));
     for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
@@ -378,6 +414,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
 
   // backgrounds first -- loop backwards
   for( int isamp = n-1 ; isamp >= 0 ; --isamp ){
+    if( TString(names.at(isamp)).Contains("data")  ) continue;
     if( TString(names.at(isamp)).Contains("sig")  ) continue;
     cout << getTableName(names.at(isamp));
     for (int ibin = 1; ibin <= n_mt2bins; ++ibin) {
