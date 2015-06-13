@@ -35,7 +35,7 @@ const int iPeriod = 4; // 13 tev
 const int iPos = 11; 
 
 //_______________________________________________________________________________
-TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names , const string& histdir , const string& histname , const string& xtitle , const string& ytitle , float xmin , float xmax , int rebin = 1 , bool logplot = true, bool printplot = false, float scalesig = -1. ) {
+TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names , const string& histdir , const string& histname , const string& xtitle , const string& ytitle , float xmin , float xmax , int rebin = 1 , bool logplot = true, bool printplot = false, float scalesig = -1., bool doRatio = false ) {
 
   cout << "-- plotting histdir: " << histdir << ", histname: " << histname << endl;
 
@@ -47,26 +47,66 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   gStyle->SetPadTickY(1);
   gStyle->SetFrameBorderMode(0);
 
-  //these 4 lines shift plot to make room for axis labels
-  gStyle->SetPadTopMargin(0.08);
-  gStyle->SetPadBottomMargin(0.12);
-  gStyle->SetPadLeftMargin(0.15);
-  gStyle->SetPadRightMargin(0.05);
+  // if ratio was requested, check if data is present.  If not, turn ratio off again
+  const unsigned int n = samples.size();
+  if (doRatio) {
+    bool foundData = false;
+    for( unsigned int i = 0 ; i < n ; ++i ) {
+      if( TString(names.at(i)).Contains("data")  ) {
+	foundData = true;
+	break;
+      }
+    }
+    if (!foundData) {
+      cout << "ratio requested but no data hist found.  Not plotting ratio" << endl;
+      doRatio = false;
+    }
+  } // if doRatio
 
+  if (!doRatio) {
+    //these 4 lines shift plot to make room for axis labels
+    gStyle->SetPadTopMargin(0.08);
+    gStyle->SetPadBottomMargin(0.12);
+    gStyle->SetPadLeftMargin(0.15);
+    gStyle->SetPadRightMargin(0.05);
+  }
+  
   TString canvas_name = Form("c_%s_%s",histdir.c_str(),histname.c_str());
   TCanvas* can = new TCanvas(canvas_name,canvas_name, 600, 600);
   can->cd();
-  if (logplot) can->SetLogy();
-  gPad->SetRightMargin(0.05);
-  gPad->Modified();
+  if (!doRatio) {
+    if (logplot) can->SetLogy();
+    gPad->SetRightMargin(0.05);
+    gPad->Modified();
+  }
 
+  // splitting canvas for ratio plots
+  TPad* fullpad(0);
+  TPad* plotpad(0);
+
+  if (doRatio) {
+    // master pad
+    fullpad = new TPad("fullpad","fullpad",0,0,1,1);
+    fullpad->Draw();
+    fullpad->cd();
+
+    // main plot pad, for ratio on bottom
+    plotpad = new TPad("plotpad","plotpad",0,0.2,1,0.99);
+    plotpad->SetTopMargin(0.05);
+    plotpad->SetRightMargin(0.05);
+    plotpad->SetBottomMargin(0.05);
+    plotpad->Draw();
+    plotpad->cd();
+    if( logplot ) plotpad->SetLogy();
+  }
+  
   //TLegend* leg = new TLegend(0.55,0.6,0.85,0.92);
   TLegend* leg = new TLegend(0.55,0.6,0.85,0.90);
   leg->SetFillColor(0);
   leg->SetBorderSize(0);
   leg->SetTextSize(0.032);
+  if (doRatio) leg->SetTextSize(0.05);
 
-  const unsigned int n = samples.size();
   TH1D* data_hist(0);
   string data_name;
   for( unsigned int i = 0 ; i < n ; ++i ) {
@@ -170,6 +210,10 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   h_axes->GetYaxis()->SetLabelSize(0.04);
   h_axes->GetYaxis()->SetTitleOffset(1.5);
   h_axes->GetYaxis()->SetTitleSize(0.05);
+  if (doRatio) {
+    h_axes->GetXaxis()->SetLabelSize(0.);
+    h_axes->GetXaxis()->SetTitleSize(0.);
+  }
   h_axes->Draw();
 
   t->Draw("hist same");
@@ -187,12 +231,20 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   TLatex label;
   label.SetNDC();
   label.SetTextSize(0.032);
+  float label_y_start = 0.82;
+  float label_y_spacing = 0.04;
+  if (doRatio) {
+    label.SetTextSize(0.039);
+    label_y_start = 0.84;
+    label_y_spacing = 0.04;
+  }
+  
   //TString ht_label = getHTPlotLabel(histdir);
   TString ht_label = getHTPlotLabel(samples.at(0), histdir);
   TString region_label = getJetBJetPlotLabel(samples.at(0), histdir);
   TString region_label_line2 = getMT2PlotLabel(samples.at(0), histdir);
   //label.DrawLatex(0.2,0.85,ht_label);
-  label.DrawLatex(0.187,0.82,ht_label);
+  label.DrawLatex(0.187,label_y_start,ht_label);
   // base region plots all have at least 2 jets
   if ((histdir.find("base") != std::string::npos)) region_label = "#geq 2j";
   // minMT plot always requires at least 2 bjets
@@ -200,17 +252,69 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   // lostlepton CR
   if ((histdir.find("crsl") != std::string::npos)) region_label += ", 1 lepton";
 
-  //if (region_label.Length() > 0) label.DrawLatex(0.2,0.81,region_label);
-  if (region_label.Length() > 0) label.DrawLatex(0.187,0.78,region_label);
-  //if (region_label.Length() > 0) label.DrawLatex(0.187,0.78,"#geq 2j");//hack for srbase for now
-  //if (region_label_line2.Length() > 0) label.DrawLatex(0.2,0.77,region_label_line2);
-  if (region_label_line2.Length() > 0) label.DrawLatex(0.187,0.74,region_label_line2);
+  if (region_label.Length() > 0) label.DrawLatex(0.187,label_y_start - label_y_spacing,region_label);
+  if (region_label_line2.Length() > 0) label.DrawLatex(0.187,label_y_start - 2 * label_y_spacing,region_label_line2);
   
   leg->Draw();
   h_axes->Draw("axissame");
 
-  CMS_lumi( can, iPeriod, iPos );
+  if (doRatio) {
+    lumiTextSize     = 0.8;
+    cmsTextSize      = 1.0;
+    CMS_lumi( plotpad, iPeriod, iPos );
+  }
+  else {
+    lumiTextSize     = 0.45;
+    cmsTextSize      = 0.55;
+    CMS_lumi( can, iPeriod, iPos );
+  }
 
+  // make ratio pad and plot
+  if (doRatio) {
+    // draw ratio pad
+    fullpad->cd();
+    TPad* ratiopad = new TPad("ratiopad","ratiopad",0.,0.,1,0.23);
+    ratiopad->SetLeftMargin(0.16);
+    ratiopad->SetRightMargin(0.05);
+    ratiopad->SetTopMargin(0.08);
+    ratiopad->SetBottomMargin(0.44);
+    ratiopad->SetGridy();
+    ratiopad->Draw();
+    ratiopad->cd();
+
+    TH1D* h_ratio = (TH1D*) data_hist->Clone(Form("ratio_%s",data_hist->GetName()));
+    h_ratio->Sumw2();
+    h_bgtot->Sumw2();
+    h_ratio->Divide(h_bgtot);
+    
+    // draw axis only
+    TH1F* h_axis_ratio = new TH1F(Form("%s_axes",h_ratio->GetName()),"",100,xmin,xmax);
+    h_axis_ratio->GetYaxis()->SetTitleOffset(0.3);
+    h_axis_ratio->GetYaxis()->SetTitleSize(0.18);
+    h_axis_ratio->GetYaxis()->SetNdivisions(5);
+    h_axis_ratio->GetYaxis()->SetLabelSize(0.15);
+    h_axis_ratio->GetYaxis()->SetRangeUser(0.5,1.5);
+    //h_axis_ratio->GetYaxis()->SetRangeUser(0.001,2.0);
+    h_axis_ratio->GetYaxis()->SetTitle("Data/MC");
+    h_axis_ratio->GetXaxis()->SetTitle(data_hist->GetXaxis()->GetTitle());
+    h_axis_ratio->GetXaxis()->SetTitleSize(0.17);
+    h_axis_ratio->GetXaxis()->SetLabelSize(0.17);
+    h_axis_ratio->GetXaxis()->SetTitleOffset(1.0);
+    h_axis_ratio->GetXaxis()->SetTickLength(0.07);
+    h_axis_ratio->Draw("axis");
+
+    TGraphErrors* g_ratio = new TGraphErrors(h_ratio);
+    g_ratio->SetName(Form("%s_graph",h_ratio->GetName()));
+    for (int ibin=0; ibin < h_ratio->GetNbinsX(); ++ibin) {
+      g_ratio->SetPointError(ibin, h_ratio->GetBinWidth(ibin+1)/2., h_ratio->GetBinError(ibin+1));
+    }
+    g_ratio->SetLineColor(kBlack);
+    g_ratio->SetMarkerColor(kBlack);
+    g_ratio->SetMarkerStyle(20);
+    g_ratio->Draw("p0same");
+
+  } // if (doRatio)
+  
   gPad->Modified();
 
   if( printplot ) {
@@ -611,6 +715,7 @@ void plotMaker(){
   //float scalesig = 50.;
   bool printplots = false;
   //bool printplots = true;
+  bool doRatio = false;
 
   if(printplots){
     TIter it(f_ttbar->GetListOfKeys());
@@ -624,14 +729,14 @@ void plotMaker(){
       if(dir_name == "") continue;
       if(dir_name != "srbase") continue; //to do only srbase
       //if(dir_name != "sr1H") continue; //for testing
-      makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , true, printplots, scalesig );
-      makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 10 GeV" , 0 , 1000 , 1 , true, printplots, scalesig );
+      makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , true, printplots, scalesig, doRatio );
+      makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 10 GeV" , 0 , 1000 , 1 , true, printplots, scalesig, doRatio );
       makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
       makePlot( samples , names , dir_name , "h_nlepveto" , "N(leptons)" , "Events" , 0 , 10 , 1 , false, printplots );
-      makePlot( samples , names , dir_name , "h_nJet40" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig );
-      makePlot( samples , names , dir_name , "h_nBJet20" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig );
+      makePlot( samples , names , dir_name , "h_nJet40" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio );
+      makePlot( samples , names , dir_name , "h_nBJet20" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio );
       makePlot( samples , names , dir_name , "h_minMTBMet"  , "min M_{T}(b,MET) [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
-      makePlot( samples , names , dir_name , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig );
+      makePlot( samples , names , dir_name , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig, doRatio );
     }
   }
 
