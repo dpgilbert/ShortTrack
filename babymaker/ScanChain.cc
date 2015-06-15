@@ -174,6 +174,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       evt_xsec = cms3.evt_xsec_incl();
       evt_kfactor = cms3.evt_kfactor();
       evt_filter = cms3.evt_filt_eff();
+      genWeight = cms3.genps_weight();
       puWeight = 1.;
       if (!isData) nTrueInt = cms3.puInfo_trueNumInteractions().at(0);
       rho = cms3.evt_fixgridfastjet_all_rho(); //this one is used in JECs
@@ -1383,6 +1384,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("evt_filter", &evt_filter );
   BabyTree_->Branch("evt_nEvts", &evt_nEvts, "evt_nEvts/l" );
   BabyTree_->Branch("evt_id", &evt_id );
+  BabyTree_->Branch("genWeight", &genWeight );
   BabyTree_->Branch("puWeight", &puWeight );
   BabyTree_->Branch("nVert", &nVert );
   BabyTree_->Branch("nTrueInt", &nTrueInt );
@@ -1618,6 +1620,7 @@ void babyMaker::InitBabyNtuple () {
   evt_filter = -999.0;
   evt_nEvts = 0;
   //evt_id = -1; // don't reset every event
+  genWeight = 0;
   puWeight = -999.0;
   nVert = -999;
   nTrueInt = -999;

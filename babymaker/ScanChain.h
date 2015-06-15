@@ -53,6 +53,7 @@ class babyMaker {
   Float_t         evt_filter;
   ULong64_t       evt_nEvts;
   Int_t           evt_id;
+  Float_t         genWeight;
   Float_t         puWeight;
   Int_t           nVert;
   Int_t           nTrueInt;
