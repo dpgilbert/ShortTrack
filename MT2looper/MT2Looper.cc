@@ -749,7 +749,7 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   std::string add="";
 
   float passPtMT2 = false;
-  if (t.mt2 < 200 && t.gamma_pt[0]>160.) passPtMT2 = true;
+  if (t.mt2 < 200 && t.gamma_pt[0]>170.) passPtMT2 = true;
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.gamma_deltaPhiMin;
