@@ -419,10 +419,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       vector<LorentzVector> p4sForHems;
       vector<LorentzVector> p4sForHemsGamma;
       vector<LorentzVector> p4sForHemsZll;
+      vector<LorentzVector> p4sForHemsRl;
 
       vector<LorentzVector> p4sForDphi;
       vector<LorentzVector> p4sForDphiGamma;
       vector<LorentzVector> p4sForDphiZll;
+      vector<LorentzVector> p4sForDphiRl;
 
       if (verbose) cout << "before electrons" << endl;
 
@@ -573,28 +575,28 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	zll_eta = ll.Eta();
 	zll_phi = ll.Phi();
       }
-      //--overload zll variables for single lepton events (w->lnu)
+      //--for removed lepton control regions (w->lnu)
       if (nlep == 1) {
-	float zll_met_px  = met_pt * cos(met_phi);
-	float zll_met_py  = met_pt * sin(met_phi);	
-	zll_met_px += lep_pt[0] * cos(lep_phi[0]);
-	zll_met_py += lep_pt[0] * sin(lep_phi[0]);
+	float rl_met_px  = met_pt * cos(met_phi);
+	float rl_met_py  = met_pt * sin(met_phi);	
+	rl_met_px += lep_pt[0] * cos(lep_phi[0]);
+	rl_met_py += lep_pt[0] * sin(lep_phi[0]);
 	// recalculated MET with photons added
-	TVector2 zll_met_vec(zll_met_px, zll_met_py);
-	zll_met_pt = zll_met_vec.Mod();
-	zll_met_phi = TVector2::Phi_mpi_pi(zll_met_vec.Phi());      
+	TVector2 rl_met_vec(rl_met_px, rl_met_py);
+	rl_met_pt = rl_met_vec.Mod();
+	rl_met_phi = TVector2::Phi_mpi_pi(rl_met_vec.Phi());      
 	// TLorentzVector l0(0,0,0,0);
 	// TLorentzVector l1(0,0,0,0);
 	// l0.SetPtEtaPhiM(lep_pt[0], lep_eta[0], lep_phi[0], lep_mass[0]);
 	// TLorentzVector ll = l0;
-	// zll_mass = ll.M();
-	// zll_pt = ll.Pt();
-	// zll_eta = ll.Eta();
-	// zll_phi = ll.Phi();
-	zll_mass = 0;
-	zll_pt = 0;
-	zll_eta = 0;
-	zll_phi = 0;
+	// rl_mass = ll.M();
+	// rl_pt = ll.Pt();
+	// rl_eta = ll.Eta();
+	// rl_phi = ll.Phi();
+	rl_mass = 0;
+	rl_pt = 0;
+	rl_eta = 0;
+	rl_phi = 0;
       }
 
       if (verbose) cout << "before isotracks" << endl;
@@ -937,6 +939,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       gamma_jet1_pt = 0.;
       gamma_jet2_pt = 0.;
       zll_minMTBMet = 999999.;
+      rl_minMTBMet = 999999.;
 
       // for applying btagging SFs, using Method 1a from the twiki below:
       //   https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
@@ -1000,6 +1003,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	      p4sForDphi.push_back(p4sCorrJets.at(iJet));
 	      p4sForHemsZll.push_back(p4sCorrJets.at(iJet));
 	      p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
+	      p4sForHemsRl.push_back(p4sCorrJets.at(iJet));
+	      p4sForDphiRl.push_back(p4sCorrJets.at(iJet));
 	      nJet40++;
 	    } // pt40
 	    //CSVv2IVFM
@@ -1026,9 +1031,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 		nBJet40++; 
 		float mt = MT(jet_pt[njet],jet_phi[njet],met_pt,met_phi);
 		if (mt < minMTBMet) minMTBMet = mt;
-		if (nlep == 2 || nlep == 1) {
+		if (nlep == 2) {
 		  float zllmt = MT(jet_pt[njet],jet_phi[njet],zll_met_pt,zll_met_phi);
 		  if (zllmt < zll_minMTBMet) zll_minMTBMet = zllmt;
+		}
+		if (nlep == 1) {
+		  float rlmt = MT(jet_pt[njet],jet_phi[njet],rl_met_pt,rl_met_phi);
+		  if (rlmt < rl_minMTBMet) rl_minMTBMet = rlmt;
 		}
 	      } // pt 40
 	    } // pass med btag
@@ -1112,6 +1121,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       sort(p4sForDphiGamma.begin(), p4sForDphiGamma.end(), sortByPt);
       sort(p4sForHemsZll.begin(), p4sForHemsZll.end(), sortByPt);
       sort(p4sForDphiZll.begin(), p4sForDphiZll.end(), sortByPt);
+      sort(p4sForHemsRl.begin(), p4sForHemsRl.end(), sortByPt);
+      sort(p4sForDphiRl.begin(), p4sForDphiRl.end(), sortByPt);
 
       ht = 0;
       deltaPhiMin = 999;
@@ -1197,9 +1208,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       gamma_diffMetMht = (mhtVectorGamma - metVectorGamma).Mod();
 
       // MT2, MHT for Z-->ll control region
-      //overloaded for single lepton events
       zll_ht = 0;
-      if (nlep == 2 || nlep == 1) {
+      if (nlep == 2) {
         zll_deltaPhiMin = 999;
         LorentzVector sumMhtp4Zll = LorentzVector(0,0,0,0);
 
@@ -1230,7 +1240,40 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	zll_diffMetMht = (mhtVectorZll - metVectorZll).Mod();
 
       }
-      
+
+      // MT2, MHT for removed lepton control region
+      rl_ht = 0;
+      if (nlep == 1) {
+        rl_deltaPhiMin = 999;
+        LorentzVector sumMhtp4Rl = LorentzVector(0,0,0,0);
+
+	// compute MHT using same objects as MT2 inputs
+	for (unsigned int ip4 = 0; ip4 < p4sForHemsRl.size(); ++ip4) {
+	  rl_ht += p4sForHemsRl.at(ip4).pt();
+	  sumMhtp4Rl -= p4sForHemsRl.at(ip4);
+	}
+
+	// min(dphi) of 4 leading objects
+	for (unsigned int ip4 = 0; ip4 < p4sForDphiRl.size(); ++ip4) {
+	  if(ip4 < 4) rl_deltaPhiMin = min(rl_deltaPhiMin, DeltaPhi( rl_met_phi, p4sForDphiRl.at(ip4).phi() ));
+	}
+
+	vector<LorentzVector> hemJetsRl;
+	if(p4sForHemsRl.size() > 1){
+	  //Hemispheres used in MT2 calculation
+	  hemJetsRl = getHemJets(p4sForHemsRl);  
+	  
+	  rl_mt2 = HemMT2(rl_met_pt, rl_met_phi, hemJetsRl.at(0), hemJetsRl.at(1));
+	}	  
+	
+	rl_mht_pt  = sumMhtp4Rl.pt();
+	rl_mht_phi = sumMhtp4Rl.phi();
+	
+	TVector2 mhtVectorRl = TVector2(rl_mht_pt*cos(rl_mht_phi), rl_mht_pt*sin(rl_mht_phi));
+	TVector2 metVectorRl = TVector2(rl_met_pt*cos(rl_met_phi), rl_met_pt*sin(rl_met_phi));
+	rl_diffMetMht = (mhtVectorRl - metVectorRl).Mod();
+
+      }
       if (!isData) {
 	//GEN MT2
 	vector<LorentzVector> goodGenJets;
@@ -1487,6 +1530,19 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("zll_eta", &zll_eta );
   BabyTree_->Branch("zll_phi", &zll_phi );
   BabyTree_->Branch("zll_ht", &zll_ht );
+  
+  BabyTree_->Branch("rl_mt2", &rl_mt2 );
+  BabyTree_->Branch("rl_deltaPhiMin", &rl_deltaPhiMin );
+  BabyTree_->Branch("rl_diffMetMht", &rl_diffMetMht );
+  BabyTree_->Branch("rl_met_pt", &rl_met_pt );
+  BabyTree_->Branch("rl_met_phi", &rl_met_phi );
+  BabyTree_->Branch("rl_mht_pt", &rl_mht_pt );
+  BabyTree_->Branch("rl_mht_phi", &rl_mht_phi );
+  BabyTree_->Branch("rl_mass", &rl_mass );
+  BabyTree_->Branch("rl_pt", &rl_pt );
+  BabyTree_->Branch("rl_eta", &rl_eta );
+  BabyTree_->Branch("rl_phi", &rl_phi );
+  BabyTree_->Branch("rl_ht", &rl_ht );
   if (saveGenParticles) {
     BabyTree_->Branch("ngenPart", &ngenPart, "ngenPart/I" );
     BabyTree_->Branch("genPart_pt", genPart_pt, "genPart_pt[ngenPart]/F" );
@@ -1594,6 +1650,7 @@ void babyMaker::InitBabyNtuple () {
   diffMetMht = -999.0;
   minMTBMet = -999.0;
   zll_minMTBMet = -999.0;
+  rl_minMTBMet = -999.0;
   gamma_minMTBMet = -999.0;
   ht = -999.0;
   mt2 = -999.0;
@@ -1673,6 +1730,18 @@ void babyMaker::InitBabyNtuple () {
   zll_eta = -999.0;
   zll_phi = -999.0;
   zll_ht = -999.0;
+  rl_mt2 = -999.0;
+  rl_deltaPhiMin = -999.0;
+  rl_diffMetMht = -999.0;
+  rl_met_pt = -999.0;
+  rl_met_phi = -999.0;
+  rl_mht_pt = -999.0;
+  rl_mht_phi = -999.0;
+  rl_mass = -999.0;
+  rl_pt = -999.0;
+  rl_eta = -999.0;
+  rl_phi = -999.0;
+  rl_ht = -999.0;
   GenSusyMScan1 = 0;
   GenSusyMScan2 = 0;
   GenSusyMScan3 = 0;
