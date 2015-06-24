@@ -471,9 +471,10 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       }// evt_id
 
       // Variables for Removed single lepton (RL) region
+      //muon only
       bool doRLplots = false;
       if (!(t.evt_id >= 700 && t.evt_id < 800)) {
-      	if (t.nlep == 1) {
+      	if (t.nlep == 1 && abs(t.lep_pdgId[0])==13) {
       	  if ( t.lep_pt[0] > 20 //lepton above 20GeV
 	       && fabs(t.lep_eta[0])<2.5 //lepton eta < 2.5
 	       // reduce electron FR in endcap to barrel level
@@ -857,6 +858,7 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
 void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suffix) {
 
   if (t.nlep!=1) return;
+  if (!abs(t.lep_pdgId[0])==13) return; //muon only
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.rl_deltaPhiMin;
