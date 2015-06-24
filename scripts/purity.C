@@ -193,7 +193,7 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, SR sr, TH2D* h_FR, const 
   
 }
 
-void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
+void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TFile* f_zinv, TString sr)
 {
   //get hists
   TH1D* h_gjet = (TH1D*) f_gjet->Get("crgj"+sr+"/h_mt2bins");
@@ -206,6 +206,8 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   TH1D* h_predFragMinus50 = (TH1D*) f_out->Get("sr"+sr+"/h_pred"+"minus50");
   TH1D* h_predFRpoisson = (TH1D*) f_out->Get("sr"+sr+"/h_pred"+"Poisson");
   TH1D* h_predSieieSBpoisson = (TH1D*) f_out->Get("sr"+sr+"/h_pred"+"FailSieiePoisson");
+
+  TH1D* h_ratio = (TH1D*) f_zinv->Get("sr"+sr+"/h_mt2binsRatio");
 
   //check existence
   if(!h_gjet) return;
@@ -365,6 +367,13 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   //f_out->cd();
   dir->cd();
 
+  //make zinv pred, predZ = N * purity * ratio
+  //note frag fraction f is included in purity
+  TH1D* h_predZ = (TH1D*) h_num->Clone();
+  h_predZ->SetName("h_predZ");
+  h_predZ->Multiply(h_predZ,h_puritySieieSB,1,1,"B");
+  h_predZ->Multiply(h_predZ,h_ratio,1,1,"B");
+  
   //write hists to output file
   h_purityTrue->Write();
   h_purityFR->Write();
@@ -376,6 +385,7 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TString sr)
   h_puritySieieSBpoisson->Write();
   h_estimateSieieSBpoisson->Write();
   h_denTrue->Write();
+  h_predZ->Write();
 
   //write raw numbers to output file
   ofstream purityLog;
@@ -409,7 +419,8 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   TFile* f_g = new TFile(Form("%s/gjet_ht.root",input_dir.c_str())); //gjet file
   TFile* f_q = new TFile(Form("%s/qcd_pt.root",input_dir.c_str())); //qcd file
   TFile* f_QCDpluGJET = new TFile(Form("%s/qcdplusgjet.root",input_dir.c_str())); //qcd+gjets file
-  if(f_g->IsZombie() || f_q->IsZombie() || f_QCDpluGJET->IsZombie()) {
+  TFile* f_z = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str())); //zinv pred from ZinvMaker.C, contains ratio
+  if(f_g->IsZombie() || f_q->IsZombie() || f_QCDpluGJET->IsZombie() || f_z->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
     return;
   }
@@ -469,7 +480,7 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
     puts( "Deleting old log file..." );
   cout << "Making purity histograms..." << endl;
   for(int i = 0; i< (int) SRVec.size(); i++){
-    purityPlots(f_out, f_g, f_q, SRVec[i].GetName());
+    purityPlots(f_out, f_g, f_q, f_z, SRVec[i].GetName());
   }
 
   //save and write
