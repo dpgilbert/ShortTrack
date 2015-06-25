@@ -30,6 +30,7 @@ void ReplaceString(std::string& subject, const std::string& search, const std::s
 
 //_______________________________________________________________________________
 int getColor(const string& sample) {
+  if (sample.find("data") != string::npos) return kBlack;
   if (sample.find("ttbar") != string::npos) return kBlue;
   if (sample.find("top") != string::npos) return kBlue;
   if (sample.find("wjets") != string::npos) return kGreen+1;
@@ -47,6 +48,8 @@ int getColor(const string& sample) {
 
 //_______________________________________________________________________________
 string getLegendName(const string& sample) {
+  if (sample.find("fakedata") != string::npos) return "Fake Data";
+  if (sample.find("data") != string::npos) return "Data";
   if (sample.find("ttbar") != string::npos) return "Top";
   if (sample.find("top") != string::npos) return "Top";
   if (sample.find("wjets") != string::npos) return "W+jets";
@@ -74,6 +77,8 @@ string getLegendName(const string& sample) {
 
 //_______________________________________________________________________________
 string getTableName(const string& sample) {
+  if (sample.find("fakedata") != string::npos) return "Fake Data";
+  if (sample.find("data") != string::npos) return "Data";
   if (sample.find("ttbar") != string::npos) return "ttbar";
   if (sample.find("ttw") != string::npos) return "ttw";
   if (sample.find("ttz") != string::npos) return "ttz";
