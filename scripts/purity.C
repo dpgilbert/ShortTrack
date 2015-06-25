@@ -373,7 +373,15 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TFile* f_zinv, TStri
   h_predZ->SetName("h_predZ");
   h_predZ->Multiply(h_predZ,h_puritySieieSB,1,1,"B");
   h_predZ->Multiply(h_predZ,h_ratio,1,1,"B");
-  
+
+  //add systematic error to zinv pred
+  for (int bin = 0; bin <= h_predZ->GetNbinsX(); bin++){
+    double statErr = h_predZ->GetBinError(bin);
+    double fragErr = 0.05*h_predZ->GetBinContent(bin);
+    double corrErr = 0.2*h_predZ-> GetBinContent(bin); 
+    h_predZ->SetBinError(bin,pow(pow(statErr,2)+pow(fragErr,2)+pow(statErr,2),0.5));
+  }
+    
   //write hists to output file
   h_purityTrue->Write();
   h_purityFR->Write();
