@@ -23,6 +23,8 @@
 #include "../MT2CORE/mt2tree.h"
 #include "../MT2CORE/sigSelections.h"
 #include "../MT2CORE/SR.h"
+#include "../MT2CORE/sigSelections.cc"
+#include "../MT2CORE/SR.cc"
 
 using namespace std;
 using namespace mt2;
@@ -138,7 +140,7 @@ void purityRL(string input_dir = "/nfs-5/users/mderdzinski/spring2015/mt2/MT2Ana
   // TFile* f_q = new TFile(Form("%s/qcd_pt.root",input_dir.c_str())); //qcd file
   // TFile* f_t = new TFile(Form("%s/ttall.root",input_dir.c_str())); //ttbar file
   // TFile* f_s = new TFile(Form("%s/singletop.root",input_dir.c_str())); //singletop file
-  TFile* f_z = new TFile("/nfs-5/users/mderdzinski/spring2015/mt2/MT2Analysis/MT2looper/output/skims/zinv_ht.root"); //zinv file
+  TFile* f_z = new TFile(Form("%s/zinv_ht.root",input_dir.c_str())); //zinv file
   TFile* f_bkg = new TFile(Form("%s/CRRLbkg.root",input_dir.c_str())); //qcd+ttall+singletop file
   
   if(f_w->IsZombie() || f_bkg->IsZombie() ||f_z->IsZombie()) {

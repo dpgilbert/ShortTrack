@@ -23,6 +23,8 @@
 #include "../MT2CORE/mt2tree.h"
 #include "../MT2CORE/sigSelections.h"
 #include "../MT2CORE/SR.h"
+#include "../MT2CORE/sigSelections.cc"
+#include "../MT2CORE/SR.cc"
 
 using namespace std;
 using namespace mt2;

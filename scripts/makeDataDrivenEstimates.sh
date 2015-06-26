@@ -32,9 +32,14 @@ cd $INDIR
 rm qcdplusgjet.root
 echo "hadd qcdplusgjet.root gjet_ht.root qcd_pt.root" 
 hadd qcdplusgjet.root gjet_ht.root qcd_pt.root  >> $THISDIR/dataDrivenEstimates.log
+rm CRRLbkg.root
+echo "hadd CRRLbkg.root ttall.root singletop.root" 
+hadd CRRLbkg.root ttall.root singletop.root  >> $THISDIR/dataDrivenEstimates.log
 cd $THISDIR
-echo "root -b -q runPurity.C(${INDIR})"
-root -b -q "runPurity.C(\"${INDIR}\")" >> dataDrivenEstimates.log
+echo "root -b -q purity.C+(${INDIR})"
+root -b -q "purity.C+(\"${INDIR}\")" >> dataDrivenEstimates.log
+echo "root -b -q purityRL.C+(${INDIR})"
+root -b -q "purityRL.C+(\"${INDIR}\")" >> dataDrivenEstimates.log
 echo "done"
 
 
