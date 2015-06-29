@@ -480,9 +480,8 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 	       // reduce electron FR in endcap to barrel level
 	       //- Barrel: MT2 selection (vetoID + miniRelIso<0.1) + medium ID + relIso03 < 0.1
 	       //- Endcap: MT2 selection (vetoID + miniRelIso<0.1) + tight ID + relIso03 < 0.1
-	       && ((t.lep_miniRelIso[0]<0.1) && t.lep_relIso03[0]<0.1)
 	       && ((abs(t.lep_pdgId[0])==11 //for electrons, pass ID above
-		    && ((fabs(t.lep_eta[0])<1.4442 && t.lep_tightId[0]>1) || (fabs(t.lep_eta[0])>1.4442 && t.lep_tightId[0]>2) ))
+		    && ((t.lep_miniRelIso[0]<0.1) && t.lep_relIso03[0]<0.1) && ((fabs(t.lep_eta[0])<1.4442 && t.lep_tightId[0]>1) || (fabs(t.lep_eta[0])>1.4442 && t.lep_tightId[0]>2) ))
 		   || (abs(t.lep_pdgId[0])==13)) //for muons, just veto ID
 	       ) {
 	    // no additional explicit lepton veto
