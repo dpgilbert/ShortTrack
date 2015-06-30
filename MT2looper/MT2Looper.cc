@@ -140,6 +140,19 @@ void MT2Looper::SetSignalRegions(){
   plot1D("h_n_mt2bins",  1, SRBase.GetNumberOfMT2Bins(), SRBase.srHistMap, "", 1, 0, 2);
   outfile_->cd();
 
+  std::vector<std::string> varsCRSL = SRBase.GetListOfVariablesCRSL();
+  TDirectory * dirCRSL = (TDirectory*)outfile_->Get("crslbase");
+  if (dirCRSL == 0) {
+    dirCRSL = outfile_->mkdir("crslbase");
+  } 
+  dirCRSL->cd();
+  for(unsigned int j = 0; j < varsCRSL.size(); j++){
+    plot1D("h_"+varsCRSL.at(j)+"_"+"LOW",  1, SRBase.GetLowerBoundCRSL(varsCRSL.at(j)), SRBase.crslHistMap, "", 1, 0, 2);
+    plot1D("h_"+varsCRSL.at(j)+"_"+"HI",   1, SRBase.GetUpperBoundCRSL(varsCRSL.at(j)), SRBase.crslHistMap, "", 1, 0, 2);
+  }
+  plot1D("h_n_mt2bins",  1, SRBase.GetNumberOfMT2Bins(), SRBase.srHistMap, "", 1, 0, 2);
+  outfile_->cd();
+
   //setup inclusive regions
   SR InclusiveHT450to575 = SRBase;
   InclusiveHT450to575.SetName("InclusiveHT450to575");
