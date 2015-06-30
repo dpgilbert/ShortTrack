@@ -178,6 +178,28 @@ public :
    Float_t         zll_phi;
    Float_t         zll_ht;
    Float_t         zll_minMTBMet;
+   Float_t         zllmt_mt2;
+   Float_t         zllmt_deltaPhiMin;
+   Float_t         zllmt_diffMetMht;
+   Float_t         zllmt_met_pt;
+   Float_t         zllmt_met_phi;
+   Float_t         zllmt_mht_pt;
+   Float_t         zllmt_mht_phi;
+   Float_t         zllmt_ht;
+   Float_t         zllmt_mt;
+   Float_t         rl_mt2;
+   Float_t         rl_met_pt;
+   Float_t         rl_met_phi;
+   Float_t         rl_mht_pt;
+   Float_t         rl_mht_phi;
+   Float_t         rl_deltaPhiMin;
+   Float_t         rl_diffMetMht;
+   Float_t         rl_mass;
+   Float_t         rl_pt;
+   Float_t         rl_eta;
+   Float_t         rl_phi;
+   Float_t         rl_ht;
+   Float_t         rl_minMTBMet;
    Int_t           ngenPart;
    Float_t         genPart_pt[200];   //[ngenPart]
    Float_t         genPart_eta[200];   //[ngenPart]
@@ -405,6 +427,28 @@ public :
    TBranch        *b_zll_phi;
    TBranch        *b_zll_ht;
    TBranch        *b_zll_minMTBMet;
+   TBranch        *b_zllmt_mt2;
+   TBranch        *b_zllmt_deltaPhiMin;
+   TBranch        *b_zllmt_diffMetMht;
+   TBranch        *b_zllmt_met_pt;
+   TBranch        *b_zllmt_met_phi;
+   TBranch        *b_zllmt_mht_pt;
+   TBranch        *b_zllmt_mht_phi;
+   TBranch        *b_zllmt_ht;
+   TBranch        *b_zllmt_mt;
+   TBranch        *b_rl_mt2;
+   TBranch        *b_rl_met_pt;
+   TBranch        *b_rl_met_phi;
+   TBranch        *b_rl_mht_pt;
+   TBranch        *b_rl_mht_phi;
+   TBranch        *b_rl_deltaPhiMin;
+   TBranch        *b_rl_diffMetMht;
+   TBranch        *b_rl_mass;
+   TBranch        *b_rl_pt;
+   TBranch        *b_rl_eta;
+   TBranch        *b_rl_phi;
+   TBranch        *b_rl_ht;
+   TBranch        *b_rl_minMTBMet;
    TBranch        *b_ngenPart;   //!
    TBranch        *b_genPart_pt;   //!
    TBranch        *b_genPart_eta;   //!
@@ -691,6 +735,28 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("zll_phi", &zll_phi, &b_zll_phi);
    fChain->SetBranchAddress("zll_ht", &zll_ht, &b_zll_ht);
    fChain->SetBranchAddress("zll_minMTBMet", &zll_minMTBMet, &b_zll_minMTBMet);
+   fChain->SetBranchAddress("zllmt_mt2", &zllmt_mt2, &b_zllmt_mt2);
+   fChain->SetBranchAddress("zllmt_deltaPhiMin", &zllmt_deltaPhiMin, &b_zllmt_deltaPhiMin);
+   fChain->SetBranchAddress("zllmt_diffMetMht", &zllmt_diffMetMht, &b_zllmt_diffMetMht);
+   fChain->SetBranchAddress("zllmt_met_pt", &zllmt_met_pt, &b_zllmt_met_pt);
+   fChain->SetBranchAddress("zllmt_met_phi", &zllmt_met_phi, &b_zllmt_met_phi);
+   fChain->SetBranchAddress("zllmt_mht_pt", &zllmt_mht_pt, &b_zllmt_mht_pt);
+   fChain->SetBranchAddress("zllmt_mht_phi", &zllmt_mht_phi, &b_zllmt_mht_phi);
+   fChain->SetBranchAddress("zllmt_ht", &zllmt_ht, &b_zllmt_ht);
+   fChain->SetBranchAddress("zllmt_mt", &zllmt_mt, &b_zllmt_mt);
+   fChain->SetBranchAddress("rl_mt2", &rl_mt2, &b_rl_mt2);
+   fChain->SetBranchAddress("rl_met_pt", &rl_met_pt, &b_rl_met_pt);
+   fChain->SetBranchAddress("rl_met_phi", &rl_met_phi, &b_rl_met_phi);
+   fChain->SetBranchAddress("rl_mht_pt", &rl_mht_pt, &b_rl_mht_pt);
+   fChain->SetBranchAddress("rl_mht_phi", &rl_mht_phi, &b_rl_mht_phi);
+   fChain->SetBranchAddress("rl_deltaPhiMin", &rl_deltaPhiMin, &b_rl_deltaPhiMin);
+   fChain->SetBranchAddress("rl_diffMetMht", &rl_diffMetMht, &b_rl_diffMetMht);
+   fChain->SetBranchAddress("rl_mass", &rl_mass, &b_rl_mass);
+   fChain->SetBranchAddress("rl_pt", &rl_pt, &b_rl_pt);
+   fChain->SetBranchAddress("rl_eta", &rl_eta, &b_rl_eta);
+   fChain->SetBranchAddress("rl_phi", &rl_phi, &b_rl_phi);
+   fChain->SetBranchAddress("rl_ht", &rl_ht, &b_rl_ht);
+   fChain->SetBranchAddress("rl_minMTBMet", &rl_minMTBMet, &b_rl_minMTBMet);
    fChain->SetBranchAddress("ngenPart", &ngenPart, &b_ngenPart);
    fChain->SetBranchAddress("genPart_pt", genPart_pt, &b_genPart_pt);
    fChain->SetBranchAddress("genPart_eta", genPart_eta, &b_genPart_eta);

@@ -73,6 +73,7 @@ class babyMaker {
   Float_t         minMTBMet;
   Float_t         gamma_minMTBMet;
   Float_t         zll_minMTBMet;
+  Float_t         rl_minMTBMet;
 
   Float_t         ht;
   Float_t         mt2;
@@ -222,6 +223,31 @@ class babyMaker {
   Float_t         zll_eta;
   Float_t         zll_phi;
   Float_t         zll_ht;
+
+  // event level vars recalculated for Z-->ll MT control region
+  Float_t         zllmt_mt2;
+  Float_t         zllmt_deltaPhiMin;
+  Float_t         zllmt_diffMetMht;
+  Float_t         zllmt_met_pt;
+  Float_t         zllmt_met_phi;
+  Float_t         zllmt_mht_pt;
+  Float_t         zllmt_mht_phi;
+  Float_t         zllmt_ht;
+  Float_t         zllmt_mt;
+
+  // event level vars recalculated for removed lepton control region
+  Float_t         rl_mt2;
+  Float_t         rl_deltaPhiMin;
+  Float_t         rl_diffMetMht;
+  Float_t         rl_met_pt;
+  Float_t         rl_met_phi;
+  Float_t         rl_mht_pt;
+  Float_t         rl_mht_phi;
+  Float_t         rl_mass;
+  Float_t         rl_pt;
+  Float_t         rl_eta;
+  Float_t         rl_phi;
+  Float_t         rl_ht;
 
 //----- GEN PARTICLES
   static const int max_ngenPart = 300;
