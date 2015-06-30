@@ -224,6 +224,17 @@ class babyMaker {
   Float_t         zll_phi;
   Float_t         zll_ht;
 
+  // event level vars recalculated for Z-->ll MT control region
+  Float_t         zllmt_mt2;
+  Float_t         zllmt_deltaPhiMin;
+  Float_t         zllmt_diffMetMht;
+  Float_t         zllmt_met_pt;
+  Float_t         zllmt_met_phi;
+  Float_t         zllmt_mht_pt;
+  Float_t         zllmt_mht_phi;
+  Float_t         zllmt_ht;
+  Float_t         zllmt_mt;
+
   // event level vars recalculated for removed lepton control region
   Float_t         rl_mt2;
   Float_t         rl_deltaPhiMin;

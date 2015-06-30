@@ -419,11 +419,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       vector<LorentzVector> p4sForHems;
       vector<LorentzVector> p4sForHemsGamma;
       vector<LorentzVector> p4sForHemsZll;
+      vector<LorentzVector> p4sForHemsZllMT;
       vector<LorentzVector> p4sForHemsRl;
 
       vector<LorentzVector> p4sForDphi;
       vector<LorentzVector> p4sForDphiGamma;
       vector<LorentzVector> p4sForDphiZll;
+      vector<LorentzVector> p4sForDphiZllMT;
       vector<LorentzVector> p4sForDphiRl;
 
       if (verbose) cout << "before electrons" << endl;
@@ -574,6 +576,31 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	zll_pt = ll.Pt();
 	zll_eta = ll.Eta();
 	zll_phi = ll.Phi();
+
+	// alternate set of vars transforming Zll to look like Wlnu. 
+	//  "Randomly" turn one lepton into MET and recalc vars
+	int kill_lep = evt%2;
+	int keep_lep = (kill_lep+1)%2;
+
+	float zllmt_met_px  = met_pt * cos(met_phi);
+	float zllmt_met_py  = met_pt * sin(met_phi);	
+	zllmt_met_px += lep_pt[kill_lep] * cos(lep_phi[kill_lep]);
+	zllmt_met_py += lep_pt[kill_lep] * sin(lep_phi[kill_lep]);
+	// recalculated MET with photons added
+	TVector2 zllmt_met_vec(zllmt_met_px, zllmt_met_py);
+	zllmt_met_pt = zllmt_met_vec.Mod();
+	zllmt_met_phi = TVector2::Phi_mpi_pi(zllmt_met_vec.Phi());      
+	zllmt_mt = MT(lep_pt[keep_lep],lep_phi[keep_lep],zllmt_met_pt,zllmt_met_phi);
+
+	LorentzVector keep_lep_vec;
+	if (keep_lep == 0) {
+	  keep_lep_vec.SetPxPyPzE(l0.Px(),l0.Py(),l0.Pz(),l0.E());
+	} else {
+	  keep_lep_vec.SetPxPyPzE(l1.Px(),l1.Py(),l1.Pz(),l1.E());
+	}
+	p4sForHemsZllMT.push_back(keep_lep_vec);
+	p4sForDphiZllMT.push_back(keep_lep_vec);
+
       }
       //--for removed lepton control regions (w->lnu)
       if (nlep == 1) {
@@ -1003,6 +1030,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	      p4sForDphi.push_back(p4sCorrJets.at(iJet));
 	      p4sForHemsZll.push_back(p4sCorrJets.at(iJet));
 	      p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
+	      p4sForHemsZllMT.push_back(p4sCorrJets.at(iJet));
+	      p4sForDphiZllMT.push_back(p4sCorrJets.at(iJet));
 	      p4sForHemsRl.push_back(p4sCorrJets.at(iJet));
 	      p4sForDphiRl.push_back(p4sCorrJets.at(iJet));
 	      nJet40++;
@@ -1121,6 +1150,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       sort(p4sForDphiGamma.begin(), p4sForDphiGamma.end(), sortByPt);
       sort(p4sForHemsZll.begin(), p4sForHemsZll.end(), sortByPt);
       sort(p4sForDphiZll.begin(), p4sForDphiZll.end(), sortByPt);
+      sort(p4sForHemsZllMT.begin(), p4sForHemsZllMT.end(), sortByPt);
+      sort(p4sForDphiZllMT.begin(), p4sForDphiZllMT.end(), sortByPt);
       sort(p4sForHemsRl.begin(), p4sForHemsRl.end(), sortByPt);
       sort(p4sForDphiRl.begin(), p4sForDphiRl.end(), sortByPt);
 
@@ -1209,6 +1240,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       // MT2, MHT for Z-->ll control region
       zll_ht = 0;
+      zllmt_ht = 0;
       if (nlep == 2) {
         zll_deltaPhiMin = 999;
         LorentzVector sumMhtp4Zll = LorentzVector(0,0,0,0);
@@ -1238,6 +1270,38 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	TVector2 mhtVectorZll = TVector2(zll_mht_pt*cos(zll_mht_phi), zll_mht_pt*sin(zll_mht_phi));
 	TVector2 metVectorZll = TVector2(zll_met_pt*cos(zll_met_phi), zll_met_pt*sin(zll_met_phi));
 	zll_diffMetMht = (mhtVectorZll - metVectorZll).Mod();
+
+
+	// same for Zll MT region test
+        zllmt_deltaPhiMin = 999;
+        LorentzVector sumMhtp4ZllMT = LorentzVector(0,0,0,0);
+
+	// compute MHT using same objects as MT2 inputs
+	for (unsigned int ip4 = 0; ip4 < p4sForHemsZllMT.size(); ++ip4) {
+	  zllmt_ht += p4sForHemsZllMT.at(ip4).pt();
+	  sumMhtp4ZllMT -= p4sForHemsZllMT.at(ip4);
+	}
+
+	// min(dphi) of 4 leading objects
+	for (unsigned int ip4 = 0; ip4 < p4sForDphiZllMT.size(); ++ip4) {
+	  if(ip4 < 4) zllmt_deltaPhiMin = min(zllmt_deltaPhiMin, DeltaPhi( zllmt_met_phi, p4sForDphiZllMT.at(ip4).phi() ));
+	}
+
+	vector<LorentzVector> hemJetsZllMT;
+	if(p4sForHemsZllMT.size() > 1){
+	  //Hemispheres used in MT2 calculation
+	  hemJetsZllMT = getHemJets(p4sForHemsZllMT);  
+	  
+	  zllmt_mt2 = HemMT2(zllmt_met_pt, zllmt_met_phi, hemJetsZllMT.at(0), hemJetsZllMT.at(1));
+	}	  
+	
+	zllmt_mht_pt  = sumMhtp4ZllMT.pt();
+	zllmt_mht_phi = sumMhtp4ZllMT.phi();
+	
+	TVector2 mhtVectorZllMT = TVector2(zllmt_mht_pt*cos(zllmt_mht_phi), zllmt_mht_pt*sin(zllmt_mht_phi));
+	TVector2 metVectorZllMT = TVector2(zllmt_met_pt*cos(zllmt_met_phi), zllmt_met_pt*sin(zllmt_met_phi));
+	zllmt_diffMetMht = (mhtVectorZllMT - metVectorZllMT).Mod();
+
 
       }
 
@@ -1530,7 +1594,15 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("zll_eta", &zll_eta );
   BabyTree_->Branch("zll_phi", &zll_phi );
   BabyTree_->Branch("zll_ht", &zll_ht );
-  
+  BabyTree_->Branch("zllmt_mt2", &zllmt_mt2 );
+  BabyTree_->Branch("zllmt_deltaPhiMin", &zllmt_deltaPhiMin );
+  BabyTree_->Branch("zllmt_diffMetMht", &zllmt_diffMetMht );
+  BabyTree_->Branch("zllmt_met_pt", &zllmt_met_pt );
+  BabyTree_->Branch("zllmt_met_phi", &zllmt_met_phi );
+  BabyTree_->Branch("zllmt_mht_pt", &zllmt_mht_pt );
+  BabyTree_->Branch("zllmt_mht_phi", &zllmt_mht_phi );
+  BabyTree_->Branch("zllmt_ht", &zllmt_ht );
+  BabyTree_->Branch("zllmt_mt", &zllmt_mt );
   BabyTree_->Branch("rl_mt2", &rl_mt2 );
   BabyTree_->Branch("rl_deltaPhiMin", &rl_deltaPhiMin );
   BabyTree_->Branch("rl_diffMetMht", &rl_diffMetMht );
@@ -1730,6 +1802,15 @@ void babyMaker::InitBabyNtuple () {
   zll_eta = -999.0;
   zll_phi = -999.0;
   zll_ht = -999.0;
+  zllmt_mt2 = -999.0;
+  zllmt_deltaPhiMin = -999.0;
+  zllmt_diffMetMht = -999.0;
+  zllmt_met_pt = -999.0;
+  zllmt_met_phi = -999.0;
+  zllmt_mht_pt = -999.0;
+  zllmt_mht_phi = -999.0;
+  zllmt_ht = -999.0;
+  zllmt_mt = -999.0;
   rl_mt2 = -999.0;
   rl_deltaPhiMin = -999.0;
   rl_diffMetMht = -999.0;
