@@ -4,7 +4,7 @@
 #include <set>
 #include <cmath>
 #include <sstream>
-
+#include <stdexcept>
 
 // ROOT
 #include "TDirectory.h"
@@ -124,8 +124,8 @@ void MT2Looper::SetSignalRegions(){
   SRBase.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
   SRBase.SetVarCRSL("nlep", 1, 2);
   SRBase.SetVarCRSL("passesHtMet", 1, 2);
-  float SRBase_mt2bins[6] = {200, 300, 400, 600, 1000, 1500}; 
-  SRBase.SetMT2Bins(5, SRBase_mt2bins);
+  float SRBase_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500}; 
+  SRBase.SetMT2Bins(7, SRBase_mt2bins);
 
   std::vector<std::string> vars = SRBase.GetListOfVariables();
   TDirectory * dir = (TDirectory*)outfile_->Get((SRBase.GetName()).c_str());
@@ -216,6 +216,17 @@ void MT2Looper::SetSignalRegions(){
     } 
   }
 
+  // CRSL inclusive regions to isolate W+jets and ttbar
+  CRSL_WJets = SRBase;
+  CRSL_WJets.SetName("crslwjets");
+  CRSL_WJets.SetVarCRSL("nbjets", 0, 1);
+  CRSL_WJets.crslHistMap.clear();
+
+  CRSL_TTbar = SRBase;
+  CRSL_TTbar.SetName("crslttbar");
+  CRSL_TTbar.SetVarCRSL("nbjets", 2, -1);
+  CRSL_TTbar.crslHistMap.clear();
+
 }
 
 
@@ -235,8 +246,8 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   SetSignalRegions();
 
   SRNoCut.SetName("nocut");
-  float SRNoCut_mt2bins[6] = {200, 300, 400, 600, 1000, 1500}; 
-  SRNoCut.SetMT2Bins(5, SRNoCut_mt2bins);
+  float SRNoCut_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500}; 
+  SRNoCut.SetMT2Bins(7, SRNoCut_mt2bins);
 
   // These will be set to true if any SL GJ or DY control region plots are produced
   bool saveGJplots = false;
@@ -567,6 +578,8 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   savePlotsDir(SRNoCut.srHistMap,outfile_,SRNoCut.GetName().c_str());
   savePlotsDir(SRBase.srHistMap,outfile_,SRBase.GetName().c_str());
   savePlotsDir(SRBase.crslHistMap,outfile_,"crslbase");
+  savePlotsDir(CRSL_WJets.crslHistMap,outfile_,CRSL_WJets.GetName().c_str());
+  savePlotsDir(CRSL_TTbar.crslHistMap,outfile_,CRSL_TTbar.GetName().c_str());
   savePlotsDir(SRNoCut.crgjHistMap,outfile_,"crgjnocut");
   savePlotsDir(SRBase.crgjHistMap,outfile_,"crgjbase");
 
@@ -712,18 +725,39 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 // hists for single lepton control region
 void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suffix) {
 
-  // first fill base region
-  std::map<std::string, float> valuesBase;
-  valuesBase["deltaPhiMin"] = t.deltaPhiMin;
-  valuesBase["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
-  valuesBase["nlep"]        = t.nLepLowMT;
-  valuesBase["j1pt"]        = t.jet1_pt;
-  valuesBase["j2pt"]        = t.jet2_pt;
-  valuesBase["mt2"]         = t.mt2;
-  valuesBase["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+  // only fill base histograms for inclusive lepton case
+  if(prefix=="crsl") {
 
-  if (SRBase.PassesSelectionCRSL(valuesBase)) {
-    fillHistosSingleLepton(SRBase.crslHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbase", suffix);
+    // first fill base region
+    std::map<std::string, float> valuesBase;
+    valuesBase["deltaPhiMin"] = t.deltaPhiMin;
+    valuesBase["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+    valuesBase["nlep"]        = t.nLepLowMT;
+    valuesBase["j1pt"]        = t.jet1_pt;
+    valuesBase["j2pt"]        = t.jet2_pt;
+    valuesBase["mt2"]         = t.mt2;
+    valuesBase["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+
+    if (SRBase.PassesSelectionCRSL(valuesBase)) {
+      fillHistosSingleLepton(SRBase.crslHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbase", suffix);
+    }
+
+    // inclusive regions with btag cuts for wjets/ttbar
+    std::map<std::string, float> valuesInc;
+    valuesInc["deltaPhiMin"] = t.deltaPhiMin;
+    valuesInc["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+    valuesInc["nlep"]        = t.nLepLowMT;
+    valuesInc["j1pt"]        = t.jet1_pt;
+    valuesInc["j2pt"]        = t.jet2_pt;
+    valuesInc["mt2"]         = t.mt2;
+    valuesInc["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+    valuesInc["nbjets"]         = t.nBJet20;
+    if (CRSL_WJets.PassesSelectionCRSL(valuesInc)) {
+      fillHistosSingleLepton(CRSL_WJets.crslHistMap, CRSL_WJets.GetNumberOfMT2Bins(), CRSL_WJets.GetMT2Bins(), CRSL_WJets.GetName().c_str(), suffix);
+    }
+    if (CRSL_TTbar.PassesSelectionCRSL(valuesInc)) {
+      fillHistosSingleLepton(CRSL_TTbar.crslHistMap, CRSL_TTbar.GetNumberOfMT2Bins(), CRSL_TTbar.GetMT2Bins(), CRSL_TTbar.GetName().c_str(), suffix);
+    }
   }
 
   // topological regions
