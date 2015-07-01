@@ -36,6 +36,7 @@ int getColor(const string& sample) {
   if (sample.find("wjets") != string::npos) return kGreen+1;
   if (sample.find("zinv") != string::npos) return kGreen-1;
   if (sample.find("qcd") != string::npos) return kYellow+1;
+  if (sample.find("dyjets") != string::npos) return kRed;
   if (sample.find("T1tttt") != string::npos) return kRed;
   if (sample.find("T1bbbb") != string::npos) return kMagenta;
   if (sample.find("T1qqqq") != string::npos) return kOrange;
@@ -56,6 +57,7 @@ string getLegendName(const string& sample) {
   if (sample.find("zinv") != string::npos) return "Z+jets";
   if (sample.find("gjet") != string::npos) return "Gamma+jets";
   if (sample.find("qcd") != string::npos) return "QCD";
+  if (sample.find("dyjets") != string::npos) return "Z+jets";
   if (sample.find("T1tttt_1500_100") != string::npos) return "T1tttt 1500, 100";
   if (sample.find("T1tttt_1200_800") != string::npos) return "T1tttt 1200, 800";
   if (sample.find("T1bbbb_1000_900") != string::npos) return "T1bbbb 1000, 900";
