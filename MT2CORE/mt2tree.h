@@ -219,6 +219,20 @@ public :
    Int_t           genLep_status[10];   //[ngenLep]
    Float_t         genLep_charge[10];   //[ngenLep]
    Int_t           genLep_sourceId[10];   //[ngenLep]
+   Int_t           ngenStat23;
+   Float_t         genStat23_pt[10];   //[ngenStat23]
+   Float_t         genStat23_eta[10];   //[ngenStat23]
+   Float_t         genStat23_phi[10];   //[ngenStat23]
+   Float_t         genStat23_mass[10];   //[ngenStat23]
+   Int_t           genStat23_pdgId[10];   //[ngenStat23]
+   Int_t           genStat23_status[10];   //[ngenStat23]
+   Float_t         genStat23_charge[10];   //[ngenStat23]
+   Int_t           genStat23_sourceId[10];   //[ngenStat23]
+   Int_t           ngenGamma;
+   Float_t         genGamma_pt[10];   //[ngenGamma]
+   Float_t         genGamma_eta[10];   //[ngenGamma]
+   Float_t         genGamma_phi[10];   //[ngenGamma]
+   Int_t           genGamma_motherId[10];   //[ngenGamma]
    Int_t           ngenLepFromTau;
    Float_t         genLepFromTau_pt[10];   //[ngenLepFromTau]
    Float_t         genLepFromTau_eta[10];   //[ngenLepFromTau]
@@ -468,6 +482,20 @@ public :
    TBranch        *b_genLep_status;   //!
    TBranch        *b_genLep_charge;   //!
    TBranch        *b_genLep_sourceId;   //!
+   TBranch        *b_ngenStat23;   //!
+   TBranch        *b_genStat23_pt;   //!
+   TBranch        *b_genStat23_eta;   //!
+   TBranch        *b_genStat23_phi;   //!
+   TBranch        *b_genStat23_mass;   //!
+   TBranch        *b_genStat23_pdgId;   //!
+   TBranch        *b_genStat23_status;   //!
+   TBranch        *b_genStat23_charge;   //!
+   TBranch        *b_genStat23_sourceId;   //!
+   TBranch        *b_ngenGamma;   //!
+   TBranch        *b_genGamma_pt;   //!
+   TBranch        *b_genGamma_eta;   //!
+   TBranch        *b_genGamma_phi;   //!
+   TBranch        *b_genGamma_motherId;   //!
    TBranch        *b_ngenLepFromTau;   //!
    TBranch        *b_genLepFromTau_pt;   //!
    TBranch        *b_genLepFromTau_eta;   //!
@@ -776,6 +804,20 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("genLep_status", genLep_status, &b_genLep_status);
    fChain->SetBranchAddress("genLep_charge", genLep_charge, &b_genLep_charge);
    fChain->SetBranchAddress("genLep_sourceId", genLep_sourceId, &b_genLep_sourceId);
+   fChain->SetBranchAddress("ngenStat23", &ngenStat23, &b_ngenStat23);
+   fChain->SetBranchAddress("genStat23_pt", genStat23_pt, &b_genStat23_pt);
+   fChain->SetBranchAddress("genStat23_eta", genStat23_eta, &b_genStat23_eta);
+   fChain->SetBranchAddress("genStat23_phi", genStat23_phi, &b_genStat23_phi);
+   fChain->SetBranchAddress("genStat23_mass", genStat23_mass, &b_genStat23_mass);
+   fChain->SetBranchAddress("genStat23_pdgId", genStat23_pdgId, &b_genStat23_pdgId);
+   fChain->SetBranchAddress("genStat23_status", genStat23_status, &b_genStat23_status);
+   fChain->SetBranchAddress("genStat23_charge", genStat23_charge, &b_genStat23_charge);
+   fChain->SetBranchAddress("genStat23_sourceId", genStat23_sourceId, &b_genStat23_sourceId);
+   fChain->SetBranchAddress("ngenGamma", &ngenGamma, &b_ngenGamma);
+   fChain->SetBranchAddress("genGamma_pt", genGamma_pt, &b_genGamma_pt);
+   fChain->SetBranchAddress("genGamma_eta", genGamma_eta, &b_genGamma_eta);
+   fChain->SetBranchAddress("genGamma_phi", genGamma_phi, &b_genGamma_phi);
+   fChain->SetBranchAddress("genGamma_motherId", genGamma_motherId, &b_genGamma_motherId);
    fChain->SetBranchAddress("ngenLepFromTau", &ngenLepFromTau, &b_ngenLepFromTau);
    fChain->SetBranchAddress("genLepFromTau_pt", genLepFromTau_pt, &b_genLepFromTau_pt);
    fChain->SetBranchAddress("genLepFromTau_eta", genLepFromTau_eta, &b_genLepFromTau_eta);

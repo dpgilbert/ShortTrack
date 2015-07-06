@@ -274,6 +274,26 @@ class babyMaker {
   Float_t         genLep_charge[max_ngenLep];   //[ngenLep]
   Int_t           genLep_sourceId[max_ngenLep];   //[ngenLep]
 
+//----- GEN STATUS 23
+  static const int max_ngenStat23 = 10;
+  Int_t           ngenStat23;
+  Float_t         genStat23_pt[max_ngenStat23];   //[ngenStat23]
+  Float_t         genStat23_eta[max_ngenStat23];   //[ngenStat23]
+  Float_t         genStat23_phi[max_ngenStat23];   //[ngenStat23]
+  Float_t         genStat23_mass[max_ngenStat23];   //[ngenStat23]
+  Int_t           genStat23_pdgId[max_ngenStat23];   //[ngenStat23]
+  Int_t           genStat23_status[max_ngenStat23];   //[ngenStat23]
+  Float_t         genStat23_charge[max_ngenStat23];   //[ngenStat23]
+  Int_t           genStat23_sourceId[max_ngenStat23];   //[ngenStat23]
+  
+//----- GEN GAMMAS
+  static const int max_ngenGamma = 10;
+  Int_t           ngenGamma;
+  Float_t         genGamma_pt[max_ngenGamma];   //[ngenGamma]
+  Float_t         genGamma_eta[max_ngenGamma];   //[ngenGamma]
+  Float_t         genGamma_phi[max_ngenGamma];   //[ngenGamma]
+  Int_t           genGamma_motherId[max_ngenGamma];   //[ngenGamma]
+  
 //----- GEN TAUS
   static const int max_ngenTau = 10;
   Int_t           ngenTau;

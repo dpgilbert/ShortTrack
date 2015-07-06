@@ -224,6 +224,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	//GEN PARTICLES
 	ngenPart = 0;
 	ngenLep = 0;
+	ngenStat23 = 0;
+	ngenGamma = 0;
 	ngenTau = 0;
 	ngenLepFromTau = 0;
 	LorentzVector recoil(0,0,0,0);
@@ -297,11 +299,41 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	    if (nHardScatter > 2) std::cout << "WARNING: found too many sbottoms in T2bb MC!" << std::endl;
 	  }
 
-	  // save lepton info
-	  if ((pdgId != 11) && (pdgId != 13) && (pdgId != 15)) continue;
-
 	  int motherId = abs(cms3.genps_id_simplemother().at(iGen));
 	  int grandmotherId = abs(cms3.genps_id_simplegrandma().at(iGen));
+
+	  // save all status 23 gen particles
+	  if (status == 23) {
+	    genStat23_pt[ngenStat23] = cms3.genps_p4().at(iGen).pt();
+	    genStat23_eta[ngenStat23] = cms3.genps_p4().at(iGen).eta();
+	    genStat23_phi[ngenStat23] = cms3.genps_p4().at(iGen).phi();
+	    genStat23_mass[ngenStat23] = cms3.genps_mass().at(iGen);
+	    genStat23_pdgId[ngenStat23] = cms3.genps_id().at(iGen);
+	    genStat23_status[ngenStat23] = cms3.genps_status().at(iGen);
+	    genStat23_charge[ngenStat23] = cms3.genps_charge().at(iGen);
+	    genStat23_sourceId[ngenStat23] = getSourceId(iGen);
+	    ++ngenStat23;
+	  }
+	  
+	  // save gen gammas good for matching
+	  bool goodGamma = false;
+	  //gamma: status 1 matched to mother photon or proton
+	  if (pdgId == 22 && status == 1) { 
+	    if (motherId <= 22  || motherId == 2212) {
+	      goodGamma = true;
+	    } 
+	  }
+	  
+	  if (goodGamma) {
+	    genGamma_pt[ngenGamma] = cms3.genps_p4().at(iGen).pt();
+	    genGamma_eta[ngenGamma] = cms3.genps_p4().at(iGen).eta();
+	    genGamma_phi[ngenGamma] = cms3.genps_p4().at(iGen).phi();
+	    genGamma_motherId[ngenGamma] = cms3.genps_id_simplemother().at(iGen);
+	    ++ngenGamma;
+	  }
+	  
+	  // save lepton info
+	  if ((pdgId != 11) && (pdgId != 13) && (pdgId != 15)) continue;
 
 	  // reject leptons with direct parents of quarks or hadrons. 
 	  //  Allow SUSY parents - not explicitly checking for now though
@@ -327,7 +359,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	      goodLep = true;
 	    } 
 	  } // status 1 e or mu
-
+	  
 	  // taus: status 2 or 23, from W/Z/H
 	  else if (pdgId == 15 && (status == 2 || status == 23)) {
 	    // save leptons pre-FSR: prefer status 23 over status 2
@@ -356,7 +388,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	    genLep_sourceId[ngenLep] = sourceId;
 	    ++ngenLep;
 	  }
-
+	  
 	  // save gen taus from W/Z/H
 	  if (goodTau) {
 	    genTau_pt[ngenTau] = cms3.genps_p4().at(iGen).pt();
@@ -1636,6 +1668,20 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("genLep_status", genLep_status, "genLep_status[ngenLep]/I" );
   BabyTree_->Branch("genLep_charge", genLep_charge, "genLep_charge[ngenLep]/F" );
   BabyTree_->Branch("genLep_sourceId", genLep_sourceId, "genLep_sourceId[ngenLep]/I" );
+  BabyTree_->Branch("ngenStat23", &ngenStat23, "ngenStat23/I" );
+  BabyTree_->Branch("genStat23_pt", genStat23_pt, "genStat23_pt[ngenStat23]/F" );
+  BabyTree_->Branch("genStat23_eta", genStat23_eta, "genStat23_eta[ngenStat23]/F" );
+  BabyTree_->Branch("genStat23_phi", genStat23_phi, "genStat23_phi[ngenStat23]/F" );
+  BabyTree_->Branch("genStat23_mass", genStat23_mass, "genStat23_mass[ngenStat23]/F" );
+  BabyTree_->Branch("genStat23_pdgId", genStat23_pdgId, "genStat23_pdgId[ngenStat23]/I" );
+  BabyTree_->Branch("genStat23_status", genStat23_status, "genStat23_status[ngenStat23]/I" );
+  BabyTree_->Branch("genStat23_charge", genStat23_charge, "genStat23_charge[ngenStat23]/F" );
+  BabyTree_->Branch("genStat23_sourceId", genStat23_sourceId, "genStat23_sourceId[ngenStat23]/I" );
+  BabyTree_->Branch("ngenGamma", &ngenGamma, "ngenGamma/I" );
+  BabyTree_->Branch("genGamma_pt", genGamma_pt, "genGamma_pt[ngenGamma]/F" );
+  BabyTree_->Branch("genGamma_eta", genGamma_eta, "genGamma_eta[ngenGamma]/F" );
+  BabyTree_->Branch("genGamma_phi", genGamma_phi, "genGamma_phi[ngenGamma]/F" );
+  BabyTree_->Branch("genGamma_motherId", genGamma_motherId, "genGamma_motherId[ngenGamma]/I" );
   BabyTree_->Branch("ngenTau", &ngenTau, "ngenTau/I" );
   BabyTree_->Branch("genTau_pt", genTau_pt, "genTau_pt[ngenTau]/F" );
   BabyTree_->Branch("genTau_eta", genTau_eta, "genTau_eta[ngenTau]/F" );
@@ -1928,6 +1974,24 @@ void babyMaker::InitBabyNtuple () {
     genLep_sourceId[i] = -999;
   }
 
+  for(int i=0; i < max_ngenStat23; i++){
+    genStat23_pt[i] = -999;
+    genStat23_eta[i] = -999;
+    genStat23_phi[i] = -999;
+    genStat23_mass[i] = -999;
+    genStat23_pdgId[i] = -999;
+    genStat23_status[i] = -999;
+    genStat23_charge[i] = -999;
+    genStat23_sourceId[i] = -999;
+  }
+    
+  for(int i=0; i < max_ngenGamma; i++){
+    genGamma_pt[i] = -999;
+    genGamma_eta[i] = -999;
+    genGamma_phi[i] = -999;
+    genGamma_motherId[i] = -999;
+  }
+  
   for(int i=0; i < max_ngenTau; i++){
     genTau_pt[i] = -999;
     genTau_eta[i] = -999;
