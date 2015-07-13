@@ -123,8 +123,10 @@ class babyMaker {
   Int_t           Flag_METFilters;
 
 //----- TRIGGER (to be better defined)
+  Int_t           HLT_HT800;   
   Int_t           HLT_HT900;   
   Int_t           HLT_MET170;
+  Int_t           HLT_ht350met100;   
   Int_t           HLT_ht350met120;   
   Int_t           HLT_SingleMu;   
   Int_t           HLT_DoubleEl;   
@@ -132,6 +134,8 @@ class babyMaker {
   Int_t           HLT_DoubleMu;   
   Int_t           HLT_Photons;   
   Int_t           HLT_ht350prescale;   
+  Int_t           HLT_ht475prescale;   
+  Int_t           HLT_ht600prescale;   
 
 //----- LEPTONS
   static const int max_nlep = 50;

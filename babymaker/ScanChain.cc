@@ -51,9 +51,11 @@ const bool saveGenParticles = false;
 // turn on to apply trigger cuts to ntuples -> OR of all triggers used
 const bool applyTriggerCuts = false;
 // turn on to apply dummy weights for lepton SFs, btag SFs, etc
-const bool applyDummyWeights = true;
+const bool applyDummyWeights = false;
 // turn on to apply json file to data
-const bool applyJSON = false;
+const bool applyJSON = true;
+// for testing purposes, running on unmerged files
+const bool removePostProcVars = false;
 
 //--------------------------------------------------------------------
 
@@ -77,7 +79,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
-  const char* json_file = "jsons/Cert_Run2012ABCD_22Jan2013ReReco_JSON_goodruns.txt";
+  const char* json_file = "jsons/json_DCSONLY_Run2015B_snt_130715.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -125,7 +127,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
-    //for( unsigned int event = 0; event < 100; ++event) {
+    //for( unsigned int event = 0; event < 1000 ++event) {
 
       // Get Event Content
       tree->LoadTree(event);
@@ -143,8 +145,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       if (verbose) cout << "before trigger" << endl;
 
       //TRIGGER - check first to enable cuts
+      HLT_HT800        = passHLTTriggerPattern("HLT_PFHT800_v");
       HLT_HT900        = passHLTTriggerPattern("HLT_PFHT900_v");
       HLT_MET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v"); 
+      HLT_ht350met100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_NoiseCleaned_v"); 
       HLT_ht350met120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v"); 
 
       HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu20_v") || passHLTTriggerPattern("HLT_IsoTkMu20_v") ||
@@ -155,10 +159,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
 	passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v")  ||
 	passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
-      HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") ||
-	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
+      HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||
+	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
       HLT_Photons      = passHLTTriggerPattern("HLT_Photon165_HE10_v"); 
       HLT_ht350prescale  = passHLTTriggerPattern("HLT_PFHT350_v"); 
+      HLT_ht475prescale  = passHLTTriggerPattern("HLT_PFHT475_v"); 
+      HLT_ht600prescale  = passHLTTriggerPattern("HLT_PFHT600_v"); 
 
       if (!isData && applyTriggerCuts && !(HLT_HT900 || HLT_ht350met120 || HLT_Photons || HLT_SingleMu 
 					   || HLT_DoubleMu || HLT_DoubleEl || HLT_MuEG)) continue;
@@ -168,15 +174,20 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       evt  = cms3.evt_event();
 
       if( applyJSON && isData && !goodrun(run, lumi) ) continue;
-
-      evt_nEvts = cms3.evt_nEvts();
-      evt_scale1fb = cms3.evt_scale1fb();
-      evt_xsec = cms3.evt_xsec_incl();
-      evt_kfactor = cms3.evt_kfactor();
-      evt_filter = cms3.evt_filt_eff();
-      genWeight = cms3.genps_weight();
-      puWeight = 1.;
-      if (!isData) nTrueInt = cms3.puInfo_trueNumInteractions().at(0);
+      
+      if (!removePostProcVars) {
+	evt_nEvts = cms3.evt_nEvts();
+	evt_scale1fb = cms3.evt_scale1fb();
+	evt_xsec = cms3.evt_xsec_incl();
+	evt_kfactor = cms3.evt_kfactor();
+	evt_filter = cms3.evt_filt_eff();
+      }
+      if (!isData) {
+	genWeight = cms3.genps_weight();
+	puWeight = 1.;
+	nTrueInt = cms3.puInfo_trueNumInteractions().at(0);
+      }
+      
       rho = cms3.evt_fixgridfastjet_all_rho(); //this one is used in JECs
 
       if (verbose) cout << "before vertices" << endl;
@@ -1486,8 +1497,10 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("Flag_goodVertices", &Flag_goodVertices );
   BabyTree_->Branch("Flag_eeBadScFilter", &Flag_eeBadScFilter );
   BabyTree_->Branch("Flag_METFilters", &Flag_METFilters );
+  BabyTree_->Branch("HLT_HT800", &HLT_HT800 );
   BabyTree_->Branch("HLT_HT900", &HLT_HT900 );
   BabyTree_->Branch("HLT_MET170", &HLT_MET170 );
+  BabyTree_->Branch("HLT_ht350met100", &HLT_ht350met100 );
   BabyTree_->Branch("HLT_ht350met120", &HLT_ht350met120 );
   BabyTree_->Branch("HLT_SingleMu", &HLT_SingleMu );
   BabyTree_->Branch("HLT_DoubleEl", &HLT_DoubleEl );
@@ -1495,6 +1508,8 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("HLT_DoubleMu", &HLT_DoubleMu );
   BabyTree_->Branch("HLT_Photons", &HLT_Photons );
   BabyTree_->Branch("HLT_ht350prescale", &HLT_ht350prescale );
+  BabyTree_->Branch("HLT_ht475prescale", &HLT_ht475prescale );
+  BabyTree_->Branch("HLT_ht600prescale", &HLT_ht600prescale );
   BabyTree_->Branch("nlep", &nlep, "nlep/I" );
   BabyTree_->Branch("lep_pt", lep_pt, "lep_pt[nlep]/F");
   BabyTree_->Branch("lep_eta", lep_eta, "lep_eta[nlep]/F" );
@@ -1736,8 +1751,10 @@ void babyMaker::InitBabyNtuple () {
   Flag_goodVertices = -999;
   Flag_eeBadScFilter = -999;
   Flag_METFilters = -999;
+  HLT_HT800 = -999;
   HLT_HT900 = -999;
   HLT_MET170 = -999;
+  HLT_ht350met100 = -999;
   HLT_ht350met120 = -999;
   HLT_SingleMu = -999;   
   HLT_DoubleEl = -999;   
@@ -1745,6 +1762,8 @@ void babyMaker::InitBabyNtuple () {
   HLT_DoubleMu = -999;   
   HLT_Photons = -999;   
   HLT_ht350prescale = -999;
+  HLT_ht475prescale = -999;
+  HLT_ht600prescale = -999;
   nlep = -999;
   nisoTrack = -999;
   nPFLep5LowMT = -999;
