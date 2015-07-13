@@ -87,14 +87,19 @@ public :
    Int_t           Flag_goodVertices;
    Int_t           Flag_eeBadScFilter;
    Int_t           Flag_METFilters;
+   Int_t           HLT_HT800;
    Int_t           HLT_HT900;
    Int_t           HLT_MET170;
+   Int_t           HLT_ht350met100;
    Int_t           HLT_ht350met120;
    Int_t           HLT_SingleMu;   
    Int_t           HLT_DoubleEl;   
    Int_t           HLT_MuEG;   
    Int_t           HLT_DoubleMu;   
    Int_t           HLT_Photons;   
+   Int_t           HLT_ht350prescale;   
+   Int_t           HLT_ht475prescale;   
+   Int_t           HLT_ht600prescale;   
    Int_t           nlep;
    Float_t         lep_pt[50];   //[nlep]
    Float_t         lep_eta[50];   //[nlep]
@@ -327,14 +332,19 @@ public :
    TBranch        *b_Flag_goodVertices;   //!
    TBranch        *b_Flag_eeBadScFilter;   //!
    TBranch        *b_Flag_METFilters;   //!
+   TBranch        *b_HLT_HT800;   //!
    TBranch        *b_HLT_HT900;   //!
    TBranch        *b_HLT_MET170;   //!
+   TBranch        *b_HLT_ht350met100;   //!
    TBranch        *b_HLT_ht350met120;   //!
    TBranch        *b_HLT_SingleMu;   //!
    TBranch        *b_HLT_DoubleEl;   //!
    TBranch        *b_HLT_MuEG;   //!
    TBranch        *b_HLT_DoubleMu;   //!
    TBranch        *b_HLT_Photons;   //!
+   TBranch        *b_HLT_ht350prescale;   //!
+   TBranch        *b_HLT_ht475prescale;   //!
+   TBranch        *b_HLT_ht600prescale;   //!
    TBranch        *b_nlep;   //!
    TBranch        *b_lep_pt;   //!
    TBranch        *b_lep_eta;   //!
@@ -626,14 +636,19 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("Flag_goodVertices", &Flag_goodVertices, &b_Flag_goodVertices);
    fChain->SetBranchAddress("Flag_eeBadScFilter", &Flag_eeBadScFilter, &b_Flag_eeBadScFilter);
    fChain->SetBranchAddress("Flag_METFilters", &Flag_METFilters, &b_Flag_METFilters);
+   fChain->SetBranchAddress("HLT_HT800", &HLT_HT800, &b_HLT_HT800);
    fChain->SetBranchAddress("HLT_HT900", &HLT_HT900, &b_HLT_HT900);
    fChain->SetBranchAddress("HLT_MET170", &HLT_MET170, &b_HLT_MET170);
+   fChain->SetBranchAddress("HLT_ht350met100", &HLT_ht350met100, &b_HLT_ht350met100);
    fChain->SetBranchAddress("HLT_ht350met120", &HLT_ht350met120, &b_HLT_ht350met120);
    fChain->SetBranchAddress("HLT_SingleMu", &HLT_SingleMu, &b_HLT_SingleMu);
    fChain->SetBranchAddress("HLT_DoubleEl", &HLT_DoubleEl, &b_HLT_DoubleEl);
    fChain->SetBranchAddress("HLT_MuEG", &HLT_MuEG, &b_HLT_MuEG);
    fChain->SetBranchAddress("HLT_DoubleMu", &HLT_DoubleMu, &b_HLT_DoubleMu);
    fChain->SetBranchAddress("HLT_Photons", &HLT_Photons, &b_HLT_Photons);
+   fChain->SetBranchAddress("HLT_ht350prescale", &HLT_ht350prescale, &b_HLT_ht350prescale);
+   fChain->SetBranchAddress("HLT_ht475prescale", &HLT_ht475prescale, &b_HLT_ht475prescale);
+   fChain->SetBranchAddress("HLT_ht600prescale", &HLT_ht600prescale, &b_HLT_ht600prescale);
    fChain->SetBranchAddress("nlep", &nlep, &b_nlep);
    fChain->SetBranchAddress("lep_pt", lep_pt, &b_lep_pt);
    fChain->SetBranchAddress("lep_eta", lep_eta, &b_lep_eta);
