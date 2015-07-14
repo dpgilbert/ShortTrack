@@ -117,9 +117,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       jetcorr_filenames_pfL1FastJetL2L3.clear();
 
       // files for Phys14 MC  
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PHYS14_V4_MC_L1FastJet_AK4PFchs.txt");
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PHYS14_V4_MC_L2Relative_AK4PFchs.txt");
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PHYS14_V4_MC_L3Absolute_AK4PFchs.txt");
+      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx50_MC_L1FastJet_AK4PFchs.txt");
+      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx50_MC_L2Relative_AK4PFchs.txt");
+      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx50_MC_L3Absolute_AK4PFchs.txt");
 
       jet_corrector_pfL1FastJetL2L3  = makeJetCorrector(jetcorr_filenames_pfL1FastJetL2L3);
     }
@@ -127,7 +127,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
-    //for( unsigned int event = 0; event < 1000 ++event) {
+    //for( unsigned int event = 0; event < 1000; ++event) {
 
       // Get Event Content
       tree->LoadTree(event);
