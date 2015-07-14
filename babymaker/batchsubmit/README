@@ -48,7 +48,7 @@ the submission log should be in submit_logs
 4) To verify that jobs ran and produced all the output files, first run sweepRoot to check all output root files.
 
 > git clone git@github.com:cmstas/NtupleTools.git
-> cd NtupleTools/condorMergingTools
+> cd NtupleTools/condorMergingTools/libC
 > make
 > ./sweepRoot -b -o "mt2" /hadoop/cms/store/user/${USER}/mt2babies/<BABYDIRS>/*.root
 
