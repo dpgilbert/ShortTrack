@@ -35,7 +35,7 @@ TAG="V00-01-00_50ns"
 # W+JETS
 #
 
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_50ns/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/V07-04-03/ ${TAG}_wjets_amcnlo
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_50ns/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/V07-04-03_mergeV2/ ${TAG}_wjets_amcatnlo
 
 
 #
