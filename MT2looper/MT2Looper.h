@@ -69,6 +69,7 @@ class MT2Looper {
   std::vector<SR> InclusiveRegions;
   SR SRBase;
   SR SRNoCut;
+  TH1D* h_nvtx_weights_;
 };
 
 #endif
