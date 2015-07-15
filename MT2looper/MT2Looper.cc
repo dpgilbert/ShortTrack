@@ -651,6 +651,9 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
 void MT2Looper::fillHistosSRBase() {
 
+  // trigger requirement on data
+  if (t.isData && !(t.HLT_HT800 || t.HLT_ht350met100)) return;
+  
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
@@ -667,6 +670,9 @@ void MT2Looper::fillHistosSRBase() {
 
 void MT2Looper::fillHistosInclusive() {
 
+  // trigger requirement on data
+  if (t.isData && !(t.HLT_HT800 || t.HLT_ht350met100)) return;
+  
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
@@ -694,6 +700,9 @@ void MT2Looper::fillHistosInclusive() {
 
 void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::string& suffix) {
 
+  // trigger requirement on data
+  if (t.isData && !(t.HLT_HT800 || t.HLT_ht350met100)) return;
+  
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
@@ -723,6 +732,9 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 // hists for single lepton control region
 void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suffix) {
 
+  // trigger requirement on data
+  if (t.isData && !(t.HLT_HT800 || t.HLT_ht350met100)) return;
+  
   // first fill base region
   std::map<std::string, float> valuesBase;
   valuesBase["deltaPhiMin"] = t.deltaPhiMin;
@@ -767,6 +779,9 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
 
   if (t.ngamma==0) return;
 
+  // trigger requirement on data
+  if (t.isData && !t.HLT_Photons) return;
+  
   bool passSieie = t.gamma_idCutBased[0] ? true : false; // just deal with the standard case now. Worry later about sideband in sieie
 
   // fill hists
@@ -842,6 +857,9 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
 
   if (t.nlep!=2) return;
 
+  // trigger requirement on data
+  if (t.isData && !(t.HLT_DoubleEl || t.HLT_DoubleMu)) return;
+  
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.zll_deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
@@ -883,6 +901,9 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
   if (t.nlep!=1) return;
   if (!abs(t.lep_pdgId[0])==13) return; //muon only
 
+  // trigger requirement on data
+  if (t.isData && !t.HLT_SingleMu) return;
+  
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.rl_deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.rl_diffMetMht/t.rl_met_pt;
