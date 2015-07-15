@@ -14,7 +14,9 @@
 #include "TBenchmark.h"
 #include "TMath.h"
 
+// Tools
 #include "../Tools/utils.h"
+#include "../Tools/dorky/dorky.h"
 
 // header
 #include "MT2Looper.h"
@@ -25,6 +27,7 @@
 
 using namespace std;
 using namespace mt2;
+using namespace duplicate_removal;
 
 class mt2tree;
 class SR;
@@ -282,14 +285,15 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       }
 
       //---------------------
-      // skip duplicates -- will need this eventually
+      // skip duplicates -- needed when running on mutiple streams in data
       //---------------------
-      //if( t.isData ) {
-      //  DorkyEventIdentifier id = {stopt.run(), stopt.event(), stopt.lumi() };
-      //  if (is_duplicate(id, already_seen) ){
-      //    continue;
-      //  }
-      //}
+      if( t.isData ) {
+	DorkyEventIdentifier id(t.run, t.evt, t.lumi);
+	if (is_duplicate(id) ){
+	  ++nDuplicates;
+	  continue;
+	}
+      }
 
       //---------------------
       // basic event selection and cleaning

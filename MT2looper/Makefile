@@ -42,7 +42,7 @@ CORESOURCES = $(wildcard ../MT2CORE/*.cc) $(wildcard ../MT2CORE/MT2/*.cc) $(wild
 COREOBJECTS = $(CORESOURCES:.cc=.o) 
 CORELIB = libMT2LooperCORE.so
 
-TOOLSSOURCES = $(wildcard ../Tools/*.cc) $(wildcard ../Tools/MT2/*.cc)
+TOOLSSOURCES = $(wildcard ../Tools/*.cc) $(wildcard ../Tools/MT2/*.cc) $(wildcard ../Tools/dorky/*.cc)
 TOOLSOBJECTS = $(TOOLSSOURCES:.cc=.o)
 TOOLSLIB = libMT2LooperTools.so
 
