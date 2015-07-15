@@ -51,7 +51,7 @@ bool applyWeights = false;
 // turn on to enable plots of MT2 with systematic variations applied. applyWeights should be true
 bool doSystVariationPlots = false;
 // turn on to apply Nvtx reweighting to MC
-bool doNvtxRewight = false;
+bool doNvtxReweight = false;
 
 MT2Looper::MT2Looper(){
 
@@ -247,7 +247,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
 
   h_nvtx_weights_ = 0;
-  if (doNvtxRewight) {
+  if (doNvtxReweight) {
     TFile* f_weights = new TFile("zjets_nvtx_hists.root");
     TH1D* h_nvtx_weights_temp = (TH1D*) f_weights->Get("h_nVert_ratio");
     outfile_->cd();
@@ -349,19 +349,24 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      const float lumi = 4.;
-      evtweight_ = t.evt_scale1fb * lumi;
-      if (!t.isData && applyWeights) evtweight_ *= t.weight_lepsf * t.weight_btagsf * t.weight_isr * t.weight_pu;
+      //      const float lumi = 4.;
+      const float lumi = 1.97e-2;
+      evtweight_ = 1.;
 
-      // get pu weight from hist, restrict range to nvtx 4-31
-      if (!t.isData && doNvtxRewight) {
-	int nvtx_input = t.nVert;
-	if (t.nVert > 31) nvtx_input = 31;
-	if (t.nVert < 4) nvtx_input = 4;
-	float puWeight = h_nvtx_weights_->GetBinContent(h_nvtx_weights_->FindBin(nvtx_input));
-	evtweight_ *= puWeight;
-      }
-      
+      // apply relevant weights to MC
+      if (!t.isData) {
+	evtweight_ = t.evt_scale1fb * lumi;
+	if (applyWeights) evtweight_ *= t.weight_lepsf * t.weight_btagsf * t.weight_isr * t.weight_pu;
+	// get pu weight from hist, restrict range to nvtx 4-31
+	if (doNvtxReweight) {
+	  int nvtx_input = t.nVert;
+	  if (t.nVert > 31) nvtx_input = 31;
+	  if (t.nVert < 4) nvtx_input = 4;
+	  float puWeight = h_nvtx_weights_->GetBinContent(h_nvtx_weights_->FindBin(nvtx_input));
+	  evtweight_ *= puWeight;
+	}
+      } // !isData
+
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
       plot1D("h_mt2",       t.mt2,       evtweight_, h_1d_global, ";M_{T2} [GeV]", 80, 0, 800);
 
