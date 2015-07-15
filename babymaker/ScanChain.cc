@@ -45,7 +45,7 @@ using namespace tas;
 // turn on to add debugging statements
 const bool verbose = false;
 // turn on to apply JEC from text files
-const bool applyJECfromFile = false;
+const bool applyJECfromFile = true;
 // turn on to save prunedGenParticle collection
 const bool saveGenParticles = false;
 // turn on to apply trigger cuts to ntuples -> OR of all triggers used
@@ -71,12 +71,17 @@ inline bool sortByValue(const std::pair<int,float>& pair1, const std::pair<int,f
 
 //--------------------------------------------------------------------
 
-void babyMaker::ScanChain(TChain* chain, std::string baby_name){
+void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
   bmark->Start("benchmark");
 
+  if (bx != 25 && bx != 50) {
+    cout << "ERROR: invalid value for bx: " << bx << ".  Exiting" << endl;
+    return;
+  }
+  
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
   const char* json_file = "jsons/json_DCSONLY_Run2015B_snt_130715.txt";
@@ -85,6 +90,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     set_goodrun_file(json_file);
   }
 
+  if (baby_name.find("data_Run2015") != std::string::npos) {
+    isDataFromFileName = true;
+    cout << "running on DATA, based on file name" << endl;
+  } else {
+    isDataFromFileName = false;
+    cout << "running on MC, based on file name" << endl;
+  }
+  
   // File Loop
   int nDuplicates = 0;
   int nEvents = chain->GetEntries();
@@ -113,13 +126,25 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     std::vector<std::string> jetcorr_filenames_pfL1FastJetL2L3;
     FactorizedJetCorrector *jet_corrector_pfL1FastJetL2L3;
 
-    if (applyJECfromFile) {
+    if (!isDataFromFileName && applyJECfromFile) {
       jetcorr_filenames_pfL1FastJetL2L3.clear();
 
-      // files for Phys14 MC  
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx50_MC_L1FastJet_AK4PFchs.txt");
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx50_MC_L2Relative_AK4PFchs.txt");
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx50_MC_L3Absolute_AK4PFchs.txt");
+      // files for RunIISpring15 MC
+      if (!isDataFromFileName && (bx == 50)) {
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx50_MC_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx50_MC_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx50_MC_L3Absolute_AK4PFchs.txt");
+      }
+      else if (!isDataFromFileName && (bx == 25)) {
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx25_MC_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx25_MC_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx25_MC_L3Absolute_AK4PFchs.txt");
+      }
+
+      cout << "applying JEC from the following files:" << endl;
+      for (unsigned int ifile = 0; ifile < jetcorr_filenames_pfL1FastJetL2L3.size(); ++ifile) {
+	cout << "   " << jetcorr_filenames_pfL1FastJetL2L3.at(ifile) << endl;
+      }
 
       jet_corrector_pfL1FastJetL2L3  = makeJetCorrector(jetcorr_filenames_pfL1FastJetL2L3);
     }
@@ -141,6 +166,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       InitBabyNtuple();
 
       isData = cms3.evt_isRealData();
+      // sanity check on whether this is data
+      if (bool(isData) != isDataFromFileName) {
+	cout << "ERROR: file name and content disagree on whether this is real data!! Exiting" << endl;
+	return;
+      }
 
       if (verbose) cout << "before trigger" << endl;
 
@@ -850,7 +880,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
 	LorentzVector pfjet_p4_cor = cms3.pfjets_p4().at(iJet);
 
-	if (applyJECfromFile) {
+	if (!isData && applyJECfromFile) {
 
 	  // get uncorrected jet p4 to use as input for corrections
 	  LorentzVector pfjet_p4_uncor = cms3.pfjets_p4().at(iJet) * cms3.pfjets_undoJEC().at(iJet);

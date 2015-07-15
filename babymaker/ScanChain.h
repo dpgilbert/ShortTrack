@@ -26,7 +26,7 @@ class babyMaker {
     delete BabyTree_;
   };
 
-  void ScanChain(TChain*, std::string = "testSample");
+  void ScanChain(TChain*, std::string = "testSample", int bx = 50);
 
   void MakeBabyNtuple(const char *);
   void InitBabyNtuple();
@@ -40,6 +40,8 @@ class babyMaker {
 
   TH1D* count_hist_;
 
+  bool isDataFromFileName;
+  
   //baby ntuple variables
 
   Int_t           run;

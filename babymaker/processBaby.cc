@@ -151,6 +151,7 @@ int main(int argc, char **argv) {
   else if (infile.Contains("SMS-T1qqqq"))                            sample = Form("T1qqqq_%s",          outfileid.Data());
   else if (infile.Contains("SMS-T1bbbb"))                            sample = Form("T1bbbb_%s",          outfileid.Data());
   //Data
+  else if (infile.Contains("Run2015B"))                            sample = Form("data_Run2015B_%s",          outfileid.Data());
   // //single mu-had
   // else if (infile.Contains("MuHad_Run2012A-recover-06Aug2012-v1_AOD"))          sample =  Form("MuHad2012A_recover06Aug2012v1V532_%s",     outfileid.Data());
   // else if (infile.Contains("MuHad_Run2012A-13Jul2012-v1_AOD"))                  sample =  Form("MuHad2012A_13Jul2012v1V532_%s",            outfileid.Data());
@@ -194,11 +195,27 @@ int main(int argc, char **argv) {
 
   std::cout<<"sample is "<<sample<<std::endl;
 
+  // get bx value (for JEC etc)
+  int bx = 0;
+  if (infile.Contains("data")) {
+    if (infile.Contains("Run2015B")) bx = 50;
+  }
+  else {
+    if (infile.Contains("50ns")) bx = 50;
+    else if (infile.Contains("25ns")) bx = 25;
+  }
+
+  if (bx == 0) {
+    std::cout << "ERROR: couldn't figure out bx for sample!! Exiting" << std::endl;
+    return 3;
+  }
+  else std::cout << "found bx value: " << bx << std::endl;
+  
   //--------------------------------
   // run
   //--------------------------------
   
   babyMaker *looper = new babyMaker();
-  looper->ScanChain(chain, sample); 
+  looper->ScanChain(chain, sample, bx); 
   return 0;
 }
