@@ -183,6 +183,15 @@ public :
    Float_t         zll_phi;
    Float_t         zll_ht;
    Float_t         zll_minMTBMet;
+   Float_t         zllmt_mt2;
+   Float_t         zllmt_deltaPhiMin;
+   Float_t         zllmt_diffMetMht;
+   Float_t         zllmt_met_pt;
+   Float_t         zllmt_met_phi;
+   Float_t         zllmt_mht_pt;
+   Float_t         zllmt_mht_phi;
+   Float_t         zllmt_ht;
+   Float_t         zllmt_mt;
    Float_t         rl_mt2;
    Float_t         rl_met_pt;
    Float_t         rl_met_phi;
@@ -215,6 +224,20 @@ public :
    Int_t           genLep_status[10];   //[ngenLep]
    Float_t         genLep_charge[10];   //[ngenLep]
    Int_t           genLep_sourceId[10];   //[ngenLep]
+   Int_t           ngenStat23;
+   Float_t         genStat23_pt[10];   //[ngenStat23]
+   Float_t         genStat23_eta[10];   //[ngenStat23]
+   Float_t         genStat23_phi[10];   //[ngenStat23]
+   Float_t         genStat23_mass[10];   //[ngenStat23]
+   Int_t           genStat23_pdgId[10];   //[ngenStat23]
+   Int_t           genStat23_status[10];   //[ngenStat23]
+   Float_t         genStat23_charge[10];   //[ngenStat23]
+   Int_t           genStat23_sourceId[10];   //[ngenStat23]
+   Int_t           ngenGamma;
+   Float_t         genGamma_pt[10];   //[ngenGamma]
+   Float_t         genGamma_eta[10];   //[ngenGamma]
+   Float_t         genGamma_phi[10];   //[ngenGamma]
+   Int_t           genGamma_motherId[10];   //[ngenGamma]
    Int_t           ngenLepFromTau;
    Float_t         genLepFromTau_pt[10];   //[ngenLepFromTau]
    Float_t         genLepFromTau_eta[10];   //[ngenLepFromTau]
@@ -428,6 +451,15 @@ public :
    TBranch        *b_zll_phi;
    TBranch        *b_zll_ht;
    TBranch        *b_zll_minMTBMet;
+   TBranch        *b_zllmt_mt2;
+   TBranch        *b_zllmt_deltaPhiMin;
+   TBranch        *b_zllmt_diffMetMht;
+   TBranch        *b_zllmt_met_pt;
+   TBranch        *b_zllmt_met_phi;
+   TBranch        *b_zllmt_mht_pt;
+   TBranch        *b_zllmt_mht_phi;
+   TBranch        *b_zllmt_ht;
+   TBranch        *b_zllmt_mt;
    TBranch        *b_rl_mt2;
    TBranch        *b_rl_met_pt;
    TBranch        *b_rl_met_phi;
@@ -460,6 +492,20 @@ public :
    TBranch        *b_genLep_status;   //!
    TBranch        *b_genLep_charge;   //!
    TBranch        *b_genLep_sourceId;   //!
+   TBranch        *b_ngenStat23;   //!
+   TBranch        *b_genStat23_pt;   //!
+   TBranch        *b_genStat23_eta;   //!
+   TBranch        *b_genStat23_phi;   //!
+   TBranch        *b_genStat23_mass;   //!
+   TBranch        *b_genStat23_pdgId;   //!
+   TBranch        *b_genStat23_status;   //!
+   TBranch        *b_genStat23_charge;   //!
+   TBranch        *b_genStat23_sourceId;   //!
+   TBranch        *b_ngenGamma;   //!
+   TBranch        *b_genGamma_pt;   //!
+   TBranch        *b_genGamma_eta;   //!
+   TBranch        *b_genGamma_phi;   //!
+   TBranch        *b_genGamma_motherId;   //!
    TBranch        *b_ngenLepFromTau;   //!
    TBranch        *b_genLepFromTau_pt;   //!
    TBranch        *b_genLepFromTau_eta;   //!
@@ -732,6 +778,15 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("zll_phi", &zll_phi, &b_zll_phi);
    fChain->SetBranchAddress("zll_ht", &zll_ht, &b_zll_ht);
    fChain->SetBranchAddress("zll_minMTBMet", &zll_minMTBMet, &b_zll_minMTBMet);
+   fChain->SetBranchAddress("zllmt_mt2", &zllmt_mt2, &b_zllmt_mt2);
+   fChain->SetBranchAddress("zllmt_deltaPhiMin", &zllmt_deltaPhiMin, &b_zllmt_deltaPhiMin);
+   fChain->SetBranchAddress("zllmt_diffMetMht", &zllmt_diffMetMht, &b_zllmt_diffMetMht);
+   fChain->SetBranchAddress("zllmt_met_pt", &zllmt_met_pt, &b_zllmt_met_pt);
+   fChain->SetBranchAddress("zllmt_met_phi", &zllmt_met_phi, &b_zllmt_met_phi);
+   fChain->SetBranchAddress("zllmt_mht_pt", &zllmt_mht_pt, &b_zllmt_mht_pt);
+   fChain->SetBranchAddress("zllmt_mht_phi", &zllmt_mht_phi, &b_zllmt_mht_phi);
+   fChain->SetBranchAddress("zllmt_ht", &zllmt_ht, &b_zllmt_ht);
+   fChain->SetBranchAddress("zllmt_mt", &zllmt_mt, &b_zllmt_mt);
    fChain->SetBranchAddress("rl_mt2", &rl_mt2, &b_rl_mt2);
    fChain->SetBranchAddress("rl_met_pt", &rl_met_pt, &b_rl_met_pt);
    fChain->SetBranchAddress("rl_met_phi", &rl_met_phi, &b_rl_met_phi);
@@ -764,6 +819,20 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("genLep_status", genLep_status, &b_genLep_status);
    fChain->SetBranchAddress("genLep_charge", genLep_charge, &b_genLep_charge);
    fChain->SetBranchAddress("genLep_sourceId", genLep_sourceId, &b_genLep_sourceId);
+   fChain->SetBranchAddress("ngenStat23", &ngenStat23, &b_ngenStat23);
+   fChain->SetBranchAddress("genStat23_pt", genStat23_pt, &b_genStat23_pt);
+   fChain->SetBranchAddress("genStat23_eta", genStat23_eta, &b_genStat23_eta);
+   fChain->SetBranchAddress("genStat23_phi", genStat23_phi, &b_genStat23_phi);
+   fChain->SetBranchAddress("genStat23_mass", genStat23_mass, &b_genStat23_mass);
+   fChain->SetBranchAddress("genStat23_pdgId", genStat23_pdgId, &b_genStat23_pdgId);
+   fChain->SetBranchAddress("genStat23_status", genStat23_status, &b_genStat23_status);
+   fChain->SetBranchAddress("genStat23_charge", genStat23_charge, &b_genStat23_charge);
+   fChain->SetBranchAddress("genStat23_sourceId", genStat23_sourceId, &b_genStat23_sourceId);
+   fChain->SetBranchAddress("ngenGamma", &ngenGamma, &b_ngenGamma);
+   fChain->SetBranchAddress("genGamma_pt", genGamma_pt, &b_genGamma_pt);
+   fChain->SetBranchAddress("genGamma_eta", genGamma_eta, &b_genGamma_eta);
+   fChain->SetBranchAddress("genGamma_phi", genGamma_phi, &b_genGamma_phi);
+   fChain->SetBranchAddress("genGamma_motherId", genGamma_motherId, &b_genGamma_motherId);
    fChain->SetBranchAddress("ngenLepFromTau", &ngenLepFromTau, &b_ngenLepFromTau);
    fChain->SetBranchAddress("genLepFromTau_pt", genLepFromTau_pt, &b_genLepFromTau_pt);
    fChain->SetBranchAddress("genLepFromTau_eta", genLepFromTau_eta, &b_genLepFromTau_eta);

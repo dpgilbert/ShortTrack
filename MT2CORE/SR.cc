@@ -17,11 +17,11 @@ void SR::SetName(std::string sr_name){
 }
 
 void SR::SetVar(std::string var_name, float lower_bound, float upper_bound){
- bins_[var_name] = std::pair<float, float>(lower_bound, upper_bound);
+  bins_[var_name] = std::pair<float, float>(lower_bound, upper_bound);
 }
 
 void SR::SetVarCRSL(std::string var_name, float lower_bound, float upper_bound){
- binsCRSL_[var_name] = std::pair<float, float>(lower_bound, upper_bound);
+  binsCRSL_[var_name] = std::pair<float, float>(lower_bound, upper_bound);
 }
 
 void SR::SetMT2Bins(int nbins, float* bins){
