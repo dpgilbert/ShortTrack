@@ -270,6 +270,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       // gen block -- for MC only
       ngenPart = 0;
       ngenLep = 0;
+      ngenStat23 = 0;
+      ngenGamma = 0;
       ngenTau = 0;
       ngenLepFromTau = 0;
       if (!isData) {
@@ -292,12 +294,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	if (verbose) cout << "before gen particles" << endl;
 
 	//GEN PARTICLES
-	ngenPart = 0;
-	ngenLep = 0;
-	ngenStat23 = 0;
-	ngenGamma = 0;
-	ngenTau = 0;
-	ngenLepFromTau = 0;
 	LorentzVector recoil(0,0,0,0);
 	int nHardScatter = 0;
 	for(unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++){
@@ -1930,6 +1926,11 @@ void babyMaker::InitBabyNtuple () {
   ntau = -999;
   ngamma = -999;
   ngenPart = -999;
+  ngenLep = -999;
+  ngenStat23 = -999;
+  ngenGamma = -999;
+  ngenTau = -999;
+  ngenLepFromTau = -999;
   njet = -999;
   gamma_mt2 = -999.0;
   gamma_nJet30 = -999;
@@ -2112,14 +2113,14 @@ void babyMaker::InitBabyNtuple () {
   }
 
   for(int i=0; i < max_ngenLepFromTau; i++){
-      genLepFromTau_pt[i] = -999;
-      genLepFromTau_eta[i] = -999;
-      genLepFromTau_phi[i] = -999;
-      genLepFromTau_mass[i] = -999;
-      genLepFromTau_pdgId[i] = -999;
-      genLepFromTau_status[i] = -999;
-      genLepFromTau_charge[i] = -999;
-      genLepFromTau_sourceId[i] = -999;
+    genLepFromTau_pt[i] = -999;
+    genLepFromTau_eta[i] = -999;
+    genLepFromTau_phi[i] = -999;
+    genLepFromTau_mass[i] = -999;
+    genLepFromTau_pdgId[i] = -999;
+    genLepFromTau_status[i] = -999;
+    genLepFromTau_charge[i] = -999;
+    genLepFromTau_sourceId[i] = -999;
   }
 
   for(int i=0; i < max_njet; i++){

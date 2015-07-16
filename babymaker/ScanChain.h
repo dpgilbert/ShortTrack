@@ -287,7 +287,7 @@ class babyMaker {
   Int_t           genLep_sourceId[max_ngenLep];   //[ngenLep]
 
 //----- GEN STATUS 23
-  static const int max_ngenStat23 = 10;
+  static const int max_ngenStat23 = 30;
   Int_t           ngenStat23;
   Float_t         genStat23_pt[max_ngenStat23];   //[ngenStat23]
   Float_t         genStat23_eta[max_ngenStat23];   //[ngenStat23]
