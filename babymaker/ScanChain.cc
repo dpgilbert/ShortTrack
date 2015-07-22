@@ -1052,6 +1052,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       nJet40 = 0;
       nBJet20 = 0;
       nBJet25 = 0;
+      nBJet30 = 0;
       nBJet40 = 0;
       minMTBMet = 999999.;
       jet1_pt = 0.;
@@ -1061,6 +1062,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       gamma_nJet40 = 0;
       gamma_nBJet20 = 0;
       gamma_nBJet25 = 0;
+      gamma_nBJet30 = 0;
       gamma_nBJet40 = 0;
       gamma_minMTBMet = 999999.;
       gamma_jet1_pt = 0.;
@@ -1161,8 +1163,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 		}
 	      }
 	      if (jet_pt[njet] > 25.0) nBJet25++; 
-	      if (jet_pt[njet] > 40.0) {
-		nBJet40++; 
+	      if (jet_pt[njet] > 30.0) {
+		nBJet30++; 
+		if (jet_pt[njet] > 40.0) nBJet40++; 
 		float mt = MT(jet_pt[njet],jet_phi[njet],met_pt,met_phi);
 		if (mt < minMTBMet) minMTBMet = mt;
 		if (nlep == 2) {
@@ -1173,7 +1176,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 		  float rlmt = MT(jet_pt[njet],jet_phi[njet],rl_met_pt,rl_met_phi);
 		  if (rlmt < rl_minMTBMet) rl_minMTBMet = rlmt;
 		}
-	      } // pt 40
+	      } // pt 30
 	    } // pass med btag
 	    else if (!isData && applyDummyWeights) { // fail med btag -- needed for SF event weights
 	      float eff = getBtagEff(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet]);
@@ -1222,11 +1225,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	      if(cms3.pfjets_pfCombinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.814) { //CSVv2IVFM
 		gamma_nBJet20++; 
 		if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++; 
-		if (p4sCorrJets.at(iJet).pt() > 40.0) {
-		  gamma_nBJet40++; 
+		if (p4sCorrJets.at(iJet).pt() > 30.0) {
+		  gamma_nBJet30++;
+		  if (p4sCorrJets.at(iJet).pt() > 40.0) gamma_nBJet40++; 
 		  float mt = MT( p4sCorrJets.at(iJet).pt(),p4sCorrJets.at(iJet).phi(),gamma_met_pt,gamma_met_phi);
 		  if (mt < gamma_minMTBMet) gamma_minMTBMet = mt;	 
-		} // pt40
+		} // pt30
 	      } // pass med btag  
 	    } // not overlap with photon
 	  } // pt 20 eta 2.5 
@@ -1577,6 +1581,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("nJet40", &nJet40 );
   BabyTree_->Branch("nBJet20", &nBJet20 );
   BabyTree_->Branch("nBJet25", &nBJet25 );
+  BabyTree_->Branch("nBJet30", &nBJet30 );
   BabyTree_->Branch("nBJet40", &nBJet40 );
   BabyTree_->Branch("nMuons10", &nMuons10 );
   BabyTree_->Branch("nElectrons10", &nElectrons10 );
@@ -1700,6 +1705,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("gamma_nJet40", &gamma_nJet40 );
   BabyTree_->Branch("gamma_nBJet20", &gamma_nBJet20 );
   BabyTree_->Branch("gamma_nBJet25", &gamma_nBJet25 );
+  BabyTree_->Branch("gamma_nBJet30", &gamma_nBJet30 );
   BabyTree_->Branch("gamma_nBJet40", &gamma_nBJet40 );
   BabyTree_->Branch("gamma_ht", &gamma_ht );
   BabyTree_->Branch("gamma_deltaPhiMin", &gamma_deltaPhiMin );
@@ -1854,6 +1860,7 @@ void babyMaker::InitBabyNtuple () {
   nJet40 = -999;
   nBJet20 = -999;
   nBJet25 = -999;
+  nBJet30 = -999;
   nBJet40 = -999;
   nMuons10 = -999;
   nElectrons10 = -999;
@@ -1937,6 +1944,7 @@ void babyMaker::InitBabyNtuple () {
   gamma_nJet40 = -999;
   gamma_nBJet20 = -999;
   gamma_nBJet25 = -999;
+  gamma_nBJet30 = -999;
   gamma_nBJet40 = -999;
   gamma_ht = -999.0;
   gamma_deltaPhiMin = -999.0;

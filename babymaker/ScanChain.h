@@ -65,6 +65,7 @@ class babyMaker {
   Int_t           nJet40;
   Int_t           nBJet20;
   Int_t           nBJet25;
+  Int_t           nBJet30;
   Int_t           nBJet40;
   Int_t           nMuons10;
   Int_t           nElectrons10;
@@ -213,6 +214,7 @@ class babyMaker {
   Int_t           gamma_nJet40;
   Int_t           gamma_nBJet20;
   Int_t           gamma_nBJet25;
+  Int_t           gamma_nBJet30;
   Int_t           gamma_nBJet40;
   Float_t         gamma_ht;
   Float_t         gamma_deltaPhiMin;
