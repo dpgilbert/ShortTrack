@@ -1149,7 +1149,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	      if (jet_pt[njet] > 40.) nJet40++;
 	    } // pt40
 	    //CSVv2IVFM
-	    if(jet_btagCSV[njet] >= 0.814) {
+	    if(jet_btagCSV[njet] >= 0.890) {
 	      nBJet20++; 
 	      // dummy btag SF
 	      if (!isData && applyDummyWeights) {
@@ -1227,7 +1227,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 		gamma_nJet30++;
 		if (p4sCorrJets.at(iJet).pt() > 40.0) gamma_nJet40++;
 	      } // pt40
-	      if(cms3.pfjets_pfCombinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.814) { //CSVv2IVFM
+	      if(cms3.pfjets_pfCombinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.890) { //CSVv2IVFM
 		gamma_nBJet20++; 
 		if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++; 
 		if (p4sCorrJets.at(iJet).pt() > 30.0) {
