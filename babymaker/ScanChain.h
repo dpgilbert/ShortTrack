@@ -133,13 +133,16 @@ class babyMaker {
   Int_t           HLT_ht350met100;   
   Int_t           HLT_ht350met120;   
   Int_t           HLT_SingleMu;   
+  Int_t           HLT_SingleEl;   
   Int_t           HLT_DoubleEl;   
   Int_t           HLT_MuEG;   
   Int_t           HLT_DoubleMu;   
-  Int_t           HLT_Photons;   
+  Int_t           HLT_Photon165_HE10;   
   Int_t           HLT_ht350prescale;   
   Int_t           HLT_ht475prescale;   
   Int_t           HLT_ht600prescale;   
+  Int_t           HLT_dijet70met120;   
+  Int_t           HLT_dijet55met110;   
 
 //----- LEPTONS
   static const int max_nlep = 50;

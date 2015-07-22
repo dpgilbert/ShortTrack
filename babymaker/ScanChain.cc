@@ -181,8 +181,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       HLT_ht350met100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_NoiseCleaned_v"); 
       HLT_ht350met120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v"); 
 
-      HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu20_v") || passHLTTriggerPattern("HLT_IsoTkMu20_v") ||
-	passHLTTriggerPattern("HLT_IsoMu24_eta2p1_v") || passHLTTriggerPattern("HLT_IsoTkMu24_eta2p1_v"); 
+      HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu17_eta2p1_v") ||
+	passHLTTriggerPattern("HLT_IsoMu20_v") || passHLTTriggerPattern("HLT_IsoMu20_eta2p1_v") ||
+	passHLTTriggerPattern("HLT_IsoTkMu20_v"); 
+      HLT_SingleEl     = passHLTTriggerPattern("HLT_Ele23_WPLoose_Gsf_v") ||
+	passHLTTriggerPattern("HLT_Ele27_eta2p1_WPLoose_Gsf_v") || passHLTTriggerPattern("HLT_Ele32_eta2p1_WPLoose_Gsf_v");
       HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
 	passHLTTriggerPattern("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"); 
       HLT_MuEG         = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
@@ -191,12 +194,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
       HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||
 	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
-      HLT_Photons      = passHLTTriggerPattern("HLT_Photon165_HE10_v"); 
+      HLT_Photon165_HE10 = passHLTTriggerPattern("HLT_Photon165_HE10_v"); 
       HLT_ht350prescale  = passHLTTriggerPattern("HLT_PFHT350_v"); 
       HLT_ht475prescale  = passHLTTriggerPattern("HLT_PFHT475_v"); 
       HLT_ht600prescale  = passHLTTriggerPattern("HLT_PFHT600_v"); 
+      HLT_dijet70met120  = passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_NoiseCleaned_v"); 
+      HLT_dijet55met110  = passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_NoiseCleaned_v"); 
 
-      if (!isData && applyTriggerCuts && !(HLT_HT900 || HLT_ht350met120 || HLT_Photons || HLT_SingleMu 
+      if (!isData && applyTriggerCuts && !(HLT_HT900 || HLT_ht350met120 || HLT_Photon165_HE10 || HLT_SingleMu 
 					   || HLT_DoubleMu || HLT_DoubleEl || HLT_MuEG)) continue;
 
       run  = cms3.evt_run();
@@ -1639,13 +1644,16 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("HLT_ht350met100", &HLT_ht350met100 );
   BabyTree_->Branch("HLT_ht350met120", &HLT_ht350met120 );
   BabyTree_->Branch("HLT_SingleMu", &HLT_SingleMu );
+  BabyTree_->Branch("HLT_SingleEl", &HLT_SingleEl );
   BabyTree_->Branch("HLT_DoubleEl", &HLT_DoubleEl );
   BabyTree_->Branch("HLT_MuEG", &HLT_MuEG );
   BabyTree_->Branch("HLT_DoubleMu", &HLT_DoubleMu );
-  BabyTree_->Branch("HLT_Photons", &HLT_Photons );
+  BabyTree_->Branch("HLT_Photon165_HE10", &HLT_Photon165_HE10 );
   BabyTree_->Branch("HLT_ht350prescale", &HLT_ht350prescale );
   BabyTree_->Branch("HLT_ht475prescale", &HLT_ht475prescale );
   BabyTree_->Branch("HLT_ht600prescale", &HLT_ht600prescale );
+  BabyTree_->Branch("HLT_dijet70met120", &HLT_dijet70met120 );
+  BabyTree_->Branch("HLT_dijet55met110", &HLT_dijet55met110 );
   BabyTree_->Branch("nlep", &nlep, "nlep/I" );
   BabyTree_->Branch("lep_pt", lep_pt, "lep_pt[nlep]/F");
   BabyTree_->Branch("lep_eta", lep_eta, "lep_eta[nlep]/F" );
@@ -1919,13 +1927,16 @@ void babyMaker::InitBabyNtuple () {
   HLT_ht350met100 = -999;
   HLT_ht350met120 = -999;
   HLT_SingleMu = -999;   
+  HLT_SingleEl = -999;   
   HLT_DoubleEl = -999;   
   HLT_MuEG = -999;   
   HLT_DoubleMu = -999;   
-  HLT_Photons = -999;   
+  HLT_Photon165_HE10 = -999;   
   HLT_ht350prescale = -999;
   HLT_ht475prescale = -999;
   HLT_ht600prescale = -999;
+  HLT_dijet70met120 = -999;
+  HLT_dijet55met110 = -999;
   nlep = -999;
   nisoTrack = -999;
   nPFLep5LowMT = -999;
