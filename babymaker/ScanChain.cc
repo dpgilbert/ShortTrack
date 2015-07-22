@@ -539,7 +539,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       for(unsigned int iEl = 0; iEl < cms3.els_p4().size(); iEl++){
         if(cms3.els_p4().at(iEl).pt() < 10.0) continue;
         if(fabs(cms3.els_p4().at(iEl).eta()) > 2.4) continue;
-        if(!electronID(iEl,id_level_t::HAD_veto_v2)) continue;
+        if(!electronID(iEl,id_level_t::HAD_veto_v3)) continue;
         nElectrons10++;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.els_p4().at(iEl).pt()) );
         vec_lep_pt.push_back ( cms3.els_p4().at(iEl).pt());
@@ -553,7 +553,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         vec_lep_tightId.push_back ( eleTightID(iEl,analysis_t::HAD,2) );
         vec_lep_relIso03.push_back (  eleRelIso03(iEl,analysis_t::HAD));
         vec_lep_relIso04.push_back ( 0);
-        vec_lep_miniRelIso.push_back ( elMiniRelIso(iEl) );
+        vec_lep_miniRelIso.push_back ( elMiniRelIsoCMS3_EA(iEl) );
         if (!isData && cms3.els_mc3dr().at(iEl) < 0.2 && cms3.els_mc3idx().at(iEl) != -9999 && abs(cms3.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.els_mc3idx().at(iEl)]);
           vec_lep_mcMatchId.push_back ( momid != 11 ? momid : genPart_grandmotherId[cms3.els_mc3idx().at(iEl)]); // if mother is different store mother, otherwise store grandmother
@@ -587,7 +587,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       for(unsigned int iMu = 0; iMu < cms3.mus_p4().size(); iMu++){
         if(cms3.mus_p4().at(iMu).pt() < 10.0) continue;
         if(fabs(cms3.mus_p4().at(iMu).eta()) > 2.4) continue;
-        if(!muonID(iMu,id_level_t::HAD_loose_v2)) continue;
+        if(!muonID(iMu,id_level_t::HAD_loose_v3)) continue;
         nMuons10++;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.mus_p4().at(iMu).pt()) );
         vec_lep_pt.push_back ( cms3.mus_p4().at(iMu).pt());
@@ -601,7 +601,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         vec_lep_tightId.push_back ( muTightID(iMu,analysis_t::HAD,2) );
         vec_lep_relIso03.push_back ( muRelIso03(iMu,analysis_t::HAD) );
         vec_lep_relIso04.push_back ( muRelIso04(iMu,analysis_t::HAD) );
-        vec_lep_miniRelIso.push_back ( muMiniRelIso(iMu) );
+        vec_lep_miniRelIso.push_back ( muMiniRelIsoCMS3_EA(iMu) );
         if (!isData && cms3.mus_mc3dr().at(iMu) < 0.2 && cms3.mus_mc3idx().at(iMu) != -9999 && abs(cms3.mus_mc3_id().at(iMu)) == 13) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.mus_mc3idx().at(iMu)]);
           vec_lep_mcMatchId.push_back ( momid != 13 ? momid : genPart_grandmotherId[cms3.mus_mc3idx().at(iMu)]); // if mother is different store mother, otherwise store grandmother
