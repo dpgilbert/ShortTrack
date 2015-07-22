@@ -131,9 +131,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 
       // files for RunIISpring15 MC
       if (!isDataFromFileName && (bx == 50)) {
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx50_MC_L1FastJet_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx50_MC_L2Relative_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx50_MC_L3Absolute_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_V5_MC_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_V5_MC_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_V5_MC_L3Absolute_AK4PFchs.txt");
       }
       else if (!isDataFromFileName && (bx == 25)) {
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx25_MC_L1FastJet_AK4PFchs.txt");
