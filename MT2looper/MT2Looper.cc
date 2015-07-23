@@ -16,6 +16,7 @@
 
 // Tools
 #include "../Tools/utils.h"
+#include "../Tools/goodrun.h"
 #include "../Tools/dorky/dorky.h"
 
 // header
@@ -52,6 +53,8 @@ bool applyWeights = false;
 bool doSystVariationPlots = false;
 // turn on to apply Nvtx reweighting to MC
 bool doNvtxReweight = false;
+// turn on to apply json file to data
+bool applyJSON = false;
 
 MT2Looper::MT2Looper(){
 
@@ -247,6 +250,13 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
   outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
 
+  //  const char* json_file = "../babymaker/jsons/combined_golden_dcsOnly_JSON_snt.txt";
+  const char* json_file = "../babymaker/jsons/shilpi_json_snt.txt";
+  if (applyJSON) {
+    cout << "Loading json file: " << json_file << endl;
+    set_goodrun_file(json_file);
+  }
+
   h_nvtx_weights_ = 0;
   if (doNvtxReweight) {
     TFile* f_weights = new TFile("zjets_nvtx_hists.root");
@@ -335,6 +345,8 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       // basic event selection and cleaning
       //---------------------
 
+      if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
+      
       if (t.nVert == 0) continue;
 
       // remove low pt QCD samples 
@@ -351,7 +363,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       //---------------------
       outfile_->cd();
       //      const float lumi = 4.;
-      const float lumi = 1.97e-2;
+      const float lumi = 0.042;
       evtweight_ = 1.;
 
       // apply relevant weights to MC
@@ -767,22 +779,24 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   // trigger requirement on data
   if (t.isData && !(t.HLT_HT800 || t.HLT_ht350met100)) return;
   
-  // only fill base histograms for inclusive lepton case
+  // first fill base region
+  std::map<std::string, float> valuesBase;
+  valuesBase["deltaPhiMin"] = t.deltaPhiMin;
+  valuesBase["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  valuesBase["nlep"]        = t.nLepLowMT;
+  valuesBase["j1pt"]        = t.jet1_pt;
+  valuesBase["j2pt"]        = t.jet2_pt;
+  valuesBase["mt2"]         = t.mt2;
+  valuesBase["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+
+  if (SRBase.PassesSelectionCRSL(valuesBase)) {
+    if(prefix=="crsl") fillHistosSingleLepton(SRBase.crslHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbase", suffix);
+    else if(prefix=="crslmu") fillHistosSingleLepton(SRBase.crslmuHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslmubase", suffix);
+    else if(prefix=="crslel") fillHistosSingleLepton(SRBase.crslelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslelbase", suffix);
+  }
+
+  // only fill wjets/ttbar histograms for inclusive lepton case
   if(prefix=="crsl") {
-
-    // first fill base region
-    std::map<std::string, float> valuesBase;
-    valuesBase["deltaPhiMin"] = t.deltaPhiMin;
-    valuesBase["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
-    valuesBase["nlep"]        = t.nLepLowMT;
-    valuesBase["j1pt"]        = t.jet1_pt;
-    valuesBase["j2pt"]        = t.jet2_pt;
-    valuesBase["mt2"]         = t.mt2;
-    valuesBase["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
-
-    if (SRBase.PassesSelectionCRSL(valuesBase)) {
-      fillHistosSingleLepton(SRBase.crslHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbase", suffix);
-    }
 
     // inclusive regions with btag cuts for wjets/ttbar
     std::map<std::string, float> valuesInc;
@@ -818,8 +832,8 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelectionCRSL(values)){
       if(prefix=="crsl")    fillHistosSingleLepton(SRVec.at(srN).crslHistMap,    SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
-      if(prefix=="crslmu")  fillHistosSingleLepton(SRVec.at(srN).crslmuHistMap,  SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
-      if(prefix=="crslel")  fillHistosSingleLepton(SRVec.at(srN).crslelHistMap,  SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
+      else if(prefix=="crslmu")  fillHistosSingleLepton(SRVec.at(srN).crslmuHistMap,  SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
+      else if(prefix=="crslel")  fillHistosSingleLepton(SRVec.at(srN).crslelHistMap,  SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
       //      break;//control regions are not necessarily orthogonal
     }
   }
