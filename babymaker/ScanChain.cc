@@ -175,11 +175,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       if (verbose) cout << "before trigger" << endl;
 
       //TRIGGER - check first to enable cuts
-      HLT_HT800        = passHLTTriggerPattern("HLT_PFHT800_v");
-      HLT_HT900        = passHLTTriggerPattern("HLT_PFHT900_v");
-      HLT_MET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v"); 
-      HLT_ht350met100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_NoiseCleaned_v"); 
-      HLT_ht350met120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v"); 
+      HLT_PFHT800        = passHLTTriggerPattern("HLT_PFHT800_v");
+      HLT_PFHT900        = passHLTTriggerPattern("HLT_PFHT900_v");
+      HLT_PFMET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v"); 
+      HLT_PFHT350_PFMET100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_NoiseCleaned_v"); 
+      HLT_PFHT350_PFMET120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v"); 
 
       HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu17_eta2p1_v") ||
 	passHLTTriggerPattern("HLT_IsoMu20_v") || passHLTTriggerPattern("HLT_IsoMu20_eta2p1_v") ||
@@ -195,13 +195,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||
 	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
       HLT_Photon165_HE10 = passHLTTriggerPattern("HLT_Photon165_HE10_v"); 
-      HLT_ht350prescale  = passHLTTriggerPattern("HLT_PFHT350_v"); 
-      HLT_ht475prescale  = passHLTTriggerPattern("HLT_PFHT475_v"); 
-      HLT_ht600prescale  = passHLTTriggerPattern("HLT_PFHT600_v"); 
-      HLT_dijet70met120  = passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_NoiseCleaned_v"); 
-      HLT_dijet55met110  = passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_NoiseCleaned_v"); 
+      HLT_PFHT350_Prescale  = passHLTTriggerPattern("HLT_PFHT350_v"); 
+      HLT_PFHT475_Prescale  = passHLTTriggerPattern("HLT_PFHT475_v"); 
+      HLT_PFHT600_Prescale  = passHLTTriggerPattern("HLT_PFHT600_v"); 
+      HLT_DiCentralPFJet70_PFMET120  = passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_NoiseCleaned_v"); 
+      HLT_DiCentralPFJet55_PFMET110  = passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_NoiseCleaned_v"); 
 
-      if (!isData && applyTriggerCuts && !(HLT_HT900 || HLT_ht350met120 || HLT_Photon165_HE10 || HLT_SingleMu 
+      if (!isData && applyTriggerCuts && !(HLT_PFHT900 || HLT_PFHT350_PFMET120 || HLT_Photon165_HE10 || HLT_SingleMu 
 					   || HLT_DoubleMu || HLT_DoubleEl || HLT_MuEG)) continue;
 
       run  = cms3.evt_run();
@@ -972,7 +972,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
 	// note this uses the eta of the jet as stored in CMS3
 	//  chance for small discrepancies if JEC changes direction slightly..
-        if(!isLoosePFJetV2(iJet)) continue;
+	// -- for 74x: don't apply PFJetID for jets with |eta| > 3.0
+	//     after a reco change, the neutral hadron fraction is always very high for those
+        if((fabs(p4sCorrJets.at(iJet).eta()) < 3.0) && !isLoosePFJetV2(iJet)) continue;
 
         passJets.push_back( std::pair<int,float>(iJet, pfjet_p4_cor.pt()) );
 
@@ -996,7 +998,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 
           if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
           if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
-          if(!isLoosePFJetV2(iJet)) continue;
+          if((fabs(p4sCorrJets.at(iJet).eta()) < 3.0) && !isLoosePFJetV2(iJet)) continue;
 
           bool alreadyRemoved = false;
           for(unsigned int j=0; j<removedJets.size(); j++){
@@ -1032,7 +1034,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 
           if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
           if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
-          if(!isLoosePFJetV2(iJet)) continue;
+          if((fabs(p4sCorrJets.at(iJet).eta()) < 3.0) && !isLoosePFJetV2(iJet)) continue;
 
           bool alreadyRemoved = false;
           for(unsigned int j=0; j<removedJetsGamma.size(); j++){
@@ -1125,8 +1127,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	  jet_area[njet] = cms3.pfjets_area().at(iJet);
 	  jet_rawPt[njet] = cms3.pfjets_p4().at(iJet).pt() * cms3.pfjets_undoJEC().at(iJet);
 
-	  if(isTightPFJetV2(iJet))  jet_id[njet] = 3;
-	  else jet_id[njet] = 1; //required to be loose above
+	  if (isTightPFJetV2(iJet)) jet_id[njet] = 3;
+	  else if (isLoosePFJetV2(iJet)) jet_id[njet] = 1;
+	  else jet_id[njet] = 0;
 
 	  jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
 
@@ -1638,22 +1641,22 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("Flag_goodVertices", &Flag_goodVertices );
   BabyTree_->Branch("Flag_eeBadScFilter", &Flag_eeBadScFilter );
   BabyTree_->Branch("Flag_METFilters", &Flag_METFilters );
-  BabyTree_->Branch("HLT_HT800", &HLT_HT800 );
-  BabyTree_->Branch("HLT_HT900", &HLT_HT900 );
-  BabyTree_->Branch("HLT_MET170", &HLT_MET170 );
-  BabyTree_->Branch("HLT_ht350met100", &HLT_ht350met100 );
-  BabyTree_->Branch("HLT_ht350met120", &HLT_ht350met120 );
+  BabyTree_->Branch("HLT_PFHT800", &HLT_PFHT800 );
+  BabyTree_->Branch("HLT_PFHT900", &HLT_PFHT900 );
+  BabyTree_->Branch("HLT_PFMET170", &HLT_PFMET170 );
+  BabyTree_->Branch("HLT_PFHT350_PFMET100", &HLT_PFHT350_PFMET100 );
+  BabyTree_->Branch("HLT_PFHT350_PFMET120", &HLT_PFHT350_PFMET120 );
   BabyTree_->Branch("HLT_SingleMu", &HLT_SingleMu );
   BabyTree_->Branch("HLT_SingleEl", &HLT_SingleEl );
   BabyTree_->Branch("HLT_DoubleEl", &HLT_DoubleEl );
   BabyTree_->Branch("HLT_MuEG", &HLT_MuEG );
   BabyTree_->Branch("HLT_DoubleMu", &HLT_DoubleMu );
   BabyTree_->Branch("HLT_Photon165_HE10", &HLT_Photon165_HE10 );
-  BabyTree_->Branch("HLT_ht350prescale", &HLT_ht350prescale );
-  BabyTree_->Branch("HLT_ht475prescale", &HLT_ht475prescale );
-  BabyTree_->Branch("HLT_ht600prescale", &HLT_ht600prescale );
-  BabyTree_->Branch("HLT_dijet70met120", &HLT_dijet70met120 );
-  BabyTree_->Branch("HLT_dijet55met110", &HLT_dijet55met110 );
+  BabyTree_->Branch("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale );
+  BabyTree_->Branch("HLT_PFHT475_Prescale", &HLT_PFHT475_Prescale );
+  BabyTree_->Branch("HLT_PFHT600_Prescale", &HLT_PFHT600_Prescale );
+  BabyTree_->Branch("HLT_DiCentralPFJet70_PFMET120", &HLT_DiCentralPFJet70_PFMET120 );
+  BabyTree_->Branch("HLT_DiCentralPFJet55_PFMET110", &HLT_DiCentralPFJet55_PFMET110 );
   BabyTree_->Branch("nlep", &nlep, "nlep/I" );
   BabyTree_->Branch("lep_pt", lep_pt, "lep_pt[nlep]/F");
   BabyTree_->Branch("lep_eta", lep_eta, "lep_eta[nlep]/F" );
@@ -1921,22 +1924,22 @@ void babyMaker::InitBabyNtuple () {
   Flag_goodVertices = -999;
   Flag_eeBadScFilter = -999;
   Flag_METFilters = -999;
-  HLT_HT800 = -999;
-  HLT_HT900 = -999;
-  HLT_MET170 = -999;
-  HLT_ht350met100 = -999;
-  HLT_ht350met120 = -999;
+  HLT_PFHT800 = -999;
+  HLT_PFHT900 = -999;
+  HLT_PFMET170 = -999;
+  HLT_PFHT350_PFMET100 = -999;
+  HLT_PFHT350_PFMET120 = -999;
   HLT_SingleMu = -999;   
   HLT_SingleEl = -999;   
   HLT_DoubleEl = -999;   
   HLT_MuEG = -999;   
   HLT_DoubleMu = -999;   
   HLT_Photon165_HE10 = -999;   
-  HLT_ht350prescale = -999;
-  HLT_ht475prescale = -999;
-  HLT_ht600prescale = -999;
-  HLT_dijet70met120 = -999;
-  HLT_dijet55met110 = -999;
+  HLT_PFHT350_Prescale = -999;
+  HLT_PFHT475_Prescale = -999;
+  HLT_PFHT600_Prescale = -999;
+  HLT_DiCentralPFJet70_PFMET120 = -999;
+  HLT_DiCentralPFJet55_PFMET110 = -999;
   nlep = -999;
   nisoTrack = -999;
   nPFLep5LowMT = -999;

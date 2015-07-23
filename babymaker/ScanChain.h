@@ -126,23 +126,23 @@ class babyMaker {
   Int_t           Flag_eeBadScFilter;
   Int_t           Flag_METFilters;
 
-//----- TRIGGER (to be better defined)
-  Int_t           HLT_HT800;   
-  Int_t           HLT_HT900;   
-  Int_t           HLT_MET170;
-  Int_t           HLT_ht350met100;   
-  Int_t           HLT_ht350met120;   
+//----- TRIGGER 
+  Int_t           HLT_PFHT800;   
+  Int_t           HLT_PFHT900;   
+  Int_t           HLT_PFMET170;
+  Int_t           HLT_PFHT350_PFMET100;   
+  Int_t           HLT_PFHT350_PFMET120;   
   Int_t           HLT_SingleMu;   
   Int_t           HLT_SingleEl;   
   Int_t           HLT_DoubleEl;   
   Int_t           HLT_MuEG;   
   Int_t           HLT_DoubleMu;   
   Int_t           HLT_Photon165_HE10;   
-  Int_t           HLT_ht350prescale;   
-  Int_t           HLT_ht475prescale;   
-  Int_t           HLT_ht600prescale;   
-  Int_t           HLT_dijet70met120;   
-  Int_t           HLT_dijet55met110;   
+  Int_t           HLT_PFHT350_Prescale;   
+  Int_t           HLT_PFHT475_Prescale;   
+  Int_t           HLT_PFHT600_Prescale;   
+  Int_t           HLT_DiCentralPFJet70_PFMET120;
+  Int_t           HLT_DiCentralPFJet55_PFMET110;
 
 //----- LEPTONS
   static const int max_nlep = 50;
