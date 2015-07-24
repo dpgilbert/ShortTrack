@@ -126,16 +126,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
     std::vector<std::string> jetcorr_filenames_pfL1FastJetL2L3;
     FactorizedJetCorrector *jet_corrector_pfL1FastJetL2L3;
 
-    if (!isDataFromFileName && applyJECfromFile) {
+    if (applyJECfromFile) {
       jetcorr_filenames_pfL1FastJetL2L3.clear();
 
       // files for RunIISpring15 MC
-      if (!isDataFromFileName && (bx == 50)) {
+      if (bx == 50) {
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_V5_MC_L1FastJet_AK4PFchs.txt");
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_V5_MC_L2Relative_AK4PFchs.txt");
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_V5_MC_L3Absolute_AK4PFchs.txt");
       }
-      else if (!isDataFromFileName && (bx == 25)) {
+      else if (bx == 25) {
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx25_MC_L1FastJet_AK4PFchs.txt");
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx25_MC_L2Relative_AK4PFchs.txt");
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx25_MC_L3Absolute_AK4PFchs.txt");
@@ -944,7 +944,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 
 	LorentzVector pfjet_p4_cor = cms3.pfjets_p4().at(iJet);
 
-	if (!isData && applyJECfromFile) {
+	if (applyJECfromFile) {
 
 	  // get uncorrected jet p4 to use as input for corrections
 	  LorentzVector pfjet_p4_uncor = cms3.pfjets_p4().at(iJet) * cms3.pfjets_undoJEC().at(iJet);
