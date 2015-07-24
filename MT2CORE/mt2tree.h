@@ -88,11 +88,16 @@ public :
    Int_t           Flag_goodVertices;
    Int_t           Flag_eeBadScFilter;
    Int_t           Flag_METFilters;
+   Int_t           HLT_PFHT800;
+   Int_t           HLT_PFHT900;
+   Int_t           HLT_PFMET170;
    Int_t           HLT_HT800;
    Int_t           HLT_HT900;
    Int_t           HLT_MET170;
    Int_t           HLT_ht350met100;
    Int_t           HLT_ht350met120;
+   Int_t           HLT_PFHT350_PFMET100;
+   Int_t           HLT_PFHT350_PFMET120;
    Int_t           HLT_SingleMu;   
    Int_t           HLT_DoubleEl;   
    Int_t           HLT_MuEG;   
@@ -101,6 +106,11 @@ public :
    Int_t           HLT_ht350prescale;   
    Int_t           HLT_ht475prescale;   
    Int_t           HLT_ht600prescale;   
+   Int_t           HLT_PFHT350_Prescale;   
+   Int_t           HLT_PFHT475_Prescale;   
+   Int_t           HLT_PFHT600_Prescale;   
+   Int_t           HLT_DiCentralPFJet70_PFMET120;   
+   Int_t           HLT_DiCentralPFJet55_PFMET110;   
    Int_t           nlep;
    Float_t         lep_pt[50];   //[nlep]
    Float_t         lep_eta[50];   //[nlep]
@@ -361,8 +371,13 @@ public :
    TBranch        *b_HLT_HT800;   //!
    TBranch        *b_HLT_HT900;   //!
    TBranch        *b_HLT_MET170;   //!
+   TBranch        *b_HLT_PFHT800;   //!
+   TBranch        *b_HLT_PFHT900;   //!
+   TBranch        *b_HLT_PFMET170;   //!
    TBranch        *b_HLT_ht350met100;   //!
    TBranch        *b_HLT_ht350met120;   //!
+   TBranch        *b_HLT_PFHT350_PFMET100;   //!
+   TBranch        *b_HLT_PFHT350_PFMET120;   //!
    TBranch        *b_HLT_SingleMu;   //!
    TBranch        *b_HLT_DoubleEl;   //!
    TBranch        *b_HLT_MuEG;   //!
@@ -371,6 +386,11 @@ public :
    TBranch        *b_HLT_ht350prescale;   //!
    TBranch        *b_HLT_ht475prescale;   //!
    TBranch        *b_HLT_ht600prescale;   //!
+   TBranch        *b_HLT_PFHT350_Prescale;   //!
+   TBranch        *b_HLT_PFHT475_Prescale;   //!
+   TBranch        *b_HLT_PFHT600_Prescale;   //!
+   TBranch        *b_HLT_DiCentralPFJet70_PFMET120;   //!
+   TBranch        *b_HLT_DiCentralPFJet55_PFMET110;   //!
    TBranch        *b_nlep;   //!
    TBranch        *b_lep_pt;   //!
    TBranch        *b_lep_eta;   //!
@@ -690,8 +710,13 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_HT800", &HLT_HT800, &b_HLT_HT800);
    fChain->SetBranchAddress("HLT_HT900", &HLT_HT900, &b_HLT_HT900);
    fChain->SetBranchAddress("HLT_MET170", &HLT_MET170, &b_HLT_MET170);
+   fChain->SetBranchAddress("HLT_PFHT800", &HLT_PFHT800, &b_HLT_PFHT800);
+   fChain->SetBranchAddress("HLT_PFHT900", &HLT_PFHT900, &b_HLT_PFHT900);
+   fChain->SetBranchAddress("HLT_PFMET170", &HLT_PFMET170, &b_HLT_PFMET170);
    fChain->SetBranchAddress("HLT_ht350met100", &HLT_ht350met100, &b_HLT_ht350met100);
    fChain->SetBranchAddress("HLT_ht350met120", &HLT_ht350met120, &b_HLT_ht350met120);
+   fChain->SetBranchAddress("HLT_PFHT350_PFMET100", &HLT_PFHT350_PFMET100, &b_HLT_PFHT350_PFMET100);
+   fChain->SetBranchAddress("HLT_PFHT350_PFMET120", &HLT_PFHT350_PFMET120, &b_HLT_PFHT350_PFMET120);
    fChain->SetBranchAddress("HLT_SingleMu", &HLT_SingleMu, &b_HLT_SingleMu);
    fChain->SetBranchAddress("HLT_DoubleEl", &HLT_DoubleEl, &b_HLT_DoubleEl);
    fChain->SetBranchAddress("HLT_MuEG", &HLT_MuEG, &b_HLT_MuEG);
@@ -700,6 +725,11 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_ht350prescale", &HLT_ht350prescale, &b_HLT_ht350prescale);
    fChain->SetBranchAddress("HLT_ht475prescale", &HLT_ht475prescale, &b_HLT_ht475prescale);
    fChain->SetBranchAddress("HLT_ht600prescale", &HLT_ht600prescale, &b_HLT_ht600prescale);
+   fChain->SetBranchAddress("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale, &b_HLT_PFHT350_Prescale);
+   fChain->SetBranchAddress("HLT_PFHT475_Prescale", &HLT_PFHT475_Prescale, &b_HLT_PFHT475_Prescale);
+   fChain->SetBranchAddress("HLT_PFHT600_Prescale", &HLT_PFHT600_Prescale, &b_HLT_PFHT600_Prescale);
+   fChain->SetBranchAddress("HLT_DiCentralPFJet70_PFMET120", &HLT_DiCentralPFJet70_PFMET120, &b_HLT_DiCentralPFJet70_PFMET120);
+   fChain->SetBranchAddress("HLT_DiCentralPFJet55_PFMET110", &HLT_DiCentralPFJet55_PFMET110, &b_HLT_DiCentralPFJet55_PFMET110);
    fChain->SetBranchAddress("nlep", &nlep, &b_nlep);
    fChain->SetBranchAddress("lep_pt", lep_pt, &b_lep_pt);
    fChain->SetBranchAddress("lep_eta", lep_eta, &b_lep_eta);
