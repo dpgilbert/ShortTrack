@@ -42,7 +42,7 @@ CORESOURCES = $(wildcard ../MT2CORE/*.cc) $(wildcard ../MT2CORE/MT2/*.cc) $(wild
 COREOBJECTS = $(CORESOURCES:.cc=.o) 
 CORELIB = libLepEffLooperCORE.so
 
-TOOLSSOURCES = $(wildcard ../Tools/*.cc) $(wildcard ../Tools/MT2/*.cc)
+TOOLSSOURCES = $(wildcard ../CORE/Tools/*.cc) $(wildcard ../CORE/Tools/MT2/*.cc)
 TOOLSOBJECTS = $(TOOLSSOURCES:.cc=.o)
 TOOLSLIB = libLepEffLooperTools.so
 
@@ -113,11 +113,11 @@ clean:
         ../MT2CORE/Plotting/*.o \
         ../MT2CORE/Plotting/*.d \
         ../MT2CORE/Plotting/*.so \
-        ../Tools/*.o \
-	../Tools/*.d \
-        ../Tools/*.so \
-        ../Tools/MT2/*.o \
-	../Tools/MT2/*.d \
-        ../Tools/MT2/*.so 
+        ../CORE/Tools/*.o \
+	../CORE/Tools/*.d \
+        ../CORE/Tools/*.so \
+        ../CORE/Tools/MT2/*.o \
+	../CORE/Tools/MT2/*.d \
+        ../CORE/Tools/MT2/*.so 
 
 endif

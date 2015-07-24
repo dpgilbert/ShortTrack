@@ -15,9 +15,9 @@
 #include "TMath.h"
 
 // Tools
-#include "../Tools/utils.h"
-#include "../Tools/goodrun.h"
-#include "../Tools/dorky/dorky.h"
+#include "../CORE/Tools/utils.h"
+#include "../CORE/Tools/goodrun.h"
+#include "../CORE/Tools/dorky/dorky.h"
 
 // header
 #include "MT2Looper.h"
