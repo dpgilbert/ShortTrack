@@ -38,13 +38,9 @@ SOURCES = $(wildcard *.cc)
 OBJECTS = $(SOURCES:.cc=.o)
 LIB = libScanChain.so
 
-CORESOURCES = $(wildcard ../CORE/*.cc)
+CORESOURCES = $(wildcard ../CORE/*.cc) $(wildcard ../CORE/Tools/*.cc) $(wildcard ../CORE/Tools/MT2/*.cc)
 COREOBJECTS = $(CORESOURCES:.cc=.o) 
 CORELIB = libBabymakerCORE.so
-
-TOOLSSOURCES = $(wildcard ../Tools/*.cc) $(wildcard ../Tools/MT2/*.cc)
-TOOLSOBJECTS = $(TOOLSSOURCES:.cc=.o) 
-TOOLSLIB = libBabymakerTools.so
 
 MT2CORESOURCES = $(wildcard ../MT2CORE/*.cc) $(wildcard ../MT2CORE/Plotting/*.cc)
 MT2COREOBJECTS = $(MT2CORESOURCES:.cc=.o) 
@@ -52,7 +48,7 @@ MT2CORELIB = libBabymakerMT2CORE.so
 
 DICT = LinkDef_out.o
 
-LIBS = $(LIB) $(CORELIB) $(TOOLSLIB) $(MT2CORELIB) 
+LIBS = $(LIB) $(CORELIB) $(MT2CORELIB) 
 
 EXE = processBaby
 
@@ -64,11 +60,6 @@ $(CORELIB): $(DICT) $(COREOBJECTS)
 	$(QUIET) echo "Linking $@"; \
 	echo "$(LINKER) -shared -o $@ $(COREOBJECTS) $(DICT) $(LINKERFLAGS)"; \
 	$(LINKER) -shared -o $@ $(COREOBJECTS) $(DICT) $(LINKERFLAGS)
-
-$(TOOLSLIB): $(DICT) $(TOOLSOBJECTS)
-	$(QUIET) echo "Linking $@"; \
-	echo "$(LINKER) -shared -o $@ $(TOOLSOBJECTS) $(DICT) $(LINKERFLAGS)"; \
-	$(LINKER) -shared -o $@ $(TOOLSOBJECTS) $(DICT) $(LINKERFLAGS)
 
 $(MT2CORELIB): $(DICT) $(MT2COREOBJECTS)
 	$(QUIET) echo "Linking $@"; \
@@ -132,11 +123,11 @@ clean:
         ../MT2CORE/Plotting/*.o \
         ../MT2CORE/Plotting/*.d \
         ../MT2CORE/Plotting/*.so \
-        ../Tools/*.o \
-	../Tools/*.d \
-        ../Tools/*.so \
-        ../Tools/MT2/*.o \
-	../Tools/MT2/*.d \
-        ../Tools/MT2/*.so 
+        ../CORE/Tools/*.o \
+	../CORE/Tools/*.d \
+        ../CORE/Tools/*.so \
+        ../CORE/Tools/MT2/*.o \
+	../CORE/Tools/MT2/*.d \
+        ../CORE/Tools/MT2/*.so 
 
 endif

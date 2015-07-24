@@ -25,12 +25,12 @@
 #include "../CORE/MetSelections.h"
 
 // Tools
-#include "../Tools/utils.h"
-#include "../Tools/hemJet.h" 
-#include "../Tools/MT2/MT2.h"
-#include "../Tools/JetCorrector.h"
-#include "../Tools/jetcorr/FactorizedJetCorrector.h"
-#include "../Tools/goodrun.h"
+#include "../CORE/Tools/utils.h"
+#include "../CORE/Tools/hemJet.h" 
+#include "../CORE/Tools/MT2/MT2.h"
+#include "../CORE/Tools/JetCorrector.h"
+#include "../CORE/Tools/jetcorr/FactorizedJetCorrector.h"
+#include "../CORE/Tools/goodrun.h"
 
 // MT2CORE
 #include "../MT2CORE/sampleID.h"
@@ -84,7 +84,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
   
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
-  const char* json_file = "jsons/json_DCSONLY_Run2015B_snt_150715.txt";
+  const char* json_file = "jsons/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
