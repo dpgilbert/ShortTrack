@@ -1,6 +1,7 @@
 #!/bin/bash
 
 INDIR=/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-12_binsHI/
+#INDIR=/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-12_binsHI/
 THISDIR=`pwd`
 
 if [ ! -d "$INDIR" ]; then
@@ -33,8 +34,8 @@ rm qcdplusgjet.root
 echo "hadd qcdplusgjet.root gjet_ht.root qcd_pt.root" 
 hadd qcdplusgjet.root gjet_ht.root qcd_pt.root  >> $THISDIR/dataDrivenEstimates.log
 rm CRRLbkg.root
-echo "hadd CRRLbkg.root ttall.root singletop.root" 
-hadd CRRLbkg.root ttall.root singletop.root  >> $THISDIR/dataDrivenEstimates.log
+echo "hadd CRRLbkg.root top.root singletop.root" # should probably include QCD here 
+hadd CRRLbkg.root top.root singletop.root  >> $THISDIR/dataDrivenEstimates.log
 cd $THISDIR
 echo "root -b -q purity.C+(${INDIR})"
 root -b -q "purity.C+(\"${INDIR}\")" >> dataDrivenEstimates.log
