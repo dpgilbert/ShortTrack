@@ -42,10 +42,10 @@ int sampleID (const string& name) {
 
   else if (name.find("GJet") != string::npos) {
     if (name.find("GJet_Pt-15to3000") != string::npos) return 200;
-    else if (name.find("GJets_HT-100to200") != string::npos) return 202;
-    else if (name.find("GJets_HT-200to400") != string::npos) return 203;
-    else if (name.find("GJets_HT-400to600") != string::npos) return 204;
-    else if (name.find("GJets_HT-600toInf") != string::npos) return 205;
+    else if ((name.find("GJets_HT-100to200") != string::npos) || (name.find("GJets_HT-100To200") != string::npos)) return 202;
+    else if ((name.find("GJets_HT-200to400") != string::npos) || (name.find("GJets_HT-200To400") != string::npos)) return 203;
+    else if ((name.find("GJets_HT-400to600") != string::npos) || (name.find("GJets_HT-400To600") != string::npos)) return 204;
+    else if ((name.find("GJets_HT-600toInf") != string::npos) || (name.find("GJets_HT-600ToInf") != string::npos)) return 205;
   }
 
   else if (name.find("TTJets") != string::npos) {
@@ -78,10 +78,10 @@ int sampleID (const string& name) {
   }
 
   else if (name.find("DYJets") != string::npos) {
-    if (name.find("DYJetsToLL_M-50_HT-100to200") != string::npos) return 702;
-    else if (name.find("DYJetsToLL_M-50_HT-200to400") != string::npos) return 703;
-    else if (name.find("DYJetsToLL_M-50_HT-400to600") != string::npos) return 704;
-    else if (name.find("DYJetsToLL_M-50_HT-600toInf") != string::npos) return 705;
+    if ((name.find("DYJetsToLL_M-50_HT-100to200")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-100To200")  != string::npos)) return 702;
+    else if ((name.find("DYJetsToLL_M-50_HT-200to400")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-200To400") != string::npos)) return 703;
+    else if ((name.find("DYJetsToLL_M-50_HT-400to600")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-400To600") != string::npos)) return 704;
+    else if ((name.find("DYJetsToLL_M-50_HT-600toInf")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-600ToInf") != string::npos)) return 705;
   }
 
   // 800 block: diboson etc
