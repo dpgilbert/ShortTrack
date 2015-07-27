@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "TH1.h"
+#include "RooDataSet.h"
 
 
 class SR {
@@ -48,6 +49,7 @@ class SR {
     std::map<std::string, TH1*> crslelHistMap;
     std::map<std::string, TH1*> crslhadHistMap;
     std::map<std::string, TH1*> crgjHistMap;
+    std::map<std::string, RooDataSet*> crgjRooDataSetMap;
     std::map<std::string, TH1*> crdyHistMap;
     std::map<std::string, TH1*> crrlHistMap;
 

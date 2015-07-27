@@ -12,6 +12,9 @@
 #include "TClass.h"
 #include "TLegend.h"
 
+#include "RooRealVar.h"
+#include "RooDataSet.h"
+
 #include <iostream>
 #include <cmath>
 
@@ -216,6 +219,22 @@ TGraph GetEff(TFile *f, const char *hist1, bool increasing)
 }
 
 
+void plotRooDataSet(string name, RooRealVar* x_, RooRealVar* w_, double weight, std::map<string, RooDataSet*> &allRooDatasets, string title)
+{
+  if (title=="") title=name; 
+  std::map<string, RooDataSet*>::iterator iter= allRooDatasets.find(name);
+  if(iter == allRooDatasets.end()) //no RooDataSet for this yet, so make a new one
+    {
+      RooDataSet* currentDataset= new RooDataSet(name.c_str(), title.c_str(), RooArgSet(*x_,*w_), w_->GetName() );
+      currentDataset->add( RooArgList(*x_, *w_), weight );
+      allRooDatasets.insert(std::pair<string, RooDataSet*> (name,currentDataset) );
+    }
+  else // exists already, so just fill it
+    {
+      (*iter).second->add( RooArgList(*x_, *w_), weight );
+    }
+}
+
 void plot1D(string name, float xval, double weight, std::map<string, TH1*> &allhistos, 
 	    string title, int numbinsx, float xmin, float xmax)  
 {
@@ -345,6 +364,31 @@ void savePlots2(std::map<string, TH2D*> &h_1d, const char* outfilename){
   outfile.Close();
 }
 
+void saveRooDataSetsDir(std::map<string, RooDataSet*>& datasets, TFile* outfile, const char* dirname){
+
+  printf("[PlotUtilities::saveRooDataSets] Saving RooDataSets to dir: %s\n", dirname);
+
+  TDirectory* dir = 0;
+
+  // base dir: just cd to output file
+  if (strcmp(dirname,"") == 0) {
+    outfile->cd();
+  } else {
+    // first check for directory, create if it doesn't exist
+    dir = (TDirectory*)outfile->Get(dirname);
+    if (dir == 0) {
+      dir = outfile->mkdir(dirname);
+    } 
+    dir->cd();
+  }
+
+  std::map<std::string, RooDataSet*>::iterator iter;
+  for(iter=datasets.begin(); iter!=datasets.end(); iter++) {
+    iter->second->Write();
+    delete iter->second;
+  }
+
+}
 
 void savePlotsDir(std::map<string, TH1*> &h_1d, TFile* outfile, const char* dirname){
 
