@@ -8,6 +8,9 @@
 #include "TCanvas.h" 
 #include "TFile.h"
 
+#include "RooRealVar.h"
+#include "RooDataSet.h"
+
 #include<map>
 #include<string>
 
@@ -24,6 +27,7 @@ TCanvas *ComparePlots(TFile *f, const char *hist1, const char *hist2, const char
 TGraph GetROC(TFile *f, const char *hist1, const char *hist2, bool increasing);
 TGraph GetEff(TFile *f, const char *hist1, bool increasing);
 
+void plotRooDataSet(string name, RooRealVar* x_, RooRealVar* w_, double weight, std::map<string, RooDataSet*> &allRooDatasets, string title);
 void plot1D(string name, float xval, double weight, std::map<string, TH1*> &allhistos, 
 	    string title, int numbinsx, float xmin, float xmax);
 void plot1D(string name, float xval, double weight, std::map<string, TH1*> &allhistos, 
@@ -54,6 +58,7 @@ void plot2DUnderOverFlow(string name, double xval, double yval, double weight, s
 
 void savePlots(std::map<string, TH1*>&, const char* );
 void savePlots2(std::map<string, TH2D*>&, const char* );
+void saveRooDataSetsDir(std::map<string, RooDataSet*>& datasets, TFile* outfile, const char* outdir = "");
 void savePlotsDir(std::map<string, TH1*>& h_1d, TFile* outfile, const char* outdir = "");
 void savePlots2Dir(std::map<string, TH2D*>& h_2d, TFile* outfile, const char* outdir = "");
 void savePlots12(std::map<string, TH1D*>&, std::map<string, TH2D*>&, const char* );

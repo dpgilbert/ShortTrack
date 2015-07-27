@@ -30,7 +30,7 @@ COREDIR = CORE
 DICTINCLUDE = $(ROOTSYS)/include/Math/QuantFuncMathCore.h $(ROOTSYS)/include/TLorentzVector.h $(ROOTSYS)/include/Math/Vector4D.h
 
 LINKER = g++
-LINKERFLAGS = $(shell root-config --ldflags --libs) -lEG -lGenVector -lTMVA
+LINKERFLAGS = $(shell root-config --ldflags --libs) -lEG -lGenVector -lTMVA -lRooFit
 
 DIR = ./
 
