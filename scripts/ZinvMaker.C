@@ -18,17 +18,49 @@ using namespace std;
 
 
 //_______________________________________________________________________________
-void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fQCD, vector<string> dirs, string output_name, int method = 0 ) {
+void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<string> dirs, string output_name, int method = 0 ) {
 
   // Generate histogram file with Zinv prediction based on GJetsData * R(Zinv/GJ)
   // Method 0.  Just Poisson from GJet: Zinv +/- Zinv/sqrt(GJet)
   // Method 1. If GJet expected yield below 5, extrapolate from previous bin using MC
-  // Method 2.  Same as method 0, add +/- QCD (100% systematic uncertainty based on QCD)
 
   TFile * outfile = new TFile(output_name.c_str(),"RECREATE") ; 
   outfile->cd();
   const unsigned int ndirs = dirs.size();
   
+  // Do the inclusive ones
+  vector<TString> inclPlots;
+  inclPlots.push_back("h_njbins");
+  inclPlots.push_back("h_nbjbins");
+  inclPlots.push_back("h_htbins");
+  inclPlots.push_back("h_mt2bins");
+
+  for ( unsigned int incl = 0; incl < inclPlots.size(); ++incl ) {
+    
+    TH1D* hGJet = (TH1D*) fGJet->Get("crgjbase/"+inclPlots[incl]);    
+    TH1D* hZll  = (TH1D*)  fZll->Get("crdybase/"+inclPlots[incl]);    
+
+    if(!hGJet || !hZll){
+      cout<<"could not find histogram "<<inclPlots[incl]<<endl;
+      continue;
+    }
+    if (hGJet->GetNbinsX() != hZll->GetNbinsX() ) {
+      cout<<"different binning for histograms "<<inclPlots[incl]<<endl;
+      continue;
+    }
+    outfile->cd();
+
+    // Since we're working on MC, let's set poissionian errors by hand
+    hZll->Sumw2(0); hZll->Sumw2(1);
+    hGJet->Sumw2(0); hGJet->Sumw2(1);
+
+    TH1D* ratio = (TH1D*) hZll->Clone(inclPlots[incl]+"Ratio");
+    ratio->Divide(hGJet);
+
+    ratio->Write();
+
+  } // end of inclusive plots
+
   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
     TString directory = "sr"+dirs.at(idir);
     TString directoryGJ = "crgj"+dirs.at(idir);
@@ -218,6 +250,8 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
   TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
   TFile* f_gjet = new TFile(Form("%s/gjet_ht.root",input_dir.c_str()));
   //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
+  TFile* f_dy = new TFile(Form("%s/dyjetsll_ht.root",input_dir.c_str()));
+
 
   if(f_zinv->IsZombie() || f_gjet->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
@@ -242,9 +276,8 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
   }
 
   //makeZinvFromGJets( f_zinv , f_gjet , f_qcd, dirs, dirsGJ, output_name, 0 );
-  makeZinvFromGJets( f_zinv , f_gjet , f_zinv, dirs, output_name, 0 ); // not using QCD for now
+  makeZinvFromGJets( f_zinv , f_gjet , f_dy ,dirs, output_name, 0 ); // not using QCD for now
 
-  TFile* f_dy = new TFile(Form("%s/dyjetsll_ht.root",input_dir.c_str()));
    output_name = input_dir+"zinvFromDY.root";
 
   makeZinvFromDY( f_zinv , f_dy , dirs, output_name, 0 ); 
