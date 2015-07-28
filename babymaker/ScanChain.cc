@@ -82,14 +82,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
     return;
   }
   
-  MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
-
-  const char* json_file = "jsons/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2_snt.txt";
-  if (applyJSON) {
-    cout << "Loading json file: " << json_file << endl;
-    set_goodrun_file(json_file);
-  }
-
   if (baby_name.find("data_Run2015") != std::string::npos) {
     isDataFromFileName = true;
     cout << "running on DATA, based on file name" << endl;
@@ -98,6 +90,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
     cout << "running on MC, based on file name" << endl;
   }
   
+  MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
+
+  const char* json_file = "jsons/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2_snt.txt";
+  if (applyJSON) {
+    cout << "Loading json file: " << json_file << endl;
+    set_goodrun_file(json_file);
+  }
+
   // File Loop
   int nDuplicates = 0;
   int nEvents = chain->GetEntries();
