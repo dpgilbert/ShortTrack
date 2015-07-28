@@ -268,7 +268,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       // note: in CMS3, filt_cscBeamHalo and evt_cscTightHaloId are the same
       Flag_CSCTightHaloFilter                       = cms3.filt_cscBeamHalo();
       // note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
-      Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
+      //      Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
+      // recompute HBHE noise filter decision using CORE to avoid maxZeros issue
+      Flag_HBHENoiseFilter                          = hbheNoiseFilter();
       // necessary?
       Flag_METFilters                               = cms3.filt_metfilter();
 
