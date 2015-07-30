@@ -41,6 +41,7 @@ class babyMaker {
   TH1D* count_hist_;
 
   bool isDataFromFileName;
+  bool isPromptReco;
   
   //baby ntuple variables
 

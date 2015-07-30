@@ -56,6 +56,8 @@ const bool applyDummyWeights = false;
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files
 const bool removePostProcVars = false;
+// for merging prompt reco with reMINIAOD
+const bool removeEarlyPromptReco = true;
 
 //--------------------------------------------------------------------
 
@@ -81,15 +83,21 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
     cout << "ERROR: invalid value for bx: " << bx << ".  Exiting" << endl;
     return;
   }
-  
+
+  isPromptReco = false;
   if (baby_name.find("data_Run2015") != std::string::npos) {
     isDataFromFileName = true;
     cout << "running on DATA, based on file name" << endl;
+    if (baby_name.find("PromptReco") != std::string::npos) {
+      isPromptReco = true;
+      cout << "  DATA is PromptReco" << endl;
+      if (removeEarlyPromptReco) cout << "  Removing runs <= 251562" << endl;
+    }
   } else {
     isDataFromFileName = false;
     cout << "running on MC, based on file name" << endl;
   }
-  
+
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
   const char* json_file = "jsons/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2_snt.txt";
@@ -100,6 +108,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 
   // File Loop
   int nDuplicates = 0;
+  int nFailJSON = 0;
+  int nFailRunNumber = 0;
   int nEvents = chain->GetEntries();
   unsigned int nEventsChain = nEvents;
   cout << "Running on " << nEventsChain << " events" << endl;
@@ -208,7 +218,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       lumi = cms3.evt_lumiBlock();
       evt  = cms3.evt_event();
 
-      if( applyJSON && isData && !goodrun(run, lumi) ) continue;
+      if ( applyJSON && isData && !goodrun(run, lumi) ) {
+	++nFailJSON;
+	continue;
+      }
+      
+      if ( isData && isPromptReco && removeEarlyPromptReco && (run <= 251562) ) {
+	++nFailRunNumber;
+	continue;
+      }
       
       if (!removePostProcVars) {
 	evt_nEvts = cms3.evt_nEvts();
@@ -1551,6 +1569,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
   }
 
   cout << nDuplicates << " duplicate events were skipped." << endl;
+  cout << nFailJSON << " events were removed by JSON." << endl;
+  cout << nFailRunNumber << " events were removed due to run number." << endl;
 
   CloseBabyNtuple();
 
