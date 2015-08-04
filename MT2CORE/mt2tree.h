@@ -99,6 +99,7 @@ public :
    Int_t           HLT_PFHT350_PFMET100;
    Int_t           HLT_PFHT350_PFMET120;
    Int_t           HLT_SingleMu;   
+   Int_t           HLT_SingleEl;   
    Int_t           HLT_DoubleEl;   
    Int_t           HLT_MuEG;   
    Int_t           HLT_DoubleMu;   
@@ -379,6 +380,7 @@ public :
    TBranch        *b_HLT_PFHT350_PFMET100;   //!
    TBranch        *b_HLT_PFHT350_PFMET120;   //!
    TBranch        *b_HLT_SingleMu;   //!
+   TBranch        *b_HLT_SingleEl;   //!
    TBranch        *b_HLT_DoubleEl;   //!
    TBranch        *b_HLT_MuEG;   //!
    TBranch        *b_HLT_DoubleMu;   //!
@@ -718,6 +720,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_PFHT350_PFMET100", &HLT_PFHT350_PFMET100, &b_HLT_PFHT350_PFMET100);
    fChain->SetBranchAddress("HLT_PFHT350_PFMET120", &HLT_PFHT350_PFMET120, &b_HLT_PFHT350_PFMET120);
    fChain->SetBranchAddress("HLT_SingleMu", &HLT_SingleMu, &b_HLT_SingleMu);
+   fChain->SetBranchAddress("HLT_SingleEl", &HLT_SingleEl, &b_HLT_SingleEl);
    fChain->SetBranchAddress("HLT_DoubleEl", &HLT_DoubleEl, &b_HLT_DoubleEl);
    fChain->SetBranchAddress("HLT_MuEG", &HLT_MuEG, &b_HLT_MuEG);
    fChain->SetBranchAddress("HLT_DoubleMu", &HLT_DoubleMu, &b_HLT_DoubleMu);
