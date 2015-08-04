@@ -10,13 +10,14 @@ TAG="V00-01-02_50ns"
 # DATA
 #
 
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_JetHT_MINIAOD_PromptReco-v1/merged/V07-04-04/ ${TAG}_data_Run2015B_JetHT_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_MET_MINIAOD_PromptReco-v1/merged/V07-04-04/ ${TAG}_data_Run2015B_MET_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_HTMHT_MINIAOD_PromptReco-v1/merged/V07-04-04/ ${TAG}_data_Run2015B_HTMHT_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_SingleMuon_MINIAOD_PromptReco-v1/merged/V07-04-04/ ${TAG}_data_Run2015B_SingleMuon_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_DoubleMuon_MINIAOD_PromptReco-v1/merged/V07-04-04/ ${TAG}_data_Run2015B_DoubleMuon_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_DoubleEG_MINIAOD_PromptReco-v1/merged/V07-04-04/ ${TAG}_data_Run2015B_DoubleEG_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_MuonEG_MINIAOD_PromptReco-v1/merged/V07-04-04/ ${TAG}_data_Run2015B_MuonEG_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_JetHT_MINIAOD_PromptReco-v1/merged/V07-04-06/ ${TAG}_data_Run2015B_JetHT_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_MET_MINIAOD_PromptReco-v1/merged/V07-04-06/ ${TAG}_data_Run2015B_MET_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_HTMHT_MINIAOD_PromptReco-v1/merged/V07-04-06/ ${TAG}_data_Run2015B_HTMHT_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_SingleMuon_MINIAOD_PromptReco-v1/merged/V07-04-06/ ${TAG}_data_Run2015B_SingleMuon_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_DoubleMuon_MINIAOD_PromptReco-v1/merged/V07-04-06/ ${TAG}_data_Run2015B_DoubleMuon_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_DoubleEG_MINIAOD_PromptReco-v1/merged/V07-04-06/ ${TAG}_data_Run2015B_DoubleEG_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_MuonEG_MINIAOD_PromptReco-v1/merged/V07-04-06/ ${TAG}_data_Run2015B_MuonEG_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_SingleElectron_MINIAOD_PromptReco-v1/merged/V07-04-06/ ${TAG}_data_Run2015B_SingleElectron_PromptReco
 
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_JetHT_MINIAOD_17Jul2015-v1/merged/V07-04-06/ ${TAG}_data_Run2015B_JetHT_17Jul2015
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_MET_MINIAOD_17Jul2015-v1/merged/V07-04-06/ ${TAG}_data_Run2015B_MET_17Jul2015
@@ -25,6 +26,7 @@ TAG="V00-01-02_50ns"
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_DoubleMuon_MINIAOD_17Jul2015-v1/merged/V07-04-06/ ${TAG}_data_Run2015B_DoubleMuon_17Jul2015
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_DoubleEG_MINIAOD_17Jul2015-v1/merged/V07-04-06/ ${TAG}_data_Run2015B_DoubleEG_17Jul2015
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_MuonEG_MINIAOD_17Jul2015-v1/merged/V07-04-06/ ${TAG}_data_Run2015B_MuonEG_17Jul2015
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015B_SingleElectron_MINIAOD_17Jul2015-v1/merged/V07-04-06/ ${TAG}_data_Run2015B_SingleElectron_17Jul2015
 
 
 #
