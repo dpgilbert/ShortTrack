@@ -21,6 +21,7 @@ run data_Run2015B_JetHT_PromptReco
 run data_Run2015B_MET_PromptReco
 run data_Run2015B_HTMHT_PromptReco
 run data_Run2015B_SingleMuon_PromptReco
+run data_Run2015B_SingleElectron_PromptReco
 run data_Run2015B_DoubleMuon_PromptReco
 run data_Run2015B_DoubleEG_PromptReco
 run data_Run2015B_MuonEG_PromptReco
@@ -29,6 +30,7 @@ run data_Run2015B_JetHT_17Jul2015
 run data_Run2015B_MET_17Jul2015
 run data_Run2015B_HTMHT_17Jul2015
 run data_Run2015B_SingleMuon_17Jul2015
+run data_Run2015B_SingleElectron_17Jul2015
 run data_Run2015B_DoubleMuon_17Jul2015
 run data_Run2015B_DoubleEG_17Jul2015
 run data_Run2015B_MuonEG_17Jul2015
