@@ -195,7 +195,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	passHLTTriggerPattern("HLT_IsoMu20_v") || passHLTTriggerPattern("HLT_IsoMu20_eta2p1_v") ||
 	passHLTTriggerPattern("HLT_IsoTkMu20_v"); 
       HLT_SingleEl     = passHLTTriggerPattern("HLT_Ele23_WPLoose_Gsf_v") ||
-	passHLTTriggerPattern("HLT_Ele27_eta2p1_WPLoose_Gsf_v") || passHLTTriggerPattern("HLT_Ele32_eta2p1_WPLoose_Gsf_v");
+	passHLTTriggerPattern("HLT_Ele27_eta2p1_WPLoose_Gsf_v") || passHLTTriggerPattern("HLT_Ele32_eta2p1_WPLoose_Gsf_v") ||
+	passHLTTriggerPattern("HLT_Ele23_WP75_Gsf_v") ||
+	passHLTTriggerPattern("HLT_Ele27_eta2p1_WP75_Gsf_v") || passHLTTriggerPattern("HLT_Ele32_eta2p1_WP75_Gsf_v");
       HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
 	passHLTTriggerPattern("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"); 
       HLT_MuEG         = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
