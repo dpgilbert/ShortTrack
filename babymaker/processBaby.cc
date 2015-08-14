@@ -199,16 +199,12 @@ int main(int argc, char **argv) {
 
   // get bx value (for JEC etc)
   int bx = 0;
-  if (infile.Contains("data")) {
-    if (infile.Contains("Run2015B")) bx = 50;
-  }
-  else {
-    if (infile.Contains("50ns")) bx = 50;
-    else if (infile.Contains("25ns")) bx = 25;
-  }
+  if (infile.Contains("Run2015B")) bx = 50;
+  else if (infile.Contains("50ns")) bx = 50;
+  else if (infile.Contains("25ns")) bx = 25;
 
   if (bx == 0) {
-    std::cout << "ERROR: couldn't figure out bx for sample!! Exiting" << std::endl;
+    std::cout << "ERROR: couldn't figure out bx for sample!! filename was: " << infile << ". Exiting" << std::endl;
     return 3;
   }
   else std::cout << "found bx value: " << bx << std::endl;
