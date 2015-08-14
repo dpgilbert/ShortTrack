@@ -22,6 +22,7 @@ run data_Run2015B_MET_PromptReco
 run data_Run2015B_HTMHT_PromptReco
 run data_Run2015B_SingleMuon_PromptReco
 run data_Run2015B_SingleElectron_PromptReco
+run data_Run2015B_SinglePhoton_PromptReco
 run data_Run2015B_DoubleMuon_PromptReco
 run data_Run2015B_DoubleEG_PromptReco
 run data_Run2015B_MuonEG_PromptReco
@@ -31,6 +32,7 @@ run data_Run2015B_MET_17Jul2015
 run data_Run2015B_HTMHT_17Jul2015
 run data_Run2015B_SingleMuon_17Jul2015
 run data_Run2015B_SingleElectron_17Jul2015
+run data_Run2015B_SinglePhoton_17Jul2015
 run data_Run2015B_DoubleMuon_17Jul2015
 run data_Run2015B_DoubleEG_17Jul2015
 run data_Run2015B_MuonEG_17Jul2015
@@ -60,9 +62,14 @@ run wjets_amcatnlo
 
 run singletop_powheg_4f_ttchan_l
 run singletop_powheg_4f_tbartchan_l
+run singletop_powheg_5f_tbarWchan
+
+#
+# ALTERNATIVE SINGLE TOP
+#
+
 run singletop_amcatnlo_4f_tchan_l
 run singletop_amcatnlo_5f_tchan_l
-run singletop_powheg_5f_tbarWchan
 
 #
 # DY+JETS
