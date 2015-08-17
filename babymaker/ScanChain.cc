@@ -141,9 +141,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 
       // files for RunIISpring15 MC
       if (bx == 50) {
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV2_MC_L1FastJet_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV2_MC_L2Relative_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV2_MC_L3Absolute_AK4PFchs.txt");
+	if (isDataFromFileName) {
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_DATA_L1FastJet_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_DATA_L2Relative_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_DATA_L3Absolute_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_DATA_L2L3Residual_AK4PFchs.txt");
+	} else {
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_MC_L1FastJet_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_MC_L2Relative_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_MC_L3Absolute_AK4PFchs.txt");
+	}
       }
       else if (bx == 25) {
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx25_MC_L1FastJet_AK4PFchs.txt");
@@ -291,6 +298,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       //      Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
       // recompute HBHE noise filter decision using CORE to avoid maxZeros issue
       Flag_HBHENoiseFilter                          = hbheNoiseFilter();
+      Flag_HBHEIsoNoiseFilter                       = hbheIsoNoiseFilter();
       // necessary?
       Flag_METFilters                               = cms3.filt_metfilter();
 
@@ -1662,6 +1670,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("Flag_trackingFailureFilter", &Flag_trackingFailureFilter );
   BabyTree_->Branch("Flag_CSCTightHaloFilter", &Flag_CSCTightHaloFilter );
   BabyTree_->Branch("Flag_HBHENoiseFilter", &Flag_HBHENoiseFilter );
+  BabyTree_->Branch("Flag_HBHEIsoNoiseFilter", &Flag_HBHEIsoNoiseFilter );
   BabyTree_->Branch("Flag_goodVertices", &Flag_goodVertices );
   BabyTree_->Branch("Flag_eeBadScFilter", &Flag_eeBadScFilter );
   BabyTree_->Branch("Flag_METFilters", &Flag_METFilters );
@@ -1947,6 +1956,7 @@ void babyMaker::InitBabyNtuple () {
   Flag_trackingFailureFilter = -999;
   Flag_CSCTightHaloFilter = -999;
   Flag_HBHENoiseFilter = -999;
+  Flag_HBHEIsoNoiseFilter = -999;
   Flag_goodVertices = -999;
   Flag_eeBadScFilter = -999;
   Flag_METFilters = -999;
