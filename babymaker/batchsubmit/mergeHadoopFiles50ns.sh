@@ -63,6 +63,7 @@ run wjets_amcatnlo
 run singletop_powheg_4f_ttchan_l
 run singletop_powheg_4f_tbartchan_l
 run singletop_powheg_5f_tbarWchan
+run singletop_powheg_5f_tWchan
 
 #
 # ALTERNATIVE SINGLE TOP
