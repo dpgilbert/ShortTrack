@@ -1000,11 +1000,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 
         if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
         if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
-	// note this uses the eta of the jet as stored in CMS3
-	//  chance for small discrepancies if JEC changes direction slightly..
-	// -- for 74x: don't apply PFJetID for jets with |eta| > 3.0
-	//     after a reco change, the neutral hadron fraction is always very high for those
-        if((fabs(p4sCorrJets.at(iJet).eta()) < 3.0) && !isLoosePFJetV2(iJet)) continue;
 
         passJets.push_back( std::pair<int,float>(iJet, pfjet_p4_cor.pt()) );
 
@@ -1091,6 +1086,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       nBJet25 = 0;
       nBJet30 = 0;
       nBJet40 = 0;
+      nJet30FailId = 0;
+      nJet100FailId = 0;
       minMTBMet = 999999.;
       jet1_pt = 0.;
       jet2_pt = 0.;
@@ -1140,7 +1137,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	}
 
 	// only save jets with pt 20 eta 4.7
-        if( (p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ){ 
+        if( (p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ){
+	  // first check jet ID - count the number of jets that fail
+	  if(!isLoosePFJet_50nsV1(iJet)) {
+	    if (p4sCorrJets.at(iJet).pt() > 30.0) ++nJet30FailId;
+	    if (p4sCorrJets.at(iJet).pt() > 100.0) ++nJet100FailId;
+	    continue;
+	  }
+
 	  jet_pt[njet]   = p4sCorrJets.at(iJet).pt();
 	  jet_eta[njet]  = p4sCorrJets.at(iJet).eta();
 	  jet_phi[njet]  = p4sCorrJets.at(iJet).phi();
@@ -1157,8 +1161,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	  jet_area[njet] = cms3.pfjets_area().at(iJet);
 	  jet_rawPt[njet] = cms3.pfjets_p4().at(iJet).pt() * cms3.pfjets_undoJEC().at(iJet);
 
-	  if (isTightPFJetV2(iJet)) jet_id[njet] = 3;
-	  else if (isLoosePFJetV2(iJet)) jet_id[njet] = 1;
+	  if (isTightPFJet_50nsV1(iJet)) jet_id[njet] = 3;
+	  else if (isLoosePFJet_50nsV1(iJet)) jet_id[njet] = 1;
 	  else jet_id[njet] = 0;
 
 	  jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
@@ -1623,6 +1627,8 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("nBJet25", &nBJet25 );
   BabyTree_->Branch("nBJet30", &nBJet30 );
   BabyTree_->Branch("nBJet40", &nBJet40 );
+  BabyTree_->Branch("nJet30FailId", &nJet30FailId );
+  BabyTree_->Branch("nJet100FailId", &nJet100FailId );
   BabyTree_->Branch("nMuons10", &nMuons10 );
   BabyTree_->Branch("nElectrons10", &nElectrons10 );
   BabyTree_->Branch("nLepLowMT", &nLepLowMT );
@@ -1908,6 +1914,8 @@ void babyMaker::InitBabyNtuple () {
   nBJet25 = -999;
   nBJet30 = -999;
   nBJet40 = -999;
+  nJet30FailId = -999;
+  nJet100FailId = -999;
   nMuons10 = -999;
   nElectrons10 = -999;
   nLepLowMT = -999;

@@ -68,6 +68,8 @@ class babyMaker {
   Int_t           nBJet25;
   Int_t           nBJet30;
   Int_t           nBJet40;
+  Int_t           nJet30FailId;
+  Int_t           nJet100FailId;
   Int_t           nMuons10;
   Int_t           nElectrons10;
   Int_t           nLepLowMT;
