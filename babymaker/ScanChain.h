@@ -139,7 +139,10 @@ class babyMaker {
   Int_t           HLT_SingleMu;   
   Int_t           HLT_SingleEl;   
   Int_t           HLT_DoubleEl;   
-  Int_t           HLT_MuEG;   
+  Int_t           HLT_Mu23_Ele12;   
+  Int_t           HLT_Mu17_Ele12;   
+  Int_t           HLT_Mu8_Ele23;   
+  Int_t           HLT_Mu8_Ele17;   
   Int_t           HLT_DoubleMu;   
   Int_t           HLT_Photon165_HE10;   
   Int_t           HLT_PFHT350_Prescale;   
