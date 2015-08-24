@@ -207,10 +207,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	passHLTTriggerPattern("HLT_Ele27_eta2p1_WP75_Gsf_v") || passHLTTriggerPattern("HLT_Ele32_eta2p1_WP75_Gsf_v");
       HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
 	passHLTTriggerPattern("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
-      HLT_Mu23_Ele12 = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
-      HLT_Mu17_Ele12 = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
-      HLT_Mu8_Ele23 = passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v");
-      HLT_Mu8_Ele17 = passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
+      HLT_MuX_Ele12 = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
+	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
+      HLT_Mu8_EleX = passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v") ||
+	passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
       HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||
 	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
       HLT_Photon165_HE10 = passHLTTriggerPattern("HLT_Photon165_HE10_v"); 
@@ -221,7 +221,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       HLT_DiCentralPFJet55_PFMET110  = passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_NoiseCleaned_v"); 
 
       if (!isData && applyTriggerCuts && !(HLT_PFHT900 || HLT_PFHT350_PFMET120 || HLT_Photon165_HE10 || HLT_SingleMu 
-					   || HLT_DoubleMu || HLT_DoubleEl || HLT_Mu17_Ele12 || HLT_Mu8_Ele17)) continue;
+					   || HLT_DoubleMu || HLT_DoubleEl || HLT_MuX_Ele12 || HLT_Mu8_EleX)) continue;
 
       run  = cms3.evt_run();
       lumi = cms3.evt_lumiBlock();
@@ -1686,10 +1686,8 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("HLT_SingleMu", &HLT_SingleMu );
   BabyTree_->Branch("HLT_SingleEl", &HLT_SingleEl );
   BabyTree_->Branch("HLT_DoubleEl", &HLT_DoubleEl );
-  BabyTree_->Branch("HLT_Mu23_Ele12", &HLT_Mu23_Ele12 );
-  BabyTree_->Branch("HLT_Mu17_Ele12", &HLT_Mu17_Ele12 );
-  BabyTree_->Branch("HLT_Mu8_Ele23", &HLT_Mu8_Ele23 );
-  BabyTree_->Branch("HLT_Mu8_Ele17", &HLT_Mu8_Ele17 );
+  BabyTree_->Branch("HLT_MuX_Ele12", &HLT_MuX_Ele12 );
+  BabyTree_->Branch("HLT_Mu8_EleX", &HLT_Mu8_EleX );
   BabyTree_->Branch("HLT_DoubleMu", &HLT_DoubleMu );
   BabyTree_->Branch("HLT_Photon165_HE10", &HLT_Photon165_HE10 );
   BabyTree_->Branch("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale );
@@ -1979,10 +1977,8 @@ void babyMaker::InitBabyNtuple () {
   HLT_SingleMu = -999;   
   HLT_SingleEl = -999;   
   HLT_DoubleEl = -999;   
-  HLT_Mu23_Ele12 = -999;   
-  HLT_Mu17_Ele12 = -999;   
-  HLT_Mu8_Ele23 = -999;   
-  HLT_Mu8_Ele17 = -999;   
+  HLT_MuX_Ele12 = -999;   
+  HLT_Mu8_EleX = -999;   
   HLT_DoubleMu = -999;   
   HLT_Photon165_HE10 = -999;   
   HLT_PFHT350_Prescale = -999;
