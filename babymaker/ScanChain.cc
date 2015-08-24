@@ -550,7 +550,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       vector<int>  vec_lep_convVeto;
       vector<int>  vec_lep_tightCharge;
 
-      vector<LorentzVector> p4sLeptonsForJetCleaning;
+      vector<LorentzVector> p4sUniqueLeptons;
 
       vector<LorentzVector> p4sForHems;
       vector<LorentzVector> p4sForHemsGamma;
@@ -599,11 +599,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         vec_lep_tightCharge.push_back ( tightChargeEle(iEl));
 
         nlep++;
+	p4sUniqueLeptons.push_back(cms3.els_p4().at(iEl));
 
 	// for mt2 and mht in lepton control region
-	p4sForHems.push_back(cms3.els_p4().at(iEl));
-	p4sForDphi.push_back(cms3.els_p4().at(iEl));
-	p4sLeptonsForJetCleaning.push_back(cms3.els_p4().at(iEl));
+	if (doJetLepOverlapRemoval) {
+	  p4sForHems.push_back(cms3.els_p4().at(iEl));
+	  p4sForDphi.push_back(cms3.els_p4().at(iEl));
+	}
 
 	if (!isData && applyDummyWeights) {
 	  weightStruct weights = getLepSF(cms3.els_p4().at(iEl).pt(), cms3.els_p4().at(iEl).eta(), 11);
@@ -647,11 +649,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         vec_lep_tightCharge.push_back ( tightChargeMuon(iMu) );
 
         nlep++;
+	p4sUniqueLeptons.push_back(cms3.mus_p4().at(iMu));
 
 	// for mt2 and mht in lepton control region
-	p4sForHems.push_back(cms3.mus_p4().at(iMu));
-	p4sForDphi.push_back(cms3.mus_p4().at(iMu));
-	p4sLeptonsForJetCleaning.push_back(cms3.mus_p4().at(iMu));
+	if (doJetLepOverlapRemoval) {
+	  p4sForHems.push_back(cms3.mus_p4().at(iMu));
+	  p4sForDphi.push_back(cms3.mus_p4().at(iMu));
+	}
 
 	if (!isData && applyDummyWeights) {
 	  weightStruct weights = getLepSF(cms3.mus_p4().at(iMu).pt(), cms3.mus_p4().at(iMu).eta(), 13);
@@ -811,11 +815,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	    }
 	  } // loop over reco leps
 	  if (!overlap) {
-	    p4sForHems.push_back(cms3.pfcands_p4().at(ipf));
-	    p4sForDphi.push_back(cms3.pfcands_p4().at(ipf));
-	    p4sLeptonsForJetCleaning.push_back(cms3.pfcands_p4().at(ipf));
+	    p4sUniqueLeptons.push_back(cms3.pfcands_p4().at(ipf));
+	    if (doJetLepOverlapRemoval) {
+	      p4sForHems.push_back(cms3.pfcands_p4().at(ipf));
+	      p4sForDphi.push_back(cms3.pfcands_p4().at(ipf));
+	    }
 	  }
-	} 
+	} // passing pflepton 
 
 	if ((cand_pt > 10.) && (pdgId == 211) && (absiso/cand_pt < 0.1) && (mt < 100.)) ++nPFHad10LowMT;
 
@@ -859,8 +865,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       // count number of unique lowMT leptons (e/mu)
       //  same collection as those used for jet/lepton overlap, but require MT < 100 explicitly
       nLepLowMT = 0;
-      for (unsigned int ilep = 0; ilep < p4sLeptonsForJetCleaning.size(); ++ilep) {
-	float mt = MT(p4sLeptonsForJetCleaning.at(ilep).pt(),p4sLeptonsForJetCleaning.at(ilep).phi(),met_pt,met_phi);
+      for (unsigned int ilep = 0; ilep < p4sUniqueLeptons.size(); ++ilep) {
+	float mt = MT(p4sUniqueLeptons.at(ilep).pt(),p4sUniqueLeptons.at(ilep).phi(),met_pt,met_phi);
 	if (mt < 100.) ++nLepLowMT;
       }
         
@@ -1024,7 +1030,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       //only want to remove the closest jet to a lepton, threshold deltaR < 0.4
       // if a jet is the closest one to 2 leptons, only remove that 1 jet. This loop will find it twice
       vector<int> removedJets; //index of jets to be removed because they overlap with a lepton
-      for(unsigned int iLep = 0; iLep < p4sLeptonsForJetCleaning.size(); iLep++){
+      for(unsigned int iLep = 0; iLep < p4sUniqueLeptons.size(); iLep++){
 
         float minDR = 0.4;
         int minIndex = -1;
@@ -1035,7 +1041,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
           if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
           if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
 
-          float thisDR = DeltaR(p4sCorrJets.at(iJet).eta(), p4sLeptonsForJetCleaning.at(iLep).eta(), p4sCorrJets.at(iJet).phi(), p4sLeptonsForJetCleaning.at(iLep).phi());
+          float thisDR = DeltaR(p4sCorrJets.at(iJet).eta(), p4sUniqueLeptons.at(iLep).eta(), p4sCorrJets.at(iJet).phi(), p4sUniqueLeptons.at(iLep).phi());
           if(thisDR < minDR){
             minDR = thisDR; 
             minIndex = iJet;
