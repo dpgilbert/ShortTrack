@@ -1020,6 +1020,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 
       //check overlapping with leptons
       //only want to remove the closest jet to a lepton, threshold deltaR < 0.4
+      // if a jet is the closest one to 2 leptons, only remove that 1 jet. This loop will find it twice
       vector<int> removedJets; //index of jets to be removed because they overlap with a lepton
       for(unsigned int iLep = 0; iLep < p4sLeptonsForJetCleaning.size(); iLep++){
 
@@ -1031,16 +1032,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 
           if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
           if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
-          if((fabs(p4sCorrJets.at(iJet).eta()) < 3.0) && !isLoosePFJetV2(iJet)) continue;
-
-          bool alreadyRemoved = false;
-          for(unsigned int j=0; j<removedJets.size(); j++){
-            if(iJet == removedJets.at(j)){
-              alreadyRemoved = true;
-              break;
-            }
-          }
-          if(alreadyRemoved) continue;
 
           float thisDR = DeltaR(p4sCorrJets.at(iJet).eta(), p4sLeptonsForJetCleaning.at(iLep).eta(), p4sCorrJets.at(iJet).phi(), p4sLeptonsForJetCleaning.at(iLep).phi());
           if(thisDR < minDR){
@@ -1067,7 +1058,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 
           if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
           if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
-          if((fabs(p4sCorrJets.at(iJet).eta()) < 3.0) && !isLoosePFJetV2(iJet)) continue;
 
           bool alreadyRemoved = false;
           for(unsigned int j=0; j<removedJetsGamma.size(); j++){
