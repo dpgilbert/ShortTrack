@@ -58,6 +58,8 @@ const bool applyJSON = true;
 const bool removePostProcVars = false;
 // for merging prompt reco with reMINIAOD
 const bool removeEarlyPromptReco = true;
+// turn on to remove jets overlapping with leptons (default true)
+const bool doJetLepOverlapRemoval = true;
 
 //--------------------------------------------------------------------
 
@@ -1127,7 +1129,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
             break;
           }
         }
-        if(isOverlapJet) continue;
+        if(doJetLepOverlapRemoval && isOverlapJet) continue;
 
 	if (njet >= max_njet) {
           std::cout << "WARNING: attempted to fill more than " << max_njet << " jets" << std::endl;
