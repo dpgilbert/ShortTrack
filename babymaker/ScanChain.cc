@@ -42,21 +42,21 @@
 using namespace std;
 using namespace tas;
 
-// turn on to add debugging statements
+// turn on to add debugging statements (default false)
 const bool verbose = false;
-// turn on to apply JEC from text files
+// turn on to apply JEC from text files (default true)
 const bool applyJECfromFile = true;
-// turn on to save prunedGenParticle collection
+// turn on to save prunedGenParticle collection (default false)
 const bool saveGenParticles = false;
-// turn on to apply trigger cuts to ntuples -> OR of all triggers used
+// turn on to apply trigger cuts to ntuples -> OR of all triggers used (default false)
 const bool applyTriggerCuts = false;
-// turn on to apply dummy weights for lepton SFs, btag SFs, etc
+// turn on to apply dummy weights for lepton SFs, btag SFs, etc (default false)
 const bool applyDummyWeights = false;
-// turn on to apply json file to data
+// turn on to apply json file to data (default true)
 const bool applyJSON = true;
-// for testing purposes, running on unmerged files
+// for testing purposes, running on unmerged files (default false)
 const bool removePostProcVars = false;
-// for merging prompt reco with reMINIAOD
+// for merging prompt reco with reMINIAOD (default true)
 const bool removeEarlyPromptReco = true;
 // turn on to remove jets overlapping with leptons (default true)
 const bool doJetLepOverlapRemoval = true;
