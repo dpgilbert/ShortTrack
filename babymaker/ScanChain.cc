@@ -542,6 +542,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       vector<float>vec_lep_relIso03;
       vector<float>vec_lep_relIso04;
       vector<float>vec_lep_miniRelIso;
+      vector<float>vec_lep_relIsoAn04;
       vector<int>  vec_lep_mcMatchId;
       vector<int>  vec_lep_lostHits;
       vector<int>  vec_lep_convVeto;
@@ -584,6 +585,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         vec_lep_relIso03.push_back (  eleRelIso03(iEl,analysis_t::HAD));
         vec_lep_relIso04.push_back ( 0);
         vec_lep_miniRelIso.push_back ( elMiniRelIsoCMS3_EA(iEl) );
+        vec_lep_relIsoAn04.push_back ( elRelIsoAn04(iEl) );
         if (!isData && cms3.els_mc3dr().at(iEl) < 0.2 && cms3.els_mc3idx().at(iEl) != -9999 && abs(cms3.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.els_mc3idx().at(iEl)]);
           vec_lep_mcMatchId.push_back ( momid != 11 ? momid : genPart_grandmotherId[cms3.els_mc3idx().at(iEl)]); // if mother is different store mother, otherwise store grandmother
@@ -632,6 +634,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         vec_lep_relIso03.push_back ( muRelIso03(iMu,analysis_t::HAD) );
         vec_lep_relIso04.push_back ( muRelIso04(iMu,analysis_t::HAD) );
         vec_lep_miniRelIso.push_back ( muMiniRelIsoCMS3_EA(iMu) );
+        vec_lep_relIsoAn04.push_back ( muRelIsoAn04(iMu) );
         if (!isData && cms3.mus_mc3dr().at(iMu) < 0.2 && cms3.mus_mc3idx().at(iMu) != -9999 && abs(cms3.mus_mc3_id().at(iMu)) == 13) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.mus_mc3idx().at(iMu)]);
           vec_lep_mcMatchId.push_back ( momid != 13 ? momid : genPart_grandmotherId[cms3.mus_mc3idx().at(iMu)]); // if mother is different store mother, otherwise store grandmother
@@ -680,6 +683,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         lep_relIso03[i]    = vec_lep_relIso03.at(it->first);
         lep_relIso04[i]    = vec_lep_relIso04.at(it->first);
         lep_miniRelIso[i]  = vec_lep_miniRelIso.at(it->first);
+        lep_relIsoAn04[i]  = vec_lep_relIsoAn04.at(it->first);
         lep_mcMatchId[i]   = vec_lep_mcMatchId.at(it->first);
         lep_lostHits[i]    = vec_lep_lostHits.at(it->first);
         lep_convVeto[i]    = vec_lep_convVeto.at(it->first);
@@ -768,6 +772,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       vector<float>vec_isoTrack_phi;
       vector<float>vec_isoTrack_mass;
       vector<float>vec_isoTrack_absIso;
+      vector<float>vec_isoTrack_relIsoAn04;
       vector<float>vec_isoTrack_dz;
       vector<int>  vec_isoTrack_pdgId;
       vector<int>  vec_isoTrack_mcMatchId;
@@ -788,6 +793,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 
 	float mt = MT(cand_pt,cms3.pfcands_p4().at(ipf).phi(),met_pt,met_phi);
 	int pdgId = abs(cms3.pfcands_particleId().at(ipf));
+	float an04 = PFCandRelIsoAn04(ipf);
 
 	if ((cand_pt > 5.) && (pdgId == 11 || pdgId == 13) && (absiso/cand_pt < 0.2) && (mt < 100.)) {
 	  ++nPFLep5LowMT;
@@ -818,6 +824,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         vec_isoTrack_phi.push_back   ( cms3.pfcands_p4().at(ipf).phi()  );
         vec_isoTrack_mass.push_back  ( cms3.pfcands_mass().at(ipf)      );
         vec_isoTrack_absIso.push_back( absiso                           );
+        vec_isoTrack_relIsoAn04.push_back( an04                         );
         vec_isoTrack_dz.push_back    ( cms3.pfcands_dz().at(ipf)        );
         vec_isoTrack_pdgId.push_back ( cms3.pfcands_particleId().at(ipf));
         vec_isoTrack_mcMatchId.push_back ( 0 );
@@ -840,6 +847,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         isoTrack_phi[i]    = vec_isoTrack_phi.at(it->first);
         isoTrack_mass[i]   = vec_isoTrack_mass.at(it->first);
         isoTrack_absIso[i] = vec_isoTrack_absIso.at(it->first);
+        isoTrack_relIsoAn04[i] = vec_isoTrack_relIsoAn04.at(it->first);
         isoTrack_dz[i]     = vec_isoTrack_dz.at(it->first);
         isoTrack_pdgId[i]  = vec_isoTrack_pdgId.at(it->first);
         isoTrack_mcMatchId[i]  = vec_isoTrack_mcMatchId.at(it->first);
@@ -1712,6 +1720,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lep_relIso03", lep_relIso03, "lep_relIso03[nlep]/F" );
   BabyTree_->Branch("lep_relIso04", lep_relIso04, "lep_relIso04[nlep]/F" );
   BabyTree_->Branch("lep_miniRelIso", lep_miniRelIso, "lep_miniRelIso[nlep]/F" );
+  BabyTree_->Branch("lep_relIsoAn04", lep_relIsoAn04, "lep_relIsoAn04[nlep]/F" );
   BabyTree_->Branch("lep_mcMatchId", lep_mcMatchId, "lep_mcMatchId[nlep]/I" );
   BabyTree_->Branch("lep_lostHits", lep_lostHits, "lep_lostHits[nlep]/I" );
   BabyTree_->Branch("lep_convVeto", lep_convVeto, "lep_convVeto[nlep]/I" );
@@ -1722,6 +1731,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("isoTrack_phi", isoTrack_phi, "isoTrack_phi[nisoTrack]/F" );
   BabyTree_->Branch("isoTrack_mass", isoTrack_mass, "isoTrack_mass[nisoTrack]/F" );
   BabyTree_->Branch("isoTrack_absIso", isoTrack_absIso, "isoTrack_absIso[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_relIsoAn04", isoTrack_relIsoAn04, "isoTrack_relIsoAn04[nisoTrack]/F" );
   BabyTree_->Branch("isoTrack_dz", isoTrack_dz, "isoTrack_dz[nisoTrack]/F" );
   BabyTree_->Branch("isoTrack_pdgId", isoTrack_pdgId, "isoTrack_pdgId[nisoTrack]/I" );
   BabyTree_->Branch("isoTrack_mcMatchId", isoTrack_mcMatchId, "isoTrack_mcMatchId[nisoTrack]/I" );
@@ -2083,6 +2093,7 @@ void babyMaker::InitBabyNtuple () {
     lep_relIso03[i] = -999;
     lep_relIso04[i] = -999;
     lep_miniRelIso[i] = -999;
+    lep_relIsoAn04[i] = -999;
     lep_mcMatchId[i] = -999;
     lep_lostHits[i] = -999;
     lep_convVeto[i] = -999;
@@ -2095,6 +2106,7 @@ void babyMaker::InitBabyNtuple () {
     isoTrack_phi[i] = -999;
     isoTrack_mass[i] = -999;
     isoTrack_absIso[i] = -999;
+    isoTrack_relIsoAn04[i] = -999;
     isoTrack_dz[i] = -999;
     isoTrack_pdgId[i] = -999;
     isoTrack_mcMatchId[i] = -999;

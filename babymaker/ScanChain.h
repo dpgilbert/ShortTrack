@@ -166,6 +166,7 @@ class babyMaker {
   Float_t         lep_relIso03[max_nlep];   //[nlep]
   Float_t         lep_relIso04[max_nlep];   //[nlep]
   Float_t         lep_miniRelIso[max_nlep];   //[nlep]
+  Float_t         lep_relIsoAn04[max_nlep];   //[nlep]
   Int_t           lep_mcMatchId[max_nlep];   //[nlep]
   Int_t           lep_lostHits[max_nlep];   //[nlep]
   Int_t           lep_convVeto[max_nlep];   //[nlep]
@@ -179,6 +180,7 @@ class babyMaker {
   Float_t           isoTrack_phi[max_nisoTrack];
   Float_t           isoTrack_mass[max_nisoTrack];
   Float_t           isoTrack_absIso[max_nisoTrack];
+  Float_t           isoTrack_relIsoAn04[max_nisoTrack];
   Float_t           isoTrack_dz[max_nisoTrack];
   Int_t             isoTrack_pdgId[max_nisoTrack];
   Int_t             isoTrack_mcMatchId[max_nisoTrack];
