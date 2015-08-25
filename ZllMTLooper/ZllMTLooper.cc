@@ -85,7 +85,7 @@ void ZllMTLooper::loop(TChain* chain, std::string output_name){
 
   h_nvtx_weights_ = 0;
   if (doNvtxReweight) {
-    TFile* f_weights = new TFile("hists_reweight_zjets.root");
+    TFile* f_weights = new TFile("../babymaker/data/hists_reweight_zjets_Run2015B.root");
     TH1D* h_nvtx_weights_temp = (TH1D*) f_weights->Get("h_nVert_ratio");
     outfile_->cd();
     h_nvtx_weights_ = (TH1D*) h_nvtx_weights_temp->Clone("h_nvtx_weights");

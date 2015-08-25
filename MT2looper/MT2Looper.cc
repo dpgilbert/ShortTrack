@@ -254,8 +254,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
   outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
 
-  //  const char* json_file = "../babymaker/jsons/combined_golden_dcsOnly_JSON_snt.txt";
-  const char* json_file = "../babymaker/jsons/shilpi_json_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -263,7 +262,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
   h_nvtx_weights_ = 0;
   if (doNvtxReweight) {
-    TFile* f_weights = new TFile("zjets_nvtx_hists.root");
+    TFile* f_weights = new TFile("../babymaker/data/hists_reweight_zjets_Run2015B.root");
     TH1D* h_nvtx_weights_temp = (TH1D*) f_weights->Get("h_nVert_ratio");
     outfile_->cd();
     h_nvtx_weights_ = (TH1D*) h_nvtx_weights_temp->Clone("h_nvtx_weights");
