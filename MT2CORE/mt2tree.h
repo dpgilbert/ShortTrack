@@ -39,6 +39,8 @@ public :
    Float_t         rho25;
    Int_t           nJet30;
    Int_t           nJet40;
+   Int_t           nJet30FailId;
+   Int_t           nJet100FailId;
    Int_t           nBJet20;
    Int_t           nBJet25;
    Int_t           nBJet40;
@@ -102,6 +104,8 @@ public :
    Int_t           HLT_SingleEl;   
    Int_t           HLT_DoubleEl;   
    Int_t           HLT_MuEG;   
+   Int_t           HLT_MuX_Ele12;   
+   Int_t           HLT_Mu8_EleX;   
    Int_t           HLT_DoubleMu;   
    Int_t           HLT_Photons;   
    Int_t           HLT_ht350prescale;   
@@ -125,6 +129,7 @@ public :
    Float_t         lep_relIso03[50];   //[nlep]
    Float_t         lep_relIso04[50];   //[nlep]
    Float_t         lep_miniRelIso[50];   //[nlep]
+   Float_t         lep_relIsoAn04[50];   //[nlep]
    Int_t           lep_mcMatchId[50];   //[nlep]
    Int_t           lep_lostHits[50];   //[nlep]
    Int_t           lep_convVeto[50];   //[nlep]
@@ -135,6 +140,7 @@ public :
    Float_t         isoTrack_phi[50];   //[nisoTrack]
    Float_t         isoTrack_mass[50];   //[nisoTrack]
    Float_t         isoTrack_absIso[50];   //[nisoTrack]
+   Float_t         isoTrack_relIsoAn04[50];   //[nisoTrack]
    Float_t         isoTrack_dz[50];   //[nisoTrack]
    Int_t           isoTrack_pdgId[50];   //[nisoTrack]
    Int_t           isoTrack_mcMatchId[50];   //[nisoTrack]
@@ -172,6 +178,8 @@ public :
    Float_t         gamma_mt2;
    Int_t           gamma_nJet30;
    Int_t           gamma_nJet40;
+   Int_t           gamma_nJet30FailId;
+   Int_t           gamma_nJet100FailId;
    Int_t           gamma_nBJet20;
    Int_t           gamma_nBJet25;
    Int_t           gamma_nBJet40;
@@ -320,6 +328,8 @@ public :
    TBranch        *b_rho25;   //!
    TBranch        *b_nJet30;   //!
    TBranch        *b_nJet40;   //!
+   TBranch        *b_nJet30FailId;   //!
+   TBranch        *b_nJet100FailId;   //!
    TBranch        *b_nBJet20;   //!
    TBranch        *b_nBJet25;   //!
    TBranch        *b_nBJet40;   //!
@@ -383,6 +393,8 @@ public :
    TBranch        *b_HLT_SingleEl;   //!
    TBranch        *b_HLT_DoubleEl;   //!
    TBranch        *b_HLT_MuEG;   //!
+   TBranch        *b_HLT_MuX_Ele12;   //!
+   TBranch        *b_HLT_Mu8_EleX;   //!
    TBranch        *b_HLT_DoubleMu;   //!
    TBranch        *b_HLT_Photons;   //!
    TBranch        *b_HLT_ht350prescale;   //!
@@ -406,6 +418,7 @@ public :
    TBranch        *b_lep_relIso03;   //!
    TBranch        *b_lep_relIso04;   //!
    TBranch        *b_lep_miniRelIso;   //!
+   TBranch        *b_lep_relIsoAn04;   //!
    TBranch        *b_lep_mcMatchId;   //!
    TBranch        *b_lep_lostHits;   //!
    TBranch        *b_lep_convVeto;   //!
@@ -416,6 +429,7 @@ public :
    TBranch        *b_isoTrack_phi;   //!
    TBranch        *b_isoTrack_mass;   //!
    TBranch        *b_isoTrack_absIso;   //!
+   TBranch        *b_isoTrack_relIsoAn04;   //!
    TBranch        *b_isoTrack_dz;   //!
    TBranch        *b_isoTrack_pdgId;   //!
    TBranch        *b_isoTrack_mcMatchId;   //!
@@ -453,6 +467,8 @@ public :
    TBranch        *b_gamma_mt2;
    TBranch        *b_gamma_nJet30;
    TBranch        *b_gamma_nJet40;
+   TBranch        *b_gamma_nJet30FailId;
+   TBranch        *b_gamma_nJet100FailId;
    TBranch        *b_gamma_nBJet20;
    TBranch        *b_gamma_nBJet25;
    TBranch        *b_gamma_nBJet40;
@@ -660,6 +676,8 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("rho25", &rho25, &b_rho25);
    fChain->SetBranchAddress("nJet30", &nJet30, &b_nJet30);
    fChain->SetBranchAddress("nJet40", &nJet40, &b_nJet40);
+   fChain->SetBranchAddress("nJet30FailId", &nJet30FailId, &b_nJet30FailId);
+   fChain->SetBranchAddress("nJet100FailId", &nJet100FailId, &b_nJet100FailId);
    fChain->SetBranchAddress("nBJet20", &nBJet20, &b_nBJet20);
    fChain->SetBranchAddress("nBJet25", &nBJet25, &b_nBJet25);
    fChain->SetBranchAddress("nBJet40", &nBJet40, &b_nBJet40);
@@ -723,6 +741,8 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_SingleEl", &HLT_SingleEl, &b_HLT_SingleEl);
    fChain->SetBranchAddress("HLT_DoubleEl", &HLT_DoubleEl, &b_HLT_DoubleEl);
    fChain->SetBranchAddress("HLT_MuEG", &HLT_MuEG, &b_HLT_MuEG);
+   fChain->SetBranchAddress("HLT_MuX_Ele12", &HLT_MuX_Ele12, &b_HLT_MuX_Ele12);
+   fChain->SetBranchAddress("HLT_Mu8_EleX", &HLT_Mu8_EleX, &b_HLT_Mu8_EleX);
    fChain->SetBranchAddress("HLT_DoubleMu", &HLT_DoubleMu, &b_HLT_DoubleMu);
    fChain->SetBranchAddress("HLT_Photons", &HLT_Photons, &b_HLT_Photons);
    fChain->SetBranchAddress("HLT_ht350prescale", &HLT_ht350prescale, &b_HLT_ht350prescale);
@@ -746,6 +766,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("lep_relIso03", lep_relIso03, &b_lep_relIso03);
    fChain->SetBranchAddress("lep_relIso04", lep_relIso04, &b_lep_relIso04);
    fChain->SetBranchAddress("lep_miniRelIso", lep_miniRelIso, &b_lep_miniRelIso);
+   fChain->SetBranchAddress("lep_relIsoAn04", lep_relIsoAn04, &b_lep_relIsoAn04);
    fChain->SetBranchAddress("lep_mcMatchId", lep_mcMatchId, &b_lep_mcMatchId);
    fChain->SetBranchAddress("lep_lostHits", lep_lostHits, &b_lep_lostHits);
    fChain->SetBranchAddress("lep_convVeto", lep_convVeto, &b_lep_convVeto);
@@ -756,6 +777,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("isoTrack_phi", isoTrack_phi, &b_isoTrack_phi);
    fChain->SetBranchAddress("isoTrack_mass", isoTrack_mass, &b_isoTrack_mass);
    fChain->SetBranchAddress("isoTrack_absIso", isoTrack_absIso, &b_isoTrack_absIso);
+   fChain->SetBranchAddress("isoTrack_relIsoAn04", isoTrack_relIsoAn04, &b_isoTrack_relIsoAn04);
    fChain->SetBranchAddress("isoTrack_dz", isoTrack_dz, &b_isoTrack_dz);
    fChain->SetBranchAddress("isoTrack_pdgId", isoTrack_pdgId, &b_isoTrack_pdgId);
    fChain->SetBranchAddress("isoTrack_mcMatchId", isoTrack_mcMatchId, &b_isoTrack_mcMatchId);
@@ -793,6 +815,8 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("gamma_mt2", &gamma_mt2, &b_gamma_mt2);
    fChain->SetBranchAddress("gamma_nJet30", &gamma_nJet30, &b_gamma_nJet30);
    fChain->SetBranchAddress("gamma_nJet40", &gamma_nJet40, &b_gamma_nJet40);
+   fChain->SetBranchAddress("gamma_nJet30FailId", &gamma_nJet30FailId, &b_gamma_nJet30FailId);
+   fChain->SetBranchAddress("gamma_nJet100FailId", &gamma_nJet100FailId, &b_gamma_nJet100FailId);
    fChain->SetBranchAddress("gamma_nBJet20", &gamma_nBJet20, &b_gamma_nBJet20);
    fChain->SetBranchAddress("gamma_nBJet25", &gamma_nBJet25, &b_gamma_nBJet25);
    fChain->SetBranchAddress("gamma_nBJet40", &gamma_nBJet40, &b_gamma_nBJet40);
