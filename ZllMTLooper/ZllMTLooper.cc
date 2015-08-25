@@ -160,7 +160,8 @@ void ZllMTLooper::loop(TChain* chain, std::string output_name){
       if (t.isData) {
 	if (!t.Flag_goodVertices) continue;
 	if (!t.Flag_CSCTightHaloFilter) continue;
-	//	if (!t.Flag_HBHENoiseFilter) continue;
+	if (!t.Flag_eeBadScFilter) continue;
+	if (!t.Flag_HBHENoiseFilter) continue;
       }
 
       // basic dilepton selection: vertex, 2 leptons, dilepton trigger
@@ -177,7 +178,7 @@ void ZllMTLooper::loop(TChain* chain, std::string output_name){
       //---------------------
       outfile_->cd();
       //      const float lumi = 4.;
-      const float lumi = 0.040;
+      const float lumi = 0.042;
       evtweight_ = 1.;
 
       // apply relevant weights to MC
@@ -298,6 +299,8 @@ void ZllMTLooper::fillHistosMT(std::map<std::string, TH1*>& h_1d, const std::str
   plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
   plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
   plot1D("h_nVert"+s,          t.nVert,   evtweight_, h_1d, ";N(vertices)",50,0,50);
+  plot1D("h_nJet30"+s,     t.nJet30,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
+  plot1D("h_nBJet20"+s,    t.nBJet20,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
   plot1D("h_kill_lep_pt"+s,    t.lep_pt[kill_lep],   evtweight_, h_1d, ";p_{T}(removed lepton) [GeV]", 1000, 0., 1000.);
   plot1D("h_keep_lep_pt"+s,    t.lep_pt[keep_lep],   evtweight_, h_1d, ";p_{T}(kept lepton) [GeV]", 1000, 0., 1000.);
   plot1D("h_zll_mass"+s,       t.zll_mass,   evtweight_, h_1d, ";dilepton mass [GeV]",100,0,200);
