@@ -60,6 +60,8 @@ const bool removePostProcVars = false;
 const bool removeEarlyPromptReco = true;
 // turn on to remove jets overlapping with leptons (default true)
 const bool doJetLepOverlapRemoval = true;
+// turn on to save only isolated leptons (default true)
+const bool applyLeptonIso = true;
 
 //--------------------------------------------------------------------
 
@@ -572,8 +574,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       for(unsigned int iEl = 0; iEl < cms3.els_p4().size(); iEl++){
         if(cms3.els_p4().at(iEl).pt() < 10.0) continue;
         if(fabs(cms3.els_p4().at(iEl).eta()) > 2.4) continue;
-        if(!electronID(iEl,id_level_t::HAD_veto_v3)) continue;
-        nElectrons10++;
+	// first check ID then iso
+        if(!electronID(iEl,id_level_t::HAD_veto_noiso_v3)) continue;
+	bool pass_iso = electronID(iEl,id_level_t::HAD_veto_v3);
+	if(applyLeptonIso && !pass_iso) continue;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.els_p4().at(iEl).pt()) );
         vec_lep_pt.push_back ( cms3.els_p4().at(iEl).pt());
         vec_lep_eta.push_back ( cms3.els_p4().at(iEl).eta()); //save eta, even though we use SCeta for ID
@@ -599,12 +603,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         vec_lep_tightCharge.push_back ( tightChargeEle(iEl));
 
         nlep++;
-	p4sUniqueLeptons.push_back(cms3.els_p4().at(iEl));
 
-	// for mt2 and mht in lepton control region
-	if (doJetLepOverlapRemoval) {
-	  p4sForHems.push_back(cms3.els_p4().at(iEl));
-	  p4sForDphi.push_back(cms3.els_p4().at(iEl));
+	// only use isolated leptons for counters, overlaps, etc
+	if (pass_iso) {
+	  nElectrons10++;
+	  p4sUniqueLeptons.push_back(cms3.els_p4().at(iEl));
+
+	  // for mt2 and mht in lepton control region
+	  if (doJetLepOverlapRemoval) {
+	    p4sForHems.push_back(cms3.els_p4().at(iEl));
+	    p4sForDphi.push_back(cms3.els_p4().at(iEl));
+	  }
 	}
 
 	if (!isData && applyDummyWeights) {
@@ -623,8 +632,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       for(unsigned int iMu = 0; iMu < cms3.mus_p4().size(); iMu++){
         if(cms3.mus_p4().at(iMu).pt() < 10.0) continue;
         if(fabs(cms3.mus_p4().at(iMu).eta()) > 2.4) continue;
-        if(!muonID(iMu,id_level_t::HAD_loose_v3)) continue;
-        nMuons10++;
+	// first check ID then iso
+        if(!muonID(iMu,id_level_t::HAD_loose_noiso_v3)) continue;
+        bool pass_iso = muonID(iMu,id_level_t::HAD_loose_v3);
+	if (applyLeptonIso && !pass_iso) continue;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.mus_p4().at(iMu).pt()) );
         vec_lep_pt.push_back ( cms3.mus_p4().at(iMu).pt());
         vec_lep_eta.push_back ( cms3.mus_p4().at(iMu).eta());
@@ -649,12 +660,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         vec_lep_tightCharge.push_back ( tightChargeMuon(iMu) );
 
         nlep++;
-	p4sUniqueLeptons.push_back(cms3.mus_p4().at(iMu));
 
-	// for mt2 and mht in lepton control region
-	if (doJetLepOverlapRemoval) {
-	  p4sForHems.push_back(cms3.mus_p4().at(iMu));
-	  p4sForDphi.push_back(cms3.mus_p4().at(iMu));
+	// only use isolated leptons for counters, overlaps, etc
+	if (pass_iso) {
+	  nMuons10++;
+	  p4sUniqueLeptons.push_back(cms3.mus_p4().at(iMu));
+
+	  // for mt2 and mht in lepton control region
+	  if (doJetLepOverlapRemoval) {
+	    p4sForHems.push_back(cms3.mus_p4().at(iMu));
+	    p4sForDphi.push_back(cms3.mus_p4().at(iMu));
+	  }
 	}
 
 	if (!isData && applyDummyWeights) {
@@ -795,7 +811,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         if(cand_pt < 5) continue;
  
         float absiso  = TrackIso(ipf);
-        if(absiso >= min(0.2*cand_pt, 8.0)) continue;
+        if(applyLeptonIso && absiso >= min(0.2*cand_pt, 8.0)) continue;
 
 	float mt = MT(cand_pt,cms3.pfcands_p4().at(ipf).phi(),met_pt,met_phi);
 	int pdgId = abs(cms3.pfcands_particleId().at(ipf));
@@ -807,8 +823,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	  // use PF leptons for hemispheres etc same as reco leptons
 	  //  BUT first do overlap removal with reco leptons to avoid double counting
 	  bool overlap = false;
-	  for(int iLep = 0; iLep < nlep; iLep++){
-	    float thisDR = DeltaR(pfcands_p4().at(ipf).eta(), lep_eta[iLep], pfcands_p4().at(ipf).phi(), lep_phi[iLep]);
+	  for(unsigned int iLep = 0; iLep < p4sUniqueLeptons.size(); iLep++){
+	    float thisDR = DeltaR(pfcands_p4().at(ipf).eta(), p4sUniqueLeptons.at(iLep).eta(), pfcands_p4().at(ipf).phi(), p4sUniqueLeptons.at(iLep).phi());
 	    if (thisDR < 0.1) {
 	      overlap = true;
 	      break;
