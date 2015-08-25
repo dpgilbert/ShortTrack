@@ -1116,6 +1116,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 
       gamma_nJet30 = 0;
       gamma_nJet40 = 0;
+      gamma_nJet30FailId = 0;
+      gamma_nJet100FailId = 0;
       gamma_nBJet20 = 0;
       gamma_nBJet25 = 0;
       gamma_nBJet30 = 0;
@@ -1153,17 +1155,33 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         }
         if(doJetLepOverlapRemoval && isOverlapJet) continue;
 
+	bool isOverlapJetGamma = false;
+	if( ( p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ) { 
+	  //check against list of jets that overlap with a photon
+	  for(unsigned int j=0; j<removedJetsGamma.size(); j++){
+	    if(iJet == removedJetsGamma.at(j)){
+	      isOverlapJetGamma = true;
+	      break;
+	    }
+	  }
+	} // pt 20 eta 2.5
+
 	if (njet >= max_njet) {
           std::cout << "WARNING: attempted to fill more than " << max_njet << " jets" << std::endl;
 	  break;
 	}
 
 	// only save jets with pt 20 eta 4.7
-        if( (p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ){
+        if( (p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {
+	  
 	  // first check jet ID - count the number of jets that fail
 	  if(!isLoosePFJet_50nsV1(iJet)) {
 	    if (p4sCorrJets.at(iJet).pt() > 30.0) ++nJet30FailId;
 	    if (p4sCorrJets.at(iJet).pt() > 100.0) ++nJet100FailId;
+	    if (!isOverlapJetGamma) {
+	      if (p4sCorrJets.at(iJet).pt() > 30.0) ++gamma_nJet30FailId;
+	      if (p4sCorrJets.at(iJet).pt() > 100.0) ++gamma_nJet100FailId;
+	    }
 	    continue;
 	  }
 
@@ -1265,16 +1283,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	  }
 
 	  // fill gamma_XXX variables before checking for lepton overlap. Why? Let's keep them consistent with the lepton-overlapped jets
-	  if( ( p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ){ 
-	    //check against list of jets that overlap with a photon
-	    bool isOverlapJetGamma = false;
-	    for(unsigned int j=0; j<removedJetsGamma.size(); j++){
-	      if(iJet == removedJetsGamma.at(j)){
-		isOverlapJetGamma = true;
-		break;
-	      }
-	    }
-
+	  if( ( p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ) { 
 	    if(!isOverlapJetGamma) {
 	      if (p4sCorrJets.at(iJet).pt() > 30.0) {
 		// store leading/subleading central jet pt.
@@ -1778,6 +1787,8 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("gamma_mt2", &gamma_mt2 );
   BabyTree_->Branch("gamma_nJet30", &gamma_nJet30 );
   BabyTree_->Branch("gamma_nJet40", &gamma_nJet40 );
+  BabyTree_->Branch("gamma_nJet30FailId", &gamma_nJet30FailId );
+  BabyTree_->Branch("gamma_nJet100FailId", &gamma_nJet100FailId );
   BabyTree_->Branch("gamma_nBJet20", &gamma_nBJet20 );
   BabyTree_->Branch("gamma_nBJet25", &gamma_nBJet25 );
   BabyTree_->Branch("gamma_nBJet30", &gamma_nBJet30 );
@@ -2026,6 +2037,8 @@ void babyMaker::InitBabyNtuple () {
   gamma_mt2 = -999.0;
   gamma_nJet30 = -999;
   gamma_nJet40 = -999;
+  gamma_nJet30FailId = -999;
+  gamma_nJet100FailId = -999;
   gamma_nBJet20 = -999;
   gamma_nBJet25 = -999;
   gamma_nBJet30 = -999;

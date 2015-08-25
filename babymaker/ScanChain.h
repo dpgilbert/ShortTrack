@@ -222,6 +222,8 @@ class babyMaker {
   Float_t         gamma_mt2;
   Int_t           gamma_nJet30;
   Int_t           gamma_nJet40;
+  Int_t           gamma_nJet30FailId;
+  Int_t           gamma_nJet100FailId;
   Int_t           gamma_nBJet20;
   Int_t           gamma_nBJet25;
   Int_t           gamma_nBJet30;
