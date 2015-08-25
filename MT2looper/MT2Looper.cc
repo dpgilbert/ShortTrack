@@ -56,9 +56,11 @@ bool applyWeights = false;
 // turn on to enable plots of MT2 with systematic variations applied. applyWeights should be true
 bool doSystVariationPlots = false;
 // turn on to apply Nvtx reweighting to MC
-bool doNvtxReweight = false;
+bool doNvtxReweight = true;
 // turn on to apply json file to data
 bool applyJSON = false;
+// veto on jets with pt > 30, |eta| > 3.0
+bool doHFJetVeto = false;
 
 MT2Looper::MT2Looper(){
 
@@ -352,6 +354,14 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       
       if (t.nVert == 0) continue;
 
+      // MET filters (data only)
+      if (t.isData) {
+	if (!t.Flag_goodVertices) continue;
+	if (!t.Flag_CSCTightHaloFilter) continue;
+	if (!t.Flag_eeBadScFilter) continue;
+	if (!t.Flag_HBHENoiseFilter) continue;
+      }
+
       // remove low pt QCD samples 
       if (t.evt_id >= 100 && t.evt_id < 109) continue;
       // remove low HT QCD samples 
@@ -395,6 +405,15 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       bool doSLELplots = false;
       leppt_ = -1.;
       mt_ = -1.;
+
+      // count number of forward jets
+      nJet30Eta3_ = 0;
+      for (int ijet = 0; ijet < t.njet; ++ijet) {
+	if (t.jet_pt[ijet] > 30. && fabs(t.jet_eta[ijet]) > 3.0) ++nJet30Eta3_;
+      }
+
+      // veto on forward jets
+      if (doHFJetVeto && nJet30Eta3_ > 0) continue;
 
       // simple counter to check for 1L CR
       if (t.nLepLowMT == 1) {
@@ -700,7 +719,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 void MT2Looper::fillHistosSRBase() {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_HT800 || t.HLT_ht350met100)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
   
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
@@ -719,7 +738,7 @@ void MT2Looper::fillHistosSRBase() {
 void MT2Looper::fillHistosInclusive() {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_HT800 || t.HLT_ht350met100)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
   
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
@@ -749,7 +768,7 @@ void MT2Looper::fillHistosInclusive() {
 void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_HT800 || t.HLT_ht350met100)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
   
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
@@ -781,7 +800,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_HT800 || t.HLT_ht350met100)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
   
   // first fill base region
   std::map<std::string, float> valuesBase;
@@ -851,7 +870,7 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   if (t.ngamma==0) return;
 
   // trigger requirement on data
-  if (t.isData && !t.HLT_Photons) return;
+  if (t.isData && !t.HLT_Photon165_HE10) return;
   
   bool passSieie = t.gamma_idCutBased[0] ? true : false; // just deal with the standard case now. Worry later about sideband in sieie
 
@@ -1032,6 +1051,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
   plot1D("h_ht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
   plot1D("h_nJet30"+s,       t.nJet30,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
+  plot1D("h_nJet30Eta3"+s,       nJet30Eta3_,   evtweight_, h_1d, ";N(jets, |#eta| > 3.0)", 10, 0, 10);
   plot1D("h_nBJet20"+s,      t.nBJet20,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
   plot1D("h_deltaPhiMin"+s,  t.deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
   plot1D("h_diffMetMht"+s,   t.diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
