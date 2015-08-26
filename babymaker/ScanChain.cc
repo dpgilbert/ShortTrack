@@ -802,12 +802,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       nisoTrack = 0;
       nPFLep5LowMT = 0;
       nPFHad10LowMT = 0;
+      nPFCHCand3 = 0;
       for (unsigned int ipf = 0; ipf < pfcands_p4().size(); ipf++) {
  
         if(cms3.pfcands_charge().at(ipf) == 0) continue;
         if(fabs(cms3.pfcands_dz().at(ipf)) > 0.1) continue;
 
         float cand_pt = cms3.pfcands_p4().at(ipf).pt();
+	if(cand_pt > 3) ++nPFCHCand3;
         if(cand_pt < 5) continue;
  
         float absiso  = TrackIso(ipf);
@@ -1665,6 +1667,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("nLepLowMT", &nLepLowMT );
   BabyTree_->Branch("nTaus20", &nTaus20 );
   BabyTree_->Branch("nGammas20", &nGammas20 );
+  BabyTree_->Branch("nPFCHCand3", &nPFCHCand3 );
   BabyTree_->Branch("deltaPhiMin", &deltaPhiMin );
   BabyTree_->Branch("diffMetMht", &diffMetMht );
   BabyTree_->Branch("minMTBMet", &minMTBMet );
@@ -1957,6 +1960,7 @@ void babyMaker::InitBabyNtuple () {
   nLepLowMT = -999;
   nTaus20 = -999;
   nGammas20 = -999;
+  nPFCHCand3 = -999;
   deltaPhiMin = -999.0;
   diffMetMht = -999.0;
   minMTBMet = -999.0;

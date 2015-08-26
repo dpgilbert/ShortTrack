@@ -75,6 +75,7 @@ class babyMaker {
   Int_t           nLepLowMT;
   Int_t           nTaus20;
   Int_t           nGammas20;
+  Int_t           nPFCHCand3;
 
   Float_t         deltaPhiMin;
   Float_t         diffMetMht;
