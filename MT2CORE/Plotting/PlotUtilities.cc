@@ -315,6 +315,27 @@ TH1D* getHist1D(string title, std::map<string, TH1*> &allhistos,
   return currentHisto;
 }
 
+TH2D* getHist2D(string title, std::map<string, TH1*> &allhistos, 
+		int numbinsx, float xmin, float xmax, int numbinsy, float ymin, float ymax)  
+{
+
+  TH2D* currentHisto = 0;
+
+  std::map<string, TH1*>::iterator iter= allhistos.find(title);
+  if(iter == allhistos.end()) //no histo for this yet, so make a new one
+    {
+      currentHisto= new TH2D(title.c_str(), title.c_str(), numbinsx, xmin, xmax, numbinsy, ymin, ymax);
+      currentHisto->Sumw2();
+      allhistos.insert(std::pair<string, TH2D*> (title,currentHisto) );
+    }
+  else // exists already, so just fill it
+    {
+      currentHisto = (TH2D*) (*iter).second;
+    }
+  
+  return currentHisto;
+}
+
 void insertHist1D(TH1D* hist, std::map<string, TH1*> &allhistos)
 {
 
@@ -328,6 +349,25 @@ void insertHist1D(TH1D* hist, std::map<string, TH1*> &allhistos)
   else // exists already, give warning and overwrite
     {
       printf("[PlotUtilities::insertHist1D] WARNING: overwriting histogram %s\n", title.c_str());
+      (*iter).second = hist;
+    }
+  
+  return;
+}
+
+void insertHist2D(TH2D* hist, std::map<string, TH1*> &allhistos)
+{
+
+  string title(hist->GetName());
+
+  std::map<string, TH1*>::iterator iter= allhistos.find(title);
+  if(iter == allhistos.end()) //no histo for this yet, insert into map
+    {
+      allhistos.insert(std::pair<string, TH2D*> (title,hist) );
+    }
+  else // exists already, give warning and overwrite
+    {
+      printf("[PlotUtilities::insertHist2D] WARNING: overwriting histogram %s\n", title.c_str());
       (*iter).second = hist;
     }
   
