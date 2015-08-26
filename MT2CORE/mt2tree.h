@@ -49,6 +49,7 @@ public :
    Int_t           nLepLowMT;
    Int_t           nTaus20;
    Int_t           nGammas20;
+   Int_t           nPFCHCand3;
    Float_t         deltaPhiMin;
    Float_t         diffMetMht;
    Float_t         minMTBMet;
@@ -338,6 +339,7 @@ public :
    TBranch        *b_nLepLowMT;   //!
    TBranch        *b_nTaus20;   //!
    TBranch        *b_nGammas20;   //!
+   TBranch        *b_nPFCHCand3;   //!
    TBranch        *b_deltaPhiMin;   //!
    TBranch        *b_diffMetMht;   //!
    TBranch        *b_minMTBMet;   //!
@@ -686,6 +688,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("nLepLowMT", &nLepLowMT, &b_nLepLowMT);
    fChain->SetBranchAddress("nTaus20", &nTaus20, &b_nTaus20);
    fChain->SetBranchAddress("nGammas20", &nGammas20, &b_nGammas20);
+   fChain->SetBranchAddress("nPFCHCand3", &nPFCHCand3, &b_nPFCHCand3);
    fChain->SetBranchAddress("deltaPhiMin", &deltaPhiMin, &b_deltaPhiMin);
    fChain->SetBranchAddress("diffMetMht", &diffMetMht, &b_diffMetMht);
    fChain->SetBranchAddress("minMTBMet", &minMTBMet, &b_minMTBMet);
