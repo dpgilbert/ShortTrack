@@ -807,12 +807,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
  
         if(cms3.pfcands_charge().at(ipf) == 0) continue;
         if(fabs(cms3.pfcands_dz().at(ipf)) > 0.1) continue;
+        if(cms3.pfcands_fromPV().at(ipf) <= 1) continue;
 
         float cand_pt = cms3.pfcands_p4().at(ipf).pt();
 	if(cand_pt > 3) ++nPFCHCand3;
         if(cand_pt < 5) continue;
  
-        float absiso  = TrackIso(ipf);
+        float absiso  = TrackIso(ipf, 0.3, 0.0, true, false);
         if(applyLeptonIso && absiso >= min(0.2*cand_pt, 8.0)) continue;
 
 	float mt = MT(cand_pt,cms3.pfcands_p4().at(ipf).phi(),met_pt,met_phi);
