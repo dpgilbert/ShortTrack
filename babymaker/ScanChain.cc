@@ -104,7 +104,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
-  const char* json_file = "jsons/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2_snt.txt";
+  const char* json_file = "jsons/Cert_246908-254879_13TeV_PromptReco_Collisions15_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
