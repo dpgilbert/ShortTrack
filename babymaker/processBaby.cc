@@ -153,7 +153,10 @@ int main(int argc, char **argv) {
   //Data
   else if (infile.Contains("Run2015B") && infile.Contains("PromptReco"))     sample = Form("data_Run2015B_PromptReco_%s",  outfileid.Data());
   else if (infile.Contains("Run2015B") && infile.Contains("17Jul2015"))      sample = Form("data_Run2015B_17Jul2015_%s",  outfileid.Data());
+  else if (infile.Contains("Run2015B") && infile.Contains("05Aug2015"))      sample = Form("data_Run2015B_05Aug2015_%s",  outfileid.Data());
   else if (infile.Contains("Run2015B"))                                      sample = Form("data_Run2015B_%s",  outfileid.Data());
+  else if (infile.Contains("Run2015C") && infile.Contains("PromptReco"))     sample = Form("data_Run2015C_PromptReco_%s",  outfileid.Data());
+  else if (infile.Contains("Run2015C"))                                      sample = Form("data_Run2015C_%s",  outfileid.Data());
   // //single mu-had
   // else if (infile.Contains("MuHad_Run2012A-recover-06Aug2012-v1_AOD"))          sample =  Form("MuHad2012A_recover06Aug2012v1V532_%s",     outfileid.Data());
   // else if (infile.Contains("MuHad_Run2012A-13Jul2012-v1_AOD"))                  sample =  Form("MuHad2012A_13Jul2012v1V532_%s",            outfileid.Data());
@@ -200,6 +203,7 @@ int main(int argc, char **argv) {
   // get bx value (for JEC etc)
   int bx = 0;
   if (infile.Contains("Run2015B")) bx = 50;
+  else if (infile.Contains("Run2015C")) bx = 25; // will need to account for the 50ns run somehow..
   else if (infile.Contains("50ns")) bx = 50;
   else if (infile.Contains("25ns")) bx = 25;
 
