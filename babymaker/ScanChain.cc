@@ -828,7 +828,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	  bool overlap = false;
 	  for(unsigned int iLep = 0; iLep < p4sUniqueLeptons.size(); iLep++){
 	    float thisDR = DeltaR(pfcands_p4().at(ipf).eta(), p4sUniqueLeptons.at(iLep).eta(), pfcands_p4().at(ipf).phi(), p4sUniqueLeptons.at(iLep).phi());
-	    if (thisDR < 0.1) {
+	    // use small DR threshold to ONLY remove objects that are exactly the same (reco/pf leptons)
+	    if (thisDR < 0.01) {
 	      overlap = true;
 	      break;
 	    }
