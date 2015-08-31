@@ -301,7 +301,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       // note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
       //      Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
       // recompute HBHE noise filter decision using CORE to avoid maxZeros issue
-      if (bx == 25) Flag_HBHENoiseFilter            = hbheNoiseFilter_25ns();
+      if (!isData) Flag_HBHENoiseFilter             = cms3.filt_hbheNoise();
+      else if (bx == 25) Flag_HBHENoiseFilter       = hbheNoiseFilter_25ns();
       else Flag_HBHENoiseFilter                     = hbheNoiseFilter();
       Flag_HBHEIsoNoiseFilter                       = hbheIsoNoiseFilter();
       // necessary?
