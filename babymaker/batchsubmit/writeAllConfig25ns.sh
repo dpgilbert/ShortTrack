@@ -83,10 +83,10 @@ TAG="V00-01-04_25ns"
 # Z INVISIBLE
 #
 
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns/ZJetsToNuNu_HT-100To200_13TeV-madgraph_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/V07-04-07/ ${TAG}_zinv_ht100To200
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns/ZJetsToNuNu_HT-200To400_13TeV-madgraph_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/V07-04-07/ ${TAG}_zinv_ht200To400
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns/ZJetsToNuNu_HT-400To600_13TeV-madgraph_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/V07-04-07/ ${TAG}_zinv_ht400To600
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns/ZJetsToNuNu_HT-600ToInf_13TeV-madgraph_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/V07-04-07/ ${TAG}_zinv_ht600ToInf
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns/ZJetsToNuNu_HT-100To200_13TeV-madgraph_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/V07-04-07/ ${TAG}_zinv_ht100to200
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns/ZJetsToNuNu_HT-200To400_13TeV-madgraph_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/V07-04-07/ ${TAG}_zinv_ht200to400
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns/ZJetsToNuNu_HT-400To600_13TeV-madgraph_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/V07-04-07/ ${TAG}_zinv_ht400to600
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns/ZJetsToNuNu_HT-600ToInf_13TeV-madgraph_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/V07-04-07/ ${TAG}_zinv_ht600toInf
 
 #
 # DIBOSON
