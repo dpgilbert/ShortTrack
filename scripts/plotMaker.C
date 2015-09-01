@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <algorithm>
 
 #include "TROOT.h"
 #include "TLatex.h"
@@ -34,8 +35,14 @@ const int iPeriod = 4; // 13 tev
 //   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
 const int iPos = 11; 
 
+//______________________________________________________________________________
+// returns the error on C = A*B (or C = A/B)
+float err_mult(float A, float B, float errA, float errB, float C) {
+  return sqrt(C*C*(pow(errA/A,2) + pow(errB/B,2)));
+}
+
 //_______________________________________________________________________________
-TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names , const string& histdir , const string& histname , const string& xtitle , const string& ytitle , float xmin , float xmax , int rebin = 1 , bool logplot = true, bool printplot = false, float scalesig = -1., bool doRatio = false ) {
+TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names , const string& histdir , const string& histname , const string& xtitle , const string& ytitle , float xmin , float xmax , int rebin = 1 , bool logplot = true, bool printplot = false, float scalesig = -1., bool doRatio = false, bool scaleBGtoData = false ) {
 
   cout << "-- plotting histdir: " << histdir << ", histname: " << histname << endl;
 
@@ -92,20 +99,18 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
 
     // main plot pad, for ratio on bottom
     plotpad = new TPad("plotpad","plotpad",0,0.2,1,0.99);
-    plotpad->SetTopMargin(0.05);
     plotpad->SetRightMargin(0.05);
-    plotpad->SetBottomMargin(0.05);
+    plotpad->SetBottomMargin(0.12);
     plotpad->Draw();
     plotpad->cd();
     if( logplot ) plotpad->SetLogy();
   }
   
-  //TLegend* leg = new TLegend(0.55,0.6,0.85,0.92);
   TLegend* leg = new TLegend(0.55,0.6,0.85,0.90);
   leg->SetFillColor(0);
   leg->SetBorderSize(0);
   leg->SetTextSize(0.032);
-  if (doRatio) leg->SetTextSize(0.05);
+  if (doRatio) leg->SetTextSize(0.06);
 
   TH1D* data_hist(0);
   string data_name;
@@ -118,9 +123,9 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     if (h_temp == 0) continue;
     data_hist = (TH1D*) h_temp->Clone(newhistname);
     data_name = names.at(i);
-    //    h->Sumw2();
     data_hist->SetLineColor(kBlack);
     data_hist->SetMarkerColor(kBlack);
+    data_hist->SetMarkerStyle(20);
     if (rebin > 1) data_hist->Rebin(rebin);
 
     // fake data -> set error bars to correspond to data stats
@@ -134,7 +139,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     break;
   }
 
-  if (data_hist) leg->AddEntry(data_hist,getLegendName(data_name).c_str(),"pe");
+  if (data_hist) leg->AddEntry(data_hist,getLegendName(data_name).c_str(),"pe1");
   
   THStack* t = new THStack(Form("stack_%s_%s",histdir.c_str(),histname.c_str()),Form("stack_%s_%s",histdir.c_str(),histname.c_str()));
   TH1D* h_bgtot = 0;
@@ -155,11 +160,9 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     TH1D* h_temp = (TH1D*) samples.at(i)->Get(fullhistname);
     if (h_temp == 0) continue;
     TH1D* h = (TH1D*) h_temp->Clone(newhistname);
-    //    h->Sumw2();
     h->SetFillColor(getColor(names.at(i)));
-    h->SetLineColor(getColor(names.at(i)));
+    h->SetLineColor(kBlack);
     if (rebin > 1) h->Rebin(rebin);
-    t->Add(h);
     if( h_bgtot==0 ) h_bgtot = (TH1D*) h->Clone(Form("%s_%s_bgtot",histname.c_str(),histdir.c_str()));
     else h_bgtot->Add(h);
 
@@ -183,7 +186,6 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     // don't draw signal if the total yield in the plot is < 0.1 events
     if (h_temp->Integral(0,-1) < 0.1) continue;
     TH1D* h = (TH1D*) h_temp->Clone(newhistname);
-    //    h->Sumw2();
     h->SetLineColor(getColor(names.at(i)));
     h->SetLineWidth(2);
     if (rebin > 1) h->Rebin(rebin);
@@ -192,12 +194,32 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     sig_names.push_back(names.at(i));
   }
 
+  // loop through backgrounds to add hists to stack
+  Double_t bg_integral_err = 0.;
+  float bg_integral = h_bgtot->IntegralAndError(0,-1,bg_integral_err);
+  float data_integral = 1.;
+  float bg_sf = 1.;
+  float bg_sf_err = 0.;
+  if (data_hist) data_integral = data_hist->Integral(0,-1);
+  for (unsigned int ibg = 0; ibg < bg_hists.size(); ++ibg) {
+    if (scaleBGtoData && data_hist) bg_hists.at(ibg)->Scale(data_integral/bg_integral);
+    t->Add(bg_hists.at(ibg));
+  }
+  if (scaleBGtoData && data_hist) {
+    bg_sf = data_integral/bg_integral;
+    bg_sf_err = err_mult(data_integral,bg_integral,sqrt(data_integral),bg_integral_err,bg_sf);
+    h_bgtot->Scale(bg_sf);
+    std::cout << "Scaled background by: " << bg_sf << " +/- " << bg_sf_err << std::endl;
+  }
+  
   float ymax = 0;
   if(h_bgtot) ymax = h_bgtot->GetMaximum();
   // also check signals for max val
   for (unsigned int isig = 0; isig < sig_hists.size(); ++isig) {
-    if (sig_hists.at(isig)->GetMaximum() > ymax) ymax = sig_hists.at(isig)->GetMaximum();
+    ymax = std::max(ymax,(float)sig_hists.at(isig)->GetMaximum());
   }
+  if (data_hist) ymax = std::max(ymax,(float)data_hist->GetMaximum());
+
   if( logplot ) ymax*=30;
   else          ymax*=1.5;
   float ymin = 0.1;
@@ -210,10 +232,6 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   h_axes->GetYaxis()->SetLabelSize(0.04);
   h_axes->GetYaxis()->SetTitleOffset(1.5);
   h_axes->GetYaxis()->SetTitleSize(0.05);
-  if (doRatio) {
-    h_axes->GetXaxis()->SetLabelSize(0.);
-    h_axes->GetXaxis()->SetTitleSize(0.);
-  }
   h_axes->Draw();
 
   t->Draw("hist same");
@@ -226,11 +244,12 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     leg->AddEntry(sig_hists.at(isig),legend_name,"l");
   }
 
-  if (data_hist) data_hist->Draw("pe same");
+  if (data_hist) data_hist->Draw("pe1 same");
 
   TLatex label;
   label.SetNDC();
   label.SetTextSize(0.032);
+  float label_x_start = 0.2;
   float label_y_start = 0.82;
   float label_y_spacing = 0.04;
   if (doRatio) {
@@ -244,16 +263,54 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   TString region_label = getJetBJetPlotLabel(samples.at(0), histdir);
   TString region_label_line2 = getMT2PlotLabel(samples.at(0), histdir);
   //label.DrawLatex(0.2,0.85,ht_label);
-  label.DrawLatex(0.187,label_y_start,ht_label);
+
+  // ------- some hardcoded labels..
   // base region plots all have at least 2 jets
   if ((histdir.find("base") != std::string::npos)) region_label = "#geq 2j";
+  // bkg control regions
+  if ((histdir.find("crslwjets") != std::string::npos)) region_label = "#geq 2j, 0b";
+  if ((histdir.find("crslttbar") != std::string::npos)) region_label = "#geq 2j, #geq 2b";
   // minMT plot always requires at least 2 bjets
   if ((histdir.find("srbase") != std::string::npos) && (histname.find("minMTBMet") != std::string::npos)) region_label = "#geq 2j, #geq 2b";
   // lostlepton CR
-  if ((histdir.find("crsl") != std::string::npos)) region_label += ", 1 lepton";
+  if ((histdir.find("crsl") != std::string::npos)) {
+    ht_label = "";
+    if (histdir.find("met50") != std::string::npos) region_label_line2 = "E_{T}^{miss} > 50 GeV";
+    else if (histdir.find("met80") != std::string::npos) region_label_line2 = "E_{T}^{miss} > 80 GeV";
+    if (histdir.find("mt30") != std::string::npos) region_label_line2 += ", M_{T} > 30 GeV";
+    if (histdir.find("nj2") != std::string::npos) region_label = "#geq 2j";
+    if (histdir.find("nb0") != std::string::npos) region_label += ", 0b";
+    else if (histdir.find("nb2") != std::string::npos) region_label += ", #geq 2b";
+    else region_label += ", #geq 0b";
+  }
+  if ((histdir.find("crslel") != std::string::npos)) region_label += ", 1 electron";
+  else if ((histdir.find("crslmu") != std::string::npos)) region_label += ", 1 muon";
+  else if ((histdir.find("crsl") != std::string::npos)) region_label += ", 1 lepton";
 
-  if (region_label.Length() > 0) label.DrawLatex(0.187,label_y_start - label_y_spacing,region_label);
-  if (region_label_line2.Length() > 0) label.DrawLatex(0.187,label_y_start - 2 * label_y_spacing,region_label_line2);
+  // zll mt CR
+  if (histdir.find("crmt") != std::string::npos) {
+    if (histdir.find("base") != std::string::npos) region_label = "";
+    else region_label = "#geq 2j, ";
+    if ((histdir.find("base") != std::string::npos) || (histdir.find("nj2nb0") != std::string::npos)) ht_label = "";
+    if (histdir.find("crmtel") != std::string::npos) region_label += "Z(ee) w/ removed lepton";
+    else if (histdir.find("crmtmu") != std::string::npos) region_label += "Z(#mu#mu) w/ removed lepton";
+    else region_label += "Z(ll) w/ removed lepton";
+    if (histname.find("mt2gt50") != std::string::npos) region_label_line2 = "M_{T2} > 50 GeV";
+    else if (histname.find("mt2gt100") != std::string::npos) region_label_line2 = "M_{T2} > 100 GeV";
+    else if (histname.find("mt2gt150") != std::string::npos) region_label_line2 = "M_{T2} > 150 GeV";
+    else if (histname.find("mt2gt200") != std::string::npos) region_label_line2 = "M_{T2} > 200 GeV";
+    else region_label_line2 = "";
+  }
+
+  if (ht_label.Length() > 0) label.DrawLatex(label_x_start,label_y_start,ht_label);
+  if (region_label.Length() > 0) label.DrawLatex(label_x_start,label_y_start - label_y_spacing,region_label);
+  if (region_label_line2.Length() > 0) label.DrawLatex(label_x_start,label_y_start - 2 * label_y_spacing,region_label_line2);
+
+  // if (scaleBGtoData && data_hist) {
+  //   TString scale_label = Form("MC scaled by %.2f",bg_sf);
+  //   label.DrawLatex(0.6,0.55,scale_label);
+  // }
+
   
   leg->Draw();
   h_axes->Draw("axissame");
@@ -273,12 +330,11 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   if (doRatio) {
     // draw ratio pad
     fullpad->cd();
-    TPad* ratiopad = new TPad("ratiopad","ratiopad",0.,0.,1,0.23);
-    ratiopad->SetLeftMargin(0.16);
+    TPad* ratiopad = new TPad("ratiopad","ratiopad",0.,0.,1,0.21);
+    ratiopad->SetTopMargin(0.05);
+    ratiopad->SetBottomMargin(0.1);
     ratiopad->SetRightMargin(0.05);
-    ratiopad->SetTopMargin(0.08);
-    ratiopad->SetBottomMargin(0.44);
-    ratiopad->SetGridy();
+    ratiopad->SetGridy();  // doesn't actually appear for some reason..
     ratiopad->Draw();
     ratiopad->cd();
 
@@ -293,29 +349,34 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     h_axis_ratio->GetYaxis()->SetTitleSize(0.18);
     h_axis_ratio->GetYaxis()->SetNdivisions(5);
     h_axis_ratio->GetYaxis()->SetLabelSize(0.15);
-    h_axis_ratio->GetYaxis()->SetRangeUser(0.5,1.5);
-    //h_axis_ratio->GetYaxis()->SetRangeUser(0.001,2.0);
+    //h_axis_ratio->GetYaxis()->SetRangeUser(0.5,1.5);
+    h_axis_ratio->GetYaxis()->SetRangeUser(0.001,2.0);
     h_axis_ratio->GetYaxis()->SetTitle("Data/MC");
-    h_axis_ratio->GetXaxis()->SetTitle(data_hist->GetXaxis()->GetTitle());
-    h_axis_ratio->GetXaxis()->SetTitleSize(0.17);
-    h_axis_ratio->GetXaxis()->SetLabelSize(0.17);
-    h_axis_ratio->GetXaxis()->SetTitleOffset(1.0);
     h_axis_ratio->GetXaxis()->SetTickLength(0.07);
+    h_axis_ratio->GetXaxis()->SetTitleSize(0.);
+    h_axis_ratio->GetXaxis()->SetLabelSize(0.);
     h_axis_ratio->Draw("axis");
+
+    // draw line at 1
+    TLine* line1 = new TLine(xmin,1,xmax,1);
+    line1->SetLineStyle(2);
+    line1->Draw("same");
 
     TGraphErrors* g_ratio = new TGraphErrors(h_ratio);
     g_ratio->SetName(Form("%s_graph",h_ratio->GetName()));
     for (int ibin=0; ibin < h_ratio->GetNbinsX(); ++ibin) {
-      g_ratio->SetPointError(ibin, h_ratio->GetBinWidth(ibin+1)/2., h_ratio->GetBinError(ibin+1));
+      //      g_ratio->SetPointError(ibin, h_ratio->GetBinWidth(ibin+1)/2., h_ratio->GetBinError(ibin+1));
+      g_ratio->SetPointError(ibin, 0., h_ratio->GetBinError(ibin+1));
     }
     g_ratio->SetLineColor(kBlack);
     g_ratio->SetMarkerColor(kBlack);
     g_ratio->SetMarkerStyle(20);
-    g_ratio->Draw("p0same");
+    g_ratio->Draw("p same");
 
   } // if (doRatio)
   
   gPad->Modified();
+  gPad->Update();
 
   if( printplot ) {
     can->Print(Form("plots/%s.pdf",canvas_name.Data()));
@@ -447,6 +508,139 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
     }
     cout << " \\\\" << endl;
   } // loop over samples
+
+  std::cout << "\\end{tabular}" << std::endl;
+  std::cout << "\\caption{}" << std::endl;
+  std::cout << "\\end{table}" << std::endl;
+
+  cout << endl;
+  return;
+}
+
+//_______________________________________________________________________________
+void printRatioTable( vector<TFile*> samples , vector<string> names , vector<string> dirs_num, vector<string> dirs_denom, int mt2bin = -1 ) {
+
+  // read off yields from h_mt2bins hist in each topological region
+
+  const unsigned int n = samples.size();
+  const unsigned int ndirs = dirs_num.size();
+
+  if (dirs_num.size() != dirs_denom.size()) {
+    std::cout << "ERROR: mismatch in number of directories" << std::endl;
+    return;
+  }
+  
+  vector<double> bgtot_num(ndirs,0.);
+  vector<double> bgerr_num(ndirs,0.);
+  vector<double> bgtot_denom(ndirs,0.);
+  vector<double> bgerr_denom(ndirs,0.);
+  
+  std::cout << "\\begin{table}[!ht]" << std::endl;
+  std::cout << "\\scriptsize" << std::endl;
+  std::cout << "\\centering" << std::endl;
+  std::cout << "\\begin{tabular}{r";
+  for (unsigned int idir=0; idir < ndirs; ++idir) std::cout << "|c";
+  std::cout << "}" << std::endl;
+  std::cout << "\\hline" << std::endl;
+
+  cout << endl << "\\hline" << endl
+    << "Sample";
+
+  // header
+  for (unsigned int idir = 0; idir < ndirs; ++idir) {
+    //cout << " & " << getRegionName(dirs.at(idir));
+    cout << " & " << getJetBJetTableLabel(samples.at(0), dirs_num.at(idir));
+  }
+  cout << " \\\\" << endl
+    << "\\hline\\hline" << endl;
+
+  // backgrounds first -- loop backwards
+  for( int i = n-1 ; i >= 0 ; --i ){
+    if( TString(names.at(i)).Contains("data")  ) continue;
+    if( TString(names.at(i)).Contains("sig")  ) continue;
+    cout << getTableName(names.at(i));
+    for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+      TString fullhistname_num = Form("%s/h_mt2bins",dirs_num.at(idir).c_str());
+      TH1D* h_num = (TH1D*) samples.at(i)->Get(fullhistname_num);
+      double yield_num = 0.;
+      double err_num = 0.;
+      if (h_num) {
+        // use all bins
+        if (mt2bin < 0) {
+          yield_num = h_num->IntegralAndError(0,-1,err_num);
+          bgtot_num.at(idir) += yield_num;
+          bgerr_num.at(idir) = sqrt(pow(bgerr_num.at(idir),2) + pow(err_num,2));
+        }
+        // last bin: include overflow
+        else if (mt2bin == h_num->GetXaxis()->GetNbins()) {
+          yield_num = h_num->IntegralAndError(mt2bin,-1,err_num);
+          bgtot_num.at(idir) += yield_num;
+          bgerr_num.at(idir) = sqrt(pow(bgerr_num.at(idir),2) + pow(err_num,2));
+        }
+        // single bin, not last bin
+        else {
+          yield_num = h_num->GetBinContent(mt2bin);
+          err_num = h_num->GetBinError(mt2bin);
+          bgtot_num.at(idir) += yield_num;
+          bgerr_num.at(idir) = sqrt(pow(bgerr_num.at(idir),2) + pow(err_num,2));
+        }
+      }
+
+      TString fullhistname_denom = Form("%s/h_mt2bins",dirs_denom.at(idir).c_str());
+      TH1D* h_denom = (TH1D*) samples.at(i)->Get(fullhistname_denom);
+      double yield_denom = 0.;
+      double err_denom = 0.;
+      if (h_denom) {
+        // use all bins
+        if (mt2bin < 0) {
+          yield_denom = h_denom->IntegralAndError(0,-1,err_denom);
+          bgtot_denom.at(idir) += yield_denom;
+          bgerr_denom.at(idir) = sqrt(pow(bgerr_denom.at(idir),2) + pow(err_denom,2));
+        }
+        // last bin: include overflow
+        else if (mt2bin == h_denom->GetXaxis()->GetNbins()) {
+          yield_denom = h_denom->IntegralAndError(mt2bin,-1,err_denom);
+          bgtot_denom.at(idir) += yield_denom;
+          bgerr_denom.at(idir) = sqrt(pow(bgerr_denom.at(idir),2) + pow(err_denom,2));
+        }
+        // single bin, not last bin
+        else {
+          yield_denom = h_denom->GetBinContent(mt2bin);
+          err_denom = h_denom->GetBinError(mt2bin);
+          bgtot_denom.at(idir) += yield_denom;
+          bgerr_denom.at(idir) = sqrt(pow(bgerr_denom.at(idir),2) + pow(err_denom,2));
+        }
+      }
+
+      if (yield_denom == 0.) {
+        cout << "  &  - ";
+      } else {
+	double ratio = yield_num / yield_denom;
+	double ratio_err = ratio * sqrt(pow(err_num/yield_num,2) + pow(err_denom/yield_denom,2));
+        cout << "  &  " << Form("%.2f $\\pm$ %.2f",ratio,ratio_err);
+      }
+    }
+    cout << " \\\\" << endl;
+  } // loop over samples
+
+  // print bg totals
+  cout << "\\hline" << endl;
+  cout << "Total SM";
+  for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+    double yield_num = bgtot_num.at(idir);
+    double err_num = bgerr_num.at(idir);
+    double yield_denom = bgtot_denom.at(idir);
+    double err_denom = bgerr_denom.at(idir);
+    if (yield_denom == 0.) {
+      cout << "  &  - ";
+    } else {
+      double ratio = yield_num / yield_denom;
+      double ratio_err = ratio * sqrt(pow(err_num/yield_num,2) + pow(err_denom/yield_denom,2));
+      cout << "  &  " << Form("%.2f $\\pm$ %.2f",ratio,ratio_err);
+    }
+  }
+  cout << " \\\\" << endl;
+  cout << "\\hline" << endl;
 
   std::cout << "\\end{tabular}" << std::endl;
   std::cout << "\\caption{}" << std::endl;
@@ -622,48 +816,58 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
 void plotMaker(){
 
   //  gROOT->LoadMacro("CMS_lumi.C");
-  cmsText = "CMS Simulation";
+  cmsText = "CMS Preliminary";
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
-  lumi_13TeV = "4 fb^{-1}";
+  //lumi_13TeV = "42 pb^{-1}";
+  lumi_13TeV = "8.6 pb^{-1}";
 
-  //string input_dir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-00-12_test/";
-  string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/V00-00-12/";
+  string input_dir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-01-04_25ns_skim_8p6pb_mt2gt100_metfilt/";
 
+  
   // ----------------------------------------
   //  samples definition
   // ----------------------------------------
 
   // get input files
 
-  TFile* f_ttbar = new TFile(Form("%s/ttall_msdecays.root",input_dir.c_str()));
-  TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
-  TFile* f_gjet = new TFile(Form("%s/gjet_ht.root",input_dir.c_str()));
-  TFile* f_wjets = new TFile(Form("%s/wjets_ht.root",input_dir.c_str()));
-  TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
-  TFile* f_tth = new TFile(Form("%s/tth.root",input_dir.c_str()));
-  TFile* f_ttw = new TFile(Form("%s/ttwjets.root",input_dir.c_str()));
-  TFile* f_ttz = new TFile(Form("%s/ttzjets.root",input_dir.c_str()));
-  TFile* f_singletop = new TFile(Form("%s/singletop.root",input_dir.c_str()));
-  TFile* f_top = new TFile(Form("%s/top.root",input_dir.c_str())); //hadd'ing of ttbar, ttw, ttz, tth, singletop
+  TFile* f_ttbar = new TFile(Form("%s/ttall_mg_lo.root",input_dir.c_str()));
+  //TFile* f_ttbar = new TFile(Form("%s/ttall_powheg.root",input_dir.c_str()));
+  //TFile* f_ttbar = new TFile(Form("%s/top.root",input_dir.c_str())); //hadd'ing of ttbar, ttw, ttz, tth, singletop
+  //TFile* f_zjets = new TFile(Form("%s/zjets_amcatnlo.root",input_dir.c_str()));
+  // TFile* f_dyjets = new TFile(Form("%s/dyjetsll_ht.root",input_dir.c_str()));
+  //TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
+  // TFile* f_gjet = new TFile(Form("%s/gjet_ht.root",input_dir.c_str()));
+  //TFile* f_wjets = new TFile(Form("%s/wjets_ht.root",input_dir.c_str()));
+  TFile* f_wjets = new TFile(Form("%s/wjets_amcatnlo.root",input_dir.c_str()));
+  //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
+  // TFile* f_tth = new TFile(Form("%s/tth.root",input_dir.c_str()));
+  // TFile* f_ttw = new TFile(Form("%s/ttwjets.root",input_dir.c_str()));
+  // TFile* f_ttz = new TFile(Form("%s/ttzjets.root",input_dir.c_str()));
+  // TFile* f_singletop = new TFile(Form("%s/singletop.root",input_dir.c_str()));
+  // //  TFile* f_singletop_wrong = new TFile(Form("%s/singletop_wrong_scale1fb.root",input_dir.c_str()));
+  //TFile* f_fakedata = new TFile(Form("%s/lostlep.root",input_dir.c_str())); //hadd'ing of ttbar, ttw, ttz, tth, singletop, wjets
+  //  TFile* f_fakedata = new TFile(Form("%s/fakedata.root",input_dir.c_str())); 
+  //TFile* f_data = new TFile(Form("%s/data_Run2015B.root",input_dir.c_str())); 
+  TFile* f_data = new TFile(Form("%s/data_Run2015C.root",input_dir.c_str())); 
 
-  TFile* f_T1tttt_1500_100 = new TFile(Form("%s/T1tttt_1500_100.root",input_dir.c_str()));
-  TFile* f_T1tttt_1200_800 = new TFile(Form("%s/T1tttt_1200_800.root",input_dir.c_str()));
-  TFile* f_T1bbbb_1500_100 = new TFile(Form("%s/T1bbbb_1500_100.root",input_dir.c_str()));
-  TFile* f_T1bbbb_1000_900 = new TFile(Form("%s/T1bbbb_1000_900.root",input_dir.c_str()));
-  TFile* f_T1qqqq_1400_100 = new TFile(Form("%s/T1qqqq_1400_100.root",input_dir.c_str()));
-  TFile* f_T1qqqq_1000_800 = new TFile(Form("%s/T1qqqq_1000_800.root",input_dir.c_str()));
+  // TFile* f_T1tttt_1500_100 = new TFile(Form("%s/T1tttt_1500_100.root",input_dir.c_str()));
+  // TFile* f_T1tttt_1200_800 = new TFile(Form("%s/T1tttt_1200_800.root",input_dir.c_str()));
+  // TFile* f_T1bbbb_1500_100 = new TFile(Form("%s/T1bbbb_1500_100.root",input_dir.c_str()));
+  // TFile* f_T1bbbb_1000_900 = new TFile(Form("%s/T1bbbb_1000_900.root",input_dir.c_str()));
+  // TFile* f_T1qqqq_1400_100 = new TFile(Form("%s/T1qqqq_1400_100.root",input_dir.c_str()));
+  // TFile* f_T1qqqq_1000_800 = new TFile(Form("%s/T1qqqq_1000_800.root",input_dir.c_str()));
 
-  TFile* f_T2tt_425_325 = new TFile(Form("%s/T2tt_425_325.root",input_dir.c_str()));
-  TFile* f_T2tt_500_325 = new TFile(Form("%s/T2tt_500_325.root",input_dir.c_str()));
-  TFile* f_T2tt_650_325 = new TFile(Form("%s/T2tt_650_325.root",input_dir.c_str()));
-  TFile* f_T2tt_850_100 = new TFile(Form("%s/T2tt_850_100.root",input_dir.c_str()));
+  // TFile* f_T2tt_425_325 = new TFile(Form("%s/T2tt_425_325.root",input_dir.c_str()));
+  // TFile* f_T2tt_500_325 = new TFile(Form("%s/T2tt_500_325.root",input_dir.c_str()));
+  // TFile* f_T2tt_650_325 = new TFile(Form("%s/T2tt_650_325.root",input_dir.c_str()));
+  // TFile* f_T2tt_850_100 = new TFile(Form("%s/T2tt_850_100.root",input_dir.c_str()));
 
-  TFile* f_T2bb_900_100 = new TFile(Form("%s/T2bb_900_100.root",input_dir.c_str()));
-  TFile* f_T2bb_600_580 = new TFile(Form("%s/T2bb_600_580.root",input_dir.c_str()));
-  TFile* f_T2qq_1200_100 = new TFile(Form("%s/T2qq_1200_100.root",input_dir.c_str()));
-  TFile* f_T2qq_600_550 = new TFile(Form("%s/T2qq_600_550.root",input_dir.c_str()));
+  // TFile* f_T2bb_900_100 = new TFile(Form("%s/T2bb_900_100.root",input_dir.c_str()));
+  // TFile* f_T2bb_600_580 = new TFile(Form("%s/T2bb_600_580.root",input_dir.c_str()));
+  // TFile* f_T2qq_1200_100 = new TFile(Form("%s/T2qq_1200_100.root",input_dir.c_str()));
+  // TFile* f_T2qq_600_550 = new TFile(Form("%s/T2qq_600_550.root",input_dir.c_str()));
 
   //TFile* f_zinv_ht100to200 = new TFile(Form("%s/zinv_ht100to200.root",input_dir.c_str()));
   //TFile* f_zinv_ht200to400 = new TFile(Form("%s/zinv_ht200to400.root",input_dir.c_str()));
@@ -678,34 +882,41 @@ void plotMaker(){
   vector<TFile*> samples;
   vector<string>  names;
 
-  samples.push_back(f_qcd); names.push_back("qcd");
-  samples.push_back(f_wjets); names.push_back("wjets");
-  samples.push_back(f_zinv);  names.push_back("zinv");
-  //samples.push_back(f_gjet);  names.push_back("gjet");
-  //samples.push_back(f_tth); names.push_back("tth");
-  //samples.push_back(f_ttw); names.push_back("ttw");
-  //samples.push_back(f_ttz); names.push_back("ttz");
-  //samples.push_back(f_singletop); names.push_back("singletop");
-  //samples.push_back(f_ttbar); names.push_back("ttbar");
+  //samples.push_back(f_qcd); names.push_back("qcd");
   //samples.push_back(f_wjets); names.push_back("wjets");
-  samples.push_back(f_top); names.push_back("top");
+  //samples.push_back(f_zinv);  names.push_back("zinv");
+  //samples.push_back(f_gjet);  names.push_back("gjet");
+  // samples.push_back(f_tth); names.push_back("tth");
+  // samples.push_back(f_ttw); names.push_back("ttw");
+  // samples.push_back(f_ttz); names.push_back("ttz");
+  // samples.push_back(f_singletop); names.push_back("singletop");
+  //  samples.push_back(f_ttbar); names.push_back("ttbar");
+  samples.push_back(f_wjets); names.push_back("wjets");
+  samples.push_back(f_ttbar); names.push_back("ttbar");
+  //samples.push_back(f_ttbar); names.push_back("top");
+  //samples.push_back(f_zjets); names.push_back("zjets");
+  //samples.push_back(f_dyjets); names.push_back("dyjets");
+  samples.push_back(f_data); names.push_back("data");
 
-  samples.push_back(f_T1tttt_1500_100); names.push_back("sig_T1tttt_1500_100");
-  samples.push_back(f_T1tttt_1200_800); names.push_back("sig_T1tttt_1200_800");
-  samples.push_back(f_T1bbbb_1500_100); names.push_back("sig_T1bbbb_1500_100");
-  samples.push_back(f_T1bbbb_1000_900); names.push_back("sig_T1bbbb_1000_900");
-  samples.push_back(f_T1qqqq_1400_100); names.push_back("sig_T1qqqq_1400_100");
-  samples.push_back(f_T1qqqq_1000_800); names.push_back("sig_T1qqqq_1000_800");
+  // samples.push_back(f_singletop_wrong); names.push_back("singletop_wrong");
+  // samples.push_back(f_singletop); names.push_back("singletop");
 
-  samples.push_back(f_T2tt_850_100); names.push_back("sig_T2tt_850_100");
-  samples.push_back(f_T2tt_650_325); names.push_back("sig_T2tt_650_325");
-  samples.push_back(f_T2tt_500_325); names.push_back("sig_T2tt_500_325");
-  samples.push_back(f_T2tt_425_325); names.push_back("sig_T2tt_425_325");
+  // samples.push_back(f_T1tttt_1500_100); names.push_back("sig_T1tttt_1500_100");
+  // samples.push_back(f_T1tttt_1200_800); names.push_back("sig_T1tttt_1200_800");
+  // samples.push_back(f_T1bbbb_1500_100); names.push_back("sig_T1bbbb_1500_100");
+  // samples.push_back(f_T1bbbb_1000_900); names.push_back("sig_T1bbbb_1000_900");
+  // samples.push_back(f_T1qqqq_1400_100); names.push_back("sig_T1qqqq_1400_100");
+  // samples.push_back(f_T1qqqq_1000_800); names.push_back("sig_T1qqqq_1000_800");
 
-  samples.push_back(f_T2bb_900_100); names.push_back("sig_T2bb_900_100");
-  samples.push_back(f_T2bb_600_580); names.push_back("sig_T2bb_600_580");
-  samples.push_back(f_T2qq_1200_100); names.push_back("sig_T2qq_1200_100");
-  samples.push_back(f_T2qq_600_550); names.push_back("sig_T2qq_600_550");
+  // samples.push_back(f_T2tt_850_100); names.push_back("sig_T2tt_850_100");
+  // samples.push_back(f_T2tt_650_325); names.push_back("sig_T2tt_650_325");
+  // samples.push_back(f_T2tt_500_325); names.push_back("sig_T2tt_500_325");
+  // samples.push_back(f_T2tt_425_325); names.push_back("sig_T2tt_425_325");
+
+  // samples.push_back(f_T2bb_900_100); names.push_back("sig_T2bb_900_100");
+  // samples.push_back(f_T2bb_600_580); names.push_back("sig_T2bb_600_580");
+  // samples.push_back(f_T2qq_1200_100); names.push_back("sig_T2qq_1200_100");
+  // samples.push_back(f_T2qq_600_550); names.push_back("sig_T2qq_600_550");
 
   // ----------------------------------------
   //  plots definitions
@@ -714,8 +925,8 @@ void plotMaker(){
   float scalesig = -1.;
   //float scalesig = 50.;
   bool printplots = false;
-  //bool printplots = true;
-  bool doRatio = false;
+  bool doRatio = true;
+  bool scaleBGtoData = false;
 
   if(printplots){
     TIter it(f_ttbar->GetListOfKeys());
@@ -727,16 +938,18 @@ void plotMaker(){
       //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
       if(dir_name == "") continue;
-      if(dir_name != "srbase") continue; //to do only srbase
+      if(dir_name != "srbase") continue; //to do only this dir
       //if(dir_name != "sr1H") continue; //for testing
-      makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , true, printplots, scalesig, doRatio );
-      makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 10 GeV" , 0 , 1000 , 1 , true, printplots, scalesig, doRatio );
-      makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
-      makePlot( samples , names , dir_name , "h_nlepveto" , "N(leptons)" , "Events" , 0 , 10 , 1 , false, printplots );
-      makePlot( samples , names , dir_name , "h_nJet40" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio );
-      makePlot( samples , names , dir_name , "h_nBJet20" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio );
-      makePlot( samples , names , dir_name , "h_minMTBMet"  , "min M_{T}(b,MET) [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
-      makePlot( samples , names , dir_name , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig, doRatio );
+
+      makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 50 GeV" , 100 , 1000 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 800 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_nlepveto" , "N(leptons)" , "Events" , 0 , 10 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_nJet30" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_nBJet20" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      //makePlot( samples , names , dir_name , "h_nJet30Eta3" , "N(jets, |#eta| > 3.0)" , "Events" , 0 , 5 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+
     }
   }
 
