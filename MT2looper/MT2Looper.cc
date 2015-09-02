@@ -56,7 +56,7 @@ bool applyWeights = false;
 // turn on to enable plots of MT2 with systematic variations applied. applyWeights should be true
 bool doSystVariationPlots = false;
 // turn on to apply Nvtx reweighting to MC
-bool doNvtxReweight = true;
+bool doNvtxReweight = false;
 // turn on to apply json file to data
 bool applyJSON = false;
 // veto on jets with pt > 30, |eta| > 3.0
@@ -453,7 +453,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 	    bool overlap = false;
 	    for(int ilep = 0; ilep < t.nlep; ilep++){
 	      float thisDR = DeltaR(t.isoTrack_eta[itrk], t.lep_eta[ilep], t.isoTrack_phi[itrk], t.lep_phi[ilep]);
-	      if (thisDR < 0.1) {
+	      if (thisDR < 0.01) {
 		overlap = true;
 		break;
 	      }
