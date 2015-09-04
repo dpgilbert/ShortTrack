@@ -19,10 +19,7 @@ int main(int argc, char **argv) {
 
   TChain *chain = new TChain("Events");
   chain->Add(infile.Data());
-  if (chain->GetEntries() == 0) {
-    std::cout << "ERROR: no entries in chain. filename was: " << infile << std::endl;
-    return 2;
-  }
+  if (chain->GetEntries() == 0) std::cout << "WARNING: no entries in chain. filename was: " << infile << std::endl;
 
   //-------------------------------------
   //set name to get comprehensible output -- will need to update these!
