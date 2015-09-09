@@ -34,7 +34,7 @@ const bool uncorrelatedZGratio = false; // treat ZGratio uncertainty as fully un
 
 const bool integratedZinvEstimate = false;
 
-const bool fourNuisancesPerBinZGratio = false;
+const bool fourNuisancesPerBinZGratio = true;
 
 //_______________________________________________________________________________
 std::string toString(int in){
@@ -341,7 +341,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
   TString name_zinv_zgamma_nb  = Form("zinv_ZGratio_nb_%s" , bjet_str.c_str() );
   TString name_zinv_zgamma_ht  = Form("zinv_ZGratio_ht_%s" , ht_str.c_str()   );
   // Only a low edge for MT2, since we want to maintain correlations between differently sized MT2 bins with the same lower edge
-  TString name_zinv_zgamma_mt2 = "m" + toString(mt2_LOW); 
+  TString name_zinv_zgamma_mt2 = "zinv_ZGratio_m" + toString(mt2_LOW); 
 
   // uncorrelated across TRs and MT2 bins
   double zinv_mcsyst = -1.;
