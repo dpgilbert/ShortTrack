@@ -50,6 +50,10 @@ float m1bins[n_m1bins+1];
 const int n_m2bins = 33;
 float m2bins[n_m2bins+1];
 
+//RooRealVars for unbinned data hist
+RooRealVar* x_ = new RooRealVar( "x", "", 0., 50.);
+RooRealVar* w_ = new RooRealVar( "w", "", 0., 1000.);
+
 bool useDRforGammaQCDMixing = true; // requires GenParticles
 // turn on to apply weights to central value
 bool applyWeights = false;
@@ -533,6 +537,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 	    //}
 	    if ( (t.evt_id < 200 && t.gamma_mcMatchId[0]>0 && t.gamma_drMinParton[0] > 0.4)   // reject DR>0.4 photons from QCD
 		 || (t.evt_id >=200 && t.gamma_mcMatchId[0]==0 )   // Reject unmatched photons from Gamma+Jets (should be small)    
+		 || (t.evt_id >=200 && t.gamma_drMinParton[0]<0.4 )   // Reject fragmentation photons from Gamma+Jets (only there in samples with DR>0.05)
 		 )
 	      { doGJplots = false; }
 	    else {
@@ -546,10 +551,11 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       bool doDYplots = false;
       if (t.evt_id >= 700 && t.evt_id < 800) {
       	if (t.nlep == 2) {
+	  // still need to add trigger requirement
       	  if ( (t.lep_charge[0] * t.lep_charge[1] == -1)
       	       && (abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1]) )
-      	       && (fabs(t.zll_mass - 90) < 20 ) 
-	       && t.lep_pt[0] > 20 && t.lep_pt[1] > 20) {
+      	       && (fabs(t.zll_mass - 90) < 10 ) 
+	       && t.lep_pt[0] > 25 && t.lep_pt[1] > 20) {
 	    // no additional explicit lepton veto
 	    // i.e. implicitly allow 3rd PF lepton or hadron
 	    //nlepveto_ = 0; 
@@ -1127,8 +1133,6 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
   float chiso = t.gamma_chHadIso[0];
 
   //RooRealVars for unbinned data hist
-  RooRealVar* x_ = new RooRealVar( "x", "", 0., 50.);
-  RooRealVar* w_ = new RooRealVar( "w", "", 0., 1000.);
   x_->setVal(chiso);
   w_->setVal(evtweight_);
  
