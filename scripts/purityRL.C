@@ -133,7 +133,7 @@ void purityRL(string input_dir = "/nfs-5/users/mderdzinski/spring2015/mt2/MT2Ana
 {
   
   //load signal regions
-  vector<SR> SRVec =  getSignalRegionsZurich_jetpt40();
+  vector<SR> SRVec =  getSignalRegionsZurich_jetpt30();
 
   //open files
   TFile* f_w = new TFile(Form("%s/wjets_ht.root",input_dir.c_str())); //wjet file
