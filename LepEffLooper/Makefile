@@ -30,7 +30,7 @@ COREDIR = CORE
 DICTINCLUDE = $(ROOTSYS)/include/Math/QuantFuncMathCore.h $(ROOTSYS)/include/TLorentzVector.h $(ROOTSYS)/include/Math/Vector4D.h
 
 LINKER = g++
-LINKERFLAGS = $(shell root-config --ldflags --libs) -lEG -lGenVector -lTMVA
+LINKERFLAGS = $(shell root-config --ldflags --libs) -lEG -lGenVector -lTMVA -lRooFit
 
 DIR = ./
 
@@ -42,7 +42,7 @@ CORESOURCES = $(wildcard ../MT2CORE/*.cc) $(wildcard ../MT2CORE/MT2/*.cc) $(wild
 COREOBJECTS = $(CORESOURCES:.cc=.o) 
 CORELIB = libLepEffLooperCORE.so
 
-TOOLSSOURCES = $(wildcard ../CORE/Tools/*.cc) $(wildcard ../CORE/Tools/MT2/*.cc)
+TOOLSSOURCES = $(wildcard ../CORE/Tools/*.cc) $(wildcard ../CORE/Tools/MT2/*.cc) $(wildcard ../CORE/Tools/dorky/*.cc)
 TOOLSOBJECTS = $(TOOLSSOURCES:.cc=.o)
 TOOLSLIB = libLepEffLooperTools.so
 
@@ -118,6 +118,9 @@ clean:
         ../CORE/Tools/*.so \
         ../CORE/Tools/MT2/*.o \
 	../CORE/Tools/MT2/*.d \
-        ../CORE/Tools/MT2/*.so 
+        ../CORE/Tools/MT2/*.so \
+        ../CORE/Tools/dorky/*.o \
+	../CORE/Tools/dorky/*.d \
+        ../CORE/Tools/dorky/*.so 
 
 endif
