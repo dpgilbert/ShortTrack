@@ -602,8 +602,15 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
       if (doGJplots) {
         saveGJplots = true;
-	//fillHistosCRGJ("crgj");
-        if ( t.gamma_mcMatchId[0] > 0 ) fillHistosCRGJ("crgj"); // Prompt photon
+	//// To test Madgraph fragmentation (need to remove drMinParton requirement from above) //
+	//if ( t.gamma_mcMatchId[0] > 0 ) {
+	//  if (t.evt_id < 200 || t.gamma_drMinParton[0]>0.4) fillHistosCRGJ("crgj"); // Prompt photon
+	//  if (t.evt_id >=200 && t.gamma_drMinParton[0]<0.4)  fillHistosCRGJ("crgj", "FragGJ");
+	//  if (t.evt_id < 200 && t.gamma_drMinParton[0]<0.05) fillHistosCRGJ("crgj", "FragGJ");
+	//}
+	//// End of Madgraph fragmentation tests //
+
+	if ( t.gamma_mcMatchId[0] > 0 ) fillHistosCRGJ("crgj"); // Prompt photon 
 	else fillHistosCRGJ("crgj", "Fake");
       }
       if (doDYplots) {
@@ -943,6 +950,13 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
       }//SRloop
     }
   }
+  if (passSieie) {
+    add = "AllIso";
+    fillHistosGammaJets(SRNoCut.crgjHistMap, SRNoCut.crgjRooDataSetMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), prefix+SRNoCut.GetName(), suffix+add);
+    if(passBase && passPtMT2) {
+      fillHistosGammaJets(SRBase.crgjHistMap, SRBase.crgjRooDataSetMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crgjbase", suffix+add);
+    }
+  }
       
 
   return;
@@ -1169,7 +1183,7 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
   //cout<<"Event "<<t.evt<<" with weight "<< evtweight_ <<" is in sr "<<dirname<<endl;
   plot1D("h_mt2bins"+s,       t.gamma_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   if ( (dirname=="crgjnocut" || dirname=="crgjbase" || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH") 
-       && (s=="" || s=="Fake") )// Don't make these for Loose, LooseNotTight, NotLoose. SieieSB
+       && (s=="" || s=="Fake" || s=="FragGJ" || s=="AllIso") )// Don't make these for Loose, LooseNotTight, NotLoose. SieieSB
     {
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
     plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
@@ -1189,6 +1203,11 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
     plot1D("h_htbins"+s,       t.gamma_ht,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins, htbins);
     plot1D("h_njbins"+s,       t.gamma_nJet30,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
     plot1D("h_nbjbins"+s,       t.gamma_nBJet20,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
+    plot1D("h_drMinParton"+s,   t.gamma_drMinParton[0],   evtweight_, h_1d, ";DRmin(photon, parton)", 100, 0, 5);
+    TString drName = "h_drMinPartonSample";
+    drName += TString::Itoa(t.evt_id, 10);
+    drName += s;
+    plot1D(drName.Data(),   t.gamma_drMinParton[0],   evtweight_, h_1d, ";DRmin(photon, parton)", 100, 0, 5);
     }
 
   outfile_->cd();
