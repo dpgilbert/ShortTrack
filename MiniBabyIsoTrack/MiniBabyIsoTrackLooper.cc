@@ -310,8 +310,6 @@ void MiniBabyIsoTrackLooper::loop(TChain* chain, std::string output_name){
 //--------------------------------------------
 
 void MiniBabyIsoTrackLooper::makeTree(TChain* chain){
-  TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
-  rootdir->cd();
 
   outfile_->cd();
   outtree_ = chain->CloneTree(0);

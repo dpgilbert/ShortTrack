@@ -5,7 +5,7 @@ function run () {
     nohup nice -n 19 root -b -q mergeHadoopFiles.C\(\"${HADOOPDIR}/${TAG}_$1/\",\"${OUTPUTDIR}/$1.root\"\) >& log_merge_${TAG}_$1.txt &
 }
 
-TAG=V00-00-12
+TAG=V00-01-04_25ns
 
 HADOOPDIR=/hadoop/cms/store/user/${USER}/mt2babies/
 OUTPUTDIR=/nfs-6/userdata/mt2/$TAG/
@@ -14,19 +14,37 @@ mkdir -p $OUTPUTDIR
 chmod -R a+wrx $OUTPUTDIR
 
 #
+# DATA
+#
+
+run data_Run2015C_JetHT_PromptReco
+run data_Run2015C_MET_PromptReco
+run data_Run2015C_HTMHT_PromptReco
+run data_Run2015C_SingleMuon_PromptReco
+run data_Run2015C_SingleElectron_PromptReco
+run data_Run2015C_SinglePhoton_PromptReco
+run data_Run2015C_DoubleMuon_PromptReco
+run data_Run2015C_DoubleEG_PromptReco
+run data_Run2015C_MuonEG_PromptReco
+
+#
 # TTBAR
 #
 
-run ttall_msdecays
+run ttall_mg_lo
 
 #
 # ALTERNATIVE TTBAR
 #
 
+#run ttall_amcatnlo
+#run ttall_powheg_p8
+
 #
 # W+JETS
 #
 
+run wjets_amcatnlo
 run wjets_ht100to200
 run wjets_ht200to400
 run wjets_ht400to600
@@ -36,17 +54,16 @@ run wjets_ht600toInf
 # SINGLE TOP
 #
 
-run singletop_tbarschan_l
-run singletop_tbartchan_l
-run singletop_tschan_l
-run singletop_ttchan_l
-run singletop_tWchan
-run singletop_tbarWchan
+run singletop_powheg_4f_ttchan_l
+run singletop_powheg_4f_tbartchan_l
+run singletop_powheg_5f_tbarWchan
+run singletop_powheg_5f_tWchan
 
 #
 # DY+JETS
 #
 
+run zjets_amcatnlo
 run dyjetsll_ht100to200
 run dyjetsll_ht200to400
 run dyjetsll_ht400to600
@@ -57,7 +74,6 @@ run dyjetsll_ht600toInf
 # GAMMA + JETS
 #
 
-#run gjet_pt15to3000
 run gjet_ht100to200
 run gjet_ht200to400
 run gjet_ht400to600
@@ -84,17 +100,10 @@ run zinv_ht600toInf
 # TTV
 #
 
-run ttwjets
-run ttzjets
-run tth
-
 #
 # QCD
 #
 
-run qcd_pt30to50
-run qcd_pt50to80
-run qcd_pt80to120
 run qcd_pt120to170
 run qcd_pt170to300
 run qcd_pt300to470
@@ -105,31 +114,12 @@ run qcd_pt1000to1400
 run qcd_pt1400to1800
 run qcd_pt1800to2400
 run qcd_pt2400to3200
-run qcd_pt3200
-
-run qcd_ht100to250
-run qcd_ht250to500
-run qcd_ht500to1000
-run qcd_ht1000
+run qcd_pt3200toInf
 
 #
 # SIGNAL
 #
 
-run T1tttt_1500_100
-run T1tttt_1200_800
-run T1qqqq_1400_100
-run T1qqqq_1000_800
-run T1bbbb_1000_900
-run T1bbbb_1500_100
-run T2tt_425_325
-run T2tt_500_325
-run T2tt_650_325
-run T2tt_850_100
-run T2bb_900_100
-run T2bb_600_580
-run T2qq_1200_100
-run T2qq_600_550
 
 
 

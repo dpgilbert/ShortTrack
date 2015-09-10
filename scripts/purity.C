@@ -23,9 +23,13 @@
 #include "../MT2CORE/mt2tree.h"
 #include "../MT2CORE/sigSelections.h"
 #include "../MT2CORE/SR.h"
+#include "../MT2CORE/sigSelections.cc"
+#include "../MT2CORE/SR.cc"
 
 using namespace std;
 using namespace mt2;
+
+bool verbose = false;
 
 //converts float to string
 std::string toString(float in){
@@ -195,6 +199,7 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, SR sr, TH2D* h_FR, const 
 
 void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TFile* f_zinv, TString sr)
 {
+  if (verbose) cout<<__LINE__<<" Making plots for region "<<sr<<endl;
   //get hists
   TH1D* h_gjet = (TH1D*) f_gjet->Get("crgj"+sr+"/h_mt2bins");
   TH1D* h_qcd = (TH1D*) f_qcd->Get("crgj"+sr+"/h_mt2bins");
@@ -211,6 +216,7 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TFile* f_zinv, TStri
 
   //check existence
   if(!h_gjet) return;
+  if (verbose) cout<<__LINE__<<" f_gjet:crgj"<<sr<<"/h_mt2bins has integral "<<h_gjet->Integral()<<endl;
   bool doTrue = false;
   bool doFR = false;
   bool doSieieSB = false;
@@ -395,6 +401,22 @@ void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TFile* f_zinv, TStri
   h_denTrue->Write();
   h_predZ->Write();
 
+  if (verbose) {
+    cout<<__LINE__<<"  h_purityTrue              " <<      h_purityTrue		    ->GetName()<<" "<<  h_purityTrue		 ->Integral()<<endl;   
+    cout<<__LINE__<<"  h_purityFR		 " << 	   h_purityFR		    ->GetName()<<" "<<  h_purityFR		 ->Integral()<<endl;   
+    cout<<__LINE__<<"  h_puritySieieSB		 " <<      h_puritySieieSB	    ->GetName()<<" "<<  h_puritySieieSB	    	 ->Integral()<<endl;
+    cout<<__LINE__<<"  h_estimateSieieSB	 " << 	   h_estimateSieieSB	    ->GetName()<<" "<<  h_estimateSieieSB	 ->Integral()<<endl;   
+    cout<<__LINE__<<"  h_purityFragPlus50	 " << 	   h_purityFragPlus50	    ->GetName()<<" "<<  h_purityFragPlus50	 ->Integral()<<endl;   
+    cout<<__LINE__<<"  h_purityFragMinus50	 " << 	   h_purityFragMinus50	    ->GetName()<<" "<<  h_purityFragMinus50	 ->Integral()<<endl;   
+    cout<<__LINE__<<"  h_purityFRpoisson	 " << 	   h_purityFRpoisson	    ->GetName()<<" "<<  h_purityFRpoisson	 ->Integral()<<endl;   
+    cout<<__LINE__<<"  h_puritySieieSBpoisson	 " <<      h_puritySieieSBpoisson   ->GetName()<<" "<<  h_puritySieieSBpoisson   ->Integral()<<endl;
+    cout<<__LINE__<<"  h_estimateSieieSBpoisson  " << 	   h_estimateSieieSBpoisson ->GetName()<<" "<<  h_estimateSieieSBpoisson ->Integral()<<endl;
+    cout<<__LINE__<<"  h_denTrue		 " << 	   h_denTrue		    ->GetName()<<" "<<  h_denTrue		 ->Integral()<<endl;   
+    cout<<__LINE__<<"  h_predZ                   " << 	   h_predZ                  ->GetName()<<" "<<  h_predZ                  ->Integral()<<endl;
+  }
+
+
+
   //write raw numbers to output file
   ofstream purityLog;
   purityLog.open("purity.log", ios::app);
@@ -418,7 +440,7 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
 {
   
   //load signal regions
-  vector<SR> SRVec =  getSignalRegionsZurich_jetpt40();
+  vector<SR> SRVec =  getSignalRegionsZurich_jetpt30();
 
   //open files
   //TFile* f_g = new TFile("$CMSSW_BASE/../MT2looper/output/V00-00-12_skim_trig_nj2_ht450_met30_mt2gt200_Zinv/gjet_ht.root"); //gjet file

@@ -12,6 +12,9 @@
 #include "TClass.h"
 #include "TLegend.h"
 
+#include "RooRealVar.h"
+#include "RooDataSet.h"
+
 #include <iostream>
 #include <cmath>
 
@@ -216,6 +219,22 @@ TGraph GetEff(TFile *f, const char *hist1, bool increasing)
 }
 
 
+void plotRooDataSet(string name, RooRealVar* x_, RooRealVar* w_, double weight, std::map<string, RooDataSet*> &allRooDatasets, string title)
+{
+  if (title=="") title=name; 
+  std::map<string, RooDataSet*>::iterator iter= allRooDatasets.find(name);
+  if(iter == allRooDatasets.end()) //no RooDataSet for this yet, so make a new one
+    {
+      RooDataSet* currentDataset= new RooDataSet(name.c_str(), title.c_str(), RooArgSet(*x_,*w_), w_->GetName() );
+      currentDataset->add( RooArgList(*x_, *w_), weight );
+      allRooDatasets.insert(std::pair<string, RooDataSet*> (name,currentDataset) );
+    }
+  else // exists already, so just fill it
+    {
+      (*iter).second->add( RooArgList(*x_, *w_), weight );
+    }
+}
+
 void plot1D(string name, float xval, double weight, std::map<string, TH1*> &allhistos, 
 	    string title, int numbinsx, float xmin, float xmax)  
 {
@@ -296,6 +315,27 @@ TH1D* getHist1D(string title, std::map<string, TH1*> &allhistos,
   return currentHisto;
 }
 
+TH2D* getHist2D(string title, std::map<string, TH1*> &allhistos, 
+		int numbinsx, float xmin, float xmax, int numbinsy, float ymin, float ymax)  
+{
+
+  TH2D* currentHisto = 0;
+
+  std::map<string, TH1*>::iterator iter= allhistos.find(title);
+  if(iter == allhistos.end()) //no histo for this yet, so make a new one
+    {
+      currentHisto= new TH2D(title.c_str(), title.c_str(), numbinsx, xmin, xmax, numbinsy, ymin, ymax);
+      currentHisto->Sumw2();
+      allhistos.insert(std::pair<string, TH2D*> (title,currentHisto) );
+    }
+  else // exists already, so just fill it
+    {
+      currentHisto = (TH2D*) (*iter).second;
+    }
+  
+  return currentHisto;
+}
+
 void insertHist1D(TH1D* hist, std::map<string, TH1*> &allhistos)
 {
 
@@ -309,6 +349,25 @@ void insertHist1D(TH1D* hist, std::map<string, TH1*> &allhistos)
   else // exists already, give warning and overwrite
     {
       printf("[PlotUtilities::insertHist1D] WARNING: overwriting histogram %s\n", title.c_str());
+      (*iter).second = hist;
+    }
+  
+  return;
+}
+
+void insertHist2D(TH2D* hist, std::map<string, TH1*> &allhistos)
+{
+
+  string title(hist->GetName());
+
+  std::map<string, TH1*>::iterator iter= allhistos.find(title);
+  if(iter == allhistos.end()) //no histo for this yet, insert into map
+    {
+      allhistos.insert(std::pair<string, TH2D*> (title,hist) );
+    }
+  else // exists already, give warning and overwrite
+    {
+      printf("[PlotUtilities::insertHist2D] WARNING: overwriting histogram %s\n", title.c_str());
       (*iter).second = hist;
     }
   
@@ -345,6 +404,31 @@ void savePlots2(std::map<string, TH2D*> &h_1d, const char* outfilename){
   outfile.Close();
 }
 
+void saveRooDataSetsDir(std::map<string, RooDataSet*>& datasets, TFile* outfile, const char* dirname){
+
+  printf("[PlotUtilities::saveRooDataSets] Saving RooDataSets to dir: %s\n", dirname);
+
+  TDirectory* dir = 0;
+
+  // base dir: just cd to output file
+  if (strcmp(dirname,"") == 0) {
+    outfile->cd();
+  } else {
+    // first check for directory, create if it doesn't exist
+    dir = (TDirectory*)outfile->Get(dirname);
+    if (dir == 0) {
+      dir = outfile->mkdir(dirname);
+    } 
+    dir->cd();
+  }
+
+  std::map<std::string, RooDataSet*>::iterator iter;
+  for(iter=datasets.begin(); iter!=datasets.end(); iter++) {
+    iter->second->Write();
+    delete iter->second;
+  }
+
+}
 
 void savePlotsDir(std::map<string, TH1*> &h_1d, TFile* outfile, const char* dirname){
 

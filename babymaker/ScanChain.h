@@ -26,7 +26,7 @@ class babyMaker {
     delete BabyTree_;
   };
 
-  void ScanChain(TChain*, std::string = "testSample");
+  void ScanChain(TChain*, std::string = "testSample", int bx = 50);
 
   void MakeBabyNtuple(const char *);
   void InitBabyNtuple();
@@ -40,6 +40,9 @@ class babyMaker {
 
   TH1D* count_hist_;
 
+  bool isDataFromFileName;
+  bool isPromptReco;
+  
   //baby ntuple variables
 
   Int_t           run;
@@ -53,6 +56,7 @@ class babyMaker {
   Float_t         evt_filter;
   ULong64_t       evt_nEvts;
   Int_t           evt_id;
+  Float_t         genWeight;
   Float_t         puWeight;
   Int_t           nVert;
   Int_t           nTrueInt;
@@ -62,12 +66,16 @@ class babyMaker {
   Int_t           nJet40;
   Int_t           nBJet20;
   Int_t           nBJet25;
+  Int_t           nBJet30;
   Int_t           nBJet40;
+  Int_t           nJet30FailId;
+  Int_t           nJet100FailId;
   Int_t           nMuons10;
   Int_t           nElectrons10;
   Int_t           nLepLowMT;
   Int_t           nTaus20;
   Int_t           nGammas20;
+  Int_t           nPFCHCand3;
 
   Float_t         deltaPhiMin;
   Float_t         diffMetMht;
@@ -102,6 +110,8 @@ class babyMaker {
   Float_t         met_rawPhi;
   Float_t         met_caloPt;
   Float_t         met_caloPhi;
+  Float_t         met_trkPt;
+  Float_t         met_trkPhi;
   Float_t         met_genPt;
   Float_t         met_genPhi;
 
@@ -116,19 +126,29 @@ class babyMaker {
   Int_t           Flag_trackingFailureFilter;
   Int_t           Flag_CSCTightHaloFilter;
   Int_t           Flag_HBHENoiseFilter;
+  Int_t           Flag_HBHEIsoNoiseFilter;
   Int_t           Flag_goodVertices;
   Int_t           Flag_eeBadScFilter;
   Int_t           Flag_METFilters;
 
-//----- TRIGGER (to be better defined)
-  Int_t           HLT_HT900;   
-  Int_t           HLT_MET170;
-  Int_t           HLT_ht350met120;   
+//----- TRIGGER 
+  Int_t           HLT_PFHT800;   
+  Int_t           HLT_PFHT900;   
+  Int_t           HLT_PFMET170;
+  Int_t           HLT_PFHT350_PFMET100;   
+  Int_t           HLT_PFHT350_PFMET120;   
   Int_t           HLT_SingleMu;   
+  Int_t           HLT_SingleEl;   
   Int_t           HLT_DoubleEl;   
-  Int_t           HLT_MuEG;   
+  Int_t           HLT_MuX_Ele12;   
+  Int_t           HLT_Mu8_EleX;   
   Int_t           HLT_DoubleMu;   
-  Int_t           HLT_Photons;   
+  Int_t           HLT_Photon165_HE10;   
+  Int_t           HLT_PFHT350_Prescale;   
+  Int_t           HLT_PFHT475_Prescale;   
+  Int_t           HLT_PFHT600_Prescale;   
+  Int_t           HLT_DiCentralPFJet70_PFMET120;
+  Int_t           HLT_DiCentralPFJet55_PFMET110;
 
 //----- LEPTONS
   static const int max_nlep = 50;
@@ -145,6 +165,7 @@ class babyMaker {
   Float_t         lep_relIso03[max_nlep];   //[nlep]
   Float_t         lep_relIso04[max_nlep];   //[nlep]
   Float_t         lep_miniRelIso[max_nlep];   //[nlep]
+  Float_t         lep_relIsoAn04[max_nlep];   //[nlep]
   Int_t           lep_mcMatchId[max_nlep];   //[nlep]
   Int_t           lep_lostHits[max_nlep];   //[nlep]
   Int_t           lep_convVeto[max_nlep];   //[nlep]
@@ -158,6 +179,7 @@ class babyMaker {
   Float_t           isoTrack_phi[max_nisoTrack];
   Float_t           isoTrack_mass[max_nisoTrack];
   Float_t           isoTrack_absIso[max_nisoTrack];
+  Float_t           isoTrack_relIsoAn04[max_nisoTrack];
   Float_t           isoTrack_dz[max_nisoTrack];
   Int_t             isoTrack_pdgId[max_nisoTrack];
   Int_t             isoTrack_mcMatchId[max_nisoTrack];
@@ -201,8 +223,11 @@ class babyMaker {
   Float_t         gamma_mt2;
   Int_t           gamma_nJet30;
   Int_t           gamma_nJet40;
+  Int_t           gamma_nJet30FailId;
+  Int_t           gamma_nJet100FailId;
   Int_t           gamma_nBJet20;
   Int_t           gamma_nBJet25;
+  Int_t           gamma_nBJet30;
   Int_t           gamma_nBJet40;
   Float_t         gamma_ht;
   Float_t         gamma_deltaPhiMin;
@@ -277,7 +302,7 @@ class babyMaker {
   Int_t           genLep_sourceId[max_ngenLep];   //[ngenLep]
 
 //----- GEN STATUS 23
-  static const int max_ngenStat23 = 10;
+  static const int max_ngenStat23 = 30;
   Int_t           ngenStat23;
   Float_t         genStat23_pt[max_ngenStat23];   //[ngenStat23]
   Float_t         genStat23_eta[max_ngenStat23];   //[ngenStat23]

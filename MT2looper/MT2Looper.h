@@ -13,6 +13,8 @@
 #include "TH1D.h"
 #include "Math/LorentzVector.h"
 
+#include "RooDataSet.h"
+
 //MT2
 #include "../MT2CORE/mt2tree.h"
 #include "../MT2CORE/sigSelections.h"
@@ -49,7 +51,7 @@ class MT2Looper {
 		  const std::string& dir = "", const std::string& suffix = ""); 
   void fillHistosSingleLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 			      const std::string& dir = "", const std::string& suffix = ""); 
-  void fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, 
+  void fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<std::string, RooDataSet*>& datasets, int n_mt2bins, float* mt2bins, 
 			      const std::string& dir = "", const std::string& suffix = ""); 
   void fillHistosRemovedLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, 
 			      const std::string& dir = "", const std::string& suffix = ""); 
@@ -63,6 +65,7 @@ class MT2Looper {
   int nlepveto_;
   float leppt_;
   float mt_;
+  int nJet30Eta3_;
   bool isSignal_;
   std::map<std::string, TH1*> h_1d_global;
   std::vector<SR> SRVec;
@@ -71,6 +74,7 @@ class MT2Looper {
   SR SRNoCut;
   SR CRSL_WJets;
   SR CRSL_TTbar;
+  TH1D* h_nvtx_weights_;
 };
 
 #endif

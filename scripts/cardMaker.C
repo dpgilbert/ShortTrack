@@ -32,6 +32,10 @@ const float dummy_alpha = 1.; // dummy value for gmN when there are no SR events
 
 const bool uncorrelatedZGratio = false; // treat ZGratio uncertainty as fully uncorrelated
 
+const bool integratedZinvEstimate = false;
+
+const bool fourNuisancesPerBinZGratio = true;
+
 //_______________________________________________________________________________
 std::string toString(int in){
   stringstream ss;
@@ -191,7 +195,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
   if (h_lostlep_cryield != 0) 
     n_lostlep_cr = round(h_lostlep_cryield->Integral(0,-1));
 
-
+  
   TH1D* h_zinv = (TH1D*) f_zinv->Get(fullhistname);
   if (h_zinv != 0) n_zinv = h_zinv->GetBinContent(mt2bin);
   // MC stat unc based on #Z/#g
@@ -204,16 +208,59 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
     err_zinv_mcstat = 1.;
     zinv_ratio_zg = 0.4;
   }
+  // Pure GJet yield (useful when extracting G_i/G_int for integral estimate)
+  TH1D* h_gjetyield = (TH1D*) f_zinv->Get(fullhistnameCRyield);
+
   // Photon yield (includes GJetPrompt+QCDPrompt+QCDFake)
   TH1D* h_zinv_cryield = (TH1D*) f_purity->Get(fullhistname);
-  if (h_zinv_cryield != 0 && h_zinv_cryield->GetBinContent(mt2bin) != 0)
+  if (h_zinv_cryield != 0 && h_zinv_cryield->GetBinContent(mt2bin) != 0) {
     n_zinv_cr = round(h_zinv_cryield->GetBinContent(mt2bin));
+    // When using the integrated estimate (over MT2), take the integral of GJet instead, 
+    // and adjust zinv_ratio_zg by G_i/G_int to account for additional extrapolation
+    if (integratedZinvEstimate)  {
+      n_zinv_cr = round(h_zinv_cryield->Integral(0,-1));
+      if (h_gjetyield != 0) zinv_ratio_zg *= h_gjetyield->GetBinContent(mt2bin)/h_gjetyield->Integral(0,-1);
+    }
+  }
   // Purity and uncertainty
   TH1D* h_zinv_purity = (TH1D*) f_purity->Get(fullhistnamePurity);
   zinv_purity = 1.;
   if (h_zinv_purity != 0 && h_zinv_purity->GetBinContent(mt2bin) != 0) {
     zinv_purity *= h_zinv_purity->GetBinContent(mt2bin);
     err_zinv_purity = h_zinv_purity->GetBinError(mt2bin)/h_zinv_purity->GetBinContent(mt2bin);
+    // When using the integrated estimate (over MT2), should use the integrated purity.
+    // For the moment, just use the purity in the first bin of the distribution.
+    if (integratedZinvEstimate)  {
+      zinv_purity = 1.*h_zinv_purity->GetBinContent(1);
+      err_zinv_purity = h_zinv_purity->GetBinError(1)/h_zinv_purity->GetBinContent(1);
+    }
+  }
+
+  float zllgamma_nj = 1., zllgamma_nb = 1., zllgamma_ht = 1., zllgamma_mt2 = 1.;
+  TString notFound = "";
+  if (fourNuisancesPerBinZGratio) {
+    // Load NJ, NB, HT, MT2 histograms of R(Z/Gamma)
+    TH1D* h_zllgamma_nj  = (TH1D*) f_zinv->Get("h_njbinsRatio");
+    TH1D* h_zllgamma_nb  = (TH1D*) f_zinv->Get("h_nbjbinsRatio");
+    TH1D* h_zllgamma_ht  = (TH1D*) f_zinv->Get("h_htbinsRatio");
+    TH1D* h_zllgamma_mt2 = (TH1D*) f_zinv->Get("h_mt2binsRatio");
+    // Extract values corresponding to this bin
+    if (h_zllgamma_nj == 0 || h_zllgamma_nb == 0 || h_zllgamma_ht == 0 || h_zllgamma_mt2 == 0) {
+      cout<<"Trying fourNuisancesPerBinZGratio, but could not find inclusive Zll/Gamma ratio plots for nuisance parameters"<<endl;
+      return;
+    }
+    int bin_nj   = h_zllgamma_nj ->FindBin(njets_LOW + 0.5);     
+    int bin_nb   = h_zllgamma_nb ->FindBin(nbjets_LOW + 0.5);
+    int bin_ht   = h_zllgamma_ht ->FindBin(ht_LOW + 1);      
+    int bin_mt2  = h_zllgamma_mt2->FindBin(mt2_LOW + 1);     
+    // (set to 100% if the ratio doesn't exist)
+    zllgamma_nj  = h_zllgamma_nj ->GetBinContent( bin_nj  ) > 0 ? h_zllgamma_nj ->GetBinError( bin_nj  ) / h_zllgamma_nj ->GetBinContent( bin_nj  ) : 1.;
+    zllgamma_nb  = h_zllgamma_nb ->GetBinContent( bin_nb  ) > 0 ? h_zllgamma_nb ->GetBinError( bin_nb  ) / h_zllgamma_nb ->GetBinContent( bin_nb  ) : 1.;
+    zllgamma_ht  = h_zllgamma_ht ->GetBinContent( bin_ht  ) > 0 ? h_zllgamma_ht ->GetBinError( bin_ht  ) / h_zllgamma_ht ->GetBinContent( bin_ht  ) : 1.;
+    zllgamma_mt2 = h_zllgamma_mt2->GetBinContent( bin_mt2 ) > 0 ? h_zllgamma_mt2->GetBinError( bin_mt2 ) / h_zllgamma_mt2->GetBinContent( bin_mt2 ) : 1.;
+    //cout<<"Looking at bin "<<channel<<endl;
+    //cout<<"Corresponding bins are: "<<bin_nj<<", "<<bin_nb<<", "<<bin_ht<<", "<<bin_mt2<<endl;
+    //cout<<"Corresponding Zll/Gamma uncertainties are: "<<zllgamma_nj<<", "<<zllgamma_nb<<", "<<zllgamma_ht<<", "<<zllgamma_mt2<<endl;
   }
 
 
@@ -288,9 +335,21 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
   double zinv_zgamma = -1.;
   TString name_zinv_zgamma = "zinv_ZGratio";
   if (uncorrelatedZGratio) name_zinv_zgamma = Form("zinv_ZGratio_%s",channel.c_str());
+  // fourNuisancesPerBinZGratio
+  double zinv_zgamma_nj = 1., zinv_zgamma_nb = 1., zinv_zgamma_ht = 1., zinv_zgamma_mt2 = 1.;
+  TString name_zinv_zgamma_nj  = Form("zinv_ZGratio_nj_%s" , jet_str.c_str()  );
+  TString name_zinv_zgamma_nb  = Form("zinv_ZGratio_nb_%s" , bjet_str.c_str() );
+  TString name_zinv_zgamma_ht  = Form("zinv_ZGratio_ht_%s" , ht_str.c_str()   );
+  // Only a low edge for MT2, since we want to maintain correlations between differently sized MT2 bins with the same lower edge
+  TString name_zinv_zgamma_mt2 = "zinv_ZGratio_m" + toString(mt2_LOW); 
+
   // uncorrelated across TRs and MT2 bins
   double zinv_mcsyst = -1.;
   TString name_zinv_mcsyst = Form("zinv_MC_%s",channel.c_str());
+  double zinv_shape = 1.075;
+  // want this to be uncorrelated (it's a shape uncertainty)
+  TString name_zinv_shape = Form("zinv_shape_%s",channel.c_str());
+ 
 
   // 2+b: pure MC estimate
   if (nbjets_LOW >= 2) {
@@ -303,6 +362,14 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
     n_zinv = n_zinv_cr * zinv_alpha; // don't use Zinv as central value any more!
     zinv_zgamma = 1.20;
     n_syst += 4; // 1: zinv_alphaerr (stat on ratio). 2: zinv_zgamma (R, p, f) 3: gamma function. 4: purity stat unc.
+    if (integratedZinvEstimate)  n_syst++;
+    if (fourNuisancesPerBinZGratio) {
+      zinv_zgamma_nj  =  1. + zllgamma_nj ;     
+      zinv_zgamma_nb  =  1. + zllgamma_nb ;
+      zinv_zgamma_ht  =  1. + zllgamma_ht ;
+      zinv_zgamma_mt2 =  1. + zllgamma_mt2;
+      n_syst += 3;
+    }
   }
 
   // ----- qcd bkg uncertainties: uncorrelated for all bins
@@ -337,8 +404,18 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
   if (nbjets_HI == 1 || nbjets_HI == 2) {
     *ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr,zinv_alpha)  << endl;
     *ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_alphaerr.Data(),zinv_alphaerr)  << endl;
-    *ofile <<  Form("%s                                   lnN    -   %.3f    -    - ",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;     
+    if (fourNuisancesPerBinZGratio) {
+      *ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nj.Data() ,zinv_zgamma_nj )  << endl;
+      *ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nb.Data() ,zinv_zgamma_nb )  << endl;
+      *ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_ht.Data() ,zinv_zgamma_ht )  << endl;
+      *ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_mt2.Data(),zinv_zgamma_mt2)  << endl;
+    }
+    else {
+      *ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;     
+    }
     *ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_purityerr.Data(),zinv_purityerr)  << endl;
+    if (integratedZinvEstimate)
+      *ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_shape.Data(),zinv_shape)  << endl;
   }
   if (nbjets_LOW >= 2) {
     *ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_mcsyst.Data(),zinv_mcsyst)  << endl;

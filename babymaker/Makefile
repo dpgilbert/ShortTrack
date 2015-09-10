@@ -1,83 +1,119 @@
-CC = g++
-INCLUDE = -I../ -I./ 
-CFLAGS = -Wall -g -fPIC $(shell root-config --cflags) $(INCLUDE) $(EXTRACFLAGS) -DTOOLSLIB
-LINKER = g++
+#
+# stuff to make
+#
+ifndef ROOTSYS
+all:
+	@echo "ROOTSYS is not set. Please set ROOT environment properly"; echo
+else
 
-LINKERFLAGS = $(shell root-config --ldflags) $(shell root-config --libs) -lMinuit
-ifeq ($(shell root-config --platform),macosx)
-	LINKERFLAGS = -dynamiclib -undefined dynamic_lookup -Wl,-x -O -Xlinker -bind_at_load -flat_namespace $(shell root-config --libs) -lEG -lGenVector
+all: 	build
+help:
+	@echo "Available Targets:";\
+	cat Makefile | perl -ne 'printf("\t%-15s %s\n",$$1,$$2) if(/^(\S+):[^#]+(#.*)$$/)'
+
+ifndef VERBOSE
+  QUIET := @
 endif
 
-SOURCES = ScanChain.cc
-OBJECTS = $(SOURCES:.cc=.o) LinkDef_out.o
+#ROOFITINCLUDE = 
+#ifdef CMSSW_VERSION
+#	ROOFITINCLUDE = $(shell scramv1 tool info roofitcore | grep INCLUDE | sed 's/^INCLUDE=/-I/')
+#endif
+
+CC = g++
+CMSROOT = ./
+INCLUDE = $(shell root-config --cflags) -I$(CMSROOT) -I$(CMSROOT)/CORE
+CFLAGS = -Wall -Wno-unused-function -g -O2 -fPIC $(INCLUDE) $(EXTRACFLAGS)
+ROOTLIBS = $(shell root-config --ldflags --cflags --libs) -lTMVA #-lEG -lGenVector
+COREDIR = CORE
+
+DICTINCLUDE = $(ROOTSYS)/include/Math/QuantFuncMathCore.h $(ROOTSYS)/include/TLorentzVector.h $(ROOTSYS)/include/Math/Vector4D.h
+
+LINKER = g++
+LINKERFLAGS = $(shell root-config --ldflags --libs) -lEG -lGenVector -lTMVA -lRooFit
+
+DIR = ./
+
+SOURCES = $(wildcard *.cc)
+OBJECTS = $(SOURCES:.cc=.o)
 LIB = libScanChain.so
 
-CORESOURCES = $(wildcard ../CORE/*.cc)
+CORESOURCES = $(wildcard ../CORE/*.cc) $(wildcard ../CORE/Tools/*.cc) $(wildcard ../CORE/Tools/MT2/*.cc)
 COREOBJECTS = $(CORESOURCES:.cc=.o) 
 CORELIB = libBabymakerCORE.so
-
-TOOLSSOURCES = $(wildcard ../Tools/*.cc) $(wildcard ../Tools/MT2/*.cc)
-TOOLSOBJECTS = $(TOOLSSOURCES:.cc=.o) 
-TOOLSLIB = libBabymakerTools.so
 
 MT2CORESOURCES = $(wildcard ../MT2CORE/*.cc) $(wildcard ../MT2CORE/Plotting/*.cc)
 MT2COREOBJECTS = $(MT2CORESOURCES:.cc=.o) 
 MT2CORELIB = libBabymakerMT2CORE.so
 
-#FWLIB = libMiniFWLite.so
-FWLIB = ../Software/MiniFWLite/libMiniFWLite.so
+DICT = LinkDef_out.o
 
-LIBS = $(LIB) $(CORELIB) $(TOOLSLIB) $(MT2CORELIB) $(FWLIB) 
+LIBS = $(LIB) $(CORELIB) $(MT2CORELIB) 
 
-.PHONY: all help compile clean cms2env
+EXE = processBaby
+
+#
+# how to make it
+#
+
+$(CORELIB): $(DICT) $(COREOBJECTS)
+	$(QUIET) echo "Linking $@"; \
+	echo "$(LINKER) -shared -o $@ $(COREOBJECTS) $(DICT) $(LINKERFLAGS)"; \
+	$(LINKER) -shared -o $@ $(COREOBJECTS) $(DICT) $(LINKERFLAGS)
+
+$(MT2CORELIB): $(DICT) $(MT2COREOBJECTS)
+	$(QUIET) echo "Linking $@"; \
+	echo "$(LINKER) -shared -o $@ $(MT2COREOBJECTS) $(DICT) $(LINKERFLAGS)"; \
+	$(LINKER) -shared -o $@ $(MT2COREOBJECTS) $(DICT) $(LINKERFLAGS)
+
+$(LIB):	$(DICT) $(OBJECTS)
+	$(QUIET) echo "Linking $@"; \
+	echo "$(LINKER) -shared -o $@ $(OBJECTS) $(DICT) $(LINKERFLAGS)"; \
+	$(LINKER) -shared -o $@ $(OBJECTS) $(DICT) $(LINKERFLAGS)
+
+LinkDef_out.cxx: LinkDef.h
+	$(QUIET) echo "Making CINT dictionaries"; \
+	rootcint -f LinkDef_out.cc -c -p $(DICTINCLUDE)  LinkDef.h; \
+	cat LinkDef_out.cc > LinkDef_out.cxx; rm LinkDef_out.cc
+
+# the option "-Wl,-rpath,./" adds ./ to the runtime search path for libraries
+$(EXE):  $(LIBS)
+	$(QUIET) echo "Building $@"; \
+	echo "$(CC) -o $@ $(LIBS) $(ROOTLIBS) -Wl,-rpath,./"; \
+	$(CC) -o $@ $(LIBS) $(ROOTLIBS) -Wl,-rpath,./ 
+
+%.o: 	%.cc %.h
+	$(QUIET) echo "Compiling $<"; \
+	$(CC) $(CFLAGS) $< -c -o $@
+
+%.o: 	%.C %.h
+	$(QUIET) echo "Compiling $<"; \
+	$(CC) $(CFLAGS) $< -c -o $@
+
+%.o: 	%.cc
+	$(QUIET) echo "Compiling $<"; \
+	$(CC) $(CFLAGS) $< -c -o $@
+
+%.o: 	%.C
+	$(QUIET) echo "Compiling $<"; \
+	$(CC) $(CFLAGS) $< -c -o $@
+
+%.o:    %.cxx 
+	$(QUIET) echo "Compiling $<"; \
+	$(CC) $(CFLAGS) $< -c -o $@
 
 libs:	$(LIBS)
 
-$(LIB):	$(OBJECTS) 
-	echo "Linking $(LIB)"; \
-	$(LINKER) $(LINKERFLAGS) -shared $(OBJECTS) -o $@
+build:  $(EXE)
 
-$(CORELIB):	$(COREOBJECTS) 
-	echo "Linking $(CORELIB)"; \
-	$(LINKER) $(LINKERFLAGS) -shared $(COREOBJECTS) -o $@
+b: build
 
-$(TOOLSLIB):	$(TOOLSOBJECTS) 
-	echo "Linking $(TOOLSLIB)"; \
-	$(LINKER) $(LINKERFLAGS) -shared $(TOOLSOBJECTS) -o $@
-
-$(MT2CORELIB):	$(MT2COREOBJECTS) 
-	echo "Linking $(MT2CORELIB)"; \
-	$(LINKER) $(LINKERFLAGS) -shared $(MT2COREOBJECTS) -o $@
-
-$(FWLIB):
-	echo "making MiniFWLite"; \
-        cd ../Software/MiniFWLite; \
-        $(MAKE) -f Makefile; cd -; \
-	cp $(FWLIB) .;
-
-LinkDef_out.cxx: LinkDef.h ScanChain.h
-	rootcint -f $@ -c $(INCLUDE) ScanChain.h $<
-
-# General rule for making object files
-%.d:	%.cc
-	$(CC) -MM -MT $@ -MT ${@:.d=.o} $(CFLAGS) $< > $@; \
-                     [ -s $@ ] || rm -f $@
-%.d:	%.cxx
-	$(CC) -MM -MT $@ -MT ${@:.d=.o} $(CFLAGS) $< > $@; \
-                     [ -s $@ ] || rm -f $@
-
-%.o: 	%.cc 
-	$(CC) $(CFLAGS) $< -c -o $@
-
-%.o: 	%.cxx
-	$(CC) $(CFLAGS) $< -c -o $@
-
-.PHONY: all
-all:	$(LIBS)  
-
-.PHONY: clean
-clean:  
-	rm -v -f \
+clean:
+	rm -f \
+	LinkDef_out* \
+	*.o \
+	$(LIBS) \
+	$(EXE) \
         ../CORE/*.o \
         ../CORE/*.d \
         ../CORE/*.so \
@@ -87,20 +123,11 @@ clean:
         ../MT2CORE/Plotting/*.o \
         ../MT2CORE/Plotting/*.d \
         ../MT2CORE/Plotting/*.so \
-        ../Tools/*.o \
-	../Tools/*.d \
-        ../Tools/*.so \
-        ../Tools/MT2/*.o \
-	../Tools/MT2/*.d \
-        ../Tools/MT2/*.so \
-        ../Software/MiniFWLite/*.o \
-	../Software/MiniFWLite/*.d \
-        $(CORELIB) $(TOOLSLIB) $(MT2CORELIB) $(LIB) $(FWLIB) \
-        LinkDef_out.cxx  LinkDef_out.h \
-        *.o *.d *.so; echo "Done"
+        ../CORE/Tools/*.o \
+	../CORE/Tools/*.d \
+        ../CORE/Tools/*.so \
+        ../CORE/Tools/MT2/*.o \
+	../CORE/Tools/MT2/*.d \
+        ../CORE/Tools/MT2/*.so 
 
-test: 
-	@echo $(INCLUDE)
-
--include $(LIBDIR)/LinkDef_out.d
-
+endif

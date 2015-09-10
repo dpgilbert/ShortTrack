@@ -31,12 +31,13 @@ void ReplaceString(std::string& subject, const std::string& search, const std::s
 //_______________________________________________________________________________
 int getColor(const string& sample) {
   if (sample.find("data") != string::npos) return kBlack;
-  if (sample.find("ttbar") != string::npos) return kBlue;
-  if (sample.find("top") != string::npos) return kBlue;
-  if (sample.find("wjets") != string::npos) return kGreen+1;
-  if (sample.find("zinv") != string::npos) return kGreen-1;
-  if (sample.find("qcd") != string::npos) return kYellow+1;
-  if (sample.find("dyjets") != string::npos) return kRed;
+  if (sample.find("ttbar") != string::npos) return 855;
+  if (sample.find("top") != string::npos) return 855;
+  if (sample.find("wjets") != string::npos) return 417;
+  if (sample.find("zinv") != string::npos) return 419;
+  if (sample.find("qcd") != string::npos) return 401;
+  if (sample.find("dyjets") != string::npos) return 430;
+  if (sample.find("zjets") != string::npos) return 430;
   if (sample.find("T1tttt") != string::npos) return kRed;
   if (sample.find("T1bbbb") != string::npos) return kMagenta;
   if (sample.find("T1qqqq") != string::npos) return kOrange;
@@ -51,13 +52,14 @@ int getColor(const string& sample) {
 string getLegendName(const string& sample) {
   if (sample.find("fakedata") != string::npos) return "Fake Data";
   if (sample.find("data") != string::npos) return "Data";
-  if (sample.find("ttbar") != string::npos) return "Top";
+  if (sample.find("ttbar") != string::npos) return "ttbar";
   if (sample.find("top") != string::npos) return "Top";
   if (sample.find("wjets") != string::npos) return "W+jets";
   if (sample.find("zinv") != string::npos) return "Z+jets";
   if (sample.find("gjet") != string::npos) return "Gamma+jets";
   if (sample.find("qcd") != string::npos) return "QCD";
   if (sample.find("dyjets") != string::npos) return "Z+jets";
+  if (sample.find("zjets") != string::npos) return "Z+jets";
   if (sample.find("T1tttt_1500_100") != string::npos) return "T1tttt 1500, 100";
   if (sample.find("T1tttt_1200_800") != string::npos) return "T1tttt 1200, 800";
   if (sample.find("T1bbbb_1000_900") != string::npos) return "T1bbbb 1000, 900";
@@ -239,7 +241,7 @@ string getMT2PlotLabel(TFile* f, std::string dir_str) {
   }
   else return "M_{T2} > 200 GeV";
 
-  return "M_{T2} > " + toString(mt2_LOW);
+  return "M_{T2} > " + toString(mt2_LOW) + " GeV";
 
 }
 

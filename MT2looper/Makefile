@@ -1,84 +1,126 @@
-CC = g++
-INCLUDE = -I../ -I./ 
-CFLAGS = -Wall -g -fPIC $(shell root-config --cflags) $(INCLUDE) $(EXTRACFLAGS) -DTOOLSLIB
-LINKER = g++
+#
+# stuff to make
+#
+ifndef ROOTSYS
+all:
+	@echo "ROOTSYS is not set. Please set ROOT environment properly"; echo
+else
 
-LINKERFLAGS = $(shell root-config --ldflags) $(shell root-config --libs) -lMinuit
-ifeq ($(shell root-config --platform),macosx)
-	LINKERFLAGS = -dynamiclib -undefined dynamic_lookup -Wl,-x -O -Xlinker -bind_at_load -flat_namespace $(shell root-config --libs) -lEG -lGenVector
+all: 	build
+help:
+	@echo "Available Targets:";\
+	cat Makefile | perl -ne 'printf("\t%-15s %s\n",$$1,$$2) if(/^(\S+):[^#]+(#.*)$$/)'
+
+ifndef VERBOSE
+  QUIET := @
 endif
 
-SOURCES =  MT2Looper.cc 
-OBJECTS = $(SOURCES:.cc=.o) LinkDef_out.o
+#ROOFITINCLUDE = 
+#ifdef CMSSW_VERSION
+#	ROOFITINCLUDE = $(shell scramv1 tool info roofitcore | grep INCLUDE | sed 's/^INCLUDE=/-I/')
+#endif
+
+CC = g++
+CMSROOT = ./
+INCLUDE = $(shell root-config --cflags) -I$(CMSROOT) -I$(CMSROOT)/CORE
+CFLAGS = -Wall -Wno-unused-function -g -O2 -fPIC $(INCLUDE) $(EXTRACFLAGS)
+ROOTLIBS = $(shell root-config --ldflags --cflags --libs) -lTMVA #-lEG -lGenVector
+COREDIR = CORE
+
+DICTINCLUDE = $(ROOTSYS)/include/Math/QuantFuncMathCore.h $(ROOTSYS)/include/TLorentzVector.h $(ROOTSYS)/include/Math/Vector4D.h
+
+LINKER = g++
+LINKERFLAGS = $(shell root-config --ldflags --libs) -lEG -lGenVector -lTMVA -lRooFit
+
+DIR = ./
+
+SOURCES = $(wildcard *.cc)
+OBJECTS = $(SOURCES:.cc=.o)
 LIB = libMT2Looper.so
 
 CORESOURCES = $(wildcard ../MT2CORE/*.cc) $(wildcard ../MT2CORE/MT2/*.cc) $(wildcard ../MT2CORE/Plotting/*.cc)
 COREOBJECTS = $(CORESOURCES:.cc=.o) 
 CORELIB = libMT2LooperCORE.so
 
-TOOLSSOURCES = $(wildcard ../Tools/*.cc) $(wildcard ../Tools/MT2/*.cc)
+TOOLSSOURCES = $(wildcard ../CORE/Tools/*.cc) $(wildcard ../CORE/Tools/MT2/*.cc) $(wildcard ../CORE/Tools/dorky/*.cc)
 TOOLSOBJECTS = $(TOOLSSOURCES:.cc=.o)
-TOOLSLIB = libBabymakerTools.so
-
+TOOLSLIB = libMT2LooperTools.so
 
 LIBS = $(LIB) $(CORELIB) $(TOOLSLIB)
 
-.PHONY: all help compile clean cms2env
+EXE = runLooper
+
+#
+# how to make it
+#
+
+$(CORELIB): $(DICT) $(COREOBJECTS)
+	$(QUIET) echo "Linking $@"; \
+	echo "$(LINKER) -shared -o $@ $(COREOBJECTS) $(DICT) $(LINKERFLAGS)"; \
+	$(LINKER) -shared -o $@ $(COREOBJECTS) $(DICT) $(LINKERFLAGS)
+
+$(TOOLSLIB): $(DICT) $(TOOLSOBJECTS)
+	$(QUIET) echo "Linking $@"; \
+	echo "$(LINKER) -shared -o $@ $(TOOLSOBJECTS) $(DICT) $(LINKERFLAGS)"; \
+	$(LINKER) -shared -o $@ $(TOOLSOBJECTS) $(DICT) $(LINKERFLAGS)
+
+$(LIB):	$(DICT) $(OBJECTS)
+	$(QUIET) echo "Linking $@"; \
+	echo "$(LINKER) -shared -o $@ $(OBJECTS) $(DICT) $(LINKERFLAGS)"; \
+	$(LINKER) -shared -o $@ $(OBJECTS) $(DICT) $(LINKERFLAGS)
+
+# the option "-Wl,-rpath,./" adds ./ to the runtime search path for libraries
+$(EXE):  $(LIBS)
+	$(QUIET) echo "Building $@"; \
+	echo "$(CC) -o $@ $(LIBS) $(ROOTLIBS) -Wl,-rpath,./"; \
+	$(CC) -o $@ $(LIBS) $(ROOTLIBS) -Wl,-rpath,./ 
+
+%.o: 	%.cc %.h
+	$(QUIET) echo "Compiling $<"; \
+	$(CC) $(CFLAGS) $< -c -o $@
+
+%.o: 	%.C %.h
+	$(QUIET) echo "Compiling $<"; \
+	$(CC) $(CFLAGS) $< -c -o $@
+
+%.o: 	%.cc
+	$(QUIET) echo "Compiling $<"; \
+	$(CC) $(CFLAGS) $< -c -o $@
+
+%.o: 	%.C
+	$(QUIET) echo "Compiling $<"; \
+	$(CC) $(CFLAGS) $< -c -o $@
+
+%.o:    %.cxx 
+	$(QUIET) echo "Compiling $<"; \
+	$(CC) $(CFLAGS) $< -c -o $@
 
 libs:	$(LIBS)
 
-$(LIB):	$(OBJECTS) 
-	echo "Linking $(LIB)"; \
-	$(LINKER) $(LINKERFLAGS) -shared $(OBJECTS) -o $@
+build:  $(EXE)
 
-$(CORELIB):	$(COREOBJECTS) 
-	echo "Linking $(CORELIB)"; \
-	$(LINKER) $(LINKERFLAGS) -shared $(COREOBJECTS) -o $@
+b: build
 
-$(TOOLSLIB): $(TOOLSOBJECTS) 
-	echo "Linking $(TOOLSLIB)"; \
-  $(LINKER) $(LINKERFLAGS) -shared $(TOOLSOBJECTS) -o $@
-
-LinkDef_out.cxx: LinkDef.h MT2Looper.h 
-	rootcint -f $@ -c $(INCLUDE) MT2Looper.h  $<
-
-# General rule for making object files
-%.d:	%.cc
-	$(CC) -MM -MT $@ -MT ${@:.d=.o} $(CFLAGS) $< > $@; \
-                     [ -s $@ ] || rm -f $@
-%.d:	%.cxx
-	$(CC) -MM -MT $@ -MT ${@:.d=.o} $(CFLAGS) $< > $@; \
-                     [ -s $@ ] || rm -f $@
-
-%.o: 	%.cc 
-	$(CC) $(CFLAGS) $< -c -o $@
-
-%.o: 	%.cxx
-	$(CC) $(CFLAGS) $< -c -o $@
-
-.PHONY: all
-all:	$(LIBS)  
-
-.PHONY: clean
-clean:  
-	rm -v -f \
+clean:
+	rm -f \
+	LinkDef_out* \
+	*.o \
+	$(LIBS) \
+	$(EXE) \
         ../MT2CORE/*.o \
         ../MT2CORE/*.d \
         ../MT2CORE/*.so \
-	      ../MT2CORE/Plotting/*.o \
-	      ../MT2CORE/Plotting/*.d \
-	      ../MT2CORE/Plotting/*.so \
-        ../Tools/*.o \
-        ../Tools/*.d \
-        ../Tools/*.so \
-        ../Tools/MT2/*.o \
-        ../Tools/MT2/*.d \
-        $(CORELIB) $(TOOLSLIB) $(LIB) \
-        LinkDef_out.cxx  LinkDef_out.h \
-        *.o *.d *.so; echo "Done"
+        ../MT2CORE/Plotting/*.o \
+        ../MT2CORE/Plotting/*.d \
+        ../MT2CORE/Plotting/*.so \
+        ../CORE/Tools/*.o \
+	../CORE/Tools/*.d \
+        ../CORE/Tools/*.so \
+        ../CORE/Tools/MT2/*.o \
+	../CORE/Tools/MT2/*.d \
+        ../CORE/Tools/MT2/*.so \
+        ../CORE/Tools/dorky/*.o \
+	../CORE/Tools/dorky/*.d \
+        ../CORE/Tools/dorky/*.so 
 
-test: 
-	@echo $(INCLUDE)
-
--include $(LIBDIR)/LinkDef_out.d
-
+endif

@@ -1,63 +1,25 @@
-
-#ifndef __CINT__
 #include "TChain.h"
 #include "TROOT.h"
-#include "TStyle.h"
 #include "TSystem.h"
+#include "TString.h"
 
-#include "scanChain.h"
+#include "ScanChain.h"
 
 #include <iostream>
-#endif
 
-void loadChain( TChain *ch, const std::string& base )
-{
-  TChain *dummy = new TChain("Events");
+int main(int argc, char **argv) {
 
-  int nFiles = 0;
-  if (dummy->Add(base.c_str())) {
-    nFiles = ch->Add(base.c_str());
-    std::cout << "Main " <<base.c_str() << " exists: use it. Loaded " 
-              << nFiles << " files" << std::endl;
-  } else
-    std::cout << "Couldn't find " << base << std::endl;
-
-  // be paranoid
-  if (nFiles == 0) {
-    std::cout << "ERROR: expected to read files " 
-              << base.c_str() << "  but found none" << std::endl;
-    //assert(0);
-    exit(0);
+  if (argc < 3) {
+    std::cout << "USAGE: processBaby <tag> <filename>" << std::endl;
+    return 1;
   }
 
-  return;
-}
-
-void processBaby( TString outfileid = "tt_test", TString infile = "/hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/merged/merged_ntuple_190.root" )
-{
-
-  //---------------------------------------------------------------
-  // choose version, output will be written to output/[version]
-  //---------------------------------------------------------------
-  
-  // Load Everything -- do we need these?
-  gSystem->Load("libTree.so");
-  gSystem->Load("libPhysics.so");
-  gSystem->Load("libEG.so");
-  gSystem->Load("libMathCore.so");
-
-  // definitely need these, at least for batch running
-  gSystem->Load("libGenVector.so");
-
-  // these libraries should be in babymaker dir after build
-  gSystem->Load("libMiniFWLite.so");
-  gSystem->Load("libBabymakerCORE.so");
-  gSystem->Load("libBabymakerTools.so");
-  gSystem->Load("libBabymakerMT2CORE.so");
-  gSystem->Load("libScanChain.so");
+  TString outfileid(argv[1]); 
+  TString infile(argv[2]); 
 
   TChain *chain = new TChain("Events");
-  loadChain(chain, infile.Data());
+  chain->Add(infile.Data());
+  if (chain->GetEntries() == 0) std::cout << "WARNING: no entries in chain. filename was: " << infile << std::endl;
 
   //-------------------------------------
   //set name to get comprehensible output -- will need to update these!
@@ -96,24 +58,24 @@ void processBaby( TString outfileid = "tt_test", TString infile = "/hadoop/cms/s
   else if (infile.Contains("ZJetsToNuNu_HT-200to400"))               sample = Form("zinv_ht200to400_%s", outfileid.Data());
   else if (infile.Contains("ZJetsToNuNu_HT-400to600"))               sample = Form("zinv_ht400to600_%s", outfileid.Data());
   else if (infile.Contains("ZJetsToNuNu_HT-600toInf"))               sample = Form("zinv_ht600toInf_%s", outfileid.Data());
-  else if (infile.Contains("QCD_Pt-5to10"))                          sample = Form("qcd_pt5to10_%s",  outfileid.Data());
-  else if (infile.Contains("QCD_Pt-10to15"))                         sample = Form("qcd_pt10to15_%s",  outfileid.Data());
-  else if (infile.Contains("QCD_Pt-15to30"))                         sample = Form("qcd_pt15to30_%s",  outfileid.Data());
-  else if (infile.Contains("QCD_Pt-30to50"))                         sample = Form("qcd_pt30to50_%s",  outfileid.Data());
-  else if (infile.Contains("QCD_Pt-50to80"))                         sample = Form("qcd_pt50to80_%s",  outfileid.Data());
-  else if (infile.Contains("QCD_Pt-80to120"))                        sample = Form("qcd_pt80to120_%s",  outfileid.Data());
-  else if (infile.Contains("QCD_Pt-120to170"))                       sample = Form("qcd_pt120to170_%s",  outfileid.Data());
-  else if (infile.Contains("QCD_Pt-170to300"))                       sample = Form("qcd_pt170to300_%s",  outfileid.Data());
-  else if (infile.Contains("QCD_Pt-300to470"))                       sample = Form("qcd_pt300to470_%s",  outfileid.Data());
-  else if (infile.Contains("QCD_Pt-470to600"))                       sample = Form("qcd_pt470to600_%s",  outfileid.Data());
-  else if (infile.Contains("QCD_Pt-600to800"))                       sample = Form("qcd_pt600to800_%s",  outfileid.Data());
-  else if (infile.Contains("QCD_Pt-800to1000"))                      sample = Form("qcd_pt800to1000_%s",  outfileid.Data());
-  else if (infile.Contains("QCD_Pt-1000to1400"))                     sample = Form("qcd_pt1000to1400_%s",  outfileid.Data());
-  else if (infile.Contains("QCD_Pt-1400to1800"))                     sample = Form("qcd_pt1400to1800_%s",  outfileid.Data());
-  else if (infile.Contains("QCD_Pt-1800to2400"))                     sample = Form("qcd_pt1800to2400_%s",  outfileid.Data());
-  else if (infile.Contains("QCD_Pt-1800"))                           sample = Form("qcd_pt1800_%s",  outfileid.Data());
-  else if (infile.Contains("QCD_Pt-2400to3200"))                     sample = Form("qcd_pt2400to3200_%s",  outfileid.Data());
-  else if (infile.Contains("QCD_Pt-3200"))                           sample = Form("qcd_pt3200_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-5to10") || infile.Contains("QCD_Pt_5to10"))              sample = Form("qcd_pt5to10_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-10to15") || infile.Contains("QCD_Pt_10to15"))            sample = Form("qcd_pt10to15_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-15to30") || infile.Contains("QCD_Pt_15to30"))            sample = Form("qcd_pt15to30_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-30to50") || infile.Contains("QCD_Pt_30to50"))            sample = Form("qcd_pt30to50_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-50to80") || infile.Contains("QCD_Pt_50to80"))            sample = Form("qcd_pt50to80_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-80to120") || infile.Contains("QCD_Pt_80to120"))          sample = Form("qcd_pt80to120_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-120to170") || infile.Contains("QCD_Pt_120to170"))        sample = Form("qcd_pt120to170_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-170to300") || infile.Contains("QCD_Pt_170to300"))        sample = Form("qcd_pt170to300_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-300to470") || infile.Contains("QCD_Pt_300to470"))        sample = Form("qcd_pt300to470_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-470to600") || infile.Contains("QCD_Pt_470to600"))        sample = Form("qcd_pt470to600_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-600to800") || infile.Contains("QCD_Pt_600to800"))        sample = Form("qcd_pt600to800_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-800to1000") || infile.Contains("QCD_Pt_800to1000"))      sample = Form("qcd_pt800to1000_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-1000to1400") || infile.Contains("QCD_Pt_1000to1400"))    sample = Form("qcd_pt1000to1400_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-1400to1800") || infile.Contains("QCD_Pt_1400to1800"))    sample = Form("qcd_pt1400to1800_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-1800to2400") || infile.Contains("QCD_Pt_1800to2400"))    sample = Form("qcd_pt1800to2400_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-1800") || infile.Contains("QCD_Pt_1800"))                sample = Form("qcd_pt1800_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-2400to3200") || infile.Contains("QCD_Pt_2400to3200"))    sample = Form("qcd_pt2400to3200_%s",  outfileid.Data());
+  else if (infile.Contains("QCD_Pt-3200") || infile.Contains("QCD_Pt_3200"))                sample = Form("qcd_pt3200_%s",  outfileid.Data());
   else if (infile.Contains("GJet_Pt-15to3000"))                      sample = Form("gjet_pt15to3000_%s",  outfileid.Data());
   else if (infile.Contains("GJets_HT-100to200"))                      sample = Form("gjet_ht100to200_%s",  outfileid.Data());
   else if (infile.Contains("GJets_HT-200to400"))                      sample = Form("gjet_ht200to400_%s",  outfileid.Data());
@@ -186,6 +148,12 @@ void processBaby( TString outfileid = "tt_test", TString infile = "/hadoop/cms/s
   else if (infile.Contains("SMS-T1qqqq"))                            sample = Form("T1qqqq_%s",          outfileid.Data());
   else if (infile.Contains("SMS-T1bbbb"))                            sample = Form("T1bbbb_%s",          outfileid.Data());
   //Data
+  else if (infile.Contains("Run2015B") && infile.Contains("PromptReco"))     sample = Form("data_Run2015B_PromptReco_%s",  outfileid.Data());
+  else if (infile.Contains("Run2015B") && infile.Contains("17Jul2015"))      sample = Form("data_Run2015B_17Jul2015_%s",  outfileid.Data());
+  else if (infile.Contains("Run2015B") && infile.Contains("05Aug2015"))      sample = Form("data_Run2015B_05Aug2015_%s",  outfileid.Data());
+  else if (infile.Contains("Run2015B"))                                      sample = Form("data_Run2015B_%s",  outfileid.Data());
+  else if (infile.Contains("Run2015C") && infile.Contains("PromptReco"))     sample = Form("data_Run2015C_PromptReco_%s",  outfileid.Data());
+  else if (infile.Contains("Run2015C"))                                      sample = Form("data_Run2015C_%s",  outfileid.Data());
   // //single mu-had
   // else if (infile.Contains("MuHad_Run2012A-recover-06Aug2012-v1_AOD"))          sample =  Form("MuHad2012A_recover06Aug2012v1V532_%s",     outfileid.Data());
   // else if (infile.Contains("MuHad_Run2012A-13Jul2012-v1_AOD"))                  sample =  Form("MuHad2012A_13Jul2012v1V532_%s",            outfileid.Data());
@@ -227,13 +195,26 @@ void processBaby( TString outfileid = "tt_test", TString infile = "/hadoop/cms/s
   //otherwise
   else sample = Form("unknown_%s", outfileid.Data());
 
-  cout<<"sample is "<<sample<<endl;
+  std::cout<<"sample is "<<sample<<std::endl;
 
+  // get bx value (for JEC etc)
+  int bx = 0;
+  if (infile.Contains("Run2015B")) bx = 50;
+  else if (infile.Contains("Run2015C")) bx = 25; // will need to account for the 50ns run somehow..
+  else if (infile.Contains("50ns")) bx = 50;
+  else if (infile.Contains("25ns")) bx = 25;
+
+  if (bx == 0) {
+    std::cout << "ERROR: couldn't figure out bx for sample!! filename was: " << infile << ". Exiting" << std::endl;
+    return 3;
+  }
+  else std::cout << "found bx value: " << bx << std::endl;
+  
   //--------------------------------
   // run
   //--------------------------------
   
   babyMaker *looper = new babyMaker();
-  looper->ScanChain(chain, sample); 
-
+  looper->ScanChain(chain, sample, bx); 
+  return 0;
 }

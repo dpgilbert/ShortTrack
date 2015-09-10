@@ -6,7 +6,7 @@
 
 1) copy files to run looper into job_input directory
 for example, from the babymaker directory
-> cp -r *.so jetCorrections processBaby.C batchsubmit/job_input/
+> cp -r *.so jetCorrections jsons processBaby batchsubmit/job_input/
 
 *** note that after copying the latest source files into the job_input subdir, you must run one of the writeConfig scripts below to recreate the input tarball which is used for the batch jobs!
 
@@ -48,7 +48,7 @@ the submission log should be in submit_logs
 4) To verify that jobs ran and produced all the output files, first run sweepRoot to check all output root files.
 
 > git clone git@github.com:cmstas/NtupleTools.git
-> cd NtupleTools/condorMergingTools
+> cd NtupleTools/condorMergingTools/libC
 > make
 > ./sweepRoot -b -o "mt2" /hadoop/cms/store/user/${USER}/mt2babies/<BABYDIRS>/*.root
 
