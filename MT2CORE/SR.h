@@ -52,6 +52,8 @@ class SR {
     std::map<std::string, RooDataSet*> crgjRooDataSetMap;
     std::map<std::string, TH1*> crdyHistMap;
     std::map<std::string, TH1*> crrlHistMap;
+    std::map<std::string, TH1*> crrlmuHistMap;
+    std::map<std::string, TH1*> crrlelHistMap;
 
   private:
 

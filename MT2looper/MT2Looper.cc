@@ -50,6 +50,13 @@ float m1bins[n_m1bins+1];
 const int n_m2bins = 33;
 float m2bins[n_m2bins+1];
 
+const int n_htbins = 4;
+const float htbins[n_htbins+1] = {450., 575., 1000., 1500., 3000.};
+const int n_njbins = 3;
+const float njbins[n_njbins+1] = {2, 4, 7, 12};
+const int n_nbjbins = 4;
+const float nbjbins[n_nbjbins+1] = {0, 1, 2, 3, 6};
+
 //RooRealVars for unbinned data hist
 RooRealVar* x_ = new RooRealVar( "x", "", 0., 50.);
 RooRealVar* w_ = new RooRealVar( "w", "", 0., 1000.);
@@ -287,6 +294,8 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   bool saveGJplots = false;
   bool saveDYplots = false;
   bool saveRLplots = false;
+  bool saveRLELplots = false;
+  bool saveRLMUplots = false;
   bool saveSLplots = false;
   bool saveSLMUplots = false;
   bool saveSLELplots = false;
@@ -549,42 +558,43 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
       // Variables for Zll (DY) control region
       bool doDYplots = false;
-      if (t.evt_id >= 700 && t.evt_id < 800) {
-      	if (t.nlep == 2) {
-	  // still need to add trigger requirement
-      	  if ( (t.lep_charge[0] * t.lep_charge[1] == -1)
-      	       && (abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1]) )
-      	       && (fabs(t.zll_mass - 90) < 10 ) 
-	       && t.lep_pt[0] > 25 && t.lep_pt[1] > 20) {
-	    // no additional explicit lepton veto
-	    // i.e. implicitly allow 3rd PF lepton or hadron
-	    //nlepveto_ = 0; 
-	    doDYplots = true;
-	  }
-      	} // nlep == 2
-      }// evt_id
-
+      if (t.nlep == 2 && !isSignal_) {
+	if ( (t.lep_charge[0] * t.lep_charge[1] == -1)
+	     && (abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1]) )
+	     && (fabs(t.zll_mass - 90) < 10 ) 
+	     && t.lep_pt[0] > 25 && t.lep_pt[1] > 20
+	     && (t.HLT_DoubleEl || t.HLT_DoubleMu)
+	     ) {
+	  // no additional explicit lepton veto
+	  // i.e. implicitly allow 3rd PF lepton or hadron
+	  //nlepveto_ = 0; 
+	  doDYplots = true;
+	}
+      } // nlep == 2
+      
       // Variables for Removed single lepton (RL) region
       //muon only
       bool doRLplots = false;
-      if (!(t.evt_id >= 700 && t.evt_id < 800)) {
-      	if (t.nlep == 1 && abs(t.lep_pdgId[0])==13) {
-      	  if ( t.lep_pt[0] > 20 //lepton above 20GeV
-	       && fabs(t.lep_eta[0])<2.5 //lepton eta < 2.5
-	       // reduce electron FR in endcap to barrel level
-	       //- Barrel: MT2 selection (vetoID + miniRelIso<0.1) + medium ID + relIso03 < 0.1
-	       //- Endcap: MT2 selection (vetoID + miniRelIso<0.1) + tight ID + relIso03 < 0.1
-	       && ((abs(t.lep_pdgId[0])==11 //for electrons, pass ID above
-		    && ((t.lep_miniRelIso[0]<0.1) && t.lep_relIso03[0]<0.1) && ((fabs(t.lep_eta[0])<1.4442 && t.lep_tightId[0]>1) || (fabs(t.lep_eta[0])>1.4442 && t.lep_tightId[0]>2) ))
-		   || (abs(t.lep_pdgId[0])==13)) //for muons, just veto ID
-	       ) {
-	    // no additional explicit lepton veto
-	    // i.e. implicitly allow 3rd PF lepton or hadron
-	    //nlepveto_ = 0; 
-	    doRLplots = true;
+      bool doRLMUplots = false;
+      bool doRLELplots = false;
+      if ( t.nlep == 1 && !isSignal_) {
+	if ( t.lep_pt[0] > 25 && fabs(t.lep_eta[0])<2.5 ) {
+	  if (abs(t.lep_pdgId[0])==13) { // muons
+	    if (t.HLT_SingleMu)  doRLMUplots = true;
 	  }
-      	} // nlep == 1
-      }// evt_id
+	  if (abs(t.lep_pdgId[0])==11) { // electrons
+	    if ( (t.HLT_SingleEl || !t.isData)   // Ele23 trigger not present in MC. Not requiring anything for now
+		 && t.lep_relIso03[0]<0.1 // tighter selection for electrons
+		 && t.lep_tightId[0]>2
+		 ) 
+	      doRLELplots = true;
+	  }
+	  // no additional explicit lepton veto
+	  // i.e. implicitly allow 2nd PF lepton or hadron
+	  //nlepveto_ = 0; 
+	  if (doRLMUplots || doRLELplots )  doRLplots = true;
+	}
+      } // nlep == 1
       
 
       ////////////////////////////////////
@@ -621,6 +631,14 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
         saveRLplots = true;
         fillHistosCRRL("crrl");
       }
+      if (doRLELplots) {
+        saveRLELplots = true;
+        fillHistosCRRL("crrlel");
+      }
+      if (doRLMUplots) {
+        saveRLMUplots = true;
+        fillHistosCRRL("crrlmu");
+      }
       if (doSLplots) {
         saveSLplots = true;
         fillHistosCRSL("crsl");
@@ -655,6 +673,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
   savePlotsDir(SRNoCut.srHistMap,outfile_,SRNoCut.GetName().c_str());
   savePlotsDir(SRBase.srHistMap,outfile_,SRBase.GetName().c_str());
   savePlotsDir(SRBase.crslHistMap,outfile_,"crslbase");
+  savePlotsDir(SRBase.crrlHistMap,outfile_,"crrlbase");
   savePlotsDir(CRSL_WJets.crslHistMap,outfile_,CRSL_WJets.GetName().c_str());
   savePlotsDir(CRSL_TTbar.crslHistMap,outfile_,CRSL_TTbar.GetName().c_str());
   savePlotsDir(SRNoCut.crgjHistMap,outfile_,"crgjnocut");
@@ -684,6 +703,20 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(!SRVec.at(srN).crrlHistMap.empty()){
         savePlotsDir(SRVec.at(srN).crrlHistMap, outfile_, ("crrl"+SRVec.at(srN).GetName()).c_str());
+      }
+    }
+  }
+  if (saveRLELplots) {
+    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+      if(!SRVec.at(srN).crrlelHistMap.empty()){
+        savePlotsDir(SRVec.at(srN).crrlelHistMap, outfile_, ("crrlel"+SRVec.at(srN).GetName()).c_str());
+      }
+    }
+  }
+  if (saveRLMUplots) {
+    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+      if(!SRVec.at(srN).crrlmuHistMap.empty()){
+        savePlotsDir(SRVec.at(srN).crrlmuHistMap, outfile_, ("crrlmu"+SRVec.at(srN).GetName()).c_str());
       }
     }
   }
@@ -967,8 +1000,7 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
 
   if (t.nlep!=2) return;
 
-  // trigger requirement on data
-  if (t.isData && !(t.HLT_DoubleEl || t.HLT_DoubleMu)) return;
+  // trigger requirement on data and MC already implemented when defining doDYplots
   
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.zll_deltaPhiMin;
@@ -1009,10 +1041,8 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
 void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suffix) {
 
   if (t.nlep!=1) return;
-  if (!abs(t.lep_pdgId[0])==13) return; //muon only
 
-  // trigger requirement on data
-  if (t.isData && !t.HLT_SingleMu) return;
+  // trigger requirement on data and MC already included in RL selection
   
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.rl_deltaPhiMin;
@@ -1037,10 +1067,20 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
   valuesBase["passesHtMet"] = ( (t.rl_ht > 450. && t.rl_met_pt > 200.) || (t.rl_ht > 1000. && t.rl_met_pt > 30.) );
   bool passBase = SRBase.PassesSelection(valuesBase);
   
-  fillHistosRemovedLepton(SRNoCut.crrlHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), prefix+SRNoCut.GetName(), suffix);
+  if(prefix=="crrl")        fillHistosRemovedLepton(SRNoCut.crrlHistMap,   SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), prefix+SRNoCut.GetName(), suffix);
+  else if(prefix=="crrlmu") fillHistosRemovedLepton(SRNoCut.crrlmuHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), prefix+SRNoCut.GetName(), suffix);
+  else if(prefix=="crrlel") fillHistosRemovedLepton(SRNoCut.crrlelHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), prefix+SRNoCut.GetName(), suffix);
     
-  if(passBase) fillHistosRemovedLepton(SRBase.crrlHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlbase", suffix);
-  if(passBase && t.nBJet20 == 0 ) fillHistosRemovedLepton(SRBase.crrlHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlbase", "ZeroB");
+  if(passBase) {
+    if(prefix=="crrl")        fillHistosRemovedLepton(SRBase.crrlHistMap,   SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlbase",   suffix);
+    else if(prefix=="crrlmu") fillHistosRemovedLepton(SRBase.crrlmuHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlmubase", suffix);
+    else if(prefix=="crrlel") fillHistosRemovedLepton(SRBase.crrlelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlelbase", suffix);
+    if (t.nBJet20 == 0) {
+      if(prefix=="crrl")        fillHistosRemovedLepton(SRBase.crrlHistMap,   SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlbase",   "ZeroB");
+      else if(prefix=="crrlmu") fillHistosRemovedLepton(SRBase.crrlmuHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlmubase", "ZeroB");
+      else if(prefix=="crrlel") fillHistosRemovedLepton(SRBase.crrlelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlelbase", "ZeroB");
+    }
+  }
   // if(passBase && t.evt_id == 400 ) fillHistosRemovedLepton(SRBase.crrlHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlbase", "TsChan");
   // if(passBase && t.evt_id == 401 ) fillHistosRemovedLepton(SRBase.crrlHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlbase", "TtChan");
   // if(passBase && t.evt_id == 402 ) fillHistosRemovedLepton(SRBase.crrlHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlbase", "TtWChan");
@@ -1050,7 +1090,9 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelection(values)){
-      fillHistosRemovedLepton(SRVec.at(srN).crrlHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
+      if(prefix=="crrl")        fillHistosRemovedLepton(SRVec.at(srN).crrlHistMap,   SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
+      else if(prefix=="crrlmu") fillHistosRemovedLepton(SRVec.at(srN).crrlmuHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
+      else if(prefix=="crrlel") fillHistosRemovedLepton(SRVec.at(srN).crrlelHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
       break;//control regions are orthogonal, event cannot be in more than one
     }
   }
@@ -1129,13 +1171,6 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
     dir = outfile_->mkdir(dirname.c_str());
   } 
   dir->cd();
-
-  const int n_htbins = 4;
-  const float htbins[n_htbins+1] = {450., 575., 1000., 1500., 3000.};
-  const int n_njbins = 3;
-  const float njbins[n_njbins+1] = {2, 4, 7, 12};
-  const int n_nbjbins = 4;
-  const float nbjbins[n_nbjbins+1] = {0, 1, 2, 3, 6};
 
   //bins for FR
   const int n_FRhtbins = 6;
@@ -1222,15 +1257,8 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
   dir->cd();
 
   plot1D("h_mt2bins"+s,       t.zll_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-
-  const int n_htbins = 4;
-  const float htbins[n_htbins+1] = {450., 575., 1000., 1500., 3000.};
-  const int n_njbins = 3;
-  const float njbins[n_njbins+1] = {2, 4, 7, 12};
-  const int n_nbjbins = 4;
-  const float nbjbins[n_nbjbins+1] = {0, 1, 2, 3, 6};
   
-  if (dirname=="crdybase" || dirname=="crdyL" || dirname=="crdyM" || dirname=="crdyH") {
+  if (dirname=="crdynocut" || dirname=="crdybase" || dirname=="crdyL" || dirname=="crdyM" || dirname=="crdyH") {
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
     plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
     plot1D("h_mt2"+s,       t.zll_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
@@ -1246,6 +1274,9 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     plot1D("h_htbins"+s,       t.zll_ht,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins, htbins);
     plot1D("h_njbins"+s,       t.nJet30,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
     plot1D("h_nbjbins"+s,       t.nBJet20,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
+    plot1D("h_leppt1"+s,      t.lep_pt[0],   evtweight_, h_1d, ";p_{T}(lep1) [GeV]", 50, 0, 200);
+    plot1D("h_leppt2"+s,      t.lep_pt[1],   evtweight_, h_1d, ";p_{T}(lep2) [GeV]", 50, 0, 200);
+    plot1D("h_zllmass"+s,      t.zll_mass,   evtweight_, h_1d, ";m_{ll} [GeV]", 60, 0, 120);
 
   }
 
@@ -1262,14 +1293,9 @@ void MT2Looper::fillHistosRemovedLepton(std::map<std::string, TH1*>& h_1d, int n
 
   plot1D("h_mt2bins"+s,       t.rl_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
 
-  const int n_htbins = 4;
-  const float htbins[n_htbins+1] = {450., 575., 1000., 1500., 3000.};
-  const int n_njbins = 3;
-  const float njbins[n_njbins+1] = {2, 4, 7, 12};
-  const int n_nbjbins = 4;
-  const float nbjbins[n_nbjbins+1] = {0, 1, 2, 3, 6};
-  
-  if (dirname=="crrlbase" || dirname=="crrlL" || dirname=="crrlM" || dirname=="crrlH") { 
+  if (dirname=="crrlnocut" || dirname=="crrlbase" || dirname=="crrlL" || dirname=="crrlM" || dirname=="crrlH" ||
+      dirname=="crrlelnocut" || dirname=="crrlelbase" || dirname=="crrlelL" || dirname=="crrlelM" || dirname=="crrlelH" ||
+      dirname=="crrlmunocut" || dirname=="crrlmubase" || dirname=="crrlmuL" || dirname=="crrlmuM" || dirname=="crrlmuH" ) { 
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
     plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
     plot1D("h_mt2"+s,       t.rl_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
@@ -1286,7 +1312,9 @@ void MT2Looper::fillHistosRemovedLepton(std::map<std::string, TH1*>& h_1d, int n
     plot1D("h_njbins"+s,       t.nJet30,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
     plot1D("h_nbjbins"+s,       t.nBJet20,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
     plot1D("h_leppt"+s,      t.lep_pt[0],   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
-    plot1D("h_nupt"+s,      t.met_pt,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
+    plot1D("h_lepreliso"+s,      t.lep_relIso03[0],   evtweight_, h_1d, ";RelIso03", 50, 0, 1);
+    plot1D("h_lepabsiso"+s,      t.lep_relIso03[0]*t.lep_pt[0],   evtweight_, h_1d, ";AbsIso03 [GeV]", 50, 0, 50);
+    plot1D("h_simplemet"+s,      t.met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 200, 0, 1000);
   }//dirname
 
   outfile_->cd();
