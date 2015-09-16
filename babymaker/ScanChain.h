@@ -324,6 +324,8 @@ class babyMaker {
 //----- GEN TAUS
   static const int max_ngenTau = 10;
   Int_t           ngenTau;
+  Int_t           ngenTau1Prong;
+  Int_t           ngenTau3Prong;
   Float_t         genTau_pt[max_ngenTau];   //[ngenTau]
   Float_t         genTau_eta[max_ngenTau];   //[ngenTau]
   Float_t         genTau_phi[max_ngenTau];   //[ngenTau]
@@ -332,6 +334,7 @@ class babyMaker {
   Int_t           genTau_status[max_ngenTau];   //[ngenTau]
   Float_t         genTau_charge[max_ngenTau];   //[ngenTau]
   Int_t           genTau_sourceId[max_ngenTau];   //[ngenTau]
+  Int_t           genTau_decayMode[max_ngenTau];   //[ngenTau]
 
 //----- GEN LEPTONS FROM TAUS
   static const int max_ngenLepFromTau = 10;
