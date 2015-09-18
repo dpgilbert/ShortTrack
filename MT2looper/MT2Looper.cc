@@ -511,7 +511,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 //		|| (t.evt_id ==116 && t.gamma_pt[0]>2400 )   //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
 //		|| (t.evt_id ==117 && t.gamma_pt[0]>3200 )   //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
 //		) 
-	  if (t.evt_id < 110) // Simply start at pt300to470, ignore earlier samples
+	  if (t.evt_id < 109 && t.evt_id != -1) // Simply start at pt170to300, ignore earlier samples
 	    { doGJplots = false; }
 	  else if (!useDRforGammaQCDMixing) {
 	    if ( (t.evt_id < 200 && t.gamma_mcMatchId[0]>0  && t.gamma_genIso04[0]<5)    // Reject true photons from QCD (iso is always 0 for now)
