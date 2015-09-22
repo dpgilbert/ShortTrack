@@ -5,7 +5,7 @@ function run () {
     nohup nice -n 19 root -b -q mergeHadoopFiles.C\(\"${HADOOPDIR}/${TAG}_$1/\",\"${OUTPUTDIR}/$1.root\"\) >& log_merge_${TAG}_$1.txt &
 }
 
-TAG=V00-01-04_25ns
+TAG=V00-01-05_25ns
 
 HADOOPDIR=/hadoop/cms/store/user/${USER}/mt2babies/
 OUTPUTDIR=/nfs-6/userdata/mt2/$TAG/
@@ -31,12 +31,14 @@ run data_Run2015C_MuonEG_PromptReco
 # TTBAR
 #
 
-run ttall_mg_lo
+run ttsl_mg_lo
+run ttdl_mg_lo
 
 #
 # ALTERNATIVE TTBAR
 #
 
+#run ttall_mg_lo
 #run ttall_amcatnlo
 #run ttall_powheg_p8
 
@@ -100,6 +102,11 @@ run zinv_ht600toInf
 # TTV
 #
 
+run ttw_lnu_amcatnlo
+run ttw_qq_amcatnlo
+run ttz_qq_amcatnlo
+run ttz_llnunu_amcatnlo
+
 #
 # QCD
 #
@@ -116,12 +123,21 @@ run qcd_pt1800to2400
 run qcd_pt2400to3200
 run qcd_pt3200toInf
 
+run qcd_ht200to300
+run qcd_ht300to500
+run qcd_ht500to700
+run qcd_ht700to1000
+run qcd_ht1000to1500
+run qcd_ht1500to2000
+run qcd_ht2000toInf
+
 #
 # SIGNAL
 #
 
-
-
-
-
-
+run T1tttt_1500_100
+run T1tttt_1200_800
+run T1bbbb_1500_100
+run T1bbbb_1000_900
+#run T1qqqq_1400_100
+run T1qqqq_1000_800
