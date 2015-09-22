@@ -46,6 +46,8 @@ using namespace tas;
 const bool verbose = false;
 // turn on to apply JEC from text files (default true)
 const bool applyJECfromFile = true;
+// turn on to recompute type1 MET using JECs from file (default true)
+const bool recomputeT1MET = true;
 // turn on to save prunedGenParticle collection (default false)
 const bool saveGenParticles = false;
 // turn on to apply trigger cuts to ntuples -> OR of all triggers used (default false)
@@ -278,14 +280,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 
       }
 
-      met_pt  = cms3.evt_pfmet();
-      met_phi = cms3.evt_pfmetPhi();
+      if (applyJECfromFile && recomputeT1MET) {
+	std::pair <float, float> t1met = getT1CHSMET(jet_corrector_pfL1FastJetL2L3);
+	met_pt  = t1met.first;
+	met_phi = t1met.second;
+	met_rawPt  = cms3.evt_METToolbox_pfmet_raw();
+	met_rawPhi = cms3.evt_METToolbox_pfmetPhi_raw();
+      } else {
+	met_pt  = cms3.evt_pfmet();
+	met_phi = cms3.evt_pfmetPhi();
+	met_rawPt  = cms3.evt_pfmet_raw();
+	met_rawPhi = cms3.evt_pfmetPhi_raw();
+      }
       if (!isData) {
         met_genPt  = cms3.gen_met();
         met_genPhi = cms3.gen_metPhi();
       }
-      met_rawPt  = cms3.evt_pfmet_raw();
-      met_rawPhi = cms3.evt_pfmetPhi_raw();
       met_caloPt  = cms3.evt_calomet();
       met_caloPhi = cms3.evt_calometPhi();
       metStruct trkmet = trackerMET(0.1);
