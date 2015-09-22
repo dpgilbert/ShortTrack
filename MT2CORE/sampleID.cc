@@ -66,15 +66,15 @@ int sampleID (const string& name) {
   else if (name.find("WJets") != string::npos) {
     if ((name.find("WJetsToLNu_HT-100to200") != string::npos) || (name.find("WJetsToLNu_HT-100To200") != string::npos)) return 502;
     else if ((name.find("WJetsToLNu_HT-200to400") != string::npos) || (name.find("WJetsToLNu_HT-200To400") != string::npos)) return 503;
-    else if ((name.find("WJetsToLNu_HT-400to600") != string::npos) || (name.find("WJetsToLNu_HT-400To600") != string::npos)) return 503;
-    else if ((name.find("WJetsToLNu_HT-600toInf") != string::npos) || (name.find("WJetsToLNu_HT-600ToInf") != string::npos)) return 503;
+    else if ((name.find("WJetsToLNu_HT-400to600") != string::npos) || (name.find("WJetsToLNu_HT-400To600") != string::npos)) return 504;
+    else if ((name.find("WJetsToLNu_HT-600toInf") != string::npos) || (name.find("WJetsToLNu_HT-600ToInf") != string::npos)) return 505;
   }
 
   else if (name.find("ZJets") != string::npos) {
     if ((name.find("ZJetsToNuNu_HT-100to200") != string::npos) || (name.find("ZJetsToNuNu_HT-100To200") != string::npos)) return 602;
     else if ((name.find("ZJetsToNuNu_HT-200to400") != string::npos) || (name.find("ZJetsToNuNu_HT-200To400") != string::npos)) return 603;
-    else if ((name.find("ZJetsToNuNu_HT-400to600") != string::npos) || (name.find("ZJetsToNuNu_HT-400To600") != string::npos)) return 603;
-    else if ((name.find("ZJetsToNuNu_HT-600toInf") != string::npos) || (name.find("ZJetsToNuNu_HT-600ToInf") != string::npos)) return 603;
+    else if ((name.find("ZJetsToNuNu_HT-400to600") != string::npos) || (name.find("ZJetsToNuNu_HT-400To600") != string::npos)) return 604;
+    else if ((name.find("ZJetsToNuNu_HT-600toInf") != string::npos) || (name.find("ZJetsToNuNu_HT-600ToInf") != string::npos)) return 605;
   }
 
   else if (name.find("DYJets") != string::npos) {
