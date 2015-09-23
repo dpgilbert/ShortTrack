@@ -367,18 +367,18 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       
       if (t.nVert == 0) continue;
 
-      // MET filters (data only)
-      if (t.isData) {
-	if (!t.Flag_goodVertices) continue;
-	if (!t.Flag_CSCTightHaloFilter) continue;
-	if (!t.Flag_eeBadScFilter) continue;
-	if (!t.Flag_HBHENoiseFilter) continue;
-      }
+      // MET filters (data and MC)
+      if (!t.Flag_goodVertices) continue;
+      if (!t.Flag_CSCTightHaloFilter) continue;
+      if (!t.Flag_eeBadScFilter) continue;
+      if (!t.Flag_HBHENoiseFilter) continue;
+      if (t.nJet30FailId > 0) continue;
 
       // remove low pt QCD samples 
       if (t.evt_id >= 100 && t.evt_id < 109) continue;
       // remove low HT QCD samples 
       if (t.evt_id >= 120 && t.evt_id < 123) continue;
+      if (t.evt_id >= 151 && t.evt_id < 154) continue;
 
       // flag signal samples
       if (t.evt_id >= 1000) isSignal_ = true;
@@ -388,8 +388,9 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      //      const float lumi = 4.;
-      const float lumi = 0.042;
+      const float lumi = 3.;
+      //      const float lumi = 0.042;
+      //      const float lumi = 0.0161;
       evtweight_ = 1.;
 
       // apply relevant weights to MC
