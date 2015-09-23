@@ -31,7 +31,8 @@ run data_Run2015C_MuonEG_PromptReco
 # TTBAR
 #
 
-run ttsl_mg_lo
+run ttsl_mg_lo_top
+run ttsl_mg_lo_tbar
 run ttdl_mg_lo
 
 #

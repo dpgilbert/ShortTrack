@@ -24,7 +24,8 @@ TAG="V00-01-05_25ns"
 # TTBAR
 #
 
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/V07-04-07/ ${TAG}_ttsl_mg_lo
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/V07-04-07/ ${TAG}_ttsl_mg_lo_top
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/V07-04-08/ ${TAG}_ttsl_mg_lo_tbar
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/V07-04-07/ ${TAG}_ttdl_mg_lo
 
 #
