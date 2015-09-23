@@ -32,6 +32,7 @@ public :
    Float_t         evt_filter;
    ULong64_t       evt_nEvts;
    Int_t           evt_id;
+   Float_t         genWeight;
    Float_t         puWeight;
    Int_t           nVert;
    Int_t           nTrueInt;
@@ -323,6 +324,7 @@ public :
    TBranch        *b_evt_filter;   //!
    TBranch        *b_evt_nEvts;   //!
    TBranch        *b_evt_id;   //!
+   TBranch        *b_genWeight;   //!
    TBranch        *b_puWeight;   //!
    TBranch        *b_nVert;   //!
    TBranch        *b_nTrueInt;   //!
@@ -673,6 +675,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("evt_filter", &evt_filter, &b_evt_filter);
    fChain->SetBranchAddress("evt_nEvts", &evt_nEvts, &b_evt_nEvts);
    fChain->SetBranchAddress("evt_id", &evt_id, &b_evt_id);
+   fChain->SetBranchAddress("genWeight", &genWeight, &b_genWeight);
    fChain->SetBranchAddress("puWeight", &puWeight, &b_puWeight);
    fChain->SetBranchAddress("nVert", &nVert, &b_nVert);
    fChain->SetBranchAddress("nTrueInt", &nTrueInt, &b_nTrueInt);
