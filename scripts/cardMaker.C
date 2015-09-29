@@ -23,6 +23,7 @@ TFile* f_zinv = 0;
 TFile* f_purity = 0;
 TFile* f_qcd = 0;
 TFile* f_sig = 0;
+TFile* f_data = 0;
 
 const bool verbose = false;
 
@@ -88,6 +89,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
   double err_zinv_purity(0.);
   double n_qcd(0.);
   double n_bkg(0.);
+  double n_data(0.);
 
   double n_sig(0.);
 
@@ -276,6 +278,17 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
     return;
   }
 
+  if (f_data) {
+    // n_data is 0 by default
+    TH1D* h_data = (TH1D*) f_data->Get(fullhistname);
+    if (h_data != 0) {
+      n_data = h_data->GetBinContent(mt2bin);
+    } 
+  } else {
+    // using only MC: take observation == total bkg
+    n_data = n_bkg;
+  }
+
   int n_syst = 0;
 
   // ----- lost lepton bkg uncertainties
@@ -389,7 +402,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
   *ofile <<  Form("kmax %d  number of nuisance parameters",n_syst)                           << endl;
   *ofile <<  "------------"                                                                  << endl;
   *ofile <<  Form("bin         %s",channel.c_str())                                          << endl;
-  *ofile <<  Form("observation %.0f",n_bkg)                                                  << endl;
+  *ofile <<  Form("observation %.0f",n_data)                                                 << endl;
   *ofile <<  "------------"                                                                  << endl;
   *ofile <<  Form("bin             %s   %s   %s   %s",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str()) << endl;
   *ofile <<  "process          sig       zinv        llep      qcd"                                      << endl; 
@@ -445,7 +458,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
 }
 
 //_______________________________________________________________________________
-void cardMaker(string signal, string input_dir, string output_dir, bool isScan = false){
+void cardMaker(string signal, string input_dir, string output_dir, bool isScan = false, bool doData = false){
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
@@ -464,7 +477,9 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
 
   f_sig = new TFile(Form("%s/%s.root",input_dir.c_str(),signal.c_str()));
 
-  if( f_lostlep->IsZombie() || f_zinv->IsZombie() || f_purity->IsZombie() || f_qcd->IsZombie() || f_sig->IsZombie()) {
+  if (doData) f_data = new TFile(Form("%s/data_Run2015D.root",input_dir.c_str()));
+
+  if( f_lostlep->IsZombie() || f_zinv->IsZombie() || f_purity->IsZombie() || f_qcd->IsZombie() || f_sig->IsZombie() || (doData && f_data->IsZombie()) ) {
     std::cout << "Input file does not exist" << std::endl;
     return;
   }
