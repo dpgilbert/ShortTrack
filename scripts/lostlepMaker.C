@@ -131,13 +131,13 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
 }
 
 //_______________________________________________________________________________
-void lostlepMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/V00-00-12/"){
+void lostlepMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/V00-00-12/", string dataname = "lostlep"){
 
   string output_name = input_dir+"lostlepFromCRs.root";
   std::cout << "Writing to file: " << output_name << std::endl;
 
-  // get input files -- faking data for now with same MC file
-  TFile* f_data = new TFile(Form("%s/lostlep.root",input_dir.c_str()));
+  // get input files -- default to faking data with same MC file
+  TFile* f_data = new TFile(Form("%s/%s.root",input_dir.c_str(),dataname.c_str()));
   TFile* f_lostlep = new TFile(Form("%s/lostlep.root",input_dir.c_str()));
   
   if(f_data->IsZombie() || f_lostlep->IsZombie()) {

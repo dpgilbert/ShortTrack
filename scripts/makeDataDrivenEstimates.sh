@@ -1,21 +1,24 @@
 #!/bin/bash
 
-#INDIR=/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-12_binsHI/
-#INDIR=/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-12_binsHI/
-INDIR=/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/test_root6/
+INDIR=/home/users/olivito/mt2_74x_dev/MT2Analysis/MT2looper/output/V00-01-05_25ns_json_246908-256869_kfactors_skim_150pb_mt2gt200/
 THISDIR=`pwd`
+
+## to use data for lostlepton
+LOSTLEPFILE=data_Run2015D
+## to use MC for lostlepton
+#LOSTLEPFILE=lostlep
 
 if [ ! -d "$INDIR" ]; then
   echo "Input directory does not exist" 
 fi
 
 cd $INDIR
-echo "hadd -f top.root ttall_msdecays.root tth.root ttzjets.root ttwjets.root singletop.root"
-hadd -f top.root ttall_msdecays.root tth.root ttzjets.root ttwjets.root singletop.root
+echo "hadd -f top.root ttsl_mg_lo.root ttdl_mg_lo.root singletop_powheg.root ttw.root ttz.root"
+hadd -f top.root ttsl_mg_lo.root ttdl_mg_lo.root singletop_powheg.root ttw.root ttz.root
 
 ## make "lostlep" from sum of MC lostlep backgrounds (except QCD, to avoid spikes)
-echo "hadd -f lostlep.root ttall_msdecays.root tth.root ttzjets.root ttwjets.root singletop.root wjets_ht.root"
-hadd -f lostlep.root ttall_msdecays.root tth.root ttzjets.root ttwjets.root singletop.root wjets_ht.root
+echo "hadd -f lostlep.root ttsl_mg_lo.root ttdl_mg_lo.root singletop_powheg.root ttw.root ttz.root wjets_ht.root"
+hadd -f lostlep.root ttsl_mg_lo.root ttdl_mg_lo.root singletop_powheg.root ttw.root ttz.root wjets_ht.root
 cd $THISDIR
 
 #this script scales the HI and LOW boundary histograms by 1/numSamples since we don't want these hadd'ed
@@ -26,8 +29,8 @@ echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/lostlep.root,6)"
 root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/lostlep.root\",6)"
 
 # make the data driven background files
-echo "root -b -q lostlepMaker.C+(${INDIR})"
-root -b -q "lostlepMaker.C+(\"${INDIR}\")" > dataDrivenEstimates.log
+echo "root -b -q lostlepMaker.C+(${INDIR},${LOSTLEPFILE})"
+root -b -q "lostlepMaker.C+(\"${INDIR}\",\"${LOSTLEPFILE}\")" > dataDrivenEstimates.log
 echo "root -b -q ZinvMaker.C+(${INDIR})"
 root -b -q "ZinvMaker.C+(\"${INDIR}\")" >> dataDrivenEstimates.log
 cd $INDIR
