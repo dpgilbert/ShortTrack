@@ -33,7 +33,7 @@ const int iPeriod = 4; // 13 tev
 // iPos=22 : center, centered
 // mode generally : 
 //   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
-const int iPos = 11; 
+const int iPos = 3;
 
 //______________________________________________________________________________
 // returns the error on C = A*B (or C = A/B)
@@ -42,8 +42,12 @@ float err_mult(float A, float B, float errA, float errB, float C) {
 }
 
 //_______________________________________________________________________________
-TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names , const string& histdir , const string& histname , const string& xtitle , const string& ytitle , float xmin , float xmax , int rebin = 1 , bool logplot = true, bool printplot = false, float scalesig = -1., bool doRatio = false, bool scaleBGtoData = false ) {
+TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names , const string& histdir , const string& histnameTmp , const string& xtitle , const string& ytitle , float xmin , float xmax , int rebin = 1 , bool logplot = true, bool printplot = false, float scalesig = -1., bool doRatio = false, bool scaleBGtoData = false ) {
 
+
+  string histname = histnameTmp;
+  if ( TString(histname).Contains("fakephoton") ) histname+="Fake";
+  
   cout << "-- plotting histdir: " << histdir << ", histname: " << histname << endl;
 
   gStyle->SetOptStat("");
@@ -306,18 +310,18 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   if (region_label.Length() > 0) label.DrawLatex(label_x_start,label_y_start - label_y_spacing,region_label);
   if (region_label_line2.Length() > 0) label.DrawLatex(label_x_start,label_y_start - 2 * label_y_spacing,region_label_line2);
 
-  // if (scaleBGtoData && data_hist) {
-  //   TString scale_label = Form("MC scaled by %.2f",bg_sf);
-  //   label.DrawLatex(0.6,0.55,scale_label);
-  // }
+  if (scaleBGtoData && data_hist) {
+    TString scale_label = Form("MC scaled by %.2f",bg_sf);
+    label.DrawLatex(0.6,0.55,scale_label);
+  }
 
   
   leg->Draw();
   h_axes->Draw("axissame");
 
   if (doRatio) {
-    lumiTextSize     = 0.8;
-    cmsTextSize      = 1.0;
+    lumiTextSize     = 0.4;
+    cmsTextSize      = 0.5;
     CMS_lumi( plotpad, iPeriod, iPos );
   }
   else {
@@ -813,7 +817,78 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
 
 
 //_______________________________________________________________________________
+void plotMakerGJets(){
+  
+  //  gROOT->LoadMacro("CMS_lumi.C");
+  cmsText = "CMS Preliminary";
+  cmsTextSize = 0.5;
+  lumiTextSize = 0.4;
+  writeExtraText = false;
+  lumi_13TeV = "150 pb^{-1}";
+  
+  string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/256630-256801_25nsV3JEC_skim";
+  
+  
+  // ----------------------------------------
+  //  samples definition
+  // ----------------------------------------
+  
+  // get input files
+  
+  TFile* f_ttbar = new TFile(Form("%s/ttall_mg_lo.root",input_dir.c_str()));
+  TFile* f_gjet = new TFile(Form("%s/gjet_ht.root",input_dir.c_str()));
+  TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
+  TFile* f_data = new TFile(Form("%s/data_Run2015D_SinglePhoton.root",input_dir.c_str()));
+  
+  vector<TFile*> samples;
+  vector<string>  names;
+  samples.push_back(f_data); names.push_back("data");
+  samples.push_back(f_qcd);   names.push_back("fragphoton");
+  samples.push_back(f_qcd);   names.push_back("fakephoton");
+  samples.push_back(f_gjet);  names.push_back("gjet");
+  
+  // ----------------------------------------
+  //  plots definitions
+  // ----------------------------------------
+  
+  float scalesig = -1.;
+  //float scalesig = 50.;
+  bool printplots = true;
+  bool doRatio = true;
+  bool scaleBGtoData = true;
+  
+  if(printplots){
+    TIter it(f_ttbar->GetListOfKeys());
+    TKey* k;
+    std::string cr_skip = "cr";
+    std::string sr_skip = "sr";
+    while ((k = (TKey *)it())) {
+      //if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
+      //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
+      std::string dir_name = k->GetTitle();
+      if(dir_name == "") continue;
+      //if(dir_name != "srbase") continue; //to do only this dir
+      //      if(dir_name != "crrlmubase") continue; //for testing
+      if(dir_name != "crgjbase") continue; //for testing
+      
+      makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 800 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 800 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_nlepveto" , "N(leptons)" , "Events" , 0 , 10 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_nJet30" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_nBJet20" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      //makePlot( samples , names , dir_name , "h_nJet30Eta3" , "N(jets, |#eta| > 3.0)" , "Events" , 0 , 5 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      //makePlot( samples , names , dir_name , "h_leppt"  , "Lepton p_{T} [GeV]" , "Events" , 0 , 1000 , 10 , false, printplots, scalesig, doRatio, scaleBGtoData );
+    }
+  }
+  
+}
+
+//_______________________________________________________________________________
 void plotMaker(){
+  //plotMakerGJets(); return;
 
   //  gROOT->LoadMacro("CMS_lumi.C");
   cmsText = "CMS Preliminary";
