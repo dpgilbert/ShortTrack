@@ -27,6 +27,16 @@ run data_Run2015C_DoubleMuon_PromptReco
 run data_Run2015C_DoubleEG_PromptReco
 run data_Run2015C_MuonEG_PromptReco
 
+run data_Run2015D_JetHT_PromptReco
+run data_Run2015D_MET_PromptReco
+run data_Run2015D_HTMHT_PromptReco
+run data_Run2015D_SingleMuon_PromptReco
+run data_Run2015D_SingleElectron_PromptReco
+run data_Run2015D_SinglePhoton_PromptReco
+run data_Run2015D_DoubleMuon_PromptReco
+run data_Run2015D_DoubleEG_PromptReco
+run data_Run2015D_MuonEG_PromptReco
+
 #
 # TTBAR
 #
