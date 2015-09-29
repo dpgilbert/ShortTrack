@@ -1,6 +1,7 @@
 #include "TH1.h"
 #include "TFile.h"
 #include "TList.h"
+#include "TString.h"
 #include "TCollection.h"
 #include "TKey.h"
 
@@ -14,7 +15,8 @@ void rescaleBoundaryHists(std::string infile, int numSamples){
   TIter dir_it(f->GetListOfKeys());
   TKey* dir_k;
   while ((dir_k = (TKey *)dir_it())) {
-    std::string dir_name = (dir_k->GetTitle());
+    if (TString(dir_k->GetClassName()) != "TDirectoryFile") continue;
+    std::string dir_name = std::string(dir_k->GetTitle());
     if(dir_name == "") continue;
     dir = (TDirectory*)dir_k->ReadObj();
     if(dir == 0) continue;
