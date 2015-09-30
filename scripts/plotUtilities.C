@@ -36,9 +36,9 @@ int getColor(const string& sample) {
   if (sample.find("wjets") != string::npos) return 417;
   if (sample.find("zinv") != string::npos) return 419;
   if (sample.find("qcd") != string::npos) return 401;
-  if (sample.find("gjet") != string::npos) return kGray;
-  if (sample.find("fakephoton") != string::npos) return 417;
-  if (sample.find("fragphoton") != string::npos) return 401;
+  if (sample.find("gjet") != string::npos) return 18;
+  if (sample.find("fakephoton") != string::npos) return 46;
+  if (sample.find("fragphoton") != string::npos) return 38;
   if (sample.find("dyjets") != string::npos) return 430;
   if (sample.find("zjets") != string::npos) return 430;
   if (sample.find("T1tttt") != string::npos) return kRed;
