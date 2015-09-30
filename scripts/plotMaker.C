@@ -237,7 +237,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   h_axes->GetXaxis()->SetTitleSize(0.05);
   h_axes->GetYaxis()->SetTitle(ytitle.c_str());
   h_axes->GetYaxis()->SetLabelSize(0.04);
-  h_axes->GetYaxis()->SetTitleOffset(1.5);
+  h_axes->GetYaxis()->SetTitleOffset(0.95);
   h_axes->GetYaxis()->SetTitleSize(0.05);
   h_axes->Draw();
 
@@ -251,7 +251,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     leg->AddEntry(sig_hists.at(isig),legend_name,"l");
   }
 
-  if (data_hist) data_hist->Draw("pe1 same");
+  if (data_hist) data_hist->Draw("pe1 x0 same");
 
   TLatex label;
   label.SetNDC();
@@ -352,7 +352,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     
     // draw axis only
     TH1F* h_axis_ratio = new TH1F(Form("%s_axes",h_ratio->GetName()),"",100,xmin,xmax);
-    h_axis_ratio->GetYaxis()->SetTitleOffset(0.3);
+    h_axis_ratio->GetYaxis()->SetTitleOffset(0.25);
     h_axis_ratio->GetYaxis()->SetTitleSize(0.18);
     h_axis_ratio->GetYaxis()->SetNdivisions(5);
     h_axis_ratio->GetYaxis()->SetLabelSize(0.15);
