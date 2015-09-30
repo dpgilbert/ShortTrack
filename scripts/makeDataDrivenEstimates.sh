@@ -8,6 +8,9 @@ LOSTLEPFILE=data_Run2015D
 ## to use MC for lostlepton
 #LOSTLEPFILE=lostlep
 
+GJETFILE=data_Run2015D
+#GJETFILE=qcdplusgjet
+
 if [ ! -d "$INDIR" ]; then
   echo "Input directory does not exist" 
 fi
@@ -35,16 +38,16 @@ echo "root -b -q ZinvMaker.C+(${INDIR})"
 root -b -q "ZinvMaker.C+(\"${INDIR}\")" >> dataDrivenEstimates.log
 cd $INDIR
 rm qcdplusgjet.root
-echo "hadd qcdplusgjet.root gjet_ht.root qcd_pt.root" 
-hadd qcdplusgjet.root gjet_ht.root qcd_pt.root  >> $THISDIR/dataDrivenEstimates.log
+echo "hadd qcdplusgjet.root gjet_ht.root qcd_ht.root"
+hadd qcdplusgjet.root gjet_ht.root qcd_ht.root  >> $THISDIR/dataDrivenEstimates.log
 rm CRRLbkg.root
-echo "hadd CRRLbkg.root ttall_mg_lo.root singletop_powheg.root" # should probably include QCD here 
-hadd CRRLbkg.root ttall_mg_lo.root singletop_powheg.root  >> $THISDIR/dataDrivenEstimates.log
+echo "hadd CRRLbkg.root ttsl_mg_lo.root ttdl_mg_lo.root singletop_powheg.root" # should probably include QCD here
+hadd CRRLbkg.root ttsl_mg_lo.root ttdl_mg_lo.root singletop_powheg.root  >> $THISDIR/dataDrivenEstimates.log
 cd $THISDIR
 echo "root -b -q purity.C+(${INDIR})"
-root -b -q "purity.C+(\"${INDIR}\")" >> dataDrivenEstimates.log
-echo "root -b -q purityRL.C+(${INDIR})"
-root -b -q "purityRL.C+(\"${INDIR}\")" >> dataDrivenEstimates.log
+root -b -q "purity.C+(\"${INDIR}\",\"${GJETFILE}\")" >> dataDrivenEstimates.log
+#echo "root -b -q purityRL.C+(${INDIR})"
+#root -b -q "purityRL.C+(\"${INDIR}\")" >> dataDrivenEstimates.log
 echo "done"
 
 

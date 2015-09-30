@@ -71,7 +71,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
   TString fullhistnameMCStat  = fullhistname+"MCStat";
   TString fullhistnameCRyield  = fullhistname+"CRyield";
   TString fullhistnameRatio  = fullhistname+"Ratio";
-  TString fullhistnamePurity = dir + "/h_puritySieieSB";
+  TString fullhistnamePurity = dir + "/h_purityFailSieieData";
 
   TString signame(signal);
   if (scanM1 >= 0 && scanM2 >= 0) {
@@ -213,7 +213,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
   // Pure GJet yield (useful when extracting G_i/G_int for integral estimate)
   TH1D* h_gjetyield = (TH1D*) f_zinv->Get(fullhistnameCRyield);
 
-  // Photon yield (includes GJetPrompt+QCDPrompt+QCDFake)
+  // Photon yield (includes GJetPrompt+QCDPrompt+QCDFake, or Data)
   TH1D* h_zinv_cryield = (TH1D*) f_purity->Get(fullhistname);
   if (h_zinv_cryield != 0 && h_zinv_cryield->GetBinContent(mt2bin) != 0) {
     n_zinv_cr = round(h_zinv_cryield->GetBinContent(mt2bin));
