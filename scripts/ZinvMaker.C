@@ -18,11 +18,10 @@ using namespace std;
 
 
 //_______________________________________________________________________________
-void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<string> dirs, string output_name, int method = 0 ) {
+void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<string> dirs, string output_name, float kFactorGJetForRatio = 1.0 ) {
 
   // Generate histogram file with Zinv prediction based on GJetsData * R(Zinv/GJ)
-  // Method 0.  Just Poisson from GJet: Zinv +/- Zinv/sqrt(GJet)
-  // Method 1. If GJet expected yield below 5, extrapolate from previous bin using MC
+
 
   TFile * outfile = new TFile(output_name.c_str(),"RECREATE") ; 
   outfile->cd();
@@ -50,10 +49,11 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
     }
     outfile->cd();
 
+    hGJet->Scale(kFactorGJetForRatio); // The goal is LO(Z) / LO(gamma)
+
     // Since we're working on MC, let's set poissionian errors by hand
     hZll->Sumw2(0); hZll->Sumw2(1);
     hGJet->Sumw2(0); hGJet->Sumw2(1);
-
     TH1D* ratio = (TH1D*) hZll->Clone(inclPlots[incl]+"Ratio");
     ratio->Divide(hGJet);
 
@@ -81,7 +81,8 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
       cout<<"different binning for histograms "<<fullhistname<<endl;
       continue;
     }
-    
+    hGJet->Scale(kFactorGJetForRatio); // The goal is LO(Z) / LO(gamma)
+
     // Make directory and plot(s) in the output file
     TDirectory* dir = 0;
     dir = (TDirectory*)outfile->Get(directory.Data());
@@ -92,13 +93,12 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
 
     TH1D* Stat = (TH1D*) hZinv->Clone("h_mt2binsStat");
     cout<<"Looking at histo "<<fullhistname<<endl;
-    if (method==0) { // --- Simple: Zinv +/- Zinv/sqrt(GJet)
-      for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { // "<=" to deal with overflow bin
-	if (hGJet->GetBinContent(ibin) > 0)
-	  Stat->SetBinError(ibin, hZinv->GetBinContent(ibin)/sqrt( hGJet->GetBinContent(ibin) ));
-	else Stat->SetBinError(ibin, hZinv->GetBinContent(ibin));
-      }
+    for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { // "<=" to deal with overflow bin
+      if (hGJet->GetBinContent(ibin) > 0)
+        Stat->SetBinError(ibin, hZinv->GetBinContent(ibin)/sqrt( hGJet->GetBinContent(ibin) ));
+      else Stat->SetBinError(ibin, hZinv->GetBinContent(ibin));
     }
+    
 
     // Zgamma ratio in each MT2bin -> to get MC stat error on ratio
     TH1D* ratio = (TH1D*) hZinv->Clone("h_mt2binsRatio");
@@ -239,7 +239,7 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
   //  string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
   //  string input_dir = "../MT2looper/output/2015ExtendedNJets/";
   //string input_dir = "../MT2looper/output/2015LowLumi/";
-  string output_name = input_dir+"zinvFromGJ.root";
+  string output_name = input_dir+"/zinvFromGJ.root";
   // ----------------------------------------
   //  samples definition
   // ----------------------------------------
@@ -267,7 +267,7 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
   std::string keep = "sr";
   std::string skip = "srbase";
   while ((k = (TKey *)it())) {
-    if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
+//    if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
       std::string sr_string = k->GetTitle();
       sr_string.erase(0, 2);//remove "sr" from front of string
@@ -276,9 +276,9 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
   }
 
   //makeZinvFromGJets( f_zinv , f_gjet , f_qcd, dirs, dirsGJ, output_name, 0 );
-  makeZinvFromGJets( f_zinv , f_gjet , f_dy ,dirs, output_name, 0 ); // not using QCD for now
+  makeZinvFromGJets( f_zinv , f_gjet , f_dy ,dirs, output_name, 1.23 ); // not using QCD for now
 
-   output_name = input_dir+"zinvFromDY.root";
+   output_name = input_dir+"/zinvFromDY.root";
 
   makeZinvFromDY( f_zinv , f_dy , dirs, output_name, 0 ); 
 
