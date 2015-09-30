@@ -42,11 +42,8 @@ float err_mult(float A, float B, float errA, float errB, float C) {
 }
 
 //_______________________________________________________________________________
-TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names , const string& histdir , const string& histnameTmp , const string& xtitle , const string& ytitle , float xmin , float xmax , int rebin = 1 , bool logplot = true, bool printplot = false, float scalesig = -1., bool doRatio = false, bool scaleBGtoData = false ) {
+TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names , const string& histdir , const string& histname , const string& xtitle , const string& ytitle , float xmin , float xmax , int rebin = 1 , bool logplot = true, bool printplot = false, float scalesig = -1., bool doRatio = false, bool scaleBGtoData = false ) {
 
-
-  string histname = histnameTmp;
-  if ( TString(histname).Contains("fakephoton") ) histname+="Fake";
   
   cout << "-- plotting histdir: " << histdir << ", histname: " << histname << endl;
 
@@ -159,6 +156,12 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     if( TString(names.at(i)).Contains("data")  ) continue;
     if( TString(names.at(i)).Contains("sig")  ) continue;
     TString fullhistname = Form("%s/%s",histdir.c_str(),histname.c_str());
+    if (TString(names.at(i)).Contains("fakephoton") ) {
+      if (!fullhistname.Contains("Loose") ) fullhistname+="Fake";
+      else if (fullhistname.Contains("LooseSieieSB")) fullhistname.ReplaceAll("LooseSieieSB", "FakeLooseSieieSB");
+      else if (fullhistname.Contains("Loose")) fullhistname.ReplaceAll("Loose", "FakeLoose");
+    }
+
     if (histdir.size() == 0) fullhistname = TString(histname);
     TString newhistname = Form("%s_%s_%s",histname.c_str(),histdir.c_str(),names.at(i).c_str());
     TH1D* h_temp = (TH1D*) samples.at(i)->Get(fullhistname);
@@ -199,13 +202,15 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   }
 
   // loop through backgrounds to add hists to stack
+  int xminBin = h_bgtot->GetXaxis()->FindBin(xmin);
+  int xmaxBin = h_bgtot->GetXaxis()->FindBin(xmax);
   Double_t bg_integral_err = 0.;
-  float bg_integral = h_bgtot->IntegralAndError(0,-1,bg_integral_err);
+  float bg_integral = h_bgtot->IntegralAndError(xminBin,xmaxBin,bg_integral_err);
   float data_integral = 1.;
   float bg_sf = 1.;
   float bg_sf_err = 0.;
   if (data_hist) {
-    data_integral = data_hist->Integral(0,-1);
+    data_integral = data_hist->Integral(xminBin,xmaxBin);
     bg_sf = data_integral/bg_integral;
     bg_sf_err = err_mult(data_integral,bg_integral,sqrt(data_integral),bg_integral_err,bg_sf);
     std::cout << "Data/MC is: " << bg_sf << " +/- " << bg_sf_err << std::endl;
@@ -827,9 +832,9 @@ void plotMakerGJets(){
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
-  lumi_13TeV = "150 pb^{-1}";
+  lumi_13TeV = "100 pb^{-1}";
   
-  string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/256630-256801_25nsV3JEC_skim";
+  string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-05_25ns_json_246908-256869_skim";
   
   
   // ----------------------------------------
@@ -840,8 +845,8 @@ void plotMakerGJets(){
   
   TFile* f_ttbar = new TFile(Form("%s/ttall_mg_lo.root",input_dir.c_str()));
   TFile* f_gjet = new TFile(Form("%s/gjet_ht.root",input_dir.c_str()));
-  TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
-  TFile* f_data = new TFile(Form("%s/data_Run2015D_SinglePhoton.root",input_dir.c_str()));
+  TFile* f_qcd = new TFile(Form("%s/qcd_ht.root",input_dir.c_str()));
+  TFile* f_data = new TFile(Form("%s/data_Run2015D.root",input_dir.c_str()));
   
   vector<TFile*> samples;
   vector<string>  names;
@@ -874,10 +879,13 @@ void plotMakerGJets(){
       //      if(dir_name != "crrlmubase") continue; //for testing
       if(dir_name != "crgjbase") continue; //for testing
       
-      makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 50 GeV" , 450 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_chisoLoose"  , "Charged Iso [GeV]" , "Events / 2.5 GeV" , 0 , 20 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_chisoLooseSieieSB"  , "Charged Iso [GeV]" , "Events / 1 GeV" , 0 , 20 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 800 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 800 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 200 , 1000 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_simplemet"  , "Untransformed E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 500 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_gammaPt"  , "Photon p_{T} [GeV]" , "Events / 50 GeV" , 150 , 1000 , 10 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_nlepveto" , "N(leptons)" , "Events" , 0 , 10 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_nJet30" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_nBJet20" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
@@ -957,6 +965,7 @@ void plotMakerCRSL(){
   
 //_______________________________________________________________________________
 void plotMaker(){
+
   //plotMakerGJets(); return;
   //plotMakerCRSL(); return;
 
