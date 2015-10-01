@@ -80,6 +80,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   }
   
   TString canvas_name = Form("c_%s_%s",histdir.c_str(),histname.c_str());
+  if (logplot) canvas_name += "_log";
   TCanvas* can = new TCanvas(canvas_name,canvas_name, 600, 600);
   can->cd();
   if (!doRatio) {
@@ -156,16 +157,23 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     if( TString(names.at(i)).Contains("data")  ) continue;
     if( TString(names.at(i)).Contains("sig")  ) continue;
     TString fullhistname = Form("%s/%s",histdir.c_str(),histname.c_str());
-    if (TString(names.at(i)).Contains("fakephoton") ) {
+    // Make sure we take the "Fake" labeled histograms from MC
+    if (TString(names.at(i)).Contains("fakephotonMC") ) {
       if (!fullhistname.Contains("Loose") ) fullhistname+="Fake";
       else if (fullhistname.Contains("LooseSieieSB")) fullhistname.ReplaceAll("LooseSieieSB", "FakeLooseSieieSB");
       else if (fullhistname.Contains("Loose")) fullhistname.ReplaceAll("Loose", "FakeLoose");
     }
+    // Try data-driven fake estimates: LooseNotTight * FR / (1 - FR)
+    bool DataDrivenQCD = false;
+    if (TString(names.at(i)).Contains("fakephotonData") && !fullhistname.Contains("Loose")) DataDrivenQCD = true;
+    
+    if (DataDrivenQCD) fullhistname+="LooseNotTight";
 
     if (histdir.size() == 0) fullhistname = TString(histname);
     TString newhistname = Form("%s_%s_%s",histname.c_str(),histdir.c_str(),names.at(i).c_str());
     TH1D* h_temp = (TH1D*) samples.at(i)->Get(fullhistname);
     if (h_temp == 0) continue;
+    if (DataDrivenQCD)  h_temp->Scale( 0.115 / (1 - 0.115) );
     TH1D* h = (TH1D*) h_temp->Clone(newhistname);
     h->SetFillColor(getColor(names.at(i)));
     h->SetLineColor(kBlack);
@@ -202,15 +210,17 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   }
 
   // loop through backgrounds to add hists to stack
-  int xminBin = h_bgtot->GetXaxis()->FindBin(xmin);
-  int xmaxBin = h_bgtot->GetXaxis()->FindBin(xmax);
+  //int xminBin = h_bgtot->GetXaxis()->FindBin(xmin*0.99);
+  //int xmaxBin = h_bgtot->GetXaxis()->FindBin(xmax*1.01);
   Double_t bg_integral_err = 0.;
-  float bg_integral = h_bgtot->IntegralAndError(xminBin,xmaxBin,bg_integral_err);
+  //float bg_integral = h_bgtot->IntegralAndError(xminBin,xmaxBin,bg_integral_err);
+  float bg_integral = h_bgtot->IntegralAndError(0,-1,bg_integral_err);
   float data_integral = 1.;
   float bg_sf = 1.;
   float bg_sf_err = 0.;
   if (data_hist) {
-    data_integral = data_hist->Integral(xminBin,xmaxBin);
+    //data_integral = data_hist->Integral(xminBin,xmaxBin);
+    data_integral = data_hist->Integral(0,-1);
     bg_sf = data_integral/bg_integral;
     bg_sf_err = err_mult(data_integral,bg_integral,sqrt(data_integral),bg_integral_err,bg_sf);
     std::cout << "Data/MC is: " << bg_sf << " +/- " << bg_sf_err << std::endl;
@@ -852,8 +862,16 @@ void plotMakerGJets(){
   vector<string>  names;
   samples.push_back(f_data); names.push_back("data");
   samples.push_back(f_qcd);   names.push_back("fragphoton");
-  samples.push_back(f_qcd);   names.push_back("fakephoton");
+  samples.push_back(f_qcd);   names.push_back("fakephotonMC");
+  //samples.push_back(f_data);   names.push_back("fakephotonData");
   samples.push_back(f_gjet);  names.push_back("gjet");
+  
+  vector<TFile*> samples2;
+  vector<string>  names2;
+  samples2.push_back(f_data); names2.push_back("data");
+  samples2.push_back(f_qcd);   names2.push_back("fragphoton");
+  samples2.push_back(f_qcd);   names2.push_back("fakephotonMC");
+  samples2.push_back(f_gjet);  names2.push_back("gjet");
   
   // ----------------------------------------
   //  plots definitions
@@ -878,24 +896,121 @@ void plotMakerGJets(){
       //if(dir_name != "srbase") continue; //to do only this dir
       //      if(dir_name != "crrlmubase") continue; //for testing
       if(dir_name != "crgjbase") continue; //for testing
+
+      bool dolog = false;
+      string s = "";
+      for (int j = 0; j < 1; j++) {
+        if (j>0) dolog = true;
+        makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 50 GeV" , 450 , 1500 , 2 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples2, names2, dir_name , "h_chisoLoose"  , "Charged Iso [GeV]" , "Events " , 0 , 20 , 2 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples2, names2, dir_name , "h_chisoEBLoose"  , "Charged Iso [GeV]" , "Events " , 0 , 20 , 2 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples2, names2, dir_name , "h_chisoEELoose"  , "Charged Iso [GeV]" , "Events " , 0 , 20 , 2 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples2, names2, dir_name , "h_chisoLooseSieieSB"  , "Charged Iso [GeV]" , "Events " , 0 , 20 , 5 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples2, names2, dir_name , "h_chisoEBLooseSieieSB"  , "Charged Iso [GeV]" , "Events " , 0 , 20 , 5 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples2, names2, dir_name , "h_chisoEELooseSieieSB"  , "Charged Iso [GeV]" , "Events " , 0 , 20 , 5 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 200 , 1000 , 5 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_simplemet"  , "Untransformed E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 500 , 5 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_gammaPt"  , "Photon p_{T} [GeV]" , "Events / 50 GeV" , 179 , 1000 , 10 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_gammaPtEB"  , "Photon p_{T} [GeV]" , "Events / 50 GeV" , 179 , 1000 , 10 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_gammaPtEE"  , "Photon p_{T} [GeV]" , "Events / 50 GeV" , 179 , 1000 , 10 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_gammaEta"  , "Photon Eta" , "Events" , -2.5 , 2.5 , 5 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_nlepveto" , "N(leptons)" , "Events" , 0 , 10 , 1 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_nJet30" , "N(jets)" , "Events" , 0 , 15 , 1 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_nBJet20" , "N(b jets)" , "Events" , 0 , 6 , 1 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        //makePlot( samples , names , dir_name , "h_nJet30Eta3" , "N(jets, |#eta| > 3.0)" , "Events" , 0 , 5 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+        //makePlot( samples , names , dir_name , "h_leppt"  , "Lepton p_{T} [GeV]" , "Events" , 0 , 1000 , 10 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      }
       
-      makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 50 GeV" , 450 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_chisoLoose"  , "Charged Iso [GeV]" , "Events / 2.5 GeV" , 0 , 20 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_chisoLooseSieieSB"  , "Charged Iso [GeV]" , "Events / 1 GeV" , 0 , 20 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 200 , 1000 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_simplemet"  , "Untransformed E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 500 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_gammaPt"  , "Photon p_{T} [GeV]" , "Events / 50 GeV" , 150 , 1000 , 10 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_nlepveto" , "N(leptons)" , "Events" , 0 , 10 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_nJet30" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_nBJet20" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      //makePlot( samples , names , dir_name , "h_nJet30Eta3" , "N(jets, |#eta| > 3.0)" , "Events" , 0 , 5 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      //makePlot( samples , names , dir_name , "h_leppt"  , "Lepton p_{T} [GeV]" , "Events" , 0 , 1000 , 10 , false, printplots, scalesig, doRatio, scaleBGtoData );
+    }
+    
+  }
+  
+}
+
+//_______________________________________________________________________________
+void plotMakerRemovedLep(){
+  
+  //  gROOT->LoadMacro("CMS_lumi.C");
+  cmsText = "CMS Preliminary";
+  cmsTextSize = 0.5;
+  lumiTextSize = 0.4;
+  writeExtraText = false;
+  lumi_13TeV = "100 pb^{-1}";
+  
+  string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-05_25ns_json_246908-256869_skim";
+  
+  
+  // ----------------------------------------
+  //  samples definition
+  // ----------------------------------------
+  
+  // get input files
+  
+  TFile* f_ttbar = new TFile(Form("%s/top.root",input_dir.c_str()));
+  TFile* f_wjets = new TFile(Form("%s/wjets_ht.root",input_dir.c_str()));
+  TFile* f_qcd = new TFile(Form("%s/qcd_ht.root",input_dir.c_str()));
+  TFile* f_data = new TFile(Form("%s/data_Run2015D.root",input_dir.c_str()));
+  
+  vector<TFile*> samples;
+  vector<string>  names;
+  samples.push_back(f_data); names.push_back("data");
+  samples.push_back(f_qcd); names.push_back("qcd");
+  samples.push_back(f_ttbar); names.push_back("top");
+  samples.push_back(f_wjets); names.push_back("wjets");
+
+  
+  // ----------------------------------------
+  //  plots definitions
+  // ----------------------------------------
+  
+  float scalesig = -1.;
+  //float scalesig = 50.;
+  bool printplots = true;
+  bool doRatio = true;
+  bool scaleBGtoData = true;
+  
+  if(printplots){
+    TIter it(f_ttbar->GetListOfKeys());
+    TKey* k;
+    std::string cr_skip = "cr";
+    std::string sr_skip = "sr";
+    while ((k = (TKey *)it())) {
+      //if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
+      //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
+      std::string dir_name = k->GetTitle();
+      if(dir_name == "") continue;
+      //if(dir_name != "srbase") continue; //to do only this dir
+      //      if(dir_name != "crrlmubase") continue; //for testing
+      if(dir_name != "crrlbase") continue; //for testing
+      
+      bool dolog = false;
+      string s = "";
+      for (int j = 0; j < 2; j++) {
+        if (j>0) dolog = true;
+        makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 50 GeV" , 450 , 1500 , 2 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_lepabsiso"  , "Abs Iso [GeV]" , "Events " , 0 , 50 , 2 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_lepreliso"  , "Rel Iso" , "Events " , 0 , 1 , 2 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_mt" , "M_{T} (lep, MET) [GeV]" , "Events " , 0 , 200 , 5 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 200 , 1000 , 5 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_simplemet"  , "Untransformed E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 10 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_leppt"  , "Lepton p_{T} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 10 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_lepeta"  , "Lepton #eta " , "Events " , -2.5 , 2.5 , 5 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_nlepveto" , "N(leptons)" , "Events" , 0 , 10 , 1 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_nJet30" , "N(jets)" , "Events" , 0 , 15 , 1 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_nBJet20" , "N(b jets)" , "Events" , 0 , 6 , 1 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        //makePlot( samples , names , dir_name , "h_nJet30Eta3" , "N(jets, |#eta| > 3.0)" , "Events" , 0 , 5 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+        //makePlot( samples , names , dir_name , "h_leppt"  , "Lepton p_{T} [GeV]" , "Events" , 0 , 1000 , 10 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      }
+      
     }
   }
   
 }
+
 
 //_______________________________________________________________________________
 void plotMakerCRSL(){
@@ -967,6 +1082,7 @@ void plotMakerCRSL(){
 void plotMaker(){
 
   //plotMakerGJets(); return;
+  //plotMakerRemovedLep(); return;
   //plotMakerCRSL(); return;
 
   //  gROOT->LoadMacro("CMS_lumi.C");
