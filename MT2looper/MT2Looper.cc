@@ -378,7 +378,9 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       if (!t.Flag_CSCTightHaloFilter) continue;
       if (!t.Flag_eeBadScFilter) continue;
       if (!t.Flag_HBHENoiseFilter) continue;
-      if (t.nJet30FailId > 0) continue;
+      bool passJetID = true;
+      //if (t.nJet30FailId > 0) continue;
+      if (t.nJet30FailId > 0) passJetID = false;
 
       // remove low pt QCD samples 
       if (t.evt_id >= 100 && t.evt_id < 109) continue;
@@ -611,6 +613,25 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       ///   time to fill histograms    /// 
       ////////////////////////////////////
 
+      if (doGJplots) {
+        saveGJplots = true;
+	if (t.gamma_nJet30FailId == 0) {
+
+	  //// To test Madgraph fragmentation (need to remove drMinParton requirement from above) //
+	  //if ( t.gamma_mcMatchId[0] > 0 ) {
+	  //  if (t.evt_id < 200 || t.gamma_drMinParton[0]>0.4) fillHistosCRGJ("crgj"); // Prompt photon
+	  //  if (t.evt_id >=200 && t.gamma_drMinParton[0]<0.4)  fillHistosCRGJ("crgj", "FragGJ");
+	  //  if (t.evt_id < 200 && t.gamma_drMinParton[0]<0.05) fillHistosCRGJ("crgj", "FragGJ");
+	  //}
+	  //// End of Madgraph fragmentation tests //
+	  
+	  if ( t.gamma_mcMatchId[0] > 0 || t.isData) fillHistosCRGJ("crgj"); // Prompt photon 
+	  else fillHistosCRGJ("crgj", "Fake");
+	}
+      }
+      
+      if (!passJetID) continue;
+
       fillHistos(SRNoCut.srHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "");
 
       fillHistosSignalRegion("sr");
@@ -618,19 +639,6 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       fillHistosSRBase();
       fillHistosInclusive();
 
-      if (doGJplots) {
-        saveGJplots = true;
-	//// To test Madgraph fragmentation (need to remove drMinParton requirement from above) //
-	//if ( t.gamma_mcMatchId[0] > 0 ) {
-	//  if (t.evt_id < 200 || t.gamma_drMinParton[0]>0.4) fillHistosCRGJ("crgj"); // Prompt photon
-	//  if (t.evt_id >=200 && t.gamma_drMinParton[0]<0.4)  fillHistosCRGJ("crgj", "FragGJ");
-	//  if (t.evt_id < 200 && t.gamma_drMinParton[0]<0.05) fillHistosCRGJ("crgj", "FragGJ");
-	//}
-	//// End of Madgraph fragmentation tests //
-
-	if ( t.gamma_mcMatchId[0] > 0 || t.isData) fillHistosCRGJ("crgj"); // Prompt photon 
-	else fillHistosCRGJ("crgj", "Fake");
-      }
       if (doDYplots) {
         saveDYplots = true;
         fillHistosCRDY("crdy");
