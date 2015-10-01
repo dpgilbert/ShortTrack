@@ -52,11 +52,10 @@ inline TH1F* sameBin(TH1F* h_in)
 
 //takes a FR histogram and signal region and calculates the predicted number of fakes
 //in the signal region 'sr' , adding fragScale*qcdPrompt to LooseNotTight
-void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, SR sr, TH2D* h_FR, const float fragScale = 1, TString s = "")
+void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString srName, TH2D* h_FR, const float fragScale = 1, TString s = "")
 {
 
   //sr name
-  TString srName = sr.GetName();
   bool realDataLocal = false;
   if (s.Contains("Data") || s.Contains("data")) realDataLocal = true;
 
@@ -81,7 +80,8 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, SR sr, TH2
   }
 
   //initialize prediction array
-  const int n_mt2bins = sr.GetNumberOfMT2Bins();
+//  const int n_mt2bins = sr.GetNumberOfMT2Bins();
+  const int n_mt2bins = h_LooseNotTight->GetNbinsX();
   Double_t preds[n_mt2bins+2]; //first and last bin are over/underflow
   Double_t predErrors[n_mt2bins+2]; //first and last bin are over/underflow
   for(int i=0; i<n_mt2bins+2; i++){
@@ -92,7 +92,8 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, SR sr, TH2
   //mt2bin names
   vector<TString> mt2binsname;
   for(int i=0; i<=n_mt2bins; i++){
-    mt2binsname.push_back(toString(sr.GetMT2Bins()[i]));
+//    mt2binsname.push_back(toString(sr.GetMT2Bins()[i]));
+    mt2binsname.push_back(toString(h_LooseNotTight->GetBinLowEdge(i+1)));
   }
   
   //loop over mt2bins
@@ -655,15 +656,18 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
 
   //make the prediction hists
   cout << "Making predicted yield histograms..." << endl;
-  for(int i = 0; i< (int) SRVec.size(); i++){
-    makePred(f_out, f_gq, f_q, f_g, SRVec[i], h_FR, 0, ""); //FR using passSieie, LooseNotTight Fakes + 0 qcdPrompt
+  for(int i = 0; i< (int) SRVec.size()+1; i++){
+    TString srName = "base";
+    if (i < (int) SRVec.size()) srName = SRVec[i].GetName();
+    makePred(f_out, f_gq, f_q, f_g, srName, h_FR, 0, ""); //FR using passSieie, LooseNotTight Fakes + 0 qcdPrompt
     //makePred(f_out, f_data, f_q, f_g, SRVec[i], h_FR, 0.5, "plus50"); //FR using passSieie, LooseNotTight Fakes + +50% qcdPrompt
     //makePred(f_out, f_data, f_q, f_g, SRVec[i], h_FR, -0.5, "minus50"); //FR using passSieie, LooseNotTight Fakes + -50% qcdPrompt
-    makePred(f_out, f_gq, f_q, f_g, SRVec[i], h_FRFailSieie, 0, "FailSieie"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt
+    makePred(f_out, f_gq, f_q, f_g, srName, h_FRFailSieie, 0, "FailSieie"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt
     //makePred(f_out, f_data, f_q, f_g, SRVec[i], h_FRFailSieie, 0, "FailSieiePoisson"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Poisson errors
-    makePred(f_out, f_data, f_q, f_g, SRVec[i], h_FRFailSieieData, 0, "FailSieieData"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
+    makePred(f_out, f_data, f_q, f_g, srName, h_FRFailSieieData, 0, "FailSieieData"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
     //makePred(f_out, f_data, f_q, f_g, SRVec[i], h_FR, 0, "Poisson"); //FR using passSieie, LooseNotTight Fakes + 0 qcdPrompt, Poisson errors
   }
+
 
   //make purity plots
   //first delete log file in case it already exists
@@ -672,10 +676,12 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   else
     puts( "Deleting old log file..." );
   cout << "Making purity histograms..." << endl;
-  for(int i = 0; i< (int) SRVec.size(); i++){
+  for(int i = 0; i< (int) SRVec.size()+1; i++){
+    TString srName = "base";
+    if (i < (int) SRVec.size()) srName = SRVec[i].GetName();
 //    purityPlots(f_out, f_g, f_q, f_z, SRVec[i].GetName());
-    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, SRVec[i].GetName(), "");
-    purityPlotsNew(f_out, f_data, f_g, f_q, f_z, SRVec[i].GetName(), "FailSieieData"); // This needs to be done last (it overwrites previous histograms)
+    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, srName, "");
+    purityPlotsNew(f_out, f_data, f_g, f_q, f_z, srName, "FailSieieData"); // This needs to be done last (it overwrites previous histograms)
   }
 
   //save and write
