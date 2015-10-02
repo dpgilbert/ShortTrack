@@ -41,6 +41,14 @@ float err_mult(float A, float B, float errA, float errB, float C) {
   return sqrt(C*C*(pow(errA/A,2) + pow(errB/B,2)));
 }
 
+void addOverflow(TH1* h) {
+  Double_t err = 0;
+  float lastBinPlusOverflow = h->IntegralAndError(h->GetXaxis()->GetNbins(), -1, err);
+  h->SetBinContent(h->GetXaxis()->GetNbins(), lastBinPlusOverflow);
+  h->SetBinError(h->GetXaxis()->GetNbins(), err);
+  return;
+}
+
 //_______________________________________________________________________________
 TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names , const string& histdir , const string& histname , const string& xtitle , const string& ytitle , float xmin , float xmax , int rebin = 1 , bool logplot = true, bool printplot = false, float scalesig = -1., bool doRatio = false, bool scaleBGtoData = false ) {
 
@@ -128,6 +136,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     data_hist->SetLineColor(kBlack);
     data_hist->SetMarkerColor(kBlack);
     data_hist->SetMarkerStyle(20);
+    addOverflow(data_hist); // Add Overflow
     if (rebin > 1) data_hist->Rebin(rebin);
 
     // fake data -> set error bars to correspond to data stats
@@ -173,10 +182,16 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     TString newhistname = Form("%s_%s_%s",histname.c_str(),histdir.c_str(),names.at(i).c_str());
     TH1D* h_temp = (TH1D*) samples.at(i)->Get(fullhistname);
     if (h_temp == 0) continue;
-    if (DataDrivenQCD)  h_temp->Scale( 0.115 / (1 - 0.115) );
+    if (DataDrivenQCD)  {
+      TH1D* h_prompt = (TH1D*) samples.at(i+1)->Get(fullhistname);
+      if (h_prompt == 0) cout<<"Can't do prompt subtraction for "<<fullhistname<<endl;
+      else h_temp->Add(h_prompt, -1.4); // 40% Data/MC scale factor
+      h_temp->Scale( 0.14 / (1 - 0.14) ); // 0.14 Data FR
+    }
     TH1D* h = (TH1D*) h_temp->Clone(newhistname);
     h->SetFillColor(getColor(names.at(i)));
     h->SetLineColor(kBlack);
+    addOverflow(h); // Add Overflow
     if (rebin > 1) h->Rebin(rebin);
     if( h_bgtot==0 ) h_bgtot = (TH1D*) h->Clone(Form("%s_%s_bgtot",histname.c_str(),histdir.c_str()));
     else h_bgtot->Add(h);
@@ -203,6 +218,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     TH1D* h = (TH1D*) h_temp->Clone(newhistname);
     h->SetLineColor(getColor(names.at(i)));
     h->SetLineWidth(2);
+    addOverflow(h); // Add Overflow
     if (rebin > 1) h->Rebin(rebin);
     if (scalesig > 0.) h->Scale(scalesig);
     sig_hists.push_back(h);
@@ -210,17 +226,13 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   }
 
   // loop through backgrounds to add hists to stack
-  //int xminBin = h_bgtot->GetXaxis()->FindBin(xmin*0.99);
-  //int xmaxBin = h_bgtot->GetXaxis()->FindBin(xmax*1.01);
   Double_t bg_integral_err = 0.;
-  //float bg_integral = h_bgtot->IntegralAndError(xminBin,xmaxBin,bg_integral_err);
-  float bg_integral = h_bgtot->IntegralAndError(0,-1,bg_integral_err);
+  float bg_integral = h_bgtot->IntegralAndError(0,h_bgtot->GetXaxis()->GetNbins(),bg_integral_err);
   float data_integral = 1.;
   float bg_sf = 1.;
   float bg_sf_err = 0.;
   if (data_hist) {
-    //data_integral = data_hist->Integral(xminBin,xmaxBin);
-    data_integral = data_hist->Integral(0,-1);
+    data_integral = data_hist->Integral(0,data_hist->GetXaxis()->GetNbins());
     bg_sf = data_integral/bg_integral;
     bg_sf_err = err_mult(data_integral,bg_integral,sqrt(data_integral),bg_integral_err,bg_sf);
     std::cout << "Data/MC is: " << bg_sf << " +/- " << bg_sf_err << std::endl;
@@ -844,7 +856,7 @@ void plotMakerGJets(){
   writeExtraText = false;
   lumi_13TeV = "100 pb^{-1}";
   
-  string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-05_25ns_json_246908-256869_skim";
+  string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-05_25ns_json_246908-256869_skimV3";
   
   
   // ----------------------------------------
@@ -853,7 +865,7 @@ void plotMakerGJets(){
   
   // get input files
   
-  TFile* f_ttbar = new TFile(Form("%s/ttall_mg_lo.root",input_dir.c_str()));
+  TFile* f_ttbar = new TFile(Form("%s/top.root",input_dir.c_str()));
   TFile* f_gjet = new TFile(Form("%s/gjet_ht.root",input_dir.c_str()));
   TFile* f_qcd = new TFile(Form("%s/qcd_ht.root",input_dir.c_str()));
   TFile* f_data = new TFile(Form("%s/data_Run2015D.root",input_dir.c_str()));
@@ -862,9 +874,9 @@ void plotMakerGJets(){
   vector<string>  names;
   samples.push_back(f_data); names.push_back("data");
   samples.push_back(f_qcd);   names.push_back("fragphoton");
-  samples.push_back(f_qcd);   names.push_back("fakephotonMC");
-  //samples.push_back(f_data);   names.push_back("fakephotonData");
-  samples.push_back(f_gjet);  names.push_back("gjet");
+  //samples.push_back(f_qcd);   names.push_back("fakephotonMC");
+  samples.push_back(f_data);   names.push_back("fakephotonData");
+  samples.push_back(f_gjet);  names.push_back("gjet"); //this needs to be right after fakephotonData, for prompt subtraction!
   
   vector<TFile*> samples2;
   vector<string>  names2;
@@ -899,7 +911,7 @@ void plotMakerGJets(){
 
       bool dolog = false;
       string s = "";
-      for (int j = 0; j < 1; j++) {
+      for (int j = 0; j < 2; j++) {
         if (j>0) dolog = true;
         makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 50 GeV" , 450 , 1500 , 2 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
         makePlot( samples2, names2, dir_name , "h_chisoLoose"  , "Charged Iso [GeV]" , "Events " , 0 , 20 , 2 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
@@ -939,7 +951,7 @@ void plotMakerRemovedLep(){
   writeExtraText = false;
   lumi_13TeV = "100 pb^{-1}";
   
-  string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-05_25ns_json_246908-256869_skim";
+  string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-05_25ns_json_246908-256869_skimV3";
   
   
   // ----------------------------------------
