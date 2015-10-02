@@ -478,9 +478,12 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
   }
   TH1F* h_predFR = (TH1F*) f_out->Get("sr"+sr+"/h_pred"+FR_type);
   TH1F* h_ratio = (TH1F*) f_zinv->Get("sr"+sr+"/h_mt2binsRatio");
+  TH1F* h_trueZinv = (TH1F*) f_zinv->Get("sr"+sr+"/h_mt2bins");
 
   if (verbose && h_gjet) cout<<__LINE__<<" f_gjet:crgj"<<sr<<"/h_mt2bins has integral "<<h_gjet->Integral()<<endl;
   if (verbose && h_gjet) cout<<__LINE__<<" f_data:crgj"<<sr<<"/h_mt2bins has integral "<<h_full->Integral()<<endl;
+  if (verbose && h_gjet) cout<<__LINE__<<" f_zinv:sr"<<sr<<"/h_mt2bins has integral "<<h_trueZinv->Integral()<<endl;
+  if (verbose && h_gjet) cout<<__LINE__<<" f_zinv:sr"<<sr<<" ratio is "<<endl; h_ratio->Print("all");
   
   f_out->cd();
   TString directory = "sr"+sr;
@@ -522,8 +525,11 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
   //note frag fraction f is included in purity
   TH1F* h_predZ = (TH1F*) h_full->Clone("h_predZ");
   h_predZ->SetName("h_predZ"+FR_type);
+  cout<<"PredZ integral "<<h_predZ->Integral()<<endl;
   if (h_purityFR) h_predZ->Multiply(h_predZ,h_purityFR,1,1,"B");
+  cout<<"PredZ integral "<<h_predZ->Integral()<<endl;
   if (h_ratio) h_predZ->Multiply(h_predZ,h_ratio,1,1,"B");
+  cout<<"PredZ integral "<<h_predZ->Integral()<<endl;
   
   //add systematic error to zinv pred
   for (int bin = 0; bin <= h_predZ->GetNbinsX(); bin++){
@@ -533,7 +539,7 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
 //    h_predZ->SetBinError(bin,pow(pow(statErr,2)+pow(fragErr,2)+pow(corrErr,2),0.5));
     h_predZ->SetBinError(bin,pow(pow(statErr,2)+pow(fragErr,2),0.5));
   }
-  
+  cout<<"PredZ integral "<<h_predZ->Integral()<<endl;
   //write hists to output file
   h_purityFR->Write();
   h_estimate->Write();
@@ -656,7 +662,7 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
 
   //make the prediction hists
   cout << "Making predicted yield histograms..." << endl;
-  for(int i = 0; i< (int) SRVec.size()+1; i++){
+  for(int i = SRVec.size(); i< (int) SRVec.size()+1; i++){
     TString srName = "base";
     if (i < (int) SRVec.size()) srName = SRVec[i].GetName();
     makePred(f_out, f_gq, f_q, f_g, srName, h_FR, 0, ""); //FR using passSieie, LooseNotTight Fakes + 0 qcdPrompt
@@ -676,7 +682,7 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   else
     puts( "Deleting old log file..." );
   cout << "Making purity histograms..." << endl;
-  for(int i = 0; i< (int) SRVec.size()+1; i++){
+  for(int i = SRVec.size(); i< (int) SRVec.size()+1; i++){
     TString srName = "base";
     if (i < (int) SRVec.size()) srName = SRVec[i].GetName();
 //    purityPlots(f_out, f_g, f_q, f_z, SRVec[i].GetName());

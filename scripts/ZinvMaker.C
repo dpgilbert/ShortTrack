@@ -36,28 +36,28 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
 
   for ( unsigned int incl = 0; incl < inclPlots.size(); ++incl ) {
     
-    TH1D* hGJet = (TH1D*) fGJet->Get("crgjbase/"+inclPlots[incl]);    
-    TH1D* hZll  = (TH1D*)  fZll->Get("crdybase/"+inclPlots[incl]);    
+    TH1D* hGJetIncl = (TH1D*) fGJet->Get("crgjbase/"+inclPlots[incl])->Clone();
+    TH1D* hZllIncl  = (TH1D*)  fZll->Get("crdybase/"+inclPlots[incl])->Clone();
 
-    if(!hGJet || !hZll){
+    if(!hGJetIncl || !hZllIncl){
       cout<<"could not find histogram "<<inclPlots[incl]<<endl;
       continue;
     }
-    if (hGJet->GetNbinsX() != hZll->GetNbinsX() ) {
+    if (hGJetIncl->GetNbinsX() != hZllIncl->GetNbinsX() ) {
       cout<<"different binning for histograms "<<inclPlots[incl]<<endl;
       continue;
     }
     outfile->cd();
 
-    hGJet->Scale(kFactorGJetForRatio); // The goal is LO(Z) / LO(gamma)
+    hGJetIncl->Scale(kFactorGJetForRatio); // The goal is LO(Z) / LO(gamma)
 
     // Since we're working on MC, let's set poissionian errors by hand
-    hZll->Sumw2(0); hZll->Sumw2(1);
-    hGJet->Sumw2(0); hGJet->Sumw2(1);
-    TH1D* ratio = (TH1D*) hZll->Clone(inclPlots[incl]+"Ratio");
-    ratio->Divide(hGJet);
+    hZllIncl->Sumw2(0); hZllIncl->Sumw2(1);
+    hGJetIncl->Sumw2(0); hGJetIncl->Sumw2(1);
+    TH1D* ratioIncl = (TH1D*) hZllIncl->Clone(inclPlots[incl]+"Ratio");
+    ratioIncl->Divide(hGJetIncl);
 
-    ratio->Write();
+    ratioIncl->Write();
 
   } // end of inclusive plots
 
@@ -81,6 +81,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
       cout<<"different binning for histograms "<<fullhistname<<endl;
       continue;
     }
+    //hGJet->Print("all");
     hGJet->Scale(kFactorGJetForRatio); // The goal is LO(Z) / LO(gamma)
 
     // Make directory and plot(s) in the output file
@@ -102,7 +103,10 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
 
     // Zgamma ratio in each MT2bin -> to get MC stat error on ratio
     TH1D* ratio = (TH1D*) hZinv->Clone("h_mt2binsRatio");
+    //ratio->Print("all");
+    //hGJet->Print("all");
     ratio->Divide(hGJet);
+    //ratio->Print("all");
 
     // MCStat: use relative bin error from ratio hist, normalized to Zinv MC prediction
     TH1D* MCStat = (TH1D*) hZinv->Clone("h_mt2binsMCStat");
