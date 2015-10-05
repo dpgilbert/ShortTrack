@@ -31,6 +31,7 @@
 #include "../CORE/Tools/JetCorrector.h"
 #include "../CORE/Tools/jetcorr/FactorizedJetCorrector.h"
 #include "../CORE/Tools/goodrun.h"
+#include "../CORE/Tools/btagsf/BTagCalibrationStandalone.h"
 
 // MT2CORE
 #include "../MT2CORE/sampleID.h"
@@ -46,6 +47,8 @@ using namespace tas;
 const bool verbose = false;
 // turn on to apply JEC from text files (default true)
 const bool applyJECfromFile = true;
+// turn on to apply btag SFs (default false)
+const bool applyBtagSFs = false;
 // turn on to recompute type1 MET using JECs from file (default true)
 const bool recomputeT1MET = true;
 // turn on to save prunedGenParticle collection (default false)
@@ -113,6 +116,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
     set_goodrun_file(json_file);
   }
 
+  if (applyBtagSFs) {
+    // setup btag calibration readers
+    calib = new BTagCalibration("csvv2", "btagsf/CSVv2.csv"); // 50ns version of SFs
+    reader_heavy = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "mujets", "central"); // central
+    reader_heavy_UP = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "mujets", "up");  // sys up
+    reader_heavy_DN = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "mujets", "down");  // sys down
+    reader_light = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "central");  // central
+    reader_light_UP = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "up");  // sys up
+    reader_light_DN = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "down");  // sys down
+  }
+  
   // File Loop
   int nDuplicates = 0;
   int nFailJSON = 0;
@@ -1300,20 +1314,33 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
             //CSVv2IVFM
             if(jet_btagCSV[njet] >= 0.890) {
               nBJet20++; 
-              // dummy btag SF
-              if (!isData && applyDummyWeights) {
+              // btag SF - not final yet
+              if (!isData && applyBtagSFs) {
                 float eff = getBtagEff(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet]);
-                weightStruct weights = getBtagSF(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet]);
-                btagprob_data *= weights.cent * eff;
+		BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG;
+		if (abs(jet_mcFlavour[njet]) == 5) flavor = BTagEntry::FLAV_B;
+		else if (abs(jet_mcFlavour[njet]) == 4) flavor = BTagEntry::FLAV_C;
+		float pt_cutoff = std::max(30.,std::min(669.,double(jet_pt[njet])));
+		float weight_cent(1.), weight_UP(1.), weight_DN(1.);
+		if (flavor == BTagEntry::FLAV_UDSG) {
+		  weight_cent = reader_light->eval(flavor, jet_eta[njet], pt_cutoff);
+		  weight_UP = reader_light_UP->eval(flavor, jet_eta[njet], pt_cutoff);
+		  weight_DN = reader_light_DN->eval(flavor, jet_eta[njet], pt_cutoff);
+		} else {
+		  weight_cent = reader_heavy->eval(flavor, jet_eta[njet], pt_cutoff);
+		  weight_UP = reader_heavy_UP->eval(flavor, jet_eta[njet], pt_cutoff);
+		  weight_DN = reader_heavy_DN->eval(flavor, jet_eta[njet], pt_cutoff);
+		}
+                btagprob_data *= weight_cent * eff;
                 btagprob_mc *= eff;
-                float abserr_UP = weights.up - weights.cent;
-                float abserr_DN = weights.cent - weights.dn;
-                if (abs(jet_mcFlavour[njet]) == 5 || abs(jet_mcFlavour[njet]) == 4) {
-                  btagprob_err_heavy_UP += abserr_UP/weights.cent;
-                  btagprob_err_heavy_DN += abserr_DN/weights.cent;
-                } else {
-                  btagprob_err_light_UP += abserr_UP/weights.cent;
-                  btagprob_err_light_DN += abserr_DN/weights.cent;
+                float abserr_UP = weight_UP - weight_cent;
+                float abserr_DN = weight_cent - weight_DN;
+		if (flavor == BTagEntry::FLAV_UDSG) {
+                  btagprob_err_light_UP += abserr_UP/weight_cent;
+                  btagprob_err_light_DN += abserr_DN/weight_cent;
+		} else {
+                  btagprob_err_heavy_UP += abserr_UP/weight_cent;
+                  btagprob_err_heavy_DN += abserr_DN/weight_cent;
                 }
               }
               if (jet_pt[njet] > 25.0) nBJet25++; 
@@ -1332,19 +1359,32 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
                 }
               } // pt 30
             } // pass med btag
-            else if (!isData && applyDummyWeights) { // fail med btag -- needed for SF event weights
+            else if (!isData && applyBtagSFs) { // fail med btag -- needed for SF event weights
               float eff = getBtagEff(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet]);
-              weightStruct weights = getBtagSF(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet]);
-              btagprob_data *= (1. - weights.cent * eff);
+	      BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG;
+	      if (abs(jet_mcFlavour[njet]) == 5) flavor = BTagEntry::FLAV_B;
+	      else if (abs(jet_mcFlavour[njet]) == 4) flavor = BTagEntry::FLAV_C;
+	      float pt_cutoff = std::max(30.,std::min(669.,double(jet_pt[njet])));
+	      float weight_cent(1.), weight_UP(1.), weight_DN(1.);
+	      if (flavor == BTagEntry::FLAV_UDSG) {
+		weight_cent = reader_light->eval(flavor, jet_eta[njet], pt_cutoff);
+		weight_UP = reader_light_UP->eval(flavor, jet_eta[njet], pt_cutoff);
+		weight_DN = reader_light_DN->eval(flavor, jet_eta[njet], pt_cutoff);
+	      } else {
+		weight_cent = reader_heavy->eval(flavor, jet_eta[njet], pt_cutoff);
+		weight_UP = reader_heavy_UP->eval(flavor, jet_eta[njet], pt_cutoff);
+		weight_DN = reader_heavy_DN->eval(flavor, jet_eta[njet], pt_cutoff);
+	      }
+              btagprob_data *= (1. - weight_cent * eff);
               btagprob_mc *= (1. - eff);
-              float abserr_UP = weights.up - weights.cent;
-              float abserr_DN = weights.cent - weights.dn;
-              if (abs(jet_mcFlavour[njet]) == 5 || abs(jet_mcFlavour[njet]) == 4) {
-                btagprob_err_heavy_UP += (-eff * abserr_UP)/(1 - eff * weights.cent);
-                btagprob_err_heavy_DN += (-eff * abserr_DN)/(1 - eff * weights.cent);
+              float abserr_UP = weight_UP - weight_cent;
+              float abserr_DN = weight_cent - weight_DN;
+	      if (flavor == BTagEntry::FLAV_UDSG) {
+                btagprob_err_light_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
+                btagprob_err_light_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
               } else {
-                btagprob_err_light_UP += (-eff * abserr_UP)/(1 - eff * weights.cent);
-                btagprob_err_light_DN += (-eff * abserr_DN)/(1 - eff * weights.cent);
+                btagprob_err_heavy_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
+                btagprob_err_heavy_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
               }
             } // fail med btag
           } // pt 20 eta 2.5
@@ -1401,7 +1441,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       }
 
       // compute event level btag weights
-      if (!isData && applyDummyWeights) {
+      if (!isData && applyBtagSFs) {
         weight_btagsf = btagprob_data / btagprob_mc;
         weight_btagsf_UP = weight_btagsf + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf);
         weight_btagsf_DN = weight_btagsf - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf);
@@ -1690,6 +1730,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
     cout << nFailRunNumber << " events were removed due to run number." << endl;
 
     CloseBabyNtuple();
+
+    if (applyBtagSFs) {
+      delete calib;
+      delete reader_heavy;
+      delete reader_heavy_UP;
+      delete reader_heavy_DN;
+      delete reader_light;
+      delete reader_light_UP;
+      delete reader_light_DN;
+    }
 
     bmark->Stop("benchmark");
     cout << endl;

@@ -16,6 +16,9 @@
 
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
 
+class BTagCalibration;
+class BTagCalibrationReader;
+
 class babyMaker {
 
  public:
@@ -42,6 +45,16 @@ class babyMaker {
 
   bool isDataFromFileName;
   bool isPromptReco;
+
+  // for btag SFs
+  BTagCalibration* calib;
+  BTagCalibrationReader* reader_heavy;
+  BTagCalibrationReader* reader_heavy_UP;
+  BTagCalibrationReader* reader_heavy_DN;
+  BTagCalibrationReader* reader_light;
+  BTagCalibrationReader* reader_light_UP;
+  BTagCalibrationReader* reader_light_DN;
+
   
   //baby ntuple variables
 
