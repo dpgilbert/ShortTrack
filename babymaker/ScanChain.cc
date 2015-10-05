@@ -370,7 +370,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	// !!!!!!!!!!! HACK !!!!!!!!!!!!!
 	// fix xsec/kfactor for HT binned Wjets, Zinv, DYjets
 	if ((evt_id >= 502 && evt_id <= 505) || (evt_id >= 602 && evt_id <= 605) || (evt_id >= 702 && evt_id <= 705)) {
-	  evt_kfactor = 1.23;
+	  if (evt_id >= 502 && evt_id <= 505) evt_kfactor = 1.21;
+	  else evt_kfactor = 1.23;
+	  
 	  if (evt_id == 502) evt_xsec = 1347.;
 	  else if (evt_id == 503) evt_xsec = 360.;
 	  else if (evt_id == 504) evt_xsec = 48.9;
