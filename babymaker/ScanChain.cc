@@ -30,6 +30,9 @@
 #include "../CORE/Tools/MT2/MT2.h"
 #include "../CORE/Tools/JetCorrector.h"
 #include "../CORE/Tools/jetcorr/FactorizedJetCorrector.h"
+#include "../CORE/Tools/jetcorr/Utilities.icc"
+#include "../CORE/Tools/jetcorr/JetCorrectionUncertainty.icc"
+#include "../CORE/Tools/jetcorr/SimpleJetCorrectionUncertainty.icc"
 #include "../CORE/Tools/goodrun.h"
 #include "../CORE/Tools/btagsf/BTagCalibrationStandalone.h"
 
@@ -47,6 +50,8 @@ using namespace tas;
 const bool verbose = false;
 // turn on to apply JEC from text files (default true)
 const bool applyJECfromFile = true;
+// change to do JEC uncertainty variations. 0 = DEFAULT, 1 = UP, -1 = DN
+const int applyJECunc = 0;
 // turn on to apply btag SFs (default false)
 const bool applyBtagSFs = false;
 // turn on to recompute type1 MET using JECs from file (default true)
@@ -127,6 +132,61 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
     reader_light_DN = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "down");  // sys down
   }
   
+  // ----------------------------------
+  // retrieve JEC from files, if using
+  // ----------------------------------
+
+  std::vector<std::string> jetcorr_filenames_pfL1FastJetL2L3;
+  FactorizedJetCorrector *jet_corrector_pfL1FastJetL2L3(0);
+  JetCorrectionUncertainty* jetcorr_uncertainty(0);
+
+  if (applyJECfromFile) {
+    jetcorr_filenames_pfL1FastJetL2L3.clear();
+    std::string jetcorr_uncertainty_filename;
+
+    // files for RunIISpring15 MC
+    if (bx == 50) {
+      if (isDataFromFileName) {
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_DATA_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_DATA_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_DATA_L3Absolute_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_DATA_L2L3Residual_AK4PFchs.txt");
+      } else {
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_MC_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_MC_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_MC_L3Absolute_AK4PFchs.txt");
+	jetcorr_uncertainty_filename = "jetCorrections/Summer15_50nsV4_DATA_Uncertainty_AK4PFchs.txt";
+      }
+    }
+    else if (bx == 25) {
+      if (isDataFromFileName) {
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV5_DATA_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV5_DATA_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV5_DATA_L3Absolute_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV5_DATA_L2L3Residual_AK4PFchs.txt");
+      } else {
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV2_MC_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV2_MC_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV2_MC_L3Absolute_AK4PFchs.txt");
+	jetcorr_uncertainty_filename = "jetCorrections/Summer15_25nsV5_DATA_Uncertainty_AK4PFchs.txt";
+      }
+    }
+
+    cout << "applying JEC from the following files:" << endl;
+    for (unsigned int ifile = 0; ifile < jetcorr_filenames_pfL1FastJetL2L3.size(); ++ifile) {
+      cout << "   " << jetcorr_filenames_pfL1FastJetL2L3.at(ifile) << endl;
+    }
+
+    jet_corrector_pfL1FastJetL2L3  = makeJetCorrector(jetcorr_filenames_pfL1FastJetL2L3);
+
+    if (!isDataFromFileName && applyJECunc != 0) {
+      cout << "applying JEC uncertainties with weight " << applyJECunc << " from file: " << endl
+	   << "   " << jetcorr_uncertainty_filename << endl;
+      jetcorr_uncertainty = new JetCorrectionUncertainty(jetcorr_uncertainty_filename);
+    }
+      
+  } // if applyJECfromFile
+
   // File Loop
   int nDuplicates = 0;
   int nFailJSON = 0;
@@ -149,50 +209,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
     TTreeCache::SetLearnEntries(10);
     tree->SetCacheSize(128*1024*1024);
     cms3.Init(tree);
-
-    // ----------------------------------
-    // retrieve JEC from files, if using
-    // ----------------------------------
-
-    std::vector<std::string> jetcorr_filenames_pfL1FastJetL2L3;
-    FactorizedJetCorrector *jet_corrector_pfL1FastJetL2L3;
-
-    if (applyJECfromFile) {
-      jetcorr_filenames_pfL1FastJetL2L3.clear();
-
-      // files for RunIISpring15 MC
-      if (bx == 50) {
-        if (isDataFromFileName) {
-          jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_DATA_L1FastJet_AK4PFchs.txt");
-          jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_DATA_L2Relative_AK4PFchs.txt");
-          jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_DATA_L3Absolute_AK4PFchs.txt");
-          jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_DATA_L2L3Residual_AK4PFchs.txt");
-        } else {
-          jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_MC_L1FastJet_AK4PFchs.txt");
-          jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_MC_L2Relative_AK4PFchs.txt");
-          jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_MC_L3Absolute_AK4PFchs.txt");
-        }
-      }
-      else if (bx == 25) {
-        if (isDataFromFileName) {
-          jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV5_DATA_L1FastJet_AK4PFchs.txt");
-          jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV5_DATA_L2Relative_AK4PFchs.txt");
-          jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV5_DATA_L3Absolute_AK4PFchs.txt");
-          jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV5_DATA_L2L3Residual_AK4PFchs.txt");
-        } else {
-          jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV2_MC_L1FastJet_AK4PFchs.txt");
-          jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV2_MC_L2Relative_AK4PFchs.txt");
-          jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV2_MC_L3Absolute_AK4PFchs.txt");
-        }
-      }
-
-      cout << "applying JEC from the following files:" << endl;
-      for (unsigned int ifile = 0; ifile < jetcorr_filenames_pfL1FastJetL2L3.size(); ++ifile) {
-        cout << "   " << jetcorr_filenames_pfL1FastJetL2L3.at(ifile) << endl;
-      }
-
-      jet_corrector_pfL1FastJetL2L3  = makeJetCorrector(jetcorr_filenames_pfL1FastJetL2L3);
-    }
 
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
@@ -1110,8 +1126,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
               << ", raw jet pt: " << pfjet_p4_uncor.pt() << ", eta: " << pfjet_p4_uncor.eta() << std::endl;
           }
 
+	  double var = 1.;
+	  if (!isData && applyJECunc != 0) {
+	    jetcorr_uncertainty->setJetEta(pfjet_p4_uncor.eta());
+	    jetcorr_uncertainty->setJetPt(pfjet_p4_uncor.pt() * corr); // must use CORRECTED pt
+	    double unc = jetcorr_uncertainty->getUncertainty(true);
+	    var = (1. + applyJECunc * unc);
+	  }
+
           // apply new JEC to p4
-          pfjet_p4_cor = pfjet_p4_uncor * corr;
+          pfjet_p4_cor = pfjet_p4_uncor * corr * var;
         }
 
         p4sCorrJets.push_back(pfjet_p4_cor);
@@ -1740,6 +1764,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       delete reader_light_UP;
       delete reader_light_DN;
     }
+
+    if (applyJECfromFile) delete jet_corrector_pfL1FastJetL2L3;
+    if (!isDataFromFileName && applyJECfromFile && applyJECunc != 0) delete jetcorr_uncertainty;
 
     bmark->Stop("benchmark");
     cout << endl;
