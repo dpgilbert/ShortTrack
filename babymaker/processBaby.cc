@@ -207,6 +207,8 @@ int main(int argc, char **argv) {
   else if (infile.Contains("50ns")) bx = 50;
   else if (infile.Contains("25ns")) bx = 25;
 
+  bool isFastsim = bool(infile.Contains("FSPremix"));
+  
   if (bx == 0) {
     std::cout << "ERROR: couldn't figure out bx for sample!! filename was: " << infile << ". Exiting" << std::endl;
     return 3;
@@ -218,6 +220,6 @@ int main(int argc, char **argv) {
   //--------------------------------
   
   babyMaker *looper = new babyMaker();
-  looper->ScanChain(chain, sample, bx); 
+  looper->ScanChain(chain, sample, bx, isFastsim); 
   return 0;
 }

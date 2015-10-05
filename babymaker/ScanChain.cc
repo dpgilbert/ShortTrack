@@ -87,7 +87,7 @@ inline bool sortByValue(const std::pair<int,float>& pair1, const std::pair<int,f
 
 //--------------------------------------------------------------------
 
-void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
+void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isFastsim){
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
@@ -333,29 +333,31 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       met_trkPt = trkmet.met;
       met_trkPhi = trkmet.metphi;
 
-      // MET FILTERS
-      Flag_EcalDeadCellTriggerPrimitiveFilter       = cms3.filt_ecalTP();
-      Flag_trkPOG_manystripclus53X                  = cms3.filt_trkPOG_manystripclus53X();
-      Flag_ecalLaserCorrFilter                      = cms3.filt_ecalLaser();
-      Flag_trkPOG_toomanystripclus53X               = cms3.filt_trkPOG_toomanystripclus53X();
-      Flag_hcalLaserEventFilter                     = cms3.filt_hcalLaser();
-      Flag_trkPOG_logErrorTooManyClusters           = cms3.filt_trkPOG_logErrorTooManyClusters();
-      Flag_trkPOGFilters                            = cms3.filt_trkPOGFilters();
-      Flag_trackingFailureFilter                    = cms3.filt_trackingFailure();
-      Flag_goodVertices                             = cms3.filt_goodVertices();
-      Flag_eeBadScFilter                            = cms3.filt_eeBadSc();
-      // note: in CMS3, filt_cscBeamHalo and evt_cscTightHaloId are the same
-      Flag_CSCTightHaloFilter                       = cms3.filt_cscBeamHalo();
-      // note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
-      //      Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
-      // recompute HBHE noise filter decision using CORE to avoid maxZeros issue
-      if (!isData) Flag_HBHENoiseFilter             = cms3.filt_hbheNoise();
-      else if (bx == 25) Flag_HBHENoiseFilter       = hbheNoiseFilter_25ns();
-      else Flag_HBHENoiseFilter                     = hbheNoiseFilter();
-      Flag_HBHEIsoNoiseFilter                       = hbheIsoNoiseFilter();
-      // necessary?
-      Flag_METFilters                               = cms3.filt_metfilter();
-
+      // MET FILTERS -- not present in fastsim
+      if (!isFastsim) {
+	Flag_EcalDeadCellTriggerPrimitiveFilter       = cms3.filt_ecalTP();
+	Flag_trkPOG_manystripclus53X                  = cms3.filt_trkPOG_manystripclus53X();
+	Flag_ecalLaserCorrFilter                      = cms3.filt_ecalLaser();
+	Flag_trkPOG_toomanystripclus53X               = cms3.filt_trkPOG_toomanystripclus53X();
+	Flag_hcalLaserEventFilter                     = cms3.filt_hcalLaser();
+	Flag_trkPOG_logErrorTooManyClusters           = cms3.filt_trkPOG_logErrorTooManyClusters();
+	Flag_trkPOGFilters                            = cms3.filt_trkPOGFilters();
+	Flag_trackingFailureFilter                    = cms3.filt_trackingFailure();
+	Flag_goodVertices                             = cms3.filt_goodVertices();
+	Flag_eeBadScFilter                            = cms3.filt_eeBadSc();
+	// note: in CMS3, filt_cscBeamHalo and evt_cscTightHaloId are the same
+	Flag_CSCTightHaloFilter                       = cms3.filt_cscBeamHalo();
+	// note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
+	//      Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
+	// recompute HBHE noise filter decision using CORE to avoid maxZeros issue
+	if (!isData) Flag_HBHENoiseFilter             = cms3.filt_hbheNoise();
+	else if (bx == 25) Flag_HBHENoiseFilter       = hbheNoiseFilter_25ns();
+	else Flag_HBHENoiseFilter                     = hbheNoiseFilter();
+	Flag_HBHEIsoNoiseFilter                       = hbheIsoNoiseFilter();
+	// necessary?
+	Flag_METFilters                               = cms3.filt_metfilter();
+      }
+      
       // gen block -- for MC only
       ngenPart = 0;
       ngenLep = 0;
