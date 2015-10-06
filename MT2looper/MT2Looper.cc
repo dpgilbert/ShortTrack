@@ -44,10 +44,10 @@ std::string toString(float in){
 }
 
 // generic binning for signal scans - need arrays since mt2 dimension will be variable
-//   assuming here: 50 GeV binning, m1 from 400-2000, m2 from 0-1600
-const int n_m1bins = 33;
+//   assuming here: 25 GeV binning, m1 from 400-2000, m2 from 0-1600
+const int n_m1bins = 65;
 float m1bins[n_m1bins+1];
-const int n_m2bins = 33;
+const int n_m2bins = 65;
 float m2bins[n_m2bins+1];
 
 const int n_htbins = 4;
@@ -83,10 +83,10 @@ MT2Looper::MT2Looper(){
 
   // set up signal binning
   for (int i = 0; i <= n_m1bins; ++i) {
-    m1bins[i] = 375. + i*50.;
+    m1bins[i] = 387.5 + i*25.;
   }
   for (int i = 0; i <= n_m2bins; ++i) {
-    m2bins[i] = -25. + i*50.;
+    m2bins[i] = -12.5 + i*25.;
   }
 
 }
