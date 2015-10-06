@@ -128,8 +128,6 @@ int main(int argc, char **argv) {
   else if (infile.Contains("TT_8TeV-mcatnlo"))          	     sample = Form("tt_mcatnlo_%s",      outfileid.Data());
   else if (infile.Contains("TTJets_CT10_8TeV-sherpa"))   	     sample = Form("tt_sherpa_%s",       outfileid.Data());
   else if (infile.Contains("WH_WToLNu_HToBB"))   	             sample = Form("whbb_%s",            outfileid.Data());
-  else if (infile.Contains("SMS-T2tt"))                              sample = Form("T2tt_%s",            outfileid.Data());
-  else if (infile.Contains("SMS-T2bw"))                              sample = Form("T2bw_%s",            outfileid.Data());
   else if (infile.Contains("SMS-T1tttt_2J_mGl-1500_mLSP-100"))       sample = Form("T1tttt_1500_100_%s", outfileid.Data());
   else if (infile.Contains("SMS-T1tttt_2J_mGl-1200_mLSP-800"))       sample = Form("T1tttt_1200_800_%s", outfileid.Data());
   else if (infile.Contains("SMS-T1qqqq_2J_mGl-1400_mLSP-100"))       sample = Form("T1qqqq_1400_100_%s", outfileid.Data());
@@ -147,6 +145,10 @@ int main(int argc, char **argv) {
   else if (infile.Contains("SMS-T1tttt"))                            sample = Form("T1tttt_%s",          outfileid.Data());
   else if (infile.Contains("SMS-T1qqqq"))                            sample = Form("T1qqqq_%s",          outfileid.Data());
   else if (infile.Contains("SMS-T1bbbb"))                            sample = Form("T1bbbb_%s",          outfileid.Data());
+  else if (infile.Contains("SMS-T2tt"))                              sample = Form("T2tt_%s",            outfileid.Data());
+  else if (infile.Contains("SMS-T2bb"))                              sample = Form("T2bb_%s",            outfileid.Data());
+  else if (infile.Contains("SMS-T2qq"))                              sample = Form("T2qq_%s",            outfileid.Data());
+  else if (infile.Contains("SMS-T2bw"))                              sample = Form("T2bw_%s",            outfileid.Data());
   //Data
   else if (infile.Contains("Run2015B") && infile.Contains("PromptReco"))     sample = Form("data_Run2015B_PromptReco_%s",  outfileid.Data());
   else if (infile.Contains("Run2015B") && infile.Contains("17Jul2015"))      sample = Form("data_Run2015B_17Jul2015_%s",  outfileid.Data());
