@@ -1,4 +1,9 @@
-{
+#include "TFile.h"
+#include "TString.h"
+#include <fstream>
+#include <iostream>
+
+void make_xsec_hist() {
 
   float sf = 1.;
   TString sparticle = "gluino";
