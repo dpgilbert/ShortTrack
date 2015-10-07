@@ -133,7 +133,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
 //_______________________________________________________________________________
 void lostlepMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/V00-00-12/", string dataname = "lostlep"){
 
-  string output_name = input_dir+"lostlepFromCRs.root";
+  string output_name = input_dir+"/lostlepFromCRs.root";
   std::cout << "Writing to file: " << output_name << std::endl;
 
   // get input files -- default to faking data with same MC file
