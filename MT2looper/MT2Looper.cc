@@ -78,6 +78,8 @@ bool doNvtxReweight = false;
 bool applyJSON = false;
 // veto on jets with pt > 30, |eta| > 3.0
 bool doHFJetVeto = false;
+// get signal scan nevents from file
+bool doScanWeights = false;
 
 MT2Looper::MT2Looper(){
 
@@ -262,16 +264,17 @@ void MT2Looper::SetSignalRegions(){
 }
 
 
-void MT2Looper::loop(TChain* chain, std::string output_name){
+void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
   bmark->Start("benchmark");
 
   gROOT->cd();
+  TString output_name = Form("%s/%s.root",output_dir.c_str(),sample.c_str());
   cout << "[MT2Looper::loop] creating output file: " << output_name << endl;
 
-  outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
+  outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
   const char* json_file = "../babymaker/jsons/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2_snt.txt";
   if (applyJSON) {
@@ -286,6 +289,15 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
     outfile_->cd();
     h_nvtx_weights_ = (TH1D*) h_nvtx_weights_temp->Clone("h_nvtx_weights");
     f_weights->Close();
+  }
+
+  h_sig_nevents_ = 0;
+  if (doScanWeights && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
+    TFile* f_nsig = new TFile(Form("../babymaker/data/nsig_%s.root",sample.c_str()));
+    TH2D* h_sig_nevents_temp = (TH2D*) f_nsig->Get("h_nsig");
+    outfile_->cd();
+    h_sig_nevents_ = (TH2D*) h_sig_nevents_temp->Clone("h_sig_nevents");
+    f_nsig->Close();
   }
   
   cout << "[MT2Looper::loop] setting up histos" << endl;
@@ -403,7 +415,14 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
       // apply relevant weights to MC
       if (!t.isData) {
-	evtweight_ = t.evt_scale1fb * lumi;
+	if (isSignal_ && doScanWeights) {
+	  int binx = h_sig_nevents_->GetXaxis()->FindBin(t.GenSusyMScan1);
+	  int biny = h_sig_nevents_->GetYaxis()->FindBin(t.GenSusyMScan2);
+	  double nevents = h_sig_nevents_->GetBinContent(binx,biny);
+	  evtweight_ = lumi * t.evt_xsec*1000./nevents; // assumes xsec is already filled correctly
+	} else {
+	  evtweight_ = t.evt_scale1fb * lumi;
+	}
 	if (applyWeights) evtweight_ *= t.weight_lepsf * t.weight_btagsf * t.weight_isr * t.weight_pu;
 	// get pu weight from hist, restrict range to nvtx 4-31
 	if (doNvtxReweight) {
