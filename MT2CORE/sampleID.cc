@@ -10,6 +10,18 @@ int sampleID (const string& name) {
 // sample ID numbers according to:
 //  https://mangano.web.cern.ch/mangano/public/MECCA/samples_50ns_miniaod.txt
 
+  if (name.find("data_Run2015") != string::npos) {
+    if (name.find("JetHT") != string::npos) return 1;
+    else if (name.find("HTMHT") != string::npos) return 2;
+    else if (name.find("MET") != string::npos) return 3;
+    else if (name.find("DoubleEG") != string::npos) return 4;
+    else if (name.find("DoubleMuon") != string::npos) return 5;
+    else if (name.find("MuonEG") != string::npos) return 6;
+    else if (name.find("SinglePhoton") != string::npos) return 7;
+    else if (name.find("SingleMuon") != string::npos) return 8;
+    else if (name.find("SingleElectron") != string::npos) return 9;
+  }
+  
   if (name.find("QCD") != string::npos) {
     if ((name.find("QCD_Pt-15to3000") != string::npos) || (name.find("QCD_Pt_15to3000") != string::npos)) return 101;
     else if ((name.find("QCD_Pt-5to10") != string::npos) || (name.find("QCD_Pt_5to10") != string::npos)) return 102;
@@ -42,6 +54,16 @@ int sampleID (const string& name) {
     else if (name.find("QCD_HT-1000to1500") != string::npos) return 156;
     else if (name.find("QCD_HT-1500to2000") != string::npos) return 157;
     else if (name.find("QCD_HT_2000toInf") != string::npos) return 158;
+
+    else if (name.find("QCD_HT100to200") != string::npos) return 151;
+    else if (name.find("QCD_HT200to300") != string::npos) return 152;
+    else if (name.find("QCD_HT300to500") != string::npos) return 153;
+    else if (name.find("QCD_HT500to700") != string::npos) return 154;
+    else if (name.find("QCD_HT700to1000") != string::npos) return 155;
+    else if (name.find("QCD_HT1000to1500") != string::npos) return 156;
+    else if (name.find("QCD_HT1500to2000") != string::npos) return 157;
+    else if (name.find("QCD_HT2000toInf") != string::npos) return 158;
+
   }
 
   else if (name.find("GJet") != string::npos) {
@@ -91,21 +113,13 @@ int sampleID (const string& name) {
   // 800 block: diboson etc
 
   else if (name.find("SMS-") != string::npos) {
-    if (name.find("SMS-T1tttt_2J_mGl-1500_mLSP-100") != string::npos) return 1001;
-    else if (name.find("SMS-T1tttt_2J_mGl-1200_mLSP-800") != string::npos) return 1002;
-    else if (name.find("SMS-T1qqqq_2J_mGl-1400_mLSP-100") != string::npos) return 1010;
-    else if (name.find("SMS-T1qqqq_2J_mGl-1000_mLSP-800") != string::npos) return 1011;
-    else if (name.find("SMS-T1bbbb_2J_mGl-1000_mLSP-900") != string::npos) return 1020;
-    else if (name.find("SMS-T1bbbb_2J_mGl-1500_mLSP-100") != string::npos) return 1021;
+    if (name.find("SMS-T1tttt") != string::npos) return 1001;
+    else if (name.find("SMS-T1qqqq") != string::npos) return 1010;
+    else if (name.find("SMS-T1bbbb") != string::npos) return 1020;
 
-    else if (name.find("SMS-T2tt_2J_mStop-425_mLSP-325") != string::npos) return 1101;
-    else if (name.find("SMS-T2tt_2J_mStop-500_mLSP-325") != string::npos) return 1102;
-    else if (name.find("SMS-T2tt_2J_mStop-650_mLSP-325") != string::npos) return 1103;
-    else if (name.find("SMS-T2tt_2J_mStop-850_mLSP-100") != string::npos) return 1104;
-    else if (name.find("SMS-T2qq_2J_mStop-600_mLSP-550") != string::npos) return 1110;
-    else if (name.find("SMS-T2qq_2J_mStop-1200_mLSP-100") != string::npos) return 1111;
-    else if (name.find("SMS-T2bb_2J_mStop-600_mLSP-580") != string::npos) return 1120;
-    else if (name.find("SMS-T2bb_2J_mStop-900_mLSP-100") != string::npos) return 1121;
+    else if (name.find("SMS-T2tt") != string::npos) return 1101;
+    else if (name.find("SMS-T2qq") != string::npos) return 1110;
+    else if (name.find("SMS-T2bb") != string::npos) return 1120;
   }
 
   cout << "sampleID: WARNING: sample not recognized!  " << name << endl;

@@ -10,7 +10,8 @@
 #include "TFile.h"
 #include "TChain.h"
 #include "TTree.h"
-#include "TH1D.h"
+#include "TH1.h"
+#include "TH2.h"
 #include "Math/LorentzVector.h"
 
 #include "RooDataSet.h"
@@ -39,7 +40,7 @@ class MT2Looper {
   ~MT2Looper();
 
   void SetSignalRegions();
-  void loop(TChain* chain, std::string output_name = "test.root");
+  void loop(TChain* chain, std::string sample, std::string output_dir);
   void fillHistosSRBase();
   void fillHistosInclusive();
   void fillHistosSignalRegion(const std::string& prefix = "", const std::string& suffix = "");
@@ -75,6 +76,7 @@ class MT2Looper {
   SR CRSL_WJets;
   SR CRSL_TTbar;
   TH1D* h_nvtx_weights_;
+  TH2D* h_sig_nevents_;
 };
 
 #endif

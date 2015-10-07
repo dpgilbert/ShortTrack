@@ -25,6 +25,6 @@ int main(int argc, char **argv) {
   }
 
   MT2Looper *looper = new MT2Looper();
-  looper->loop(ch, output_dir + "/" + sample + ".root"); 
+  looper->loop(ch, sample, output_dir); 
   return 0;
 }

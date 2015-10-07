@@ -187,6 +187,23 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       
   } // if applyJECfromFile
 
+  // get susy xsec file
+  TH1F* h_sig_xsec(0);
+  if ((baby_name.find("T1") != std::string::npos) || (baby_name.find("T2") != std::string::npos)) {
+    // determine which susy particle is being produced
+    TString sparticle = "";
+    if (baby_name.find("T1") != std::string::npos) sparticle = "gluino";
+    else if ((baby_name.find("T2tt") != std::string::npos) || (baby_name.find("T2bb") != std::string::npos)) sparticle = "stop";
+    else if (baby_name.find("T2qq") != std::string::npos) sparticle = "squark";
+    if (sparticle == "") std::cout << "WARNING: didn't recognize signal sample from name: " << baby_name << std::endl;
+    
+    TFile* f_xsec = new TFile("data/xsec_susy_13tev.root");
+    TH1F* h_sig_xsec_temp = (TH1F*) f_xsec->Get(Form("h_xsec_%s",sparticle.Data()));
+    BabyFile_->cd();
+    h_sig_xsec = (TH1F*) h_sig_xsec_temp->Clone("h_sig_xsec");
+    f_xsec->Close();
+  }
+  
   // File Loop
   int nDuplicates = 0;
   int nFailJSON = 0;
@@ -384,19 +401,23 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	
         if (verbose) cout << "before sparm values" << endl;
 
-        TString filename(currentFile->GetTitle());
-        if (filename.Contains("T1tttt") || filename.Contains("T1bbbb") || filename.Contains("T1qqqq")) {
+	// T1 models
+        if (evt_id >= 1000 && evt_id < 1100) {
           for (unsigned int i=0; i<sparm_values().size(); ++i) {
             if (sparm_names().at(i).Contains("mGluino")) GenSusyMScan1 = sparm_values().at(i);
             if (sparm_names().at(i).Contains("mLSP")) GenSusyMScan2 = sparm_values().at(i);
           }
         }
-        else if (filename.Contains("T2tt") || filename.Contains("T2bb") || filename.Contains("T2qq")) {
+	// T2 models
+        else if (evt_id >= 1100 && evt_id < 1200) {
           for (unsigned int i=0; i<sparm_values().size(); ++i) {
             if (sparm_names().at(i).Contains("mStop")) GenSusyMScan1 = sparm_values().at(i);
             if (sparm_names().at(i).Contains("mLSP")) GenSusyMScan2 = sparm_values().at(i);
           }
         }
+
+	// use sparm values to look up xsec
+	if (evt_id >= 1000 && evt_id < 1200) evt_xsec = h_sig_xsec->GetBinContent(h_sig_xsec->FindBin(GenSusyMScan1));
 
         if (verbose) cout << "before gen particles" << endl;
 
