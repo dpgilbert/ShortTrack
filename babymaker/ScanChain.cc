@@ -10,6 +10,7 @@
 #include "TVector2.h"
 #include "TBenchmark.h"
 #include "TLorentzVector.h"
+#include "TH2.h"
 
 // CORE
 #include "../CORE/CMS3.h"
@@ -52,8 +53,8 @@ const bool verbose = false;
 const bool applyJECfromFile = true;
 // change to do JEC uncertainty variations. 0 = DEFAULT, 1 = UP, -1 = DN
 const int applyJECunc = 0;
-// turn on to apply btag SFs (default false)
-const bool applyBtagSFs = false;
+// turn on to apply btag SFs (default true)
+const bool applyBtagSFs = true;
 // turn on to recompute type1 MET using JECs from file (default true)
 const bool recomputeT1MET = true;
 // turn on to save prunedGenParticle collection (default false)
@@ -130,6 +131,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     reader_light = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "central");  // central
     reader_light_UP = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "up");  // sys up
     reader_light_DN = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "down");  // sys down
+
+    // get btag efficiencies
+    TFile* f_btag_eff = new TFile("btagsf/btageff_ttbar_25ns.root");
+    TH2D* h_btag_eff_b_temp = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_b");
+    TH2D* h_btag_eff_c_temp = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_c");
+    TH2D* h_btag_eff_udsg_temp = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_udsg");
+    BabyFile_->cd();
+    h_btag_eff_b = (TH2D*) h_btag_eff_b_temp->Clone("h_btag_eff_b");
+    h_btag_eff_c = (TH2D*) h_btag_eff_c_temp->Clone("h_btag_eff_c");
+    h_btag_eff_udsg = (TH2D*) h_btag_eff_udsg_temp->Clone("h_btag_eff_udsg");
+    f_btag_eff->Close();
   }
   
   // ----------------------------------
@@ -1365,7 +1377,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               nBJet20++; 
               // btag SF - not final yet
               if (!isData && applyBtagSFs) {
-                float eff = getBtagEff(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet]);
+                float eff = getBtagEffFromFile(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet]);
 		BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG;
 		if (abs(jet_mcFlavour[njet]) == 5) flavor = BTagEntry::FLAV_B;
 		else if (abs(jet_mcFlavour[njet]) == 4) flavor = BTagEntry::FLAV_C;
@@ -1409,7 +1421,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               } // pt 30
             } // pass med btag
             else if (!isData && applyBtagSFs) { // fail med btag -- needed for SF event weights
-              float eff = getBtagEff(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet]);
+              float eff = getBtagEffFromFile(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet]);
 	      BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG;
 	      if (abs(jet_mcFlavour[njet]) == 5) flavor = BTagEntry::FLAV_B;
 	      else if (abs(jet_mcFlavour[njet]) == 4) flavor = BTagEntry::FLAV_C;
@@ -2443,3 +2455,30 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyFile_->Close();
     return;
   }
+
+  float babyMaker::getBtagEffFromFile(float pt, float eta, int mcFlavour){
+    if(!h_btag_eff_b || !h_btag_eff_c || !h_btag_eff_udsg) {
+      std::cout << "babyMaker::getBtagEffFromFile: ERROR: missing input hists" << std::endl;
+      return 1.;
+    }
+
+    // only use pt bins up to 300 GeV for charm and udsg
+    float pt_cutoff = std::max(20.,std::min(299.,double(pt)));
+    TH2D* h(0);
+    if (abs(mcFlavour) == 5) {
+      h = h_btag_eff_b;
+      // use pt bins up to 600 GeV for b
+      pt_cutoff = std::max(20.,std::min(599.,double(pt)));
+    }
+    else if (abs(mcFlavour) == 4) {
+      h = h_btag_eff_c;
+    }
+    else {
+      h = h_btag_eff_udsg;
+    }
+    
+    int binx = h->GetXaxis()->FindBin(pt_cutoff);
+    int biny = h->GetYaxis()->FindBin(fabs(eta));
+    return h->GetBinContent(binx,biny);
+  }
+

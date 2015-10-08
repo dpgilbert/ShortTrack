@@ -11,6 +11,7 @@
 #include "TChain.h"
 #include "TTree.h"
 #include "TH1D.h"
+#include "TH2D.h"
 #include "Math/LorentzVector.h"
 #include "Math/GenVector/LorentzVector.h"
 
@@ -38,6 +39,8 @@ class babyMaker {
 
  private:
 
+  float getBtagEffFromFile(float pt, float eta, int mcFlavour);
+  
   TFile *BabyFile_;
   TTree *BabyTree_;
 
@@ -55,6 +58,9 @@ class babyMaker {
   BTagCalibrationReader* reader_light_UP;
   BTagCalibrationReader* reader_light_DN;
 
+  TH2D* h_btag_eff_b;
+  TH2D* h_btag_eff_c;
+  TH2D* h_btag_eff_udsg;
   
   //baby ntuple variables
 
