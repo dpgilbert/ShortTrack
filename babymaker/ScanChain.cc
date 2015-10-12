@@ -73,6 +73,8 @@ const bool removeEarlyPromptReco = true;
 const bool doJetLepOverlapRemoval = true;
 // turn on to save only isolated leptons (default true)
 const bool applyLeptonIso = true;
+// turn on to save MC scale and PDF weights (default false, makes babies ~4x as large)
+const bool saveLHEweights = false;
 
 //--------------------------------------------------------------------
 
@@ -665,6 +667,19 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           else if (recoil_pt > 150. && recoil_pt < 250.) weight_isr = 0.90;
           else if (recoil_pt > 250.)                     weight_isr = 0.80;
         }
+
+	// store LHE weight variations
+	if (saveLHEweights) {
+	  nLHEweight = 0;
+	  for (unsigned int iwgt = 0; iwgt < cms3.genweights().size(); ++iwgt) {
+	    if (iwgt >= max_nLHEweight) {
+	      std::cout << "WARNING: attempted to fill more than " << max_nLHEweight << " LHEweights" << std::endl;
+	      break;
+	    }
+	    LHEweight_wgt[nLHEweight] = cms3.genweights().at(iwgt);
+	    ++nLHEweight;
+	  }
+	}
       } // !isData
 
       //LEPTONS
@@ -2081,6 +2096,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       BabyTree_->Branch("GenSusyMScan2", &GenSusyMScan2 );
       BabyTree_->Branch("GenSusyMScan3", &GenSusyMScan3 );
       BabyTree_->Branch("GenSusyMScan4", &GenSusyMScan4 );
+      if (saveLHEweights) {
+	BabyTree_->Branch("nLHEweight", &nLHEweight, "nLHEweight/I" );
+	BabyTree_->Branch("LHEweight_wgt", LHEweight_wgt, "LHEweight_wgt[nLHEweight]/F" );
+      }
     }
     BabyTree_->Branch("njet", &njet, "njet/I" );
     BabyTree_->Branch("jet_pt", jet_pt, "jet_pt[njet]/F" );
@@ -2295,6 +2314,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     weight_scales_DN = 1.;
     weight_pdfs_UP = 1.;
     weight_pdfs_DN = 1.;
+    nLHEweight = -999;
 
     for(int i=0; i < max_nlep; i++){
       lep_pt[i] = -999;
@@ -2439,7 +2459,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       jet_puId[i] = -999;
     }
 
-
+    if (saveLHEweights) {
+      for(int i=0; i < max_nLHEweight; i++){
+	LHEweight_wgt[i] = -999;
+      }
+    }
+    
     return;
   }
 
