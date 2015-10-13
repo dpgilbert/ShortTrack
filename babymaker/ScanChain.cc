@@ -511,8 +511,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           int motherId = abs(cms3.genps_id_simplemother().at(iGen));
           int grandmotherId = abs(cms3.genps_id_simplegrandma().at(iGen));
 
-          // save all status 23 gen particles
-          if (status == 23) {
+          // save all status 22 or 23 gen particles
+          if (status == 23 || status == 22) {
             genStat23_pt[ngenStat23] = cms3.genps_p4().at(iGen).pt();
             genStat23_eta[ngenStat23] = cms3.genps_p4().at(iGen).eta();
             genStat23_phi[ngenStat23] = cms3.genps_p4().at(iGen).phi();
@@ -1044,6 +1044,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       if (verbose) cout << "before photons" << endl;
 
       //PHOTONS
+      std::vector<std::pair<int, float> > gamma_pt_ordering;
+      vector<float> vec_gamma_pt;
+      vector<float> vec_gamma_eta;
+      vector<float> vec_gamma_phi;
+      vector<float> vec_gamma_mass;
+      vector<int>   vec_gamma_mcMatchId;
+      vector<float> vec_gamma_genIso04;
+      vector<float> vec_gamma_drMinParton;
+      vector<float> vec_gamma_chHadIso;
+      vector<float> vec_gamma_neuHadIso;
+      vector<float> vec_gamma_phIso;
+      vector<float> vec_gamma_sigmaIetaIeta;
+      vector<float> vec_gamma_r9;
+      vector<float> vec_gamma_hOverE;
+      vector<int>   vec_gamma_idCutBased;
+
       ngamma = 0;
       nGammas20 = 0;
       // to recalculate MET adding photons
@@ -1058,22 +1074,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           std::cout << "WARNING: attempted to fill more than " << max_ngamma << " photons" << std::endl;
           break;
         }
-
+	gamma_pt_ordering.push_back( std::pair<int,float>(ngamma,cms3.photons_p4().at(iGamma).pt()) );
         float pt = cms3.photons_p4().at(iGamma).pt();
         float eta = cms3.photons_p4().at(iGamma).eta();
         float phi = cms3.photons_p4().at(iGamma).phi();
-        gamma_pt[ngamma]   = pt;
-        gamma_eta[ngamma]  = eta;
-        gamma_phi[ngamma]  = phi;
-        gamma_mass[ngamma] = cms3.photons_mass().at(iGamma);
-        gamma_sigmaIetaIeta[ngamma] = cms3.photons_full5x5_sigmaIEtaIEta().at(iGamma);
-        gamma_chHadIso[ngamma] = photons_recoChargedHadronIso().at(iGamma);
-        gamma_neuHadIso[ngamma] = photons_recoNeutralHadronIso().at(iGamma);
-        gamma_phIso[ngamma] = photons_recoPhotonIso().at(iGamma);
-        gamma_r9[ngamma] =  photons_full5x5_r9().at(iGamma);
-        gamma_hOverE[ngamma] =  photons_full5x5_hOverEtowBC().at(iGamma);
-        gamma_idCutBased[ngamma] =  isTightPhoton(iGamma,analysis_t::HAD,2) ? 1 : 0; 
-        if(gamma_pt[ngamma] > 20) nGammas20++;
+        vec_gamma_pt.push_back ( pt );
+        vec_gamma_eta.push_back ( eta );
+        vec_gamma_phi.push_back ( phi );
+        vec_gamma_mass.push_back ( cms3.photons_mass().at(iGamma) );
+        vec_gamma_sigmaIetaIeta.push_back ( cms3.photons_full5x5_sigmaIEtaIEta().at(iGamma) );
+        vec_gamma_chHadIso.push_back ( photons_recoChargedHadronIso().at(iGamma) );
+        vec_gamma_neuHadIso.push_back ( photons_recoNeutralHadronIso().at(iGamma) );
+        vec_gamma_phIso.push_back ( photons_recoPhotonIso().at(iGamma) );
+        vec_gamma_r9.push_back (  photons_full5x5_r9().at(iGamma) );
+        vec_gamma_hOverE.push_back (  photons_full5x5_hOverEtowBC().at(iGamma) );
+        vec_gamma_idCutBased.push_back (  isTightPhoton(iGamma,analysis_t::HAD,2) ? 1 : 0 ); 
+        if(pt > 20) nGammas20++;
 
         // Some work for truth-matching (should be integrated in CMS3 as for the leptons)
         int bestMatch = -1;
@@ -1099,8 +1115,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         } // !isData
         if (bestMatch != -1) {
           // 7 is a special code for photons without a mother. this seems to be due to a miniAOD bug where links are broken.
-          gamma_mcMatchId[ngamma] = cms3.genps_id_simplemother().at(bestMatch) == 0 ? 7 : 22; 
-          gamma_genIso04[ngamma] = cms3.genps_iso().at(bestMatch);
+          vec_gamma_mcMatchId.push_back ( cms3.genps_id_simplemother().at(bestMatch) == 0 ? 7 : 22 ); 
+          vec_gamma_genIso04.push_back ( cms3.genps_iso().at(bestMatch) );
           // Now want to look at DR between photon and parton
           float minDR = 999.; 
           for(unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++){
@@ -1109,24 +1125,51 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
             float dr = DeltaR( cms3.genps_p4().at(iGen).eta(), bestMatchEta, cms3.genps_p4().at(iGen).phi(), bestMatchPhi);
             if (dr < minDR) minDR = dr;
           }
-          gamma_drMinParton[ngamma] = minDR;
+          vec_gamma_drMinParton.push_back ( minDR );
         }
         else {
-          gamma_mcMatchId[ngamma]    = 0;
-          gamma_genIso04[ngamma]     = -1;
-          gamma_drMinParton[ngamma]  = -1;
+          vec_gamma_mcMatchId.push_back ( 0 );
+          vec_gamma_genIso04.push_back ( -1 );
+          vec_gamma_drMinParton.push_back ( -1 );
         }
 
-        // for photon+jets control regions
-        if (nGammas20==1) { // Only use the leading Loose photon. Otherwise mt2 will be affected by a bunch of tiny photons
-          gamma_met_px += cms3.photons_p4().at(iGamma).px();
-          gamma_met_py += cms3.photons_p4().at(iGamma).py();
-        }
         // do not use photon in MT2 or MHT calculations!!
         //p4sForHemsGamma.push_back(cms3.photons_p4().at(iGamma));
         //p4sForDphiGamma.push_back(cms3.photons_p4().at(iGamma));
-
         ngamma++;
+      }
+
+      // Implement pT ordering for photons (to match ETH)
+      i = 0;
+      std::sort(gamma_pt_ordering.begin(), gamma_pt_ordering.end(), sortByValue);
+      for(std::vector<std::pair<int, float> >::iterator it = gamma_pt_ordering.begin(); it!= gamma_pt_ordering.end(); ++it){
+
+        if (i >= max_ngamma) {
+          std::cout << "WARNING: attempted to fill more than " << max_ngamma << " gammas" << std::endl;
+          break;
+        }
+
+        gamma_pt[i]     = vec_gamma_pt.at(it->first);
+        gamma_eta[i]    = vec_gamma_eta.at(it->first);
+        gamma_phi[i]    = vec_gamma_phi.at(it->first);
+        gamma_mass[i]   = vec_gamma_mass.at(it->first);
+        gamma_mcMatchId[i]    = vec_gamma_mcMatchId.at(it->first);
+        gamma_genIso04[i]     = vec_gamma_genIso04.at(it->first);
+        gamma_drMinParton[i]  = vec_gamma_drMinParton.at(it->first);
+        gamma_chHadIso[i]     = vec_gamma_chHadIso.at(it->first);
+        gamma_neuHadIso[i]    = vec_gamma_neuHadIso.at(it->first);
+        gamma_phIso[i]        = vec_gamma_phIso.at(it->first);
+        gamma_sigmaIetaIeta[i]  = vec_gamma_sigmaIetaIeta.at(it->first);
+        gamma_r9[i]           = vec_gamma_r9.at(it->first);
+        gamma_hOverE[i]       = vec_gamma_hOverE.at(it->first);
+        gamma_idCutBased[i]   = vec_gamma_idCutBased.at(it->first);
+        i++;
+      }
+
+      // for photon+jets control regions
+      if (nGammas20>0) { // Only use the leading Loose photon. Otherwise mt2 will be affected by a bunch of tiny photons
+        gamma_met_px += gamma_pt[0] * cos(gamma_phi[0]);
+        gamma_met_py += gamma_pt[0] * sin(gamma_phi[0]);
       }
 
       // recalculated MET with photons added
