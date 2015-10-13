@@ -80,6 +80,8 @@ bool applyJSON = false;
 bool doHFJetVeto = false;
 // get signal scan nevents from file
 bool doScanWeights = false;
+// doesn't plot data for MT2 > 200 in signal regions
+bool doBlindData = true;
 
 MT2Looper::MT2Looper(){
 
@@ -408,9 +410,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      const float lumi = 3.;
+      // const float lumi = 3.;
       //      const float lumi = 0.042;
-      //      const float lumi = 0.107;
+      //      const float lumi = 0.209;
+      const float lumi = 0.579;
       evtweight_ = 1.;
 
       // apply relevant weights to MC
@@ -650,13 +653,15 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
       
       if (!passJetID) continue;
+      
+      if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
+	fillHistos(SRNoCut.srHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "");
 
-      fillHistos(SRNoCut.srHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "");
+	fillHistosSignalRegion("sr");
 
-      fillHistosSignalRegion("sr");
-
-      fillHistosSRBase();
-      fillHistosInclusive();
+	fillHistosSRBase();
+	fillHistosInclusive();
+      }
 
       if (doDYplots) {
         saveDYplots = true;
@@ -801,7 +806,7 @@ void MT2Looper::fillHistosSRBase() {
 
   // trigger requirement on data
   if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
-  
+
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
