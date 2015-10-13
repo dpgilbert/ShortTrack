@@ -8,7 +8,7 @@
 #include "TCut.h"
 #include "TEfficiency.h"
 
-void plot_trigeff_PFHT350_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-05_25ns_json_246908-257599_Summer15_25nsV5/") {
+void plot_trigeff_PFHT350_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-05_25ns_json_246908-258159_v3_Summer15_25nsV5/") {
 
   TH1::SetDefaultSumw2();
   
@@ -33,7 +33,7 @@ void plot_trigeff_PFHT350_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/
   TH1D* h_met_num_ele23 = (TH1D*) h_met_denom_ht475->Clone("h_met_num_ele23");
 
   TCut base = "nVert > 0 && nJet30 > 1 && Flag_CSCTightHaloFilter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHEIsoNoiseFilter";
-  TCut had = base + "nElectrons10+nMuons10==0";
+  TCut had = base + "nElectrons10+nMuons10==0 && deltaPhiMin > 0.3";
   TCut ele = base + "nElectrons10 > 0 && abs(lep_pdgId[0]) == 11 && lep_pt[0] > 25.";
 
   t_jetht->Draw("met_pt>>h_met_denom_ht475",had+"ht > 500. && HLT_PFHT475_Prescale");

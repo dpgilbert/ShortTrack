@@ -8,7 +8,7 @@
 #include "TCut.h"
 #include "TEfficiency.h"
 
-void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-05_25ns_json_246908-257599_Summer15_25nsV5/") {
+void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-05_25ns_json_246908-258159_v3_Summer15_25nsV5/") {
 
   TH1::SetDefaultSumw2();
   
