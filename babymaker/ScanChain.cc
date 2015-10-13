@@ -288,6 +288,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
       HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||
         passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
+      HLT_Photon120 = passHLTTriggerPattern("HLT_Photon120_v"); 
       HLT_Photon165_HE10 = passHLTTriggerPattern("HLT_Photon165_HE10_v"); 
       HLT_PFHT350_Prescale  = passHLTTriggerPattern("HLT_PFHT350_v"); 
       HLT_PFHT475_Prescale  = passHLTTriggerPattern("HLT_PFHT475_v"); 
@@ -1924,6 +1925,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("HLT_MuX_Ele12", &HLT_MuX_Ele12 );
     BabyTree_->Branch("HLT_Mu8_EleX", &HLT_Mu8_EleX );
     BabyTree_->Branch("HLT_DoubleMu", &HLT_DoubleMu );
+    BabyTree_->Branch("HLT_Photon120", &HLT_Photon120 );
     BabyTree_->Branch("HLT_Photon165_HE10", &HLT_Photon165_HE10 );
     BabyTree_->Branch("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale );
     BabyTree_->Branch("HLT_PFHT475_Prescale", &HLT_PFHT475_Prescale );
@@ -2225,6 +2227,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     HLT_MuX_Ele12 = -999;   
     HLT_Mu8_EleX = -999;   
     HLT_DoubleMu = -999;   
+    HLT_Photon120 = -999;   
     HLT_Photon165_HE10 = -999;   
     HLT_PFHT350_Prescale = -999;
     HLT_PFHT475_Prescale = -999;
