@@ -133,4 +133,10 @@ clean:
 	../CORE/Tools/btagsf/*.d \
         ../CORE/Tools/btagsf/*.so 
 
+localclean:
+	rm -f \
+	LinkDef_out* \
+	*.o \
+	*.so 
+
 endif
