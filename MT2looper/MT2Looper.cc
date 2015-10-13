@@ -526,66 +526,31 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // Variables for gamma+jets control region
       bool doGJplots = false;
-      if (t.evt_id < 300 && t.evt_id!=120) { // remove lowest qcd_ht sample
-      	if (t.ngamma > 0) {
-//	  if (	(t.evt_id ==105 && t.gamma_pt[0]>50      )   //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
-//		|| (t.evt_id ==106 && t.gamma_pt[0]>80   )   //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
-//		|| (t.evt_id ==107 && t.gamma_pt[0]>120  )   //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
-//		|| (t.evt_id ==108 && t.gamma_pt[0]>170  )   //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
-//		|| (t.evt_id ==109 && t.gamma_pt[0]>300  )   //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
-//		|| (t.evt_id ==110 && t.gamma_pt[0]>470  )   //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
-//		|| (t.evt_id ==111 && t.gamma_pt[0]>600  )   //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
-//		|| (t.evt_id ==112 && t.gamma_pt[0]>800  )   //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
-//		|| (t.evt_id ==113 && t.gamma_pt[0]>1000 )   //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
-//		|| (t.evt_id ==114 && t.gamma_pt[0]>1400 )   //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
-//		|| (t.evt_id ==115 && t.gamma_pt[0]>1800 )   //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
-//		|| (t.evt_id ==116 && t.gamma_pt[0]>2400 )   //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
-//		|| (t.evt_id ==117 && t.gamma_pt[0]>3200 )   //reject photons in qcd_ptAAAtoBBB samples with pt>BBB
-//		) 
-	  if (t.evt_id < 109 && t.evt_id != -1) // Simply start at pt170to300, ignore earlier samples
+      if (t.ngamma > 0) {
+	if (t.isData) {
+	  doGJplots = true;
+	}
+	else if (!useDRforGammaQCDMixing) {
+	  if ( (t.evt_id < 200 && t.gamma_mcMatchId[0]>0  && t.gamma_genIso04[0]<5)    // Reject true photons from QCD (iso is always 0 for now)
+	       || (t.evt_id >=200 && t.gamma_mcMatchId[0]==0 )                           // Reject unmatched photons from Gamma+Jets
+	       || (t.evt_id >=200 && t.gamma_mcMatchId[0] >0 && t.gamma_genIso04[0]>5)    // Reject non-iso photons from Gamma+Jets
+	       )
 	    { doGJplots = false; }
-	  else if (!useDRforGammaQCDMixing) {
-	    if ( (t.evt_id < 200 && t.gamma_mcMatchId[0]>0  && t.gamma_genIso04[0]<5)    // Reject true photons from QCD (iso is always 0 for now)
-		|| (t.evt_id >=200 && t.gamma_mcMatchId[0]==0 )                           // Reject unmatched photons from Gamma+Jets
-		|| (t.evt_id >=200 && t.gamma_mcMatchId[0] >0 && t.gamma_genIso04[0]>5)    // Reject non-iso photons from Gamma+Jets
-		 )
-	      { doGJplots = false; }
-	    else {
-	      doGJplots = true;
-	    }	    
+	  else {
+	    doGJplots = true;
+	  }	    
+	}
+	else {
+	  if ( (t.evt_id < 200 && t.gamma_mcMatchId[0]>0 && t.gamma_drMinParton[0] > 0.4)   // reject DR>0.4 photons from QCD
+	       || (t.evt_id >=200 && t.gamma_mcMatchId[0]==0 )   // Reject unmatched photons from Gamma+Jets (should be small)    
+	       || (t.evt_id >=200 && t.gamma_drMinParton[0]<0.4 )   // Reject fragmentation photons from Gamma+Jets (only there in samples with DR>0.05)
+	       )
+	    { doGJplots = false; }
+	  else {
+	    doGJplots = true;
 	  }
-	  else {//useDRforGammaQCDMixing
-	    //float minDR = 3;
-	    //float minDRtrue = 3;
-	    //float photonEta=0;
-	    //float photonPhi=0;
-	    //for (int i = 0; i < t.ngenPart; i++) {
-	    //  if (t.genPart_status[i]!=22 &&  t.genPart_status[i]!=23) continue;
-	    //  if (fabs(t.genPart_pdgId[i])!=22) continue;
-	    //  photonEta = t.genPart_eta[i];
-	    //  photonPhi = t.genPart_phi[i];
-	    //}
-	    //for (int i = 0; i < t.ngenPart; i++) {
-	    //  if (t.genPart_status[i]!=22 &&  t.genPart_status[i]!=23) continue;
-	    //  if (fabs(t.genPart_pdgId[i])>21) continue;
-	    //  float dr = DeltaR(t.genPart_eta[i],  t.gamma_eta[0], t.genPart_phi[i],  t.gamma_phi[0]);
-	    //  if (dr < minDR) minDR = dr;
-	    //  if (photonEta!=0 && photonPhi!=0) {
-	    //	float drtrue = DeltaR(t.genPart_eta[i], photonEta, t.genPart_phi[i], photonPhi);
-	    //	if (drtrue < minDRtrue) minDRtrue = drtrue;
-	    //  }
-	    //}
-	    if ( (t.evt_id < 200 && t.gamma_mcMatchId[0]>0 && t.gamma_drMinParton[0] > 0.4)   // reject DR>0.4 photons from QCD
-		 || (t.evt_id >=200 && t.gamma_mcMatchId[0]==0 )   // Reject unmatched photons from Gamma+Jets (should be small)    
-		 || (t.evt_id >=200 && t.gamma_drMinParton[0]<0.4 )   // Reject fragmentation photons from Gamma+Jets (only there in samples with DR>0.05)
-		 )
-	      { doGJplots = false; }
-	    else {
-	      doGJplots = true;
-	    }
-	  } //useDRforGammaQCDMixing
-      	} // ngamma > 0
-      }// evt_id < 300
+	} //useDRforGammaQCDMixing
+      } // ngamma > 0
 
       // Variables for Zll (DY) control region
       bool doDYplots = false;
@@ -1000,6 +965,11 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   if (!passSieie) add += "SieieSB"; // Keep Sigma IEta IEta sideband
   if (t.gamma_ht > 200) fillHistosGammaJets(SRNoCut.crgjHistMap, SRNoCut.crgjRooDataSetMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), prefix+SRNoCut.GetName(), suffix+add);
   if(passBase && passPtMT2) {
+    //if (t.nJet30FailId > 0) cout<<"Event "<<t.evt<<" in run "<<t.run<<" fails jet ID"<<endl;
+    //if (iso<isoCutTight && passSieie) {
+    //  cout<<" "<<endl;
+    //  cout<<"Event "<<t.evt<<" in run "<<t.run<<" passes baseline selection"<<endl;
+    //}
     fillHistosGammaJets(SRBase.crgjHistMap, SRBase.crgjRooDataSetMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crgjbase", suffix+add);
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(SRVec.at(srN).PassesSelection(values)){
@@ -1284,16 +1254,16 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
   plotRooDataSet("rds_chIso_"+s, x_, w_, evtweight_, datasets, "");
 
   //for FR calculation
-  if( (t.evt_id>110 && t.evt_id<120) || t.evt_id==-1){ //only use qcd samples with pt>=470 to compute FR
-    if(t.gamma_idCutBased[0]){ //passSieie
-      plot2D("h2d_gammaht_gammapt"+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",n_FRhtbins,FRhtbins,n_FRptbins,FRptbins);
-      plot2D("h2d_gammaht_gammaptW1"+s, t.gamma_ht, t.gamma_pt[0], 1, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",n_FRhtbins,FRhtbins,n_FRptbins,FRptbins);
-    }
-    if(!t.gamma_idCutBased[0]){ //!passSieie
-      plot2D("h2d_gammaht_gammaptSingleBin"+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",1,0,3000,1,0,1500);
-      plot2D("h2d_gammaht_gammaptSingleBinW1"+s, t.gamma_ht, t.gamma_pt[0], 1, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",1,0,3000,1,0,1500);
-    }
+  //if( (t.evt_id>110 && t.evt_id<120) || t.isData){ //only use qcd samples with pt>=470 to compute FR
+  if(t.gamma_idCutBased[0]){ //passSieie
+    plot2D("h2d_gammaht_gammapt"+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",n_FRhtbins,FRhtbins,n_FRptbins,FRptbins);
+    plot2D("h2d_gammaht_gammaptW1"+s, t.gamma_ht, t.gamma_pt[0], 1, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",n_FRhtbins,FRhtbins,n_FRptbins,FRptbins);
   }
+  if(!t.gamma_idCutBased[0]){ //!passSieie
+    plot2D("h2d_gammaht_gammaptSingleBin"+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",1,0,3000,1,0,1500);
+    plot2D("h2d_gammaht_gammaptSingleBinW1"+s, t.gamma_ht, t.gamma_pt[0], 1, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",1,0,3000,1,0,1500);
+  }
+  //  }
   
   for (int i = 0; i < SRBase.GetNumberOfMT2Bins(); i++) {
     if ( t.gamma_mt2 > SRBase.GetMT2Bins()[i] &&  t.gamma_mt2 < SRBase.GetMT2Bins()[i+1]) {
