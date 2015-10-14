@@ -186,6 +186,7 @@ class babyMaker {
   Float_t         lep_dxy[max_nlep];   //[nlep]
   Float_t         lep_dz[max_nlep];   //[nlep]
   Int_t           lep_tightId[max_nlep];   //[nlep]
+  Int_t           lep_heepId[max_nlep];   //[nlep]
   Float_t         lep_relIso03[max_nlep];   //[nlep]
   Float_t         lep_relIso04[max_nlep];   //[nlep]
   Float_t         lep_miniRelIso[max_nlep];   //[nlep]

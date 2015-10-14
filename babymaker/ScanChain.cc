@@ -714,6 +714,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       vector<float>vec_lep_dxy;
       vector<float>vec_lep_dz;
       vector<int>  vec_lep_tightId;
+      vector<int>  vec_lep_heepId;
       vector<float>vec_lep_relIso03;
       vector<float>vec_lep_relIso04;
       vector<float>vec_lep_miniRelIso;
@@ -759,6 +760,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         vec_lep_dxy.push_back ( cms3.els_dxyPV().at(iEl));
         vec_lep_dz.push_back ( cms3.els_dzPV().at(iEl));
         vec_lep_tightId.push_back ( eleTightID(iEl,analysis_t::HAD,2) );
+        vec_lep_heepId.push_back ( isHEEPV60(iEl) );
         vec_lep_relIso03.push_back (  eleRelIso03(iEl,analysis_t::HAD));
         vec_lep_relIso04.push_back ( 0);
         vec_lep_miniRelIso.push_back ( elMiniRelIsoCMS3_EA(iEl) );
@@ -817,6 +819,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         vec_lep_dxy.push_back ( cms3.mus_dxyPV().at(iMu)); // this uses the silicon track. should we use best track instead?
         vec_lep_dz.push_back ( cms3.mus_dzPV().at(iMu)); // this uses the silicon track. should we use best track instead?
         vec_lep_tightId.push_back ( muTightID(iMu,analysis_t::HAD,2) );
+        vec_lep_heepId.push_back ( 0 );
         vec_lep_relIso03.push_back ( muRelIso03(iMu,analysis_t::HAD) );
         vec_lep_relIso04.push_back ( muRelIso04(iMu,analysis_t::HAD) );
         vec_lep_miniRelIso.push_back ( muMiniRelIsoCMS3_EA(iMu) );
@@ -873,6 +876,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         lep_dz[i]     = vec_lep_dz.at(it->first);
         lep_dxy[i]    = vec_lep_dxy.at(it->first);
         lep_tightId[i]     = vec_lep_tightId.at(it->first);
+        lep_heepId[i]      = vec_lep_heepId.at(it->first);
         lep_relIso03[i]    = vec_lep_relIso03.at(it->first);
         lep_relIso04[i]    = vec_lep_relIso04.at(it->first);
         lep_miniRelIso[i]  = vec_lep_miniRelIso.at(it->first);
@@ -2009,6 +2013,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("lep_dxy", lep_dxy, "lep_dxy[nlep]/F" );
     BabyTree_->Branch("lep_dz", lep_dz, "lep_dz[nlep]/F" );
     BabyTree_->Branch("lep_tightId", lep_tightId, "lep_tightId[nlep]/I" );
+    BabyTree_->Branch("lep_heepId", lep_heepId, "lep_heepId[nlep]/I" );
     BabyTree_->Branch("lep_relIso03", lep_relIso03, "lep_relIso03[nlep]/F" );
     BabyTree_->Branch("lep_relIso04", lep_relIso04, "lep_relIso04[nlep]/F" );
     BabyTree_->Branch("lep_miniRelIso", lep_miniRelIso, "lep_miniRelIso[nlep]/F" );
@@ -2402,6 +2407,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       lep_dxy[i] = -999;
       lep_dz[i] = -999;
       lep_tightId[i] = -999;
+      lep_heepId[i] = -999;
       lep_relIso03[i] = -999;
       lep_relIso04[i] = -999;
       lep_miniRelIso[i] = -999;
