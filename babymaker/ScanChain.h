@@ -156,6 +156,10 @@ class babyMaker {
   Int_t           HLT_PFMET170;
   Int_t           HLT_PFHT350_PFMET100;   
   Int_t           HLT_PFHT350_PFMET120;   
+  Int_t           HLT_PFMETNoMu90_PFMHTNoMu90;
+  Int_t           HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90;
+  Int_t           HLT_PFMETNoMu120_PFMHTNoMu120;
+  Int_t           HLT_PFMET90_PFMHT90;
   Int_t           HLT_SingleMu;   
   Int_t           HLT_SingleEl;   
   Int_t           HLT_DoubleEl;   

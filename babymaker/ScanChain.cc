@@ -272,6 +272,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       HLT_PFMET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_JetIdCleaned_v"); 
       HLT_PFHT350_PFMET100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_JetIdCleaned_v"); 
       HLT_PFHT350_PFMET120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET120_JetIdCleaned_v"); 
+      HLT_PFMETNoMu90_PFMHTNoMu90   = passHLTTriggerPattern("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v");
+      HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90   = passHLTTriggerPattern("HLT_MonoCentralPFJet80_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v");
+      HLT_PFMETNoMu120_PFMHTNoMu120 = passHLTTriggerPattern("HLT_PFMETNoMu120_JetIdCleaned_PFMHTNoMu120_IDTight_v");
+      HLT_PFMET90_PFMHT90           = passHLTTriggerPattern("HLT_PFMET90_PFMHT90_IDTight_v");
 
       HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu17_eta2p1_v") ||
         passHLTTriggerPattern("HLT_IsoMu20_v") || passHLTTriggerPattern("HLT_IsoMu20_eta2p1_v") ||
@@ -1962,6 +1966,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("HLT_PFMET170", &HLT_PFMET170 );
     BabyTree_->Branch("HLT_PFHT350_PFMET100", &HLT_PFHT350_PFMET100 );
     BabyTree_->Branch("HLT_PFHT350_PFMET120", &HLT_PFHT350_PFMET120 );
+    BabyTree_->Branch("HLT_PFMETNoMu90_PFMHTNoMu90", &HLT_PFMETNoMu90_PFMHTNoMu90 );
+    BabyTree_->Branch("HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90", &HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90 );
+    BabyTree_->Branch("HLT_PFMETNoMu120_PFMHTNoMu120", &HLT_PFMETNoMu120_PFMHTNoMu120 );
+    BabyTree_->Branch("HLT_PFMET90_PFMHT90", &HLT_PFMET90_PFMHT90 );
     BabyTree_->Branch("HLT_SingleMu", &HLT_SingleMu );
     BabyTree_->Branch("HLT_SingleEl", &HLT_SingleEl );
     BabyTree_->Branch("HLT_DoubleEl", &HLT_DoubleEl );
@@ -2264,6 +2272,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     HLT_PFMET170 = -999;
     HLT_PFHT350_PFMET100 = -999;
     HLT_PFHT350_PFMET120 = -999;
+    HLT_PFMETNoMu90_PFMHTNoMu90 = -999;
+    HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90 = -999;
+    HLT_PFMETNoMu120_PFMHTNoMu120 = -999;
+    HLT_PFMET90_PFMHT90 = -999;
     HLT_SingleMu = -999;   
     HLT_SingleEl = -999;   
     HLT_DoubleEl = -999;   
