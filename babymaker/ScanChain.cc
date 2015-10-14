@@ -555,6 +555,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           bool goodLep = false;
           bool goodTau = false;
 	  int decayMode = 0;
+	  int neutralDaughters = 0;
+	  float leadTrackPt = 0.;
           bool goodLepFromTau = false;
           int sourceId = 0;
 
@@ -600,17 +602,26 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 		}
 	      }
 	      for(unsigned int jGen = 0; jGen < cms3.genps_p4().size(); jGen++) {
+		int id2 = abs(cms3.genps_id().at(jGen));
 		if (cms3.genps_idx_mother().at(jGen) != int(tauIdx)) continue;
-		if (cms3.genps_charge().at(jGen) == 0) continue;
-		if (cms3.genps_status().at(jGen) != 1) continue;
+		//if (cms3.genps_charge().at(jGen) == 0) continue;
+		if ((cms3.genps_status().at(jGen) != 1) && (cms3.genps_status().at(jGen) != 2)) continue;
 		// don't count duplicated taus as daughters
-		if (abs(cms3.genps_id().at(jGen)) == 15) continue;
-		if ( (abs(cms3.genps_id().at(jGen)) == 11) || (abs(cms3.genps_id().at(jGen)) == 13) ) {
+		if (id2 == 15) continue;
+		if ( (id2 == 11) || (id2 == 13) ) {
 		  decayMode = cms3.genps_id().at(jGen);
+		  leadTrackPt = cms3.genps_p4().at(jGen).pt();
 		  break;
 		}
 		// not a lepton: count number of prongs
-		else ++decayMode; 
+		else if (abs(cms3.genps_charge().at(jGen)) == 1) {
+		  ++decayMode;
+		  if (cms3.genps_p4().at(jGen).pt() > leadTrackPt) leadTrackPt = cms3.genps_p4().at(jGen).pt();
+		}
+		// not charged: count neutral (non-neutrino) daughters
+		else if ((cms3.genps_charge().at(jGen) == 0) && (id2 != 12 && id2 != 14 && id2 != 16)) {
+		  ++neutralDaughters;
+		}
 	      }
 	    } // if goodTau
 	    
@@ -644,6 +655,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
             genTau_charge[ngenTau] = cms3.genps_charge().at(iGen);
             genTau_sourceId[ngenTau] = sourceId;
             genTau_decayMode[ngenTau] = decayMode;
+            genTau_leadTrackPt[ngenTau] = leadTrackPt;
+            genTau_neutralDaughters[ngenTau] = neutralDaughters;
             ++ngenTau;
 	    if (decayMode == 1) ++ngenTau1Prong;
 	    else if (decayMode == 3) ++ngenTau3Prong;
@@ -2136,6 +2149,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       BabyTree_->Branch("genTau_charge", genTau_charge, "genTau_charge[ngenTau]/F" );
       BabyTree_->Branch("genTau_sourceId", genTau_sourceId, "genTau_sourceId[ngenTau]/I" );
       BabyTree_->Branch("genTau_decayMode", genTau_decayMode, "genTau_decayMode[ngenTau]/I" );
+      BabyTree_->Branch("genTau_leadTrackPt", genTau_leadTrackPt, "genTau_leadTrackPt[ngenTau]/F" );
+      BabyTree_->Branch("genTau_neutralDaughters", genTau_neutralDaughters, "genTau_neutralDaughters[ngenTau]/I" );
       BabyTree_->Branch("ngenLepFromTau", &ngenLepFromTau, "ngenLepFromTau/I" );
       BabyTree_->Branch("genLepFromTau_pt", genLepFromTau_pt, "genLepFromTau_pt[ngenLepFromTau]/F" );
       BabyTree_->Branch("genLepFromTau_eta", genLepFromTau_eta, "genLepFromTau_eta[ngenLepFromTau]/F" );
@@ -2489,6 +2504,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       genTau_charge[i] = -999;
       genTau_sourceId[i] = -999;
       genTau_decayMode[i] = -999;
+      genTau_leadTrackPt[i] = -999;
+      genTau_neutralDaughters[i] = -999;
     }
 
     for(int i=0; i < max_ngenLepFromTau; i++){
