@@ -75,6 +75,8 @@ const bool doJetLepOverlapRemoval = true;
 const bool applyLeptonIso = true;
 // turn on to save MC scale and PDF weights (default false, makes babies ~4x as large)
 const bool saveLHEweights = false;
+// turn on to save MC scale weights (default false, small size impact)
+const bool saveLHEweightsScaleOnly = false;
 
 //--------------------------------------------------------------------
 
@@ -687,9 +689,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         }
 
 	// store LHE weight variations
-	if (saveLHEweights) {
+	if (saveLHEweights || saveLHEweightsScaleOnly) {
 	  nLHEweight = 0;
 	  for (unsigned int iwgt = 0; iwgt < cms3.genweights().size(); ++iwgt) {
+	    if (saveLHEweightsScaleOnly && iwgt > 8) break;
 	    if (iwgt >= max_nLHEweight) {
 	      std::cout << "WARNING: attempted to fill more than " << max_nLHEweight << " LHEweights" << std::endl;
 	      break;
@@ -2164,7 +2167,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       BabyTree_->Branch("GenSusyMScan2", &GenSusyMScan2 );
       BabyTree_->Branch("GenSusyMScan3", &GenSusyMScan3 );
       BabyTree_->Branch("GenSusyMScan4", &GenSusyMScan4 );
-      if (saveLHEweights) {
+      if (saveLHEweights || saveLHEweightsScaleOnly) {
 	BabyTree_->Branch("nLHEweight", &nLHEweight, "nLHEweight/I" );
 	BabyTree_->Branch("LHEweight_wgt", LHEweight_wgt, "LHEweight_wgt[nLHEweight]/F" );
       }
@@ -2534,7 +2537,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       jet_puId[i] = -999;
     }
 
-    if (saveLHEweights) {
+    if (saveLHEweights || saveLHEweightsScaleOnly) {
       for(int i=0; i < max_nLHEweight; i++){
 	LHEweight_wgt[i] = -999;
       }
