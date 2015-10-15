@@ -95,6 +95,10 @@ public :
    Int_t           HLT_PFHT800;
    Int_t           HLT_PFHT900;
    Int_t           HLT_PFMET170;
+   Int_t           HLT_PFMETNoMu90_PFMHTNoMu90;
+   Int_t           HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90;
+   Int_t           HLT_PFMETNoMu120_PFMHTNoMu120;
+   Int_t           HLT_PFMET90_PFMHT90;
    Int_t           HLT_HT800;
    Int_t           HLT_HT900;
    Int_t           HLT_MET170;
@@ -110,6 +114,7 @@ public :
    Int_t           HLT_Mu8_EleX;   
    Int_t           HLT_DoubleMu;   
    Int_t           HLT_Photons;   
+   Int_t           HLT_Photon120;   
    Int_t           HLT_Photon165_HE10;   
    Int_t           HLT_ht350prescale;   
    Int_t           HLT_ht475prescale;   
@@ -129,6 +134,7 @@ public :
    Float_t         lep_dxy[50];   //[nlep]
    Float_t         lep_dz[50];   //[nlep]
    Int_t           lep_tightId[50];   //[nlep]
+   Int_t           lep_heepId[50];   //[nlep]
    Float_t         lep_relIso03[50];   //[nlep]
    Float_t         lep_relIso04[50];   //[nlep]
    Float_t         lep_miniRelIso[50];   //[nlep]
@@ -272,6 +278,8 @@ public :
    Float_t         genLepFromTau_charge[10];   //[ngenLepFromTau]
    Int_t           genLepFromTau_sourceId[10];   //[ngenLepFromTau]
    Int_t           ngenTau;
+   Int_t           ngenTau1Prong;
+   Int_t           ngenTau3Prong;
    Float_t         genTau_pt[10];   //[ngenTau]
    Float_t         genTau_eta[10];   //[ngenTau]
    Float_t         genTau_phi[10];   //[ngenTau]
@@ -280,6 +288,9 @@ public :
    Int_t           genTau_status[10];   //[ngenTau]
    Float_t         genTau_charge[10];   //[ngenTau]
    Int_t           genTau_sourceId[10];   //[ngenTau]
+   Int_t           genTau_decayMode[10];   //[ngenTau]
+   Float_t         genTau_leadTrackPt[10];   //[ngenTau]
+   Int_t           genTau_neutralDaughters[10];   //[ngenTau]
    Int_t           njet;
    Float_t         jet_pt[100];   //[njet]
    Float_t         jet_eta[100];   //[njet]
@@ -312,6 +323,8 @@ public :
    Float_t         weight_scales_DN;
    Float_t         weight_pdfs_UP;
    Float_t         weight_pdfs_DN;
+   Int_t           nLHEweight;
+   Float_t         LHEweight_wgt[500];   //[nLHEweight]
 
    // List of branches
    TBranch        *b_run;   //!
@@ -390,6 +403,10 @@ public :
    TBranch        *b_HLT_PFHT800;   //!
    TBranch        *b_HLT_PFHT900;   //!
    TBranch        *b_HLT_PFMET170;   //!
+   TBranch        *b_HLT_PFMETNoMu90_PFMHTNoMu90;   //!
+   TBranch        *b_HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90;   //!
+   TBranch        *b_HLT_PFMETNoMu120_PFMHTNoMu120;   //!
+   TBranch        *b_HLT_PFMET90_PFMHT90;   //!
    TBranch        *b_HLT_ht350met100;   //!
    TBranch        *b_HLT_ht350met120;   //!
    TBranch        *b_HLT_PFHT350_PFMET100;   //!
@@ -402,6 +419,7 @@ public :
    TBranch        *b_HLT_Mu8_EleX;   //!
    TBranch        *b_HLT_DoubleMu;   //!
    TBranch        *b_HLT_Photons;   //!
+   TBranch        *b_HLT_Photon120;   //!
    TBranch        *b_HLT_Photon165_HE10;   //!
    TBranch        *b_HLT_ht350prescale;   //!
    TBranch        *b_HLT_ht475prescale;   //!
@@ -421,6 +439,7 @@ public :
    TBranch        *b_lep_dxy;   //!
    TBranch        *b_lep_dz;   //!
    TBranch        *b_lep_tightId;   //!
+   TBranch        *b_lep_heepId;   //!
    TBranch        *b_lep_relIso03;   //!
    TBranch        *b_lep_relIso04;   //!
    TBranch        *b_lep_miniRelIso;   //!
@@ -564,6 +583,8 @@ public :
    TBranch        *b_genLepFromTau_charge;   //!
    TBranch        *b_genLepFromTau_sourceId;   //!
    TBranch        *b_ngenTau;   //!
+   TBranch        *b_ngenTau1Prong;   //!
+   TBranch        *b_ngenTau3Prong;   //!
    TBranch        *b_genTau_pt;   //!
    TBranch        *b_genTau_eta;   //!
    TBranch        *b_genTau_phi;   //!
@@ -572,6 +593,9 @@ public :
    TBranch        *b_genTau_status;   //!
    TBranch        *b_genTau_charge;   //!
    TBranch        *b_genTau_sourceId;   //!
+   TBranch        *b_genTau_decayMode;   //!
+   TBranch        *b_genTau_leadTrackPt;   //!
+   TBranch        *b_genTau_neutralDaughters;   //!
    TBranch        *b_njet;   //!
    TBranch        *b_jet_pt;   //!
    TBranch        *b_jet_eta;   //!
@@ -604,6 +628,8 @@ public :
    TBranch        *b_weight_scales_DN;   //!
    TBranch        *b_weight_pdfs_UP;   //!
    TBranch        *b_weight_pdfs_DN;   //!
+   TBranch        *b_nLHEweight;   //!
+   TBranch        *b_LHEweight_wgt;   //!
 
    mt2tree(TTree *tree=0);
    virtual ~mt2tree();
@@ -741,6 +767,10 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_PFHT800", &HLT_PFHT800, &b_HLT_PFHT800);
    fChain->SetBranchAddress("HLT_PFHT900", &HLT_PFHT900, &b_HLT_PFHT900);
    fChain->SetBranchAddress("HLT_PFMET170", &HLT_PFMET170, &b_HLT_PFMET170);
+   fChain->SetBranchAddress("HLT_PFMETNoMu90_PFMHTNoMu90", &HLT_PFMETNoMu90_PFMHTNoMu90, &b_HLT_PFMETNoMu90_PFMHTNoMu90);
+   fChain->SetBranchAddress("HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90", &HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90, &b_HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90);
+   fChain->SetBranchAddress("HLT_PFMETNoMu120_PFMHTNoMu120", &HLT_PFMETNoMu120_PFMHTNoMu120, &b_HLT_PFMETNoMu120_PFMHTNoMu120);
+   fChain->SetBranchAddress("HLT_PFMET90_PFMHT90", &HLT_PFMET90_PFMHT90, &b_HLT_PFMET90_PFMHT90);
    fChain->SetBranchAddress("HLT_ht350met100", &HLT_ht350met100, &b_HLT_ht350met100);
    fChain->SetBranchAddress("HLT_ht350met120", &HLT_ht350met120, &b_HLT_ht350met120);
    fChain->SetBranchAddress("HLT_PFHT350_PFMET100", &HLT_PFHT350_PFMET100, &b_HLT_PFHT350_PFMET100);
@@ -753,6 +783,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_Mu8_EleX", &HLT_Mu8_EleX, &b_HLT_Mu8_EleX);
    fChain->SetBranchAddress("HLT_DoubleMu", &HLT_DoubleMu, &b_HLT_DoubleMu);
    fChain->SetBranchAddress("HLT_Photons", &HLT_Photons, &b_HLT_Photons);
+   fChain->SetBranchAddress("HLT_Photon120", &HLT_Photon120, &b_HLT_Photon120);
    fChain->SetBranchAddress("HLT_Photon165_HE10", &HLT_Photon165_HE10, &b_HLT_Photon165_HE10);
    fChain->SetBranchAddress("HLT_ht350prescale", &HLT_ht350prescale, &b_HLT_ht350prescale);
    fChain->SetBranchAddress("HLT_ht475prescale", &HLT_ht475prescale, &b_HLT_ht475prescale);
@@ -772,6 +803,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("lep_dxy", lep_dxy, &b_lep_dxy);
    fChain->SetBranchAddress("lep_dz", lep_dz, &b_lep_dz);
    fChain->SetBranchAddress("lep_tightId", lep_tightId, &b_lep_tightId);
+   fChain->SetBranchAddress("lep_heepId", lep_heepId, &b_lep_heepId);
    fChain->SetBranchAddress("lep_relIso03", lep_relIso03, &b_lep_relIso03);
    fChain->SetBranchAddress("lep_relIso04", lep_relIso04, &b_lep_relIso04);
    fChain->SetBranchAddress("lep_miniRelIso", lep_miniRelIso, &b_lep_miniRelIso);
@@ -915,6 +947,8 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("genLepFromTau_charge", genLepFromTau_charge, &b_genLepFromTau_charge);
    fChain->SetBranchAddress("genLepFromTau_sourceId", genLepFromTau_sourceId, &b_genLepFromTau_sourceId);
    fChain->SetBranchAddress("ngenTau", &ngenTau, &b_ngenTau);
+   fChain->SetBranchAddress("ngenTau1Prong", &ngenTau1Prong, &b_ngenTau1Prong);
+   fChain->SetBranchAddress("ngenTau3Prong", &ngenTau3Prong, &b_ngenTau3Prong);
    fChain->SetBranchAddress("genTau_pt", genTau_pt, &b_genTau_pt);
    fChain->SetBranchAddress("genTau_eta", genTau_eta, &b_genTau_eta);
    fChain->SetBranchAddress("genTau_phi", genTau_phi, &b_genTau_phi);
@@ -923,6 +957,9 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("genTau_status", genTau_status, &b_genTau_status);
    fChain->SetBranchAddress("genTau_charge", genTau_charge, &b_genTau_charge);
    fChain->SetBranchAddress("genTau_sourceId", genTau_sourceId, &b_genTau_sourceId);
+   fChain->SetBranchAddress("genTau_decayMode", genTau_decayMode, &b_genTau_decayMode);
+   fChain->SetBranchAddress("genTau_leadTrackPt", genTau_leadTrackPt, &b_genTau_leadTrackPt);
+   fChain->SetBranchAddress("genTau_neutralDaughters", genTau_neutralDaughters, &b_genTau_neutralDaughters);
    fChain->SetBranchAddress("njet", &njet, &b_njet);
    fChain->SetBranchAddress("jet_pt", jet_pt, &b_jet_pt);
    fChain->SetBranchAddress("jet_eta", jet_eta, &b_jet_eta);
@@ -955,6 +992,8 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("weight_scales_DN", &weight_scales_DN, &b_weight_scales_DN);
    fChain->SetBranchAddress("weight_pdfs_UP", &weight_pdfs_UP, &b_weight_pdfs_UP);
    fChain->SetBranchAddress("weight_pdfs_DN", &weight_pdfs_DN, &b_weight_pdfs_DN);
+   fChain->SetBranchAddress("nLHEweight", &nLHEweight, &b_nLHEweight);
+   fChain->SetBranchAddress("LHEweight_wgt", &LHEweight_wgt, &b_LHEweight_wgt);
    Notify();
 }
 
