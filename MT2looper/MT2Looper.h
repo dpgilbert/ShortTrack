@@ -70,8 +70,11 @@ class MT2Looper {
   bool isSignal_;
   std::map<std::string, TH1*> h_1d_global;
   std::vector<SR> SRVec;
+  std::vector<SR> SRVecMonojet;
   std::vector<SR> InclusiveRegions;
+  std::vector<SR> InclusiveRegionsMonojet;
   SR SRBase;
+  SR SRBaseMonojet;
   SR SRNoCut;
   SR CRSL_WJets;
   SR CRSL_TTbar;
