@@ -1338,6 +1338,10 @@ std::vector<SR> getSignalRegionsMonojet(){
   baseSR.SetVar("nlep", 0, 1);
   baseSR.SetVar("njets", 1, 2);
   baseSR.SetVar("met", 200, -1);
+  baseSR.SetVarCRSL("j1pt", 200, -1);
+  baseSR.SetVarCRSL("nlep", 1, 2);
+  baseSR.SetVarCRSL("njets", 1, 2);
+  baseSR.SetVarCRSL("met", 200, -1);
   baseSR.SetMT2Bins(1, mt2bins_monojet);
 
   // fine binning in HT
@@ -1347,7 +1351,7 @@ std::vector<SR> getSignalRegionsMonojet(){
   temp_SR_vec.clear();
   for(unsigned int iSR = 0; iSR < nbins_monojet; iSR++){
     SR fullSR0b = baseSR;  
-    fullSR0b.SetName(std::to_string(iSR) + "J");
+    fullSR0b.SetName(std::to_string(iSR+1) + "J");
     fullSR0b.SetVar("ht", htbins[iSR], htbins[iSR+1]);
     fullSR0b.SetVar("nbjets", 0, 1);
     fullSR0b.SetVarCRSL("ht", htbins[iSR], htbins[iSR+1]);
@@ -1357,7 +1361,7 @@ std::vector<SR> getSignalRegionsMonojet(){
     // btag bins: offset bin number by 10
     if (iSR < nbins_monojet-1) {
       SR fullSR1b = baseSR;  
-      fullSR1b.SetName(std::to_string(iSR+10) + "J");
+      fullSR1b.SetName(std::to_string(iSR+11) + "J");
       float ht_max = htbins[iSR+1];
       if (iSR == nbins_monojet-2) ht_max = htbins[nbins_monojet];
       fullSR1b.SetVar("ht", htbins[iSR], ht_max);
