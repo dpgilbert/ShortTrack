@@ -252,6 +252,11 @@ void MT2Looper::SetSignalRegions(){
   outfile_->cd();
 
   //setup inclusive regions
+  SR InclusiveHT200to450 = SRBase;
+  InclusiveHT200to450.SetName("InclusiveHT200to450");
+  InclusiveHT200to450.SetVar("ht", 200, 450);
+  InclusiveRegions.push_back(InclusiveHT200to450);
+
   SR InclusiveHT450to575 = SRBase;
   InclusiveHT450to575.SetName("InclusiveHT450to575");
   InclusiveHT450to575.SetVar("ht", 450, 575);
@@ -872,7 +877,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 void MT2Looper::fillHistosSRBase() {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
@@ -881,9 +886,21 @@ void MT2Looper::fillHistosSRBase() {
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["mt2"]         = t.mt2;
-  values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+  values["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   if(SRBase.PassesSelection(values)) fillHistos(SRBase.srHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), SRBase.GetName(), "");
+
+  // do monojet SRs -- NEED TO ADD JETID CUT SOMEHOW
+  if (!t.isData || t.HLT_PFMETNoMu90_PFMHTNoMu90) {
+    std::map<std::string, float> values_monojet;
+    values_monojet["nlep"]        = nlepveto_;
+    values_monojet["j1pt"]        = t.jet1_pt;
+    values_monojet["njets"]       = t.nJet30;
+    values_monojet["met"]         = t.met_pt;
+
+    if(SRBaseMonojet.PassesSelection(values_monojet)) fillHistos(SRBaseMonojet.srHistMap, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.GetMT2Bins(), SRBaseMonojet.GetName(), "");
+  }
+
 
   return;
 }
@@ -900,7 +917,7 @@ void MT2Looper::fillHistosInclusive() {
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["mt2"]         = t.mt2;
-  values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+  values["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   for(unsigned int srN = 0; srN < InclusiveRegions.size(); srN++){
     std::map<std::string, float> values_temp = values;
@@ -934,7 +951,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
   values["mt2"]         = t.mt2;
   values["ht"]          = t.ht;
   values["met"]         = t.met_pt;
-  //values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+  //values["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
@@ -969,7 +986,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;
   
   // first fill base region
   std::map<std::string, float> valuesBase;
@@ -979,7 +996,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   valuesBase["j1pt"]        = t.jet1_pt;
   valuesBase["j2pt"]        = t.jet2_pt;
   valuesBase["mt2"]         = t.mt2;
-  valuesBase["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+  valuesBase["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   if (SRBase.PassesSelectionCRSL(valuesBase)) {
     if(prefix=="crsl") fillHistosSingleLepton(SRBase.crslHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbase", suffix);
@@ -998,7 +1015,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
     valuesInc["j1pt"]        = t.jet1_pt;
     valuesInc["j2pt"]        = t.jet2_pt;
     valuesInc["mt2"]         = t.mt2;
-    valuesInc["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+    valuesInc["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
     valuesInc["nbjets"]         = t.nBJet20;
     if (CRSL_WJets.PassesSelectionCRSL(valuesInc)) {
       fillHistosSingleLepton(CRSL_WJets.crslHistMap, CRSL_WJets.GetNumberOfMT2Bins(), CRSL_WJets.GetMT2Bins(), CRSL_WJets.GetName().c_str(), suffix);
@@ -1032,6 +1049,21 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
 
   // do monojet SRs -- NEED TO ADD JETID CUT SOMEHOW
   if (!t.isData || t.HLT_PFMETNoMu90_PFMHTNoMu90) {
+
+    // first fill base region
+    std::map<std::string, float> valuesBase_monojet;
+    valuesBase_monojet["nlep"]        = t.nLepLowMT;
+    valuesBase_monojet["j1pt"]        = t.jet1_pt;
+    valuesBase_monojet["njets"]       = t.nJet30;
+    valuesBase_monojet["met"]         = t.met_pt;
+
+    if (SRBaseMonojet.PassesSelectionCRSL(valuesBase_monojet)) {
+      if(prefix=="crsl") fillHistosSingleLepton(SRBaseMonojet.crslHistMap, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.GetMT2Bins(), "crslbaseJ", suffix);
+      else if(prefix=="crslmu") fillHistosSingleLepton(SRBaseMonojet.crslmuHistMap, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.GetMT2Bins(), "crslmubaseJ", suffix);
+      else if(prefix=="crslel") fillHistosSingleLepton(SRBaseMonojet.crslelHistMap, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.GetMT2Bins(), "crslelbaseJ", suffix);
+    }
+
+    
     std::map<std::string, float> values_monojet;
     values_monojet["nlep"]        = t.nLepLowMT;
     values_monojet["j1pt"]        = t.jet1_pt;
