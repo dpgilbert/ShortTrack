@@ -16,6 +16,8 @@ std::vector<SR> getSignalRegions2015SevenJets_UltraHighHT();
 std::vector<SR> getSignalRegionsZurich();
 std::vector<SR> getSignalRegionsZurich_jetpt40();
 std::vector<SR> getSignalRegionsZurich_jetpt30();
+std::vector<SR> getSignalRegionsJamboree();
+std::vector<SR> getSignalRegionsMonojet();
 
 } // namespace mt2
 
