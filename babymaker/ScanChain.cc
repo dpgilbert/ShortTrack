@@ -271,13 +271,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       //TRIGGER - check first to enable cuts
       HLT_PFHT800        = passHLTTriggerPattern("HLT_PFHT800_v");
       HLT_PFHT900        = passHLTTriggerPattern("HLT_PFHT900_v");
-      HLT_PFMET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_JetIdCleaned_v"); 
-      HLT_PFHT350_PFMET100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_JetIdCleaned_v"); 
+      HLT_PFMET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_v"); 
+      HLT_PFHT350_PFMET100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_v"); 
       HLT_PFHT350_PFMET120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET120_JetIdCleaned_v"); 
-      HLT_PFMETNoMu90_PFMHTNoMu90   = passHLTTriggerPattern("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v");
-      HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90   = passHLTTriggerPattern("HLT_MonoCentralPFJet80_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v");
-      HLT_PFMETNoMu120_PFMHTNoMu120 = passHLTTriggerPattern("HLT_PFMETNoMu120_JetIdCleaned_PFMHTNoMu120_IDTight_v");
-      HLT_PFMET90_PFMHT90           = passHLTTriggerPattern("HLT_PFMET90_PFMHT90_IDTight_v");
+      HLT_PFMETNoMu90_PFMHTNoMu90   = passHLTTriggerPattern("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu90_PFMHTNoMu90_IDTight_v");
+      HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90   = passHLTTriggerPattern("HLT_MonoCentralPFJet80_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_MonoCentralPFJet80_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90_IDTight_v");
+      HLT_PFMETNoMu120_PFMHTNoMu120 = passHLTTriggerPattern("HLT_PFMETNoMu120_JetIdCleaned_PFMHTNoMu120_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v");
+      HLT_PFMET90_PFMHT90           = passHLTTriggerPattern("HLT_PFMET90_PFMHT90_IDTight_v") || passHLTTriggerPattern("HLT_PFMET90_PFMHT90_IDLoose_v");
 
       HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu17_eta2p1_v") ||
         passHLTTriggerPattern("HLT_IsoMu20_v") || passHLTTriggerPattern("HLT_IsoMu20_eta2p1_v") ||
@@ -388,8 +388,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	// note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
 	//      Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
 	// recompute HBHE noise filter decision using CORE to avoid maxZeros issue
-	if (!isData) Flag_HBHENoiseFilter             = cms3.filt_hbheNoise();
-	else if (bx == 25) Flag_HBHENoiseFilter       = hbheNoiseFilter_25ns();
+	if (bx == 25) Flag_HBHENoiseFilter            = hbheNoiseFilter_25ns();
 	else Flag_HBHENoiseFilter                     = hbheNoiseFilter();
 	Flag_HBHEIsoNoiseFilter                       = hbheIsoNoiseFilter();
 	// necessary?
@@ -747,8 +746,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         if(cms3.els_p4().at(iEl).pt() < 10.0) continue;
         if(fabs(cms3.els_p4().at(iEl).eta()) > 2.4) continue;
         // first check ID then iso
-        if(!electronID(iEl,id_level_t::HAD_veto_noiso_v3)) continue;
-        bool pass_iso = electronID(iEl,id_level_t::HAD_veto_v3);
+        if(!electronID(iEl,id_level_t::HAD_veto_noiso_v4)) continue;
+        bool pass_iso = electronID(iEl,id_level_t::HAD_veto_v4);
         if(applyLeptonIso && !pass_iso) continue;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.els_p4().at(iEl).pt()) );
         vec_lep_pt.push_back ( cms3.els_p4().at(iEl).pt());
@@ -759,11 +758,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         vec_lep_pdgId.push_back ( (-11)*cms3.els_charge().at(iEl));
         vec_lep_dxy.push_back ( cms3.els_dxyPV().at(iEl));
         vec_lep_dz.push_back ( cms3.els_dzPV().at(iEl));
-        vec_lep_tightId.push_back ( eleTightID(iEl,analysis_t::HAD,2) );
+        vec_lep_tightId.push_back ( eleTightID(iEl,analysis_t::HAD,4) );
         vec_lep_heepId.push_back ( isHEEPV60(iEl) );
         vec_lep_relIso03.push_back (  eleRelIso03(iEl,analysis_t::HAD));
         vec_lep_relIso04.push_back ( 0);
-        vec_lep_miniRelIso.push_back ( elMiniRelIsoCMS3_EA(iEl) );
+        vec_lep_miniRelIso.push_back ( elMiniRelIsoCMS3_EA(iEl,1) );
         vec_lep_relIsoAn04.push_back ( elRelIsoAn04(iEl) );
         if (!isData && cms3.els_mc3dr().at(iEl) < 0.2 && cms3.els_mc3idx().at(iEl) != -9999 && abs(cms3.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.els_mc3idx().at(iEl)]);
@@ -806,8 +805,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         if(cms3.mus_p4().at(iMu).pt() < 10.0) continue;
         if(fabs(cms3.mus_p4().at(iMu).eta()) > 2.4) continue;
         // first check ID then iso
-        if(!muonID(iMu,id_level_t::HAD_loose_noiso_v3)) continue;
-        bool pass_iso = muonID(iMu,id_level_t::HAD_loose_v3);
+        if(!muonID(iMu,id_level_t::HAD_loose_noiso_v4)) continue;
+        bool pass_iso = muonID(iMu,id_level_t::HAD_loose_v4);
         if (applyLeptonIso && !pass_iso) continue;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.mus_p4().at(iMu).pt()) );
         vec_lep_pt.push_back ( cms3.mus_p4().at(iMu).pt());
@@ -818,11 +817,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         vec_lep_pdgId.push_back ( (-13)*cms3.mus_charge().at(iMu));
         vec_lep_dxy.push_back ( cms3.mus_dxyPV().at(iMu)); // this uses the silicon track. should we use best track instead?
         vec_lep_dz.push_back ( cms3.mus_dzPV().at(iMu)); // this uses the silicon track. should we use best track instead?
-        vec_lep_tightId.push_back ( muTightID(iMu,analysis_t::HAD,2) );
+        vec_lep_tightId.push_back ( muTightID(iMu,analysis_t::HAD,4) );
         vec_lep_heepId.push_back ( 0 );
         vec_lep_relIso03.push_back ( muRelIso03(iMu,analysis_t::HAD) );
         vec_lep_relIso04.push_back ( muRelIso04(iMu,analysis_t::HAD) );
-        vec_lep_miniRelIso.push_back ( muMiniRelIsoCMS3_EA(iMu) );
+        vec_lep_miniRelIso.push_back ( muMiniRelIsoCMS3_EA(iMu,1) );
         vec_lep_relIsoAn04.push_back ( muRelIsoAn04(iMu) );
         if (!isData && cms3.mus_mc3dr().at(iMu) < 0.2 && cms3.mus_mc3idx().at(iMu) != -9999 && abs(cms3.mus_mc3_id().at(iMu)) == 13) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.mus_mc3idx().at(iMu)]);
@@ -1092,7 +1091,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       for(unsigned int iGamma = 0; iGamma < cms3.photons_p4().size(); iGamma++){
         if(cms3.photons_p4().at(iGamma).pt() < 20.0) continue;
         if(fabs(cms3.photons_p4().at(iGamma).eta()) > 2.5) continue;
-        if ( !isLoosePhoton(iGamma,analysis_t::HAD,2) ) continue;
+        if ( !isLoosePhoton(iGamma,analysis_t::HAD,3) ) continue;
 
         if (ngamma >= max_ngamma) {
           std::cout << "WARNING: attempted to fill more than " << max_ngamma << " photons" << std::endl;
@@ -1112,7 +1111,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         vec_gamma_phIso.push_back ( photons_recoPhotonIso().at(iGamma) );
         vec_gamma_r9.push_back (  photons_full5x5_r9().at(iGamma) );
         vec_gamma_hOverE.push_back (  photons_full5x5_hOverEtowBC().at(iGamma) );
-        vec_gamma_idCutBased.push_back (  isTightPhoton(iGamma,analysis_t::HAD,2) ? 1 : 0 ); 
+        vec_gamma_idCutBased.push_back (  isTightPhoton(iGamma,analysis_t::HAD,3) ? 1 : 0 ); 
         if(pt > 20) nGammas20++;
 
         // Some work for truth-matching (should be integrated in CMS3 as for the leptons)
@@ -1431,7 +1430,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           jet_area[njet] = cms3.pfjets_area().at(iJet);
           jet_rawPt[njet] = cms3.pfjets_p4().at(iJet).pt() * cms3.pfjets_undoJEC().at(iJet);
 
-          if (isTightPFJet_50nsV1(iJet)) jet_id[njet] = 3;
+          if (isMonoPFJet_Monojet(iJet)) jet_id[njet] = 5;
+          else if (isMonoPFJet_MT2(iJet)) jet_id[njet] = 4;
+          else if (isTightPFJet_50nsV1(iJet)) jet_id[njet] = 3;
           else if (isLoosePFJet_50nsV1(iJet)) jet_id[njet] = 1;
           else jet_id[njet] = 0;
 
@@ -1811,8 +1812,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         if(cms3.taus_pf_p4().at(iTau).pt() < 20.0) continue; 
         if(fabs(cms3.taus_pf_p4().at(iTau).eta()) > 2.3) continue; 
         if (!cms3.passTauID("byLooseCombinedIsolationDeltaBetaCorr3Hits", iTau)) continue; // HPS3 hits taus
-        if (!cms3.passTauID("againstElectronLoose", iTau)) continue; // loose electron rejection 
-        if (!cms3.passTauID("againstMuonTight", iTau)) continue; // loose muon rejection 
 
         if (ntau >= max_ntau) {
           std::cout << "WARNING: attempted to fill more than " << max_ntau << " taus" << std::endl;
