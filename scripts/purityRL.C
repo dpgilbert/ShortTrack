@@ -30,6 +30,7 @@ using namespace std;
 using namespace mt2;
 
 bool doData = false;
+bool verbose = false;
 
 void makePred(TFile* f_out, TFile* f_data, TFile* f_w, TFile* f_bkg, TFile* f_z, TString srName)
 {
@@ -41,19 +42,26 @@ void makePred(TFile* f_out, TFile* f_data, TFile* f_w, TFile* f_bkg, TFile* f_z,
     dir = f_out->mkdir("sr"+srName);
   } 
   dir->cd();
-
+  if (verbose) cout<<__LINE__<<endl;
   //if no crrl directory, exit
   if (!f_data->GetDirectory("crrl"+srName)) return;
   if (!f_w->GetDirectory("crrl"+srName)) return;
   if (!f_bkg->GetDirectory("crrl"+srName)) cout << "no h_bkg" << endl;
-  
+  if (verbose) cout<<__LINE__<<endl;
+
   //get hists for FR calc
   TH1D* h_w = (TH1D*) f_w->Get("crrl"+srName+"/h_mt2bins");
   TH1D* h_bkg = (TH1D*) f_bkg->Get("crrl"+srName+"/h_mt2bins");
   TH1D* h_data = (TH1D*) f_data->Get("crrl"+srName+"/h_mt2bins");
+  if (h_w==0 || h_data == 0) return;
+  if (h_bkg==0) {
+    h_bkg = (TH1D*) h_data->Clone("");
+    h_bkg->Reset();
+  }
   h_w->SetName("h_w");
   h_bkg->SetName("h_bkg");
   h_data->SetName("h_data");
+  if (verbose) cout<<__LINE__<<endl;
 
   //if no w->lnu, exit
   if (h_w->GetEntries() == 0 ) return;
@@ -63,7 +71,8 @@ void makePred(TFile* f_out, TFile* f_data, TFile* f_w, TFile* f_bkg, TFile* f_z,
   h_total->Reset();
   h_total->SetName("h_total");
   h_total->Add(h_w,h_bkg);
-  
+  if (verbose) cout<<__LINE__<<endl;
+
   //make another total hist with 150% bkg, for syst.
   TH1D* h_totalplus50 = (TH1D*) h_w->Clone();
   h_totalplus50->Reset();
@@ -94,10 +103,12 @@ void makePred(TFile* f_out, TFile* f_data, TFile* f_w, TFile* f_bkg, TFile* f_z,
     double syst = h_syst-> GetBinError(bin);
     h_purity->SetBinError(bin,pow(pow(stat,2)+pow(syst,2),0.5));
   }
+  if (verbose) cout<<__LINE__<<endl;
 
   //make R(Z/W) histogram
   TH1D* h_z = (TH1D*) f_z->Get("sr"+srName+"/h_mt2bins");
   h_z->SetName("h_z");
+  if (verbose) cout<<__LINE__<<endl;
 
   TH1D* h_ratio = (TH1D*) h_w->Clone();
   h_ratio->Reset();
@@ -129,6 +140,7 @@ void makePred(TFile* f_out, TFile* f_data, TFile* f_w, TFile* f_bkg, TFile* f_z,
   h_predZmc->Reset();
   h_predZmc->SetName("h_predZmc");
   h_predZmc->Multiply(h_predWmc,h_ratio,1,1,"B");
+  if (verbose) cout<<__LINE__<<endl;
 
   //save it all
   h_w->Write();
@@ -141,6 +153,7 @@ void makePred(TFile* f_out, TFile* f_data, TFile* f_w, TFile* f_bkg, TFile* f_z,
   h_predZ->Write();   
   h_predWmc->Write();
   h_predZmc->Write();   
+  if (verbose) cout<<__LINE__<<endl;
 
   return ;
 }
@@ -154,6 +167,7 @@ void purityRL(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/ou
   //open files
   TString datanamestring(dataname);
   if (datanamestring.Contains("Data") || datanamestring.Contains("data")) doData = true;
+  if (verbose) cout<<__LINE__<<endl;
 
   TFile* f_data = new TFile(Form("%s/%s.root",input_dir.c_str(),dataname.c_str())); //data file
   TFile* f_w = new TFile(Form("%s/wjets_ht.root",input_dir.c_str())); //wjet file
@@ -162,12 +176,14 @@ void purityRL(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/ou
   // TFile* f_s = new TFile(Form("%s/singletop.root",input_dir.c_str())); //singletop file
   TFile* f_z = new TFile(Form("%s/zinv_ht.root",input_dir.c_str())); //zinv file
   TFile* f_bkg = new TFile(Form("%s/CRRLbkg.root",input_dir.c_str())); //qcd+ttall+singletop file
-  
+  if (verbose) cout<<__LINE__<<endl;
+
 
   if(f_data->IsZombie() || f_w->IsZombie() || f_bkg->IsZombie() ||f_z->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
     return;
   }
+  if (verbose) cout<<__LINE__<<endl;
 
   TFile* f_out = new TFile(Form("%s/purityRL.root",input_dir.c_str()),"RECREATE");
   

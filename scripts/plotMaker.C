@@ -914,7 +914,7 @@ void plotMakerGJets(){
       for (int j = 0; j < 2; j++) {
         if (j>0) dolog = true;
         makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 50 GeV" , 450 , 1500 , 2 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
-        makePlot( samples2, names2, dir_name , "h_chisoLoose"  , "Charged Iso [GeV]" , "Events " , 0 , 20 , 2 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples2, names2, dir_name , "h_chisoLoose"  , "Charged Iso [GeV]" , "Events " , 0 , 10 , 1 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
         makePlot( samples2, names2, dir_name , "h_chisoEBLoose"  , "Charged Iso [GeV]" , "Events " , 0 , 20 , 2 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
         makePlot( samples2, names2, dir_name , "h_chisoEELoose"  , "Charged Iso [GeV]" , "Events " , 0 , 20 , 2 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
         makePlot( samples2, names2, dir_name , "h_chisoLooseSieieSB"  , "Charged Iso [GeV]" , "Events " , 0 , 20 , 5 , dolog, printplots, scalesig, doRatio, scaleBGtoData );
@@ -951,7 +951,7 @@ void plotMakerRemovedLep(){
   writeExtraText = false;
   lumi_13TeV = "100 pb^{-1}";
   
-  string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-05_25ns_json_246908-256869_skimV3";
+  string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-05_25ns_json_246908-256869_skimV3_3fb";
   
   
   // ----------------------------------------
@@ -1020,6 +1020,41 @@ void plotMakerRemovedLep(){
       
     }
   }
+  
+//  std::cout << "\\documentclass[landscape, 10pt]{article}" << std::endl;
+//  std::cout << "\\usepackage{amsmath}" << std::endl;
+//  std::cout << "\\usepackage{amssymb}" << std::endl;
+//  std::cout << "\\usepackage{graphicx}" << std::endl;
+//  std::cout << "\\usepackage[left=.1in,top=1in,right=.1in,bottom=.1in,nohead]{geometry}" << std::endl;
+//  std::cout << "\\begin{document}" << std::endl;
+//  vector<string> dirs;
+//  dirs.push_back("crrl1L");
+//  dirs.push_back("crrl4L");
+//  dirs.push_back("crrl7L");
+//  printTable(samples, names, dirs);
+//  dirs.clear();
+//  dirs.push_back("crrl1M");
+//  dirs.push_back("crrl4M");
+//  dirs.push_back("crrl7M");
+//  printTable(samples, names, dirs);
+//  dirs.clear();
+//  dirs.push_back("crrl1H");
+//  dirs.push_back("crrl4H");
+//  dirs.push_back("crrl7H");
+//  printTable(samples, names, dirs);
+//  dirs.clear();
+//  dirs.push_back("crrl1UH");
+//  dirs.push_back("crrl4UH");
+//  dirs.push_back("crrl7UH");
+//  printTable(samples, names, dirs);
+//  dirs.clear();
+//  dirs.push_back("crrlbase");
+//  for(unsigned int i=0; i<dirs.size(); i++){
+//    printDetailedTable(samples, names, dirs.at(i));
+//    if(i % 2 != 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
+//  }
+//  std::cout << "\\end{document}" << std::endl;
+
   
 }
 

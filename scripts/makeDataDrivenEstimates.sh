@@ -1,7 +1,7 @@
 #!/bin/bash
 
 INDIR=/home/users/olivito/mt2_74x_dev/MT2Analysis/MT2looper/output/V00-01-05_25ns_json_246908-256869_kfactors_skim_150pb_mt2gt200/
-#INDIR=/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-05_25ns_json_246908-256869_skim/
+#INDIR=/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-05_25ns_json_246908-256869_skimV3_3fb/
 THISDIR=`pwd`
 
 ## to use data for lostlepton
@@ -13,7 +13,7 @@ GJETFILE=data_Run2015D
 #GJETFILE=qcdplusgjet
 
 RLFILE=data_Run2015D
-#RLFILE=qcdplusgjet
+#RLFILE=removedlep
 
 if [ ! -d "$INDIR" ]; then
   echo "Input directory does not exist" 
@@ -41,17 +41,21 @@ root -b -q "lostlepMaker.C+(\"${INDIR}\",\"${LOSTLEPFILE}\")" > dataDrivenEstima
 echo "root -b -q ZinvMaker.C+(${INDIR})"
 root -b -q "ZinvMaker.C+(\"${INDIR}\")" >> dataDrivenEstimates.log
 cd $INDIR
-rm qcdplusgjet.root
 echo "hadd qcdplusgjet.root gjet_ht.root qcd_ht.root"
 hadd -f qcdplusgjet.root gjet_ht.root qcd_ht.root  >> $THISDIR/dataDrivenEstimates.log
-rm CRRLbkg.root
 echo "hadd CRRLbkg.root ttsl_mg_lo.root ttdl_mg_lo.root singletop_powheg.root" # should probably include QCD here
 hadd -f CRRLbkg.root ttsl_mg_lo.root ttdl_mg_lo.root singletop_powheg.root  >> $THISDIR/dataDrivenEstimates.log
 hadd -f removedlep.root wjets_ht.root CRRLbkg.root >> $THISDIR/dataDrivenEstimates.log
 cd $THISDIR
+echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/qcdplusgjet.root,2)"
+root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/qcdplusgjet.root\",2)" >> dataDrivenEstimates.log
+echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/CRRLbkg.root,3)"
+root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/CRRLbkg.root\",3)" >> dataDrivenEstimates.log
+echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/removedlep.root,2)"
+root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/removedlep.root\",2)" >> dataDrivenEstimates.log
 echo "root -b -q purity.C+(${INDIR})"
 root -b -q "purity.C+(\"${INDIR}\",\"${GJETFILE}\")" >> dataDrivenEstimates.log
-echo "root -b -q purityRL.C+(${INDIR})"
+echo "root -b -q purityRL.C+(${INDIR}, ${RLFILE})"
 root -b -q "purityRL.C+(\"${INDIR}\",\"${RLFILE}\")" >> dataDrivenEstimates.log
 echo "done"
 
