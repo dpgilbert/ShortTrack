@@ -50,13 +50,13 @@ using namespace tas;
 // turn on to add debugging statements (default false)
 const bool verbose = false;
 // turn on to apply JEC from text files (default true)
-const bool applyJECfromFile = true;
+const bool applyJECfromFile = false;
 // change to do JEC uncertainty variations. 0 = DEFAULT, 1 = UP, -1 = DN
 const int applyJECunc = 0;
 // turn on to apply btag SFs (default true)
 const bool applyBtagSFs = true;
 // turn on to recompute type1 MET using JECs from file (default true)
-const bool recomputeT1MET = true;
+const bool recomputeT1MET = false;
 // turn on to save prunedGenParticle collection (default false)
 const bool saveGenParticles = false;
 // turn on to apply trigger cuts to ntuples -> OR of all triggers used (default false)
