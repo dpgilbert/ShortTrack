@@ -1304,7 +1304,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   plot1D("h_mt2bins"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
 
   TString directoryname(dirname);
-  if (directoryname.Contains("nocut")) {
+  if (directoryname.Contains("nocut") && !t.isData) {
     
     float genHT = 0;
     int lep1idx = -1;
