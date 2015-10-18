@@ -949,14 +949,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         // TLorentzVector l1(0,0,0,0);
         // l0.SetPtEtaPhiM(lep_pt[0], lep_eta[0], lep_phi[0], lep_mass[0]);
         // TLorentzVector ll = l0;
-        // rl_mass = ll.M();
-        // rl_pt = ll.Pt();
-        // rl_eta = ll.Eta();
-        // rl_phi = ll.Phi();
-        rl_mass = 0;
-        rl_pt = 0;
-        rl_eta = 0;
-        rl_phi = 0;
+        rl_mass = lep_mass[0];
+        rl_pt  = lep_pt[0];
+        rl_eta = lep_eta[0];
+        rl_phi = lep_phi[0];
       }
 
       if (verbose) cout << "before isotracks" << endl;
