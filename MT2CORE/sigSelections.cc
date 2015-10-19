@@ -1338,10 +1338,14 @@ std::vector<SR> getSignalRegionsMonojet(){
   baseSR.SetVar("nlep", 0, 1);
   baseSR.SetVar("njets", 1, 2);
   baseSR.SetVar("met", 200, -1);
+  baseSR.SetVar("deltaPhiMin", 0.3, -1);
+  baseSR.SetVar("diffMetMhtOverMet", 0, 0.5);
   baseSR.SetVarCRSL("j1pt", 200, -1);
   baseSR.SetVarCRSL("nlep", 1, 2);
   baseSR.SetVarCRSL("njets", 1, 2);
   baseSR.SetVarCRSL("met", 200, -1);
+  baseSR.SetVarCRSL("deltaPhiMin", 0.3, -1);
+  baseSR.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
   baseSR.SetMT2Bins(1, mt2bins_monojet);
 
   // fine binning in HT
@@ -1365,9 +1369,9 @@ std::vector<SR> getSignalRegionsMonojet(){
       float ht_max = htbins[iSR+1];
       if (iSR == nbins_monojet-2) ht_max = htbins[nbins_monojet];
       fullSR1b.SetVar("ht", htbins[iSR], ht_max);
-      fullSR1b.SetVar("nbjets", 0, 1);
+      fullSR1b.SetVar("nbjets", 1, -1);
       fullSR1b.SetVarCRSL("ht", htbins[iSR], ht_max);
-      fullSR1b.SetVarCRSL("nbjets", 0, 1);
+      fullSR1b.SetVarCRSL("nbjets", 1, -1);
       SRVec.push_back(fullSR1b);
     }
   }

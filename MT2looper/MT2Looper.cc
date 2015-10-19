@@ -337,10 +337,14 @@ void MT2Looper::SetSignalRegions(){
   SRBaseMonojet.SetVar("njets", 1, 2);
   SRBaseMonojet.SetVar("nlep", 0, 1);
   SRBaseMonojet.SetVar("met", 200, -1);
+  SRBaseMonojet.SetVar("deltaPhiMin", 0.3, -1);
+  SRBaseMonojet.SetVar("diffMetMhtOverMet", 0, 0.5);
   SRBaseMonojet.SetVarCRSL("j1pt", 200, -1);
   SRBaseMonojet.SetVarCRSL("njets", 1, 2);
   SRBaseMonojet.SetVarCRSL("nlep", 1, 2);
   SRBaseMonojet.SetVarCRSL("met", 200, -1);
+  SRBaseMonojet.SetVarCRSL("deltaPhiMin", 0.3, -1);
+  SRBaseMonojet.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
   float SRBaseMonojet_mt2bins[2] = {0, 1500}; 
   SRBaseMonojet.SetMT2Bins(1, SRBaseMonojet_mt2bins);
 
@@ -893,6 +897,8 @@ void MT2Looper::fillHistosSRBase() {
   // do monojet SRs -- NEED TO ADD JETID CUT SOMEHOW
   if (!t.isData || t.HLT_PFMETNoMu90_PFMHTNoMu90) {
     std::map<std::string, float> values_monojet;
+    values_monojet["deltaPhiMin"] = t.deltaPhiMin;
+    values_monojet["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
     values_monojet["nlep"]        = nlepveto_;
     values_monojet["j1pt"]        = t.jet1_pt;
     values_monojet["njets"]       = t.nJet30;
@@ -964,6 +970,8 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
   // do monojet SRs -- NEED TO ADD JETID CUT SOMEHOW
   if (!t.isData || t.HLT_PFMETNoMu90_PFMHTNoMu90) {
     std::map<std::string, float> values_monojet;
+    values_monojet["deltaPhiMin"] = t.deltaPhiMin;
+    values_monojet["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
     values_monojet["nlep"]        = nlepveto_;
     values_monojet["j1pt"]        = t.jet1_pt;
     values_monojet["njets"]       = t.nJet30;
@@ -1052,6 +1060,8 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
 
     // first fill base region
     std::map<std::string, float> valuesBase_monojet;
+    valuesBase_monojet["deltaPhiMin"] = t.deltaPhiMin;
+    valuesBase_monojet["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
     valuesBase_monojet["nlep"]        = t.nLepLowMT;
     valuesBase_monojet["j1pt"]        = t.jet1_pt;
     valuesBase_monojet["njets"]       = t.nJet30;
@@ -1065,6 +1075,8 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
 
     
     std::map<std::string, float> values_monojet;
+    values_monojet["deltaPhiMin"] = t.deltaPhiMin;
+    values_monojet["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
     values_monojet["nlep"]        = t.nLepLowMT;
     values_monojet["j1pt"]        = t.jet1_pt;
     values_monojet["njets"]       = t.nJet30;
