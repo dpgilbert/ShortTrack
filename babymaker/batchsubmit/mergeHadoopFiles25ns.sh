@@ -5,7 +5,7 @@ function run () {
     nohup nice -n 19 root -b -q mergeHadoopFiles.C\(\"${HADOOPDIR}/${TAG}_$1/\",\"${OUTPUTDIR}/$1.root\"\) >& log_merge_${TAG}_$1.txt &
 }
 
-TAG=V00-01-05_25ns
+TAG=V00-01-06_25ns
 
 HADOOPDIR=/hadoop/cms/store/user/${USER}/mt2babies/
 OUTPUTDIR=/nfs-6/userdata/mt2/$TAG/
@@ -17,15 +17,25 @@ chmod -R a+wrx $OUTPUTDIR
 # DATA
 #
 
-run data_Run2015C_JetHT_PromptReco
-run data_Run2015C_MET_PromptReco
-run data_Run2015C_HTMHT_PromptReco
-run data_Run2015C_SingleMuon_PromptReco
-run data_Run2015C_SingleElectron_PromptReco
-run data_Run2015C_SinglePhoton_PromptReco
-run data_Run2015C_DoubleMuon_PromptReco
-run data_Run2015C_DoubleEG_PromptReco
-run data_Run2015C_MuonEG_PromptReco
+# run data_Run2015C_JetHT_PromptReco
+# run data_Run2015C_MET_PromptReco
+# run data_Run2015C_HTMHT_PromptReco
+# run data_Run2015C_SingleMuon_PromptReco
+# run data_Run2015C_SingleElectron_PromptReco
+# run data_Run2015C_SinglePhoton_PromptReco
+# run data_Run2015C_DoubleMuon_PromptReco
+# run data_Run2015C_DoubleEG_PromptReco
+# run data_Run2015C_MuonEG_PromptReco
+
+run data_Run2015D_JetHT_05Oct2015
+run data_Run2015D_MET_05Oct2015
+run data_Run2015D_HTMHT_05Oct2015
+run data_Run2015D_SingleMuon_05Oct2015
+run data_Run2015D_SingleElectron_05Oct2015
+run data_Run2015D_SinglePhoton_05Oct2015
+run data_Run2015D_DoubleMuon_05Oct2015
+run data_Run2015D_DoubleEG_05Oct2015
+run data_Run2015D_MuonEG_05Oct2015
 
 run data_Run2015D_JetHT_PromptReco
 run data_Run2015D_MET_PromptReco

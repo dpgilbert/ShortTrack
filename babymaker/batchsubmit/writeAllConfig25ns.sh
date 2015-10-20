@@ -4,31 +4,41 @@
 # All MT2 related datasets available on hadoop
 #
 
-TAG="V00-01-05_25ns"
+TAG="V00-01-06_25ns"
 
 #
 # DATA
 #
 
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_JetHT_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_JetHT_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_MET_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_MET_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_HTMHT_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_HTMHT_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_SingleMuon_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_SingleMuon_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_DoubleMuon_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_DoubleMuon_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_DoubleEG_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_DoubleEG_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_MuonEG_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_MuonEG_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_SingleElectron_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_SingleElectron_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_SinglePhoton_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_SinglePhoton_PromptReco
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_JetHT_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_JetHT_PromptReco
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_MET_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_MET_PromptReco
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_HTMHT_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_HTMHT_PromptReco
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_SingleMuon_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_SingleMuon_PromptReco
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_DoubleMuon_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_DoubleMuon_PromptReco
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_DoubleEG_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_DoubleEG_PromptReco
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_MuonEG_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_MuonEG_PromptReco
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_SingleElectron_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_SingleElectron_PromptReco
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015C_SinglePhoton_MINIAOD_PromptReco-v1/merged/V07-04-08/ ${TAG}_data_Run2015C_SinglePhoton_PromptReco
 
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_JetHT_MINIAOD_PromptReco-v3/merged/V07-04-09/ ${TAG}_data_Run2015D_JetHT_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_MET_MINIAOD_PromptReco-v3/merged/V07-04-09/ ${TAG}_data_Run2015D_MET_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_HTMHT_MINIAOD_PromptReco-v3/merged/V07-04-09/ ${TAG}_data_Run2015D_HTMHT_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_SingleMuon_MINIAOD_PromptReco-v3/merged/V07-04-09/ ${TAG}_data_Run2015D_SingleMuon_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_DoubleMuon_MINIAOD_PromptReco-v3/merged/V07-04-09/ ${TAG}_data_Run2015D_DoubleMuon_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_DoubleEG_MINIAOD_PromptReco-v3/merged/V07-04-09/ ${TAG}_data_Run2015D_DoubleEG_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_MuonEG_MINIAOD_PromptReco-v3/merged/V07-04-09/ ${TAG}_data_Run2015D_MuonEG_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_SingleElectron_MINIAOD_PromptReco-v3/merged/V07-04-09/ ${TAG}_data_Run2015D_SingleElectron_PromptReco
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_SinglePhoton_MINIAOD_PromptReco-v3/merged/V07-04-09/ ${TAG}_data_Run2015D_SinglePhoton_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_JetHT_MINIAOD_05Oct2015-v1/merged/V07-04-11/ ${TAG}_data_Run2015D_JetHT_05Oct2015
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_MET_MINIAOD_05Oct2015-v1/merged/V07-04-11/ ${TAG}_data_Run2015D_MET_05Oct2015
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_HTMHT_MINIAOD_05Oct2015-v1/merged/V07-04-11/ ${TAG}_data_Run2015D_HTMHT_05Oct2015
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_SingleMuon_MINIAOD_05Oct2015-v1/merged/V07-04-11/ ${TAG}_data_Run2015D_SingleMuon_05Oct2015
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_DoubleMuon_MINIAOD_05Oct2015-v1/merged/V07-04-11/ ${TAG}_data_Run2015D_DoubleMuon_05Oct2015
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_DoubleEG_MINIAOD_05Oct2015-v1/merged/V07-04-11/ ${TAG}_data_Run2015D_DoubleEG_05Oct2015
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_MuonEG_MINIAOD_05Oct2015-v1/merged/V07-04-11/ ${TAG}_data_Run2015D_MuonEG_05Oct2015
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_SingleElectron_MINIAOD_05Oct2015-v1/merged/V07-04-11/ ${TAG}_data_Run2015D_SingleElectron_05Oct2015
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_SinglePhoton_MINIAOD_05Oct2015-v1/merged/V07-04-11/ ${TAG}_data_Run2015D_SinglePhoton_05Oct2015
+
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_JetHT_MINIAOD_PromptReco-v4/merged/V07-04-11/ ${TAG}_data_Run2015D_JetHT_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_MET_MINIAOD_PromptReco-v4/merged/V07-04-11/ ${TAG}_data_Run2015D_MET_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_HTMHT_MINIAOD_PromptReco-v4/merged/V07-04-11/ ${TAG}_data_Run2015D_HTMHT_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_SingleMuon_MINIAOD_PromptReco-v4/merged/V07-04-11/ ${TAG}_data_Run2015D_SingleMuon_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_DoubleMuon_MINIAOD_PromptReco-v4/merged/V07-04-11/ ${TAG}_data_Run2015D_DoubleMuon_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_DoubleEG_MINIAOD_PromptReco-v4/merged/V07-04-11/ ${TAG}_data_Run2015D_DoubleEG_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_MuonEG_MINIAOD_PromptReco-v4/merged/V07-04-11/ ${TAG}_data_Run2015D_MuonEG_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_SingleElectron_MINIAOD_PromptReco-v4/merged/V07-04-11/ ${TAG}_data_Run2015D_SingleElectron_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2015D_SinglePhoton_MINIAOD_PromptReco-v4/merged/V07-04-11/ ${TAG}_data_Run2015D_SinglePhoton_PromptReco
 
 #
 # TTBAR
