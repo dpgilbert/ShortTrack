@@ -746,8 +746,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         if(cms3.els_p4().at(iEl).pt() < 10.0) continue;
         if(fabs(cms3.els_p4().at(iEl).eta()) > 2.4) continue;
         // first check ID then iso
-        if(!electronID(iEl,id_level_t::HAD_veto_noiso_v4)) continue;
-        bool pass_iso = electronID(iEl,id_level_t::HAD_veto_v4);
+        if(!electronID(iEl,id_level_t::HAD_veto_noiso_v3)) continue;
+        bool pass_iso = electronID(iEl,id_level_t::HAD_veto_v3);
         if(applyLeptonIso && !pass_iso) continue;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.els_p4().at(iEl).pt()) );
         vec_lep_pt.push_back ( cms3.els_p4().at(iEl).pt());
@@ -758,11 +758,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         vec_lep_pdgId.push_back ( (-11)*cms3.els_charge().at(iEl));
         vec_lep_dxy.push_back ( cms3.els_dxyPV().at(iEl));
         vec_lep_dz.push_back ( cms3.els_dzPV().at(iEl));
-        vec_lep_tightId.push_back ( eleTightID(iEl,analysis_t::HAD,4) );
+        vec_lep_tightId.push_back ( eleTightID(iEl,analysis_t::HAD,3) );
         vec_lep_heepId.push_back ( isHEEPV60(iEl) );
         vec_lep_relIso03.push_back (  eleRelIso03(iEl,analysis_t::HAD));
         vec_lep_relIso04.push_back ( 0);
-        vec_lep_miniRelIso.push_back ( elMiniRelIsoCMS3_EA(iEl,1) );
+        vec_lep_miniRelIso.push_back ( elMiniRelIsoCMS3_EA(iEl,0) );
         vec_lep_relIsoAn04.push_back ( elRelIsoAn04(iEl) );
         if (!isData && cms3.els_mc3dr().at(iEl) < 0.2 && cms3.els_mc3idx().at(iEl) != -9999 && abs(cms3.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.els_mc3idx().at(iEl)]);
@@ -805,8 +805,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         if(cms3.mus_p4().at(iMu).pt() < 10.0) continue;
         if(fabs(cms3.mus_p4().at(iMu).eta()) > 2.4) continue;
         // first check ID then iso
-        if(!muonID(iMu,id_level_t::HAD_loose_noiso_v4)) continue;
-        bool pass_iso = muonID(iMu,id_level_t::HAD_loose_v4);
+        if(!muonID(iMu,id_level_t::HAD_loose_noiso_v3)) continue;
+        bool pass_iso = muonID(iMu,id_level_t::HAD_loose_v3);
         if (applyLeptonIso && !pass_iso) continue;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.mus_p4().at(iMu).pt()) );
         vec_lep_pt.push_back ( cms3.mus_p4().at(iMu).pt());
@@ -817,11 +817,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         vec_lep_pdgId.push_back ( (-13)*cms3.mus_charge().at(iMu));
         vec_lep_dxy.push_back ( cms3.mus_dxyPV().at(iMu)); // this uses the silicon track. should we use best track instead?
         vec_lep_dz.push_back ( cms3.mus_dzPV().at(iMu)); // this uses the silicon track. should we use best track instead?
-        vec_lep_tightId.push_back ( muTightID(iMu,analysis_t::HAD,4) );
+        vec_lep_tightId.push_back ( muTightID(iMu,analysis_t::HAD,3) );
         vec_lep_heepId.push_back ( 0 );
         vec_lep_relIso03.push_back ( muRelIso03(iMu,analysis_t::HAD) );
         vec_lep_relIso04.push_back ( muRelIso04(iMu,analysis_t::HAD) );
-        vec_lep_miniRelIso.push_back ( muMiniRelIsoCMS3_EA(iMu,1) );
+        vec_lep_miniRelIso.push_back ( muMiniRelIsoCMS3_EA(iMu,0) );
         vec_lep_relIsoAn04.push_back ( muRelIsoAn04(iMu) );
         if (!isData && cms3.mus_mc3dr().at(iMu) < 0.2 && cms3.mus_mc3idx().at(iMu) != -9999 && abs(cms3.mus_mc3_id().at(iMu)) == 13) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.mus_mc3idx().at(iMu)]);
@@ -1087,7 +1087,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       for(unsigned int iGamma = 0; iGamma < cms3.photons_p4().size(); iGamma++){
         if(cms3.photons_p4().at(iGamma).pt() < 20.0) continue;
         if(fabs(cms3.photons_p4().at(iGamma).eta()) > 2.5) continue;
-        if ( !isLoosePhoton(iGamma,analysis_t::HAD,3) ) continue;
+        if ( !isLoosePhoton(iGamma,analysis_t::HAD,2) ) continue;
 
         if (ngamma >= max_ngamma) {
           std::cout << "WARNING: attempted to fill more than " << max_ngamma << " photons" << std::endl;
