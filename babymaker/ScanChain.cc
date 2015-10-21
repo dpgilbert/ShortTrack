@@ -137,7 +137,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     reader_light_DN = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "down");  // sys down
 
     // get btag efficiencies
-    TFile* f_btag_eff = new TFile("btagsf/btageff_ttbar_25ns.root");
+    TFile* f_btag_eff = new TFile("btagsf/btageff__ttbar_powheg_pythia8_25ns.root");
     TH2D* h_btag_eff_b_temp = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_b");
     TH2D* h_btag_eff_c_temp = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_c");
     TH2D* h_btag_eff_udsg_temp = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_udsg");
@@ -2566,8 +2566,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       return 1.;
     }
 
-    // only use pt bins up to 300 GeV for charm and udsg
-    float pt_cutoff = std::max(20.,std::min(299.,double(pt)));
+    // only use pt bins up to 400 GeV for charm and udsg
+    float pt_cutoff = std::max(20.,std::min(399.,double(pt)));
     TH2D* h(0);
     if (abs(mcFlavour) == 5) {
       h = h_btag_eff_b;
