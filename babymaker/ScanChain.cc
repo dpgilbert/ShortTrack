@@ -1399,8 +1399,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         }
 
         // only save jets with pt 20 eta 4.7
-        //if( (p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {
-        if( (p4sCorrJets.at(iJet).pt() > 10.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {//for RS
+        if( (p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {
+        //if( (p4sCorrJets.at(iJet).pt() > 10.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {//for RS
 
           // first check jet ID - count the number of jets that fail
           if(!isLoosePFJet_50nsV1(iJet)) {
