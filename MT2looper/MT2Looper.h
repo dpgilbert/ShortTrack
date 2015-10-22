@@ -68,6 +68,7 @@ class MT2Looper {
   float mt_;
   int nJet30Eta3_;
   bool isSignal_;
+  bool passMonojetId_;
   std::map<std::string, TH1*> h_1d_global;
   std::vector<SR> SRVec;
   std::vector<SR> SRVecMonojet;

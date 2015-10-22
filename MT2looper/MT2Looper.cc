@@ -82,6 +82,8 @@ bool doHFJetVeto = false;
 bool doScanWeights = false;
 // doesn't plot data for MT2 > 200 in signal regions
 bool doBlindData = true;
+// make variation histograms for tau efficiency
+bool doGenTauVars = false;
 
 MT2Looper::MT2Looper(){
 
@@ -561,6 +563,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //      const float lumi = 0.042;
       //      const float lumi = 0.209;
       //      const float lumi = 0.579;
+      //      const float lumi = 1.264;
       evtweight_ = 1.;
 
       // apply relevant weights to MC
@@ -606,6 +609,18 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // veto on forward jets
       if (doHFJetVeto && nJet30Eta3_ > 0) continue;
 
+      // check jet id for monojet
+      passMonojetId_ = false;
+      if (t.nJet30 == 1) {
+	// loop to find central monojet
+	for (int ijet = 0; ijet < t.njet; ++ijet) {
+	  if (fabs(t.jet_eta[ijet]) > 2.5) continue;
+	  if (t.jet_pt[ijet] < 200.) continue;
+	  if (t.jet_id[ijet] >= 4) passMonojetId_ = true;
+	  break;
+	}
+      }
+      
       // simple counter to check for 1L CR
       if (t.nLepLowMT == 1) {
 	doSLplots = true;
@@ -930,8 +945,8 @@ void MT2Looper::fillHistosSRBase() {
 
   if(SRBase.PassesSelection(values)) fillHistos(SRBase.srHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), SRBase.GetName(), "");
 
-  // do monojet SRs -- NEED TO ADD JETID CUT SOMEHOW
-  if (!t.isData || t.HLT_PFMETNoMu90_PFMHTNoMu90) {
+  // do monojet SRs
+  if (passMonojetId_ && (!t.isData || t.HLT_PFMETNoMu90_PFMHTNoMu90)) {
     std::map<std::string, float> values_monojet;
     values_monojet["deltaPhiMin"] = t.deltaPhiMin;
     values_monojet["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
@@ -1003,8 +1018,8 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
     }
   }
 
-  // do monojet SRs -- NEED TO ADD JETID CUT SOMEHOW
-  if (!t.isData || t.HLT_PFMETNoMu90_PFMHTNoMu90) {
+  // do monojet SRs
+  if (passMonojetId_ && (!t.isData || t.HLT_PFMETNoMu90_PFMHTNoMu90)) {
     std::map<std::string, float> values_monojet;
     values_monojet["deltaPhiMin"] = t.deltaPhiMin;
     values_monojet["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
@@ -1091,8 +1106,8 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
     }
   }
 
-  // do monojet SRs -- NEED TO ADD JETID CUT SOMEHOW
-  if (!t.isData || t.HLT_PFMETNoMu90_PFMHTNoMu90) {
+  // do monojet SRs
+  if (passMonojetId_ && (!t.isData || t.HLT_PFMETNoMu90_PFMHTNoMu90)) {
 
     // first fill base region
     std::map<std::string, float> valuesBase_monojet;
@@ -1473,6 +1488,25 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_mt2bins_scales_DN"+s,       mt2_temp,   evtweight_ * t.weight_scales_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_pdfs_UP"+s,       mt2_temp,   evtweight_  * t.weight_pdfs_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_pdfs_DN"+s,       mt2_temp,   evtweight_  * t.weight_pdfs_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+
+  if (!t.isData && doGenTauVars) {
+    float unc_tau1p = 0.;
+    float unc_tau3p = 0.;
+    if (t.ngenTau1Prong > 0 || t.ngenTau3Prong > 0) {
+      // loop on gen taus
+      for (int itau = 0; itau < t.ngenTau; ++itau) {
+	// check acceptance for veto: pt > 10
+	if (t.genTau_leadTrackPt[itau] < 10.) continue;
+	if (t.genTau_decayMode[itau] == 1) unc_tau1p += 0.14; // 14% relative uncertainty for missing a 1-prong tau
+	else if (t.genTau_decayMode[itau] == 3) unc_tau3p += 0.06; // 6% relative uncertainty for missing a 3-prong tau
+      }
+    }
+    
+    plot1D("h_mt2bins_tau1p_UP"+s,       mt2_temp,   evtweight_ * (1. + unc_tau1p), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_tau1p_DN"+s,       mt2_temp,   evtweight_ * (1. - unc_tau1p), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_tau3p_UP"+s,       mt2_temp,   evtweight_ * (1. + unc_tau3p), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_tau3p_DN"+s,       mt2_temp,   evtweight_ * (1. - unc_tau3p), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   }
 
   outfile_->cd();
