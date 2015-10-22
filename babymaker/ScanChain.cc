@@ -296,9 +296,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
       HLT_Photon120 = passHLTTriggerPattern("HLT_Photon120_v"); 
       HLT_Photon165_HE10 = passHLTTriggerPattern("HLT_Photon165_HE10_v"); 
-      HLT_PFHT350_Prescale  = passHLTTriggerPattern("HLT_PFHT350_v"); 
-      HLT_PFHT475_Prescale  = passHLTTriggerPattern("HLT_PFHT475_v"); 
-      HLT_PFHT600_Prescale  = passHLTTriggerPattern("HLT_PFHT600_v"); 
+      HLT_PFHT200_Prescale  = passHLTTriggerPattern("HLT_PFHT200_v") ? HLT_prescale(triggerName("HLT_PFHT200_v")) : 0; 
+      HLT_PFHT300_Prescale  = passHLTTriggerPattern("HLT_PFHT300_v") ? HLT_prescale(triggerName("HLT_PFHT300_v")) : 0; 
+      HLT_PFHT350_Prescale  = passHLTTriggerPattern("HLT_PFHT350_v") ? HLT_prescale(triggerName("HLT_PFHT350_v")) : 0; 
+      HLT_PFHT475_Prescale  = passHLTTriggerPattern("HLT_PFHT475_v") ? HLT_prescale(triggerName("HLT_PFHT475_v")) : 0; 
+      HLT_PFHT600_Prescale  = passHLTTriggerPattern("HLT_PFHT600_v") ? HLT_prescale(triggerName("HLT_PFHT600_v")) : 0; 
       HLT_DiCentralPFJet70_PFMET120  = passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_JetIdCleaned_v"); 
       HLT_DiCentralPFJet55_PFMET110  = passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_JetIdCleaned_v"); 
 
@@ -1397,7 +1399,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         }
 
         // only save jets with pt 20 eta 4.7
-        if( (p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {
+        //if( (p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {
+        if( (p4sCorrJets.at(iJet).pt() > 10.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {//for RS
 
           // first check jet ID - count the number of jets that fail
           if(!isLoosePFJet_50nsV1(iJet)) {
@@ -1993,6 +1996,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("HLT_DoubleMu", &HLT_DoubleMu );
     BabyTree_->Branch("HLT_Photon120", &HLT_Photon120 );
     BabyTree_->Branch("HLT_Photon165_HE10", &HLT_Photon165_HE10 );
+    BabyTree_->Branch("HLT_PFHT200_Prescale", &HLT_PFHT200_Prescale );
+    BabyTree_->Branch("HLT_PFHT300_Prescale", &HLT_PFHT300_Prescale );
     BabyTree_->Branch("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale );
     BabyTree_->Branch("HLT_PFHT475_Prescale", &HLT_PFHT475_Prescale );
     BabyTree_->Branch("HLT_PFHT600_Prescale", &HLT_PFHT600_Prescale );
@@ -2302,6 +2307,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     HLT_DoubleMu = -999;   
     HLT_Photon120 = -999;   
     HLT_Photon165_HE10 = -999;   
+    HLT_PFHT200_Prescale = -999;
+    HLT_PFHT300_Prescale = -999;
     HLT_PFHT350_Prescale = -999;
     HLT_PFHT475_Prescale = -999;
     HLT_PFHT600_Prescale = -999;

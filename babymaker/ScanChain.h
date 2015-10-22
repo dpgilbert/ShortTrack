@@ -168,6 +168,8 @@ class babyMaker {
   Int_t           HLT_DoubleMu;   
   Int_t           HLT_Photon120;   
   Int_t           HLT_Photon165_HE10;   
+  Int_t           HLT_PFHT200_Prescale;   
+  Int_t           HLT_PFHT300_Prescale;   
   Int_t           HLT_PFHT350_Prescale;   
   Int_t           HLT_PFHT475_Prescale;   
   Int_t           HLT_PFHT600_Prescale;   
