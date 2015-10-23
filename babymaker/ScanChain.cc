@@ -1465,15 +1465,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 		if (abs(jet_mcFlavour[njet]) == 5) flavor = BTagEntry::FLAV_B;
 		else if (abs(jet_mcFlavour[njet]) == 4) flavor = BTagEntry::FLAV_C;
 		float pt_cutoff = std::max(30.,std::min(669.,double(jet_pt[njet])));
+		float eta_cutoff = std::min(2.39,fabs(double(jet_eta[njet])));
 		float weight_cent(1.), weight_UP(1.), weight_DN(1.);
 		if (flavor == BTagEntry::FLAV_UDSG) {
-		  weight_cent = reader_light->eval(flavor, jet_eta[njet], pt_cutoff);
-		  weight_UP = reader_light_UP->eval(flavor, jet_eta[njet], pt_cutoff);
-		  weight_DN = reader_light_DN->eval(flavor, jet_eta[njet], pt_cutoff);
+		  weight_cent = reader_light->eval(flavor, eta_cutoff, pt_cutoff);
+		  weight_UP = reader_light_UP->eval(flavor, eta_cutoff, pt_cutoff);
+		  weight_DN = reader_light_DN->eval(flavor, eta_cutoff, pt_cutoff);
 		} else {
-		  weight_cent = reader_heavy->eval(flavor, jet_eta[njet], pt_cutoff);
-		  weight_UP = reader_heavy_UP->eval(flavor, jet_eta[njet], pt_cutoff);
-		  weight_DN = reader_heavy_DN->eval(flavor, jet_eta[njet], pt_cutoff);
+		  weight_cent = reader_heavy->eval(flavor, eta_cutoff, pt_cutoff);
+		  weight_UP = reader_heavy_UP->eval(flavor, eta_cutoff, pt_cutoff);
+		  weight_DN = reader_heavy_DN->eval(flavor, eta_cutoff, pt_cutoff);
 		}
                 btagprob_data *= weight_cent * eff;
                 btagprob_mc *= eff;
@@ -1509,15 +1510,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	      if (abs(jet_mcFlavour[njet]) == 5) flavor = BTagEntry::FLAV_B;
 	      else if (abs(jet_mcFlavour[njet]) == 4) flavor = BTagEntry::FLAV_C;
 	      float pt_cutoff = std::max(30.,std::min(669.,double(jet_pt[njet])));
+	      float eta_cutoff = std::min(2.39,fabs(double(jet_eta[njet])));
 	      float weight_cent(1.), weight_UP(1.), weight_DN(1.);
 	      if (flavor == BTagEntry::FLAV_UDSG) {
-		weight_cent = reader_light->eval(flavor, jet_eta[njet], pt_cutoff);
-		weight_UP = reader_light_UP->eval(flavor, jet_eta[njet], pt_cutoff);
-		weight_DN = reader_light_DN->eval(flavor, jet_eta[njet], pt_cutoff);
+		weight_cent = reader_light->eval(flavor, eta_cutoff, pt_cutoff);
+		weight_UP = reader_light_UP->eval(flavor, eta_cutoff, pt_cutoff);
+		weight_DN = reader_light_DN->eval(flavor, eta_cutoff, pt_cutoff);
 	      } else {
-		weight_cent = reader_heavy->eval(flavor, jet_eta[njet], pt_cutoff);
-		weight_UP = reader_heavy_UP->eval(flavor, jet_eta[njet], pt_cutoff);
-		weight_DN = reader_heavy_DN->eval(flavor, jet_eta[njet], pt_cutoff);
+		weight_cent = reader_heavy->eval(flavor, eta_cutoff, pt_cutoff);
+		weight_UP = reader_heavy_UP->eval(flavor, eta_cutoff, pt_cutoff);
+		weight_DN = reader_heavy_DN->eval(flavor, eta_cutoff, pt_cutoff);
 	      }
               btagprob_data *= (1. - weight_cent * eff);
               btagprob_mc *= (1. - eff);
