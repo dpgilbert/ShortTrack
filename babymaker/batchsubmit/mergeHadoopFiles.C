@@ -1,6 +1,6 @@
 
 void mergeHadoopFiles(const TString& indir, const TString& outpath) {
-  gSystem->Load("../libMiniFWLite.so");
+  //gSystem->Load("../libMiniFWLite.so");
   TChain *chain = new TChain("mt2");
   chain->SetMaxTreeSize(5000000000LL); //default is 100000000000LL
 
