@@ -331,7 +331,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       if (!isData) {
         genWeight = cms3.genps_weight();
         puWeight = 1.;
-        nTrueInt = cms3.puInfo_trueNumInteractions().at(0);
+        nTrueInt = -1;
+	if (cms3.puInfo_trueNumInteractions().size() > 0) nTrueInt = cms3.puInfo_trueNumInteractions().at(0);
       }
 
       rho = cms3.evt_fixgridfastjet_all_rho(); //this one is used in JECs
@@ -1419,8 +1420,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           jet_mass[njet] = cms3.pfjets_mass().at(iJet);
           jet_btagCSV[njet] = cms3.pfjets_pfCombinedInclusiveSecondaryVertexV2BJetTag().at(iJet); 
           if (!isData) {
-            jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
-            jet_mcFlavour[njet] = cms3.pfjets_partonFlavour().at(iJet);
+	    jet_mcPt[njet] = -1;
+            if (cms3.pfjets_mc_p4().size() > 0) jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
+	    jet_mcFlavour[njet] = 0;
+            if (cms3.pfjets_partonFlavour().size() > 0) jet_mcFlavour[njet] = cms3.pfjets_partonFlavour().at(iJet);
           } else {
             jet_mcPt[njet] = -999.;
             jet_mcFlavour[njet] = -999;
