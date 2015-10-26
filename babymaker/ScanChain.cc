@@ -1244,8 +1244,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               << ", raw jet pt: " << pfjet_p4_uncor.pt() << ", eta: " << pfjet_p4_uncor.eta() << std::endl;
           }
 
+	  // include protections here on jet kinematics to prevent rare crashes
 	  double var = 1.;
-	  if (!isData && applyJECunc != 0) {
+	  if (!isData && applyJECunc != 0 && pfjet_p4_uncor.pt()*corr > 0. && fabs(pfjet_p4_uncor.eta()) < 5.4) {
 	    jetcorr_uncertainty->setJetEta(pfjet_p4_uncor.eta());
 	    jetcorr_uncertainty->setJetPt(pfjet_p4_uncor.pt() * corr); // must use CORRECTED pt
 	    double unc = jetcorr_uncertainty->getUncertainty(true);
