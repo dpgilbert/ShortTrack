@@ -76,6 +76,8 @@ class MT2Looper {
   std::vector<SR> InclusiveRegionsMonojet;
   SR SRBase;
   SR SRBaseMonojet;
+  SR SRBaseMonojet0B;
+  SR SRBaseMonojet1B;
   SR SRNoCut;
   SR CRSL_WJets;
   SR CRSL_TTbar;
