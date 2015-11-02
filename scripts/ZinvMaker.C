@@ -62,28 +62,42 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
   } // end of inclusive plots
 
   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+
     TString directory = "sr"+dirs.at(idir);
     TString directoryGJ = "crgj"+dirs.at(idir);
 
+    cout<<"Looking at directory "<<directory<<endl;
+
+    
     TString fullhistname = directory + "/h_mt2bins";
+    TString fullhistnameHT = directory + "/h_htbins";
+    TString fullhistnameNJ = directory + "/h_njbins";
+    TString fullhistnameNB = directory + "/h_nbjbins";
     TString fullhistnameGJ = directoryGJ + "/h_mt2bins";
-
+      
     TH1D* hGJet = (TH1D*) fGJet->Get(fullhistnameGJ);    
-    TH1D* hZinv = (TH1D*) fZinv->Get(fullhistname);    
-
+    TH1D* hZinv = (TH1D*) fZinv->Get(fullhistname);
+    TH1D* hZinvHT = (TH1D*) fZinv->Get(fullhistnameHT);
+    TH1D* hZinvNJ = (TH1D*) fZinv->Get(fullhistnameNJ);
+    TH1D* hZinvNB = (TH1D*) fZinv->Get(fullhistnameNB);
+    
     // If Zinv or GJet histograms are not filled, just leave (shouldn't happen when running on full stat MC)
-    if(!hGJet || !hZinv){
+    if(!hGJet ){
+      cout<<"could not find histogram "<<fullhistnameGJ<<endl;
+      continue;
+    }
+    if(!hZinv){
       cout<<"could not find histogram "<<fullhistname<<endl;
       continue;
     }
-    
+    cout<<"Looking at histo "<<fullhistname<<endl;      
     if (hGJet->GetNbinsX() != hZinv->GetNbinsX() ) {
       cout<<"different binning for histograms "<<fullhistname<<endl;
       continue;
     }
     //hGJet->Print("all");
     hGJet->Scale(kFactorGJetForRatio); // The goal is LO(Z) / LO(gamma)
-
+    
     // Make directory and plot(s) in the output file
     TDirectory* dir = 0;
     dir = (TDirectory*)outfile->Get(directory.Data());
@@ -91,29 +105,29 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
       dir = outfile->mkdir(directory.Data());
     } 
     dir->cd();
-
+    
     TH1D* Stat = (TH1D*) hZinv->Clone("h_mt2binsStat");
-    cout<<"Looking at histo "<<fullhistname<<endl;
+    
     for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { // "<=" to deal with overflow bin
       if (hGJet->GetBinContent(ibin) > 0)
-        Stat->SetBinError(ibin, hZinv->GetBinContent(ibin)/sqrt( hGJet->GetBinContent(ibin) ));
+	Stat->SetBinError(ibin, hZinv->GetBinContent(ibin)/sqrt( hGJet->GetBinContent(ibin) ));
       else Stat->SetBinError(ibin, hZinv->GetBinContent(ibin));
     }
     
-
+    
     // Zgamma ratio in each MT2bin -> to get MC stat error on ratio
     TH1D* ratio = (TH1D*) hZinv->Clone("h_mt2binsRatio");
     //ratio->Print("all");
     //hGJet->Print("all");
     ratio->Divide(hGJet);
     //ratio->Print("all");
-
+    
     // MCStat: use relative bin error from ratio hist, normalized to Zinv MC prediction
     TH1D* MCStat = (TH1D*) hZinv->Clone("h_mt2binsMCStat");
     for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
       MCStat->SetBinError(ibin, MCStat->GetBinContent(ibin) * ratio->GetBinError(ibin) / ratio->GetBinContent(ibin) );
     }
-
+    
     TH1D* Syst = (TH1D*) Stat->Clone("h_mt2binsSyst");
     TH1D* pred = (TH1D*) Stat->Clone("h_mt2bins");
     for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
@@ -122,9 +136,9 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
       pred->SetBinError(ibin, sqrt(quadrature));
     }
     //pred->Print("all");
-
+    
     TH1D* CRyield = (TH1D*) hGJet->Clone("h_mt2binsCRyield");
-
+    
     // Extrapolation to next bin: just a ratio of GJet_i/GJet_i-1, so that we can later obtain bin i prediction from bin i-1 yield
     // Instead of : GJet_i * R(Zinv_i/GJet_i), we will do GJet_i-1 * R(GJet_i/GJet_i-1) * R(Zinv_i/GJet_i)
     TH1D* PreviousBinRatio = (TH1D*) hGJet->Clone("h_mt2binsPreviousBinRatio");
@@ -137,7 +151,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
       PreviousBinRatio->SetBinError(ibin, 0.); // Ignore uncertainty (just MC anyway)
     }
     
-
+    
     pred->Write();
     Stat->Write();
     Syst->Write();
@@ -145,8 +159,10 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
     MCStat->Write();
     PreviousBinRatio->Write();
     ratio->Write();
+    hZinvHT->Write();
+    hZinvNJ->Write();
+    hZinvNB->Write();
   } // loop over signal regions
-
 
   return;
 }
@@ -272,7 +288,8 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
   std::string skip = "srbase";
   while ((k = (TKey *)it())) {
 //    if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
-    if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
+    if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0 
+) {//it is a signal region
       std::string sr_string = k->GetTitle();
       sr_string.erase(0, 2);//remove "sr" from front of string
       dirs.push_back(sr_string);

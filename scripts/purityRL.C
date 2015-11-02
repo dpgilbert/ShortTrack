@@ -163,7 +163,9 @@ void purityRL(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/ou
 {
   
   //load signal regions
-  vector<SR> SRVec =  getSignalRegionsZurich_jetpt30();
+  vector<SR> SRVec =  getSignalRegionsJamboree();
+  vector<SR> SRVec2 =  getSignalRegionsMonojet();
+
   //open files
   TString datanamestring(dataname);
   if (datanamestring.Contains("Data") || datanamestring.Contains("data")) doData = true;
@@ -194,7 +196,17 @@ void purityRL(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/ou
     srName =  SRVec[i].GetName();
     makePred(f_out, f_data, f_w, f_bkg, f_z, srName);
   }
+  for(int i = 0; i< (int) SRVec2.size(); i++){
+    srName =  SRVec2[i].GetName();
+    makePred(f_out, f_data, f_w, f_bkg, f_z, srName);
+  }
   makePred(f_out, f_data, f_w, f_bkg, f_z, "base");
+  makePred(f_out, f_data, f_w, f_bkg, f_z, "baseVL");
+  makePred(f_out, f_data, f_w, f_bkg, f_z, "baseL");
+  makePred(f_out, f_data, f_w, f_bkg, f_z, "baseM");
+  makePred(f_out, f_data, f_w, f_bkg, f_z, "baseH");
+  makePred(f_out, f_data, f_w, f_bkg, f_z, "baseUH");
+  makePred(f_out, f_data, f_w, f_bkg, f_z, "baseJ");
 
   cout << "Saving and closing..." << endl;
   f_out->Close();
