@@ -190,7 +190,7 @@ string getHTPlotLabel(TFile* f, std::string dir_str) {
     ht_LOW = h_ht_LOW->GetBinContent(1);
     ht_HI = h_ht_HI->GetBinContent(1);
   }
-  else return "H_{T} > 450 GeV";
+  else return "H_{T} > 200 GeV";
 
   if(ht_HI != -1) return toString(ht_LOW) + " < H_{T} < " + toString(ht_HI) + " GeV"; 
   else  return "H_{T} > " + toString(ht_LOW) + " GeV";
@@ -210,7 +210,7 @@ string getHTTableLabel(TFile* f, std::string dir_str) {
     ht_LOW = h_ht_LOW->GetBinContent(1);
     ht_HI = h_ht_HI->GetBinContent(1);
   }
-  else return "$H_{T} > 450$~GeV";
+  else return "$H_{T} > 200$~GeV";
 
   if(ht_HI != -1) return "$" + toString(ht_LOW) + " < H_{T} < " + toString(ht_HI) + "$~GeV"; 
   else  return "$H_{T} > " + toString(ht_LOW) + "$~GeV";
