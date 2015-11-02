@@ -218,8 +218,7 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString sr
   
 }
 
-//takes a FR histogram and signal region and calculates the predicted number of fakes
-//in the signal region 'sr' , adding fragScale*qcdPrompt to LooseNotTight
+//this is all we need if the FR is a single number, thus we don't have to loop over 2-dimentional FR histograms
 void makePredOneBinFR(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString srName, TH2D* h_FR, const float fragScale = 1, TString s = "", TString plotname = "htbins")
 {
   
@@ -247,9 +246,10 @@ void makePredOneBinFR(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TS
     return;
   }
   
-  //initialize prediction array
-  //  const int n_mt2bins = sr.GetNumberOfMT2Bins();
-  const int n_mt2bins = h_LooseNotTight->GetNbinsX();
+
+  int mt2bins_tmp = h_LooseNotTight->GetNbinsX();
+  if (plotname=="mt2bins") mt2bins_tmp = 1; // use this to make an integrated estimate plot
+  const int n_mt2bins = mt2bins_tmp;
   Double_t preds[n_mt2bins+2]; //first and last bin are over/underflow
   Double_t predErrors[n_mt2bins+2]; //first and last bin are over/underflow
   for(int i=0; i<n_mt2bins+2; i++){
@@ -303,7 +303,11 @@ void makePredOneBinFR(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TS
       
       Float_t nFOs      = h_sideband->GetBinContent(xbin+1);    // number of denominator not numerator objects for this bin
       if (nFOs<0) nFOs = 0;
-      Float_t nFOsError = h_sideband->GetBinError(xbin+1);      // number error on number of of denominator not numerator objects for this bin
+      Double_t nFOsError = h_sideband->GetBinError(xbin+1);      // number error on number of of denominator not numerator objects for this bin
+      
+      if (plotname=="mt2bins") {
+        nFOs = h_sideband->IntegralAndError(0, -1, nFOsError);
+      }
       
       Float_t FRvalue   = h_FR->GetBinContent(FRbin); // get value of fake rate for this bin
       Float_t FRerror   = h_FR->GetBinError(FRbin);   // get error on fake rate for this bin
@@ -311,6 +315,7 @@ void makePredOneBinFR(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TS
       //shift nFOs by fragScale*QCDPrompt in LooseNotTight. (add fragmentation to sideband, unless looking at data)
       if(h_sidebandqcdPrompt && !realDataLocal) {
         float fragYield = h_sidebandqcdPrompt->GetBinContent(xbin);
+        if (plotname=="mt2bins") fragYield = h_sidebandqcdPrompt->Integral();
         if (fragYield > 0) {
           nFOs = nFOs + fragScale*fragYield;
         }
@@ -381,9 +386,17 @@ void makePredOneBinFR(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TS
   
   TH1F* h_pred = (TH1F*) h_LooseNotTight->Clone();
   h_pred->Reset();
-  h_pred->SetName("h_pred"+plotname+s);
-  h_pred->SetContent(preds);
-  h_pred->SetError(predErrors);
+  if (plotname=="mt2bins") {
+    h_pred->SetName("h_INTpred"+plotname+s);
+    h_pred->SetBinContent(1, preds[1]);
+    h_pred->SetBinError(1,predErrors[1]);
+  }
+  else {
+    h_pred->SetName("h_pred"+plotname+s);
+    h_pred->SetContent(preds);
+    h_pred->SetError(predErrors);
+  }
+  
   h_pred->Write();
   
   return;
@@ -685,10 +698,20 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
   TH1F* h_numTrue = (TH1F*) h_gjet->Clone("h_numTrue"); h_numTrue->SetName("h_numTrue");
   TH1F* h_denTrue = (TH1F*) h_gjet->Clone("h_denTrue"); h_denTrue->SetName("h_denTrue");
   TH1F* h_purityTrue = (TH1F*) h_gjet->Clone("h_"+plotname+"purityTrue"); h_purityTrue->SetName("h_"+plotname+"purityTrue");
+  TH1F* h_purityTrueInt = new TH1F("h_"+plotname+"purityTrueInt"+FR_type,"h_"+plotname+"purityTrueInt"+FR_type, 1, 0, 1);
+  TH1F* h_numTrueInt = (TH1F*)h_purityTrueInt->Clone("h_"+plotname+"numTrueInt");
+  TH1F* h_denTrueInt = (TH1F*)h_purityTrueInt->Clone("h_"+plotname+"denTrueInt");
   if(h_qcd) h_numTrue->Add(h_qcd);
   if(h_qcd) h_denTrue->Add(h_qcd);
   if(h_qcdFake) h_denTrue->Add(h_qcdFake);
   h_purityTrue->Divide(h_numTrue,h_denTrue,1,1,"B");
+
+  double errnum, errden;
+  h_numTrueInt->SetBinContent(1, h_numTrue->IntegralAndError(0, -1, errnum) );
+  h_numTrueInt->SetBinError(1, errnum );
+  h_denTrueInt->SetBinContent(1, h_denTrue->IntegralAndError(0, -1, errden) );
+  h_denTrueInt->SetBinError(1, errden );
+  h_purityTrueInt->Divide(h_numTrueInt,h_denTrueInt,1,1,"B");
 
   
   //do FR purity: full - predFakes / full
@@ -701,12 +724,26 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
   }
   if(h_predFakes) h_numFR->Add(h_predFakes, -1.);
   h_purityFR->Divide(h_numFR,h_denFR,1,1,"B");
-  // add systematic uncertainty to purity if estimated from Sieie sideband
-  for (int ibin = 1; ibin <= h_purityFR->GetNbinsX(); ibin++) {
-    float fivepercent = 0.05*h_purityFR->GetBinContent(ibin);
-    float err = h_purityFR->GetBinError(ibin);
-    h_purityFR->SetBinError(ibin, TMath::Sqrt(err*err + fivepercent*fivepercent) );
-  }
+//  // add systematic uncertainty to purity if estimated from Sieie sideband
+//  for (int ibin = 1; ibin <= h_purityFR->GetNbinsX(); ibin++) {
+//    float fivepercent = 0.05*h_purityFR->GetBinContent(ibin);
+//    float err = h_purityFR->GetBinError(ibin);
+//    h_purityFR->SetBinError(ibin, TMath::Sqrt(err*err + fivepercent*fivepercent) );
+//  }
+  
+  TH1F* h_purityInt = new TH1F("h_"+plotname+"purityInt"+FR_type,"h_"+plotname+"purityInt"+FR_type, 1, 0, 1);
+  TH1F* h_numInt = (TH1F*)h_purityInt->Clone("h_"+plotname+"numInt"+FR_type);
+  TH1F* h_denInt = (TH1F*)h_purityInt->Clone("h_"+plotname+"denInt"+FR_type);
+  h_numInt->SetBinContent(1, h_numFR->IntegralAndError(0, -1, errnum) );
+  h_numInt->SetBinError(1, errnum );
+  h_denInt->SetBinContent(1, h_denFR->IntegralAndError(0, -1, errden) );
+  h_denInt->SetBinError(1, errden );
+  h_purityInt->Divide(h_numInt,h_denInt,1,1,"B");
+//  for (int ibin = 1; ibin <= h_purityInt->GetNbinsX(); ibin++) {
+//    float fivepercent = 0.05*h_purityInt->GetBinContent(ibin);
+//    float err = h_purityInt->GetBinError(ibin);
+//    h_purityInt->SetBinError(ibin, TMath::Sqrt(err*err + fivepercent*fivepercent) );
+//  }
   
   // estimate of photon yield = (full - predFakes)*f
   TH1F* h_estimate = (TH1F*) h_numFR->Clone("h_"+plotname+"photonestimate"); h_estimate->SetName("h_"+plotname+"photonestimate"+FR_type);
@@ -786,12 +823,14 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
   
   //write hists to output file
   h_purityFR->Write();
+  h_purityInt->Write();
   h_estimate->Write();
   h_predZ->Write();
   h_predZwithUncInt->Write();
   h_predZwithUncBin->Write();
-  if (!FR_type.Contains("Data") ) {
+  if (!FR_type.Contains("Data") && !FR_type.Contains("FailSieie") ) {
     h_purityTrue->Write();
+    h_purityTrueInt->Write();
   }
   if (FR_type.Contains("Data") ) {
     h_denFR->Write();

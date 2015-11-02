@@ -34,7 +34,7 @@ const float dummy_alpha = 1.; // dummy value for gmN when there are no SR events
 
 const bool uncorrelatedZGratio = false; // treat ZGratio uncertainty as fully uncorrelated
 
-const bool integratedZinvEstimate = false;
+const bool integratedZinvEstimate = true;
 
 const bool fourNuisancesPerBinZGratio = true;
 
@@ -72,7 +72,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString fullhistnameMCStat  = fullhistname+"MCStat";
   TString fullhistnameCRyield  = fullhistname+"CRyield";
   TString fullhistnameRatio  = fullhistname+"Ratio";
-  TString fullhistnamePurity = dir + "/h_purityFailSieieData";
+  TString fullhistnamePurity = dir + "/h_mt2binspurityFailSieieData";
+  TString fullhistnamePurityInt = dir + "/h_mt2binspurityIntFailSieieData";
 
   TString signame(signal);
   if (scanM1 >= 0 && scanM2 >= 0) {
@@ -225,18 +226,18 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
       if (h_gjetyield != 0) zinv_ratio_zg *= h_gjetyield->GetBinContent(mt2bin)/h_gjetyield->Integral(0,-1);
     }
   }
-  // Purity and uncertainty
+  // Purity and uncertainty (bin-by-bin estimate)
   TH1D* h_zinv_purity = (TH1D*) f_purity->Get(fullhistnamePurity);
   zinv_purity = 1.;
+  int mt2bin_tmp = mt2bin;
+  if (integratedZinvEstimate) {
+    // When using the integrated estimate (over MT2), should use the integrated purity.
+    h_zinv_purity = (TH1D*) f_purity->Get(fullhistnamePurityInt);
+    mt2bin_tmp = 1;
+  }
   if (h_zinv_purity != 0 && h_zinv_purity->GetBinContent(mt2bin) != 0) {
     zinv_purity *= h_zinv_purity->GetBinContent(mt2bin);
     err_zinv_purity = h_zinv_purity->GetBinError(mt2bin)/h_zinv_purity->GetBinContent(mt2bin);
-    // When using the integrated estimate (over MT2), should use the integrated purity.
-    // For the moment, just use the purity in the first bin of the distribution.
-    if (integratedZinvEstimate)  {
-      zinv_purity = 1.*h_zinv_purity->GetBinContent(1);
-      err_zinv_purity = h_zinv_purity->GetBinError(1)/h_zinv_purity->GetBinContent(1);
-    }
   }
 
   float zllgamma_nj = 1., zllgamma_nb = 1., zllgamma_ht = 1., zllgamma_mt2 = 1.;
@@ -422,7 +423,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
       ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nj.Data() ,zinv_zgamma_nj )  << endl;
       ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nb.Data() ,zinv_zgamma_nb )  << endl;
       ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_ht.Data() ,zinv_zgamma_ht )  << endl;
-      ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_mt2.Data(),zinv_zgamma_mt2)  << endl;
+      if (!integratedZinvEstimate)
+        ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_mt2.Data(),zinv_zgamma_mt2)  << endl;
     }
     else {
       ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;     
