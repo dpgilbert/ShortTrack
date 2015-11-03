@@ -22,6 +22,7 @@
 #include "../CORE/Tools/utils.h"
 #include "../CORE/Tools/goodrun.h"
 #include "../CORE/Tools/dorky/dorky.h"
+#include "../CORE/Tools/badEventFilter.h"
 
 // header
 #include "MT2Looper.h"
@@ -595,6 +596,21 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     set_goodrun_file(json_file);
   }
 
+  eventFilter metFilterTxt;
+  TString stringsample = sample;
+  if (stringsample.Contains("data")) {
+    cout<<"Loading bad event files ..."<<endl;
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_DoubleEG_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_DoubleMuon_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_HTMHT_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_JetHT_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_MET_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_SingleElectron_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_SingleMuon_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_SinglePhoton_csc2015.txt");
+    cout<<" ... finished!"<<endl;
+  }
+
   h_nvtx_weights_ = 0;
   if (doNvtxReweight) {
     TFile* f_weights = new TFile("../babymaker/data/hists_reweight_zjets_Run2015B.root");
@@ -703,6 +719,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (!t.Flag_CSCTightHaloFilter) continue;
       if (!t.Flag_eeBadScFilter) continue;
       if (!t.Flag_HBHENoiseFilter) continue;
+      // txt MET filters (data only)
+      if (t.isData && metFilterTxt.eventFails(t.run, t.lumi, t.evt)) {
+	//cout<<"Found bad event in data: "<<t.run<<", "<<t.lumi<<", "<<t.evt<<endl;
+	continue;
+      }
+
+      // Jet ID Veto
       bool passJetID = true;
       //if (t.nJet30FailId > 0) continue;
       if (t.nJet30FailId > 0) passJetID = false;
