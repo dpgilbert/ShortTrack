@@ -53,6 +53,8 @@ const bool verbose = false;
 const bool applyJECfromFile = false;
 // change to do JEC uncertainty variations. 0 = DEFAULT, 1 = UP, -1 = DN
 const int applyJECunc = 0;
+// change to do unclustered energy uncertainty MET variations. 0 = DEFAULT, 1 = UP, -1 = DN
+const int applyUnclusteredUnc = 0;
 // turn on to apply btag SFs (default true)
 const bool applyBtagSFs = true;
 // turn on to recompute type1 MET using JECs from file (default true)
@@ -353,7 +355,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       }
 
       if (applyJECfromFile && recomputeT1MET) {
-	std::pair <float, float> t1met = getT1CHSMET(jet_corrector_pfL1FastJetL2L3);
+	std::pair <float, float> t1met;
+	if (!isData) t1met = getT1CHSMET(jet_corrector_pfL1FastJetL2L3, jetcorr_uncertainty, bool(applyJECunc == 1), applyUnclusteredUnc);
+	else t1met = getT1CHSMET(jet_corrector_pfL1FastJetL2L3); // never apply variations to data
 	met_pt  = t1met.first;
 	met_phi = t1met.second;
 	met_rawPt  = cms3.evt_METToolbox_pfmet_raw();
@@ -1244,7 +1248,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               << ", raw jet pt: " << pfjet_p4_uncor.pt() << ", eta: " << pfjet_p4_uncor.eta() << std::endl;
           }
 
-	  // include protections here on jet kinematics to prevent rare crashes
+	  // include protections here on jet kinematics to prevent rare warnings/crashes
 	  double var = 1.;
 	  if (!isData && applyJECunc != 0 && pfjet_p4_uncor.pt()*corr > 0. && fabs(pfjet_p4_uncor.eta()) < 5.4) {
 	    jetcorr_uncertainty->setJetEta(pfjet_p4_uncor.eta());
