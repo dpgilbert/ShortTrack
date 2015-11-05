@@ -155,9 +155,10 @@ int main(int argc, char **argv) {
   else if (infile.Contains("Run2015B") && infile.Contains("05Aug2015"))      sample = Form("data_Run2015B_05Aug2015_%s",  outfileid.Data());
   else if (infile.Contains("Run2015B"))                                      sample = Form("data_Run2015B_%s",  outfileid.Data());
   else if (infile.Contains("Run2015C") && infile.Contains("PromptReco"))     sample = Form("data_Run2015C_PromptReco_%s",  outfileid.Data());
+  else if (infile.Contains("Run2015C") && infile.Contains("05Oct2015"))      sample = Form("data_Run2015C_05Oct2015_%s",  outfileid.Data());
   else if (infile.Contains("Run2015C"))                                      sample = Form("data_Run2015C_%s",  outfileid.Data());
   else if (infile.Contains("Run2015D") && infile.Contains("PromptReco"))     sample = Form("data_Run2015D_PromptReco_%s",  outfileid.Data());
-  else if (infile.Contains("Run2015D") && infile.Contains("05Oct2015"))     sample = Form("data_Run2015D_05Oct2015_%s",  outfileid.Data());
+  else if (infile.Contains("Run2015D") && infile.Contains("05Oct2015"))      sample = Form("data_Run2015D_05Oct2015_%s",  outfileid.Data());
   else if (infile.Contains("Run2015D"))                                      sample = Form("data_Run2015D_%s",  outfileid.Data());
   // //single mu-had
   // else if (infile.Contains("MuHad_Run2012A-recover-06Aug2012-v1_AOD"))          sample =  Form("MuHad2012A_recover06Aug2012v1V532_%s",     outfileid.Data());
