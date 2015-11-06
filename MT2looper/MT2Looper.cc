@@ -258,26 +258,31 @@ void MT2Looper::SetSignalRegions(){
   SR InclusiveHT200to450 = SRBase;
   InclusiveHT200to450.SetName("srbaseVL");
   InclusiveHT200to450.SetVar("ht", 200, 450);
+  InclusiveHT200to450.SetVarCRSL("ht", 200, 450);
   InclusiveRegions.push_back(InclusiveHT200to450);
 
   SR InclusiveHT450to575 = SRBase;
   InclusiveHT450to575.SetName("srbaseL");
   InclusiveHT450to575.SetVar("ht", 450, 575);
+  InclusiveHT450to575.SetVarCRSL("ht", 450, 575);
   InclusiveRegions.push_back(InclusiveHT450to575);
 
   SR InclusiveHT575to1000 = SRBase;
   InclusiveHT575to1000.SetName("srbaseM");
   InclusiveHT575to1000.SetVar("ht", 575, 1000);
+  InclusiveHT575to1000.SetVarCRSL("ht", 575, 1000);
   InclusiveRegions.push_back(InclusiveHT575to1000);
 
   SR InclusiveHT1000to1500 = SRBase;
   InclusiveHT1000to1500.SetName("srbaseH");
   InclusiveHT1000to1500.SetVar("ht", 1000, 1500);
+  InclusiveHT1000to1500.SetVarCRSL("ht", 1000, 1500);
   InclusiveRegions.push_back(InclusiveHT1000to1500);
 
   SR InclusiveHT1500toInf = SRBase;
   InclusiveHT1500toInf.SetName("srbaseUH");
   InclusiveHT1500toInf.SetVar("ht", 1500, -1);
+  InclusiveHT1500toInf.SetVarCRSL("ht", 1500, -1);
   InclusiveRegions.push_back(InclusiveHT1500toInf);
 
   SR InclusiveNJets2to3 = SRBase;
@@ -1258,6 +1263,15 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
     if(prefix=="crsl") fillHistosSingleLepton(SRBase.crslHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbase", suffix);
     else if(prefix=="crslmu") fillHistosSingleLepton(SRBase.crslmuHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslmubase", suffix);
     else if(prefix=="crslel") fillHistosSingleLepton(SRBase.crslelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslelbase", suffix);
+
+    // only fill inclusive HT regions for inclusive lepton case
+    if (prefix=="crsl") {
+      if(t.ht > 200.  && t.ht < 450.)  fillHistosSingleLepton(InclusiveRegions.at(0).crslHistMap,   SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbaseVL", suffix);
+      if(t.ht > 450.  && t.ht < 575.)  fillHistosSingleLepton(InclusiveRegions.at(1).crslHistMap,   SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbaseL", suffix);
+      if(t.ht > 575.  && t.ht < 1000.) fillHistosSingleLepton(InclusiveRegions.at(2).crslHistMap,  SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbaseM", suffix);
+      if(t.ht > 1000. && t.ht < 1500.) fillHistosSingleLepton(InclusiveRegions.at(3).crslHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbaseH", suffix);
+      if(t.ht > 1500.                 ) fillHistosSingleLepton(InclusiveRegions.at(4).crslHistMap,  SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbaseUH", suffix);
+    }
   }
 
   // only fill wjets/ttbar histograms for inclusive lepton case
