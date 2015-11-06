@@ -716,9 +716,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // MET filters (data and MC)
       if (!t.Flag_goodVertices) continue;
-      if (!t.Flag_CSCTightHaloFilter) continue;
+      //if (!t.Flag_CSCTightHaloFilter) continue; // use txt files instead
       if (!t.Flag_eeBadScFilter) continue;
       if (!t.Flag_HBHENoiseFilter) continue;
+      if (!t.Flag_HBHEIsoNoiseFilter) continue;
       // txt MET filters (data only)
       if (t.isData && metFilterTxt.eventFails(t.run, t.lumi, t.evt)) {
 	//cout<<"Found bad event in data: "<<t.run<<", "<<t.lumi<<", "<<t.evt<<endl;
