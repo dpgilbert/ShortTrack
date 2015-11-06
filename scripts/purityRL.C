@@ -100,7 +100,8 @@ void makePred(TFile* f_out, TFile* f_data, TFile* f_w, TFile* f_bkg, TFile* f_z,
   //recalculate purity errors, summing stat and syst.
   for (int bin = 0; bin <= h_purity->GetNbinsX(); bin++){
     double stat = h_purity->GetBinError(bin);
-    double syst = h_syst-> GetBinError(bin);
+    double syst = 0.5*(1-h_purity->GetBinContent(bin));
+    //double syst = h_syst-> GetBinError(bin);
     h_purity->SetBinError(bin,pow(pow(stat,2)+pow(syst,2),0.5));
   }
   if (verbose) cout<<__LINE__<<endl;
@@ -113,33 +114,33 @@ void makePred(TFile* f_out, TFile* f_data, TFile* f_w, TFile* f_bkg, TFile* f_z,
   TH1D* h_ratio = (TH1D*) h_w->Clone();
   h_ratio->Reset();
   h_ratio->SetName("h_ratio");
-  h_ratio->Divide(h_z,h_w,1,1,"B");
+  h_ratio->Divide(h_z,h_w,1,1,"");
 
   //make predicition for this SR
   //predicted number of real w->lnu
   TH1D* h_predW = (TH1D*) h_w->Clone();
   h_predW->Reset();
   h_predW->SetName("h_predW");
-  h_predW->Multiply(h_data,h_purity,1,1,"B");
+  h_predW->Multiply(h_data,h_purity,1,1,"");
 
   //predicted number of zinv
   TH1D* h_predZ = (TH1D*) h_w->Clone();
   h_predZ->Reset();
   h_predZ->SetName("h_predZ");
-  h_predZ->Multiply(h_predW,h_ratio,1,1,"B");
+  h_predZ->Multiply(h_predW,h_ratio,1,1,"");
 
   //make predicition for this SR based on MC
   //predicted number of real w->lnu
   TH1D* h_predWmc = (TH1D*) h_w->Clone();
   h_predWmc->Reset();
   h_predWmc->SetName("h_predWmc");
-  h_predWmc->Multiply(h_total,h_purity,1,1,"B");
+  h_predWmc->Multiply(h_total,h_purity,1,1,"");
 
   //predicted number of zinv
   TH1D* h_predZmc = (TH1D*) h_w->Clone();
   h_predZmc->Reset();
   h_predZmc->SetName("h_predZmc");
-  h_predZmc->Multiply(h_predWmc,h_ratio,1,1,"B");
+  h_predZmc->Multiply(h_predWmc,h_ratio,1,1,"");
   if (verbose) cout<<__LINE__<<endl;
 
   //save it all
