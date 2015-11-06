@@ -71,6 +71,8 @@ RooRealVar* w_ = new RooRealVar( "w", "", 0., 1000.);
 bool useDRforGammaQCDMixing = true; // requires GenParticles
 // turn on to apply weights to central value
 bool applyWeights = false;
+// turn on to apply btag sf to central value
+bool applyBtagSF = false;
 // turn on to enable plots of MT2 with systematic variations applied. applyWeights should be true
 bool doSystVariationPlots = false;
 // turn on to apply Nvtx reweighting to MC
@@ -769,6 +771,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  evtweight_ = t.evt_scale1fb * lumi;
 	}
 	if (applyWeights) evtweight_ *= t.weight_lepsf * t.weight_btagsf * t.weight_isr * t.weight_pu;
+	else if (applyBtagSF) {
+	  // remove events with 0 btag weight for now..
+	  if (fabs(t.weight_btagsf) < 0.001) continue;
+	  evtweight_ *= t.weight_btagsf;
+	}
 	// get pu weight from hist, restrict range to nvtx 4-31
 	if (doNvtxReweight) {
 	  int nvtx_input = t.nVert;
@@ -1785,8 +1792,6 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     // assume weights are already applied to central value: lepsf, btagsf, isr 
     plot1D("h_mt2bins_lepsf_UP"+s,       mt2_temp,   evtweight_ / t.weight_lepsf * t.weight_lepsf_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_lepsf_DN"+s,       mt2_temp,   evtweight_ / t.weight_lepsf * t.weight_lepsf_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_btagsf_UP"+s,       mt2_temp,   evtweight_ / t.weight_btagsf * t.weight_btagsf_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_btagsf_DN"+s,       mt2_temp,   evtweight_ / t.weight_btagsf * t.weight_btagsf_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_isr_UP"+s,       mt2_temp,   evtweight_ / t.weight_isr, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_isr_DN"+s,       mt2_temp,   evtweight_ * t.weight_isr, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     // WARNING: will have to make sure we get the correct normalization for these
@@ -1795,6 +1800,12 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_mt2bins_scales_DN"+s,       mt2_temp,   evtweight_ * t.weight_scales_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_pdfs_UP"+s,       mt2_temp,   evtweight_  * t.weight_pdfs_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_pdfs_DN"+s,       mt2_temp,   evtweight_  * t.weight_pdfs_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+
+  if (!t.isData && applyBtagSF && doSystVariationPlots) {
+    // assume weights are already applied to central value: lepsf, btagsf, isr 
+    plot1D("h_mt2bins_btagsf_UP"+s,       mt2_temp,   evtweight_ / t.weight_btagsf * t.weight_btagsf_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_btagsf_DN"+s,       mt2_temp,   evtweight_ / t.weight_btagsf * t.weight_btagsf_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   }
 
   if (!t.isData && doGenTauVars) {
