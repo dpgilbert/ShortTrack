@@ -163,6 +163,7 @@ class babyMaker {
   Int_t           HLT_SingleMu;   
   Int_t           HLT_SingleEl;   
   Int_t           HLT_DoubleEl;   
+  Int_t           HLT_DoubleEl33;   
   Int_t           HLT_MuX_Ele12;   
   Int_t           HLT_Mu8_EleX;   
   Int_t           HLT_DoubleMu;   

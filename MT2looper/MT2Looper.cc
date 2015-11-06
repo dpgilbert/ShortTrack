@@ -22,6 +22,7 @@
 #include "../CORE/Tools/utils.h"
 #include "../CORE/Tools/goodrun.h"
 #include "../CORE/Tools/dorky/dorky.h"
+#include "../CORE/Tools/badEventFilter.h"
 
 // header
 #include "MT2Looper.h"
@@ -237,7 +238,7 @@ void MT2Looper::SetSignalRegions(){
     plot1D("h_"+varsCRSL.at(j)+"_"+"LOW",  1, SRBase.GetLowerBoundCRSL(varsCRSL.at(j)), SRBase.crslHistMap, "", 1, 0, 2);
     plot1D("h_"+varsCRSL.at(j)+"_"+"HI",   1, SRBase.GetUpperBoundCRSL(varsCRSL.at(j)), SRBase.crslHistMap, "", 1, 0, 2);
   }
-  plot1D("h_n_mt2bins",  1, SRBase.GetNumberOfMT2Bins(), SRBase.srHistMap, "", 1, 0, 2);
+  plot1D("h_n_mt2bins",  1, SRBase.GetNumberOfMT2Bins(), SRBase.crslHistMap, "", 1, 0, 2);
   outfile_->cd();
 
   std::vector<std::string> varsCRRL = SRBase.GetListOfVariables();
@@ -373,7 +374,7 @@ void MT2Looper::SetSignalRegions(){
     plot1D("h_"+varsCRSL.at(j)+"_"+"LOW",  1, SRBaseMonojet.GetLowerBoundCRSL(varsCRSL.at(j)), SRBaseMonojet.crslHistMap, "", 1, 0, 2);
     plot1D("h_"+varsCRSL.at(j)+"_"+"HI",   1, SRBaseMonojet.GetUpperBoundCRSL(varsCRSL.at(j)), SRBaseMonojet.crslHistMap, "", 1, 0, 2);
   }
-  plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.srHistMap, "", 1, 0, 2);
+  plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.crslHistMap, "", 1, 0, 2);
   outfile_->cd();
 
   dir = (TDirectory*)outfile_->Get("crgjbaseJ");
@@ -382,10 +383,10 @@ void MT2Looper::SetSignalRegions(){
   } 
   dir->cd();
   for(unsigned int j = 0; j < vars.size(); j++){
-    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet.GetLowerBound(vars.at(j)), SRBaseMonojet.srHistMap, "", 1, 0, 2);
-    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet.GetUpperBound(vars.at(j)), SRBaseMonojet.srHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet.GetLowerBound(vars.at(j)), SRBaseMonojet.crgjHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet.GetUpperBound(vars.at(j)), SRBaseMonojet.crgjHistMap, "", 1, 0, 2);
   }
-  plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.srHistMap, "", 1, 0, 2);
+  plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.crgjHistMap, "", 1, 0, 2);
   outfile_->cd();
 
   dir = (TDirectory*)outfile_->Get("crdybaseJ");
@@ -394,10 +395,10 @@ void MT2Looper::SetSignalRegions(){
   } 
   dir->cd();
   for(unsigned int j = 0; j < vars.size(); j++){
-    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet.GetLowerBound(vars.at(j)), SRBaseMonojet.srHistMap, "", 1, 0, 2);
-    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet.GetUpperBound(vars.at(j)), SRBaseMonojet.srHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet.GetLowerBound(vars.at(j)), SRBaseMonojet.crdyHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet.GetUpperBound(vars.at(j)), SRBaseMonojet.crdyHistMap, "", 1, 0, 2);
   }
-  plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.srHistMap, "", 1, 0, 2);
+  plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.crdyHistMap, "", 1, 0, 2);
   outfile_->cd();
 
   dir = (TDirectory*)outfile_->Get("crrlbaseJ");
@@ -406,10 +407,10 @@ void MT2Looper::SetSignalRegions(){
   } 
   dir->cd();
   for(unsigned int j = 0; j < vars.size(); j++){
-    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet.GetLowerBound(vars.at(j)), SRBaseMonojet.srHistMap, "", 1, 0, 2);
-    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet.GetUpperBound(vars.at(j)), SRBaseMonojet.srHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet.GetLowerBound(vars.at(j)), SRBaseMonojet.crrlHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet.GetUpperBound(vars.at(j)), SRBaseMonojet.crrlHistMap, "", 1, 0, 2);
   }
-  plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.srHistMap, "", 1, 0, 2);
+  plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.crrlHistMap, "", 1, 0, 2);
   outfile_->cd();
 
 
@@ -454,7 +455,7 @@ void MT2Looper::SetSignalRegions(){
     plot1D("h_"+varsCRSL.at(j)+"_"+"LOW",  1, SRBaseMonojet0B.GetLowerBoundCRSL(varsCRSL.at(j)), SRBaseMonojet0B.crslHistMap, "", 1, 0, 2);
     plot1D("h_"+varsCRSL.at(j)+"_"+"HI",   1, SRBaseMonojet0B.GetUpperBoundCRSL(varsCRSL.at(j)), SRBaseMonojet0B.crslHistMap, "", 1, 0, 2);
   }
-  plot1D("h_n_mt2bins",  1, SRBaseMonojet0B.GetNumberOfMT2Bins(), SRBaseMonojet0B.srHistMap, "", 1, 0, 2);
+  plot1D("h_n_mt2bins",  1, SRBaseMonojet0B.GetNumberOfMT2Bins(), SRBaseMonojet0B.crslHistMap, "", 1, 0, 2);
   outfile_->cd();
 
   dir = (TDirectory*)outfile_->Get("crgjbaseJ0B");
@@ -463,10 +464,10 @@ void MT2Looper::SetSignalRegions(){
   } 
   dir->cd();
   for(unsigned int j = 0; j < vars.size(); j++){
-    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet0B.GetLowerBound(vars.at(j)), SRBaseMonojet0B.srHistMap, "", 1, 0, 2);
-    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet0B.GetUpperBound(vars.at(j)), SRBaseMonojet0B.srHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet0B.GetLowerBound(vars.at(j)), SRBaseMonojet0B.crgjHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet0B.GetUpperBound(vars.at(j)), SRBaseMonojet0B.crgjHistMap, "", 1, 0, 2);
   }
-  plot1D("h_n_mt2bins",  1, SRBaseMonojet0B.GetNumberOfMT2Bins(), SRBaseMonojet0B.srHistMap, "", 1, 0, 2);
+  plot1D("h_n_mt2bins",  1, SRBaseMonojet0B.GetNumberOfMT2Bins(), SRBaseMonojet0B.crgjHistMap, "", 1, 0, 2);
   outfile_->cd();
 
   dir = (TDirectory*)outfile_->Get("crdybaseJ0B");
@@ -475,10 +476,10 @@ void MT2Looper::SetSignalRegions(){
   } 
   dir->cd();
   for(unsigned int j = 0; j < vars.size(); j++){
-    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet0B.GetLowerBound(vars.at(j)), SRBaseMonojet0B.srHistMap, "", 1, 0, 2);
-    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet0B.GetUpperBound(vars.at(j)), SRBaseMonojet0B.srHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet0B.GetLowerBound(vars.at(j)), SRBaseMonojet0B.crdyHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet0B.GetUpperBound(vars.at(j)), SRBaseMonojet0B.crdyHistMap, "", 1, 0, 2);
   }
-  plot1D("h_n_mt2bins",  1, SRBaseMonojet0B.GetNumberOfMT2Bins(), SRBaseMonojet0B.srHistMap, "", 1, 0, 2);
+  plot1D("h_n_mt2bins",  1, SRBaseMonojet0B.GetNumberOfMT2Bins(), SRBaseMonojet0B.crdyHistMap, "", 1, 0, 2);
   outfile_->cd();
 
   dir = (TDirectory*)outfile_->Get("crrlbaseJ0B");
@@ -487,10 +488,10 @@ void MT2Looper::SetSignalRegions(){
   } 
   dir->cd();
   for(unsigned int j = 0; j < vars.size(); j++){
-    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet0B.GetLowerBound(vars.at(j)), SRBaseMonojet0B.srHistMap, "", 1, 0, 2);
-    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet0B.GetUpperBound(vars.at(j)), SRBaseMonojet0B.srHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet0B.GetLowerBound(vars.at(j)), SRBaseMonojet0B.crrlHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet0B.GetUpperBound(vars.at(j)), SRBaseMonojet0B.crrlHistMap, "", 1, 0, 2);
   }
-  plot1D("h_n_mt2bins",  1, SRBaseMonojet0B.GetNumberOfMT2Bins(), SRBaseMonojet0B.srHistMap, "", 1, 0, 2);
+  plot1D("h_n_mt2bins",  1, SRBaseMonojet0B.GetNumberOfMT2Bins(), SRBaseMonojet0B.crrlHistMap, "", 1, 0, 2);
   outfile_->cd();
 
 
@@ -535,7 +536,7 @@ void MT2Looper::SetSignalRegions(){
     plot1D("h_"+varsCRSL.at(j)+"_"+"LOW",  1, SRBaseMonojet1B.GetLowerBoundCRSL(varsCRSL.at(j)), SRBaseMonojet1B.crslHistMap, "", 1, 0, 2);
     plot1D("h_"+varsCRSL.at(j)+"_"+"HI",   1, SRBaseMonojet1B.GetUpperBoundCRSL(varsCRSL.at(j)), SRBaseMonojet1B.crslHistMap, "", 1, 0, 2);
   }
-  plot1D("h_n_mt2bins",  1, SRBaseMonojet1B.GetNumberOfMT2Bins(), SRBaseMonojet1B.srHistMap, "", 1, 0, 2);
+  plot1D("h_n_mt2bins",  1, SRBaseMonojet1B.GetNumberOfMT2Bins(), SRBaseMonojet1B.crslHistMap, "", 1, 0, 2);
   outfile_->cd();
 
   dir = (TDirectory*)outfile_->Get("crgjbaseJ1B");
@@ -544,10 +545,10 @@ void MT2Looper::SetSignalRegions(){
   } 
   dir->cd();
   for(unsigned int j = 0; j < vars.size(); j++){
-    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet1B.GetLowerBound(vars.at(j)), SRBaseMonojet1B.srHistMap, "", 1, 0, 2);
-    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet1B.GetUpperBound(vars.at(j)), SRBaseMonojet1B.srHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet1B.GetLowerBound(vars.at(j)), SRBaseMonojet1B.crgjHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet1B.GetUpperBound(vars.at(j)), SRBaseMonojet1B.crgjHistMap, "", 1, 0, 2);
   }
-  plot1D("h_n_mt2bins",  1, SRBaseMonojet1B.GetNumberOfMT2Bins(), SRBaseMonojet1B.srHistMap, "", 1, 0, 2);
+  plot1D("h_n_mt2bins",  1, SRBaseMonojet1B.GetNumberOfMT2Bins(), SRBaseMonojet1B.crgjHistMap, "", 1, 0, 2);
   outfile_->cd();
 
   dir = (TDirectory*)outfile_->Get("crdybaseJ1B");
@@ -556,10 +557,10 @@ void MT2Looper::SetSignalRegions(){
   } 
   dir->cd();
   for(unsigned int j = 0; j < vars.size(); j++){
-    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet1B.GetLowerBound(vars.at(j)), SRBaseMonojet1B.srHistMap, "", 1, 0, 2);
-    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet1B.GetUpperBound(vars.at(j)), SRBaseMonojet1B.srHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet1B.GetLowerBound(vars.at(j)), SRBaseMonojet1B.crdyHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet1B.GetUpperBound(vars.at(j)), SRBaseMonojet1B.crdyHistMap, "", 1, 0, 2);
   }
-  plot1D("h_n_mt2bins",  1, SRBaseMonojet1B.GetNumberOfMT2Bins(), SRBaseMonojet1B.srHistMap, "", 1, 0, 2);
+  plot1D("h_n_mt2bins",  1, SRBaseMonojet1B.GetNumberOfMT2Bins(), SRBaseMonojet1B.crdyHistMap, "", 1, 0, 2);
   outfile_->cd();
 
   dir = (TDirectory*)outfile_->Get("crrlbaseJ1B");
@@ -568,10 +569,10 @@ void MT2Looper::SetSignalRegions(){
   } 
   dir->cd();
   for(unsigned int j = 0; j < vars.size(); j++){
-    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet1B.GetLowerBound(vars.at(j)), SRBaseMonojet1B.srHistMap, "", 1, 0, 2);
-    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet1B.GetUpperBound(vars.at(j)), SRBaseMonojet1B.srHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet1B.GetLowerBound(vars.at(j)), SRBaseMonojet1B.crrlHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet1B.GetUpperBound(vars.at(j)), SRBaseMonojet1B.crrlHistMap, "", 1, 0, 2);
   }
-  plot1D("h_n_mt2bins",  1, SRBaseMonojet1B.GetNumberOfMT2Bins(), SRBaseMonojet1B.srHistMap, "", 1, 0, 2);
+  plot1D("h_n_mt2bins",  1, SRBaseMonojet1B.GetNumberOfMT2Bins(), SRBaseMonojet1B.crrlHistMap, "", 1, 0, 2);
   outfile_->cd();
 
 }
@@ -593,6 +594,21 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
+  }
+
+  eventFilter metFilterTxt;
+  TString stringsample = sample;
+  if (stringsample.Contains("data")) {
+    cout<<"Loading bad event files ..."<<endl;
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_DoubleEG_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_DoubleMuon_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_HTMHT_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_JetHT_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_MET_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_SingleElectron_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_SingleMuon_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_SinglePhoton_csc2015.txt");
+    cout<<" ... finished!"<<endl;
   }
 
   h_nvtx_weights_ = 0;
@@ -703,6 +719,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (!t.Flag_CSCTightHaloFilter) continue;
       if (!t.Flag_eeBadScFilter) continue;
       if (!t.Flag_HBHENoiseFilter) continue;
+      // txt MET filters (data only)
+      if (t.isData && metFilterTxt.eventFails(t.run, t.lumi, t.evt)) {
+	//cout<<"Found bad event in data: "<<t.run<<", "<<t.lumi<<", "<<t.evt<<endl;
+	continue;
+      }
+
+      // Jet ID Veto
       bool passJetID = true;
       //if (t.nJet30FailId > 0) continue;
       if (t.nJet30FailId > 0) passJetID = false;

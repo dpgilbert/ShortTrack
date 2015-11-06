@@ -53,6 +53,8 @@ const bool verbose = false;
 const bool applyJECfromFile = false;
 // change to do JEC uncertainty variations. 0 = DEFAULT, 1 = UP, -1 = DN
 const int applyJECunc = 0;
+// change to do unclustered energy uncertainty MET variations. 0 = DEFAULT, 1 = UP, -1 = DN
+const int applyUnclusteredUnc = 0;
 // turn on to apply btag SFs (default true)
 const bool applyBtagSFs = true;
 // turn on to recompute type1 MET using JECs from file (default true)
@@ -288,6 +290,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         passHLTTriggerPattern("HLT_Ele22_eta2p1_WP75_Gsf_v");
       HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
         passHLTTriggerPattern("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
+      HLT_DoubleEl33   = passHLTTriggerPattern("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");
       HLT_MuX_Ele12 = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
         passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
       HLT_Mu8_EleX = passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v") ||
@@ -353,7 +356,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       }
 
       if (applyJECfromFile && recomputeT1MET) {
-	std::pair <float, float> t1met = getT1CHSMET(jet_corrector_pfL1FastJetL2L3);
+	std::pair <float, float> t1met;
+	if (!isData) t1met = getT1CHSMET(jet_corrector_pfL1FastJetL2L3, jetcorr_uncertainty, bool(applyJECunc == 1), applyUnclusteredUnc);
+	else t1met = getT1CHSMET(jet_corrector_pfL1FastJetL2L3); // never apply variations to data
 	met_pt  = t1met.first;
 	met_phi = t1met.second;
 	met_rawPt  = cms3.evt_METToolbox_pfmet_raw();
@@ -749,8 +754,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         if(cms3.els_p4().at(iEl).pt() < 10.0) continue;
         if(fabs(cms3.els_p4().at(iEl).eta()) > 2.4) continue;
         // first check ID then iso
-        if(!electronID(iEl,id_level_t::HAD_veto_noiso_v3)) continue;
-        bool pass_iso = electronID(iEl,id_level_t::HAD_veto_v3);
+        if(!electronID(iEl,id_level_t::HAD_veto_noiso_v4)) continue;
+        bool pass_iso = electronID(iEl,id_level_t::HAD_veto_v4);
         if(applyLeptonIso && !pass_iso) continue;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.els_p4().at(iEl).pt()) );
         vec_lep_pt.push_back ( cms3.els_p4().at(iEl).pt());
@@ -761,11 +766,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         vec_lep_pdgId.push_back ( (-11)*cms3.els_charge().at(iEl));
         vec_lep_dxy.push_back ( cms3.els_dxyPV().at(iEl));
         vec_lep_dz.push_back ( cms3.els_dzPV().at(iEl));
-        vec_lep_tightId.push_back ( eleTightID(iEl,analysis_t::HAD,3) );
+        vec_lep_tightId.push_back ( eleTightID(iEl,analysis_t::HAD,4) );
         vec_lep_heepId.push_back ( isHEEPV60(iEl) );
         vec_lep_relIso03.push_back (  eleRelIso03(iEl,analysis_t::HAD));
         vec_lep_relIso04.push_back ( 0);
-        vec_lep_miniRelIso.push_back ( elMiniRelIsoCMS3_EA(iEl,0) );
+        vec_lep_miniRelIso.push_back ( elMiniRelIsoCMS3_EA(iEl,1) );
         vec_lep_relIsoAn04.push_back ( elRelIsoAn04(iEl) );
         if (!isData && cms3.els_mc3dr().size() > 0 && cms3.els_mc3dr().at(iEl) < 0.2 && cms3.els_mc3idx().at(iEl) != -9999 && abs(cms3.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.els_mc3idx().at(iEl)]);
@@ -808,8 +813,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         if(cms3.mus_p4().at(iMu).pt() < 10.0) continue;
         if(fabs(cms3.mus_p4().at(iMu).eta()) > 2.4) continue;
         // first check ID then iso
-        if(!muonID(iMu,id_level_t::HAD_loose_noiso_v3)) continue;
-        bool pass_iso = muonID(iMu,id_level_t::HAD_loose_v3);
+        if(!muonID(iMu,id_level_t::HAD_loose_noiso_v4)) continue;
+        bool pass_iso = muonID(iMu,id_level_t::HAD_loose_v4);
         if (applyLeptonIso && !pass_iso) continue;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.mus_p4().at(iMu).pt()) );
         vec_lep_pt.push_back ( cms3.mus_p4().at(iMu).pt());
@@ -820,11 +825,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         vec_lep_pdgId.push_back ( (-13)*cms3.mus_charge().at(iMu));
         vec_lep_dxy.push_back ( cms3.mus_dxyPV().at(iMu)); // this uses the silicon track. should we use best track instead?
         vec_lep_dz.push_back ( cms3.mus_dzPV().at(iMu)); // this uses the silicon track. should we use best track instead?
-        vec_lep_tightId.push_back ( muTightID(iMu,analysis_t::HAD,3) );
+        vec_lep_tightId.push_back ( muTightID(iMu,analysis_t::HAD,4) );
         vec_lep_heepId.push_back ( 0 );
         vec_lep_relIso03.push_back ( muRelIso03(iMu,analysis_t::HAD) );
         vec_lep_relIso04.push_back ( muRelIso04(iMu,analysis_t::HAD) );
-        vec_lep_miniRelIso.push_back ( muMiniRelIsoCMS3_EA(iMu,0) );
+        vec_lep_miniRelIso.push_back ( muMiniRelIsoCMS3_EA(iMu,1) );
         vec_lep_relIsoAn04.push_back ( muRelIsoAn04(iMu) );
         if (!isData && cms3.mus_mc3dr().size() > 0 && cms3.mus_mc3dr().at(iMu) < 0.2 && cms3.mus_mc3idx().at(iMu) != -9999 && abs(cms3.mus_mc3_id().at(iMu)) == 13) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.mus_mc3idx().at(iMu)]);
@@ -1090,7 +1095,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       for(unsigned int iGamma = 0; iGamma < cms3.photons_p4().size(); iGamma++){
         if(cms3.photons_p4().at(iGamma).pt() < 20.0) continue;
         if(fabs(cms3.photons_p4().at(iGamma).eta()) > 2.5) continue;
-        if ( !isLoosePhoton(iGamma,analysis_t::HAD,2) ) continue;
+        if ( !isLoosePhoton(iGamma,analysis_t::HAD,3) ) continue;
 
         if (ngamma >= max_ngamma) {
           std::cout << "WARNING: attempted to fill more than " << max_ngamma << " photons" << std::endl;
@@ -1244,7 +1249,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               << ", raw jet pt: " << pfjet_p4_uncor.pt() << ", eta: " << pfjet_p4_uncor.eta() << std::endl;
           }
 
-	  // include protections here on jet kinematics to prevent rare crashes
+	  // include protections here on jet kinematics to prevent rare warnings/crashes
 	  double var = 1.;
 	  if (!isData && applyJECunc != 0 && pfjet_p4_uncor.pt()*corr > 0. && fabs(pfjet_p4_uncor.eta()) < 5.4) {
 	    jetcorr_uncertainty->setJetEta(pfjet_p4_uncor.eta());
@@ -1997,6 +2002,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("HLT_SingleMu", &HLT_SingleMu );
     BabyTree_->Branch("HLT_SingleEl", &HLT_SingleEl );
     BabyTree_->Branch("HLT_DoubleEl", &HLT_DoubleEl );
+    BabyTree_->Branch("HLT_DoubleEl33", &HLT_DoubleEl33 );
     BabyTree_->Branch("HLT_MuX_Ele12", &HLT_MuX_Ele12 );
     BabyTree_->Branch("HLT_Mu8_EleX", &HLT_Mu8_EleX );
     BabyTree_->Branch("HLT_DoubleMu", &HLT_DoubleMu );
@@ -2308,6 +2314,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     HLT_SingleMu = -999;   
     HLT_SingleEl = -999;   
     HLT_DoubleEl = -999;   
+    HLT_DoubleEl33 = -999;   
     HLT_MuX_Ele12 = -999;   
     HLT_Mu8_EleX = -999;   
     HLT_DoubleMu = -999;   

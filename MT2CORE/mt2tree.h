@@ -89,6 +89,7 @@ public :
    Int_t           Flag_trackingFailureFilter;
    Int_t           Flag_CSCTightHaloFilter;
    Int_t           Flag_HBHENoiseFilter;
+   Int_t           Flag_HBHEIsoNoiseFilter;
    Int_t           Flag_goodVertices;
    Int_t           Flag_eeBadScFilter;
    Int_t           Flag_METFilters;
@@ -109,6 +110,7 @@ public :
    Int_t           HLT_SingleMu;   
    Int_t           HLT_SingleEl;   
    Int_t           HLT_DoubleEl;   
+   Int_t           HLT_DoubleEl33;   
    Int_t           HLT_MuEG;   
    Int_t           HLT_MuX_Ele12;   
    Int_t           HLT_Mu8_EleX;   
@@ -396,6 +398,7 @@ public :
    TBranch        *b_Flag_trackingFailureFilter;   //!
    TBranch        *b_Flag_CSCTightHaloFilter;   //!
    TBranch        *b_Flag_HBHENoiseFilter;   //!
+   TBranch        *b_Flag_HBHEIsoNoiseFilter;   //!
    TBranch        *b_Flag_goodVertices;   //!
    TBranch        *b_Flag_eeBadScFilter;   //!
    TBranch        *b_Flag_METFilters;   //!
@@ -416,6 +419,7 @@ public :
    TBranch        *b_HLT_SingleMu;   //!
    TBranch        *b_HLT_SingleEl;   //!
    TBranch        *b_HLT_DoubleEl;   //!
+   TBranch        *b_HLT_DoubleEl33;   //!
    TBranch        *b_HLT_MuEG;   //!
    TBranch        *b_HLT_MuX_Ele12;   //!
    TBranch        *b_HLT_Mu8_EleX;   //!
@@ -762,6 +766,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("Flag_trackingFailureFilter", &Flag_trackingFailureFilter, &b_Flag_trackingFailureFilter);
    fChain->SetBranchAddress("Flag_CSCTightHaloFilter", &Flag_CSCTightHaloFilter, &b_Flag_CSCTightHaloFilter);
    fChain->SetBranchAddress("Flag_HBHENoiseFilter", &Flag_HBHENoiseFilter, &b_Flag_HBHENoiseFilter);
+   fChain->SetBranchAddress("Flag_HBHEIsoNoiseFilter", &Flag_HBHEIsoNoiseFilter, &b_Flag_HBHEIsoNoiseFilter);
    fChain->SetBranchAddress("Flag_goodVertices", &Flag_goodVertices, &b_Flag_goodVertices);
    fChain->SetBranchAddress("Flag_eeBadScFilter", &Flag_eeBadScFilter, &b_Flag_eeBadScFilter);
    fChain->SetBranchAddress("Flag_METFilters", &Flag_METFilters, &b_Flag_METFilters);
@@ -782,6 +787,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_SingleMu", &HLT_SingleMu, &b_HLT_SingleMu);
    fChain->SetBranchAddress("HLT_SingleEl", &HLT_SingleEl, &b_HLT_SingleEl);
    fChain->SetBranchAddress("HLT_DoubleEl", &HLT_DoubleEl, &b_HLT_DoubleEl);
+   fChain->SetBranchAddress("HLT_DoubleEl33", &HLT_DoubleEl33, &b_HLT_DoubleEl33);
    fChain->SetBranchAddress("HLT_MuEG", &HLT_MuEG, &b_HLT_MuEG);
    fChain->SetBranchAddress("HLT_MuX_Ele12", &HLT_MuX_Ele12, &b_HLT_MuX_Ele12);
    fChain->SetBranchAddress("HLT_Mu8_EleX", &HLT_Mu8_EleX, &b_HLT_Mu8_EleX);
