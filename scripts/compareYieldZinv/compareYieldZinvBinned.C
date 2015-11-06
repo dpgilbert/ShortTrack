@@ -17,7 +17,8 @@ void compareYieldZinvBinned( TString region = "L", bool withMC = false){
   TH1F* hdata = (TH1F*)f1->Get("yields_Integrated");
   TH1F* hdataBin = (TH1F*)f1->Get("yields_Binned");
   //TH1F* h_Pull = (TH1F*)f1->Get("h_pull");
-  TH1F* h_Pull = (TH1F*)f1->Get("h_ratio");
+  TH1F* h_Pull = (TH1F*)f1->Get("h_ratioData");
+  TH1F* h_RatioMC = (TH1F*)f1->Get("h_ratioMC");
 
   TCanvas* c2 = new TCanvas("c2", "", 1200, 600);
   c2->cd();
@@ -60,16 +61,16 @@ void compareYieldZinvBinned( TString region = "L", bool withMC = false){
 
 
   hdata->SetMarkerStyle(20);
-  hdata->SetMarkerSize(1.1);
+  hdata->SetMarkerSize(1.0);
   hdata->SetLineColor( kBlack );
   hdata->SetMarkerColor( kBlack );
     hdataBin->SetMarkerStyle(20);
-    hdataBin->SetMarkerSize(1.1);
+    hdataBin->SetMarkerSize(1.0);
     hdataBin->SetLineColor( kRed );
     hdataBin->SetMarkerColor( kRed );
 
   hestimate->SetMarkerStyle(20);
-  hestimate->SetMarkerSize(1.1);
+  hestimate->SetMarkerSize(1.0);
   hestimate->SetLineColor( 401 );
   hestimate->SetMarkerColor( 401 );
 if (withMC)  hestimate->Draw("PE, same");
@@ -169,8 +170,9 @@ if (withMC)  legend->AddEntry( hestimate, "Z invisible MC", "PL" );
 
   h_Pull->SetStats(0);
   h_Pull->SetMarkerStyle(20);
-  h_Pull->SetMarkerSize(1.6);
-  h_Pull->SetLineColor(1);
+  h_Pull->SetMarkerSize(1.0);
+  h_Pull->SetLineColor(kRed);
+  h_Pull->SetMarkerColor(kRed);
   h_Pull->GetXaxis()->SetLabelSize(0.00);
   h_Pull->GetXaxis()->SetTickLength(0.09);
   h_Pull->GetYaxis()->SetNdivisions(5,5,0);
@@ -199,7 +201,13 @@ if (withMC)  legend->AddEntry( hestimate, "Z invisible MC", "PL" );
 
   h2_axes_ratio->Draw("");
   LineCentral->Draw("same");
+  h_RatioMC->SetMarkerSize(0);
+  h_RatioMC->SetFillColor (kGray+2);
+  h_RatioMC->SetFillStyle (3244);
+  h_RatioMC->Draw("E2,same");
+  
   h_Pull->Draw("pe,same");
+
 
 //  TLine* lHT_b[6];
 //  for( int iHT=1; iHT < 6; iHT++ ){

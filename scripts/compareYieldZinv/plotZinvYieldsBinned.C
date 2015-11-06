@@ -178,14 +178,29 @@ void plotZinvYieldsBinned(TString HTregion = "VL"){
 // With uncertainties on R(Z/Gamma)
 //      if (i==1) fullhistname = Form("%s/h_mt2binspredZFailSieieDatawithRuncBin", regions.at(j).Data());
 //      if (i==2) fullhistname = Form("%s/h_mt2binspredZFailSieieDatawithRuncInt", regions.at(j).Data());
-// Without uncertainties on R(Z/Gamma). Only includes P and F (10%)
+// Without uncertainties on R(Z/Gamma). Only includes P and   F (10%)
       if (i==1) fullhistname = Form("%s/h_mt2binspredZFailSieieData", regions.at(j).Data());
       if (i==2) fullhistname = Form("%s/h_mt2binspredZFailSieieData", regions.at(j).Data());
       samples.at(i)->cd();
       TH1F* h = (TH1F*) samples.at(i)->Get(fullhistname);
-      // for integrated estimate, just rescale Zinv MC to the prediction in each bin ;-)
-      // but add a 20% uncertainty on all bins except the first one
+      // for BinByBin estimate, assign binomial uncertainty to all bins with respect to total
+      // ignore the initial uncertainty (on f, P, stats)
       float integral = 0;
+      if (i==1 && h) {
+        double err = 0;
+        integral = h->IntegralAndError(0, -1, err);
+        // ok, now each bin needs to get the binomial error
+        for (unsigned int k = 1; k <= h->GetNbinsX(); k++) {
+          float cont = h->GetBinContent(k);
+          float p;
+          if (integral>0) p = cont / integral;
+          else p = 0.;
+          float err = TMath::Sqrt( integral*p*(1-p) );
+          h->SetBinError( k, err );
+        }
+      }
+      // for integrated estimate, just rescale Zinv MC to the prediction in each bin ;-)
+      // but add a 0-40% uncertainty on all bins
       if (i==2 && h) {
         double err = 0;
         integral = h->IntegralAndError(0, -1, err);
@@ -193,12 +208,22 @@ void plotZinvYieldsBinned(TString HTregion = "VL"){
         fullhistname = Form("%s/h_mt2bins", regions.at(j).Data());
         h = (TH1F*) samples.at(0)->Get(fullhistname);
         if (h) h->Scale(1.*integral/h->Integral());
-        // ok, now each bin needs to get the percentage error of the integrated estimate, plus 20%
+        // ok, now each bin needs to get the shape uncertainty
+        // first bin needs to recover the normalization if all other bins go high
+        // so first bin uncertainty  = sum (all other uncertainties)
+        int nbins = h->GetNbinsX();
+        float firstBinUnc = 0;
         for (unsigned int k = 1; k <= h->GetNbinsX(); k++) {
           float cont = h->GetBinContent(k);
-          if (k==1) h->SetBinError( k, percenterr * cont );
-          else h->SetBinError( k, TMath::Sqrt( percenterr*cont*percenterr*cont + 0.2*cont*0.2*cont ));
+          float percenterr = 0.4 / (nbins-1) * (k-1);
+          if (k==1) h->SetBinError( k, 0. );
+          else {
+            h->SetBinError( k, percenterr*cont );
+            firstBinUnc += percenterr*cont;
+          }
         }
+        if (firstBinUnc > h->GetBinContent(1)) firstBinUnc = h->GetBinContent(1); // max to 100%
+        h->SetBinError( 1,  firstBinUnc);
       }
       for (unsigned int k = 1; k <= mt2bins.at(j); k++) {
         savedbins++;
@@ -259,6 +284,8 @@ void plotZinvYieldsBinned(TString HTregion = "VL"){
   //hPull is filled with a SetBinContent (iBin, (estimate-MC)/sqrt(sigma(estimate)^2+sigma(MC)^2)), and a SetBinError(iBin, 1.0)
   TH1F* h_pull = new TH1F("h_pull", "h_pull", totalmt2bins, 0, totalmt2bins);
   TH1F* h_ratio = new TH1F("h_ratio", "h_ratio", totalmt2bins, 0, totalmt2bins);
+  TH1F* h_ratioMC   = new TH1F("h_ratioMC",   "h_ratioMC",   totalmt2bins, 0, totalmt2bins);
+  TH1F* h_ratioData = new TH1F("h_ratioData", "h_ratioData", totalmt2bins, 0, totalmt2bins);
 //  for(int i=0; i<regions.size(); i++){
   for(int i=0; i<totalmt2bins; i++){
     float mc = sample_hists.at(2).GetBinContent(i+1);
@@ -274,8 +301,14 @@ void plotZinvYieldsBinned(TString HTregion = "VL"){
       h_pull->SetBinError(i+1, 1.0);
       h_ratio->SetBinContent(i+1, rs/mc);
       h_ratio->SetBinError(i+1, (rs/mc)*sqrt( (rs_err/rs)*(rs_err/rs) + (mc_err/mc)*(mc_err/mc) ) );
+      h_ratioMC->SetBinContent(i+1, 1);
+      h_ratioMC->SetBinError(i+1, mc_err / mc );
+      h_ratioData->SetBinContent(i+1, rs/mc);
+      h_ratioData->SetBinError(i+1, rs_err / rs );
     }
   }
+  //h_ratioData->Print("all");
+  //h_ratioMC->Print("all");
   
 
   TFile* outfile = 0;
@@ -290,6 +323,8 @@ void plotZinvYieldsBinned(TString HTregion = "VL"){
   }
   h_pull->Write();
   h_ratio->Write();
+  h_ratioData->Write();
+  h_ratioMC->Write();
   outfile->Close();
 
 }
