@@ -18,7 +18,7 @@ void plot_trigeff_Photon165_HE10 (const TString& indir = "/nfs-6/userdata/mt2/V0
 
   TFile* f_out = new TFile("trigeff_Photon165_HE10.root","RECREATE");
   
-  TH1D* h_pt_denom_phot120 = new TH1D("h_pt_denom_phot120",";photon p_{T} [GeV]",20,150,250);
+  TH1D* h_pt_denom_phot120 = new TH1D("h_pt_denom_phot120",";photon p_{T} [GeV]",40,150,350);
   TH1D* h_pt_denom_eb_phot120 = (TH1D*) h_pt_denom_phot120->Clone("h_pt_denom_eb_phot120");
   TH1D* h_pt_denom_ee_phot120 = (TH1D*) h_pt_denom_phot120->Clone("h_pt_denom_ee_phot120");
   TH1D* h_pt_num_phot120 = (TH1D*) h_pt_denom_phot120->Clone("h_pt_num_phot120");
@@ -42,7 +42,7 @@ void plot_trigeff_Photon165_HE10 (const TString& indir = "/nfs-6/userdata/mt2/V0
   t_phot->Draw("gamma_pt[0]>>h_pt_denom_ee_phot120",base+ee+"HLT_Photon120");
   t_phot->Draw("gamma_pt[0]>>h_pt_num_ee_phot120",base+ee+"HLT_Photon120 && HLT_Photon165_HE10");
 
-  TH2F* h_axis = new TH2F("h_axis",";photon p_{T} [GeV];Efficiency of HLT_Photon165_HE10",20,150,250,20,0,1);
+  TH2F* h_axis = new TH2F("h_axis",";photon p_{T} [GeV];Efficiency of HLT_Photon165_HE10",40,150,350,20,0,1);
   h_axis->Draw();
   
   TEfficiency* h_pt_eff_phot120 = new TEfficiency(*h_pt_num_phot120, *h_pt_denom_phot120);

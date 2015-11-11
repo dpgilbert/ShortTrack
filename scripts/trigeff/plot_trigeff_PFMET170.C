@@ -22,7 +22,7 @@ void plot_trigeff_PFMET170 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-0
 
   TFile* f_out = new TFile("trigeff_PFMET170.root","RECREATE");
   
-  TH1D* h_met_denom_ht800 = new TH1D("h_met_denom_ht800",";E_{T}^{miss} [GeV]",30,100,400);
+  TH1D* h_met_denom_ht800 = new TH1D("h_met_denom_ht800",";E_{T}^{miss} [GeV]",40,100,500);
   TH1D* h_met_num_ht800 = (TH1D*) h_met_denom_ht800->Clone("h_met_num_ht800");
   TH1D* h_met_denom_mu20 = (TH1D*) h_met_denom_ht800->Clone("h_met_denom_mu20");
   TH1D* h_met_num_mu20 = (TH1D*) h_met_denom_ht800->Clone("h_met_num_mu20");
@@ -35,11 +35,11 @@ void plot_trigeff_PFMET170 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-0
 
   TCut base = "nVert > 0 && nJet30 > 1 && Flag_CSCTightHaloFilter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHEIsoNoiseFilter";
   TCut had = base + "nElectrons10+nMuons10==0 && ht > 1000. && deltaPhiMin > 0.3";
-  TCut ele = base + "nElectrons10 > 0 && abs(lep_pdgId[0]) == 11 && lep_pt[0] > 25.";
-  TCut mu = base + "nMuons10 > 0 && abs(lep_pdgId[0]) == 13 && lep_pt[0] > 25.";
+  TCut ele = base + "nElectrons10 > 0 && abs(lep_pdgId[0]) == 11 && lep_pt[0] > 25.&& lep_tightId[0] > 2 && lep_relIso03[0] < 0.1";
+  TCut mu = base + "nMuons10 > 0 && abs(lep_pdgId[0]) == 13 && lep_pt[0] > 25. && lep_tightId[0] > 0 && lep_relIso03[0] < 0.1";
 
-  t_jetht->Draw("met_pt>>h_met_denom_ht800",had+"HLT_PFHT800");
-  t_jetht->Draw("met_pt>>h_met_num_ht800",had+"HLT_PFHT800 && HLT_PFMET170");
+  // t_jetht->Draw("met_pt>>h_met_denom_ht800",had+"HLT_PFHT800");
+  // t_jetht->Draw("met_pt>>h_met_num_ht800",had+"HLT_PFHT800 && HLT_PFMET170");
 
   t_muon->Draw("met_pt>>h_met_denom_mu20",mu+"HLT_SingleMu");
   t_muon->Draw("met_pt>>h_met_num_mu20",mu+"HLT_SingleMu && HLT_PFMET170");
@@ -47,12 +47,12 @@ void plot_trigeff_PFMET170 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-0
   t_ele->Draw("met_pt>>h_met_denom_ele23",ele+"HLT_SingleEl");
   t_ele->Draw("met_pt>>h_met_num_ele23",ele+"HLT_SingleEl && HLT_PFMET170");
 
-  TH2F* h_axis = new TH2F("h_axis",";E_{T}^{miss} [GeV];Efficiency of HLT_PFMET170",30,100,400,20,0,1);
+  TH2F* h_axis = new TH2F("h_axis",";E_{T}^{miss} [GeV];Efficiency of HLT_PFMET170",40,100,500,20,0,1);
   h_axis->Draw();
   
-  TEfficiency* h_met_eff_ht800 = new TEfficiency(*h_met_num_ht800, *h_met_denom_ht800);
-  h_met_eff_ht800->SetLineColor(kRed);
-  h_met_eff_ht800->SetMarkerColor(kRed);
+  // TEfficiency* h_met_eff_ht800 = new TEfficiency(*h_met_num_ht800, *h_met_denom_ht800);
+  // h_met_eff_ht800->SetLineColor(kRed);
+  // h_met_eff_ht800->SetMarkerColor(kRed);
   
   TEfficiency* h_met_eff_mu20 = new TEfficiency(*h_met_num_mu20, *h_met_denom_mu20);
   h_met_eff_mu20->SetLineColor(kBlue);

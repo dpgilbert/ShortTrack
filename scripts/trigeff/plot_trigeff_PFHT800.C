@@ -7,8 +7,34 @@
 #include "TCanvas.h"
 #include "TCut.h"
 #include "TEfficiency.h"
+#include "TStyle.h"
 
-void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-05_25ns_json_246908-258159_v3_Summer15_25nsV5/") {
+#include "../CMS_lumi.C"
+
+// -- for CMS_lumi label
+
+const int iPeriod = 4; // 13 tev
+
+// iPos drives the position of the CMS logo in the plot
+// iPos=11 : top-left, left-aligned
+// iPos=33 : top-right, right-aligned
+// iPos=22 : center, centered
+// mode generally : 
+//   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
+const int iPos = 3;
+
+void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-07_25ns_miniaodv2/") {
+
+  cmsText = "CMS Preliminary";
+  cmsTextSize = 0.5;
+  lumiTextSize = 0.4;
+  writeExtraText = false;
+  lumi_13TeV = "1.3 fb^{-1}";
+  
+  gStyle->SetPadTopMargin(0.08);
+  gStyle->SetPadBottomMargin(0.12);
+  gStyle->SetPadLeftMargin(0.15);
+  gStyle->SetPadRightMargin(0.05);
 
   TH1::SetDefaultSumw2();
   
@@ -23,6 +49,7 @@ void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-05
   TFile* f_out = new TFile("trigeff_PFHT800.root","RECREATE");
   
   TH1D* h_ht_denom_ht475 = new TH1D("h_ht_denom_ht475",";H_{T} [GeV]",28,600,1300);
+  //TH1D* h_ht_denom_ht475 = new TH1D("h_ht_denom_ht475",";H_{T} [GeV]",38,600,2500);
   TH1D* h_ht_num_ht475 = (TH1D*) h_ht_denom_ht475->Clone("h_ht_num_ht475");
   TH1D* h_ht_denom_met170 = (TH1D*) h_ht_denom_ht475->Clone("h_ht_denom_met170");
   TH1D* h_ht_num_met170 = (TH1D*) h_ht_denom_ht475->Clone("h_ht_num_met170");
@@ -43,10 +70,12 @@ void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-05
   t_met->Draw("ht>>h_ht_denom_met170",had+"met_pt > 200. && HLT_PFMET170");
   t_met->Draw("ht>>h_ht_num_met170",had+"met_pt > 200. && HLT_PFMET170 && HLT_PFHT800");
 
-  t_ele->Draw("ht>>h_ht_denom_ele23",ele+"HLT_SingleEl");
-  t_ele->Draw("ht>>h_ht_num_ele23",ele+"HLT_SingleEl && HLT_PFHT800");
+  // t_ele->Draw("ht>>h_ht_denom_ele23",ele+"HLT_SingleEl");
+  // t_ele->Draw("ht>>h_ht_num_ele23",ele+"HLT_SingleEl && HLT_PFHT800");
 
   TH2F* h_axis = new TH2F("h_axis",";H_{T} [GeV];Efficiency of HLT_PFHT800",14,600,1300,20,0,1);
+  //TH2F* h_axis = new TH2F("h_axis",";H_{T} [GeV];Efficiency of HLT_PFHT800",38,600,2500,20,0,1);
+  h_axis->GetYaxis()->SetTitleOffset(0.98);
   h_axis->Draw();
   
   TEfficiency* h_ht_eff_ht475 = new TEfficiency(*h_ht_num_ht475, *h_ht_denom_ht475);
@@ -58,9 +87,9 @@ void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-05
   h_ht_eff_met170->SetLineColor(kBlue);
   h_ht_eff_met170->SetMarkerColor(kBlue);
 
-  TEfficiency* h_ht_eff_ele23 = new TEfficiency(*h_ht_num_ele23, *h_ht_denom_ele23);
-  h_ht_eff_ele23->SetLineColor(kGreen+2);
-  h_ht_eff_ele23->SetMarkerColor(kGreen+2);
+  // TEfficiency* h_ht_eff_ele23 = new TEfficiency(*h_ht_num_ele23, *h_ht_denom_ele23);
+  // h_ht_eff_ele23->SetLineColor(kGreen+2);
+  // h_ht_eff_ele23->SetMarkerColor(kGreen+2);
 
   h_ht_eff_met170->Draw("pe same");
   h_ht_eff_ht475->Draw("pe same");
@@ -72,6 +101,7 @@ void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-05
   //  leg->AddEntry(h_ht_eff_ele23,"HLT_Ele23_WPLoose_Gsf","pe");
   leg->Draw("same");
 
+  CMS_lumi( c, iPeriod, iPos );
   c->SaveAs("trigeff_PFHT800.pdf");
   c->SaveAs("trigeff_PFHT800.eps");
 
