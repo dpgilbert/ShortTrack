@@ -357,8 +357,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
       if (applyJECfromFile && recomputeT1MET) {
 	std::pair <float, float> t1met;
-	if (!isData) t1met = getT1CHSMET(jet_corrector_pfL1FastJetL2L3, jetcorr_uncertainty, bool(applyJECunc == 1), applyUnclusteredUnc);
-	else t1met = getT1CHSMET(jet_corrector_pfL1FastJetL2L3); // never apply variations to data
+	if (!isData) t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3, jetcorr_uncertainty, bool(applyJECunc == 1));
+	else t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3); // never apply variations to data
 	met_pt  = t1met.first;
 	met_phi = t1met.second;
 	met_rawPt  = cms3.evt_METToolbox_pfmet_raw();
