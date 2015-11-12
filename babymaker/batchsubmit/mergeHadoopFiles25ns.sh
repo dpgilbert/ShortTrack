@@ -70,7 +70,7 @@ run ttdl_mg_lo
 # #run wjets_mg_lo
 run wjets_ht100to200
 run wjets_ht200to400
-# #run wjets_ht400to600
+run wjets_ht400to600
 run wjets_ht600to800
 run wjets_ht800to1200
 run wjets_ht1200to2500
@@ -133,6 +133,7 @@ run ttz_qq_amcatnlo
 run ttz_llnunu_amcatnlo
 run ttg_amcatnlo
 run tth_nonbb_amcatnlo
+run tth_bb_amcatnlo
 
 #
 # QCD
