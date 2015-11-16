@@ -87,6 +87,8 @@ bool doScanWeights = false;
 bool doBlindData = true;
 // make variation histograms for tau efficiency
 bool doGenTauVars = false;
+// make variation histograms for e+mu efficiency
+bool doLepEffVars = false;
 
 MT2Looper::MT2Looper(){
 
@@ -1825,6 +1827,54 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_mt2bins_tau1p_DN"+s,       mt2_temp,   evtweight_ * (1. - unc_tau1p), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_tau3p_UP"+s,       mt2_temp,   evtweight_ * (1. + unc_tau3p), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_tau3p_DN"+s,       mt2_temp,   evtweight_ * (1. - unc_tau3p), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+
+  // lepton efficiency variation in signal region: large uncertainty on leptons NOT vetoed
+  if (!t.isData && doLepEffVars && directoryname.Contains("sr")) {
+    float unc_lepeff = 0.;
+    if (t.ngenLep > 0 || t.ngenLepFromTau > 0) {
+      // loop on gen e/mu
+      for (int ilep = 0; ilep < t.ngenLep; ++ilep) {
+	// check acceptance for veto: pt > 5, |eta| < 2.4
+       if (t.genLep_pt[ilep] < 5.) continue;
+       if (fabs(t.genLep_eta[ilep]) > 2.4) continue;
+       unc_lepeff += 0.20; // 12% relative uncertainty for missing lepton
+      }
+      for (int ilep = 0; ilep < t.ngenLepFromTau; ++ilep) {
+	// check acceptance for veto: pt > 5
+       if (t.genLepFromTau_pt[ilep] < 5.) continue;
+       if (fabs(t.genLepFromTau_eta[ilep]) > 2.4) continue;
+       unc_lepeff += 0.20; // 12% relative uncertainty for missing lepton
+      }
+    }
+
+    // if lepeff goes up, number of events in SR should go down.
+    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ * (1. - unc_lepeff), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ * (1. + unc_lepeff), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+
+  // lepton efficiency variation in control region: smallish uncertainty on leptons which ARE vetoed
+  if (!t.isData && doLepEffVars && directoryname.Contains("crsl")) {
+    float unc_lepeff = 0.;
+    if (t.ngenLep > 0 || t.ngenLepFromTau > 0) {
+      // loop on gen e/mu
+      for (int ilep = 0; ilep < t.ngenLep; ++ilep) {
+	// check acceptance for veto: pt > 5
+       if (t.genLep_pt[ilep] < 5.) continue;
+       if (fabs(t.genLep_eta[ilep]) > 2.4) continue;
+       unc_lepeff += 0.03; // 3% relative uncertainty for finding lepton
+      }
+      for (int ilep = 0; ilep < t.ngenLepFromTau; ++ilep) {
+	// check acceptance for veto: pt > 5
+       if (t.genLepFromTau_pt[ilep] < 5.) continue;
+       if (fabs(t.genLepFromTau_eta[ilep]) > 2.4) continue;
+       unc_lepeff += 0.03; // 3% relative uncertainty for finding lepton
+      }
+    }
+
+    // if lepeff goes up, number of events in CR should go up
+    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ * (1. + unc_lepeff), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ * (1. - unc_lepeff), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   }
   
   outfile_->cd();
