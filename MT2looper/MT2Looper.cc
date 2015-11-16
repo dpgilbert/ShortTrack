@@ -84,7 +84,7 @@ bool doHFJetVeto = false;
 // get signal scan nevents from file
 bool doScanWeights = false;
 // doesn't plot data for MT2 > 200 in signal regions
-bool doBlindData = true;
+bool doBlindData = false;
 // make variation histograms for tau efficiency
 bool doGenTauVars = false;
 // make variation histograms for e+mu efficiency
@@ -758,7 +758,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //      const float lumi = 0.042;
       //      const float lumi = 0.209;
       //      const float lumi = 0.579;
-      const float lumi = 1.264;
+      //      const float lumi = 1.264;
+      const float lumi = 2.11;
 
       evtweight_ = 1.;
 
