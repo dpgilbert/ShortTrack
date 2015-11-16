@@ -15,6 +15,7 @@
 #include "../CORE/Tools/utils.h"
 #include "../CORE/Tools/goodrun.h"
 #include "../CORE/Tools/dorky/dorky.h"
+#include "../CORE/Tools/badEventFilter.h"
 
 // header
 #include "ZllMTLooper.h"
@@ -35,7 +36,7 @@ bool applyWeights = false;
 // turn on to apply Nvtx reweighting to MC
 bool doNvtxReweight = true;
 // turn on to apply json file to data
-bool applyJSON = true;
+bool applyJSON = false;
 
 //_______________________________________
 ZllMTLooper::ZllMTLooper(){
@@ -56,6 +57,12 @@ void ZllMTLooper::SetSignalRegions(){
   CRMTNj2Nb0.SetVar("nJet30", 2, -1);
   CRMTNj2Nb0.SetVar("nBJet20", 0, 1);
 
+  // CRMT with 2 jets, bveto, ht > 200
+  CRMTHT200.SetName("crmtht200");
+  CRMTHT200.SetVar("nJet30", 2, -1);
+  CRMTHT200.SetVar("nBJet20", 0, 1);
+  CRMTHT200.SetVar("ht", 200, -1);
+
   // CRMT with 2 jets, bveto, ht > 450
   CRMTHT450.SetName("crmtht450");
   CRMTHT450.SetVar("nJet30", 2, -1);
@@ -66,16 +73,17 @@ void ZllMTLooper::SetSignalRegions(){
 
 
 //_______________________________________
-void ZllMTLooper::loop(TChain* chain, std::string output_name){
+void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
   bmark->Start("benchmark");
 
   gROOT->cd();
+  TString output_name = Form("%s/%s.root",output_dir.c_str(),sample.c_str());
   cout << "[ZllMTLooper::loop] creating output file: " << output_name << endl;
 
-  outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
+  outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
   const char* json_file = "../babymaker/jsons/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2_snt.txt";
   if (applyJSON) {
@@ -85,13 +93,30 @@ void ZllMTLooper::loop(TChain* chain, std::string output_name){
 
   h_nvtx_weights_ = 0;
   if (doNvtxReweight) {
-    TFile* f_weights = new TFile("../babymaker/data/hists_reweight_zjets_Run2015B.root");
-    TH1D* h_nvtx_weights_temp = (TH1D*) f_weights->Get("h_nVert_ratio");
+    //    TFile* f_weights = new TFile("../babymaker/data/hists_reweight_zjets_Run2015B.root");
+    //    TH1D* h_nvtx_weights_temp = (TH1D*) f_weights->Get("h_nVert_ratio");
+    TFile* f_weights = new TFile("nvtx_ratio.root");
+    TH1D* h_nvtx_weights_temp = (TH1D*) f_weights->Get("h_vtx_ratio");
     outfile_->cd();
     h_nvtx_weights_ = (TH1D*) h_nvtx_weights_temp->Clone("h_nvtx_weights");
     f_weights->Close();
   }
   
+  eventFilter metFilterTxt;
+  TString stringsample = sample;
+  if (stringsample.Contains("data")) {
+    cout<<"Loading bad event files ..."<<endl;
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_DoubleEG_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_DoubleMuon_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_HTMHT_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_JetHT_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_MET_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_SingleElectron_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_SingleMuon_csc2015.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/eventlist_SinglePhoton_csc2015.txt");
+    cout<<" ... finished!"<<endl;
+  }
+
   cout << "[ZllMTLooper::loop] setting up histos" << endl;
 
   SetSignalRegions();
@@ -156,19 +181,28 @@ void ZllMTLooper::loop(TChain* chain, std::string output_name){
 
       if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
 
-      // MET filters (data only)
-      if (t.isData) {
-	if (!t.Flag_goodVertices) continue;
-	if (!t.Flag_CSCTightHaloFilter) continue;
-	if (!t.Flag_eeBadScFilter) continue;
-	if (!t.Flag_HBHENoiseFilter) continue;
+      // MET filters (data and MC)
+      if (!t.Flag_goodVertices) continue;
+      //if (!t.Flag_CSCTightHaloFilter) continue; // use txt files instead
+      if (!t.Flag_eeBadScFilter) continue;
+      if (!t.Flag_HBHENoiseFilter) continue;
+      if (!t.Flag_HBHEIsoNoiseFilter) continue;
+      // txt MET filters (data only)
+      if (t.isData && metFilterTxt.eventFails(t.run, t.lumi, t.evt)) {
+	//cout<<"Found bad event in data: "<<t.run<<", "<<t.lumi<<", "<<t.evt<<endl;
+	continue;
       }
+
+      //bool passJetID = true;
+      if (t.nJet30FailId > 0) continue;
 
       // basic dilepton selection: vertex, 2 leptons, dilepton trigger
       if (t.nVert == 0) continue;
       if (t.nlep < 2) continue;
       //      if (t.isData && (!t.HLT_DoubleEl && !t.HLT_DoubleMu)) continue;
       if (!t.HLT_DoubleEl && !t.HLT_DoubleMu) continue;
+      // also allow single muon triggers
+      //if (!t.HLT_DoubleEl && !t.HLT_DoubleMu && !t.HLT_SingleMu) continue;
 
       // remove low pt QCD samples 
       if (t.evt_id >= 100 && t.evt_id < 108) continue;
@@ -178,7 +212,8 @@ void ZllMTLooper::loop(TChain* chain, std::string output_name){
       //---------------------
       outfile_->cd();
       //      const float lumi = 4.;
-      const float lumi = 0.042;
+      //      const float lumi = 0.042;
+      const float lumi = 1.26;
       evtweight_ = 1.;
 
       // apply relevant weights to MC
@@ -199,12 +234,12 @@ void ZllMTLooper::loop(TChain* chain, std::string output_name){
       if (t.nlep != 2) continue; // require exactly 2 loose leptons
       if (t.lep_pt[0] < 25. || t.lep_pt[1] < 20.) continue; // pt 25,20
       if (t.lep_charge[0] * t.lep_charge[1] != -1) continue; // OS
-      if (fabs(t.zll_mass - 90.) > 10.) continue; // z mass
+      if (fabs(t.zll_mass - 90.) > 20.) continue; // z mass
 
       // require 2 SF leptons, ID+iso
-      bool pass_electrons = bool(abs(t.lep_pdgId[0]) == 11 && abs(t.lep_pdgId[1]) == 11 && t.lep_tightId[0] > 1 && t.lep_tightId[1] > 1 && t.lep_miniRelIso[0] < 0.1 && t.lep_miniRelIso[1] < 0.1);
+      bool pass_electrons = bool(t.HLT_DoubleEl && abs(t.lep_pdgId[0]) == 11 && abs(t.lep_pdgId[1]) == 11 && t.lep_tightId[0] > 1 && t.lep_tightId[1] > 1 && t.lep_miniRelIso[0] < 0.1 && t.lep_miniRelIso[1] < 0.1);
     
-      bool pass_muons = bool(abs(t.lep_pdgId[0]) == 13 && abs(t.lep_pdgId[1]) == 13 && t.lep_tightId[0] > 0 && t.lep_tightId[1] > 0 && t.lep_miniRelIso[0] < 0.2 && t.lep_miniRelIso[1] < 0.2);
+      bool pass_muons = bool((t.HLT_DoubleMu || t.HLT_SingleMu) && abs(t.lep_pdgId[0]) == 13 && abs(t.lep_pdgId[1]) == 13 && t.lep_tightId[0] > 0 && t.lep_tightId[1] > 0 && t.lep_miniRelIso[0] < 0.2 && t.lep_miniRelIso[1] < 0.2);
 
       if (!pass_electrons && !pass_muons) continue;
 
@@ -219,6 +254,16 @@ void ZllMTLooper::loop(TChain* chain, std::string output_name){
 	fillHistosMT(CRMTNj2Nb0.crslHistMap,"crmtnj2nb0");
 	if (pass_electrons) fillHistosMT(CRMTNj2Nb0.crslelHistMap,"crmtelnj2nb0");
 	else if (pass_muons) fillHistosMT(CRMTNj2Nb0.crslmuHistMap,"crmtmunj2nb0");
+      }
+
+      std::map<std::string, float> valuesHT200;
+      valuesHT200["ht"] = t.ht;
+      valuesHT200["nJet30"] = t.nJet30;
+      valuesHT200["nBJet20"] = t.nBJet20;
+      if (CRMTHT200.PassesSelection(valuesHT200)) {
+	fillHistosMT(CRMTHT200.crslHistMap,"crmtht200");
+	if (pass_electrons) fillHistosMT(CRMTHT200.crslelHistMap,"crmtelht200");
+	else if (pass_muons) fillHistosMT(CRMTHT200.crslmuHistMap,"crmtmuht200");
       }
 
       std::map<std::string, float> valuesHT450;
@@ -256,6 +301,9 @@ void ZllMTLooper::loop(TChain* chain, std::string output_name){
   savePlotsDir(CRMTNj2Nb0.crslHistMap,outfile_,"crmtnj2nb0");
   savePlotsDir(CRMTNj2Nb0.crslelHistMap,outfile_,"crmtelnj2nb0");
   savePlotsDir(CRMTNj2Nb0.crslmuHistMap,outfile_,"crmtmunj2nb0");
+  savePlotsDir(CRMTHT200.crslHistMap,outfile_,"crmtht200");
+  savePlotsDir(CRMTHT200.crslelHistMap,outfile_,"crmtelht200");
+  savePlotsDir(CRMTHT200.crslmuHistMap,outfile_,"crmtmuht200");
   savePlotsDir(CRMTHT450.crslHistMap,outfile_,"crmtht450");
   savePlotsDir(CRMTHT450.crslelHistMap,outfile_,"crmtelht450");
   savePlotsDir(CRMTHT450.crslmuHistMap,outfile_,"crmtmuht450");

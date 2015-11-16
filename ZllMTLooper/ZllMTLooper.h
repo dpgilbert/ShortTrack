@@ -30,7 +30,7 @@ class ZllMTLooper {
   ~ZllMTLooper();
 
   void SetSignalRegions();
-  void loop(TChain* chain, std::string output_name = "test.root");
+  void loop(TChain* chain, std::string sample, std::string output_dir);
   void fillHistosMT(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
 
  private:
@@ -41,6 +41,7 @@ class ZllMTLooper {
   std::map<std::string, TH1*> h_1d_global;
   SR CRMTBase;
   SR CRMTNj2Nb0;
+  SR CRMTHT200;
   SR CRMTHT450;
   TH1D* h_nvtx_weights_;
 };

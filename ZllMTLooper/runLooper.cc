@@ -25,6 +25,6 @@ int main(int argc, char **argv) {
   }
 
   ZllMTLooper *looper = new ZllMTLooper();
-  looper->loop(ch, output_dir + "/" + sample + ".root"); 
+  looper->loop(ch, sample, output_dir); 
   return 0;
 }
