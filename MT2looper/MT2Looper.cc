@@ -662,6 +662,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   bool saveSLplots = false;
   bool saveSLMUplots = false;
   bool saveSLELplots = false;
+  bool saveQCDplots = false;
 
   // File Loop
   int nDuplicates = 0;
@@ -820,8 +821,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // check jet id for monojet
       passMonojetId_ = false;
-      if (t.nJet30 == 1) {
-	// loop to find central monojet
+      if (t.nJet30 >= 1) {
+	// loop to find central (highest pt) monojet
 	for (int ijet = 0; ijet < t.njet; ++ijet) {
 	  if (fabs(t.jet_eta[ijet]) > 2.5) continue;
 	  if (t.jet_pt[ijet] < 200.) continue;
@@ -963,7 +964,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  if (doRLMUplots || doRLELplots )  doRLplots = true;
 	}
       } // nlep == 1
-      
+
+      // check for failing minDphi, for QCD CR
+      bool doQCDplots = false;
+      if (t.nJet30 >= 2 && t.deltaPhiMin < 0.3) doQCDplots = true;
 
       ////////////////////////////////////
       /// done with overall selection  /// 
@@ -1024,6 +1028,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
       if (doSLELplots) {
         fillHistosCRSL("crslel");
+      }
+      if (doQCDplots) {
+        saveQCDplots = true;
+        fillHistosCRQCD("crqcd");
       }
 
 
@@ -1114,6 +1122,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(!SRVec.at(srN).crslelHistMap.empty()){
         savePlotsDir(SRVec.at(srN).crslelHistMap, outfile_, ("crslel"+SRVec.at(srN).GetName()).c_str());
+      }
+    }
+  }
+  if (saveQCDplots) {
+    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+      if(!SRVec.at(srN).crqcdHistMap.empty()){
+        savePlotsDir(SRVec.at(srN).crqcdHistMap, outfile_, ("crqcd"+SRVec.at(srN).GetName()).c_str());
       }
     }
   }
@@ -1704,6 +1719,55 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
   return;
 }
 
+// hists for single lepton control region
+void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& suffix) {
+
+  // trigger requirement on data
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;
+  
+  // topological regions
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = t.deltaPhiMin;
+  values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  values["nlep"]        = t.nLepLowMT;
+  values["j1pt"]        = t.jet1_pt;
+  values["j2pt"]        = t.jet2_pt;
+  values["mt2"]         = t.mt2;
+  values["ht"]          = t.ht;
+  values["met"]         = t.met_pt;
+
+  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+    if(SRVec.at(srN).PassesSelectionCRQCD(values)){
+      fillHistosQCD(SRVec.at(srN).crqcdHistMap,    SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
+      //      break;//control regions are not necessarily orthogonal
+    }
+  }
+
+  // do monojet SRs
+  if (passMonojetId_ && (!t.isData || t.HLT_PFMETNoMu90_PFMHTNoMu90)) {
+
+    std::map<std::string, float> values_monojet;
+    values_monojet["deltaPhiMin"] = t.deltaPhiMin;
+    values_monojet["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+    values_monojet["nlep"]        = t.nLepLowMT;
+    values_monojet["j1pt"]        = t.jet1_pt;
+    values_monojet["j2pt"]        = t.jet2_pt;
+    values_monojet["njets"]       = t.nJet30;
+    values_monojet["nbjets"]      = t.nBJet20;
+    values_monojet["ht"]          = t.ht;
+    values_monojet["met"]         = t.met_pt;
+
+    for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
+      if(SRVecMonojet.at(srN).PassesSelectionCRQCD(values_monojet)){
+	fillHistosQCD(SRVecMonojet.at(srN).crqcdHistMap,    SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix);
+	//      break;//control regions are not necessarily orthogonal
+      }
+    }
+  } // monojet regions
+  
+  return;
+}
+
 void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
@@ -2098,3 +2162,41 @@ void MT2Looper::fillHistosRemovedLepton(std::map<std::string, TH1*>& h_1d, int n
   outfile_->cd();
   return;
 }
+
+void MT2Looper::fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
+  TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
+  if (dir == 0) {
+    dir = outfile_->mkdir(dirname.c_str());
+  } 
+  dir->cd();
+
+  // workaround for monojet bins
+  float mt2_temp = t.mt2;
+  TString directoryname(dirname);
+  // to include QCD estimate for monojet region
+  if (t.nJet30 == 1 || directoryname.Contains("J")) mt2_temp = t.jet1_pt;
+
+  plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
+  plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
+  plot1D("h_mt2"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
+  plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
+  plot1D("h_ht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
+  plot1D("h_nJet30"+s,       t.nJet30,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
+  plot1D("h_nJet30Eta3"+s,       nJet30Eta3_,   evtweight_, h_1d, ";N(jets, |#eta| > 3.0)", 10, 0, 10);
+  plot1D("h_nBJet20"+s,      t.nBJet20,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
+  plot1D("h_deltaPhiMin"+s,  t.deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
+  plot1D("h_diffMetMht"+s,   t.diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
+  plot1D("h_diffMetMhtOverMet"+s,   t.diffMetMht/t.met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
+  plot1D("h_minMTBMet"+s,   t.minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
+  plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
+  plot1D("h_J0pt"+s,       t.jet1_pt,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
+  plot1D("h_J1pt"+s,       t.jet2_pt,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
+  plot1D("h_mt2bins"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  plot1D("h_htbins"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins, htbins);
+  plot1D("h_njbins"+s,       t.nJet30,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
+  plot1D("h_nbjbins"+s,       t.nBJet20,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
+  
+  outfile_->cd();
+  return;
+}
+
