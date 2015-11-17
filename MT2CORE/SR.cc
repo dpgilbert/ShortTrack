@@ -24,6 +24,10 @@ void SR::SetVarCRSL(std::string var_name, float lower_bound, float upper_bound){
   binsCRSL_[var_name] = std::pair<float, float>(lower_bound, upper_bound);
 }
 
+void SR::SetVarCRQCD(std::string var_name, float lower_bound, float upper_bound){
+  binsCRQCD_[var_name] = std::pair<float, float>(lower_bound, upper_bound);
+}
+
 void SR::SetMT2Bins(int nbins, float* bins){
   n_mt2bins_ = nbins;
   mt2bins_ = new float [n_mt2bins_+1];
@@ -71,6 +75,26 @@ unsigned int SR::GetNumberOfVariablesCRSL(){
 std::vector<std::string> SR::GetListOfVariablesCRSL(){
   std::vector<std::string> vars;
   for(std::map<std::string, std::pair<float, float> >::const_iterator it = binsCRSL_.begin(); it != binsCRSL_.end(); ++it) {
+    vars.push_back(it->first);
+  }
+  return (vars);
+}
+
+float SR::GetLowerBoundCRQCD(std::string var_name){
+  return (binsCRQCD_.at(var_name)).first;
+}
+
+float SR::GetUpperBoundCRQCD(std::string var_name){
+  return (binsCRQCD_.at(var_name)).second;
+}
+
+unsigned int SR::GetNumberOfVariablesCRQCD(){
+  return (binsCRQCD_.size());
+}
+
+std::vector<std::string> SR::GetListOfVariablesCRQCD(){
+  std::vector<std::string> vars;
+  for(std::map<std::string, std::pair<float, float> >::const_iterator it = binsCRQCD_.begin(); it != binsCRQCD_.end(); ++it) {
     vars.push_back(it->first);
   }
   return (vars);
@@ -125,6 +149,27 @@ bool SR::PassesSelectionCRSL(std::map<std::string, float> values){
   return true;
 }
 
+bool SR::PassesSelectionCRQCD(std::map<std::string, float> values){
+  float ep = 0.000001;
+  if(GetNumberOfVariablesCRQCD() != values.size()){
+    std::cout << "Number of variables to cut on != number of variables in CRQCD region. Passed " << values.size() << ", expected " << GetNumberOfVariablesCRQCD() << std::endl;
+    throw std::invalid_argument("Number of variables to cut on != number of variables in CRQCD region");
+  }
+  for(std::map<std::string, float>::const_iterator it = values.begin(); it != values.end(); it++){
+    if(binsCRQCD_.find(it->first) != binsCRQCD_.end()){ //check that we actually have bounds set for this variable
+      float value = it->second;
+      float cut_lower = GetLowerBoundCRQCD(it->first);
+      float cut_upper = GetUpperBoundCRQCD(it->first);
+      if(value < cut_lower) return false;
+      if(( std::abs(cut_upper + 1.0) > ep ) && (value >= cut_upper)) return false;
+    }
+    else{
+      throw std::invalid_argument("Cut values not set for this variable");
+    }
+  }
+  return true;
+}
+
 void SR::RemoveVar(std::string var_name){
   if(bins_.find(var_name) != bins_.end()) bins_.erase(var_name);
   else throw std::invalid_argument("Variable not added. Cannot remove!");
@@ -135,8 +180,14 @@ void SR::RemoveVarCRSL(std::string var_name){
   else throw std::invalid_argument("Variable not added. Cannot remove!");
 }
 
+void SR::RemoveVarCRQCD(std::string var_name){
+  if(binsCRQCD_.find(var_name) != binsCRQCD_.end()) binsCRQCD_.erase(var_name);
+  else throw std::invalid_argument("Variable not added. Cannot remove!");
+}
+
 void SR::Clear(){
   srName_ = "";
   bins_.clear();
   binsCRSL_.clear();
+  binsCRQCD_.clear();
 }

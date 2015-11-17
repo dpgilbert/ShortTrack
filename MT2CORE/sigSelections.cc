@@ -1081,7 +1081,6 @@ std::vector<SR> getSignalRegionsJamboree(){
   std::vector<SR> SRVec;
   SR sr;
   SR baseSR;
-  SR baseSRmonojet;
 
   //first set binning in njet-nbjet plane
   sr.SetName("1");
@@ -1184,6 +1183,8 @@ std::vector<SR> getSignalRegionsJamboree(){
     fullSR.SetVar("met", 200, -1);
     fullSR.SetVarCRSL("ht", 200, 450);
     fullSR.SetVarCRSL("met", 200, -1);
+    fullSR.SetVarCRQCD("ht", 200, 450);
+    fullSR.SetVarCRQCD("met", 200, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
@@ -1206,6 +1207,8 @@ std::vector<SR> getSignalRegionsJamboree(){
     fullSR.SetVar("met", 200, -1);
     fullSR.SetVarCRSL("ht", 450, 575);
     fullSR.SetVarCRSL("met", 200, -1);
+    fullSR.SetVarCRQCD("ht", 450, 575);
+    fullSR.SetVarCRQCD("met", 200, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
@@ -1228,6 +1231,8 @@ std::vector<SR> getSignalRegionsJamboree(){
     fullSR.SetVar("met", 200, -1);
     fullSR.SetVarCRSL("ht", 575, 1000);
     fullSR.SetVarCRSL("met", 200, -1);
+    fullSR.SetVarCRQCD("ht", 575, 1000);
+    fullSR.SetVarCRQCD("met", 200, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
@@ -1250,6 +1255,8 @@ std::vector<SR> getSignalRegionsJamboree(){
     fullSR.SetVar("met", 30, -1);
     fullSR.SetVarCRSL("ht", 1000, 1500);
     fullSR.SetVarCRSL("met", 30, -1);
+    fullSR.SetVarCRQCD("ht", 1000, 1500);
+    fullSR.SetVarCRQCD("met", 30, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
@@ -1272,6 +1279,8 @@ std::vector<SR> getSignalRegionsJamboree(){
     fullSR.SetVar("met", 30, -1);
     fullSR.SetVarCRSL("ht", 1500, -1);
     fullSR.SetVarCRSL("met", 30, -1);
+    fullSR.SetVarCRQCD("ht", 1500, -1);
+    fullSR.SetVarCRQCD("met", 30, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
@@ -1305,6 +1314,14 @@ std::vector<SR> getSignalRegionsJamboree(){
   baseSR.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
   baseSR.SetVarCRSL("nlep", 1, 2);
 
+  // common selections for QCD
+  baseSR.SetVarCRQCD("mt2", 200, -1);
+  baseSR.SetVarCRQCD("j1pt", 30, -1);
+  baseSR.SetVarCRQCD("j2pt", 30, -1);
+  baseSR.SetVarCRQCD("deltaPhiMin", 0., 0.3);
+  baseSR.SetVarCRQCD("diffMetMhtOverMet", 0, 0.5);
+  baseSR.SetVarCRQCD("nlep", 0, 1);
+
   //add baseline selections to all signal regions 
   std::vector<std::string> vars = baseSR.GetListOfVariables();
   for(unsigned int i = 0; i < SRVec.size(); i++){
@@ -1321,6 +1338,14 @@ std::vector<SR> getSignalRegionsJamboree(){
     }
   }
 
+  //add baseline selections to all QCD regions 
+  std::vector<std::string> varsCRQCD = baseSR.GetListOfVariablesCRQCD();
+  for(unsigned int i = 0; i < SRVec.size(); i++){
+    for(unsigned int j = 0; j < varsCRQCD.size(); j++){
+      SRVec.at(i).SetVarCRQCD(varsCRQCD.at(j), baseSR.GetLowerBoundCRQCD(varsCRQCD.at(j)), baseSR.GetUpperBoundCRQCD(varsCRQCD.at(j)));
+    }
+  }
+
   return SRVec;
 
 }
@@ -1333,48 +1358,52 @@ std::vector<SR> getSignalRegionsMonojet(){
   SR baseSR;
 
   // define baseline selections commmon to all monojet regions
-  float mt2bins_monojet[2] = {0, 1500};
   baseSR.SetVar("j1pt", 200, -1);
   baseSR.SetVar("nlep", 0, 1);
   baseSR.SetVar("njets", 1, 2);
+  baseSR.SetVar("ht", 200, -1);
   baseSR.SetVar("met", 200, -1);
   baseSR.SetVar("deltaPhiMin", 0.3, -1);
   baseSR.SetVar("diffMetMhtOverMet", 0, 0.5);
   baseSR.SetVarCRSL("j1pt", 200, -1);
   baseSR.SetVarCRSL("nlep", 1, 2);
   baseSR.SetVarCRSL("njets", 1, 2);
+  baseSR.SetVarCRSL("ht", 200, -1);
   baseSR.SetVarCRSL("met", 200, -1);
   baseSR.SetVarCRSL("deltaPhiMin", 0.3, -1);
   baseSR.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
-  baseSR.SetMT2Bins(1, mt2bins_monojet);
+  // QCD region: 2 jets, low deltaPhiMin, pt subleading between 30 and 60 GeV
+  baseSR.SetVarCRQCD("j1pt", 200, -1);
+  baseSR.SetVarCRQCD("j2pt", 30, 60);
+  baseSR.SetVarCRQCD("nlep", 0, 1);
+  baseSR.SetVarCRQCD("njets", 2, 3);
+  baseSR.SetVarCRQCD("ht", 200, -1);
+  baseSR.SetVarCRQCD("met", 200, -1);
+  baseSR.SetVarCRQCD("deltaPhiMin", 0., 0.3);
+  baseSR.SetVarCRQCD("diffMetMhtOverMet", 0, 0.5);
 
   // fine binning in HT
-  const int nbins_monojet = 7;
-  float htbins[nbins_monojet+1] = {200, 300, 400, 500, 600, 800, 1000, 1500};
+  const int nbins_monojet_0b = 7;
+  float htbins_0b[nbins_monojet_0b+1] = {200, 300, 400, 500, 600, 800, 1000, 1500};
+  const int nbins_monojet_1b = 6;
+  float htbins_1b[nbins_monojet_1b+1] = {200, 300, 400, 500, 600, 800, 1500};
 
   temp_SR_vec.clear();
-  for(unsigned int iSR = 0; iSR < nbins_monojet; iSR++){
-    SR fullSR0b = baseSR;  
-    fullSR0b.SetName(std::to_string(iSR+1) + "J");
-    fullSR0b.SetVar("ht", htbins[iSR], htbins[iSR+1]);
-    fullSR0b.SetVar("nbjets", 0, 1);
-    fullSR0b.SetVarCRSL("ht", htbins[iSR], htbins[iSR+1]);
-    fullSR0b.SetVarCRSL("nbjets", 0, 1);
-    SRVec.push_back(fullSR0b);
+  SR fullSR0b = baseSR;  
+  fullSR0b.SetName("1J");
+  fullSR0b.SetVar("nbjets", 0, 1);
+  fullSR0b.SetVarCRSL("nbjets", 0, 1);
+  fullSR0b.SetVarCRQCD("nbjets", 0, 1);
+  fullSR0b.SetMT2Bins(nbins_monojet_0b, htbins_0b);
+  SRVec.push_back(fullSR0b);
 
-    // btag bins: offset bin number by 10
-    if (iSR < nbins_monojet-1) {
-      SR fullSR1b = baseSR;  
-      fullSR1b.SetName(std::to_string(iSR+11) + "J");
-      float ht_max = htbins[iSR+1];
-      if (iSR == nbins_monojet-2) ht_max = htbins[nbins_monojet];
-      fullSR1b.SetVar("ht", htbins[iSR], ht_max);
-      fullSR1b.SetVar("nbjets", 1, -1);
-      fullSR1b.SetVarCRSL("ht", htbins[iSR], ht_max);
-      fullSR1b.SetVarCRSL("nbjets", 1, -1);
-      SRVec.push_back(fullSR1b);
-    }
-  }
+  SR fullSR1b = baseSR;  
+  fullSR1b.SetName("2J");
+  fullSR1b.SetVar("nbjets", 1, -1);
+  fullSR1b.SetVarCRSL("nbjets", 1, -1);
+  fullSR1b.SetVarCRQCD("nbjets", 1, -1);
+  fullSR1b.SetMT2Bins(nbins_monojet_1b, htbins_1b);
+  SRVec.push_back(fullSR1b);
   
   return SRVec;
 
