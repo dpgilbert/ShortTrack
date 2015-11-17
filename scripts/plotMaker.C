@@ -471,7 +471,7 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
 
   // backgrounds first -- loop backwards
   for( int i = n-1 ; i >= 0 ; --i ){
-    if( TString(names.at(i)).Contains("data")  ) continue;
+    if( TString(names.at(i)).Contains("data")  ) {found_data = true; continue;}
     if( TString(names.at(i)).Contains("sig")  ) continue;
     cout << getTableName(names.at(i));
     for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
@@ -531,6 +531,37 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
   cout << " \\\\" << endl;
   cout << "\\hline" << endl;
 
+  // next print data, if it exists
+  if (found_data) {
+    for( unsigned int i = 0 ; i < n ; i++ ){
+      if( !TString(names.at(i)).Contains("data") ) continue;
+      cout << getTableName(names.at(i));
+      for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+	TString fullhistname = Form("%s/h_mt2bins",dirs.at(idir).c_str());
+	TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
+	double yield = 0.;
+	if (h) {
+	  // use all bins
+	  if (mt2bin < 0) {
+	    yield = h->Integral(0,-1);
+	  }
+	  // last bin: include overflow
+	  else if (mt2bin == h->GetXaxis()->GetNbins()) {
+	    yield = h->Integral(mt2bin,-1);
+	  }
+	  // single bin, not last bin
+	  else {
+	    yield = h->GetBinContent(mt2bin);
+	  }
+	}
+	cout << "  &  " << Form("%d",(int)yield);
+      }
+      cout << " \\\\" << endl;
+    } // loop over samples
+    cout << "\\hline" << endl;
+  } // if found_data
+  
+  // finally print signals
   for( unsigned int i = 0 ; i < n ; i++ ){
     if( !TString(names.at(i)).Contains("sig") ) continue;
     cout << getTableName(names.at(i));
