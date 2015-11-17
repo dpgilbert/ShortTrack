@@ -8,7 +8,12 @@
 
 int colors[4] = {2,4,3,6};
 
-std::string savedir = "jec_errcomp/";
+//std::string savedir = "zinv_mccomp/";
+//std::string savedir = "jec_wjets_errcomp/";
+std::string savedir = "jec_ttbar_errcomp_Summer15_25nsV6/";
+//std::string savedir = "jec_wjets_errcomp_Summer15_25nsV6/";
+//std::string savedir = "jec_zinv_errcomp_Summer15_25nsV6/";
+//std::string savedir = "unclustered_errcomp/";
 
 TFile* f1(0);
 
@@ -30,18 +35,29 @@ void compare_mt2bins_files() {
   TH1::SetDefaultSumw2();
 
   TString basedir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/";
-  f1 = new TFile(Form("%s/V00-01-06_25ns_skim_base_3fb_mt2gt200_monojet_allqcdht/ttsl_mg_lo.root",basedir.Data()), "READ");
+  TString sample = "ttsl_mg_lo";
+  //TString sample = "wjets_ht";
+  //TString sample = "zinv_ht";
+  // TString sample2 = "zinv_amcatnlo";
+  
+  //f1 = new TFile(Form("%s/V00-01-06_25ns_skim_base_3fb_mt2gt200_monojet_int/%s.root",basedir.Data(),sample.Data()), "READ");
+  //f1 = new TFile(Form("%s/V00-01-07_25ns_miniaodv2_skim_base_1p26fb_mt2gt200_lepeffvar20_eta24/%s.root",basedir.Data(),sample.Data()), "READ");
+  f1 = new TFile(Form("%s/V00-01-07_25ns_miniaodv2_skim_base_1p26fb_mt2gt200_jec_nominal/%s.root",basedir.Data(),sample.Data()), "READ");
+  //std::string central_histname = "h_ht";
   std::string central_histname = "h_mt2bins";
   std::vector<std::string> vars;
   std::vector<TFile*> files_vars;
-  //vars.push_back("jec_UP"); files_vars.push_back(new TFile(Form("%s/V00-01-06_25ns_jec_UP_skim_base_3fb_mt2gt200_monojet/ttsl_mg_lo.root",basedir.Data()),"READ"));
-  //  vars.push_back("jec_DN"); files_vars.push_back(new TFile(Form("%s/V00-01-06_25ns_jec_DN_skim_base_3fb_mt2gt200_monojet/ttsl_mg_lo.root",basedir.Data()),"READ"));
-  vars.push_back("unclustered_UP"); files_vars.push_back(new TFile(Form("%s/V00-01-06_25ns_unclustered_UP_v2_skim_base_3fb_mt2gt200_monojet/ttsl_mg_lo.root",basedir.Data()),"READ"));
-  vars.push_back("unclustered_DN"); files_vars.push_back(new TFile(Form("%s/V00-01-06_25ns_unclustered_DN_v2_skim_base_3fb_mt2gt200_monojet/ttsl_mg_lo.root",basedir.Data()),"READ"));
-  
+  // vars.push_back("jec_UP"); files_vars.push_back(new TFile(Form("%s/V00-01-06_25ns_jec_UP_v2_skim_base_3fb_mt2gt200_monojet_int/%s.root",basedir.Data(),sample.Data()),"READ"));
+  // vars.push_back("jec_DN"); files_vars.push_back(new TFile(Form("%s/V00-01-06_25ns_jec_DN_v2_skim_base_3fb_mt2gt200_monojet_int/%s.root",basedir.Data(),sample.Data()),"READ"));
+  vars.push_back("jec_UP"); files_vars.push_back(new TFile(Form("%s/V00-01-07_25ns_miniaodv2_skim_base_1p26fb_mt2gt200_Summer15_25nsV6_jec_UP/%s.root",basedir.Data(),sample.Data()),"READ"));
+  vars.push_back("jec_DN"); files_vars.push_back(new TFile(Form("%s/V00-01-07_25ns_miniaodv2_skim_base_1p26fb_mt2gt200_Summer15_25nsV6_jec_DN/%s.root",basedir.Data(),sample.Data()),"READ"));
+  //  vars.push_back("aMCatNLO"); files_vars.push_back(new TFile(Form("%s/V00-01-07_25ns_miniaodv2_skim_base_1p26fb_mt2gt200_lepeffvar20_eta24/%s.root",basedir.Data(),sample2.Data()),"READ"));
 
   std::vector<std::string> regions;
 
+  regions.push_back("srbaseJ0B");
+  regions.push_back("srbaseJ1B");
+  
   regions.push_back("sr1VL");
   regions.push_back("sr2VL");
   regions.push_back("sr3VL");
@@ -100,6 +116,7 @@ void compare_mt2bins_files() {
 
   // loop over regions
   for (unsigned int j=0; j<regions.size(); ++j) {
+
     TString fullhistname = Form("%s/%s", regions.at(j).c_str(),central_histname.c_str());
     TH1D* h = (TH1D*) f1->Get(fullhistname);
     if (h == 0) continue;
@@ -108,6 +125,7 @@ void compare_mt2bins_files() {
     // loop over variations
     for (unsigned int ivar = 0; ivar < vars.size(); ++ivar) {
       TH1D* h_var = (TH1D*) files_vars.at(ivar)->Get(fullhistname);
+      if (!h_var) std::cout << "WARNING: couldn't find hist for variation: " << vars.at(ivar) << std::endl;
       hists_vars.push_back(h_var);
     }
 
@@ -136,6 +154,8 @@ void make_plot(std::string region, TH1D* h, std::vector<TH1D*> hists_vars, std::
   pad1->SetLogy();
 
   h->SetLineColor(kBlack);
+  if (region_name.find("j1") != std::string::npos) h->GetXaxis()->SetTitle("p_{T}(jet1) [GeV]");
+  //  h->GetXaxis()->SetRangeUser(0,1000);
   h->Draw("histe");
   double norm = h->Integral(0,-1);
 
@@ -144,7 +164,7 @@ void make_plot(std::string region, TH1D* h, std::vector<TH1D*> hists_vars, std::
   legend->SetTextSize(0.038);
   legend->SetTextFont(42);
   legend->SetFillColor(0);
-  legend->AddEntry( h, "central", "l" );
+  legend->AddEntry( h, "Nominal", "l" );
 
   for (unsigned int i=0; i<hists_vars.size(); ++i) {
     TH1D* h_var = hists_vars.at(i);
@@ -156,7 +176,6 @@ void make_plot(std::string region, TH1D* h, std::vector<TH1D*> hists_vars, std::
   }
 
   legend->Draw("same");
-
 
   //  gPad->RedrawAxis();
   
@@ -171,6 +190,7 @@ void make_plot(std::string region, TH1D* h, std::vector<TH1D*> hists_vars, std::
   pad2->SetGridy();
 
   TH2D* h2_axes_ratio = new TH2D("axes_ratio", "", 130, 200, 1500, 20, 0.5, 1.5 );
+  //TH2D* h2_axes_ratio = new TH2D("axes_ratio", "", 130, 0, 1000, 20, 0.01, 2.0 );
   h2_axes_ratio->SetStats(0);
   h2_axes_ratio->GetXaxis()->SetLabelSize(0.00);
   h2_axes_ratio->GetXaxis()->SetTickLength(0.09);
@@ -194,8 +214,9 @@ void make_plot(std::string region, TH1D* h, std::vector<TH1D*> hists_vars, std::
     h_ratio->SetLineColor(colors[i]);
     h_ratio->SetStats(0);
     h_ratio->SetMarkerStyle(20);
-    h_ratio->SetMarkerSize(1.2);
+    h_ratio->SetMarkerSize(0.8);
     h_ratio->Draw("hist same");
+    //h_ratio->Draw("histe same");
   }
 
   gPad->RedrawAxis();
@@ -211,6 +232,10 @@ void make_plot(std::string region, TH1D* h, std::vector<TH1D*> hists_vars, std::
 
 //_______________________________________________________________________________
 std::string getRegionName(TString dir) {
+
+  if (dir == "srbaseJ0B") return "HT200toInf_j1_b0";
+  else if (dir == "srbaseJ1B") return "HT200toInf_j1_b1toInf";
+  else if (dir == "srbaseJ") return "HT200toInf_j1";
 
   //Get variable boundaries for signal region.
   //Used to create datacard name.

@@ -8,7 +8,9 @@
 
 int colors[4] = {2,4,3,6};
 
-std::string savedir = "btagsf_errcomp/";
+//std::string savedir = "btagsf_ttbar_errcomp_ext1/";
+//std::string savedir = "btagsf_wjets_errcomp_ext1/";
+std::string savedir = "btagsf_zinv_errcomp_ext1/";
 
 TFile* f1(0);
 
@@ -29,7 +31,11 @@ void compare_mt2bins() {
 
   TH1::SetDefaultSumw2();
   
-  f1 = new TFile("/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-01-06_25ns_skim_base_3fb_mt2gt200_monojet_btagsf_vars/ttsl_mg_lo.root", "READ");
+  //  f1 = new TFile("/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-01-06_25ns_skim_base_3fb_mt2gt200_monojet_btagsf_ignore0weight/ttsl_mg_lo.root", "READ");
+  //f1 = new TFile("/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-01-06_25ns_skim_base_3fb_mt2gt200_monojet_int_btagsf_vars/wjets_ht.root", "READ");
+  //  f1 = new TFile("/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-01-07_25ns_miniaodv2_skim_base_1p26fb_mt2gt200_btagsf_vars/ttsl_mg_lo.root", "READ");
+  //  f1 = new TFile("/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-01-07_25ns_miniaodv2_skim_base_1p26fb_mt2gt200_btagsf_vars/wjets_ht.root", "READ");
+  f1 = new TFile("/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-01-07_25ns_miniaodv2_skim_base_1p26fb_mt2gt200_btagsf_vars/ttsl_mg_lo.root", "READ");
   std::string central_histname = "h_mt2bins";
   std::vector<std::string> vars;
   vars.push_back("btagsf_UP");
@@ -37,6 +43,9 @@ void compare_mt2bins() {
 
   std::vector<std::string> regions;
 
+  regions.push_back("srbaseJ0B");
+  regions.push_back("srbaseJ1B");
+  
   regions.push_back("sr1VL");
   regions.push_back("sr2VL");
   regions.push_back("sr3VL");
@@ -132,6 +141,7 @@ void make_plot(std::string region, TH1D* h, std::vector<TH1D*> hists_vars, std::
   pad1->SetLogy();
 
   h->SetLineColor(kBlack);
+  if (region_name.find("j1") != std::string::npos) h->GetXaxis()->SetTitle("p_{T}(jet1) [GeV]");
   h->Draw("histe");
   double norm = h->Integral(0,-1);
 
@@ -207,6 +217,9 @@ void make_plot(std::string region, TH1D* h, std::vector<TH1D*> hists_vars, std::
 
 //_______________________________________________________________________________
 std::string getRegionName(TString dir) {
+
+  if (dir == "srbaseJ0B") return "HT200toInf_j1_b0";
+  else if (dir == "srbaseJ1B") return "HT200toInf_j1_b1toInf";
 
   //Get variable boundaries for signal region.
   //Used to create datacard name.
