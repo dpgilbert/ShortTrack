@@ -116,7 +116,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     if( logplot ) plotpad->SetLogy();
   }
   
-  TLegend* leg = new TLegend(0.55,0.6,0.85,0.90);
+  TLegend* leg = new TLegend(0.55,0.57,0.85,0.87);
   leg->SetFillColor(0);
   leg->SetBorderSize(0);
   leg->SetTextSize(0.032);
@@ -320,13 +320,19 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   // lostlepton CR
   if ((histdir.find("crsl") != std::string::npos)) {
     ht_label = "";
+    if (histdir.find("J") != std::string::npos) region_label_line2 = "E_{T}^{miss} > 200 GeV";
     if (histdir.find("met50") != std::string::npos) region_label_line2 = "E_{T}^{miss} > 50 GeV";
     else if (histdir.find("met80") != std::string::npos) region_label_line2 = "E_{T}^{miss} > 80 GeV";
     if (histdir.find("mt30") != std::string::npos) region_label_line2 += ", M_{T} > 30 GeV";
+    if (histdir.find("J") != std::string::npos) region_label = "exactly 1j";
+    else if (histdir.find("VL") != std::string::npos) {region_label = "#geq 2j"; ht_label = "200 < H_{T} < 450 GeV";}
+    else if (histdir.find("L") != std::string::npos) {region_label = "#geq 2j"; ht_label = "450 < H_{T} < 575 GeV";}
+    else if (histdir.find("M") != std::string::npos) {region_label = "#geq 2j"; ht_label = "575 < H_{T} < 1000 GeV";}
+    else if (histdir.find("UH") != std::string::npos) {region_label = "#geq 2j"; ht_label = "H_{T} > 1500 GeV";}
+    else if (histdir.find("H") != std::string::npos) {region_label = "#geq 2j"; ht_label = "1000 < H_{T} < 1500 GeV";}
     if (histdir.find("nj2") != std::string::npos) region_label = "#geq 2j";
     if (histdir.find("nb0") != std::string::npos) region_label += ", 0b";
     else if (histdir.find("nb2") != std::string::npos) region_label += ", #geq 2b";
-    else region_label += ", #geq 0b";
   }
   if ((histdir.find("crslel") != std::string::npos)) region_label += ", 1 electron";
   else if ((histdir.find("crslmu") != std::string::npos)) region_label += ", 1 muon";
@@ -337,6 +343,8 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     if (histdir.find("base") != std::string::npos) region_label = "";
     else region_label = "#geq 2j, ";
     if ((histdir.find("base") != std::string::npos) || (histdir.find("nj2nb0") != std::string::npos)) ht_label = "";
+    else if (histdir.find("ht200") != std::string::npos) ht_label = "H_{T} > 200 GeV";
+    else if (histdir.find("ht450") != std::string::npos) ht_label = "H_{T} > 450 GeV";
     if (histdir.find("crmtel") != std::string::npos) region_label += "Z(ee) w/ removed lepton";
     else if (histdir.find("crmtmu") != std::string::npos) region_label += "Z(#mu#mu) w/ removed lepton";
     else region_label += "Z(ll) w/ removed lepton";
@@ -352,7 +360,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   if (region_label_line2.Length() > 0) label.DrawLatex(label_x_start,label_y_start - 2 * label_y_spacing,region_label_line2);
 
   if (scaleBGtoData && data_hist) {
-    TString scale_label = Form("MC scaled by %.2f",bg_sf);
+    TString scale_label = Form("MC scaled by %.2f #pm %.2f",bg_sf,bg_sf_err);
     label.DrawLatex(0.6,0.55,scale_label);
   }
 
@@ -862,6 +870,80 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
 
 
 //_______________________________________________________________________________
+// requires output files from ZllMTLooper
+void plotMakerZllMT(){
+
+  //  gROOT->LoadMacro("CMS_lumi.C");
+  cmsText = "CMS Preliminary";
+  cmsTextSize = 0.5;
+  lumiTextSize = 0.4;
+  writeExtraText = false;
+  lumi_13TeV = "1.3 fb^{-1}";
+
+  string input_dir = "/home/olivito/cms3/MT2Analysis/ZllMTLooper/output/V00-01-07_25ns_miniaodv2_1p26fb_mt2gt200_crht200/";
+
+  
+  // ----------------------------------------
+  //  samples definition
+  // ----------------------------------------
+
+  // get input files
+
+  TFile* f_ttbar = new TFile(Form("%s/top.root",input_dir.c_str())); //hadd'ing of ttbar, ttw, ttz, tth, singletop
+  TFile* f_dyjets = new TFile(Form("%s/dyjetsll_ht.root",input_dir.c_str()));
+  //TFile* f_dyjets = new TFile(Form("%s/zjets_mg_lo.root",input_dir.c_str()));
+  TFile* f_data = new TFile(Form("%s/data_Run2015D.root",input_dir.c_str())); 
+
+  vector<TFile*> samples;
+  vector<string>  names;
+
+  samples.push_back(f_ttbar); names.push_back("top");
+  samples.push_back(f_dyjets); names.push_back("dyjets");
+  samples.push_back(f_data); names.push_back("data");
+
+  // ----------------------------------------
+  //  plots definitions
+  // ----------------------------------------
+
+  float scalesig = -1.;
+  //float scalesig = 50.;
+  bool printplots = true;
+  bool doRatio = true;
+  bool scaleBGtoData = true;
+
+  if(printplots){
+    TIter it(f_ttbar->GetListOfKeys());
+    TKey* k;
+    std::string cr_skip = "cr";
+    std::string sr_skip = "sr";
+    while ((k = (TKey *)it())) {
+      //if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
+      //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
+      std::string dir_name = k->GetTitle();
+      //if(dir_name != "crmtbase") continue; //to do only this dir
+      //if(dir_name != "crmtnj2nb0") continue; //to do only this dir
+      if(dir_name != "crmtht200") continue; //to do only this dir
+      //if(dir_name != "crmtht450") continue; //to do only this dir
+      //if(dir_name != "crmtmuht200" && dir_name != "crmtelht200") continue; //to do only this dir
+
+      makePlot( samples , names , dir_name , "h_zll_mass" , "Dilepton Mass [GeV]" , "Events / 1 GeV" , 0 , 200 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_nVert" , "N(vertices)" , "Events" , 0 , 50 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_kill_lep_pt" , "Removed Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_keep_lep_pt" , "Kept Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_zll_pt" , "Dilepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_zllmt_met_pt" , "Transformed E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 500 , 5 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_zllmt_mt2" , "Transformed M_{T2} [GeV]" , "Events / 10 GeV" , 0 , 500 , 5 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_zllmt_mt" , "Transformed M_{T} [GeV]" , "Events / 10 GeV" , 0 , 300 , 5 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_zllmt_mt_mt2gt50" , "Transformed M_{T} [GeV]" , "Events / 10 GeV" , 0 , 300 , 5 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_zllmt_mt_mt2gt100" , "Transformed M_{T} [GeV]" , "Events / 10 GeV" , 0 , 300 , 5 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_zllmt_mt_mt2gt150" , "Transformed M_{T} [GeV]" , "Events / 10 GeV" , 0 , 300 , 5 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_zllmt_mt_mt2gt200" , "Transformed M_{T} [GeV]" , "Events / 10 GeV" , 0 , 300 , 5 , true, printplots, scalesig, doRatio, scaleBGtoData );
+
+    }
+  }
+}
+  
+//_______________________________________________________________________________
 void plotMakerGJets(){
   
   //  gROOT->LoadMacro("CMS_lumi.C");
@@ -1282,6 +1364,7 @@ void plotMakerCRSL(){
 void plotMaker(){
   //tableMakerZinvCR(); return;
   //plotMakerDY(); return;
+  //plotMakerZllMT(); return;
   //plotMakerGJets(); return;
   //plotMakerRemovedLep(); return;
   //plotMakerCRSL(); return;
