@@ -211,7 +211,7 @@ int main(int argc, char **argv) {
   else if (infile.Contains("50ns")) bx = 50;
   else if (infile.Contains("25ns")) bx = 25;
 
-  bool isFastsim = bool(infile.Contains("FSPremix"));
+  bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns"));
   
   if (bx == 0) {
     std::cout << "ERROR: couldn't figure out bx for sample!! filename was: " << infile << ". Exiting" << std::endl;
