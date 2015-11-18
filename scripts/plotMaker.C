@@ -476,9 +476,9 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
     cout << getTableName(names.at(i));
     for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
       TString fullhistname = Form("%s/h_mt2bins",dirs.at(idir).c_str());
-      if (names.at(i)=="gjets" || names.at(i)=="gjetsqcd") fullhistname.ReplaceAll("sr","crgj");
-      if (names.at(i)=="dyjets") fullhistname.ReplaceAll("sr","crdy");
-      if (names.at(i)=="wjets") fullhistname.ReplaceAll("sr","crrl");
+      // if (names.at(i)=="gjets" || names.at(i)=="gjetsqcd") fullhistname.ReplaceAll("sr","crgj");
+      // if (names.at(i)=="dyjets") fullhistname.ReplaceAll("sr","crdy");
+      // if (names.at(i)=="wjets") fullhistname.ReplaceAll("sr","crrl");
       TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
       double yield = 0.;
       double err = 0.;
