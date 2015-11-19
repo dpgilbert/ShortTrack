@@ -315,9 +315,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_lostlep_shape = Form("llep_shape_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   TString name_lostlep_crstat = Form("llep_CRstat_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   TString name_lostlep_mcstat = Form("llep_MCstat_%s", channel.c_str());
-  TString name_lostlep_alphaerr = Form("llep_CRstat_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
+  TString name_lostlep_alphaerr = Form("llep_alphaerr_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   TString name_lostlep_lepeff = Form("llep_lepeff_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
-  TString name_lostlep_bTag = Form("llep_lepeff_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
+  TString name_lostlep_bTag = Form("llep_bTag_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
 
   if (n_lostlep_cr > 0.) {
     lostlep_crstat = n_lostlep / n_lostlep_cr > 0 ? n_lostlep / n_lostlep_cr : last_lostlep_transfer;
