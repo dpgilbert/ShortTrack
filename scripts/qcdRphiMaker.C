@@ -240,8 +240,7 @@ void qcdRphiMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/
   // inputs with rphi, fj, rb and uncertainties from ETH.  Assume this will live in scripts dir
   TFile* f_qcd = new TFile(Form("./%s.root",qcdname.c_str()));
   // other MC backgrounds needed for EWK subtraction in monojet prediction region
-  //  TFile* f_lostlep = new TFile(Form("%s/lostlep.root",input_dir.c_str()));
-  TFile* f_lostlep = new TFile(Form("%s/top.root",input_dir.c_str()));
+  TFile* f_lostlep = new TFile(Form("%s/lostlep.root",input_dir.c_str()));
   TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
   
   if(f_data->IsZombie() || f_qcd->IsZombie() || f_lostlep->IsZombie() || f_zinv->IsZombie()) {
