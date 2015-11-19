@@ -269,6 +269,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     // (set to 100% if the ratio doesn't exist)
     zllgamma_nj  = h_zllgamma_nj ->GetBinContent( bin_nj  ) > 0 ? h_zllgamma_nj ->GetBinError( bin_nj  ) / h_zllgamma_nj ->GetBinContent( bin_nj  ) : 1.;
     zllgamma_nb  = h_zllgamma_nb ->GetBinContent( bin_nb  ) > 0 ? h_zllgamma_nb ->GetBinError( bin_nb  ) / h_zllgamma_nb ->GetBinContent( bin_nb  ) : 1.;
+    if (nbjets_LOW >= 3) zllgamma_nb *= 2;
     zllgamma_ht  = h_zllgamma_ht ->GetBinContent( bin_ht  ) > 0 ? h_zllgamma_ht ->GetBinError( bin_ht  ) / h_zllgamma_ht ->GetBinContent( bin_ht  ) : 1.;
     zllgamma_mt2 = h_zllgamma_mt2->GetBinContent( bin_mt2 ) > 0 ? h_zllgamma_mt2->GetBinError( bin_mt2 ) / h_zllgamma_mt2->GetBinContent( bin_mt2 ) : 1.;
     //cout<<"Looking at bin "<<channel<<endl;
@@ -284,7 +285,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   n_bkg = n_lostlep+n_zinv+n_qcd;
   if (n_bkg < 0.001) n_qcd = 0.01;
 
-  if (suppressZeroBins && ((n_sig < 0.1) || (n_sig/n_bkg < 0.02))) {
+  //  if (suppressZeroBins && ((n_sig < 0.1) || (n_sig/n_bkg < 0.02))) {
+  if (suppressZeroBins && (n_sig < 0)) {
     if (verbose) std::cout << "Zero signal, card not printed: " << cardname << std::endl;
     return 0;
   }
@@ -332,7 +334,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
       // first bin needs to compensate normalization from the rest
       float increment = 0.;
       for (int ibin=1; ibin<h_lostlep->GetNbinsX(); ibin++) 
-	increment += 0.4 / (n_mt2bins - 1) * (mt2bin - 1) * h_lostlep->GetBinContent(ibin);
+	increment += 0.4 / (n_mt2bins - 1) * (ibin - 1) * h_lostlep->GetBinContent(ibin);
       lostlep_shape = 1. - increment/n_zinv;
     }
     else
@@ -392,7 +394,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 	// first bin needs to compensate normalization from the rest
 	float increment = 0.;
 	for (int ibin=1; ibin<h_zinv->GetNbinsX(); ibin++) 
-	  increment += 0.4 / (n_mt2bins - 1) * (mt2bin - 1) * h_zinv->GetBinContent(ibin);
+	  increment += 0.4 / (n_mt2bins - 1) * (ibin - 1) * h_zinv->GetBinContent(ibin);
 	zinv_shape = 1. - increment/n_zinv;
       }
       else
