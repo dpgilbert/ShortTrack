@@ -24,13 +24,13 @@ const int iPeriod = 4; // 13 tev
 const int iPos = 3;
 
 
-void plot_trigeff_PFHT350_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-05_25ns_json_246908-258159_v3_Summer15_25nsV5/") {
+void plot_trigeff_PFHT350_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-07_25ns_miniaodv2_Summer15_25nsV6_2p1fb/") {
 
   cmsText = "CMS Preliminary";
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
-  lumi_13TeV = "1.3 fb^{-1}";
+  lumi_13TeV = "2.1 fb^{-1}";
   
   gStyle->SetPadTopMargin(0.08);
   gStyle->SetPadBottomMargin(0.12);
@@ -67,11 +67,11 @@ void plot_trigeff_PFHT350_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/
   TCut had = base + "nElectrons10+nMuons10==0 && deltaPhiMin > 0.3";
   TCut ele = base + "nElectrons10 > 0 && abs(lep_pdgId[0]) == 11 && lep_pt[0] > 25.";
 
-  t_jetht->Draw("met_pt>>h_met_denom_ht475",had+"ht > 500. && HLT_PFHT475_Prescale");
-  t_jetht->Draw("met_pt>>h_met_num_ht475",had+"ht > 500. && HLT_PFHT475_Prescale && HLT_PFHT350_PFMET100");
+  // t_jetht->Draw("met_pt>>h_met_denom_ht475",had+"ht > 500. && HLT_PFHT475_Prescale");
+  // t_jetht->Draw("met_pt>>h_met_num_ht475",had+"ht > 500. && HLT_PFHT475_Prescale && HLT_PFHT350_PFMET100");
 
-  t_ele->Draw("met_pt>>h_met_denom_ele23",ele+"ht > 450. && HLT_SingleEl");
-  t_ele->Draw("met_pt>>h_met_num_ele23",ele+"ht > 450. && HLT_SingleEl && HLT_PFHT350_PFMET100");
+  t_ele->Draw("met_pt>>h_met_denom_ele23",ele+"ht > 500. && HLT_SingleEl");
+  t_ele->Draw("met_pt>>h_met_num_ele23",ele+"ht > 500. && HLT_SingleEl && HLT_PFHT350_PFMET100");
 
   t_met->Draw("ht>>h_ht_denom_met170",had+"met_pt > 250. && HLT_PFMET170");
   t_met->Draw("ht>>h_ht_num_met170",had+"met_pt > 250. && HLT_PFMET170 && HLT_PFHT350_PFMET100");
@@ -82,9 +82,9 @@ void plot_trigeff_PFHT350_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/
   TH2F* h_met_axis = new TH2F("h_met_axis",";E_{T}^{miss} [GeV];Efficiency of PFMET100 leg",20,0,500,20,0,1);
   h_met_axis->GetYaxis()->SetTitleOffset(0.98);
   
-  TEfficiency* h_met_eff_ht475 = new TEfficiency(*h_met_num_ht475, *h_met_denom_ht475);
-  h_met_eff_ht475->SetLineColor(kRed);
-  h_met_eff_ht475->SetMarkerColor(kRed);
+  // TEfficiency* h_met_eff_ht475 = new TEfficiency(*h_met_num_ht475, *h_met_denom_ht475);
+  // h_met_eff_ht475->SetLineColor(kRed);
+  // h_met_eff_ht475->SetMarkerColor(kRed);
   
   TEfficiency* h_met_eff_ele23 = new TEfficiency(*h_met_num_ele23, *h_met_denom_ele23);
   h_met_eff_ele23->SetLineColor(kGreen+2);

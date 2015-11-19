@@ -23,13 +23,13 @@ const int iPeriod = 4; // 13 tev
 //   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
 const int iPos = 3;
 
-void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-07_25ns_miniaodv2/") {
+void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-07_25ns_miniaodv2_Summer15_25nsV6_2p1fb/") {
 
   cmsText = "CMS Preliminary";
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
-  lumi_13TeV = "1.3 fb^{-1}";
+  lumi_13TeV = "2.1 fb^{-1}";
   
   gStyle->SetPadTopMargin(0.08);
   gStyle->SetPadBottomMargin(0.12);

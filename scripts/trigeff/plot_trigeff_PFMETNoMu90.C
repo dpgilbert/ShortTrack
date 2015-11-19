@@ -23,14 +23,13 @@ const int iPeriod = 4; // 13 tev
 //   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
 const int iPos = 3;
 
-
-void plot_trigeff_PFMETNoMu90 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-05_25ns_json_246908-258159_v3_Summer15_25nsV5_met90/") {
+void plot_trigeff_PFMETNoMu90 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-07_25ns_miniaodv2_Summer15_25nsV6_2p1fb/") {
 
   cmsText = "CMS Preliminary";
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
-  lumi_13TeV = "1.3 fb^{-1}";
+  lumi_13TeV = "2.1 fb^{-1}";
   
   gStyle->SetPadTopMargin(0.08);
   gStyle->SetPadBottomMargin(0.12);
@@ -72,11 +71,11 @@ void plot_trigeff_PFMETNoMu90 (const TString& indir = "/nfs-6/userdata/mt2/V00-0
   // t_jetht->Draw("met_pt>>h_met_denom_ht800",had+"HLT_PFHT800");
   // t_jetht->Draw("met_pt>>h_met_num_ht800",had+"HLT_PFHT800 && HLT_PFMETNoMu90");
 
-  t_muon->Draw("met_pt>>h_met_denom_mu20",mu+"HLT_SingleMu");
-  t_muon->Draw("met_pt>>h_met_num_mu20",mu+"HLT_SingleMu && HLT_PFMETNoMu90");
+  // t_muon->Draw("met_pt>>h_met_denom_mu20",mu+"HLT_SingleMu");
+  // t_muon->Draw("met_pt>>h_met_num_mu20",mu+"HLT_SingleMu && HLT_PFMETNoMu90_PFMHTNoMu90");
 
   t_ele->Draw("met_pt>>h_met_denom_ele23",ele+"HLT_SingleEl");
-  t_ele->Draw("met_pt>>h_met_num_ele23",ele+"HLT_SingleEl && HLT_PFMETNoMu90");
+  t_ele->Draw("met_pt>>h_met_num_ele23",ele+"HLT_SingleEl && HLT_PFMETNoMu90_PFMHTNoMu90");
 
   TH2F* h_axis = new TH2F("h_axis",";E_{T}^{miss} [GeV];Eff of HLT_PFMETNoMu90_etc",40,100,500,20,0,1);
   h_axis->GetYaxis()->SetTitleOffset(0.98);
@@ -86,9 +85,9 @@ void plot_trigeff_PFMETNoMu90 (const TString& indir = "/nfs-6/userdata/mt2/V00-0
   // h_met_eff_ht800->SetLineColor(kRed);
   // h_met_eff_ht800->SetMarkerColor(kRed);
   
-  TEfficiency* h_met_eff_mu20 = new TEfficiency(*h_met_num_mu20, *h_met_denom_mu20);
-  h_met_eff_mu20->SetLineColor(kBlue);
-  h_met_eff_mu20->SetMarkerColor(kBlue);
+  // TEfficiency* h_met_eff_mu20 = new TEfficiency(*h_met_num_mu20, *h_met_denom_mu20);
+  // h_met_eff_mu20->SetLineColor(kBlue);
+  // h_met_eff_mu20->SetMarkerColor(kBlue);
 
   TEfficiency* h_met_eff_ele23 = new TEfficiency(*h_met_num_ele23, *h_met_denom_ele23);
   h_met_eff_ele23->SetLineColor(kGreen+2);
