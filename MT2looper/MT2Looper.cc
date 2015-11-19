@@ -1729,7 +1729,7 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
-  values["nlep"]        = t.nLepLowMT;
+  values["nlep"]        = nlepveto_;
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["mt2"]         = t.mt2;
@@ -1749,7 +1749,7 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
     std::map<std::string, float> values_monojet;
     values_monojet["deltaPhiMin"] = t.deltaPhiMin;
     values_monojet["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
-    values_monojet["nlep"]        = t.nLepLowMT;
+    values_monojet["nlep"]        = nlepveto_;
     values_monojet["j1pt"]        = t.jet1_pt;
     values_monojet["j2pt"]        = t.jet2_pt;
     values_monojet["njets"]       = t.nJet30;
