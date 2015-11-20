@@ -78,6 +78,7 @@ class MT2Looper {
   std::vector<SR> InclusiveRegions;
   std::vector<SR> InclusiveRegionsMonojet;
   SR SRBase;
+  SR SRBaseIncl;
   SR SRBaseMonojet;
   SR SRBaseMonojet0B;
   SR SRBaseMonojet1B;
