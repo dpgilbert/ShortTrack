@@ -16,6 +16,8 @@
 
 using namespace std;
 
+const bool verbose = false;
+
 //_______________________________________________________________________________
 void ReplaceString(std::string& subject, const std::string& search, const std::string& replace) {
     size_t pos = 0;
@@ -26,7 +28,7 @@ void ReplaceString(std::string& subject, const std::string& search, const std::s
 }
 
 //_______________________________________________________________________________
-void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_lostlep , TFile* f_zinv , vector<string> dirs, string output_name ) {
+void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vector<string> dirs, string output_name ) {
 
   // Generate histogram file with qcd prediction based on low dphi CRs
   // 2 cases: multijet and monojet
@@ -42,7 +44,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_lostlep , TFile* f_
     TString crdir = "crqcd"+TString(dirs.at(idir));
     TString fullhistnameCR = crdir+"/h_mt2bins";
 
-    //std::cout << "making estimate for region: " << directory << ", from CR: " << crdir << std::endl;
+    if (verbose) std::cout << "making estimate for region: " << directory << ", from CR: " << crdir << std::endl;
 
     TH1D* h_qcd_cr_data = (TH1D*) f_data->Get(fullhistnameCR);
     
@@ -54,7 +56,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_lostlep , TFile* f_
       mt2bins[i] = h_qcd_cr_data->GetBinLowEdge(i+1);  
     }
 
-    //std::cout << "got stuff from data" << std::endl;
+    if (verbose) std::cout << "got stuff from data" << std::endl;
 
     // retrieve relevant factors and uncertainties from ETH input file -- need to convert name
     TH1D* h_ht_LOW = (TH1D*) f_data->Get(directory+"/h_ht_LOW");
@@ -92,7 +94,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_lostlep , TFile* f_
     if (nbjets_LOW == 3 && njets_LOW == 2) channel_njonly = "HT200toInf_j4to6_b0toInf";
     std::string channel_htonly = ht_str + "_j2toInf_b0toInf";
 
-    //std::cout << "channel is: " << channel << std::endl;
+    if (verbose) std::cout << "channel is: " << channel << std::endl;
 
     // Make directory and plot(s) in the output file
     TDirectory* dir = 0;
@@ -105,11 +107,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_lostlep , TFile* f_
     // special case for monojet
     if (njets_LOW == 1) {
 
-      // get CR hists for data and for EWK backgrounds, to do subtraction
-      TH1D* h_qcd_cr_lostlep = (TH1D*) f_lostlep->Get(fullhistnameCR);
-      TH1D* h_qcd_cr_zinv = (TH1D*) f_zinv->Get(fullhistnameCR);
-
-      // get subtracted plot -- first clone original
+      // clone original to become prediction
       TH1D* h_qcd_sr_pred = 0;
       if(h_qcd_cr_data) {
 	h_qcd_sr_pred = (TH1D*) h_qcd_cr_data->Clone("h_mt2bins");
@@ -118,20 +116,53 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_lostlep , TFile* f_
 	// make empty histogram
 	h_qcd_sr_pred = new TH1D("h_mt2bins", "h_mt2bins", n_mt2bins, mt2bins);
       }
+      // for gamma function
+      TH1D* CRstats = (TH1D*) h_qcd_sr_pred->Clone("h_mt2binsCRyield");
+      TH1D* alphaHist = (TH1D*) h_qcd_sr_pred->Clone("h_mt2binsAlpha");
 
-      // do subtraction
-      if (h_qcd_cr_lostlep) h_qcd_sr_pred->Add(h_qcd_cr_lostlep,-1);
-      if (h_qcd_cr_zinv) h_qcd_sr_pred->Add(h_qcd_cr_zinv,-1);
-
-      // check for negative bins, set them to 0. No transfer factor to apply for monojet
+      // look up r / purity factor ( = alpha ) from ETH input file
+      TH1D* h_purity = (TH1D*) f_qcd_monojet->Get(Form("monojet_r/%s/yield_monojet_r_%s",channel.c_str(),channel.c_str()));
+      
+      float lastPurityValue = 0.;
+      float lastPurityError = 0.;
       for (int ibin=1; ibin <= h_qcd_sr_pred->GetNbinsX(); ++ibin) {
-	if (h_qcd_sr_pred->GetBinContent(ibin) < 0.) h_qcd_sr_pred->SetBinContent(ibin,0.);
-      }
+	if (verbose) std::cout << " bin " << ibin << std::endl;
+	float purity = h_purity->GetBinContent(ibin);
+	float purity_err = h_purity->GetBinError(ibin);
+	// convert to relative error
+	purity_err = purity > 0. ? purity_err/purity : 0.;
+	// HACK: for now, set relative error to 50%.  Next version of input should have error bars..
+	purity_err = 0.5;
+	if (verbose) std::cout << " purity: " << purity << " +/- " << purity_err << std::endl;
+
+	// if purity is 0, use last nonzero bin
+	if (purity > 0.) {
+	  lastPurityValue = purity;
+	  lastPurityError = purity_err;
+	} else {
+	  purity = lastPurityValue;
+	  purity_err = lastPurityError;
+	}	  
+
+	float pred = h_qcd_sr_pred->GetBinContent(ibin);
+	pred *= purity;
+	// convert back to absolute err
+	float pred_err = pred * purity_err;
+	if (verbose) std::cout << " pred: " << pred << " +/- " << pred_err << " (abs err)" << std::endl;
+
+	h_qcd_sr_pred->SetBinContent(ibin,pred);
+	h_qcd_sr_pred->SetBinError(ibin,pred_err);
+	
+	alphaHist->SetBinContent(ibin,purity);
+	alphaHist->SetBinError(ibin,purity*purity_err);
+      } // loop on mt2 (jet1pt) bins
 
       dir->cd();
       h_qcd_sr_pred->Write();
+      CRstats->Write();
+      alphaHist->Write();
       
-      //std::cout << "done for monojet bin " << std::endl;
+      if (verbose) std::cout << "done for monojet bin " << std::endl;
 
     } // monojet
     
@@ -151,7 +182,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_lostlep , TFile* f_
       TH1D* CRstats = (TH1D*) h_qcd_sr_pred->Clone("h_mt2binsCRyield");
       TH1D* alphaHist = (TH1D*) h_qcd_sr_pred->Clone("h_mt2binsAlpha");
 
-      //std::cout << "cloned data hist " << std::endl;
+      if (verbose) std::cout << "cloned data hist " << std::endl;
       
       // lookup transfer factors from ETH input file
       TH1D* h_reff = (TH1D*) f_qcd->Get(Form("r_effective/%s/yield_r_effective_%s",channel.c_str(),channel.c_str()));
@@ -165,11 +196,11 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_lostlep , TFile* f_
       float rb = h_rb->GetBinContent( h_rb->FindBin(nbjets_LOW) );
       float rb_err = h_rb->GetBinError( h_rb->FindBin(njets_LOW) );
 
-      //std::cout << "got fjets and rb " << std::endl;
+      if (verbose) std::cout << "got fjets and rb " << std::endl;
 	
       // have to combine bins for j2to6, b3toInf
       if (nbjets_LOW == 3 && njets_LOW == 2) {
-	//std::cout << "need to get extra bin for fjets " << std::endl;
+	if (verbose) std::cout << "need to get extra bin for fjets " << std::endl;
 	int otherFJetsBin  = h_fjets->FindBin(4);
 	fjets += h_fjets->GetBinContent( otherFJetsBin );
 	fjets_err *= fjets_err;
@@ -181,27 +212,27 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_lostlep , TFile* f_
       fjets_err = fjets > 0. ? fjets_err/fjets : 0.;
       rb_err = rb > 0. ? rb_err/rb : 0.;
 
-      //std::cout << " fjets: " << fjets << " +/- " << fjets_err << std::endl;
-      //std::cout << " rb: " << rb << " +/- " << rb_err << std::endl;
+      if (verbose) std::cout << " fjets: " << fjets << " +/- " << fjets_err << std::endl;
+      if (verbose) std::cout << " rb: " << rb << " +/- " << rb_err << std::endl;
       
-      //std::cout << "going to scale yields " << std::endl;
+      if (verbose) std::cout << "going to scale yields " << std::endl;
       
       for (int ibin=1; ibin <= h_qcd_sr_pred->GetNbinsX(); ++ibin) {
-	//std::cout << " bin " << ibin << std::endl;
+	if (verbose) std::cout << " bin " << ibin << std::endl;
 	float reff = h_reff->GetBinContent(ibin);
 	float reff_err = h_reff->GetBinError(ibin);
 	// convert to relative error
 	reff_err = reff > 0. ? reff_err/reff : 0.;
-	//std::cout << " reff: " << reff << " +/- " << reff_err << std::endl;
+	if (verbose) std::cout << " reff: " << reff << " +/- " << reff_err << std::endl;
 	float alpha = reff * fjets * rb;
 	float alpha_err = sqrt(fjets_err*fjets_err + rb_err*rb_err + reff_err*reff_err); 
-	//std::cout << " alpha: " << alpha << " +/- " << alpha_err << std::endl;
+	if (verbose) std::cout << " alpha: " << alpha << " +/- " << alpha_err << std::endl;
 
 	float pred = h_qcd_sr_pred->GetBinContent(ibin);
 	pred *= alpha;
 	// convert back to absolute err
 	float pred_err = pred * alpha_err;
-	//std::cout << " pred: " << pred << " +/- " << pred_err << " (abs err)" << std::endl;
+	if (verbose) std::cout << " pred: " << pred << " +/- " << pred_err << " (abs err)" << std::endl;
 
 	h_qcd_sr_pred->SetBinContent(ibin,pred);
 	h_qcd_sr_pred->SetBinError(ibin,pred_err);
@@ -215,7 +246,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_lostlep , TFile* f_
       CRstats->Write();
       alphaHist->Write();
 
-      //std::cout << "done for multijet bin " << std::endl;
+      if (verbose) std::cout << "done for multijet bin " << std::endl;
 
     } // multijets
 
@@ -230,7 +261,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_lostlep , TFile* f_
 }
 
 //_______________________________________________________________________________
-void qcdRphiMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/V00-00-12/", string dataname = "data_Run2015D", string qcdname = "qcdEstimateData") {
+void qcdRphiMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/V00-00-12/", string dataname = "data_Run2015D", string qcdname = "qcdEstimateData", string qcdmonojetname = "qcdEstimateMonojet") {
 
   string output_name = input_dir+"/qcdFromCRs.root";
   std::cout << "Writing to file: " << output_name << std::endl;
@@ -239,11 +270,9 @@ void qcdRphiMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/
   TFile* f_data = new TFile(Form("%s/%s.root",input_dir.c_str(),dataname.c_str()));
   // inputs with rphi, fj, rb and uncertainties from ETH.  Assume this will live in scripts dir
   TFile* f_qcd = new TFile(Form("./%s.root",qcdname.c_str()));
-  // other MC backgrounds needed for EWK subtraction in monojet prediction region
-  TFile* f_lostlep = new TFile(Form("%s/lostlep.root",input_dir.c_str()));
-  TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
+  TFile* f_qcd_monojet = new TFile(Form("./%s.root",qcdmonojetname.c_str()));
   
-  if(f_data->IsZombie() || f_qcd->IsZombie() || f_lostlep->IsZombie() || f_zinv->IsZombie()) {
+  if(f_data->IsZombie() || f_qcd->IsZombie() || f_qcd_monojet->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
     return;
   }
@@ -265,6 +294,6 @@ void qcdRphiMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/
     }
   }
 
-  makeQCDFromCRs( f_data , f_qcd , f_lostlep , f_zinv , dirs, output_name );
+  makeQCDFromCRs( f_data , f_qcd , f_qcd_monojet , dirs, output_name );
 
 }
