@@ -78,6 +78,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString fullhistnameRatioInt  = fullhistname+"RatioInt";
   TString fullhistnamePurity = dir + "/h_mt2binspurityFailSieieData";
   TString fullhistnamePurityInt = dir + "/h_mt2binspurityIntFailSieieData";
+  TString fullhistnameAlpha  = fullhistname+"Alpha";
 
   TString signame(signal);
   if (scanM1 >= 0 && scanM2 >= 0) {
@@ -94,6 +95,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double zinv_purity(0.);
   double err_zinv_purity(0.);
   double n_qcd(0.);
+  double n_qcd_cr(0.);
+  double qcd_alpha(0.);
+  double err_qcd_alpha(0.);
   double n_bkg(0.);
   double n_data(0.);
 
@@ -281,6 +285,14 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TH1D* h_qcd = (TH1D*) f_qcd->Get(fullhistname);
   if (h_qcd != 0) n_qcd = h_qcd->GetBinContent(mt2bin);
   //  if (n_qcd < 0.01) n_qcd = 0.01;
+  TH1D* h_qcd_cryield = (TH1D*) f_qcd->Get(fullhistnameCRyield);
+  if (h_qcd_cryield != 0) 
+    n_qcd_cr = round(h_qcd_cryield->GetBinContent(mt2bin));
+  TH1D* h_qcd_alpha = (TH1D*) f_qcd->Get(fullhistnameAlpha);
+  if (h_qcd_alpha != 0) {
+    qcd_alpha = h_qcd_alpha->GetBinContent(mt2bin);
+    err_qcd_alpha = h_qcd_alpha->GetBinError(mt2bin);
+  }
 
   n_bkg = n_lostlep+n_zinv+n_qcd;
   if (n_bkg < 0.001) n_qcd = 0.01;
@@ -418,10 +430,16 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     n_zinv = n_zinv_cr * zinv_alpha; // don't use Zinv MC as central value any more!
   }
  
-  // ----- qcd bkg uncertainties: uncorrelated for all bins
-  double qcd_syst = 2.00;
-  TString name_qcd_syst = Form("qcd_syst_%s", channel.c_str());
-  if (n_qcd > 0.) ++n_syst;
+  // ----- qcd bkg uncertainties from data driven rphi method
+  //       monojet and multijet cases should be the same at this point
+  double qcd_crstat = qcd_alpha; // transfer factor
+  double qcd_alphaerr = 1. + (err_qcd_alpha / qcd_alpha); // transfer factor syst uncertainty
+ 
+  // fully uncorrelated for now, to match what ETH does
+  TString name_qcd_crstat = "qcd_CRstat_"+perChannel;
+  TString name_qcd_alphaerr = "qcd_alphaerr_"+perChannel;
+  
+  n_syst += 2;
 
   // ----- sig uncertainties: correlated for all bins
   double sig_syst = 1.10;
@@ -482,7 +500,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_bTag.Data(),lostlep_bTag)  << endl;
 
   // ---- QCD systs
-  if (n_qcd > 0.) ofile <<  Form("%s     lnN    -      -       -   %.3f ",name_qcd_syst.Data(),qcd_syst)  << endl;
+  ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_qcd_crstat.Data(),n_qcd_cr,qcd_crstat)  << endl;
+  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_qcd_alphaerr.Data(),qcd_alphaerr)  << endl;
 
   ofile.close();
 
@@ -507,7 +526,7 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
   f_lostlep = new TFile(Form("%s/lostlepFromCRs.root",input_dir.c_str()));
   f_zinv = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str()));
   f_purity = new TFile(Form("%s/purity.root",input_dir.c_str()));
-  f_qcd = new TFile(Form("%s/qcd_ht.root",input_dir.c_str()));
+  f_qcd = new TFile(Form("%s/qcdFromCRs.root",input_dir.c_str()));
 
   f_sig = new TFile(Form("%s/%s.root",input_dir.c_str(),signal.c_str()));
 
