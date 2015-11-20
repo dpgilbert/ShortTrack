@@ -969,6 +969,9 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   makePredOneBinFR(f_out, f_data, f_q, f_g, srName, h_FRFailSieieData, 0, "FailSieieData", "htbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_data, f_q, f_g, srName, h_FRFailSieieData, 0, "FailSieieData", "njbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_data, f_q, f_g, srName, h_FRFailSieieData, 0, "FailSieieData", "nbjbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
+  makePredOneBinFR(f_out, f_data, f_q, f_g, srName+"Incl", h_FRFailSieieData, 0, "FailSieieData", "htbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
+  makePredOneBinFR(f_out, f_data, f_q, f_g, srName+"Incl", h_FRFailSieieData, 0, "FailSieieData", "njbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
+  makePredOneBinFR(f_out, f_data, f_q, f_g, srName+"Incl", h_FRFailSieieData, 0, "FailSieieData", "nbjbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   vector<TString> additionalRegions;
   additionalRegions.push_back("baseJ");
   additionalRegions.push_back("baseJ0B");
@@ -1030,6 +1033,9 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
     purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, srName, "", plot);
     purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, srName, "FailSieie", plot); // This needs to be done last (it overwrites previous histograms)
     purityPlotsNew(f_out, f_data, f_g, f_q, f_z, srName, "FailSieieData", plot); // This needs to be done last (it overwrites previous histograms)
+    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, srName+"Incl", "", plot);
+    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, srName+"Incl", "FailSieie", plot); // This needs to be done last (it overwrites previous histograms)
+    purityPlotsNew(f_out, f_data, f_g, f_q, f_z, srName+"Incl", "FailSieieData", plot); // This needs to be done last (it overwrites previous histograms)
   }
   //save and write
   cout << "Saving and closing..." << endl;
