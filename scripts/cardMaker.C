@@ -339,7 +339,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   else {
     lostlep_crstat = last_lostlep_transfer;
   }
-  n_syst += 3; // lostlep_crstat, lostlep_mcstat, lostlep_alphaerr, lostlep_lepeff
+  n_syst += 4; // lostlep_crstat, lostlep_mcstat, lostlep_alphaerr, lostlep_lepeff
 
   if (n_mt2bins > 1) {
     if (mt2bin == 1 && n_lostlep > 0.) {
