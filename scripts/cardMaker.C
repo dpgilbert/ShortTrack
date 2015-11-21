@@ -67,7 +67,7 @@ double round(double d)
 int printCard( string dir_str , int mt2bin , string signal, string output_dir, int scanM1 = -1, int scanM2 = -1) {
 
   // read off yields from h_mt2bins hist in each topological region
-
+  cout<<"Looking at region "<<dir_str<<", mt2 bin "<<mt2bin<<endl;
   TString dir = TString(dir_str);
   TString fullhistname = dir + "/h_mt2bins";
   TString fullhistnameScan  = fullhistname+"_sigscan";
@@ -117,7 +117,10 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     h_sig = (TH1D*) f_sig->Get(fullhistname);
   }
 
-  if (!h_sig) return 0;
+  if (!h_sig) {
+    if (verbose) cout<<"No signal found in this region"<<endl;
+    return 0;
+  }
   n_sig = h_sig->GetBinContent(mt2bin);
   
   //Get variable boundaries for signal region.
@@ -327,7 +330,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_lostlep_shape = Form("llep_shape_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   TString name_lostlep_crstat = Form("llep_CRstat_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   TString name_lostlep_mcstat = Form("llep_MCstat_%s", channel.c_str());
-  TString name_lostlep_alphaerr = Form("llep_alphaerr_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
+  TString name_lostlep_alphaerr = Form("llep_alpha_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   TString name_lostlep_lepeff = Form("llep_lepeff_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   TString name_lostlep_bTag = Form("llep_bTag_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
 
@@ -416,8 +419,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     if (fourNuisancesPerBinZGratio) {
       zinv_zgamma_nj  =  1. + zllgamma_nj ;     
       zinv_zgamma_nb  =  1. + zllgamma_nb ;
-      zinv_zgamma_ht  =  1. + zllgamma_ht ;
-      n_syst += 3;
+      zinv_zgamma_ht  =  1. + zllgamma_ht ; // not used in 1-jet bin
+      if (njets_LOW == 1) n_syst += 2;
+      else n_syst += 3;
       if (!integratedZinvEstimate) {
 	zinv_zgamma_mt2 =  1. + zllgamma_mt2;	
 	n_syst++;
@@ -469,35 +473,35 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_mcsyst.Data(),zinv_mcsyst)  << endl;
   }
   else {
-    ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr,zinv_alpha)  << endl;
-    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_alphaerr.Data(),zinv_alphaerr)  << endl;
-    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_purityerr.Data(),zinv_purityerr)  << endl;
-    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_puritysyst.Data(),zinv_puritysyst)  << endl;
     ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_doubleRatioOffset.Data(),zinv_doubleRatioOffset )  << endl;
     if (fourNuisancesPerBinZGratio) {
       ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nj.Data() ,zinv_zgamma_nj )  << endl;
       ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nb.Data() ,zinv_zgamma_nb )  << endl;
-      ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_ht.Data() ,zinv_zgamma_ht )  << endl;
+      if (njets_LOW != 1) ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_ht.Data() ,zinv_zgamma_ht )  << endl;
       if (!integratedZinvEstimate)
         ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_mt2.Data(),zinv_zgamma_mt2)  << endl;
     }
     else {
       ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;     
     }
-
+    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_puritysyst.Data(),zinv_puritysyst)  << endl;
+    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_purityerr.Data(),zinv_purityerr)  << endl;
+    ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr,zinv_alpha)  << endl;
+    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_alphaerr.Data(),zinv_alphaerr)  << endl;
     if (integratedZinvEstimate && n_mt2bins > 1)
       ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_shape.Data(),zinv_shape)  << endl;
   }
 
   // ---- lostlep systs
-  ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_lostlep_crstat.Data(),n_lostlep_cr,lostlep_crstat)  << endl;
-  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mcstat.Data(),lostlep_mcstat)  << endl;
-  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_alphaerr.Data(),lostlep_alphaerr)  << endl;
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_lepeff.Data(),lostlep_lepeff)  << endl;
-  if (n_mt2bins > 1)
-    ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_shape.Data(),lostlep_shape)  << endl;
+  ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_lostlep_crstat.Data(),n_lostlep_cr,lostlep_crstat)  << endl;
   if ( njets_LOW == 7 && nbjets_LOW >= 1) 
     ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_bTag.Data(),lostlep_bTag)  << endl;
+  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mcstat.Data(),lostlep_mcstat)  << endl;
+  if (n_mt2bins > 1)
+    ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_shape.Data(),lostlep_shape)  << endl;
+  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_alphaerr.Data(),lostlep_alphaerr)  << endl;
+
 
   // ---- QCD systs
   ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_qcd_crstat.Data(),n_qcd_cr,qcd_crstat)  << endl;
