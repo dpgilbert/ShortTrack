@@ -404,246 +404,6 @@ void makePredOneBinFR(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TS
 }
 
 
-void purityPlots(TFile* f_out, TFile* f_gjet, TFile* f_qcd, TFile* f_zinv, TString sr)
-{
-  if (verbose) cout<<__LINE__<<" Making plots for region "<<sr<<endl;
-  //get hists
-  TH1F* h_gjet = (TH1F*) f_gjet->Get("crgj"+sr+"/h_mt2bins");
-  TH1F* h_qcd = (TH1F*) f_qcd->Get("crgj"+sr+"/h_mt2bins");
-  TH1F* h_qcdFake = (TH1F*) f_qcd->Get("crgj"+sr+"/h_mt2binsFake");
-  TH1F* h_qcdFakeLooseNotTight = (TH1F*) f_qcd->Get("crgj"+sr+"/h_mt2binsFakeLooseNotTight");
-  TH1F* h_predFR = (TH1F*) f_out->Get("sr"+sr+"/h_pred");
-  TH1F* h_predSieieSB = (TH1F*) f_out->Get("sr"+sr+"/h_pred"+"FailSieie");
-  TH1F* h_predFragPlus50 = (TH1F*) f_out->Get("sr"+sr+"/h_pred"+"plus50");
-  TH1F* h_predFragMinus50 = (TH1F*) f_out->Get("sr"+sr+"/h_pred"+"minus50");
-  TH1F* h_predFRpoisson = (TH1F*) f_out->Get("sr"+sr+"/h_pred"+"Poisson");
-  TH1F* h_predSieieSBpoisson = (TH1F*) f_out->Get("sr"+sr+"/h_pred"+"FailSieiePoisson");
-
-  TH1F* h_ratio = (TH1F*) f_zinv->Get("sr"+sr+"/h_mt2binsRatio");
-
-  //check existence
-  if(!h_gjet) return;
-  if (verbose) cout<<__LINE__<<" f_gjet:crgj"<<sr<<"/h_mt2bins has integral "<<h_gjet->Integral()<<endl;
-  bool doTrue = false;
-  bool doFR = false;
-  bool doSieieSB = false;
-  bool doFragPlus50 = false;
-  bool doFragMinus50 = false;
-  bool doFRpoisson = false;
-  bool doSieieSBpoisson = false;
-  if(h_qcdFake) doTrue = true;
-  if(h_predFR) doFR = true;
-  if(h_predSieieSB) doSieieSB = true;
-  if(h_predFragPlus50) doFragPlus50 = true;
-  if(h_predFragMinus50) doFragMinus50 = true;
-  if(h_predFRpoisson) doFRpoisson = true;
-  if(h_predSieieSBpoisson) doSieieSBpoisson = true;
-  //cout<<doTrue <<" "<<doFR <<" "<<doSieieSB <<" "<<doFragPlus50 <<" "<<doFragMinus50 <<" "<<doFRpoisson <<" "<<doSieieSBpoisson<<endl;
-
-  f_out->cd();
-  TString directory = "sr"+sr;
-  TDirectory* dir = 0;
-  dir = (TDirectory*)f_out->Get(directory.Data());
-  if (dir == 0) {
-    dir = f_out->mkdir(directory.Data());
-  } 
-  dir->cd();
-
-  //initialize numerator, den, and purity hists
-  TH1F* h_num = sameBin(h_gjet);
-  TH1F* h_denTrue = sameBin(h_gjet);
-  TH1F* h_denFR = sameBin(h_gjet);
-  TH1F* h_denFRpoisson = sameBin(h_gjet);
-  TH1F* h_denSieieSB = sameBin(h_gjet);
-  TH1F* h_denSieieSBpoisson = sameBin(h_gjet);
-  TH1F* h_denFragPlus50 = sameBin(h_gjet);
-  TH1F* h_denFragMinus50 = sameBin(h_gjet);
-  TH1F* h_purityTrue = sameBin(h_gjet);
-  TH1F* h_purityFR = sameBin(h_gjet);
-  TH1F* h_purityFRpoisson = sameBin(h_gjet);
-  TH1F* h_puritySieieSB = sameBin(h_gjet);
-  TH1F* h_estimateSieieSB = sameBin(h_gjet);
-  TH1F* h_estimateSieieSBpoisson = sameBin(h_gjet);
-  TH1F* h_puritySieieSBpoisson = sameBin(h_gjet);
-  TH1F* h_purityFragPlus50 = sameBin(h_gjet);
-  TH1F* h_purityFragMinus50 = sameBin(h_gjet);
-
-  //fill numerator
-  if(h_qcd) h_num->Add(h_gjet, h_qcd);
-  else h_num->Add(h_gjet);
-
-  //initialize denominators
-  if (h_qcd){ //if there are qcdPrompt, add to gjetPrompt
-    h_denTrue->Add(h_gjet, h_qcd);
-    h_denFR->Add(h_gjet, h_qcd);
-    h_denFRpoisson->Add(h_gjet, h_qcd);
-    h_denSieieSB->Add(h_gjet, h_qcd);
-    h_denSieieSBpoisson->Add(h_gjet, h_qcd);
-    h_denFragPlus50->Add(h_gjet, h_qcd);
-    h_denFragMinus50->Add(h_gjet, h_qcd);
-  }
-  else { //otherwise numerator is just gjet prompt
-    h_denTrue->Add(h_gjet);
-    h_denFR->Add(h_gjet);
-    h_denFRpoisson->Add(h_gjet);
-    h_denSieieSB->Add(h_gjet);
-    h_denSieieSBpoisson->Add(h_gjet);
-    h_denFragPlus50->Add(h_gjet);
-    h_denFragMinus50->Add(h_gjet);
-  }
-
-  //do True purity
-  if(doTrue) h_denTrue->Add(h_qcdFake);
-  h_purityTrue->Divide(h_num,h_denTrue,1,1,"B");
-  h_purityTrue->SetName("h_purityTrue");
-  h_denTrue->SetName("h_mt2bins");
-
-  //do FR purity
-  if(doFR) h_denFR->Add(h_predFR);
-  h_purityFR->Divide(h_num,h_denFR,1,1,"B");
-  h_purityFR->SetName("h_purityFR");
-
-  //do FR purity with poisson errors on yields
-  TH1F* h_numP =  (TH1F*) h_num->Clone("numPoisson");
-  h_numP->GetSumw2()->Set(0); h_numP->Sumw2(); // reset sumw2
-  h_denFRpoisson->GetSumw2()->Set(0); h_denFRpoisson->Sumw2(); // reset sumw2
-  if(doFRpoisson) h_denFRpoisson->Add(h_predFRpoisson);
-  h_purityFRpoisson->Divide(h_numP,h_denFRpoisson,1,1,"B");
-  h_purityFRpoisson->SetName("h_purityFRpoisson");
-
-
-  //do SieieSB purity
-  if(doSieieSB) h_denSieieSB->Add(h_predSieieSB);
-  h_puritySieieSB->Divide(h_num,h_denSieieSB,1,1,"B");
-  h_puritySieieSB->SetName("h_puritySieieSB");
-  // want to also save: (DenTrue (total of all tight events) - prediction) *0.92, which is our actual gjet prediction
-  h_estimateSieieSB->Add(h_denTrue);
-  if(doSieieSB) h_estimateSieieSB->Add(h_predSieieSB, -1);
-  h_estimateSieieSB->Scale(0.92);
-  h_estimateSieieSB->SetName("h_estimateSieieSB");
-  //h_estimateSieieSB->Print("all");
-  //h_gjet->Print("all");
-  
-  //TEfficiency * pEff = new TEfficiency((const TH1*) h_num, (const TH1*) h_denSieieSB);
-  
-  // Dump everything!
-  //if (sr == "1M") {
-  //  cout<<"h_purity"<<sr<<"SieieSB"<<endl;
-  //  TEfficiency * pEff = new TEfficiency(*h_num,*h_denSieieSB);
-  //  pEff->SetStatisticOption(TEfficiency::EStatOption::kBBayesian); //kBayesian
-  //  h_gjet->Print("all");
-  //  h_num->Print("all");
-  //  if (doTrue) h_qcdFake->Print("all");
-  //  if(doSieieSB) h_predSieieSB->Print("all");
-  //  h_denSieieSB->Print("all");
-  //  h_puritySieieSB->Print("all");
-  //  for ( int i = 1; i <= h_puritySieieSB->GetNbinsX(); i++)
-  //	cout<<"Bin "<<i<<" has eff "<<pEff->GetEfficiency(i)<<" +"<<pEff->GetEfficiencyErrorUp(i)<<"/-"<<pEff->GetEfficiencyErrorLow(i)<<endl;;
-  //}
-  
-  //do SieieSB purity with poisson errors on yields
-  TH1F* h_numP2 = (TH1F*) h_num->Clone("numPoisson2");
-  h_numP2->GetSumw2()->Set(0); h_numP2->Sumw2(); // reset sumw2
-  h_denSieieSBpoisson->GetSumw2()->Set(0); h_denSieieSBpoisson->Sumw2(); // reset sumw2
-  if(doSieieSBpoisson) h_denSieieSBpoisson->Add(h_predSieieSBpoisson);
-  h_puritySieieSBpoisson->Divide(h_numP2,h_denSieieSBpoisson,1,1,"B");
-  h_puritySieieSBpoisson->SetName("h_puritySieieSBpoisson");
-  h_estimateSieieSBpoisson->Add(h_denTrue);
-  h_estimateSieieSBpoisson->GetSumw2()->Set(0); h_estimateSieieSBpoisson->Sumw2();
-  if(doSieieSBpoisson) h_estimateSieieSBpoisson->Add(h_predSieieSBpoisson, -1);
-  h_estimateSieieSBpoisson->Scale(0.92);
-  h_estimateSieieSBpoisson->SetName("h_estimateSieieSBpoisson");
-  // Dump everything!
-  //if (sr == "1M") {
-  //  cout<<"h_purity"<<sr<<"SieieSBpoisson"<<endl;
-  //  TEfficiency * pEff = new TEfficiency(*h_numP2,*h_denSieieSBpoisson);
-  //  pEff->SetStatisticOption(TEfficiency::EStatOption::kBBayesian); //kBayesian
-  //  h_numP2->Print("all");
-  //  if(doSieieSBpoisson) h_predSieieSBpoisson->Print("all");
-  //  h_denSieieSBpoisson->Print("all");
-  //  h_puritySieieSBpoisson->Print("all");
-  //  for ( int i = 1; i <= h_puritySieieSB->GetNbinsX(); i++)
-  //	cout<<"Bin "<<i<<" has eff "<<pEff->GetEfficiency(i)<<" +"<<pEff->GetEfficiencyErrorUp(i)<<"/-"<<pEff->GetEfficiencyErrorLow(i)<<endl;;
-  //}
-  
-  
-  //do FragPlus50 purity
-  if(doFragPlus50) h_denFragPlus50->Add(h_predFragPlus50);
-  h_purityFragPlus50->Divide(h_num,h_denFragPlus50,1,1,"B");
-  h_purityFragPlus50->SetName("h_purityFragPlus50");
-
-  //do FragMinus50 purity
-  if(doFragMinus50) h_denFragMinus50->Add(h_predFragMinus50);
-  h_purityFragMinus50->Divide(h_num,h_denFragMinus50,1,1,"B");
-  h_purityFragMinus50->SetName("h_purityFragMinus50");
-   
-  //f_out->cd();
-  dir->cd();
-
-  //make zinv pred, predZ = N * purity * ratio
-  //note frag fraction f is included in purity
-  TH1F* h_predZ = (TH1F*) h_num->Clone();
-  h_predZ->SetName("h_predZ");
-  h_predZ->Multiply(h_predZ,h_puritySieieSB,1,1,"B");
-  h_predZ->Multiply(h_predZ,h_ratio,1,1,"B");
-
-  //add systematic error to zinv pred
-  for (int bin = 0; bin <= h_predZ->GetNbinsX(); bin++){
-    double statErr = h_predZ->GetBinError(bin);
-    double fragErr = 0.05*h_predZ->GetBinContent(bin);
-    double corrErr = 0.2*h_predZ-> GetBinContent(bin); 
-    h_predZ->SetBinError(bin,pow(pow(statErr,2)+pow(fragErr,2)+pow(statErr,2),0.5));
-  }
-    
-  //write hists to output file
-  h_purityTrue->Write();
-  h_purityFR->Write();
-  h_puritySieieSB->Write();
-  h_estimateSieieSB->Write();
-  h_purityFragPlus50->Write();
-  h_purityFragMinus50->Write();
-  h_purityFRpoisson->Write();
-  h_puritySieieSBpoisson->Write();
-  h_estimateSieieSBpoisson->Write();
-  h_denTrue->Write();
-  h_predZ->Write();
-
-  if (verbose) {
-    cout<<__LINE__<<"  h_purityTrue              " <<      h_purityTrue		    ->GetName()<<" "<<  h_purityTrue		 ->Integral()<<endl;   
-    cout<<__LINE__<<"  h_purityFR		 " << 	   h_purityFR		    ->GetName()<<" "<<  h_purityFR		 ->Integral()<<endl;   
-    cout<<__LINE__<<"  h_puritySieieSB		 " <<      h_puritySieieSB	    ->GetName()<<" "<<  h_puritySieieSB	    	 ->Integral()<<endl;
-    cout<<__LINE__<<"  h_estimateSieieSB	 " << 	   h_estimateSieieSB	    ->GetName()<<" "<<  h_estimateSieieSB	 ->Integral()<<endl;   
-    cout<<__LINE__<<"  h_purityFragPlus50	 " << 	   h_purityFragPlus50	    ->GetName()<<" "<<  h_purityFragPlus50	 ->Integral()<<endl;   
-    cout<<__LINE__<<"  h_purityFragMinus50	 " << 	   h_purityFragMinus50	    ->GetName()<<" "<<  h_purityFragMinus50	 ->Integral()<<endl;   
-    cout<<__LINE__<<"  h_purityFRpoisson	 " << 	   h_purityFRpoisson	    ->GetName()<<" "<<  h_purityFRpoisson	 ->Integral()<<endl;   
-    cout<<__LINE__<<"  h_puritySieieSBpoisson	 " <<      h_puritySieieSBpoisson   ->GetName()<<" "<<  h_puritySieieSBpoisson   ->Integral()<<endl;
-    cout<<__LINE__<<"  h_estimateSieieSBpoisson  " << 	   h_estimateSieieSBpoisson ->GetName()<<" "<<  h_estimateSieieSBpoisson ->Integral()<<endl;
-    cout<<__LINE__<<"  h_denTrue		 " << 	   h_denTrue		    ->GetName()<<" "<<  h_denTrue		 ->Integral()<<endl;   
-    cout<<__LINE__<<"  h_predZ                   " << 	   h_predZ                  ->GetName()<<" "<<  h_predZ                  ->Integral()<<endl;
-  }
-
-
-
-  //write raw numbers to output file
-  ofstream purityLog;
-  purityLog.open("purity.log", ios::app);
-  purityLog << "------------------------------" << endl;
-  purityLog << "Signal Region " << sr << endl;
-  for (int i = 1; i<= h_gjet->GetNbinsX(); i++){
-    purityLog << h_gjet->GetBinLowEdge(i) << " < MT2 < " << h_gjet->GetBinLowEdge(i+1) << endl;
-    if(h_qcdFake) purityLog << "Ngamma (tight): " << h_qcdFake->GetBinContent(i) << endl;
-    if(h_qcdFakeLooseNotTight) purityLog << "Ngamma (loose not tight): " << h_qcdFakeLooseNotTight->GetBinContent(i) << endl;
-    if(doFR) purityLog << "Purity: " << h_purityFR->GetBinContent(i) << " +/- " << h_purityFR->GetBinError(i) << endl;
-    purityLog << endl;
-  }
-  purityLog << "------------------------------" << endl;
-  purityLog.close();
-  
-  f_out->cd();
-  return;
-}
-
-
 void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TFile* f_zinv, TString sr, TString FR_type, TString plotname = "mt2bins")
 
 {
@@ -773,7 +533,6 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
     TH1D* h_ht_LOW     = (TH1D*) f_data->Get(srdir+"/h_ht_LOW");
     TH1D* h_nbjets_LOW = (TH1D*) f_data->Get(srdir+"/h_nbjets_LOW");
     TH1D* h_njets_LOW  = (TH1D*) f_data->Get(srdir+"/h_njets_LOW");
-    // NEED TO MAKE THIS WORK FOR MONOJET BASE REGION BY ADDING THE RELEVANT HISTOGRAMS TO srbaseJ0B and srbaseJ1B
     if (h_nbjets_LOW && h_njets_LOW ) {
       int ht_LOW = h_ht_LOW ? h_ht_LOW->GetBinContent(1) : 200;
       int nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
@@ -789,7 +548,7 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
         int bin_nj   = h_zllgamma_nj ->FindBin(njets_LOW + 0.5);
         int bin_nb   = h_zllgamma_nb ->FindBin(nbjets_LOW + 0.5);
         int bin_ht   = h_zllgamma_ht ->FindBin(ht_LOW + 1);
-        if (srdir.Contains("J")) {bin_nj = 1; bin_nb = 1; bin_ht = 1;}
+        //if (srdir.Contains("J")) {bin_nj = 1; bin_nb = 1; bin_ht = 1;}
         // (set to 100% if the ratio doesn't exist)
         float zllgamma_nj  = h_zllgamma_nj ->GetBinContent( bin_nj  ) > 0 ? h_zllgamma_nj ->GetBinError( bin_nj  ) / h_zllgamma_nj ->GetBinContent( bin_nj  ) : 1.;
         float zllgamma_nb  = h_zllgamma_nb ->GetBinContent( bin_nb  ) > 0 ? h_zllgamma_nb ->GetBinError( bin_nb  ) / h_zllgamma_nb ->GetBinContent( bin_nb  ) : 1.;
@@ -974,8 +733,6 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   makePredOneBinFR(f_out, f_data, f_q, f_g, srName+"Incl", h_FRFailSieieData, 0, "FailSieieData", "nbjbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   vector<TString> additionalRegions;
   additionalRegions.push_back("baseJ");
-  additionalRegions.push_back("baseJ0B");
-  additionalRegions.push_back("baseJ1B");
   additionalRegions.push_back("baseVL");
   additionalRegions.push_back("baseL");
   additionalRegions.push_back("baseM");
@@ -1010,8 +767,6 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   additionalRegions.clear();
   additionalRegions.push_back("base");
   additionalRegions.push_back("baseJ");
-  additionalRegions.push_back("baseJ0B");
-  additionalRegions.push_back("baseJ1B");
   additionalRegions.push_back("baseVL");
   additionalRegions.push_back("baseL");
   additionalRegions.push_back("baseM");
