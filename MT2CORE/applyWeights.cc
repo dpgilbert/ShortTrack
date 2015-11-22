@@ -37,6 +37,71 @@ weightStruct getLepSF(float pt, float, int pdgId) {
   return weights;
 }
 
+bool setElSFfile(TString filename){
+  TFile * f = new TFile(filename);
+  if (!f->IsOpen()) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find scale factor file "<<filename<<std::endl;
+  TH2D* h_id = (TH2D*) f->Get("CutBasedVeto");
+  TH2D* h_iso = (TH2D*) f->Get("MiniIso0p1_vs_AbsEta");
+  if (!h_id || !h_iso) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find scale factor histogram"<<std::endl;
+  h_elSF = (TH2D*) h_id->Clone("h_elSF");
+  h_elSF->SetDirectory(0);
+  h_elSF->Multiply(h_iso);
+  //h_elSF->Print("all");
+  return true;
+}
+
+bool setMuSFfile(TString filenameID, TString filenameISO){
+  TFile * f1 = new TFile(filenameID);
+  TFile * f2 = new TFile(filenameISO);
+  if (!f1->IsOpen()) { std::cout<<"applyWeights::setElSFfile: ERROR: Could not find ID scale factor file "<<filenameID<<std::endl; return 0;}
+  if (!f2->IsOpen()) { std::cout<<"applyWeights::setElSFfile: ERROR: Could not find ISO scale factor file "<<filenameISO<<std::endl; return 0;}
+  TH2D* h_id = (TH2D*) f1->Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_tag_IsoMu20_pass");
+  TH2D* h_iso = (TH2D*) f2->Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_PF_pass_&_tag_IsoMu20_pass");
+  if (!h_id || !h_iso) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find scale factor histogram"<<std::endl; return 0;}
+  h_muSF = (TH2D*) h_id->Clone("h_muSF");
+  h_muSF->SetDirectory(0);
+  h_muSF->Multiply(h_iso);
+  //h_muSF->Print("all");
+  return true;
+}
+
+weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
+
+  weightStruct weights;
+
+  if(!h_elSF || !h_muSF) {
+    std::cout << "applyWeights::getLepSFFromFile: ERROR: missing input hists" << std::endl;
+    return weights;
+  }
+
+  float pt_cutoff = std::max(5.,std::min(100.,double(pt)));
+
+  if (abs(pdgId) == 11) {
+    int binx = h_elSF->GetXaxis()->FindBin(pt_cutoff);
+    int biny = h_elSF->GetYaxis()->FindBin(fabs(eta));
+    float central = h_elSF->GetBinContent(binx,biny);
+    float err  = h_elSF->GetBinError(binx,biny);
+    weights.cent = central;
+    weights.up = central+err;
+    weights.dn = central-err;
+    if (central > 1.2 || central < 0.8) 
+      std::cout<<"STRANGE: Electron with pT/eta of "<<pt_cutoff<<"/"<<eta<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
+  }
+  else if (abs(pdgId) == 13) {
+    int binx = h_muSF->GetXaxis()->FindBin(pt_cutoff);
+    int biny = h_muSF->GetYaxis()->FindBin(fabs(eta));
+    float central = h_muSF->GetBinContent(binx,biny);
+    float err  = 0.014; // adding in quadrature 1% unc. on ID and 1% unc. on ISO
+    weights.cent = central;
+    weights.up = central+err;
+    weights.dn = central-err;
+    if (central > 1.2 || central < 0.8) 
+      std::cout<<"STRANGE: Muon with pT/eta of "<<pt_cutoff<<"/"<<eta<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
+  }
+
+  return weights;
+}
+
 
 //_________________________________________________________
 weightStruct getBtagSF(float pt, float, int pdgId) {

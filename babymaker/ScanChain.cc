@@ -65,6 +65,8 @@ const bool saveGenParticles = false;
 const bool applyTriggerCuts = false;
 // turn on to apply dummy weights for lepton SFs, btag SFs, etc (default false)
 const bool applyDummyWeights = false;
+// turn on to apply lepton SF
+const bool applyLeptonSFs = true;
 // turn on to apply json file to data (default true)
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
@@ -149,7 +151,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     h_btag_eff_udsg = (TH2D*) h_btag_eff_udsg_temp->Clone("h_btag_eff_udsg");
     f_btag_eff->Close();
   }
-  
+
+  // Lepton Scale Factors
+  if (applyLeptonSFs) {
+    setElSFfile("lepsf/kinematicBinSFele.root");
+    setMuSFfile("lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root");
+  }
+
   // ----------------------------------
   // retrieve JEC from files, if using
   // ----------------------------------
@@ -802,12 +810,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         }
 
         if (!isData && applyDummyWeights) {
-          weightStruct weights = getLepSF(cms3.els_p4().at(iEl).pt(), cms3.els_p4().at(iEl).eta(), 11);
+	  weightStruct weights = getLepSF(cms3.els_p4().at(iEl).pt(), cms3.els_p4().at(iEl).eta(), 11);
           weight_lepsf *= weights.cent;
           weight_lepsf_UP *= weights.up;
           weight_lepsf_DN *= weights.dn;
         }
-
+        if (!isData && applyLeptonSFs) {
+          weightStruct weights = getLepSFFromFile(cms3.els_p4().at(iEl).pt(), cms3.els_p4().at(iEl).eta(), 11);
+          weight_lepsf *= weights.cent;
+          weight_lepsf_UP *= weights.up;
+          weight_lepsf_DN *= weights.dn;
+        }
       }
 
       if (verbose) cout << "before muons" << endl;
@@ -860,7 +873,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         }
 
         if (!isData && applyDummyWeights) {
-          weightStruct weights = getLepSF(cms3.mus_p4().at(iMu).pt(), cms3.mus_p4().at(iMu).eta(), 13);
+	  weightStruct weights = getLepSF(cms3.mus_p4().at(iMu).pt(), cms3.mus_p4().at(iMu).eta(), 13);
+          weight_lepsf *= weights.cent;
+          weight_lepsf_UP *= weights.up;
+          weight_lepsf_DN *= weights.dn;
+        }
+        if (!isData && applyLeptonSFs) {
+          weightStruct weights = getLepSFFromFile(cms3.mus_p4().at(iMu).pt(), cms3.mus_p4().at(iMu).eta(), 13);
           weight_lepsf *= weights.cent;
           weight_lepsf_UP *= weights.up;
           weight_lepsf_DN *= weights.dn;
