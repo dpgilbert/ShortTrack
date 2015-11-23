@@ -57,7 +57,7 @@ void plot_trigeff_PFHT350_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/
   TH1D* h_ht_denom_ele23 = (TH1D*) h_ht_denom_met170->Clone("h_ht_denom_ele23");
   TH1D* h_ht_num_ele23 = (TH1D*) h_ht_denom_met170->Clone("h_ht_num_ele23");
 
-  TH1D* h_met_denom_ht475 = new TH1D("h_met_denom_ht475",";E_{T}^{miss} [GeV]",20,0,500);
+  TH1D* h_met_denom_ht475 = new TH1D("h_met_denom_ht475",";E_{T}^{miss} [GeV]",40,100,500);
   TH1D* h_met_num_ht475 = (TH1D*) h_met_denom_ht475->Clone("h_met_num_ht475");
   TH1D* h_met_denom_ele23 = (TH1D*) h_met_denom_ht475->Clone("h_met_denom_ele23");
   TH1D* h_met_num_ele23 = (TH1D*) h_met_denom_ht475->Clone("h_met_num_ele23");
@@ -79,7 +79,7 @@ void plot_trigeff_PFHT350_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/
   t_ele->Draw("ht>>h_ht_denom_ele23",ele+"met_pt > 250. && HLT_SingleEl");
   t_ele->Draw("ht>>h_ht_num_ele23",ele+"met_pt > 250. && HLT_SingleEl && HLT_PFHT350_PFMET100");
 
-  TH2F* h_met_axis = new TH2F("h_met_axis",";E_{T}^{miss} [GeV];Efficiency of PFMET100 leg",20,0,500,20,0,1);
+  TH2F* h_met_axis = new TH2F("h_met_axis",";E_{T}^{miss} [GeV];Efficiency of PFMET100 leg",40,100,500,20,0,1);
   h_met_axis->GetYaxis()->SetTitleOffset(0.98);
   
   // TEfficiency* h_met_eff_ht475 = new TEfficiency(*h_met_num_ht475, *h_met_denom_ht475);
