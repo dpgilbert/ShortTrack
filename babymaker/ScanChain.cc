@@ -483,11 +483,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
           int pdgId = abs(cms3.genps_id().at(iGen));
           int status = cms3.genps_status().at(iGen);
+          int isLastCopy = cms3.genps_isLastCopy().at(iGen);
 
           // find hard scatter products to get recoil pt
           if (evt_id == 300) {
             // ttbar
-            if (status == 22 && pdgId == 6) {
+            if (isLastCopy == 1 && pdgId == 6) {
               recoil += cms3.genps_p4().at(iGen);
               ++nHardScatter;
             }
@@ -495,7 +496,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           }
           else if (evt_id >= 500 && evt_id < 600) {
             // W+jets
-            if (status == 22 && pdgId == 24) {
+            if (isLastCopy == 1 && pdgId == 24) {
               recoil += cms3.genps_p4().at(iGen);
               ++nHardScatter;
             }
@@ -503,7 +504,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           }
           else if (evt_id >= 1000 && evt_id < 1100) {
             // SMS T1 models - gluinos
-            if (status == 22 && pdgId == 1000021) {
+            if (isLastCopy == 1 && pdgId == 1000021) {
               recoil += cms3.genps_p4().at(iGen);
               ++nHardScatter;
             }
@@ -511,7 +512,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           }
           else if (evt_id >= 1100 && evt_id < 1110) {
             // SMS T2tt - stops
-            if (status == 22 && pdgId == 1000006) {
+            if (isLastCopy == 1 && pdgId == 1000006) {
               recoil += cms3.genps_p4().at(iGen);
               ++nHardScatter;
             }
@@ -519,7 +520,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           }
           else if (evt_id >= 1110 && evt_id < 1120) {
             // SMS T2qq - squarks
-            if (status == 22 && ( (pdgId >= 1000001 && pdgId <= 1000004) || (pdgId >= 2000001 && pdgId <= 2000004) ) ) {
+            if (isLastCopy == 1 && ( (pdgId >= 1000001 && pdgId <= 1000004) || (pdgId >= 2000001 && pdgId <= 2000004) ) ) {
               recoil += cms3.genps_p4().at(iGen);
               ++nHardScatter;
             }
@@ -527,7 +528,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           }
           else if (evt_id >= 1120 && evt_id < 1130) {
             // SMS T2bb - sbottoms
-            if (status == 22 && pdgId == 1000005) {
+            if (isLastCopy == 1 && pdgId == 1000005) {
               recoil += cms3.genps_p4().at(iGen);
               ++nHardScatter;
             }
@@ -700,13 +701,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         } // loop over genPart
 
         // recoil "ISR" weight
-        if (applyDummyWeights) {
-          float recoil_pt = recoil.pt();
-          weight_isr = 1.;
-          if (recoil_pt > 120. && recoil_pt < 150.)      weight_isr = 0.95;
-          else if (recoil_pt > 150. && recoil_pt < 250.) weight_isr = 0.90;
-          else if (recoil_pt > 250.)                     weight_isr = 0.80;
-        }
+	genRecoil_pt = recoil.pt();
+	weight_isr = 1.;
+	if (genRecoil_pt > 400. && genRecoil_pt < 600.)  weight_isr = 0.85;
+	else if (genRecoil_pt > 600.)                    weight_isr = 0.70;
 
 	// store LHE weight variations
 	if (saveLHEweights || saveLHEweightsScaleOnly) {
@@ -2241,6 +2239,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("weight_scales_DN", &weight_scales_DN );
     BabyTree_->Branch("weight_pdfs_UP", &weight_pdfs_UP );
     BabyTree_->Branch("weight_pdfs_DN", &weight_pdfs_DN );
+    BabyTree_->Branch("genRecoil_pt", &genRecoil_pt );
 
     // also make counter histogram
     count_hist_ = new TH1D("Count","Count",1,0,2);
@@ -2434,6 +2433,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     weight_scales_DN = 1.;
     weight_pdfs_UP = 1.;
     weight_pdfs_DN = 1.;
+    genRecoil_pt = -999.;
     nLHEweight = -999;
 
     for(int i=0; i < max_nlep; i++){
