@@ -416,8 +416,11 @@ class babyMaker {
   Float_t         weight_scales_DN;
   Float_t         weight_pdfs_UP;
   Float_t         weight_pdfs_DN;
+  Float_t         weight_toppt;
   
   Float_t         genRecoil_pt;
+  Float_t         genTop_pt;
+  Float_t         genTbar_pt;
 
 //----- MC SCALE AND PDF WEIGHTS
   static const int max_nLHEweight = 500;

@@ -465,6 +465,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         //GEN PARTICLES
         LorentzVector recoil(0,0,0,0);
         int nHardScatter = 0;
+	genTop_pt = -1.;
+	genTbar_pt = -1.;
         for(unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++){
           if (ngenPart >= max_ngenPart) {
             std::cout << "WARNING: attempted to fill more than " << max_ngenPart << " gen particles" << std::endl;
@@ -486,10 +488,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           int isLastCopy = cms3.genps_isLastCopy().at(iGen);
 
           // find hard scatter products to get recoil pt
-          if (evt_id == 300) {
+          if (evt_id >= 300 && evt_id < 400) {
             // ttbar
             if (isLastCopy == 1 && pdgId == 6) {
               recoil += cms3.genps_p4().at(iGen);
+	      if (cms3.genps_id().at(iGen) == 6) genTop_pt = cms3.genps_p4().at(iGen).pt();
+	      else if (cms3.genps_id().at(iGen) == -6) genTbar_pt = cms3.genps_p4().at(iGen).pt();
               ++nHardScatter;
             }
             if (nHardScatter > 2) std::cout << "WARNING: found too many tops in ttbar MC!" << std::endl;
@@ -699,6 +703,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           }
 
         } // loop over genPart
+
+	// top pt weight
+	if (evt_id >= 300 && evt_id < 400) {
+	  weight_toppt = topPtWeight(genTop_pt,genTbar_pt);
+	}
 
         // recoil "ISR" weight
 	genRecoil_pt = recoil.pt();
@@ -2239,7 +2248,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("weight_scales_DN", &weight_scales_DN );
     BabyTree_->Branch("weight_pdfs_UP", &weight_pdfs_UP );
     BabyTree_->Branch("weight_pdfs_DN", &weight_pdfs_DN );
+    BabyTree_->Branch("weight_toppt", &weight_toppt );
     BabyTree_->Branch("genRecoil_pt", &genRecoil_pt );
+    BabyTree_->Branch("genTop_pt", &genTop_pt );
+    BabyTree_->Branch("genTbar_pt", &genTbar_pt );
 
     // also make counter histogram
     count_hist_ = new TH1D("Count","Count",1,0,2);
@@ -2433,7 +2445,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     weight_scales_DN = 1.;
     weight_pdfs_UP = 1.;
     weight_pdfs_DN = 1.;
+    weight_toppt = 1.;
     genRecoil_pt = -999.;
+    genTop_pt = -999.;
+    genTbar_pt = -999.;
     nLHEweight = -999;
 
     for(int i=0; i < max_nlep; i++){
