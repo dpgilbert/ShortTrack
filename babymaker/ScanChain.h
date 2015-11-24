@@ -398,6 +398,7 @@ class babyMaker {
   Float_t         jet_rawPt[max_njet];   //[njet]
   Float_t         jet_mcPt[max_njet];   //[njet]
   Int_t           jet_mcFlavour[max_njet];   //[njet]
+  Int_t           jet_hadronFlavour[max_njet];   //[njet]
   Float_t         jet_qgl[max_njet];   //[njet]
   Float_t         jet_area[max_njet];   //[njet]
   Int_t           jet_id[max_njet];   //[njet]

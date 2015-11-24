@@ -1485,9 +1485,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
             if (cms3.pfjets_mc_p4().size() > 0) jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
 	    jet_mcFlavour[njet] = 0;
             if (cms3.pfjets_partonFlavour().size() > 0) jet_mcFlavour[njet] = cms3.pfjets_partonFlavour().at(iJet);
+	    jet_hadronFlavour[njet] = 0;
+            if (cms3.pfjets_hadronFlavour().size() > 0) jet_hadronFlavour[njet] = cms3.pfjets_hadronFlavour().at(iJet);
           } else {
             jet_mcPt[njet] = -999.;
             jet_mcFlavour[njet] = -999;
+            jet_hadronFlavour[njet] = -999;
           }
           //jet_qgl
           jet_area[njet] = cms3.pfjets_area().at(iJet);
@@ -1524,10 +1527,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               nBJet20++; 
               // btag SF - not final yet
               if (!isData && applyBtagSFs) {
-                float eff = getBtagEffFromFile(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet], isFastsim);
+                float eff = getBtagEffFromFile(jet_pt[njet], jet_eta[njet], jet_hadronFlavour[njet], isFastsim);
 		BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG;
-		if (abs(jet_mcFlavour[njet]) == 5) flavor = BTagEntry::FLAV_B;
-		else if (abs(jet_mcFlavour[njet]) == 4) flavor = BTagEntry::FLAV_C;
+		if (abs(jet_hadronFlavour[njet]) == 5) flavor = BTagEntry::FLAV_B;
+		else if (abs(jet_hadronFlavour[njet]) == 4) flavor = BTagEntry::FLAV_C;
 		float pt_cutoff = std::max(30.,std::min(669.,double(jet_pt[njet])));
 		float eta_cutoff = std::min(2.39,fabs(double(jet_eta[njet])));
 		float weight_cent(1.), weight_UP(1.), weight_DN(1.);
@@ -1575,10 +1578,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               } // pt 30
             } // pass med btag
             else if (!isData && applyBtagSFs) { // fail med btag -- needed for SF event weights
-              float eff = getBtagEffFromFile(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet], isFastsim);
+              float eff = getBtagEffFromFile(jet_pt[njet], jet_eta[njet], jet_hadronFlavour[njet], isFastsim);
 	      BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG;
-	      if (abs(jet_mcFlavour[njet]) == 5) flavor = BTagEntry::FLAV_B;
-	      else if (abs(jet_mcFlavour[njet]) == 4) flavor = BTagEntry::FLAV_C;
+	      if (abs(jet_hadronFlavour[njet]) == 5) flavor = BTagEntry::FLAV_B;
+	      else if (abs(jet_hadronFlavour[njet]) == 4) flavor = BTagEntry::FLAV_C;
 	      float pt_cutoff = std::max(30.,std::min(669.,double(jet_pt[njet])));
 	      float eta_cutoff = std::min(2.39,fabs(double(jet_eta[njet])));
 	      float weight_cent(1.), weight_UP(1.), weight_DN(1.);
@@ -2271,6 +2274,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("jet_rawPt", jet_rawPt, "jet_rawPt[njet]/F" );
     BabyTree_->Branch("jet_mcPt", jet_mcPt, "jet_mcPt[njet]/F" );
     BabyTree_->Branch("jet_mcFlavour", jet_mcFlavour, "jet_mcFlavour[njet]/I" );
+    BabyTree_->Branch("jet_hadronFlavour", jet_hadronFlavour, "jet_hadronFlavour[njet]/I" );
     BabyTree_->Branch("jet_qgl", jet_qgl, "jet_qgl[njet]/F" );
     BabyTree_->Branch("jet_area", jet_area, "jet_area[njet]/F" );
     BabyTree_->Branch("jet_id", jet_id, "jet_id[njet]/I" );
@@ -2633,6 +2637,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       jet_rawPt[i] = -999;
       jet_mcPt[i] = -999;
       jet_mcFlavour[i] = -999;
+      jet_hadronFlavour[i] = -999;
       jet_qgl[i] = -999;
       jet_area[i] = -999;
       jet_id[i] = -999;
