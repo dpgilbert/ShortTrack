@@ -132,7 +132,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
   if (applyBtagSFs) {
     // setup btag calibration readers
-    calib = new BTagCalibration("csvv2", "btagsf/CSVv2.csv"); // 50ns version of SFs
+    calib = new BTagCalibration("csvv2", "btagsf/CSVv2.csv"); // 25s version of SFs
     reader_heavy = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "mujets", "central"); // central
     reader_heavy_UP = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "mujets", "up");  // sys up
     reader_heavy_DN = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "mujets", "down");  // sys down
@@ -150,6 +150,30 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     h_btag_eff_c = (TH2D*) h_btag_eff_c_temp->Clone("h_btag_eff_c");
     h_btag_eff_udsg = (TH2D*) h_btag_eff_udsg_temp->Clone("h_btag_eff_udsg");
     f_btag_eff->Close();
+
+    std::cout << "loaded fullsim btag SFs" << std::endl;
+    
+    // extra copy for fastsim -> fullsim SFs
+    if (isFastsim) {
+      // setup btag calibration readers
+      calib_fastsim = new BTagCalibration("CSV", "btagsf/CSV_13TEV_Combined_20_11_2015.csv"); // 25ns fastsim version of SFs
+      reader_fastsim = new BTagCalibrationReader(calib_fastsim, BTagEntry::OP_MEDIUM, "fastsim", "central"); // central
+      reader_fastsim_UP = new BTagCalibrationReader(calib_fastsim, BTagEntry::OP_MEDIUM, "fastsim", "up");  // sys up
+      reader_fastsim_DN = new BTagCalibrationReader(calib_fastsim, BTagEntry::OP_MEDIUM, "fastsim", "down");  // sys down
+
+      // get btag efficiencies
+      TFile* f_btag_eff_fastsim = new TFile("btagsf/btageff__SMS-T1bbbb-T1qqqq_fastsim.root");
+      TH2D* h_btag_eff_b_fastsim_temp = (TH2D*) f_btag_eff_fastsim->Get("h2_BTaggingEff_csv_med_Eff_b");
+      TH2D* h_btag_eff_c_fastsim_temp = (TH2D*) f_btag_eff_fastsim->Get("h2_BTaggingEff_csv_med_Eff_c");
+      TH2D* h_btag_eff_udsg_fastsim_temp = (TH2D*) f_btag_eff_fastsim->Get("h2_BTaggingEff_csv_med_Eff_udsg");
+      BabyFile_->cd();
+      h_btag_eff_b_fastsim = (TH2D*) h_btag_eff_b_fastsim_temp->Clone("h_btag_eff_b_fastsim");
+      h_btag_eff_c_fastsim = (TH2D*) h_btag_eff_c_fastsim_temp->Clone("h_btag_eff_c_fastsim");
+      h_btag_eff_udsg_fastsim = (TH2D*) h_btag_eff_udsg_fastsim_temp->Clone("h_btag_eff_udsg_fastsim");
+      f_btag_eff_fastsim->Close();
+      
+      std::cout << "loaded fastsim btag SFs" << std::endl;
+    } // if (isFastsim)
   }
 
   // Lepton Scale Factors
@@ -1500,7 +1524,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               nBJet20++; 
               // btag SF - not final yet
               if (!isData && applyBtagSFs) {
-                float eff = getBtagEffFromFile(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet]);
+                float eff = getBtagEffFromFile(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet], isFastsim);
 		BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG;
 		if (abs(jet_mcFlavour[njet]) == 5) flavor = BTagEntry::FLAV_B;
 		else if (abs(jet_mcFlavour[njet]) == 4) flavor = BTagEntry::FLAV_C;
@@ -1515,6 +1539,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 		  weight_cent = reader_heavy->eval(flavor, eta_cutoff, pt_cutoff);
 		  weight_UP = reader_heavy_UP->eval(flavor, eta_cutoff, pt_cutoff);
 		  weight_DN = reader_heavy_DN->eval(flavor, eta_cutoff, pt_cutoff);
+		}
+		// extra SF for fastsim
+		if (isFastsim) {
+		  weight_cent *= reader_fastsim->eval(flavor, eta_cutoff, pt_cutoff);
+		  weight_UP *= reader_fastsim_UP->eval(flavor, eta_cutoff, pt_cutoff);
+		  weight_DN *= reader_fastsim_DN->eval(flavor, eta_cutoff, pt_cutoff);
 		}
                 btagprob_data *= weight_cent * eff;
                 btagprob_mc *= eff;
@@ -1545,7 +1575,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               } // pt 30
             } // pass med btag
             else if (!isData && applyBtagSFs) { // fail med btag -- needed for SF event weights
-              float eff = getBtagEffFromFile(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet]);
+              float eff = getBtagEffFromFile(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet], isFastsim);
 	      BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG;
 	      if (abs(jet_mcFlavour[njet]) == 5) flavor = BTagEntry::FLAV_B;
 	      else if (abs(jet_mcFlavour[njet]) == 4) flavor = BTagEntry::FLAV_C;
@@ -1560,6 +1590,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 		weight_cent = reader_heavy->eval(flavor, eta_cutoff, pt_cutoff);
 		weight_UP = reader_heavy_UP->eval(flavor, eta_cutoff, pt_cutoff);
 		weight_DN = reader_heavy_DN->eval(flavor, eta_cutoff, pt_cutoff);
+	      }
+	      // extra SF for fastsim
+	      if (isFastsim) {
+		weight_cent *= reader_fastsim->eval(flavor, eta_cutoff, pt_cutoff);
+		weight_UP *= reader_fastsim_UP->eval(flavor, eta_cutoff, pt_cutoff);
+		weight_DN *= reader_fastsim_DN->eval(flavor, eta_cutoff, pt_cutoff);
 	      }
               btagprob_data *= (1. - weight_cent * eff);
               btagprob_mc *= (1. - eff);
@@ -1923,6 +1959,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       delete reader_light;
       delete reader_light_UP;
       delete reader_light_DN;
+      if (isFastsim) {
+	delete calib_fastsim;
+	delete reader_fastsim;
+	delete reader_fastsim_UP;
+	delete reader_fastsim_DN;
+      }
     }
 
     if (applyJECfromFile) delete jet_corrector_pfL1FastJetL2L3;
@@ -2619,8 +2661,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     return;
   }
 
-  float babyMaker::getBtagEffFromFile(float pt, float eta, int mcFlavour){
+  float babyMaker::getBtagEffFromFile(float pt, float eta, int mcFlavour, bool isFastsim){
     if(!h_btag_eff_b || !h_btag_eff_c || !h_btag_eff_udsg) {
+      std::cout << "babyMaker::getBtagEffFromFile: ERROR: missing input hists" << std::endl;
+      return 1.;
+    }
+
+    if(isFastsim && (!h_btag_eff_b_fastsim || !h_btag_eff_c_fastsim || !h_btag_eff_udsg_fastsim)) {
       std::cout << "babyMaker::getBtagEffFromFile: ERROR: missing input hists" << std::endl;
       return 1.;
     }
@@ -2629,15 +2676,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     float pt_cutoff = std::max(20.,std::min(399.,double(pt)));
     TH2D* h(0);
     if (abs(mcFlavour) == 5) {
-      h = h_btag_eff_b;
+      h = isFastsim ? h_btag_eff_b_fastsim : h_btag_eff_b;
       // use pt bins up to 600 GeV for b
       pt_cutoff = std::max(20.,std::min(599.,double(pt)));
     }
     else if (abs(mcFlavour) == 4) {
-      h = h_btag_eff_c;
+      h = isFastsim ? h_btag_eff_c_fastsim : h_btag_eff_c;
     }
     else {
-      h = h_btag_eff_udsg;
+      h = isFastsim ? h_btag_eff_udsg_fastsim : h_btag_eff_udsg;
     }
     
     int binx = h->GetXaxis()->FindBin(pt_cutoff);

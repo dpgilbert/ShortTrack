@@ -39,7 +39,7 @@ class babyMaker {
 
  private:
 
-  float getBtagEffFromFile(float pt, float eta, int mcFlavour);
+  float getBtagEffFromFile(float pt, float eta, int mcFlavour, bool isFastsim = false);
   
   TFile *BabyFile_;
   TTree *BabyTree_;
@@ -61,6 +61,15 @@ class babyMaker {
   TH2D* h_btag_eff_b;
   TH2D* h_btag_eff_c;
   TH2D* h_btag_eff_udsg;
+  
+  BTagCalibration* calib_fastsim;
+  BTagCalibrationReader* reader_fastsim;
+  BTagCalibrationReader* reader_fastsim_UP;
+  BTagCalibrationReader* reader_fastsim_DN;
+
+  TH2D* h_btag_eff_b_fastsim;
+  TH2D* h_btag_eff_c_fastsim;
+  TH2D* h_btag_eff_udsg_fastsim;
   
   //baby ntuple variables
 
