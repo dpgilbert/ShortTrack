@@ -37,6 +37,7 @@ weightStruct getLepSF(float pt, float, int pdgId) {
   return weights;
 }
 
+//_________________________________________________________
 bool setElSFfile(TString filename){
   TFile * f = new TFile(filename);
   if (!f->IsOpen()) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find scale factor file "<<filename<<std::endl;
@@ -50,6 +51,7 @@ bool setElSFfile(TString filename){
   return true;
 }
 
+//_________________________________________________________
 bool setMuSFfile(TString filenameID, TString filenameISO){
   TFile * f1 = new TFile(filenameID);
   TFile * f2 = new TFile(filenameISO);
@@ -65,6 +67,7 @@ bool setMuSFfile(TString filenameID, TString filenameISO){
   return true;
 }
 
+//_________________________________________________________
 weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
 
   weightStruct weights;
@@ -74,7 +77,7 @@ weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
     return weights;
   }
 
-  float pt_cutoff = std::max(5.,std::min(100.,double(pt)));
+  float pt_cutoff = std::max(10.1,std::min(100.,double(pt)));
 
   if (abs(pdgId) == 11) {
     int binx = h_elSF->GetXaxis()->FindBin(pt_cutoff);
@@ -96,6 +99,72 @@ weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
     weights.up = central+err;
     weights.dn = central-err;
     if (central > 1.2 || central < 0.8) 
+      std::cout<<"STRANGE: Muon with pT/eta of "<<pt_cutoff<<"/"<<eta<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
+  }
+
+  return weights;
+}
+
+
+//_________________________________________________________
+bool setElSFfile_fastsim(TString filename){
+  TFile * f = new TFile(filename);
+  if (!f->IsOpen()) std::cout<<"applyWeights::setElSFfile_fastsim: ERROR: Could not find scale factor file "<<filename<<std::endl;
+  TH2D* h_eff = (TH2D*) f->Get("histo2D");
+  if (!h_eff) std::cout<<"applyWeights::setElSFfile_fastsim: ERROR: Could not find scale factor histogram"<<std::endl;
+  h_elSF_fastsim = (TH2D*) h_eff->Clone("h_elSF_fastsim");
+  h_elSF_fastsim->SetDirectory(0);
+  //h_elSF_fastsim->Print("all");
+  return true;
+}
+
+//_________________________________________________________
+bool setMuSFfile_fastsim(TString filename){
+  TFile * f = new TFile(filename);
+  if (!f->IsOpen()) { std::cout<<"applyWeights::setMuSFfile_fastsim: ERROR: Could not find scale factor file "<<filename<<std::endl; return 0;}
+  TH2D* h_eff = (TH2D*) f->Get("histo2D");
+  if (!h_eff) { std::cout<<"applyWeights::setMuSFfile_fastsim: ERROR: Could not find scale factor histogram"<<std::endl; return 0;}
+  h_muSF_fastsim = (TH2D*) h_eff->Clone("h_muSF_fastsim");
+  h_muSF_fastsim->SetDirectory(0);
+  //h_muSF_fastsim->Print("all");
+  return true;
+}
+
+//_________________________________________________________
+weightStruct getLepSFFromFile_fastsim(float pt, float eta, int pdgId) {
+
+  weightStruct weights;
+
+  if(!h_elSF_fastsim || !h_muSF_fastsim) {
+    std::cout << "applyWeights::getLepSFFromFile_fastsim: ERROR: missing input hists" << std::endl;
+    return weights;
+  }
+
+  float pt_cutoff = std::max(10.1,std::min(100.,double(pt)));
+
+  if (abs(pdgId) == 11) {
+    int binx = h_elSF_fastsim->GetXaxis()->FindBin(pt_cutoff);
+    int biny = h_elSF_fastsim->GetYaxis()->FindBin(fabs(eta));
+    float central = h_elSF_fastsim->GetBinContent(binx,biny);
+    float err  = 0.06; // 6% for pt > 30
+    if (pt_cutoff < 20.) err = 0.15; // 15% for pt < 20
+    else if (pt_cutoff < 30.) err = 0.10; // 10% for pt 20-30
+    weights.cent = central;
+    weights.up = central+err;
+    weights.dn = central-err;
+    if (central > 1.3 || central < 0.7) 
+      std::cout<<"STRANGE: Electron with pT/eta of "<<pt_cutoff<<"/"<<eta<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
+  }
+  else if (abs(pdgId) == 13) {
+    int binx = h_muSF_fastsim->GetXaxis()->FindBin(pt_cutoff);
+    int biny = h_muSF_fastsim->GetYaxis()->FindBin(fabs(eta));
+    float central = h_muSF_fastsim->GetBinContent(binx,biny);
+    float err  = 0.03; // 3% for pt > 20
+    if (pt_cutoff < 20.) err = 0.10; // 10% for pt < 20
+    weights.cent = central;
+    weights.up = central+err;
+    weights.dn = central-err;
+    if (central > 1.3 || central < 0.7) 
       std::cout<<"STRANGE: Muon with pT/eta of "<<pt_cutoff<<"/"<<eta<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
   }
 
