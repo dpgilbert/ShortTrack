@@ -6,7 +6,7 @@
 
 1) copy files to run looper into job_input directory
 for example, from the babymaker directory
-> cp -r *.so jetCorrections jsons btagsf data processBaby batchsubmit/job_input/
+> cp -r *.so jetCorrections jsons btagsf lepsf data processBaby batchsubmit/job_input/
 
 *** note that after copying the latest source files into the job_input subdir, you must run one of the writeConfig scripts below to recreate the input tarball which is used for the batch jobs!
 
