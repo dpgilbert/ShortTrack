@@ -180,6 +180,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   if (applyLeptonSFs) {
     setElSFfile("lepsf/kinematicBinSFele.root");
     setMuSFfile("lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root");
+    if (isFastsim) {
+      setElSFfile_fastsim("lepsf/sf_el_vetoCB_mini01.root");
+      setMuSFfile_fastsim("lepsf/sf_mu_looseID_mini02.root");
+    }
   }
 
   // ----------------------------------
@@ -838,20 +842,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
             p4sForHems.push_back(cms3.els_p4().at(iEl));
             p4sForDphi.push_back(cms3.els_p4().at(iEl));
           }
-        }
 
-        if (!isData && applyDummyWeights) {
-	  weightStruct weights = getLepSF(cms3.els_p4().at(iEl).pt(), cms3.els_p4().at(iEl).eta(), 11);
-          weight_lepsf *= weights.cent;
-          weight_lepsf_UP *= weights.up;
-          weight_lepsf_DN *= weights.dn;
-        }
-        if (!isData && applyLeptonSFs) {
-          weightStruct weights = getLepSFFromFile(cms3.els_p4().at(iEl).pt(), cms3.els_p4().at(iEl).eta(), 11);
-          weight_lepsf *= weights.cent;
-          weight_lepsf_UP *= weights.up;
-          weight_lepsf_DN *= weights.dn;
-        }
+	  if (!isData && applyLeptonSFs) {
+	    weightStruct weights = getLepSFFromFile(cms3.els_p4().at(iEl).pt(), cms3.els_p4().at(iEl).eta(), 11);
+	    weight_lepsf *= weights.cent;
+	    weight_lepsf_UP *= weights.up;
+	    weight_lepsf_DN *= weights.dn;
+	    // if (isFastsim) {
+	    //   weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.els_p4().at(iEl).pt(), cms3.els_p4().at(iEl).eta(), 11);
+	    //   weight_lepsf *= weights_fastsim.cent;
+	    //   weight_lepsf_UP *= weights_fastsim.up;
+	    //   weight_lepsf_DN *= weights_fastsim.dn;
+	    // }
+	  }
+
+        } // if (pass_iso)
+
       }
 
       if (verbose) cout << "before muons" << endl;
@@ -901,20 +907,21 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
             p4sForHems.push_back(cms3.mus_p4().at(iMu));
             p4sForDphi.push_back(cms3.mus_p4().at(iMu));
           }
-        }
+	  
+	  if (!isData && applyLeptonSFs) {
+	    weightStruct weights = getLepSFFromFile(cms3.mus_p4().at(iMu).pt(), cms3.mus_p4().at(iMu).eta(), 13);
+	    weight_lepsf *= weights.cent;
+	    weight_lepsf_UP *= weights.up;
+	    weight_lepsf_DN *= weights.dn;
+	    // if (isFastsim) {
+	    //   weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.mus_p4().at(iMu).pt(), cms3.mus_p4().at(iMu).eta(), 13);
+	    //   weight_lepsf *= weights_fastsim.cent;
+	    //   weight_lepsf_UP *= weights_fastsim.up;
+	    //   weight_lepsf_DN *= weights_fastsim.dn;
+	    // }
+	  }
 
-        if (!isData && applyDummyWeights) {
-	  weightStruct weights = getLepSF(cms3.mus_p4().at(iMu).pt(), cms3.mus_p4().at(iMu).eta(), 13);
-          weight_lepsf *= weights.cent;
-          weight_lepsf_UP *= weights.up;
-          weight_lepsf_DN *= weights.dn;
-        }
-        if (!isData && applyLeptonSFs) {
-          weightStruct weights = getLepSFFromFile(cms3.mus_p4().at(iMu).pt(), cms3.mus_p4().at(iMu).eta(), 13);
-          weight_lepsf *= weights.cent;
-          weight_lepsf_UP *= weights.up;
-          weight_lepsf_DN *= weights.dn;
-        }
+        } // if (pass_iso)
 
       }
 
@@ -1068,11 +1075,29 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
             }
           } // loop over reco leps
           if (!overlap) {
+
             p4sUniqueLeptons.push_back(cms3.pfcands_p4().at(ipf));
             if (doJetLepOverlapRemoval) {
               p4sForHems.push_back(cms3.pfcands_p4().at(ipf));
               p4sForDphi.push_back(cms3.pfcands_p4().at(ipf));
             }
+
+	    // // -------------- WORK IN PROGRESS -----------------
+	    // // update scale factor and uncertainty.  Assume SFs are 1 for fullsim, based on isolation T&P results.  use only uncertainty.
+	    // //  for fastsim, assume that ID + iso results apply, use SF and uncertainty
+	    // if (!isData && applyLeptonSFs) {
+	    //   weightStruct weights = getLepSFFromFile(cms3.pfcands_p4().at(ipf).pt(), cms3.pfcands_p4().at(ipf).eta(), pdgId);
+	    //   //weight_lepsf *= weights.cent;
+	    //   weight_lepsf_UP *= weights.up;
+	    //   weight_lepsf_DN *= weights.dn;
+	    //   if (isFastsim) {
+	    // 	weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.pfcands_p4().at(ipf).pt(), cms3.pfcands_p4().at(ipf).eta(), pdgId);
+	    // 	weight_lepsf *= weights_fastsim.cent;
+	    // 	weight_lepsf_UP *= weights_fastsim.up;
+	    // 	weight_lepsf_DN *= weights_fastsim.dn;
+	    //   }
+	    // }
+	    
           }
         } // passing pflepton 
 
