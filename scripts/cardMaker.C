@@ -21,6 +21,7 @@ using namespace std;
 
 TFile* f_lostlep = 0;
 TFile* f_zinv = 0;
+TFile* f_zgratio = 0;
 TFile* f_purity = 0;
 TFile* f_qcd = 0;
 TFile* f_sig = 0;
@@ -261,11 +262,11 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString notFound = "";
   if (fourNuisancesPerBinZGratio) {
     // Load NJ, NB, HT, MT2 histograms of R(Z/Gamma)
-    TH1D* h_zllgamma_nj  = (TH1D*) f_zinv->Get("h_njbinsRatio");
-    TH1D* h_zllgamma_nb  = (TH1D*) f_zinv->Get("h_nbjbinsRatio");
-    TH1D* h_zllgamma_ht  = (TH1D*) f_zinv->Get("h_htbinsRatio");
-    TH1D* h_zllgamma_ht2  = (TH1D*) f_zinv->Get("h_htbins2Ratio");
-    TH1D* h_zllgamma_mt2 = (TH1D*) f_zinv->Get("h_mt2binsRatio");
+    TH1D* h_zllgamma_nj  = (TH1D*) f_zgratio->Get("h_njbinsRatio");
+    TH1D* h_zllgamma_nb  = (TH1D*) f_zgratio->Get("h_nbjbinsRatio");
+    TH1D* h_zllgamma_ht  = (TH1D*) f_zgratio->Get("h_htbinsRatio");
+    TH1D* h_zllgamma_ht2  = (TH1D*) f_zgratio->Get("h_htbins2Ratio");
+    TH1D* h_zllgamma_mt2 = (TH1D*) f_zgratio->Get("h_mt2binsRatio");
     // Extract values corresponding to this bin
     if (h_zllgamma_nj == 0 || h_zllgamma_nb == 0 || h_zllgamma_ht == 0 || h_zllgamma_ht2 == 0 || h_zllgamma_mt2 == 0) {
       cout<<"Trying fourNuisancesPerBinZGratio, but could not find inclusive Zll/Gamma ratio plots for nuisance parameters"<<endl;
@@ -535,6 +536,8 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
 
   f_lostlep = new TFile(Form("%s/lostlepFromCRs.root",input_dir.c_str()));
   f_zinv = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str()));
+  f_zgratio = new TFile(Form("%s/doubleRatio.root",input_dir.c_str())); // zgratio from data
+  //  f_zgratio = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str())); // zgratio from MC (with poisson uncertainty)
   f_purity = new TFile(Form("%s/purity.root",input_dir.c_str()));
   f_qcd = new TFile(Form("%s/qcdFromCRs.root",input_dir.c_str()));
 
@@ -542,7 +545,7 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
 
   if (doData) f_data = new TFile(Form("%s/data_Run2015D.root",input_dir.c_str()));
 
-  if( f_lostlep->IsZombie() || f_zinv->IsZombie() || f_purity->IsZombie() || f_qcd->IsZombie() || f_sig->IsZombie() || (doData && f_data->IsZombie()) ) {
+  if( f_lostlep->IsZombie() || f_zinv->IsZombie() || f_purity->IsZombie() || f_qcd->IsZombie() || f_sig->IsZombie() || f_zgratio ->IsZombie() || (doData && f_data->IsZombie()) ) {
   // Trick to look at estimates even if QCD prediction is broken
   //  if( f_lostlep->IsZombie() || f_zinv->IsZombie() || f_purity->IsZombie() || f_sig->IsZombie() || (doData && f_data->IsZombie()) ) {
     std::cout << "Input file does not exist" << std::endl;
