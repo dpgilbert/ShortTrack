@@ -115,6 +115,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // single point sample
   else {
     h_sig = (TH1D*) f_sig->Get(fullhistname);
+    // Trick to print out monojet regions even when running on signal without monojet events
+    //    if (fullhistname.Contains("J")) 
+    //      h_sig = (TH1D*) f_sig->Get("sr6M/h_mt2bins");
   }
 
   if (!h_sig) {
@@ -254,16 +257,17 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     err_zinv_purity = h_zinv_purity->GetBinError(mt2bin_tmp)/h_zinv_purity->GetBinContent(mt2bin_tmp);
   }
  
-  float zllgamma_nj = 1., zllgamma_nb = 1., zllgamma_ht = 1., zllgamma_mt2 = 1.;
+  float zllgamma_nj = 1., zllgamma_nb = 1., zllgamma_ht = 1., zllgamma_ht2 = 1., zllgamma_mt2 = 1.;
   TString notFound = "";
   if (fourNuisancesPerBinZGratio) {
     // Load NJ, NB, HT, MT2 histograms of R(Z/Gamma)
     TH1D* h_zllgamma_nj  = (TH1D*) f_zinv->Get("h_njbinsRatio");
     TH1D* h_zllgamma_nb  = (TH1D*) f_zinv->Get("h_nbjbinsRatio");
     TH1D* h_zllgamma_ht  = (TH1D*) f_zinv->Get("h_htbinsRatio");
+    TH1D* h_zllgamma_ht2  = (TH1D*) f_zinv->Get("h_htbins2Ratio");
     TH1D* h_zllgamma_mt2 = (TH1D*) f_zinv->Get("h_mt2binsRatio");
     // Extract values corresponding to this bin
-    if (h_zllgamma_nj == 0 || h_zllgamma_nb == 0 || h_zllgamma_ht == 0 || h_zllgamma_mt2 == 0) {
+    if (h_zllgamma_nj == 0 || h_zllgamma_nb == 0 || h_zllgamma_ht == 0 || h_zllgamma_ht2 == 0 || h_zllgamma_mt2 == 0) {
       cout<<"Trying fourNuisancesPerBinZGratio, but could not find inclusive Zll/Gamma ratio plots for nuisance parameters"<<endl;
       return 0;
     }
@@ -272,12 +276,14 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     int bin_nb   = h_zllgamma_nb ->FindBin(nbjets_LOW + 0.5);
     if (nbjets_LOW >= 3) bin_nb   = h_zllgamma_nb ->FindBin(nbjets_LOW - 1 + 0.5);
     int bin_ht   = h_zllgamma_ht ->FindBin(ht_LOW + 1);      
+    int bin_ht2   = h_zllgamma_ht2 ->FindBin(ht_LOW + 1);      
     int bin_mt2  = h_zllgamma_mt2->FindBin(mt2_LOW + 1);     
     // (set to 100% if the ratio doesn't exist)
     zllgamma_nj  = h_zllgamma_nj ->GetBinContent( bin_nj  ) > 0 ? h_zllgamma_nj ->GetBinError( bin_nj  ) / h_zllgamma_nj ->GetBinContent( bin_nj  ) : 1.;
     zllgamma_nb  = h_zllgamma_nb ->GetBinContent( bin_nb  ) > 0 ? h_zllgamma_nb ->GetBinError( bin_nb  ) / h_zllgamma_nb ->GetBinContent( bin_nb  ) : 1.;
     if (nbjets_LOW >= 3) zllgamma_nb *= 2;
     zllgamma_ht  = h_zllgamma_ht ->GetBinContent( bin_ht  ) > 0 ? h_zllgamma_ht ->GetBinError( bin_ht  ) / h_zllgamma_ht ->GetBinContent( bin_ht  ) : 1.;
+    zllgamma_ht2 = h_zllgamma_ht2->GetBinContent( bin_ht2 ) > 0 ? h_zllgamma_ht2->GetBinError( bin_ht2 ) / h_zllgamma_ht2->GetBinContent( bin_ht2 ) : 1.;
     zllgamma_mt2 = h_zllgamma_mt2->GetBinContent( bin_mt2 ) > 0 ? h_zllgamma_mt2->GetBinError( bin_mt2 ) / h_zllgamma_mt2->GetBinContent( bin_mt2 ) : 1.;
     //cout<<"Looking at bin "<<channel<<endl;
     //cout<<"Corresponding bins are: "<<bin_nj<<", "<<bin_nb<<", "<<bin_ht<<", "<<bin_mt2<<endl;
@@ -419,8 +425,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     if (fourNuisancesPerBinZGratio) {
       zinv_zgamma_nj  =  1. + zllgamma_nj ;     
       zinv_zgamma_nb  =  1. + zllgamma_nb ;
-      zinv_zgamma_ht  =  1. + zllgamma_ht ; // not used in 1-jet bin
-      if (njets_LOW == 1) n_syst += 2;
+      zinv_zgamma_ht  =  1. + zllgamma_ht ; 
+      if (njets_LOW == 1) zinv_zgamma_ht  =  1. + zllgamma_ht2 ; // special double ratio for 1-jet
       else n_syst += 3;
       if (!integratedZinvEstimate) {
 	zinv_zgamma_mt2 =  1. + zllgamma_mt2;	
@@ -477,7 +483,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     if (fourNuisancesPerBinZGratio) {
       ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nj.Data() ,zinv_zgamma_nj )  << endl;
       ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nb.Data() ,zinv_zgamma_nb )  << endl;
-      if (njets_LOW != 1) ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_ht.Data() ,zinv_zgamma_ht )  << endl;
+      ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_ht.Data() ,zinv_zgamma_ht )  << endl;
       if (!integratedZinvEstimate)
         ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_mt2.Data(),zinv_zgamma_mt2)  << endl;
     }
@@ -537,6 +543,8 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
   if (doData) f_data = new TFile(Form("%s/data_Run2015D.root",input_dir.c_str()));
 
   if( f_lostlep->IsZombie() || f_zinv->IsZombie() || f_purity->IsZombie() || f_qcd->IsZombie() || f_sig->IsZombie() || (doData && f_data->IsZombie()) ) {
+  // Trick to look at estimates even if QCD prediction is broken
+  //  if( f_lostlep->IsZombie() || f_zinv->IsZombie() || f_purity->IsZombie() || f_sig->IsZombie() || (doData && f_data->IsZombie()) ) {
     std::cout << "Input file does not exist" << std::endl;
     return;
   }

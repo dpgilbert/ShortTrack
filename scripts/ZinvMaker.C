@@ -32,12 +32,13 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
   inclPlots.push_back("h_njbins");
   inclPlots.push_back("h_nbjbins");
   inclPlots.push_back("h_htbins");
+  inclPlots.push_back("h_htbins2");
   inclPlots.push_back("h_mt2bins");
 
   for ( unsigned int incl = 0; incl < inclPlots.size(); ++incl ) {
     
-    TH1D* hGJetIncl = (TH1D*) fGJet->Get("crgjbase/"+inclPlots[incl])->Clone();
-    TH1D* hZllIncl  = (TH1D*)  fZll->Get("crdybase/"+inclPlots[incl])->Clone();
+    TH1D* hGJetIncl = (TH1D*) fGJet->Get("crgjbaseIncl/"+inclPlots[incl])->Clone();
+    TH1D* hZllIncl  = (TH1D*)  fZll->Get("crdybaseIncl/"+inclPlots[incl])->Clone();
 
     if(!hGJetIncl || !hZllIncl){
       cout<<"could not find histogram "<<inclPlots[incl]<<endl;
@@ -71,6 +72,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
     
     TString fullhistname = directory + "/h_mt2bins";
     TString fullhistnameHT = directory + "/h_htbins";
+    TString fullhistnameHT2 = directory + "/h_htbins2";
     TString fullhistnameNJ = directory + "/h_njbins";
     TString fullhistnameNB = directory + "/h_nbjbins";
     TString fullhistnameGJ = directoryGJ + "/h_mt2bins";
@@ -78,6 +80,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
     TH1D* hGJet = (TH1D*) fGJet->Get(fullhistnameGJ);    
     TH1D* hZinv = (TH1D*) fZinv->Get(fullhistname);
     TH1D* hZinvHT = (TH1D*) fZinv->Get(fullhistnameHT);
+    TH1D* hZinvHT2 = (TH1D*) fZinv->Get(fullhistnameHT2);
     TH1D* hZinvNJ = (TH1D*) fZinv->Get(fullhistnameNJ);
     TH1D* hZinvNB = (TH1D*) fZinv->Get(fullhistnameNB);
     
@@ -179,6 +182,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
     ratio->Write();
     ratioInt->Write();
     hZinvHT->Write();
+    hZinvHT2->Write();
     hZinvNJ->Write();
     hZinvNB->Write();
   } // loop over signal regions

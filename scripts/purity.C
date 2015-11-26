@@ -94,6 +94,7 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString sr
   for(int i=0; i<=n_mt2bins; i++){
 //    mt2binsname.push_back(toString(sr.GetMT2Bins()[i]));
     mt2binsname.push_back(toString(h_LooseNotTight->GetBinLowEdge(i+1)));
+    cout<<"Added MT2 bin name "<<h_LooseNotTight->GetBinLowEdge(i+1)<<endl;
   }
   
   //loop over mt2bins
@@ -726,9 +727,11 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   makePred(f_out, f_gq, f_q, f_g, srName, h_FRFailSieie, 0, "FailSieie"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt
   makePred(f_out, f_data, f_q, f_g, srName, h_FRFailSieieData, 0, "FailSieieData"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_data, f_q, f_g, srName, h_FRFailSieieData, 0, "FailSieieData", "htbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
+  makePredOneBinFR(f_out, f_data, f_q, f_g, srName, h_FRFailSieieData, 0, "FailSieieData", "htbins2"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_data, f_q, f_g, srName, h_FRFailSieieData, 0, "FailSieieData", "njbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_data, f_q, f_g, srName, h_FRFailSieieData, 0, "FailSieieData", "nbjbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_data, f_q, f_g, srName+"Incl", h_FRFailSieieData, 0, "FailSieieData", "htbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
+  makePredOneBinFR(f_out, f_data, f_q, f_g, srName+"Incl", h_FRFailSieieData, 0, "FailSieieData", "htbins2"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_data, f_q, f_g, srName+"Incl", h_FRFailSieieData, 0, "FailSieieData", "njbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_data, f_q, f_g, srName+"Incl", h_FRFailSieieData, 0, "FailSieieData", "nbjbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   vector<TString> additionalRegions;
@@ -780,6 +783,7 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   }
   vector<TString> additionalPlots;
   additionalPlots.push_back("htbins");
+  additionalPlots.push_back("htbins2");
   additionalPlots.push_back("njbins");
   additionalPlots.push_back("nbjbins");
   for(int i = 0; i< (int) additionalPlots.size(); i++){
