@@ -1358,17 +1358,16 @@ std::vector<SR> getSignalRegionsMonojet(){
   SR baseSR;
 
   // define baseline selections commmon to all monojet regions
+  float mt2bins_monojet[2] = {0, 1500};
   baseSR.SetVar("j1pt", 200, -1);
   baseSR.SetVar("nlep", 0, 1);
   baseSR.SetVar("njets", 1, 2);
-  baseSR.SetVar("ht", 200, -1);
   baseSR.SetVar("met", 200, -1);
   baseSR.SetVar("deltaPhiMin", 0.3, -1);
   baseSR.SetVar("diffMetMhtOverMet", 0, 0.5);
   baseSR.SetVarCRSL("j1pt", 200, -1);
   baseSR.SetVarCRSL("nlep", 1, 2);
   baseSR.SetVarCRSL("njets", 1, 2);
-  baseSR.SetVarCRSL("ht", 200, -1);
   baseSR.SetVarCRSL("met", 200, -1);
   baseSR.SetVarCRSL("deltaPhiMin", 0.3, -1);
   baseSR.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
@@ -1377,34 +1376,65 @@ std::vector<SR> getSignalRegionsMonojet(){
   baseSR.SetVarCRQCD("j2pt", 30, 60);
   baseSR.SetVarCRQCD("nlep", 0, 1);
   baseSR.SetVarCRQCD("njets", 2, 3);
-  baseSR.SetVarCRQCD("ht", 200, -1);
   baseSR.SetVarCRQCD("met", 200, -1);
   baseSR.SetVarCRQCD("deltaPhiMin", 0., 0.3);
   baseSR.SetVarCRQCD("diffMetMhtOverMet", 0, 0.5);
+  baseSR.SetMT2Bins(1, mt2bins_monojet);
 
   // fine binning in HT
   const int nbins_monojet_0b = 7;
-  float htbins_0b[nbins_monojet_0b+1] = {200, 300, 400, 500, 600, 800, 1000, 1500};
+  float htbins_0b[nbins_monojet_0b+1] = {200, 250, 350, 450, 575, 700, 1000, 1500};
   const int nbins_monojet_1b = 6;
-  float htbins_1b[nbins_monojet_1b+1] = {200, 300, 400, 500, 600, 800, 1500};
+  float htbins_1b[nbins_monojet_1b+1] = {200, 250, 350, 450, 575, 1000, 1500};
 
   temp_SR_vec.clear();
+  for(unsigned int iSR = 0; iSR < nbins_monojet_0b; iSR++){
+    SR fullSR0b = baseSR;  
+    fullSR0b.SetName(std::to_string(iSR+1) + "J");
+    fullSR0b.SetVar("ht", htbins_0b[iSR], htbins_0b[iSR+1]);
+    fullSR0b.SetVar("nbjets", 0, 1);
+    fullSR0b.SetVarCRSL("ht", htbins_0b[iSR], htbins_0b[iSR+1]);
+    fullSR0b.SetVarCRSL("nbjets", 0, 1);
+    fullSR0b.SetVarCRQCD("ht", htbins_0b[iSR], htbins_0b[iSR+1]);
+    fullSR0b.SetVarCRQCD("nbjets", 0, 1);
+    SRVec.push_back(fullSR0b);
+  }
+  for(unsigned int iSR = 0; iSR < nbins_monojet_1b; iSR++){
+    SR fullSR1b = baseSR;  
+    fullSR1b.SetName(std::to_string(iSR+11) + "J");
+    fullSR1b.SetVar("ht", htbins_1b[iSR], htbins_1b[iSR+1]);
+    fullSR1b.SetVar("nbjets", 1, -1);
+    fullSR1b.SetVarCRSL("ht", htbins_1b[iSR], htbins_1b[iSR+1]);
+    fullSR1b.SetVarCRSL("nbjets", 1, -1);
+    fullSR1b.SetVarCRQCD("ht", htbins_1b[iSR], htbins_1b[iSR+1]);
+    fullSR1b.SetVarCRQCD("nbjets", 1, -1);
+    SRVec.push_back(fullSR1b);
+  }
+
+
+  // Also put in some inclusive regions: 0b, 1b
   SR fullSR0b = baseSR;  
-  fullSR0b.SetName("1J");
+  fullSR0b.SetName("baseJ0B");
   fullSR0b.SetVar("nbjets", 0, 1);
   fullSR0b.SetVarCRSL("nbjets", 0, 1);
   fullSR0b.SetVarCRQCD("nbjets", 0, 1);
+  fullSR0b.SetVar("ht", 200, -1);
+  fullSR0b.SetVarCRSL("ht", 200, -1);
+  fullSR0b.SetVarCRQCD("ht", 200, -1);
   fullSR0b.SetMT2Bins(nbins_monojet_0b, htbins_0b);
   SRVec.push_back(fullSR0b);
 
   SR fullSR1b = baseSR;  
-  fullSR1b.SetName("2J");
+  fullSR1b.SetName("baseJ1B");
   fullSR1b.SetVar("nbjets", 1, -1);
   fullSR1b.SetVarCRSL("nbjets", 1, -1);
   fullSR1b.SetVarCRQCD("nbjets", 1, -1);
+  fullSR1b.SetVar("ht", 200, -1);
+  fullSR1b.SetVarCRSL("ht", 200, -1);
+  fullSR1b.SetVarCRQCD("ht", 200, -1);
   fullSR1b.SetMT2Bins(nbins_monojet_1b, htbins_1b);
   SRVec.push_back(fullSR1b);
-  
+
   return SRVec;
 
 }
