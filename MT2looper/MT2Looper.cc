@@ -1677,7 +1677,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
 
   // workaround for monojet bins
   float mt2_temp = t.mt2;
-  if (t.nJet30 == 1) mt2_temp = t.ht;
+  if (t.nJet30 == 1) mt2_temp = t.jet1_pt;
 
   plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
   plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
