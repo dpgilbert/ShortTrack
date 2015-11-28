@@ -535,7 +535,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   h_sig_nevents_ = 0;
   if (doScanWeights && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
-    TFile* f_nsig = new TFile(Form("../babymaker/data/nsig_%s.root",sample.c_str()));
+    std::string scan_name = sample;
+    if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
+    else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
+    TFile* f_nsig = new TFile(Form("../babymaker/data/nsig_%s.root",scan_name.c_str()));
     TH2D* h_sig_nevents_temp = (TH2D*) f_nsig->Get("h_nsig");
     outfile_->cd();
     h_sig_nevents_ = (TH2D*) h_sig_nevents_temp->Clone("h_sig_nevents");
@@ -1783,6 +1786,10 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     // assume weights are already applied to central value: lepsf, btagsf, isr 
     plot1D("h_mt2bins_btagsf_UP"+s,       mt2_temp,   evtweight_ / t.weight_btagsf * t.weight_btagsf_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_btagsf_DN"+s,       mt2_temp,   evtweight_ / t.weight_btagsf * t.weight_btagsf_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    if (isSignal_) {
+      plot3D("h_mt2bins_sigscan_btagsf_UP"+s, t.GenSusyMScan1, t.GenSusyMScan2, t.mt2, evtweight_ / t.weight_btagsf * t.weight_btagsf_UP, h_1d, "mass1 [GeV];mass2 [GeV];M_{T2} [GeV]", n_m1bins, m1bins, n_m2bins, m2bins, n_mt2bins, mt2bins);
+      plot3D("h_mt2bins_sigscan_btagsf_DN"+s, t.GenSusyMScan1, t.GenSusyMScan2, t.mt2, evtweight_ / t.weight_btagsf * t.weight_btagsf_DN, h_1d, "mass1 [GeV];mass2 [GeV];M_{T2} [GeV]", n_m1bins, m1bins, n_m2bins, m2bins, n_mt2bins, mt2bins);
+    }
   }
 
   if (!t.isData && doGenTauVars) {
