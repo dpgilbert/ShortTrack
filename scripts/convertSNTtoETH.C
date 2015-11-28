@@ -98,9 +98,9 @@ void convertSNTtoETH(TString dir, TString sample) {
       if (TString(hist_k->GetClassName()) != "TH3D") continue;
       TString hist_name = (hist_k->GetName());
       TString hist_name_eth(hist_name);
-      hist_name_eth.ReplaceAll("h_mt2bins","yield3d");
+      hist_name_eth.ReplaceAll("h_mt2bins_","yield3d");
       hist_name_eth.ReplaceAll("sigscan","");
-      hist_name_eth += sample + "_" + dir_name_eth;
+      hist_name_eth += "_" + sample + "_" + dir_name_eth;
       TH3D* h = (TH3D*)hist_k->ReadObj();
       h->SetName(hist_name_eth);
       dout->WriteObject(h,hist_name_eth);
