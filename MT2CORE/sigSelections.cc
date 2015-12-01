@@ -1383,9 +1383,9 @@ std::vector<SR> getSignalRegionsMonojet(){
 
   // fine binning in HT
   const int nbins_monojet_0b = 7;
-  float htbins_0b[nbins_monojet_0b+1] = {200, 250, 350, 450, 575, 700, 1000, 1500};
+  float htbins_0b[nbins_monojet_0b+1] = {200, 250, 350, 450, 575, 700, 1000, -1};
   const int nbins_monojet_1b = 5;
-  float htbins_1b[nbins_monojet_1b+1] = {200, 250, 350, 450, 575, 1500};
+  float htbins_1b[nbins_monojet_1b+1] = {200, 250, 350, 450, 575, -1};
 
   temp_SR_vec.clear();
   for(unsigned int iSR = 0; iSR < nbins_monojet_0b; iSR++){
