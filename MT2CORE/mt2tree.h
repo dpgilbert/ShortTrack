@@ -317,7 +317,11 @@ public :
    Float_t         weight_lepsf_DN;
    Float_t         weight_btagsf;
    Float_t         weight_btagsf_UP;
+   Float_t         weight_btagsf_heavy_UP;
+   Float_t         weight_btagsf_light_UP;
    Float_t         weight_btagsf_DN;
+   Float_t         weight_btagsf_heavy_DN;
+   Float_t         weight_btagsf_light_DN;
    Float_t         weight_sigtrigsf;
    Float_t         weight_dileptrigsf;
    Float_t         weight_phottrigsf;
@@ -626,7 +630,11 @@ public :
    TBranch        *b_weight_lepsf_DN;   //!
    TBranch        *b_weight_btagsf;   //!
    TBranch        *b_weight_btagsf_UP;   //!
+   TBranch        *b_weight_btagsf_heavy_UP;   //!
+   TBranch        *b_weight_btagsf_light_UP;   //!
    TBranch        *b_weight_btagsf_DN;   //!
+   TBranch        *b_weight_btagsf_heavy_DN;   //!
+   TBranch        *b_weight_btagsf_light_DN;   //!
    TBranch        *b_weight_sigtrigsf;   //!
    TBranch        *b_weight_dileptrigsf;   //!
    TBranch        *b_weight_phottrigsf;   //!
@@ -994,7 +1002,11 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("weight_lepsf_DN", &weight_lepsf_DN, &b_weight_lepsf_DN);
    fChain->SetBranchAddress("weight_btagsf", &weight_btagsf, &b_weight_btagsf);
    fChain->SetBranchAddress("weight_btagsf_UP", &weight_btagsf_UP, &b_weight_btagsf_UP);
+   fChain->SetBranchAddress("weight_btagsf_heavy_UP", &weight_btagsf_heavy_UP, &b_weight_btagsf_heavy_UP);
+   fChain->SetBranchAddress("weight_btagsf_light_UP", &weight_btagsf_light_UP, &b_weight_btagsf_light_UP);
    fChain->SetBranchAddress("weight_btagsf_DN", &weight_btagsf_DN, &b_weight_btagsf_DN);
+   fChain->SetBranchAddress("weight_btagsf_heavy_DN", &weight_btagsf_heavy_DN, &b_weight_btagsf_heavy_DN);
+   fChain->SetBranchAddress("weight_btagsf_light_DN", &weight_btagsf_light_DN, &b_weight_btagsf_light_DN);
    fChain->SetBranchAddress("weight_sigtrigsf", &weight_sigtrigsf, &b_weight_sigtrigsf);
    fChain->SetBranchAddress("weight_dileptrigsf", &weight_dileptrigsf, &b_weight_dileptrigsf);
    fChain->SetBranchAddress("weight_phottrigsf", &weight_phottrigsf, &b_weight_phottrigsf);
