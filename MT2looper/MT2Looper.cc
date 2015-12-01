@@ -74,7 +74,7 @@ bool useDRforGammaQCDMixing = true; // requires GenParticles
 // turn on to apply weights to central value
 bool applyWeights = false;
 // turn on to apply btag sf to central value
-bool applyBtagSF = false;
+bool applyBtagSF = true;
 // turn on to apply lepton sf to central value
 bool applyLeptonSF = false;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
@@ -86,7 +86,7 @@ bool applyJSON = false;
 // veto on jets with pt > 30, |eta| > 3.0
 bool doHFJetVeto = false;
 // get signal scan nevents from file
-bool doScanWeights = false;
+bool doScanWeights = true;
 // doesn't plot data for MT2 > 200 in signal regions
 bool doBlindData = false;
 // make variation histograms for tau efficiency
@@ -1800,7 +1800,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   } // nocut region only
 
   if (isSignal_) {
-    plot3D("h_mt2bins_sigscan"+s, t.GenSusyMScan1, t.GenSusyMScan2, t.mt2, evtweight_, h_1d, "mass1 [GeV];mass2 [GeV];M_{T2} [GeV]", n_m1bins, m1bins, n_m2bins, m2bins, n_mt2bins, mt2bins);
+    plot3D("h_mt2bins_sigscan"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
   }
 
   if (!t.isData && applyWeights && doSystVariationPlots) {
@@ -1827,8 +1827,8 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     float avgweight_isr_UP = 2. - avgweight_isr_DN;
     plot1D("h_mt2bins_isr_UP"+s,       mt2_temp,   evtweight_ * weight_isr_UP / avgweight_isr_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_isr_DN"+s,       mt2_temp,   evtweight_ * weight_isr_DN / avgweight_isr_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot3D("h_mt2bins_sigscan_isr_UP"+s, t.GenSusyMScan1, t.GenSusyMScan2, t.mt2, evtweight_ * weight_isr_UP / avgweight_isr_UP, h_1d, "mass1 [GeV];mass2 [GeV];M_{T2} [GeV]", n_m1bins, m1bins, n_m2bins, m2bins, n_mt2bins, mt2bins);
-    plot3D("h_mt2bins_sigscan_isr_DN"+s, t.GenSusyMScan1, t.GenSusyMScan2, t.mt2, evtweight_ * weight_isr_DN / avgweight_isr_DN, h_1d, "mass1 [GeV];mass2 [GeV];M_{T2} [GeV]", n_m1bins, m1bins, n_m2bins, m2bins, n_mt2bins, mt2bins);
+    plot3D("h_mt2bins_sigscan_isr_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ * weight_isr_UP / avgweight_isr_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    plot3D("h_mt2bins_sigscan_isr_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ * weight_isr_DN / avgweight_isr_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
   }
 
   if (!t.isData && applyBtagSF && doSystVariationPlots) {
@@ -1856,10 +1856,10 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_mt2bins_btagsf_heavy_DN"+s,       mt2_temp,   evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_DN / avgweight_heavy_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_btagsf_light_DN"+s,       mt2_temp,   evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_DN / avgweight_light_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     if (isSignal_) {
-      plot3D("h_mt2bins_sigscan_btagsf_heavy_UP"+s, t.GenSusyMScan1, t.GenSusyMScan2, t.mt2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_UP / avgweight_heavy_UP, h_1d, "mass1 [GeV];mass2 [GeV];M_{T2} [GeV]", n_m1bins, m1bins, n_m2bins, m2bins, n_mt2bins, mt2bins);
-      plot3D("h_mt2bins_sigscan_btagsf_light_UP"+s, t.GenSusyMScan1, t.GenSusyMScan2, t.mt2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_UP / avgweight_light_UP, h_1d, "mass1 [GeV];mass2 [GeV];M_{T2} [GeV]", n_m1bins, m1bins, n_m2bins, m2bins, n_mt2bins, mt2bins);
-      plot3D("h_mt2bins_sigscan_btagsf_heavy_DN"+s, t.GenSusyMScan1, t.GenSusyMScan2, t.mt2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_DN / avgweight_heavy_DN, h_1d, "mass1 [GeV];mass2 [GeV];M_{T2} [GeV]", n_m1bins, m1bins, n_m2bins, m2bins, n_mt2bins, mt2bins);
-      plot3D("h_mt2bins_sigscan_btagsf_light_DN"+s, t.GenSusyMScan1, t.GenSusyMScan2, t.mt2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_DN / avgweight_light_DN, h_1d, "mass1 [GeV];mass2 [GeV];M_{T2} [GeV]", n_m1bins, m1bins, n_m2bins, m2bins, n_mt2bins, mt2bins);
+      plot3D("h_mt2bins_sigscan_btagsf_heavy_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_UP / avgweight_heavy_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+      plot3D("h_mt2bins_sigscan_btagsf_light_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_UP / avgweight_light_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+      plot3D("h_mt2bins_sigscan_btagsf_heavy_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_DN / avgweight_heavy_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+      plot3D("h_mt2bins_sigscan_btagsf_light_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_DN / avgweight_light_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
     }
   }
 
