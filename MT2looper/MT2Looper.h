@@ -87,6 +87,11 @@ class MT2Looper {
   SR CRSL_TTbar;
   TH1D* h_nvtx_weights_;
   TH2D* h_sig_nevents_;
+  TH2D* h_sig_avgweight_btagsf_;
+  TH2D* h_sig_avgweight_btagsf_heavy_UP_;
+  TH2D* h_sig_avgweight_btagsf_light_UP_;
+  TH2D* h_sig_avgweight_btagsf_heavy_DN_;
+  TH2D* h_sig_avgweight_btagsf_light_DN_;
 };
 
 #endif
