@@ -92,6 +92,7 @@ class MT2Looper {
   TH2D* h_sig_avgweight_btagsf_light_UP_;
   TH2D* h_sig_avgweight_btagsf_heavy_DN_;
   TH2D* h_sig_avgweight_btagsf_light_DN_;
+  TH2D* h_sig_avgweight_isr_;
 };
 
 #endif

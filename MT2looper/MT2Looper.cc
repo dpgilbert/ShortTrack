@@ -543,6 +543,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   h_sig_avgweight_btagsf_light_UP_ = 0;
   h_sig_avgweight_btagsf_heavy_DN_ = 0;
   h_sig_avgweight_btagsf_light_DN_ = 0;
+  h_sig_avgweight_isr_ = 0;
   if ((doScanWeights || applyBtagSF) && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
     std::string scan_name = sample;
     if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
@@ -554,18 +555,21 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     TH2D* h_sig_avgweight_btagsf_light_UP_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf_light_UP");
     TH2D* h_sig_avgweight_btagsf_heavy_DN_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf_heavy_DN");
     TH2D* h_sig_avgweight_btagsf_light_DN_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf_light_DN");
+    TH2D* h_sig_avgweight_isr_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_isr");
     h_sig_nevents_ = (TH2D*) h_sig_nevents_temp->Clone("h_sig_nevents");
     h_sig_avgweight_btagsf_ = (TH2D*) h_sig_avgweight_btagsf_temp->Clone("h_sig_avgweight_btagsf");
     h_sig_avgweight_btagsf_heavy_UP_ = (TH2D*) h_sig_avgweight_btagsf_heavy_UP_temp->Clone("h_sig_avgweight_btagsf_heavy_UP");
     h_sig_avgweight_btagsf_light_UP_ = (TH2D*) h_sig_avgweight_btagsf_light_UP_temp->Clone("h_sig_avgweight_btagsf_light_UP");
     h_sig_avgweight_btagsf_heavy_DN_ = (TH2D*) h_sig_avgweight_btagsf_heavy_DN_temp->Clone("h_sig_avgweight_btagsf_heavy_DN");
     h_sig_avgweight_btagsf_light_DN_ = (TH2D*) h_sig_avgweight_btagsf_light_DN_temp->Clone("h_sig_avgweight_btagsf_light_DN");
+    h_sig_avgweight_isr_ = (TH2D*) h_sig_avgweight_isr_temp->Clone("h_sig_avgweight_isr");
     h_sig_nevents_->SetDirectory(0);
     h_sig_avgweight_btagsf_->SetDirectory(0);
     h_sig_avgweight_btagsf_heavy_UP_->SetDirectory(0);
     h_sig_avgweight_btagsf_light_UP_->SetDirectory(0);
     h_sig_avgweight_btagsf_heavy_DN_->SetDirectory(0);
     h_sig_avgweight_btagsf_light_DN_->SetDirectory(0);
+    h_sig_avgweight_isr_->SetDirectory(0);
     f_nsig_weights->Close();
     delete f_nsig_weights;
   }
@@ -1811,6 +1815,20 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_mt2bins_scales_DN"+s,       mt2_temp,   evtweight_ * t.weight_scales_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_pdfs_UP"+s,       mt2_temp,   evtweight_  * t.weight_pdfs_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_pdfs_DN"+s,       mt2_temp,   evtweight_  * t.weight_pdfs_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+
+  if (!t.isData && isSignal_ && doSystVariationPlots) {
+    int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(t.GenSusyMScan1);
+    int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(t.GenSusyMScan2);
+    // stored ISR weight is for DN variation
+    float weight_isr_DN = t.weight_isr;
+    float avgweight_isr_DN = h_sig_avgweight_isr_->GetBinContent(binx,biny);
+    float weight_isr_UP = 2. - weight_isr_DN;
+    float avgweight_isr_UP = 2. - avgweight_isr_DN;
+    plot1D("h_mt2bins_isr_UP"+s,       mt2_temp,   evtweight_ * weight_isr_UP / avgweight_isr_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_isr_DN"+s,       mt2_temp,   evtweight_ * weight_isr_DN / avgweight_isr_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot3D("h_mt2bins_sigscan_isr_UP"+s, t.GenSusyMScan1, t.GenSusyMScan2, t.mt2, evtweight_ * weight_isr_UP / avgweight_isr_UP, h_1d, "mass1 [GeV];mass2 [GeV];M_{T2} [GeV]", n_m1bins, m1bins, n_m2bins, m2bins, n_mt2bins, mt2bins);
+    plot3D("h_mt2bins_sigscan_isr_DN"+s, t.GenSusyMScan1, t.GenSusyMScan2, t.mt2, evtweight_ * weight_isr_DN / avgweight_isr_DN, h_1d, "mass1 [GeV];mass2 [GeV];M_{T2} [GeV]", n_m1bins, m1bins, n_m2bins, m2bins, n_mt2bins, mt2bins);
   }
 
   if (!t.isData && applyBtagSF && doSystVariationPlots) {
