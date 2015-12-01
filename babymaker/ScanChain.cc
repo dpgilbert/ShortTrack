@@ -1693,8 +1693,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       // compute event level btag weights
       if (!isData && applyBtagSFs) {
         weight_btagsf = btagprob_data / btagprob_mc;
-        weight_btagsf_UP = weight_btagsf + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf);
-        weight_btagsf_DN = weight_btagsf - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf);
+        weight_btagsf_heavy_UP = weight_btagsf + btagprob_err_heavy_UP*weight_btagsf;
+        weight_btagsf_light_UP = weight_btagsf + btagprob_err_light_UP*weight_btagsf;
+        weight_btagsf_heavy_DN = weight_btagsf - btagprob_err_heavy_DN*weight_btagsf;
+        weight_btagsf_light_DN = weight_btagsf - btagprob_err_light_DN*weight_btagsf;
       }
 
       if (verbose) cout << "before hemispheres" << endl;
@@ -2308,8 +2310,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("weight_lepsf_UP", &weight_lepsf_UP );
     BabyTree_->Branch("weight_lepsf_DN", &weight_lepsf_DN );
     BabyTree_->Branch("weight_btagsf", &weight_btagsf );
-    BabyTree_->Branch("weight_btagsf_UP", &weight_btagsf_UP );
-    BabyTree_->Branch("weight_btagsf_DN", &weight_btagsf_DN );
+    BabyTree_->Branch("weight_btagsf_heavy_UP", &weight_btagsf_heavy_UP );
+    BabyTree_->Branch("weight_btagsf_light_UP", &weight_btagsf_light_UP );
+    BabyTree_->Branch("weight_btagsf_heavy_DN", &weight_btagsf_heavy_DN );
+    BabyTree_->Branch("weight_btagsf_light_DN", &weight_btagsf_light_DN );
     BabyTree_->Branch("weight_sigtrigsf", &weight_sigtrigsf );
     BabyTree_->Branch("weight_dileptrigsf", &weight_dileptrigsf );
     BabyTree_->Branch("weight_phottrigsf", &weight_phottrigsf );
@@ -2505,8 +2509,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     weight_lepsf_UP = 1.;
     weight_lepsf_DN = 1.;
     weight_btagsf = 1.;
-    weight_btagsf_UP = 1.;
-    weight_btagsf_DN = 1.;
+    weight_btagsf_heavy_UP = 1.;
+    weight_btagsf_light_UP = 1.;
+    weight_btagsf_heavy_DN = 1.;
+    weight_btagsf_light_DN = 1.;
     weight_sigtrigsf = 1.;
     weight_dileptrigsf = 1.;
     weight_phottrigsf = 1.;
