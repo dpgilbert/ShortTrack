@@ -77,6 +77,8 @@ bool applyWeights = false;
 bool applyBtagSF = true;
 // turn on to apply lepton sf to central value
 bool applyLeptonSF = false;
+// turn on to apply lepton sf to central value for 0L sample in fastsim
+bool applyLeptonSFfastsim = false;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
 bool doSystVariationPlots = false;
 // turn on to apply Nvtx reweighting to MC
@@ -573,6 +575,38 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     f_nsig_weights->Close();
     delete f_nsig_weights;
   }
+
+  h_sf_fastsim_el_ = 0;
+  h_sf_fastsim_mu_ = 0;
+  h_vetoeff_fastsim_el_ = 0;
+  h_vetoeff_fastsim_mu_ = 0;
+  if (applyLeptonSFfastsim && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
+    TFile* f_sf_fastsim_el = new TFile("../babymaker/lepsf/sf_el_vetoCB_mini01.root");
+    TFile* f_sf_fastsim_mu = new TFile("../babymaker/lepsf/sf_mu_looseID_mini02.root");
+    TFile* f_vetoeff_fastsim = new TFile("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt_mGluino-1500to1525.root");
+    TH2D* h_sf_fastsim_el_temp = (TH2D*) f_sf_fastsim_el->Get("histo2D");
+    TH2D* h_sf_fastsim_mu_temp = (TH2D*) f_sf_fastsim_mu->Get("histo2D");
+    TH2D* h_vetoeff_fastsim_el_temp = (TH2D*) f_vetoeff_fastsim->Get("h_ele_comb_eff");
+    TH2D* h_vetoeff_fastsim_mu_temp = (TH2D*) f_vetoeff_fastsim->Get("h_mu_comb_eff");
+    
+    h_sf_fastsim_el_ = (TH2D*) h_sf_fastsim_el_temp->Clone("h_sf_fastsim_el");
+    h_sf_fastsim_mu_ = (TH2D*) h_sf_fastsim_mu_temp->Clone("h_sf_fastsim_mu");
+    h_vetoeff_fastsim_el_ = (TH2D*) h_vetoeff_fastsim_el_temp->Clone("h_vetoeff_fastsim_el");
+    h_vetoeff_fastsim_mu_ = (TH2D*) h_vetoeff_fastsim_mu_temp->Clone("h_vetoeff_fastsim_mu");
+    
+    h_sf_fastsim_el_->SetDirectory(0);
+    h_sf_fastsim_mu_->SetDirectory(0);
+    h_vetoeff_fastsim_el_->SetDirectory(0);
+    h_vetoeff_fastsim_mu_->SetDirectory(0);
+    
+    f_sf_fastsim_el->Close();
+    f_sf_fastsim_mu->Close();
+    f_vetoeff_fastsim->Close();
+    delete f_sf_fastsim_el;
+    delete f_sf_fastsim_mu;
+    delete f_vetoeff_fastsim;
+  }
+  
   
   cout << "[MT2Looper::loop] setting up histos" << endl;
 
@@ -687,6 +721,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (t.evt_id >= 1000) isSignal_ = true;
       else isSignal_ = false;
 
+      // note: this will double count some leptons, since reco leptons can appear as PFcands
+      nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
+
       //---------------------
       // set weights and start making plots
       //---------------------
@@ -729,13 +766,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  float puWeight = h_nvtx_weights_->GetBinContent(h_nvtx_weights_->FindBin(nvtx_input));
 	  evtweight_ *= puWeight;
 	}
+	if (isSignal_ && applyLeptonSFfastsim && nlepveto_ == 0) {
+	  fillLepCorSRfastsim();
+	  evtweight_ *= (1. + cor_lepeff_sr_);
+	}
       } // !isData
 
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
       plot1D("h_mt2",       t.mt2,       evtweight_, h_1d_global, ";M_{T2} [GeV]", 80, 0, 800);
-
-      // note: this will double count some leptons, since reco leptons can appear as PFcands
-      nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
 
       // variables for single lep control region
       bool doSLplots = false;
@@ -1803,20 +1841,6 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot3D("h_mt2bins_sigscan"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
   }
 
-  if (!t.isData && applyWeights && doSystVariationPlots) {
-    // assume weights are already applied to central value: lepsf, btagsf, isr 
-    plot1D("h_mt2bins_lepsf_UP"+s,       mt2_temp,   evtweight_ / t.weight_lepsf * t.weight_lepsf_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_lepsf_DN"+s,       mt2_temp,   evtweight_ / t.weight_lepsf * t.weight_lepsf_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_isr_UP"+s,       mt2_temp,   evtweight_ / t.weight_isr, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_isr_DN"+s,       mt2_temp,   evtweight_ * t.weight_isr, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    // WARNING: will have to make sure we get the correct normalization for these
-    //  to avoid including xsec effects..
-    plot1D("h_mt2bins_scales_UP"+s,       mt2_temp,   evtweight_ * t.weight_scales_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_scales_DN"+s,       mt2_temp,   evtweight_ * t.weight_scales_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_pdfs_UP"+s,       mt2_temp,   evtweight_  * t.weight_pdfs_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_pdfs_DN"+s,       mt2_temp,   evtweight_  * t.weight_pdfs_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-  }
-
   if (!t.isData && isSignal_ && doSystVariationPlots) {
     int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(t.GenSusyMScan1);
     int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(t.GenSusyMScan2);
@@ -1882,30 +1906,49 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_mt2bins_tau3p_DN"+s,       mt2_temp,   evtweight_ * (1. - unc_tau3p), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   }
 
-  // lepton efficiency variation in signal region: large uncertainty on leptons NOT vetoed
-  if (!t.isData && doLepEffVars && directoryname.Contains("sr")) {
-    float unc_lepeff = 0.;
-    if (t.ngenLep > 0 || t.ngenLepFromTau > 0) {
-      // loop on gen e/mu
-      for (int ilep = 0; ilep < t.ngenLep; ++ilep) {
-	// check acceptance for veto: pt > 5, |eta| < 2.4
-       if (t.genLep_pt[ilep] < 5.) continue;
-       if (fabs(t.genLep_eta[ilep]) > 2.4) continue;
-       unc_lepeff += 0.20; // 12% relative uncertainty for missing lepton
-      }
-      for (int ilep = 0; ilep < t.ngenLepFromTau; ++ilep) {
-	// check acceptance for veto: pt > 5
-       if (t.genLepFromTau_pt[ilep] < 5.) continue;
-       if (fabs(t.genLepFromTau_eta[ilep]) > 2.4) continue;
-       unc_lepeff += 0.20; // 12% relative uncertainty for missing lepton
-      }
-    }
+  // --------------------------------------------------------
+  // -------------- old dummy uncertainty code --------------
+  // --------------------------------------------------------
+  
+  // // lepton efficiency variation in signal region: large uncertainty on leptons NOT vetoed
+  // if (!t.isData && doLepEffVars && directoryname.Contains("sr")) {
+  //   float unc_lepeff = 0.;
+  //   if (t.ngenLep > 0 || t.ngenLepFromTau > 0) {
+  //     // loop on gen e/mu
+  //     for (int ilep = 0; ilep < t.ngenLep; ++ilep) {
+  // 	// check acceptance for veto: pt > 5, |eta| < 2.4
+  //      if (t.genLep_pt[ilep] < 5.) continue;
+  //      if (fabs(t.genLep_eta[ilep]) > 2.4) continue;
+  //      unc_lepeff += 0.20; // 12% relative uncertainty for missing lepton
+  //     }
+  //     for (int ilep = 0; ilep < t.ngenLepFromTau; ++ilep) {
+  // 	// check acceptance for veto: pt > 5
+  //      if (t.genLepFromTau_pt[ilep] < 5.) continue;
+  //      if (fabs(t.genLepFromTau_eta[ilep]) > 2.4) continue;
+  //      unc_lepeff += 0.20; // 12% relative uncertainty for missing lepton
+  //     }
+  //   }
 
-    // if lepeff goes up, number of events in SR should go down.
-    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ * (1. - unc_lepeff), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ * (1. + unc_lepeff), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  //   // if lepeff goes up, number of events in SR should go down.
+  //   plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ * (1. - unc_lepeff), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  //   plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ * (1. + unc_lepeff), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  // }
+  // --------------------------------------------------------
+
+  // lepton efficiency variation in signal region for fastsim: large uncertainty on leptons NOT vetoed
+  if (!t.isData && isSignal_ && doLepEffVars && applyLeptonSFfastsim && directoryname.Contains("sr")) {
+
+    // if lepeff goes up, number of events in SR should go down. Already taken into account in unc_lepeff_sr_
+    //  need to first remove lepeff SF
+    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ + unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ - unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot3D("h_mt2bins_sigscan_lepeff_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ + unc_lepeff_sr_), h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    plot3D("h_mt2bins_sigscan_lepeff_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ - unc_lepeff_sr_), h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    
   }
 
+  // !!!!!!!!! need to re-implement uncertainty for fullsim for SR
+  
   // lepton efficiency variation in control region: smallish uncertainty on leptons which ARE vetoed
   if (!t.isData && doLepEffVars && directoryname.Contains("crsl")) {
     // lepsf was already applied as a central value, take it back out
@@ -2209,3 +2252,111 @@ void MT2Looper::fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, 
   return;
 }
 
+float MT2Looper::getLepSF(float pt, float eta, int pdgId, bool isFastsim){
+  if (!isFastsim) {
+    std::cout << "MT2Looper::getLepSF: only implemented for fastsim for now" << std::endl;
+    return 1.;
+  }
+
+  if(isFastsim && (!h_sf_fastsim_el_ || !h_sf_fastsim_mu_)) {
+    std::cout << "MT2Looper::getLepSF: ERROR: missing input hists" << std::endl;
+    return 1.;
+  }
+
+  // only use pt bins up to 200 GeV
+  float pt_cutoff = std::max(11.,std::min(199.,double(pt)));
+  TH2D* h(0);
+  if (abs(pdgId) == 11) {
+    h = isFastsim ? h_sf_fastsim_el_ : h_sf_fullsim_el_;
+  }
+  else if (abs(pdgId) == 13) {
+    h = isFastsim ? h_sf_fastsim_mu_ : h_sf_fullsim_mu_;
+  }
+    
+  int binx = h->GetXaxis()->FindBin(pt_cutoff);
+  int biny = h->GetYaxis()->FindBin(fabs(eta));
+  return h->GetBinContent(binx,biny);
+}
+
+float MT2Looper::getLepVetoEff(float pt, float eta, int pdgId, bool isFastsim){
+  if (!isFastsim) {
+    std::cout << "MT2Looper::getLepVetoEff: only implemented for fastsim for now" << std::endl;
+    return 1.;
+  }
+
+  if(isFastsim && (!h_vetoeff_fastsim_el_ || !h_vetoeff_fastsim_mu_)) {
+    std::cout << "MT2Looper::getLepVetoEff: ERROR: missing input hists" << std::endl;
+    return 1.;
+  }
+
+  // only use pt bins up to 200 GeV
+  float pt_cutoff = std::min(199.,double(pt));
+  TH2D* h(0);
+  if (abs(pdgId) == 11) {
+    h = isFastsim ? h_vetoeff_fastsim_el_ : h_vetoeff_fullsim_el_;
+  }
+  else if (abs(pdgId) == 13) {
+    h = isFastsim ? h_vetoeff_fastsim_mu_ : h_vetoeff_fullsim_mu_;
+  }
+    
+  int binx = h->GetXaxis()->FindBin(pt_cutoff);
+  int biny = h->GetYaxis()->FindBin(fabs(eta));
+  return h->GetBinContent(binx,biny);
+}
+
+float MT2Looper::getLepUncFastsim(float pt, float eta, int pdgId){
+  if (abs(pdgId) == 11) {
+    if (pt > 30.) return 0.06;
+    else if (pt > 20.) return 0.10;
+    else return 0.15;
+  }
+  else if (abs(pdgId) == 13) {
+    if (pt > 20.) return 0.03;
+    else return 0.10;
+  }
+
+  return 0.;
+}
+
+void MT2Looper::fillLepCorSRfastsim() {
+
+  // lepton efficiency variation in signal region for fastsim: large uncertainty on leptons NOT vetoed
+  cor_lepeff_sr_ = 0.;
+  unc_lepeff_sr_ = 0.;
+  if (t.ngenLep > 0 || t.ngenLepFromTau > 0) {
+    // loop on gen e/mu
+    for (int ilep = 0; ilep < t.ngenLep; ++ilep) {
+      // check acceptance for veto: pt > 5, |eta| < 2.4
+      if (t.genLep_pt[ilep] < 5.) continue;
+      if (fabs(t.genLep_eta[ilep]) > 2.4) continue;
+      // look up SF and vetoeff, by flavor
+      float sf = getLepSF(t.genLep_pt[ilep], t.genLep_eta[ilep], t.genLep_pdgId[ilep], 1);
+      float vetoeff = getLepVetoEff(t.genLep_pt[ilep], t.genLep_eta[ilep], t.genLep_pdgId[ilep], 1);
+      // apply SF to vetoeff, then correction for 0L will be (1 - vetoeff_cor) / (1 - vetoeff) - 1.
+      float vetoeff_cor = vetoeff * sf;
+      float cor_0l = ( (1. - vetoeff_cor) / (1. - vetoeff) ) - 1.;
+      cor_lepeff_sr_ += cor_0l;
+      float unc = getLepUncFastsim(t.genLep_pt[ilep], t.genLep_eta[ilep], t.genLep_pdgId[ilep]);
+      float vetoeff_cor_unc_UP = vetoeff_cor * (1. + unc);
+      float unc_UP_0l = ( (1. - vetoeff_cor_unc_UP) / (1. - vetoeff_cor) ) - 1.;
+      unc_lepeff_sr_ += unc_UP_0l;
+    }
+    for (int ilep = 0; ilep < t.ngenLepFromTau; ++ilep) {
+      // check acceptance for veto: pt > 5
+      if (t.genLepFromTau_pt[ilep] < 5.) continue;
+      if (fabs(t.genLepFromTau_eta[ilep]) > 2.4) continue;
+      float sf = getLepSF(t.genLepFromTau_pt[ilep], t.genLepFromTau_eta[ilep], t.genLepFromTau_pdgId[ilep], 1);
+      float vetoeff = getLepVetoEff(t.genLepFromTau_pt[ilep], t.genLepFromTau_eta[ilep], t.genLepFromTau_pdgId[ilep], 1);
+      // apply SF to vetoeff, then correction for 0L will be 1. - (1 - vetoeff_cor) / (1 - vetoeff)
+      float vetoeff_cor = vetoeff * sf;
+      float cor_0l = ( (1. - vetoeff_cor) / (1. - vetoeff) ) - 1.;
+      cor_lepeff_sr_ += cor_0l;
+      float unc = getLepUncFastsim(t.genLepFromTau_pt[ilep], t.genLepFromTau_eta[ilep], t.genLepFromTau_pdgId[ilep]);
+      float vetoeff_cor_unc_UP = vetoeff_cor * (1. + unc);
+      float unc_UP_0l = ( (1. - vetoeff_cor_unc_UP) / (1. - vetoeff_cor) ) - 1.;
+      unc_lepeff_sr_ += unc_UP_0l;
+    }
+  }
+
+  return;
+}
