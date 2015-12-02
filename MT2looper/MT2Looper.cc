@@ -76,7 +76,9 @@ bool applyWeights = false;
 // turn on to apply btag sf to central value
 bool applyBtagSF = true;
 // turn on to apply lepton sf to central value
-bool applyLeptonSF = false;
+bool applyLeptonSF = true;
+// turn on to apply reweighting to ttbar based on top pt
+bool applyTopPtReweight = true;
 // turn on to apply lepton sf to central value for 0L sample in fastsim
 bool applyLeptonSFfastsim = false;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
@@ -770,6 +772,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  fillLepCorSRfastsim();
 	  evtweight_ *= (1. + cor_lepeff_sr_);
 	}
+	if (applyLeptonSF) evtweight_ *= t.weight_lepsf;
+	if (applyTopPtReweight && t.evt_id >= 300 && t.evt_id < 400) {
+	  evtweight_ *= t.weight_toppt;
+	}
       } // !isData
 
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
@@ -806,7 +812,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // simple counter to check for 1L CR
       if (t.nLepLowMT == 1) {
 	doSLplots = true;
-	if (applyLeptonSF) evtweight_ *= t.weight_lepsf;
 
 	// find unique lepton to plot pt,MT and get flavor
 	bool foundlep = false;
