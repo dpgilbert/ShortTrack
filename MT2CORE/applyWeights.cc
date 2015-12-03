@@ -171,6 +171,96 @@ weightStruct getLepSFFromFile_fastsim(float pt, float eta, int pdgId) {
   return weights;
 }
 
+//_________________________________________________________
+bool setVetoEffFile_fullsim(TString filename){
+  TFile * f = new TFile(filename);
+  if (!f->IsOpen()) std::cout<<"applyWeights::setVetoEffFile_fullsim: ERROR: Could not find vetoeff file "<<filename<<std::endl;
+  TH2D* h_eff_el = (TH2D*) f->Get("h_ele_comb_eff");
+  if (!h_eff_el) std::cout<<"applyWeights::setVetoEffFile_fullsim: ERROR: Could not find vetoeff histogram"<<std::endl;
+  h_elVetoEff_fullsim = (TH2D*) h_eff_el->Clone("h_elVetoEff_fullsim");
+  h_elVetoEff_fullsim->SetDirectory(0);
+  //h_elVetoEff_fullsim->Print("all");
+
+  TH2D* h_eff_mu = (TH2D*) f->Get("h_mu_comb_eff");
+  if (!h_eff_mu) { std::cout<<"applyWeights::setMuVetoEffFile_fullsim: ERROR: Could not find vetoeff histogram"<<std::endl; return 0;}
+  h_muVetoEff_fullsim = (TH2D*) h_eff_mu->Clone("h_muVetoEff_fullsim");
+  h_muVetoEff_fullsim->SetDirectory(0);
+  //h_muVetoEff_fullsim->Print("all");
+
+  f->Close();
+  delete f;
+  return true;
+}
+
+//_________________________________________________________
+float getLepVetoEffFromFile_fullsim(float pt, float eta, int pdgId) {
+
+  if(!h_elVetoEff_fullsim || !h_muVetoEff_fullsim) {
+    std::cout << "applyWeights::getLepVetoEffFromFile_fullsim: ERROR: missing input hists" << std::endl;
+    return 0.;
+  }
+
+  float pt_cutoff = std::max(5.1,std::min(100.,double(pt)));
+
+  if (abs(pdgId) == 11) {
+    int binx = h_elVetoEff_fullsim->GetXaxis()->FindBin(pt_cutoff);
+    int biny = h_elVetoEff_fullsim->GetYaxis()->FindBin(fabs(eta));
+    return h_elVetoEff_fullsim->GetBinContent(binx,biny);
+  }
+  else if (abs(pdgId) == 13) {
+    int binx = h_muVetoEff_fullsim->GetXaxis()->FindBin(pt_cutoff);
+    int biny = h_muVetoEff_fullsim->GetYaxis()->FindBin(fabs(eta));
+    return h_muVetoEff_fullsim->GetBinContent(binx,biny);
+  }
+
+  return 0.;
+}
+
+//_________________________________________________________
+bool setVetoEffFile_fastsim(TString filename){
+  TFile * f = new TFile(filename);
+  if (!f->IsOpen()) std::cout<<"applyWeights::setVetoEffFile_fastsim: ERROR: Could not find vetoeff file "<<filename<<std::endl;
+  TH2D* h_eff_el = (TH2D*) f->Get("h_ele_comb_eff");
+  if (!h_eff_el) std::cout<<"applyWeights::setVetoEffFile_fastsim: ERROR: Could not find vetoeff histogram"<<std::endl;
+  h_elVetoEff_fastsim = (TH2D*) h_eff_el->Clone("h_elVetoEff_fastsim");
+  h_elVetoEff_fastsim->SetDirectory(0);
+  //h_elVetoEff_fastsim->Print("all");
+
+  TH2D* h_eff_mu = (TH2D*) f->Get("h_mu_comb_eff");
+  if (!h_eff_mu) { std::cout<<"applyWeights::setMuVetoEffFile_fastsim: ERROR: Could not find vetoeff histogram"<<std::endl; return 0;}
+  h_muVetoEff_fastsim = (TH2D*) h_eff_mu->Clone("h_muVetoEff_fastsim");
+  h_muVetoEff_fastsim->SetDirectory(0);
+  //h_muVetoEff_fastsim->Print("all");
+
+  f->Close();
+  delete f;
+  return true;
+}
+
+//_________________________________________________________
+float getLepVetoEffFromFile_fastsim(float pt, float eta, int pdgId) {
+
+  if(!h_elVetoEff_fastsim || !h_muVetoEff_fastsim) {
+    std::cout << "applyWeights::getLepVetoEffFromFile_fastsim: ERROR: missing input hists" << std::endl;
+    return 0.;
+  }
+
+  float pt_cutoff = std::max(5.1,std::min(100.,double(pt)));
+
+  if (abs(pdgId) == 11) {
+    int binx = h_elVetoEff_fastsim->GetXaxis()->FindBin(pt_cutoff);
+    int biny = h_elVetoEff_fastsim->GetYaxis()->FindBin(fabs(eta));
+    return h_elVetoEff_fastsim->GetBinContent(binx,biny);
+  }
+  else if (abs(pdgId) == 13) {
+    int binx = h_muVetoEff_fastsim->GetXaxis()->FindBin(pt_cutoff);
+    int biny = h_muVetoEff_fastsim->GetYaxis()->FindBin(fabs(eta));
+    return h_muVetoEff_fastsim->GetBinContent(binx,biny);
+  }
+
+  return 0.;
+}
+
 
 //_________________________________________________________
 weightStruct getBtagSF(float pt, float, int pdgId) {

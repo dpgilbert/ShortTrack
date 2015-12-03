@@ -29,5 +29,15 @@ bool setElSFfile_fastsim(TString filename);
 bool setMuSFfile_fastsim(TString filename);
 weightStruct getLepSFFromFile_fastsim(float pt, float eta, int pdgId);
 
+TH2D* h_elVetoEff_fullsim = 0;
+TH2D* h_muVetoEff_fullsim = 0;
+bool setVetoEffFile_fullsim(TString filename);
+float getLepVetoEffFromFile_fullsim(float pt, float eta, int pdgId);
+
+TH2D* h_elVetoEff_fastsim = 0;
+TH2D* h_muVetoEff_fastsim = 0;
+bool setVetoEffFile_fastsim(TString filename);
+float getLepVetoEffFromFile_fastsim(float pt, float eta, int pdgId);
+
 
 #endif
