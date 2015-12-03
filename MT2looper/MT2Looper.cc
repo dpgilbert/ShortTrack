@@ -29,6 +29,7 @@
 
 //MT2
 #include "../MT2CORE/Plotting/PlotUtilities.h"
+#include "../MT2CORE/applyWeights.h"
 
 using namespace std;
 using namespace mt2;
@@ -578,37 +579,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     delete f_nsig_weights;
   }
 
-  h_sf_fastsim_el_ = 0;
-  h_sf_fastsim_mu_ = 0;
-  h_vetoeff_fastsim_el_ = 0;
-  h_vetoeff_fastsim_mu_ = 0;
   if (applyLeptonSFfastsim && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
-    TFile* f_sf_fastsim_el = new TFile("../babymaker/lepsf/sf_el_vetoCB_mini01.root");
-    TFile* f_sf_fastsim_mu = new TFile("../babymaker/lepsf/sf_mu_looseID_mini02.root");
-    TFile* f_vetoeff_fastsim = new TFile("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt_mGluino-1500to1525.root");
-    TH2D* h_sf_fastsim_el_temp = (TH2D*) f_sf_fastsim_el->Get("histo2D");
-    TH2D* h_sf_fastsim_mu_temp = (TH2D*) f_sf_fastsim_mu->Get("histo2D");
-    TH2D* h_vetoeff_fastsim_el_temp = (TH2D*) f_vetoeff_fastsim->Get("h_ele_comb_eff");
-    TH2D* h_vetoeff_fastsim_mu_temp = (TH2D*) f_vetoeff_fastsim->Get("h_mu_comb_eff");
-    
-    h_sf_fastsim_el_ = (TH2D*) h_sf_fastsim_el_temp->Clone("h_sf_fastsim_el");
-    h_sf_fastsim_mu_ = (TH2D*) h_sf_fastsim_mu_temp->Clone("h_sf_fastsim_mu");
-    h_vetoeff_fastsim_el_ = (TH2D*) h_vetoeff_fastsim_el_temp->Clone("h_vetoeff_fastsim_el");
-    h_vetoeff_fastsim_mu_ = (TH2D*) h_vetoeff_fastsim_mu_temp->Clone("h_vetoeff_fastsim_mu");
-    
-    h_sf_fastsim_el_->SetDirectory(0);
-    h_sf_fastsim_mu_->SetDirectory(0);
-    h_vetoeff_fastsim_el_->SetDirectory(0);
-    h_vetoeff_fastsim_mu_->SetDirectory(0);
-    
-    f_sf_fastsim_el->Close();
-    f_sf_fastsim_mu->Close();
-    f_vetoeff_fastsim->Close();
-    delete f_sf_fastsim_el;
-    delete f_sf_fastsim_mu;
-    delete f_vetoeff_fastsim;
+    setElSFfile_fastsim("../babymaker/lepsf/sf_el_vetoCB_mini01.root");  
+    setMuSFfile_fastsim("../babymaker/lepsf/sf_mu_looseID_mini02.root");  
+    setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt_mGluino-1500to1525.root");  
   }
-  
   
   cout << "[MT2Looper::loop] setting up histos" << endl;
 
@@ -723,6 +698,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (t.evt_id >= 1000) isSignal_ = true;
       else isSignal_ = false;
 
+      //if (isSignal_ && (t.GenSusyMScan1 != 1600 || t.GenSusyMScan2 != 0)) continue;
+      
       // note: this will double count some leptons, since reco leptons can appear as PFcands
       nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
 
@@ -2257,72 +2234,6 @@ void MT2Looper::fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, 
   return;
 }
 
-float MT2Looper::getLepSF(float pt, float eta, int pdgId, bool isFastsim){
-  if (!isFastsim) {
-    std::cout << "MT2Looper::getLepSF: only implemented for fastsim for now" << std::endl;
-    return 1.;
-  }
-
-  if(isFastsim && (!h_sf_fastsim_el_ || !h_sf_fastsim_mu_)) {
-    std::cout << "MT2Looper::getLepSF: ERROR: missing input hists" << std::endl;
-    return 1.;
-  }
-
-  // only use pt bins up to 200 GeV
-  float pt_cutoff = std::max(11.,std::min(199.,double(pt)));
-  TH2D* h(0);
-  if (abs(pdgId) == 11) {
-    h = isFastsim ? h_sf_fastsim_el_ : h_sf_fullsim_el_;
-  }
-  else if (abs(pdgId) == 13) {
-    h = isFastsim ? h_sf_fastsim_mu_ : h_sf_fullsim_mu_;
-  }
-    
-  int binx = h->GetXaxis()->FindBin(pt_cutoff);
-  int biny = h->GetYaxis()->FindBin(fabs(eta));
-  return h->GetBinContent(binx,biny);
-}
-
-float MT2Looper::getLepVetoEff(float pt, float eta, int pdgId, bool isFastsim){
-  if (!isFastsim) {
-    std::cout << "MT2Looper::getLepVetoEff: only implemented for fastsim for now" << std::endl;
-    return 1.;
-  }
-
-  if(isFastsim && (!h_vetoeff_fastsim_el_ || !h_vetoeff_fastsim_mu_)) {
-    std::cout << "MT2Looper::getLepVetoEff: ERROR: missing input hists" << std::endl;
-    return 1.;
-  }
-
-  // only use pt bins up to 200 GeV
-  float pt_cutoff = std::min(199.,double(pt));
-  TH2D* h(0);
-  if (abs(pdgId) == 11) {
-    h = isFastsim ? h_vetoeff_fastsim_el_ : h_vetoeff_fullsim_el_;
-  }
-  else if (abs(pdgId) == 13) {
-    h = isFastsim ? h_vetoeff_fastsim_mu_ : h_vetoeff_fullsim_mu_;
-  }
-    
-  int binx = h->GetXaxis()->FindBin(pt_cutoff);
-  int biny = h->GetYaxis()->FindBin(fabs(eta));
-  return h->GetBinContent(binx,biny);
-}
-
-float MT2Looper::getLepUncFastsim(float pt, float eta, int pdgId){
-  if (abs(pdgId) == 11) {
-    if (pt > 30.) return 0.06;
-    else if (pt > 20.) return 0.10;
-    else return 0.15;
-  }
-  else if (abs(pdgId) == 13) {
-    if (pt > 20.) return 0.03;
-    else return 0.10;
-  }
-
-  return 0.;
-}
-
 void MT2Looper::fillLepCorSRfastsim() {
 
   // lepton efficiency variation in signal region for fastsim: large uncertainty on leptons NOT vetoed
@@ -2335,13 +2246,14 @@ void MT2Looper::fillLepCorSRfastsim() {
       if (t.genLep_pt[ilep] < 5.) continue;
       if (fabs(t.genLep_eta[ilep]) > 2.4) continue;
       // look up SF and vetoeff, by flavor
-      float sf = getLepSF(t.genLep_pt[ilep], t.genLep_eta[ilep], t.genLep_pdgId[ilep], 1);
-      float vetoeff = getLepVetoEff(t.genLep_pt[ilep], t.genLep_eta[ilep], t.genLep_pdgId[ilep], 1);
+      weightStruct sf_struct = getLepSFFromFile_fastsim(t.genLep_pt[ilep], t.genLep_eta[ilep], t.genLep_pdgId[ilep]);
+      float sf = sf_struct.cent;
+      float vetoeff = getLepVetoEffFromFile_fastsim(t.genLep_pt[ilep], t.genLep_eta[ilep], t.genLep_pdgId[ilep]);
       // apply SF to vetoeff, then correction for 0L will be (1 - vetoeff_cor) / (1 - vetoeff) - 1.
       float vetoeff_cor = vetoeff * sf;
       float cor_0l = ( (1. - vetoeff_cor) / (1. - vetoeff) ) - 1.;
       cor_lepeff_sr_ += cor_0l;
-      float unc = getLepUncFastsim(t.genLep_pt[ilep], t.genLep_eta[ilep], t.genLep_pdgId[ilep]);
+      float unc = sf_struct.up - sf;
       float vetoeff_cor_unc_UP = vetoeff_cor * (1. + unc);
       float unc_UP_0l = ( (1. - vetoeff_cor_unc_UP) / (1. - vetoeff_cor) ) - 1.;
       unc_lepeff_sr_ += unc_UP_0l;
@@ -2350,13 +2262,14 @@ void MT2Looper::fillLepCorSRfastsim() {
       // check acceptance for veto: pt > 5
       if (t.genLepFromTau_pt[ilep] < 5.) continue;
       if (fabs(t.genLepFromTau_eta[ilep]) > 2.4) continue;
-      float sf = getLepSF(t.genLepFromTau_pt[ilep], t.genLepFromTau_eta[ilep], t.genLepFromTau_pdgId[ilep], 1);
-      float vetoeff = getLepVetoEff(t.genLepFromTau_pt[ilep], t.genLepFromTau_eta[ilep], t.genLepFromTau_pdgId[ilep], 1);
+      weightStruct sf_struct = getLepSFFromFile_fastsim(t.genLepFromTau_pt[ilep], t.genLepFromTau_eta[ilep], t.genLepFromTau_pdgId[ilep]);
+      float sf = sf_struct.cent;
+      float vetoeff = getLepVetoEffFromFile_fastsim(t.genLepFromTau_pt[ilep], t.genLepFromTau_eta[ilep], t.genLepFromTau_pdgId[ilep]);
       // apply SF to vetoeff, then correction for 0L will be 1. - (1 - vetoeff_cor) / (1 - vetoeff)
       float vetoeff_cor = vetoeff * sf;
       float cor_0l = ( (1. - vetoeff_cor) / (1. - vetoeff) ) - 1.;
       cor_lepeff_sr_ += cor_0l;
-      float unc = getLepUncFastsim(t.genLepFromTau_pt[ilep], t.genLepFromTau_eta[ilep], t.genLepFromTau_pdgId[ilep]);
+      float unc = sf_struct.up - sf;
       float vetoeff_cor_unc_UP = vetoeff_cor * (1. + unc);
       float unc_UP_0l = ( (1. - vetoeff_cor_unc_UP) / (1. - vetoeff_cor) ) - 1.;
       unc_lepeff_sr_ += unc_UP_0l;
