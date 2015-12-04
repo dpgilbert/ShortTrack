@@ -5,7 +5,7 @@ function run () {
     nohup nice -n 19 root -b -q mergeHadoopFiles.C\(\"${HADOOPDIR}/${TAG}_$1/\",\"${OUTPUTDIR}/$1.root\"\) >& log_merge_${TAG}_$1.txt &
 }
 
-TAG=V00-01-08_25ns_miniaodv2
+TAG=V00-01-09_25ns_fastsim
 
 HADOOPDIR=/hadoop/cms/store/user/${USER}/mt2babies/
 OUTPUTDIR=/nfs-6/userdata/mt2/$TAG/
@@ -125,32 +125,39 @@ run T1qqqq_mGluino-1075_mLSP-925to975
 run T1qqqq_mGluino-1100to1125_mLSP-1to1100
 run T1qqqq_mGluino-1125to1175_mLSP-925to1125
 run T1qqqq_mGluino-1175_mLSP-975to1150
+run T1qqqq_mGluino-1200to1225_mLSP-1to1175
+
 run T1qqqq_mGluino-1225to1250_mLSP-1to1225
 run T1qqqq_mGluino-1250to1275_mLSP-550to1250
 run T1qqqq_mGluino-1300to1325_mLSP-1to1275
-
 run T1qqqq_mGluino-1325to1350_mLSP-1to1275
 run T1qqqq_mGluino-1350to1375_mLSP-650to1275
 run T1qqqq_mGluino-1400to1450_mLSP-1to1275
 run T1qqqq_mGluino-1450to1500_mLSP-1to1275
 run T1qqqq_mGluino-1500to1550_mLSP-1to1250
+
 run T1qqqq_mGluino-1550_mLSP-950
 run T1qqqq_mGluino-1600to1650_mLSP-1to1250
-
 run T1qqqq_mGluino-1650to1750_mLSP-1to1250
 run T1qqqq_mGluino-1750_mLSP-50to1250
 run T1qqqq_mGluino-1800to1850_mLSP-1to1250
 run T1qqqq_mGluino-1850to1950_mLSP-1to1250
 run T1qqqq_mGluino-1950to2000_mLSP-1to1250
 run T1qqqq_mGluino-2000_mLSP-50to950
-run T1qqqq_mGluino-600_mLSP-1to300
 
+run T1qqqq_mGluino-600_mLSP-1to300
 run T1qqqq_mGluino-600_mLSP-400to475
 run T1qqqq_mGluino-600_mLSP-500to575
 run T1qqqq_mGluino-625_mLSP-425to525
 run T1qqqq_mGluino-625to650_mLSP-475to550
+run T1qqqq_mGluino-650to675_mLSP-475to500
 run T1qqqq_mGluino-675_mLSP-500to650
+
+run T1qqqq_mGluino-700_mLSP-1to575
+run T1qqqq_mGluino-700to750_mLSP-400to700
 run T1qqqq_mGluino-750to775_mLSP-450to750
 run T1qqqq_mGluino-800to825_mLSP-1to750
 run T1qqqq_mGluino-825to875_mLSP-400to825
+run T1qqqq_mGluino-875to925_mLSP-1to850
 run T1qqqq_mGluino-925to975_mLSP-400to900
+run T1qqqq_mGluino-925to975_mLSP-950
