@@ -579,6 +579,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     delete f_nsig_weights;
   }
 
+  if (doLepEffVars) {
+    setElSFfile("../babymaker/lepsf/kinematicBinSFele.root");
+    setMuSFfile("../babymaker/lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","../babymaker/lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root");
+    setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  
+  }
+  
   if (applyLeptonSFfastsim && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
     setElSFfile_fastsim("../babymaker/lepsf/sf_el_vetoCB_mini01.root");  
     setMuSFfile_fastsim("../babymaker/lepsf/sf_mu_looseID_mini02.root");  
@@ -749,6 +755,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  fillLepCorSRfastsim();
 	  evtweight_ *= (1. + cor_lepeff_sr_);
 	}
+	else if (doLepEffVars && nlepveto_ == 0) fillLepUncSR();
 	if (applyLeptonSF) evtweight_ *= t.weight_lepsf;
 	if (applyTopPtReweight && t.evt_id >= 300 && t.evt_id < 400) {
 	  evtweight_ *= t.weight_toppt;
@@ -1929,10 +1936,14 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     
   }
 
-  // !!!!!!!!! need to re-implement uncertainty for fullsim for SR
+  else if (!t.isData && doLepEffVars && directoryname.Contains("sr")) {
+    // if lepeff goes up, number of events in SR should go down. Already taken into account in unc_lepeff_sr_
+    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ * (1. + unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ * (1. - unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
   
   // lepton efficiency variation in control region: smallish uncertainty on leptons which ARE vetoed
-  if (!t.isData && doLepEffVars && directoryname.Contains("crsl")) {
+  else if (!t.isData && doLepEffVars && directoryname.Contains("crsl")) {
     // lepsf was already applied as a central value, take it back out
     plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ / t.weight_lepsf * t.weight_lepsf_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ / t.weight_lepsf * t.weight_lepsf_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
@@ -2231,6 +2242,43 @@ void MT2Looper::fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, 
   }
   
   outfile_->cd();
+  return;
+}
+
+void MT2Looper::fillLepUncSR() {
+
+  // lepton efficiency variation in signal region for fastsim: large uncertainty on leptons NOT vetoed
+  cor_lepeff_sr_ = 0.;
+  unc_lepeff_sr_ = 0.;
+  if (t.ngenLep > 0 || t.ngenLepFromTau > 0) {
+    // loop on gen e/mu
+    for (int ilep = 0; ilep < t.ngenLep; ++ilep) {
+      // check acceptance for veto: pt > 5, |eta| < 2.4
+      if (t.genLep_pt[ilep] < 5.) continue;
+      if (fabs(t.genLep_eta[ilep]) > 2.4) continue;
+      // look up SF and vetoeff, by flavor
+      weightStruct sf_struct = getLepSFFromFile(t.genLep_pt[ilep], t.genLep_eta[ilep], t.genLep_pdgId[ilep]);
+      float sf = sf_struct.cent;
+      float vetoeff = getLepVetoEffFromFile_fullsim(t.genLep_pt[ilep], t.genLep_eta[ilep], t.genLep_pdgId[ilep]);
+      float unc = sf_struct.up - sf;
+      float vetoeff_unc_UP = vetoeff * (1. + unc);
+      float unc_UP_0l = ( (1. - vetoeff_unc_UP) / (1. - vetoeff) ) - 1.;
+      unc_lepeff_sr_ += unc_UP_0l;
+    }
+    for (int ilep = 0; ilep < t.ngenLepFromTau; ++ilep) {
+      // check acceptance for veto: pt > 5
+      if (t.genLepFromTau_pt[ilep] < 5.) continue;
+      if (fabs(t.genLepFromTau_eta[ilep]) > 2.4) continue;
+      weightStruct sf_struct = getLepSFFromFile(t.genLepFromTau_pt[ilep], t.genLepFromTau_eta[ilep], t.genLepFromTau_pdgId[ilep]);
+      float sf = sf_struct.cent;
+      float vetoeff = getLepVetoEffFromFile_fullsim(t.genLepFromTau_pt[ilep], t.genLepFromTau_eta[ilep], t.genLepFromTau_pdgId[ilep]);
+      float unc = sf_struct.up - sf;
+      float vetoeff_unc_UP = vetoeff * (1. + unc);
+      float unc_UP_0l = ( (1. - vetoeff_unc_UP) / (1. - vetoeff) ) - 1.;
+      unc_lepeff_sr_ += unc_UP_0l;
+    }
+  }
+
   return;
 }
 

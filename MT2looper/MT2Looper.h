@@ -61,6 +61,7 @@ class MT2Looper {
 			      const std::string& dir = "", const std::string& suffix = ""); 
   void fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 			      const std::string& dir = "", const std::string& suffix = "");
+  void fillLepUncSR();
   void fillLepCorSRfastsim();
   
  private:
