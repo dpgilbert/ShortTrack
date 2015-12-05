@@ -1,7 +1,7 @@
 #!/bin/bash
 
 INDIR=/home/users/olivito/mt2_74x_dev/MT2Analysis/MT2looper/output/V00-01-07_25ns_miniaodv2_skim_base_1p26fb_mt2gt200_crqcd/
-#INDIR=/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-05_25ns_json_246908-256869_skimV3_3fb/
+#INDIR=/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-01-07_25ns_miniaodv2_Summer15_25nsV6_2p1fb_skim_base_mt2gt200_ZinvV3/
 THISDIR=`pwd`
 
 ## to use data for lostlepton
@@ -66,8 +66,10 @@ echo "root -b -q purity.C+(${INDIR})"
 root -b -q "purity.C+(\"${INDIR}\",\"${GJETFILE}\")" >> dataDrivenEstimates.log
 echo "root -b -q purityRL.C+(${INDIR}, ${RLFILE})"
 root -b -q "purityRL.C+(\"${INDIR}\",\"${RLFILE}\")" >> dataDrivenEstimates.log
+echo "root -b -q DataRZGammaRatioMaker.C+(${INDIR})"
+root -b -q "DataRZGammaRatioMaker.C+(\"${INDIR}\",\"${GJETFILE}\")" >> dataDrivenEstimates.log
 echo "root -b -q qcdRphiMaker.C+(${INDIR},${QCDFILE})"
-root -b -q "qcdRphiMaker.C+(\"${INDIR}\",\"${QCDFILE}\")" > dataDrivenEstimates.log
+root -b -q "qcdRphiMaker.C+(\"${INDIR}\",\"${QCDFILE}\")" >> dataDrivenEstimates.log
 echo "done"
 
 
