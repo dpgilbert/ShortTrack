@@ -49,11 +49,20 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
     TH1D* h_qcd_cr_data = (TH1D*) f_data->Get(fullhistnameCR);
     
     TH1D* h_n_mt2bins = (TH1D*) f_data->Get(n_mt2bins_name);
-    const int n_mt2bins = h_n_mt2bins->GetBinContent(1);
+
+    int n_mt2bins = 1;
+    if (h_n_mt2bins) n_mt2bins = h_n_mt2bins->GetBinContent(1);
     float* mt2bins = new float[n_mt2bins+1];
-    for(int i=0; i<=(n_mt2bins); i++){
-      //std::cout << "bin edge = " << h_lostlep_sr->GetBinLowEdge(i+1) << std::endl;
-      mt2bins[i] = h_qcd_cr_data->GetBinLowEdge(i+1);  
+    if (h_qcd_cr_data) {
+      for(int i=0; i<=(n_mt2bins); i++){
+	//std::cout << "bin edge = " << h_lostlep_sr->GetBinLowEdge(i+1) << std::endl;
+	mt2bins[i] = h_qcd_cr_data->GetBinLowEdge(i+1);  
+      }
+    }
+    // some monojet bins don't have any CR stats, so no hist
+    else if (!h_qcd_cr_data && n_mt2bins == 1) {
+      mt2bins[0] = 0;
+      mt2bins[1] = 1500;
     }
 
     if (verbose) std::cout << "got stuff from data" << std::endl;
@@ -181,11 +190,15 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
       // for gamma function
       TH1D* CRstats = (TH1D*) h_qcd_sr_pred->Clone("h_mt2binsCRyield");
       TH1D* alphaHist = (TH1D*) h_qcd_sr_pred->Clone("h_mt2binsAlpha");
+      TH1D* FJRBsystHist = (TH1D*) h_qcd_sr_pred->Clone("h_mt2binsFJRBsyst");
+      TH1D* FitStatHist = (TH1D*) h_qcd_sr_pred->Clone("h_mt2binsFitStat");
+      TH1D* FitSystHist = (TH1D*) h_qcd_sr_pred->Clone("h_mt2binsFitSyst");
 
       if (verbose) std::cout << "cloned data hist " << std::endl;
       
       // lookup transfer factors from ETH input file
       TH1D* h_reff = (TH1D*) f_qcd->Get(Form("r_effective/%s/yield_r_effective_%s",channel.c_str(),channel.c_str()));
+      TH1D* h_fitsyst = (TH1D*) f_qcd->Get(Form("r_systFit/%s/yield_r_systFit_%s",channel.c_str(),channel.c_str()));
       string f_jets_dir = "f_jets_data";
       if (ht_LOW == 200) f_jets_dir = "f_jets_data_noPS";
       TH1D* h_fjets = (TH1D*) f_qcd->Get(Form("%s/%s/yield_%s_%s",f_jets_dir.c_str(),channel_htonly.c_str(),f_jets_dir.c_str(),channel_htonly.c_str()));
@@ -211,6 +224,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
       // convert to relative error
       fjets_err = fjets > 0. ? fjets_err/fjets : 0.;
       rb_err = rb > 0. ? rb_err/rb : 0.;
+      float fjrb_err = sqrt(fjets_err*fjets_err + rb_err*rb_err);
 
       if (verbose) std::cout << " fjets: " << fjets << " +/- " << fjets_err << std::endl;
       if (verbose) std::cout << " rb: " << rb << " +/- " << rb_err << std::endl;
@@ -224,8 +238,10 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
 	// convert to relative error
 	reff_err = reff > 0. ? reff_err/reff : 0.;
 	if (verbose) std::cout << " reff: " << reff << " +/- " << reff_err << std::endl;
+	// get fit systematic error: is stored as a relative error
+	float fit_syst = h_fitsyst->GetBinContent(ibin);
 	float alpha = reff * fjets * rb;
-	float alpha_err = sqrt(fjets_err*fjets_err + rb_err*rb_err + reff_err*reff_err); 
+	float alpha_err = sqrt(fjets_err*fjets_err + rb_err*rb_err + reff_err*reff_err + fit_syst*fit_syst);
 	if (verbose) std::cout << " alpha: " << alpha << " +/- " << alpha_err << std::endl;
 
 	float pred = h_qcd_sr_pred->GetBinContent(ibin);
@@ -235,16 +251,23 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
 	if (verbose) std::cout << " pred: " << pred << " +/- " << pred_err << " (abs err)" << std::endl;
 
 	h_qcd_sr_pred->SetBinContent(ibin,pred);
-	h_qcd_sr_pred->SetBinError(ibin,pred_err);
+	h_qcd_sr_pred->SetBinError(ibin,pred_err); // not used later
 	
 	alphaHist->SetBinContent(ibin,alpha);
-	alphaHist->SetBinError(ibin,alpha*alpha_err);
+	alphaHist->SetBinError(ibin,alpha*alpha_err); // not used later
+	
+	FJRBsystHist->SetBinContent(ibin,fjrb_err); // relative err on fjrb
+	FitStatHist->SetBinContent(ibin,reff_err); // relative stat err from fit
+	FitSystHist->SetBinContent(ibin,fit_syst); // relative syst err from fit
       } // loop on mt2 bins
 
       dir->cd();
       h_qcd_sr_pred->Write();
       CRstats->Write();
       alphaHist->Write();
+      FJRBsystHist->Write();
+      FitStatHist->Write();
+      FitSystHist->Write();
 
       if (verbose) std::cout << "done for multijet bin " << std::endl;
 
