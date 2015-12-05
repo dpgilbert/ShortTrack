@@ -39,6 +39,8 @@ const bool fourNuisancesPerBinZGratio = true;
 
 const bool integratedZinvEstimate = true;
 
+const bool doDummySignalSyst = true;
+
 double last_zinv_ratio = 0.5;
 double last_lostlep_transfer = 2.;
 
@@ -80,6 +82,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString fullhistnamePurity = dir + "/h_mt2binspurityFailSieieData";
   TString fullhistnamePurityInt = dir + "/h_mt2binspurityIntFailSieieData";
   TString fullhistnameAlpha  = fullhistname+"Alpha";
+  TString fullhistnameFJRB  = fullhistname+"FJRBsyst";
+  TString fullhistnameFitStat  = fullhistname+"FitStat";
+  TString fullhistnameFitSyst  = fullhistname+"FitSyst";
 
   TString signame(signal);
   if (scanM1 >= 0 && scanM2 >= 0) {
@@ -99,19 +104,23 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double n_qcd_cr(0.);
   double qcd_alpha(0.);
   double err_qcd_alpha(0.);
+  double err_qcd_fjrb(0.);
+  double err_qcd_fitstat(0.);
+  double err_qcd_fitsyst(0.);
   double n_bkg(0.);
   double n_data(0.);
 
   double n_sig(0.);
+  double err_sig_mcstat(0.);
 
   TH1D* h_sig(0);
   // pick point out of signal scan
   if (scanM1 >= 0 && scanM2 >= 0) {
     TH3D* h_sigscan = (TH3D*) f_sig->Get(fullhistnameScan);
     if (!h_sigscan) return 0;
-    int binx = h_sigscan->GetXaxis()->FindBin(scanM1);
-    int biny = h_sigscan->GetYaxis()->FindBin(scanM2);
-    h_sig = h_sigscan->ProjectionZ(Form("h_mt2bins_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),binx,binx,biny,biny);
+    int bin1 = h_sigscan->GetYaxis()->FindBin(scanM1);
+    int bin2 = h_sigscan->GetZaxis()->FindBin(scanM2);
+    h_sig = h_sigscan->ProjectionX(Form("h_mt2bins_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),bin1,bin1,bin2,bin2);
   }
   // single point sample
   else {
@@ -126,6 +135,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     return 0;
   }
   n_sig = h_sig->GetBinContent(mt2bin);
+  err_sig_mcstat = h_sig->GetBinError(mt2bin);
   
   //Get variable boundaries for signal region.
   //Used to create datacard name.
@@ -301,7 +311,19 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TH1D* h_qcd_alpha = (TH1D*) f_qcd->Get(fullhistnameAlpha);
   if (h_qcd_alpha != 0) {
     qcd_alpha = h_qcd_alpha->GetBinContent(mt2bin);
-    err_qcd_alpha = h_qcd_alpha->GetBinError(mt2bin);
+    err_qcd_alpha = h_qcd_alpha->GetBinError(mt2bin); // for 1j, 50%.  For multijet, not used
+  }
+  TH1D* h_qcd_fjrb = (TH1D*) f_qcd->Get(fullhistnameFJRB);
+  if (h_qcd_fjrb != 0) {
+    err_qcd_fjrb = h_qcd_fjrb->GetBinContent(mt2bin); // multijet only
+  }
+  TH1D* h_qcd_fitstat = (TH1D*) f_qcd->Get(fullhistnameFitStat);
+  if (h_qcd_fitstat != 0) {
+    err_qcd_fitstat = h_qcd_fitstat->GetBinContent(mt2bin); // multijet only
+  }
+  TH1D* h_qcd_fitsyst = (TH1D*) f_qcd->Get(fullhistnameFitSyst);
+  if (h_qcd_fitsyst != 0) {
+    err_qcd_fitsyst = h_qcd_fitsyst->GetBinContent(mt2bin); // multijet only
   }
 
   n_bkg = n_lostlep+n_zinv+n_qcd;
@@ -441,20 +463,34 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     n_zinv = n_zinv_cr * zinv_alpha; // don't use Zinv MC as central value any more!
   }
  
-  // ----- qcd bkg uncertainties from data driven rphi method
-  //       monojet and multijet cases should be the same at this point
+  // ----- qcd bkg uncertainties from data driven rphi method (or monojet method)
   double qcd_crstat = qcd_alpha; // transfer factor
-  double qcd_alphaerr = 1. + (err_qcd_alpha / qcd_alpha); // transfer factor syst uncertainty
+  double qcd_alphaerr = 1. + (err_qcd_alpha / qcd_alpha); // for 1j, 50%.  For multijet, not used
+  double qcd_fjrbsyst = 1. + err_qcd_fjrb; // multijet only, error on fj+rb
+  double qcd_fitstat = 1. + err_qcd_fitstat; // multijet only, stat error on fit
+  double qcd_fitsyst = 1. + err_qcd_fitsyst; // multijet only, syst error on fit
  
-  // fully uncorrelated for now, to match what ETH does
+  // fully uncorrelated for all except fit related, those are correlated within HT bins
   TString name_qcd_crstat = "qcd_CRstat_"+perChannel;
   TString name_qcd_alphaerr = "qcd_alphaerr_"+perChannel;
-  
-  n_syst += 2;
+  TString name_qcd_fjrbsyst = "qcd_FJRBsyst_"+perChannel;
+  TString name_qcd_fitstat = Form("qcd_RPHIstat_%s",ht_str.c_str());
+  TString name_qcd_fitsyst = Form("qcd_RPHIsyst_%s",ht_str.c_str());
 
-  // ----- sig uncertainties: correlated for all bins
-  double sig_syst = 1.10;
-  ++n_syst;
+  if (njets_LOW == 1) n_syst += 2; // crstat, alphaerr
+  else n_syst += 4; // crstat, fjrbsyst, fitstat, fitsyst
+
+  // ----- sig uncertainties
+  double sig_syst = 1.10; // dummy 10% from early MC studies
+  double sig_mcstat = err_sig_mcstat/n_sig; // MC stat err
+  if (doDummySignalSyst) {
+    // dummy: just 1 nuisance
+    ++n_syst;
+  }
+  // otherwise do "real" signal systematics
+  else {
+
+  }
 
   ofstream ofile;
   ofile.open(cardname);
@@ -512,7 +548,13 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   // ---- QCD systs
   ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_qcd_crstat.Data(),n_qcd_cr,qcd_crstat)  << endl;
-  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_qcd_alphaerr.Data(),qcd_alphaerr)  << endl;
+  if (njets_LOW == 1) {
+    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_qcd_alphaerr.Data(),qcd_alphaerr)  << endl;
+  } else {
+    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_qcd_fjrbsyst.Data(),qcd_fjrbsyst)  << endl;
+    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_qcd_fitstat.Data(),qcd_fitstat)  << endl;
+    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_qcd_fitsyst.Data(),qcd_fitsyst)  << endl;
+  }
 
   ofile.close();
 
