@@ -146,9 +146,7 @@ weightStruct getLepSFFromFile_fastsim(float pt, float eta, int pdgId) {
     int binx = h_elSF_fastsim->GetXaxis()->FindBin(pt_cutoff);
     int biny = h_elSF_fastsim->GetYaxis()->FindBin(fabs(eta));
     float central = h_elSF_fastsim->GetBinContent(binx,biny);
-    float err  = 0.06; // 6% for pt > 30
-    if (pt_cutoff < 20.) err = 0.15; // 15% for pt < 20
-    else if (pt_cutoff < 30.) err = 0.10; // 10% for pt 20-30
+    float err  = 0.05; // 5% for all pt
     weights.cent = central;
     weights.up = central+err;
     weights.dn = central-err;
@@ -159,8 +157,8 @@ weightStruct getLepSFFromFile_fastsim(float pt, float eta, int pdgId) {
     int binx = h_muSF_fastsim->GetXaxis()->FindBin(pt_cutoff);
     int biny = h_muSF_fastsim->GetYaxis()->FindBin(fabs(eta));
     float central = h_muSF_fastsim->GetBinContent(binx,biny);
-    float err  = 0.03; // 3% for pt > 20
-    if (pt_cutoff < 20.) err = 0.10; // 10% for pt < 20
+    float err  = 0.01; // 1% for pt > 20
+    if (pt_cutoff < 20.) err = 0.03; // 3% for pt < 20
     weights.cent = central;
     weights.up = central+err;
     weights.dn = central-err;
