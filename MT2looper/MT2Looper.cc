@@ -869,6 +869,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (t.nlep == 2 && !isSignal_) {
 	if ( (t.lep_charge[0] * t.lep_charge[1] == -1)
 	     && (abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1]) )
+             && (abs(t.lep_pdgId[0]) == 13 ||  t.lep_tightId[0] > 0 )
+             && (abs(t.lep_pdgId[1]) == 13 ||  t.lep_tightId[1] > 0 )
 	     && (fabs(t.zll_mass - 90) < 10 ) 
 	     && t.lep_pt[0] > 25 && t.lep_pt[1] > 20
 	     && (t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10)
