@@ -1489,8 +1489,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         if( (p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {
         //if( (p4sCorrJets.at(iJet).pt() > 10.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {//for RS
 
-          // first check jet ID - count the number of jets that fail
-          if(!isLoosePFJet_50nsV1(iJet)) {
+          // first check jet ID - count the number of jets that fail.  Don't apply for fastsim
+          if(!isLoosePFJet_50nsV1(iJet) && !isFastsim) {
             if (p4sCorrJets.at(iJet).pt() > 30.0) ++nJet30FailId;
             if (p4sCorrJets.at(iJet).pt() > 100.0) ++nJet100FailId;
             if (!isOverlapJetGamma) {
