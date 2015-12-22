@@ -502,32 +502,30 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   else n_syst += 4; // crstat, fjrbsyst, fitstat, fitsyst
 
   // ----- sig uncertainties
-  double sig_syst         = 1.071; // quadrature sum of 5% for JES, 5% for renorm/fact scales
-  double sig_mcstat       = (n_sig > 0.) ? 1. + err_sig_mcstat/n_sig : 1.00; // MC stat err
+  double sig_syst         = 1.10; // dummy 10% from early MC studies
   double sig_lumi         = 1.046; // 4.6% lumi uncertainty, end of 2015
+  double sig_mcstat       = (n_sig > 0.) ? 1. + sqrt(pow(err_sig_mcstat/n_sig,2) + 0.005) : 1.071; // MC stat err +  quadrature sum of 5% for JES, 5% for renorm/fact scales
   double sig_btagsf_heavy = (n_sig > 0.) ? n_sig_btagsf_heavy_UP/n_sig : 1.00; // btagsf heavy, eff UP
   double sig_btagsf_light = (n_sig > 0.) ? n_sig_btagsf_light_UP/n_sig : 1.00; // btagsf light, eff UP
   double sig_lepeff       = (n_sig > 0.) ? n_sig_lepeff_UP/n_sig : 1.00; // lepton eff UP
   double sig_isr          = (n_sig > 0.) ? n_sig_isr_UP/n_sig : 1.00; // isr weight UP
 
   // fully correlated for lumi, btagsf, lepeff, isr.  Fully uncorrelated for stats and other systs
-  TString name_sig_syst         = "sig_syst_"+perChannel;
-  TString name_sig_mcstat       = "sig_mcstat_"+perChannel;
-  TString name_sig_lumi         = "sig_lumi";
-  TString name_sig_btagsf_heavy = "sig_btagsf_heavy";
-  TString name_sig_btagsf_light = "sig_btagsf_light";
-  TString name_sig_lepeff       = "sig_lepeff";
-  TString name_sig_isr          = "sig_isr";
+  TString name_sig_syst         = "sig_syst";
+  TString name_sig_lumi         = "lumi_syst";
+  TString name_sig_mcstat       = "sig_MCstat_"+perChannel;
+  TString name_sig_isr          = "sig_isrSyst";
+  TString name_sig_btagsf_heavy = "sig_bTagHeavySyst";
+  TString name_sig_btagsf_light = "sig_bTagLightSyst";
+  TString name_sig_lepeff       = "sig_lepEffSyst";
   
   if (doDummySignalSyst) {
     // dummy: just 1 nuisance, correlated
-    sig_syst = 1.10; // dummy 10% from early MC studies
-    name_sig_syst = "sig_syst";
     ++n_syst;
   }
   // otherwise do "real" signal systematics
   else {
-    n_syst += 6; // syst, mcstat, lumi, btagsf_heavy, btagsf_light, isr
+    n_syst += 5; // mcstat (including gen scales and JEC), lumi, btagsf_heavy, btagsf_light, isr
     if (isSignalWithLeptons) ++n_syst; // lepeff
   }
 
@@ -553,13 +551,12 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   }
   // full signal systematics
   else {
-    ofile <<  Form("%s       lnN    %.3f   -    -    - ",name_sig_syst.Data(),sig_syst)  << endl;
+    ofile <<  Form("%s                    lnN    %.3f   -    -    - ",name_sig_lumi.Data(),sig_lumi)  << endl;
     ofile <<  Form("%s     lnN    %.3f   -    -    - ",name_sig_mcstat.Data(),sig_mcstat)  << endl;
-    ofile <<  Form("%s                     lnN    %.3f   -    -    - ",name_sig_lumi.Data(),sig_lumi)  << endl;
-    ofile <<  Form("%s             lnN    %.3f   -    -    - ",name_sig_btagsf_heavy.Data(),sig_btagsf_heavy)  << endl;
-    ofile <<  Form("%s             lnN    %.3f   -    -    - ",name_sig_btagsf_light.Data(),sig_btagsf_light)  << endl;
-    if (isSignalWithLeptons) ofile <<  Form("%s                   lnN    %.3f   -    -    - ",name_sig_lepeff.Data(),sig_lepeff)  << endl;
-    ofile <<  Form("%s                      lnN    %.3f   -    -    - ",name_sig_isr.Data(),sig_isr)  << endl;
+    ofile <<  Form("%s                  lnN    %.3f   -    -    - ",name_sig_isr.Data(),sig_isr)  << endl;
+    ofile <<  Form("%s            lnN    %.3f   -    -    - ",name_sig_btagsf_heavy.Data(),sig_btagsf_heavy)  << endl;
+    ofile <<  Form("%s            lnN    %.3f   -    -    - ",name_sig_btagsf_light.Data(),sig_btagsf_light)  << endl;
+    if (isSignalWithLeptons) ofile <<  Form("%s               lnN    %.3f   -    -    - ",name_sig_lepeff.Data(),sig_lepeff)  << endl;
   }
 
   // ---- Zinv systs
