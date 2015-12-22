@@ -27,9 +27,11 @@ TFile* f_qcd = 0;
 TFile* f_sig = 0;
 TFile* f_data = 0;
 
-const bool verbose = true;
+const bool verbose = false;
 
-const bool suppressZeroBins = true;
+const bool suppressZeroBins = false;
+
+const bool suppressZeroTRs = true;
 
 const float dummy_alpha = 1.; // dummy value for gmN when there are no SR events
 
@@ -39,17 +41,10 @@ const bool fourNuisancesPerBinZGratio = true;
 
 const bool integratedZinvEstimate = true;
 
-const bool doDummySignalSyst = true;
+const bool doDummySignalSyst = false;
 
 double last_zinv_ratio = 0.5;
 double last_lostlep_transfer = 2.;
-
-//_______________________________________________________________________________
-std::string toString(int in){
-  stringstream ss;
-  ss << in;
-  return ss.str();
-}
 
 //_______________________________________________________________________________
 void ReplaceString(std::string& subject, const std::string& search, const std::string& replace) {
@@ -70,10 +65,14 @@ double round(double d)
 int printCard( string dir_str , int mt2bin , string signal, string output_dir, int scanM1 = -1, int scanM2 = -1) {
 
   // read off yields from h_mt2bins hist in each topological region
-  cout<<"Looking at region "<<dir_str<<", mt2 bin "<<mt2bin<<endl;
+  if (verbose) cout<<"Looking at region "<<dir_str<<", mt2 bin "<<mt2bin<<endl;
   TString dir = TString(dir_str);
   TString fullhistname = dir + "/h_mt2bins";
   TString fullhistnameScan  = fullhistname+"_sigscan";
+  TString fullhistnameScanBtagsfHeavy  = fullhistname+"_sigscan_btagsf_heavy_UP";
+  TString fullhistnameScanBtagsfLight  = fullhistname+"_sigscan_btagsf_light_UP";
+  TString fullhistnameScanLepeff  = fullhistname+"_sigscan_lepeff_UP";
+  TString fullhistnameScanIsr  = fullhistname+"_sigscan_isr_UP";
   //  TString fullhistnameStat  = fullhistname+"Stat";
   TString fullhistnameMCStat  = fullhistname+"MCStat";
   TString fullhistnameCRyield  = fullhistname+"CRyield";
@@ -90,6 +89,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (scanM1 >= 0 && scanM2 >= 0) {
     signame = Form("%s_%d_%d",signal.c_str(),scanM1,scanM2);
   }
+  bool isSignalWithLeptons = bool(signame.Contains("T1tttt") || signame.Contains("T2tt"));
 
   double n_lostlep(0.);
   double n_lostlep_cr(0.);
@@ -111,9 +111,18 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double n_data(0.);
 
   double n_sig(0.);
+  double n_sig_TR(0.);
   double err_sig_mcstat(0.);
+  double n_sig_btagsf_heavy_UP(0.);
+  double n_sig_btagsf_light_UP(0.);
+  double n_sig_lepeff_UP(0.);
+  double n_sig_isr_UP(0.);
 
   TH1D* h_sig(0);
+  TH1D* h_sig_btagsf_heavy_UP(0);
+  TH1D* h_sig_btagsf_light_UP(0);
+  TH1D* h_sig_lepeff_UP(0);
+  TH1D* h_sig_isr_UP(0);
   // pick point out of signal scan
   if (scanM1 >= 0 && scanM2 >= 0) {
     TH3D* h_sigscan = (TH3D*) f_sig->Get(fullhistnameScan);
@@ -121,6 +130,14 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     int bin1 = h_sigscan->GetYaxis()->FindBin(scanM1);
     int bin2 = h_sigscan->GetZaxis()->FindBin(scanM2);
     h_sig = h_sigscan->ProjectionX(Form("h_mt2bins_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),bin1,bin1,bin2,bin2);
+    TH3D* h_sigscan_btagsf_heavy_UP = (TH3D*) f_sig->Get(fullhistnameScanBtagsfHeavy);
+    if (h_sigscan_btagsf_heavy_UP) h_sig_btagsf_heavy_UP = h_sigscan_btagsf_heavy_UP->ProjectionX(Form("h_mt2bins_btagsf_heavy_UP_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),bin1,bin1,bin2,bin2);
+    TH3D* h_sigscan_btagsf_light_UP = (TH3D*) f_sig->Get(fullhistnameScanBtagsfLight);
+    if (h_sigscan_btagsf_light_UP) h_sig_btagsf_light_UP = h_sigscan_btagsf_light_UP->ProjectionX(Form("h_mt2bins_btagsf_light_UP_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),bin1,bin1,bin2,bin2);
+    TH3D* h_sigscan_lepeff_UP = (TH3D*) f_sig->Get(fullhistnameScanLepeff);
+    if (h_sigscan_lepeff_UP) h_sig_lepeff_UP = h_sigscan_lepeff_UP->ProjectionX(Form("h_mt2bins_lepeff_UP_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),bin1,bin1,bin2,bin2);
+    TH3D* h_sigscan_isr_UP = (TH3D*) f_sig->Get(fullhistnameScanIsr);
+    if (h_sigscan_isr_UP) h_sig_isr_UP = h_sigscan_isr_UP->ProjectionX(Form("h_mt2bins_isr_UP_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),bin1,bin1,bin2,bin2);
   }
   // single point sample
   else {
@@ -135,7 +152,12 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     return 0;
   }
   n_sig = h_sig->GetBinContent(mt2bin);
+  n_sig_TR = h_sig->Integral(0,-1);
   err_sig_mcstat = h_sig->GetBinError(mt2bin);
+  if (h_sig_btagsf_heavy_UP) n_sig_btagsf_heavy_UP = h_sig_btagsf_heavy_UP->GetBinContent(mt2bin);
+  if (h_sig_btagsf_light_UP) n_sig_btagsf_light_UP = h_sig_btagsf_light_UP->GetBinContent(mt2bin);
+  if (h_sig_lepeff_UP) n_sig_lepeff_UP = h_sig_lepeff_UP->GetBinContent(mt2bin);
+  if (h_sig_isr_UP) n_sig_isr_UP = h_sig_isr_UP->GetBinContent(mt2bin);
   
   //Get variable boundaries for signal region.
   //Used to create datacard name.
@@ -164,10 +186,10 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if(nbjets_HI != -1) nbjets_HI_mod--;
   if(njets_HI != -1) njets_HI_mod--;
 
-  std::string ht_str = "HT" + toString(ht_LOW) + "to" + toString(ht_HI);
-  std::string jet_str = (njets_HI_mod == njets_LOW) ? "j" + toString(njets_LOW) : "j" + toString(njets_LOW) + "to" + toString(njets_HI_mod);
-  std::string bjet_str = (nbjets_HI_mod == nbjets_LOW) ? "b" + toString(nbjets_LOW) : "b" + toString(nbjets_LOW) + "to" + toString(nbjets_HI_mod);
-  std::string mt2_str = "m" + toString(mt2_LOW) + "to" + toString(mt2_HI);
+  std::string ht_str = "HT" + to_string(ht_LOW) + "to" + to_string(ht_HI);
+  std::string jet_str = (njets_HI_mod == njets_LOW) ? "j" + to_string(njets_LOW) : "j" + to_string(njets_LOW) + "to" + to_string(njets_HI_mod);
+  std::string bjet_str = (nbjets_HI_mod == nbjets_LOW) ? "b" + to_string(nbjets_LOW) : "b" + to_string(nbjets_LOW) + "to" + to_string(nbjets_HI_mod);
+  std::string mt2_str = "m" + to_string(mt2_LOW) + "to" + to_string(mt2_HI);
   
   //Replace instances of "-1" with "inf" for variables with no upper bound.
   ReplaceString(ht_str, "-1", "Inf");
@@ -200,18 +222,23 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if(nbjets_HI_crsl != -1) nbjets_HI_crsl_mod--;
   if(njets_HI_crsl != -1) njets_HI_crsl_mod--;
 
-  std::string ht_str_crsl = "HT" + toString(ht_LOW_crsl) + "to" + toString(ht_HI_crsl);
-  std::string jet_str_crsl = (njets_HI_crsl_mod == njets_LOW_crsl) ? "j" + toString(njets_LOW_crsl) : "j" + toString(njets_LOW_crsl) + "to" + toString(njets_HI_crsl_mod);
-  std::string bjet_str_crsl = (nbjets_HI_crsl_mod == nbjets_LOW_crsl) ? "b" + toString(nbjets_LOW_crsl) : "b" + toString(nbjets_LOW_crsl) + "to" + toString(nbjets_HI_crsl_mod);
+  std::string ht_str_crsl = "HT" + to_string(ht_LOW_crsl) + "to" + to_string(ht_HI_crsl);
+  std::string jet_str_crsl = (njets_HI_crsl_mod == njets_LOW_crsl) ? "j" + to_string(njets_LOW_crsl) : "j" + to_string(njets_LOW_crsl) + "to" + to_string(njets_HI_crsl_mod);
+  std::string bjet_str_crsl = (nbjets_HI_crsl_mod == nbjets_LOW_crsl) ? "b" + to_string(nbjets_LOW_crsl) : "b" + to_string(nbjets_LOW_crsl) + "to" + to_string(nbjets_HI_crsl_mod);
   
   //Replace instances of "-1" with "inf" for variables with no upper bound.
   ReplaceString(ht_str_crsl, "-1", "Inf");
   ReplaceString(jet_str_crsl, "-1", "Inf");
   ReplaceString(bjet_str_crsl, "-1", "Inf");
 
-
   TString cardname = Form("%s/datacard_%s_%s.txt",output_dir.c_str(),channel.c_str(),signame.Data());
 
+  //  if (suppressZeroBins && ((n_sig < 0.1) || (n_sig/n_bkg < 0.02))) {
+  if ( (suppressZeroBins && (n_sig < 0.001)) || (suppressZeroTRs && (n_sig < 0.001)) ) {
+    if (verbose) std::cout << "Zero signal, card not printed: " << cardname << std::endl;
+    return 0;
+  }
+ 
   // get yields for each sample
   // !!!!! HACK: set zero bins to 0.01 for now to make combine happy
   TH1D* h_lostlep = (TH1D*) f_lostlep->Get(fullhistname);
@@ -329,12 +356,6 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   n_bkg = n_lostlep+n_zinv+n_qcd;
   if (n_bkg < 0.001) n_qcd = 0.01;
 
-  //  if (suppressZeroBins && ((n_sig < 0.1) || (n_sig/n_bkg < 0.02))) {
-  if (suppressZeroBins && (n_sig < 0)) {
-    if (verbose) std::cout << "Zero signal, card not printed: " << cardname << std::endl;
-    return 0;
-  }
- 
   if (f_data) {
     // n_data is 0 by default
     TH1D* h_data = (TH1D*) f_data->Get(fullhistname);
@@ -387,7 +408,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   }
  
   if ( njets_LOW == 7 && nbjets_LOW >= 1) {
-    cout<<"special case with 7jets 1btag"<<endl;
+    if (verbose) cout<<"special case with 7jets 1btag"<<endl;
     n_syst++; // nBtag extrapolation
   }
 
@@ -406,7 +427,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_zinv_zgamma_nb  = Form("zinv_ZGratio_nb_%s" , bjet_str.c_str() );
   TString name_zinv_zgamma_ht  = Form("zinv_ZGratio_ht_%s" , ht_str.c_str()   );
   // Only a low edge for MT2, since we want to maintain correlations between differently sized MT2 bins with the same lower edge
-  TString name_zinv_zgamma_mt2 = "zinv_ZGratio_m" + toString(mt2_LOW); 
+  TString name_zinv_zgamma_mt2 = "zinv_ZGratio_m" + to_string(mt2_LOW); 
   TString name_zinv_doubleRatioOffset = "zinv_doubleRatioOffset";
   TString name_zinv_mcsyst = Form("zinv_MC_%s",channel.c_str());
   TString name_zinv_shape = "zinv_shape_"+perTopoRegion;
@@ -481,15 +502,33 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   else n_syst += 4; // crstat, fjrbsyst, fitstat, fitsyst
 
   // ----- sig uncertainties
-  double sig_syst = 1.10; // dummy 10% from early MC studies
-  double sig_mcstat = err_sig_mcstat/n_sig; // MC stat err
+  double sig_syst         = 1.071; // quadrature sum of 5% for JES, 5% for renorm/fact scales
+  double sig_mcstat       = (n_sig > 0.) ? 1. + err_sig_mcstat/n_sig : 1.00; // MC stat err
+  double sig_lumi         = 1.046; // 4.6% lumi uncertainty, end of 2015
+  double sig_btagsf_heavy = (n_sig > 0.) ? n_sig_btagsf_heavy_UP/n_sig : 1.00; // btagsf heavy, eff UP
+  double sig_btagsf_light = (n_sig > 0.) ? n_sig_btagsf_light_UP/n_sig : 1.00; // btagsf light, eff UP
+  double sig_lepeff       = (n_sig > 0.) ? n_sig_lepeff_UP/n_sig : 1.00; // lepton eff UP
+  double sig_isr          = (n_sig > 0.) ? n_sig_isr_UP/n_sig : 1.00; // isr weight UP
+
+  // fully correlated for lumi, btagsf, lepeff, isr.  Fully uncorrelated for stats and other systs
+  TString name_sig_syst         = "sig_syst_"+perChannel;
+  TString name_sig_mcstat       = "sig_mcstat_"+perChannel;
+  TString name_sig_lumi         = "sig_lumi";
+  TString name_sig_btagsf_heavy = "sig_btagsf_heavy";
+  TString name_sig_btagsf_light = "sig_btagsf_light";
+  TString name_sig_lepeff       = "sig_lepeff";
+  TString name_sig_isr          = "sig_isr";
+  
   if (doDummySignalSyst) {
-    // dummy: just 1 nuisance
+    // dummy: just 1 nuisance, correlated
+    sig_syst = 1.10; // dummy 10% from early MC studies
+    name_sig_syst = "sig_syst";
     ++n_syst;
   }
   // otherwise do "real" signal systematics
   else {
-
+    n_syst += 6; // syst, mcstat, lumi, btagsf_heavy, btagsf_light, isr
+    if (isSignalWithLeptons) ++n_syst; // lepeff
   }
 
   ofstream ofile;
@@ -509,7 +548,19 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   ofile <<  "------------"                                                                  << endl;
  
   // ---- sig systs
-  ofile <<  Form("sig_syst                                            lnN   %.3f    -      -     - ",sig_syst)  << endl;
+  if (doDummySignalSyst) {
+    ofile <<  Form("%s                                lnN   %.3f    -      -     - ",name_sig_syst.Data(),sig_syst)  << endl;
+  }
+  // full signal systematics
+  else {
+    ofile <<  Form("%s       lnN    %.3f   -    -    - ",name_sig_syst.Data(),sig_syst)  << endl;
+    ofile <<  Form("%s     lnN    %.3f   -    -    - ",name_sig_mcstat.Data(),sig_mcstat)  << endl;
+    ofile <<  Form("%s                     lnN    %.3f   -    -    - ",name_sig_lumi.Data(),sig_lumi)  << endl;
+    ofile <<  Form("%s             lnN    %.3f   -    -    - ",name_sig_btagsf_heavy.Data(),sig_btagsf_heavy)  << endl;
+    ofile <<  Form("%s             lnN    %.3f   -    -    - ",name_sig_btagsf_light.Data(),sig_btagsf_light)  << endl;
+    if (isSignalWithLeptons) ofile <<  Form("%s                   lnN    %.3f   -    -    - ",name_sig_lepeff.Data(),sig_lepeff)  << endl;
+    ofile <<  Form("%s                      lnN    %.3f   -    -    - ",name_sig_isr.Data(),sig_isr)  << endl;
+  }
 
   // ---- Zinv systs
   if ( !integratedZinvEstimate && nbjets_LOW >= 2) {
