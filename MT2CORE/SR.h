@@ -64,7 +64,30 @@ class SR {
     std::map<std::string, TH1*> crrlelHistMap;
     std::map<std::string, TH1*> crqcdHistMap;
 
-  private:
+    //soft-lepton SRs
+    std::map<std::string, TH1*> crloosesoftlHistMap;
+    std::map<std::string, TH1*> crloosesoftlmuHistMap;
+    std::map<std::string, TH1*> crloosesoftlelHistMap;
+    std::map<std::string, TH1*> crsoftlHistMap;
+    std::map<std::string, TH1*> crsoftlmuHistMap;
+    std::map<std::string, TH1*> crsoftlelHistMap;
+    std::map<std::string, TH1*> crsoftlLowMtHistMap;
+    std::map<std::string, TH1*> crsoftlmuLowMtHistMap;
+    std::map<std::string, TH1*> crsoftlelLowMtHistMap;
+    std::map<std::string, TH1*> crsoftlHighMtHistMap;
+    std::map<std::string, TH1*> crsoftlmuHighMtHistMap;
+    std::map<std::string, TH1*> crsoftlelHighMtHistMap;
+    std::map<std::string, TH1*> srsoftlHistMap;
+    std::map<std::string, TH1*> srsoftlmuHistMap;
+    std::map<std::string, TH1*> srsoftlelHistMap;
+    std::map<std::string, TH1*> srsoftlLowMtHistMap;
+    std::map<std::string, TH1*> srsoftlmuLowMtHistMap;
+    std::map<std::string, TH1*> srsoftlelLowMtHistMap;
+    std::map<std::string, TH1*> srsoftlHighMtHistMap;
+    std::map<std::string, TH1*> srsoftlmuHighMtHistMap;
+    std::map<std::string, TH1*> srsoftlelHighMtHistMap;
+
+ private:
 
     std::string srName_;
     std::map<std::string, std::pair<float, float> > bins_;
