@@ -809,6 +809,19 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	int pdgId = t.isoTrack_pdgId[itrk];
 	if ((abs(pdgId) != 11) && (abs(pdgId) != 13)) continue;
 	if (t.isoTrack_absIso[itrk]/pt > 0.2) continue;
+
+
+	//overlap removal with reco leps
+	bool overlap = false;
+	for(int ilep = 0; ilep < t.nlep; ilep++){
+	  float thisDR = DeltaR(t.isoTrack_eta[itrk], t.lep_eta[ilep], t.isoTrack_phi[itrk], t.lep_phi[ilep]);
+	  if (thisDR < 0.01) {
+	    overlap = true;
+	    break;
+	  }
+	} // loop over reco leps
+	if (overlap) continue;
+
 	nPFlepLowPt++;
       }
       int nUniqueLep = t.nMuons10 + t.nElectrons10 + nPFlepLowPt;
