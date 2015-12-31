@@ -1397,7 +1397,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   savePlotsDir(SRBase.srsoftlHighMtHistMap,outfile_,"srsoftlHighMt");
   savePlotsDir(SRBase.srsoftlmuHighMtHistMap,outfile_,"srsoftlmuHighMt");
   savePlotsDir(SRBase.srsoftlelHighMtHistMap,outfile_,"srsoftlelHighMt");
-  savePlotsDir(SRBase.crdoublelHistMap,outfile_,"crdoublel");
+  savePlotsDir(SRBase.crdoublelHistMap,outfile_,"crdoublelbase");
   
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(!SRVec.at(srN).srHistMap.empty()){
@@ -1728,7 +1728,7 @@ void MT2Looper::fillHistosDoubleL(const std::string& prefix, const std::string& 
       ) passBaseline = true;
 
   
-  if (passBaseline) fillHistosDoubleLepton(SRBase.crdoublelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdoublel", suffix);
+  if (passBaseline) fillHistosDoubleLepton(SRBase.crdoublelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdoublelbase", suffix);
  
   return;
 } //double lep
