@@ -30,6 +30,14 @@ void ReplaceString(std::string& subject, const std::string& search, const std::s
 
 //_______________________________________________________________________________
 int getColor(const string& sample) {
+
+  //softLep fakes
+  if (sample.find("wjets fakeLep") != string::npos) return 417+3;
+  if (sample.find("zinv fakeLep") != string::npos) return 419+3;
+  if (sample.find("tt+1l fakeLep") != string::npos) return kAzure+2+3;
+  if (sample.find("tt+2l fakeLep") != string::npos) return kOrange-1+3;
+  if (sample.find("st fakeLep") != string::npos) return kViolet+3;
+  
   if (sample.find("data") != string::npos) return kBlack;
   if (sample.find("ttbar") != string::npos) return 855;
   if (sample.find("top") != string::npos) return 855;
@@ -46,6 +54,9 @@ int getColor(const string& sample) {
   if (sample.find("T1qqqq") != string::npos) return kOrange;
   if (sample.find("T2tt") != string::npos) return kCyan;
   if (sample.find("T2bb") != string::npos) return kMagenta+3;
+  if (sample.find("tt+1l") != string::npos) return kAzure+2;
+  if (sample.find("tt+2l") != string::npos) return kOrange-1;
+  if (sample.find("st") != string::npos) return kViolet;
 
   cout << "getColor: WARNING: didn't recognize sample: " << sample << endl;
   return kBlack;
@@ -53,12 +64,20 @@ int getColor(const string& sample) {
 
 //_______________________________________________________________________________
 string getLegendName(const string& sample) {
+
+  //softLep fakes
+  if (sample.find("wjets fakeLep") != string::npos) return "Fake W+jets";
+  if (sample.find("st fakeLep") != string::npos) return "Fake singletop";
+  if (sample.find("zinv fakeLep") != string::npos) return "Fake Z #rightarrow #nu#nu";
+  if (sample.find("tt+1l fakeLep") != string::npos) return "Fake tt + 1l";
+  if (sample.find("tt+2l fakeLep") != string::npos) return "Fake tt + 2l";
+
   if (sample.find("fakedata") != string::npos) return "Fake Data";
   if (sample.find("data") != string::npos) return "Data";
   if (sample.find("ttbar") != string::npos) return "ttbar";
   if (sample.find("top") != string::npos) return "Top";
   if (sample.find("wjets") != string::npos) return "W+jets";
-  if (sample.find("zinv") != string::npos) return "Z+jets";
+  if (sample.find("zinv") != string::npos) return "Z #rightarrow #nu#nu";
   if (sample.find("gjet") != string::npos) return "Prompt #gamma";
   if (sample.find("fakephotonMC") != string::npos) return "Fake #gamma";
   if (sample.find("fakephotonData") != string::npos) return "Fake #gamma (data)";
@@ -80,6 +99,9 @@ string getLegendName(const string& sample) {
   if (sample.find("T2bb_600_580") != string::npos) return "T2bb 600, 580";
   if (sample.find("T2qq_1200_100") != string::npos) return "T2qq 1200, 100";
   if (sample.find("T2qq_600_550") != string::npos) return "T2qq 600, 550";
+  if (sample.find("tt+1l") != string::npos) return "tt + 1l";
+  if (sample.find("tt+2l") != string::npos) return "tt + 2l";
+  if (sample.find("st") != string::npos) return "singletop";
 
   cout << "getLegendName: WARNING: didn't recognize sample: " << sample << endl;
   return sample;
