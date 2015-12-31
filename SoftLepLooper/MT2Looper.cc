@@ -917,11 +917,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       
       //recompute dPhiMin for SR/CR
-      if (doSoftLepSRplots || doSoftLepCRplots){
-	for(int ijet = 0; ijet < t.njet; ijet++){
-	  //deltaPhiMin of 4 leading jet objects
-	  if (ijet < 4) softlepDPhiMin_ = min(softlepDPhiMin_, DeltaPhi( softlepphi_ , t.jet_phi[ijet] ));
-	}
+      for(int ijet = 0; ijet < t.njet; ijet++){
+	//deltaPhiMin of 4 leading jet objects
+	if (ijet < 4) softlepDPhiMin_ = min(softlepDPhiMin_, DeltaPhi( softlepphi_ , t.jet_phi[ijet] ));
       }
 
       
@@ -982,7 +980,126 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}
       }//if doSoftLep plots
 
+      //-------------------------------------//
+      //----------2 lep control region-------//
+      //-------------------------------------//
+      
+      bool doDoubleLepCRplots = false;
+      lep1pt_ = -1;
+      lep1eta_ = -1;
+      lep1phi_ = -1;
+      lep1M_ = -1;
+      lep2pt_ = -1;
+      lep2eta_ = -1;
+      lep2phi_ = -1;
+      lep2M_ = -1;
+      dilepmll_ = -1;
+      if (nUniqueLep == 2) {
+	// find unique lepton to plot pt,MT and get flavor
+	int nfoundlep = 0;
+	int cand1_pdgId = 0;
+	int cand2_pdgId = 0;
 
+	// if reco leps, check those
+	if (t.nlep > 0) {
+      	  for (int ilep = 0; ilep < t.nlep; ++ilep) {
+
+	    // good candidate: save
+	    if (nfoundlep == 0){
+	      lep1pt_ = t.lep_pt[ilep];
+	      lep1eta_ = t.lep_eta[ilep];
+	      lep1phi_ = t.lep_phi[ilep];
+	      lep1M_ = t.lep_mass[ilep];
+	      cand1_pdgId = t.lep_pdgId[ilep];
+	      nfoundlep++;
+	      continue;
+	    }
+	    if (nfoundlep == 1){
+	      lep2pt_ = t.lep_pt[ilep];
+	      lep2eta_ = t.lep_eta[ilep];
+	      lep2phi_ = t.lep_phi[ilep];
+	      lep2M_ = t.lep_mass[ilep];
+	      cand2_pdgId = t.lep_pdgId[ilep];
+	      nfoundlep++;
+	      break;
+	    }
+	  }
+	} // t.nlep > 0
+
+	// otherwise check PF leps that don't overlap with a reco lepton
+	if (nfoundlep < 2) {
+      	  for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
+	    float pt = t.isoTrack_pt[itrk];
+	    if (pt < 5. || pt > 10.) continue;
+      	    int pdgId = t.isoTrack_pdgId[itrk];
+	    if ((abs(pdgId) != 11) && (abs(pdgId) != 13)) continue;
+      	    if (t.isoTrack_absIso[itrk]/pt > 0.2) continue;
+	    float eta = t.isoTrack_eta[itrk];
+	    float phi = t.isoTrack_phi[itrk];
+	    float mass = t.isoTrack_mass[itrk];
+
+	    // check overlap with reco leptons
+	    bool overlap = false;
+	    for(int ilep = 0; ilep < t.nlep; ilep++){
+	      float thisDR = DeltaR(t.isoTrack_eta[itrk], t.lep_eta[ilep], t.isoTrack_phi[itrk], t.lep_phi[ilep]);
+	      if (thisDR < 0.01) {
+		overlap = true;
+		break;
+	      }
+	    } // loop over reco leps
+	    if (overlap) continue;
+
+	    
+	    // good candidate: save
+	    if (nfoundlep == 0){
+	      lep1pt_ = pt;
+	      lep1eta_ = eta;
+	      lep1phi_ = phi;
+	      lep1M_ = mass;
+	      cand1_pdgId = pdgId;
+	      nfoundlep++;
+	      continue;
+	    }
+	    if (nfoundlep == 1){
+	      lep2pt_ = pt;
+	      lep2eta_ = eta;
+	      lep2phi_ = phi;
+	      lep2M_ = mass;
+	      cand2_pdgId = pdgId;
+	      nfoundlep++;
+	      break;
+	    }
+	  } // loop on isotracks	  
+	} //nfoundlep < 2
+
+	//at least one soft lepton
+	if (lep1pt_ > 20 && lep2pt_ > 20) { continue; }
+	
+	//opposite sign
+	if (((cand1_pdgId < 0) && (cand2_pdgId < 0)) || ((cand1_pdgId > 0) && (cand2_pdgId > 0)) ){ continue; }
+	
+	
+	//construct dilep mass
+	TLorentzVector lep1_p4(0,0,0,0);
+	TLorentzVector lep2_p4(0,0,0,0);
+	lep1_p4.SetPtEtaPhiM(lep1pt_,lep1eta_,lep1phi_,lep1M_);
+	lep2_p4.SetPtEtaPhiM(lep2pt_,lep2eta_,lep2phi_,lep2M_);
+	TLorentzVector dilep_p4 = lep1_p4 + lep2_p4;
+	dilepmll_ = dilep_p4.M();
+
+	//z-window veto
+	if (dilepmll_ > 76 && dilepmll_ < 106) { continue; }
+	
+	//if you get to here, fill in CR
+	doDoubleLepCRplots = true;
+	
+	if (nfoundlep != 2) {
+	  std::cout << "MT2Looper::Loop: WARNING! didn't find 2 leptons when expected: evt: " << t.evt
+		    << ", nMuons10: " << t.nMuons10 << ", nElectrons10: " << t.nElectrons10 
+		    << ", nPFLep5LowMT: " << t.nPFLep5LowMT << ", nLepLowMT: " << t.nLepLowMT << std::endl;
+	}
+	
+      }//nUniqueLep==2
       
       // simple counter to check for 1L CR
       if (t.nLepLowMT == 1) {
@@ -1222,6 +1339,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
          if (softlepMatched) fillHistosSoftL("crsoftlel");
 	 else fillHistosSoftL("crsoftlel","Fake");
       }
+      if (doDoubleLepCRplots) {
+        //saveSoftLplots = true;
+         fillHistosDoubleL("crdoublel");
+      }
 
 
    }//end loop on events in a file
@@ -1276,7 +1397,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   savePlotsDir(SRBase.srsoftlHighMtHistMap,outfile_,"srsoftlHighMt");
   savePlotsDir(SRBase.srsoftlmuHighMtHistMap,outfile_,"srsoftlmuHighMt");
   savePlotsDir(SRBase.srsoftlelHighMtHistMap,outfile_,"srsoftlelHighMt");
-
+  savePlotsDir(SRBase.crdoublelHistMap,outfile_,"crdoublel");
   
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(!SRVec.at(srN).srHistMap.empty()){
@@ -1590,6 +1711,27 @@ void MT2Looper::fillHistosSoftL(const std::string& prefix, const std::string& su
  
   return;
 } //soft lepton
+
+
+void MT2Looper::fillHistosDoubleL(const std::string& prefix, const std::string& suffix) {
+
+  bool passBaseline = false;
+  if (t.ht > 200 &&
+      t.mt2 > 200 &&
+      //t.nBJet20 < 2 &&
+      t.nJet30 >= 2 &&
+      t.met_pt > 200 &&
+      softlepDPhiMin_ > 0.3 && //deltaPhiMin compute only with jet objects
+      //t.deltaPhiMin > 0.3 &&
+      //t.rl_deltaPhiMin > 0.3 &&
+      t.diffMetMht/t.met_pt < 0.5 
+      ) passBaseline = true;
+
+  
+  if (passBaseline) fillHistosDoubleLepton(SRBase.crdoublelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdoublel", suffix);
+ 
+  return;
+} //double lep
 
 // hists for single lepton control region
 void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suffix) {
@@ -2439,6 +2581,60 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
     if (wPt < 300 && wPt > 200) plot1D("h_deltaPhiWminusLepPlus_W200t300"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
     if (wPt < 500 && wPt > 300) plot1D("h_deltaPhiWminusLepPlus_W300t500"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
   }
+
+  
+  outfile_->cd();
+
+  fillHistos(h_1d, n_mt2bins, mt2bins, dirname, s);
+  return;
+}
+
+void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
+  TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
+  if (dir == 0) {
+    dir = outfile_->mkdir(dirname.c_str());
+  } 
+  dir->cd();
+
+  plot1D("h_lep1pt"+s,      lep1pt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
+  plot1D("h_lep1ptshort"+s,      lep1pt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
+  plot1D("h_lep1phi"+s,      lep1phi_,   evtweight_, h_1d, "phi",  64, -3.2, 3.2);
+  plot1D("h_lep1eta"+s,      lep1eta_,   evtweight_, h_1d, "eta",  60, -3, 3);
+  plot1D("h_lep2pt"+s,      lep2pt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
+  plot1D("h_lep2ptshort"+s,      lep2pt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
+  plot1D("h_lep2phi"+s,      lep2phi_,   evtweight_, h_1d, "phi",  64, -3.2, 3.2);
+  plot1D("h_lep2eta"+s,      lep2eta_,   evtweight_, h_1d, "eta",  60, -3, 3);
+  
+  //compute mt with softest lepton for soft lep
+  float lowpt = -1;
+  float lowphi = -1;
+  float highpt = -1;
+  float highphi = -1;
+  if (lep1pt_ < lep2pt_) {
+    lowpt = lep1pt_;
+    lowphi = lep1phi_;
+    highpt = lep2pt_;
+    highphi = lep2phi_;
+  }
+  else {
+    lowpt = lep2pt_;
+    lowphi = lep2phi_; 
+    highpt = lep1pt_;
+    highphi = lep1phi_; 
+  }
+  float mt = sqrt( 2 * t.met_pt * lowpt * ( 1 - cos( t.met_phi - lowphi) ) );
+
+  plot1D("h_mt"+s,            mt,   evtweight_, h_1d, ";M_{T} [GeV]", 500, 0, 500);
+  plot1D("h_lowleppt"+s,      lowpt,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
+  plot1D("h_highleppt"+s,      highpt,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
+
+  //save type
+  int type = -1;
+  if (lep1pt_ < 20 && lep2pt_ < 20) type = 0;
+  else if (lep1pt_ > 20 && lep2pt_ < 20) type = 1;
+  else if (lep1pt_ < 20 && lep2pt_ > 20) type = 1;
+  else if (lep1pt_ > 20 && lep2pt_ > 20) type = 2;
+  plot1D("h_type"+s,      type,   evtweight_, h_1d, ";type", 1, 0, 2);
 
   
   outfile_->cd();

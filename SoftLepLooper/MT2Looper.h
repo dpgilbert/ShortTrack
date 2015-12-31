@@ -45,6 +45,7 @@ class MT2Looper {
   void fillHistosInclusive();
   void fillHistosSignalRegion(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosSoftL(const std::string& prefix = "", const std::string& suffix = "");
+  void fillHistosDoubleL(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRSL(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRGJ(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRDY(const std::string& prefix = "", const std::string& suffix = "");
@@ -53,6 +54,8 @@ class MT2Looper {
   void fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 		  const std::string& dir = "", const std::string& suffix = "");
   void fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
+			      const std::string& dir = "", const std::string& suffix = ""); 
+  void fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 			      const std::string& dir = "", const std::string& suffix = ""); 
   void fillHistosSingleLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 			      const std::string& dir = "", const std::string& suffix = ""); 
@@ -75,6 +78,8 @@ class MT2Looper {
   int nlepveto_;
   float leppt_;
   float mt_;
+
+  //soft lep variables
   float softleppt_;
   float softlepeta_;
   float softlepphi_;
@@ -84,6 +89,18 @@ class MT2Looper {
   float softlepmt_;
   float softlepmt2_;
   float softlepDPhiMin_;
+
+  //2-lep softLep CR variables
+  float lep1pt_;
+  float lep1eta_;
+  float lep1phi_;
+  float lep1M_;
+  float lep2pt_;
+  float lep2eta_;
+  float lep2phi_;
+  float lep2M_;
+  float dilepmll_;
+  
   int nJet30Eta3_;
   bool isSignal_;
   bool passMonojetId_;

@@ -9,13 +9,14 @@ OUTDIR=output/softLepSR/
 # OUTDIR=output/softLepCR/
 
 #declare -a Samples=(data_Run2015C data_Run2015D ttsl_mg_lo ttdl_mg_lo wjets_ht zinv_ht singletop qcd_ht ttw ttz ttg tth dyjetsll_ht gjet_ht)
-declare -a Samples=(wjets_ht zinv_ht singletop ttdl ttsl ttg tth ttw ttz)
-#declare -a Samples=(singletop)
+declare -a Samples=(wjets_ht zinv_ht singletop ttdl ttsl ttg tth ttw ttz dyjetsll)
+#declare -a Samples=(ttdl)
 
 mkdir -p ${OUTDIR}
-mkdir logs
+mkdir -p logs
 
 for SAMPLE in ${Samples[@]};
   do echo nice -n 19 ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR}
   nohup nice -n 19 ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR} >& logs/${SAMPLE}.log &
 done
+

@@ -65,6 +65,7 @@ class SR {
     std::map<std::string, TH1*> crqcdHistMap;
 
     //soft-lepton SRs
+    std::map<std::string, TH1*> crdoublelHistMap;
     std::map<std::string, TH1*> crloosesoftlHistMap;
     std::map<std::string, TH1*> crloosesoftlmuHistMap;
     std::map<std::string, TH1*> crloosesoftlelHistMap;
