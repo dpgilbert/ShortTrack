@@ -13,6 +13,7 @@ OUTDIR=output/softLepSR/
 declare -a Samples=(singletop)
 
 mkdir -p ${OUTDIR}
+mkdir logs
 
 for SAMPLE in ${Samples[@]};
   do echo ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR}
