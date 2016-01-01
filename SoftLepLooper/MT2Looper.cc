@@ -2633,8 +2633,8 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   if (lep1pt_ < 20 && lep2pt_ < 20) type = 0;
   else if (lep1pt_ > 20 && lep2pt_ < 20) type = 1;
   else if (lep1pt_ < 20 && lep2pt_ > 20) type = 1;
-  else if (lep1pt_ > 20 && lep2pt_ > 20) type = 2;
-  plot1D("h_type"+s,      type,   evtweight_, h_1d, ";type", 1, 0, 2);
+  //else if (lep1pt_ > 20 && lep2pt_ > 20) type = 2;
+  plot1D("h_type"+s,      type,   evtweight_, h_1d, ";type", 2, 0, 2);
 
   
   outfile_->cd();

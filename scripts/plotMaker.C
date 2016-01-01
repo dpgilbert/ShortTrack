@@ -1556,12 +1556,12 @@ void plotMakerDoubleLepCR(){
   vector<string>  names;
 
   //samples.push_back(f_qcd); names.push_back("qcd");
-  samples.push_back(f_dy); names.push_back("dyjets");
-  samples.push_back(f_tt2l); names.push_back("tt+2l");
   samples.push_back(f_st); names.push_back("st");
-  samples.push_back(f_zinv); names.push_back("zinv");
-  samples.push_back(f_tt1l); names.push_back("tt+1l");
+  samples.push_back(f_dy); names.push_back("dyjets");
   samples.push_back(f_wjets); names.push_back("wjets");
+  samples.push_back(f_tt1l); names.push_back("tt+1l");
+  samples.push_back(f_tt2l); names.push_back("tt+2l");
+  samples.push_back(f_zinv); names.push_back("zinv");
   // samples.push_back(f_data); names.push_back("data");
 
   // ----------------------------------------
@@ -1595,6 +1595,7 @@ void plotMakerDoubleLepCR(){
       makePlot( samples , names , dir_name , "h_J0pt" , "p_{T}(jet1) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_J1pt" , "p_{T}(jet2) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_mt" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , false , printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_type" , "type" , "Events" , 0 , 3 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
 
       //log plots
       makePlot( samples , names , dir_name , "h_lowleppt" , "Lepton p_{T} [GeV]" , "Events / 1 GeV" , 0 , 30 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
@@ -1606,6 +1607,8 @@ void plotMakerDoubleLepCR(){
       makePlot( samples , names , dir_name , "h_J0pt" , "p_{T}(jet1) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_J1pt" , "p_{T}(jet2) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_mt" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_type" , "type" , "Events" , 0 , 3 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+
 
 
     }
@@ -1678,7 +1681,7 @@ void plotMakerCRSL(){
     }
   }
 }
-  
+
 //_______________________________________________________________________________
 void plotMaker(){
   //tableMakerZinvCR(); return;
@@ -1689,7 +1692,7 @@ void plotMaker(){
   //plotMakerCRSL(); return;
   //plotMakerSoftLepSR(); return;
   //plotMakerSoftLepCR(); return;
-  //plotMakerDoubleLepCR(); return;
+  plotMakerDoubleLepCR(); return;
 
   //  gROOT->LoadMacro("CMS_lumi.C");
   cmsText = "CMS Preliminary";
