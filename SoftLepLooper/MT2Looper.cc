@@ -128,6 +128,7 @@ void MT2Looper::SetSignalRegions(){
 
   //SRVec =  getSignalRegionsZurich_jetpt30(); //same as getSignalRegionsZurich(), but with j1pt and j2pt cuts changed to 30 GeV
   SRVec =  getSignalRegionsJamboree(); //adds HT 200-450 regions
+  SRVecLep =  getSignalRegionsLep(); 
   SRVecMonojet = getSignalRegionsMonojet(); // first pass of monojet regions
 
   //store histograms with cut values for all variables
@@ -217,6 +218,23 @@ void MT2Looper::SetSignalRegions(){
       plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVecMonojet.at(i).GetUpperBound(vars.at(j)), SRVecMonojet.at(i).crgjHistMap, "", 1, 0, 2);
     }
     plot1D("h_n_mt2bins",  1, SRVecMonojet.at(i).GetNumberOfMT2Bins(), SRVecMonojet.at(i).crgjHistMap, "", 1, 0, 2);
+    outfile_->cd();
+  }
+
+  //store histograms with cut values for all variables
+  for(unsigned int i = 0; i < SRVecLep.size(); i++){
+    std::vector<std::string> vars = SRVecLep.at(i).GetListOfVariables();
+    TDirectory * dir = (TDirectory*)outfile_->Get(("srLep"+SRVecLep.at(i).GetName()).c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir(("srLep"+SRVecLep.at(i).GetName()).c_str());
+    } 
+    dir->cd();
+    for(unsigned int j = 0; j < vars.size(); j++){
+      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVecLep.at(i).GetLowerBound(vars.at(j)), SRVecLep.at(i).srHistMap, "", 1, 0, 2);
+      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVecLep.at(i).GetUpperBound(vars.at(j)), SRVecLep.at(i).srHistMap, "", 1, 0, 2);
+    }
+    plot1D("h_n_mt2bins",  1, SRVecLep.at(i).GetNumberOfMT2Bins(), SRVecLep.at(i).srHistMap, "", 1, 0, 2);
+
     outfile_->cd();
   }
 
@@ -704,8 +722,15 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //      const float lumi = 0.209;
       //      const float lumi = 0.579;
       //      const float lumi = 1.264;
-      //      const float lumi = 2.11;
-      const float lumi = 4;
+      const float lumi = 2.115;
+      //const float lumi = 4;
+
+      if (isSignal_ 
+          && !(t.GenSusyMScan1 == 400 && t.GenSusyMScan2 == 325)
+          && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 200)
+	  //&& !(t.GenSusyMScan1 == 900 && t.GenSusyMScan2 == 875 && sample == "T1bbbb_mGluino-875-900-925")
+          ) continue;
+
 
       evtweight_ = 1.;
 
@@ -824,10 +849,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
 	nPFlepLowPt++;
       }
-      int nUniqueLep = t.nMuons10 + t.nElectrons10 + nPFlepLowPt;
+      nUniqueLep_ = t.nMuons10 + t.nElectrons10 + nPFlepLowPt;
 
       //if nleps==1, find soft lepton
-      if (nUniqueLep == 1) {
+      if (nUniqueLep_ == 1) {
 	// find unique lepton to plot pt,MT and get flavor
 	bool foundlep = false;
 	int cand_pdgId = 0;
@@ -913,7 +938,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 		    << ", nPFLep5LowMT: " << t.nPFLep5LowMT << ", nLepLowMT: " << t.nLepLowMT << std::endl;
 	}
 
-      } //nUniqueLep==1
+      } //nUniqueLep_==1
 
       
       //recompute dPhiMin for SR/CR
@@ -994,7 +1019,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       lep2phi_ = -1;
       lep2M_ = -1;
       dilepmll_ = -1;
-      if (nUniqueLep == 2) {
+      if (nUniqueLep_ == 2) {
 	// find unique lepton to plot pt,MT and get flavor
 	int nfoundlep = 0;
 	int cand1_pdgId = 0;
@@ -1099,7 +1124,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 		    << ", nPFLep5LowMT: " << t.nPFLep5LowMT << ", nLepLowMT: " << t.nLepLowMT << std::endl;
 	}
 	
-      }//nUniqueLep==2
+      }//nUniqueLep_==2
       
       // simple counter to check for 1L CR
       if (t.nLepLowMT == 1) {
@@ -1313,6 +1338,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         //saveSoftLplots = true;
         if (softlepMatched) fillHistosSoftL("srsoftl");
 	else fillHistosSoftL("srsoftl", "Fake");
+        fillHistosLepSignalRegions("srLep");
       }
       if (doSoftLepMuSRplots && !doMinimalPlots) {
         //saveSoftLplots = true;
@@ -1468,7 +1494,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
     }
   }
-
+  if (saveSoftLplots) {
+    for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+      if(!SRVecLep.at(srN).srHistMap.empty()){
+	cout<<"Saving srLep"<< SRVecLep.at(srN).GetName() <<endl;
+        savePlotsDir(SRVecLep.at(srN).srHistMap, outfile_, ("srLep"+SRVecLep.at(srN).GetName()).c_str());
+      }
+    }
+  }
 
   //---------------------
   // Write and Close file
@@ -1604,6 +1637,30 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
   } // monojet regions
 
   return;
+}
+
+//hists for soft lepton regions
+void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std::string& suffix) {
+
+  // trigger requirement on data
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;
+
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = softlepDPhiMin_;
+  values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  values["nlep"]        = nUniqueLep_;
+  values["njets"]       = t.nJet30;
+  values["nbjets"]      = t.nBJet20;
+  values["mt2"]         = t.nJet30 > 1 ? t.mt2 : t.met_pt; // require large MT2 for multijet events
+  values["ht"]          = t.ht;
+
+  for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+    if(SRVecLep.at(srN).PassesSelection(values)){
+      fillHistosSingleSoftLepton(SRVecLep.at(srN).srHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
+      break;//signal regions are orthogonal, event cannot be in more than one
+    }
+  }
+
 }
 
 //hists for soft lepton regions

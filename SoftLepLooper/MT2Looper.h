@@ -19,6 +19,7 @@
 //MT2
 #include "../MT2CORE/mt2tree.h"
 #include "../MT2CORE/sigSelections.h"
+#include "../MT2CORE/sigSelectionsLep.h"
 #include "../MT2CORE/SR.h"
 
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
@@ -44,6 +45,7 @@ class MT2Looper {
   void fillHistosSRBase();
   void fillHistosInclusive();
   void fillHistosSignalRegion(const std::string& prefix = "", const std::string& suffix = "");
+  void fillHistosLepSignalRegions(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosSoftL(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosDoubleL(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRSL(const std::string& prefix = "", const std::string& suffix = "");
@@ -80,6 +82,7 @@ class MT2Looper {
   float mt_;
 
   //soft lep variables
+  int nUniqueLep_;
   float softleppt_;
   float softlepeta_;
   float softlepphi_;
@@ -109,6 +112,7 @@ class MT2Looper {
   std::vector<SR> SRVecMonojet;
   std::vector<SR> InclusiveRegions;
   std::vector<SR> InclusiveRegionsMonojet;
+  std::vector<SR> SRVecLep;
   SR SRBase;
   SR SRBaseIncl;
   SR SRBaseMonojet;
