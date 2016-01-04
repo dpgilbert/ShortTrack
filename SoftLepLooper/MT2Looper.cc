@@ -132,111 +132,16 @@ void MT2Looper::SetSignalRegions(){
   SRVecMonojet = getSignalRegionsMonojet(); // first pass of monojet regions
 
   //store histograms with cut values for all variables
-  for(unsigned int i = 0; i < SRVec.size(); i++){
-    std::vector<std::string> vars = SRVec.at(i).GetListOfVariables();
-    TDirectory * dir = (TDirectory*)outfile_->Get(("sr"+SRVec.at(i).GetName()).c_str());
-    if (dir == 0) {
-      dir = outfile_->mkdir(("sr"+SRVec.at(i).GetName()).c_str());
-    } 
-    dir->cd();
-    for(unsigned int j = 0; j < vars.size(); j++){
-      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).srHistMap, "", 1, 0, 2);
-      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).srHistMap, "", 1, 0, 2);
-    }
-    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).srHistMap, "", 1, 0, 2);
+  storeHistWithCutValues(SRVec, "sr");
+  storeHistWithCutValues(SRVec, "crsl");
+  storeHistWithCutValues(SRVec, "crgj");
+  storeHistWithCutValues(SRVec, "crrl");
+  storeHistWithCutValues(SRVecMonojet, "sr");
+  storeHistWithCutValues(SRVecMonojet, "crsl");
+  storeHistWithCutValues(SRVecMonojet, "crgj");
+  storeHistWithCutValues(SRVecMonojet, "crrl");
 
-    dir = (TDirectory*)outfile_->Get(("crsl"+SRVec.at(i).GetName()).c_str());
-    if (dir == 0) {
-      dir = outfile_->mkdir(("crsl"+SRVec.at(i).GetName()).c_str());
-    } 
-    dir->cd();
-    std::vector<std::string> varsCRSL = SRVec.at(i).GetListOfVariablesCRSL();
-    for(unsigned int j = 0; j < varsCRSL.size(); j++){
-      plot1D("h_"+varsCRSL.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBoundCRSL(varsCRSL.at(j)), SRVec.at(i).crslHistMap, "", 1, 0, 2);
-      plot1D("h_"+varsCRSL.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBoundCRSL(varsCRSL.at(j)), SRVec.at(i).crslHistMap, "", 1, 0, 2);
-    }
-    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).crslHistMap, "", 1, 0, 2);
-
-    dir = (TDirectory*)outfile_->Get(("crgj"+SRVec.at(i).GetName()).c_str());
-    if (dir == 0) {
-      dir = outfile_->mkdir(("crgj"+SRVec.at(i).GetName()).c_str());
-    } 
-    dir->cd();
-    for(unsigned int j = 0; j < vars.size(); j++){
-      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).crgjHistMap, "", 1, 0, 2);
-      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).crgjHistMap, "", 1, 0, 2);
-    }
-    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).crgjHistMap, "", 1, 0, 2);
-
-    dir = (TDirectory*)outfile_->Get(("crrl"+SRVec.at(i).GetName()).c_str());
-    if (dir == 0) {
-      dir = outfile_->mkdir(("crrl"+SRVec.at(i).GetName()).c_str());
-    } 
-    dir->cd();
-    for(unsigned int j = 0; j < vars.size(); j++){
-      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).crrlHistMap, "", 1, 0, 2);
-      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).crrlHistMap, "", 1, 0, 2);
-    }
-    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).crrlHistMap, "", 1, 0, 2);
-
-    outfile_->cd();
-  }
-
-  //monojet regions: store histograms with cut values for all variables
-  for(unsigned int i = 0; i < SRVecMonojet.size(); i++){
-    std::vector<std::string> vars = SRVecMonojet.at(i).GetListOfVariables();
-    TDirectory * dir = (TDirectory*)outfile_->Get(("sr"+SRVecMonojet.at(i).GetName()).c_str());
-    if (dir == 0) {
-      dir = outfile_->mkdir(("sr"+SRVecMonojet.at(i).GetName()).c_str());
-    } 
-    dir->cd();
-    for(unsigned int j = 0; j < vars.size(); j++){
-      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVecMonojet.at(i).GetLowerBound(vars.at(j)), SRVecMonojet.at(i).srHistMap, "", 1, 0, 2);
-      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVecMonojet.at(i).GetUpperBound(vars.at(j)), SRVecMonojet.at(i).srHistMap, "", 1, 0, 2);
-    }
-    plot1D("h_n_mt2bins",  1, SRVecMonojet.at(i).GetNumberOfMT2Bins(), SRVecMonojet.at(i).srHistMap, "", 1, 0, 2);
-
-    dir = (TDirectory*)outfile_->Get(("crsl"+SRVecMonojet.at(i).GetName()).c_str());
-    if (dir == 0) {
-      dir = outfile_->mkdir(("crsl"+SRVecMonojet.at(i).GetName()).c_str());
-    } 
-    dir->cd();
-    std::vector<std::string> varsCRSL = SRVecMonojet.at(i).GetListOfVariablesCRSL();
-    for(unsigned int j = 0; j < varsCRSL.size(); j++){
-      plot1D("h_"+varsCRSL.at(j)+"_"+"LOW",  1, SRVecMonojet.at(i).GetLowerBoundCRSL(varsCRSL.at(j)), SRVecMonojet.at(i).crslHistMap, "", 1, 0, 2);
-      plot1D("h_"+varsCRSL.at(j)+"_"+"HI",   1, SRVecMonojet.at(i).GetUpperBoundCRSL(varsCRSL.at(j)), SRVecMonojet.at(i).crslHistMap, "", 1, 0, 2);
-    }
-    plot1D("h_n_mt2bins",  1, SRVecMonojet.at(i).GetNumberOfMT2Bins(), SRVecMonojet.at(i).crslHistMap, "", 1, 0, 2);
-
-    dir = (TDirectory*)outfile_->Get(("crgj"+SRVecMonojet.at(i).GetName()).c_str());
-    if (dir == 0) {
-      dir = outfile_->mkdir(("crgj"+SRVecMonojet.at(i).GetName()).c_str());
-    } 
-    dir->cd();
-    for(unsigned int j = 0; j < vars.size(); j++){
-      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVecMonojet.at(i).GetLowerBound(vars.at(j)), SRVecMonojet.at(i).crgjHistMap, "", 1, 0, 2);
-      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVecMonojet.at(i).GetUpperBound(vars.at(j)), SRVecMonojet.at(i).crgjHistMap, "", 1, 0, 2);
-    }
-    plot1D("h_n_mt2bins",  1, SRVecMonojet.at(i).GetNumberOfMT2Bins(), SRVecMonojet.at(i).crgjHistMap, "", 1, 0, 2);
-    outfile_->cd();
-  }
-
-  //store histograms with cut values for all variables
-  for(unsigned int i = 0; i < SRVecLep.size(); i++){
-    std::vector<std::string> vars = SRVecLep.at(i).GetListOfVariables();
-    TDirectory * dir = (TDirectory*)outfile_->Get(("srLep"+SRVecLep.at(i).GetName()).c_str());
-    if (dir == 0) {
-      dir = outfile_->mkdir(("srLep"+SRVecLep.at(i).GetName()).c_str());
-    } 
-    dir->cd();
-    for(unsigned int j = 0; j < vars.size(); j++){
-      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVecLep.at(i).GetLowerBound(vars.at(j)), SRVecLep.at(i).srHistMap, "", 1, 0, 2);
-      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVecLep.at(i).GetUpperBound(vars.at(j)), SRVecLep.at(i).srHistMap, "", 1, 0, 2);
-    }
-    plot1D("h_n_mt2bins",  1, SRVecLep.at(i).GetNumberOfMT2Bins(), SRVecLep.at(i).srHistMap, "", 1, 0, 2);
-
-    outfile_->cd();
-  }
+  storeHistWithCutValues(SRVecLep, "srLep");
 
   SRBase.SetName("srbase");
   SRBase.SetVar("mt2", 200, -1);
@@ -256,44 +161,6 @@ void MT2Looper::SetSignalRegions(){
   float SRBase_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500}; 
   SRBase.SetMT2Bins(7, SRBase_mt2bins);
 
-  std::vector<std::string> vars = SRBase.GetListOfVariables();
-  TDirectory * dir = (TDirectory*)outfile_->Get((SRBase.GetName()).c_str());
-  if (dir == 0) {
-    dir = outfile_->mkdir((SRBase.GetName()).c_str());
-  } 
-  dir->cd();
-  for(unsigned int j = 0; j < vars.size(); j++){
-    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBase.GetLowerBound(vars.at(j)), SRBase.srHistMap, "", 1, 0, 2);
-    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBase.GetUpperBound(vars.at(j)), SRBase.srHistMap, "", 1, 0, 2);
-  }
-  plot1D("h_n_mt2bins",  1, SRBase.GetNumberOfMT2Bins(), SRBase.srHistMap, "", 1, 0, 2);
-  outfile_->cd();
-
-  std::vector<std::string> varsCRSL = SRBase.GetListOfVariablesCRSL();
-  TDirectory * dirCRSL = (TDirectory*)outfile_->Get("crslbase");
-  if (dirCRSL == 0) {
-    dirCRSL = outfile_->mkdir("crslbase");
-  } 
-  dirCRSL->cd();
-  for(unsigned int j = 0; j < varsCRSL.size(); j++){
-    plot1D("h_"+varsCRSL.at(j)+"_"+"LOW",  1, SRBase.GetLowerBoundCRSL(varsCRSL.at(j)), SRBase.crslHistMap, "", 1, 0, 2);
-    plot1D("h_"+varsCRSL.at(j)+"_"+"HI",   1, SRBase.GetUpperBoundCRSL(varsCRSL.at(j)), SRBase.crslHistMap, "", 1, 0, 2);
-  }
-  plot1D("h_n_mt2bins",  1, SRBase.GetNumberOfMT2Bins(), SRBase.crslHistMap, "", 1, 0, 2);
-  outfile_->cd();
-
-  std::vector<std::string> varsCRRL = SRBase.GetListOfVariables();
-  TDirectory * dirCRRL = (TDirectory*)outfile_->Get("crrlbase");
-  if (dirCRRL == 0) {
-    dirCRRL = outfile_->mkdir("crrlbase");
-  } 
-  dirCRRL->cd();
-  for(unsigned int j = 0; j < varsCRRL.size(); j++){
-    plot1D("h_"+varsCRRL.at(j)+"_"+"LOW",  1, SRBase.GetLowerBound(varsCRRL.at(j)), SRBase.crrlHistMap, "", 1, 0, 2);
-    plot1D("h_"+varsCRRL.at(j)+"_"+"HI",   1, SRBase.GetUpperBound(varsCRRL.at(j)), SRBase.crrlHistMap, "", 1, 0, 2);
-  }
-  plot1D("h_n_mt2bins",  1, SRBase.GetNumberOfMT2Bins(), SRBase.crrlHistMap, "", 1, 0, 2);
-  outfile_->cd();
 
   //setup inclusive regions
   SR InclusiveHT200to450 = SRBase;
@@ -397,112 +264,49 @@ void MT2Looper::SetSignalRegions(){
   float SRBaseMonojet_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500};
   SRBaseMonojet.SetMT2Bins(7, SRBaseMonojet_mt2bins);
 
-  vars = SRBaseMonojet.GetListOfVariables();
-  dir = (TDirectory*)outfile_->Get((SRBaseMonojet.GetName()).c_str());
-  if (dir == 0) {
-    dir = outfile_->mkdir((SRBaseMonojet.GetName()).c_str());
-  } 
-  dir->cd();
-  for(unsigned int j = 0; j < vars.size(); j++){
-    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet.GetLowerBound(vars.at(j)), SRBaseMonojet.srHistMap, "", 1, 0, 2);
-    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet.GetUpperBound(vars.at(j)), SRBaseMonojet.srHistMap, "", 1, 0, 2);
-  }
-  plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.srHistMap, "", 1, 0, 2);
-  outfile_->cd();
-
-  varsCRSL = SRBaseMonojet.GetListOfVariablesCRSL();
-  dirCRSL = (TDirectory*)outfile_->Get("crslbaseJ");
-  if (dirCRSL == 0) {
-    dirCRSL = outfile_->mkdir("crslbaseJ");
-  } 
-  dirCRSL->cd();
-  for(unsigned int j = 0; j < varsCRSL.size(); j++){
-    plot1D("h_"+varsCRSL.at(j)+"_"+"LOW",  1, SRBaseMonojet.GetLowerBoundCRSL(varsCRSL.at(j)), SRBaseMonojet.crslHistMap, "", 1, 0, 2);
-    plot1D("h_"+varsCRSL.at(j)+"_"+"HI",   1, SRBaseMonojet.GetUpperBoundCRSL(varsCRSL.at(j)), SRBaseMonojet.crslHistMap, "", 1, 0, 2);
-  }
-  plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.crslHistMap, "", 1, 0, 2);
-  outfile_->cd();
-
-  dir = (TDirectory*)outfile_->Get("crgjbaseJ");
-  if (dir == 0) {
-    dir = outfile_->mkdir("crgjbaseJ");
-  } 
-  dir->cd();
-  for(unsigned int j = 0; j < vars.size(); j++){
-    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet.GetLowerBound(vars.at(j)), SRBaseMonojet.crgjHistMap, "", 1, 0, 2);
-    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet.GetUpperBound(vars.at(j)), SRBaseMonojet.crgjHistMap, "", 1, 0, 2);
-  }
-  plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.crgjHistMap, "", 1, 0, 2);
-  outfile_->cd();
-
-  dir = (TDirectory*)outfile_->Get("crdybaseJ");
-  if (dir == 0) {
-    dir = outfile_->mkdir("crdybaseJ");
-  } 
-  dir->cd();
-  for(unsigned int j = 0; j < vars.size(); j++){
-    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet.GetLowerBound(vars.at(j)), SRBaseMonojet.crdyHistMap, "", 1, 0, 2);
-    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet.GetUpperBound(vars.at(j)), SRBaseMonojet.crdyHistMap, "", 1, 0, 2);
-  }
-  plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.crdyHistMap, "", 1, 0, 2);
-  outfile_->cd();
-
-  dir = (TDirectory*)outfile_->Get("crrlbaseJ");
-  if (dir == 0) {
-    dir = outfile_->mkdir("crrlbaseJ");
-  } 
-  dir->cd();
-  for(unsigned int j = 0; j < vars.size(); j++){
-    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet.GetLowerBound(vars.at(j)), SRBaseMonojet.crrlHistMap, "", 1, 0, 2);
-    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet.GetUpperBound(vars.at(j)), SRBaseMonojet.crrlHistMap, "", 1, 0, 2);
-  }
-  plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.crrlHistMap, "", 1, 0, 2);
-  outfile_->cd();
-
   SRBaseIncl.SetName("srbaseIncl");
   float SRBaseIncl_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500};
   SRBaseIncl.SetMT2Bins(7, SRBaseIncl_mt2bins);
+}
 
-  dir = (TDirectory*)outfile_->Get((SRBaseIncl.GetName()).c_str());
-  if (dir == 0) {
-    dir = outfile_->mkdir((SRBaseIncl.GetName()).c_str());
-  } 
-  dir->cd();
-  plot1D("h_n_mt2bins",  1, SRBaseIncl.GetNumberOfMT2Bins(), SRBaseIncl.srHistMap, "", 1, 0, 2);
+
+void MT2Looper::storeHistWithCutValues(std::vector<SR> & srvector, TString SR) {
+  
+  for(unsigned int i = 0; i < srvector.size(); i++){
+    std::vector<std::string> vars = srvector.at(i).GetListOfVariables();
+    if (SR=="crsl") vars = srvector.at(i).GetListOfVariablesCRSL();
+    TString dirname = SR+srvector.at(i).GetName();
+    TDirectory * dir = (TDirectory*)outfile_->Get(dirname);
+    if (dir == 0) {
+      dir = outfile_->mkdir(dirname);
+    } 
+    dir->cd();
+    for(unsigned int j = 0; j < vars.size(); j++){
+      if (SR=="crsl") {
+	plot1D("h_"+vars.at(j)+"_"+"LOW",  1, srvector.at(i).GetLowerBoundCRSL(vars.at(j)), srvector.at(i).crslHistMap, "", 1, 0, 2);
+	plot1D("h_"+vars.at(j)+"_"+"HI",   1, srvector.at(i).GetUpperBoundCRSL(vars.at(j)), srvector.at(i).crslHistMap, "", 1, 0, 2);
+      }
+      else if (SR=="crgj") {
+	plot1D("h_"+vars.at(j)+"_"+"LOW",  1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).crgjHistMap, "", 1, 0, 2);
+	plot1D("h_"+vars.at(j)+"_"+"HI",   1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).crgjHistMap, "", 1, 0, 2);
+      }
+      else if (SR=="crrl") {
+	plot1D("h_"+vars.at(j)+"_"+"LOW",  1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).crrlHistMap, "", 1, 0, 2);
+	plot1D("h_"+vars.at(j)+"_"+"HI",   1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).crrlHistMap, "", 1, 0, 2);
+      }
+      else {
+	plot1D("h_"+vars.at(j)+"_"+"LOW",  1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).srHistMap, "", 1, 0, 2);
+	plot1D("h_"+vars.at(j)+"_"+"HI",   1, srvector.at(i).GetUpperBound(vars.at(j)), srvector.at(i).srHistMap, "", 1, 0, 2);
+      }
+    }
+    if (SR=="crsl")       plot1D("h_n_mt2bins",  1, srvector.at(i).GetNumberOfMT2Bins(), srvector.at(i).crslHistMap, "", 1, 0, 2);
+    else if (SR=="crgj")  plot1D("h_n_mt2bins",  1, srvector.at(i).GetNumberOfMT2Bins(), srvector.at(i).crgjHistMap, "", 1, 0, 2);
+    else if (SR=="crrl")  plot1D("h_n_mt2bins",  1, srvector.at(i).GetNumberOfMT2Bins(), srvector.at(i).crrlHistMap, "", 1, 0, 2);
+    else                  plot1D("h_n_mt2bins",  1, srvector.at(i).GetNumberOfMT2Bins(), srvector.at(i).srHistMap, "", 1, 0, 2);
+    
+  }
   outfile_->cd();
-
-  dirCRSL = (TDirectory*)outfile_->Get("crslbaseIncl");
-  if (dirCRSL == 0) {
-    dirCRSL = outfile_->mkdir("crslbaseIncl");
-  } 
-  dirCRSL->cd();
-  plot1D("h_n_mt2bins",  1, SRBaseIncl.GetNumberOfMT2Bins(), SRBaseIncl.crslHistMap, "", 1, 0, 2);
-  outfile_->cd();
-
-  dir = (TDirectory*)outfile_->Get("crgjbaseIncl");
-  if (dir == 0) {
-    dir = outfile_->mkdir("crgjbaseIncl");
-  } 
-  dir->cd();
-  plot1D("h_n_mt2bins",  1, SRBaseIncl.GetNumberOfMT2Bins(), SRBaseIncl.crgjHistMap, "", 1, 0, 2);
-  outfile_->cd();
-
-  dir = (TDirectory*)outfile_->Get("crdybaseIncl");
-  if (dir == 0) {
-    dir = outfile_->mkdir("crdybaseIncl");
-  } 
-  dir->cd();
-  plot1D("h_n_mt2bins",  1, SRBaseIncl.GetNumberOfMT2Bins(), SRBaseIncl.crdyHistMap, "", 1, 0, 2);
-  outfile_->cd();
-
-  dir = (TDirectory*)outfile_->Get("crrlbaseIncl");
-  if (dir == 0) {
-    dir = outfile_->mkdir("crrlbaseIncl");
-  } 
-  dir->cd();
-  plot1D("h_n_mt2bins",  1, SRBaseIncl.GetNumberOfMT2Bins(), SRBaseIncl.crrlHistMap, "", 1, 0, 2);
-  outfile_->cd();
-
+  
 }
 
 
@@ -2319,65 +2123,6 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_J0pt"+s,       t.jet1_pt,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
     plot1D("h_J1pt"+s,       t.jet2_pt,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
   }
-
-  TString directoryname(dirname);
-  if (directoryname.Contains("nocut") && !t.isData && !doMinimalPlots) {
-    
-    float genHT = 0;
-    int lep1idx = -1;
-    int lep1id = -1;
-    int lep2idx = -1;
-    int Zidx = -1;
-    int Gidx = -1;
-    float minDR = 999;
-    for ( int i = 0; i < t.ngenStat23; i++) {
-      int ID = fabs(t.genStat23_pdgId[i]);
-      if (ID==22) Gidx = i;
-      if (ID==23 || ID==24) Zidx = i;
-    }
-
-    for ( int i = 0; i < t.ngenStat23; i++) {
-      int ID = fabs(t.genStat23_pdgId[i]);
-      if (ID<6 ||ID==21) {
-	genHT += t.genStat23_pt[i];
-	if (Gidx!=-1) {
-	  float thisDR = DeltaR(t.genStat23_eta[Gidx],t.genStat23_eta[i],t.genStat23_phi[Gidx],t.genStat23_phi[i]);
-	  if ( thisDR < minDR ) minDR = thisDR;
-	}
-      }
-      if ( (ID==11 || ID==13) &&  t.genStat23_pt[i]>20 && fabs(t.genStat23_eta[i])<2.5 ) { 
-	if (lep1idx==-1) {
-	  lep1idx = i;
-	  lep1id = ID;
-	}
-	else if ( ID == lep1id ) lep2idx = i;
-      }
-    }
-    
-    TLorentzVector V(0,0,0,0);
-    if (lep2idx!=-1) {
-	TLorentzVector lep1(0,0,0,0);
-	lep1.SetPtEtaPhiM(t.genStat23_pt[lep1idx], t.genStat23_eta[lep1idx], t.genStat23_phi[lep1idx], t.genStat23_mass[lep1idx]);
-	TLorentzVector lep2(0,0,0,0);
-	lep2.SetPtEtaPhiM(t.genStat23_pt[lep2idx], t.genStat23_eta[lep2idx], t.genStat23_phi[lep2idx], t.genStat23_mass[lep2idx]);
-	V = lep1 + lep2;
-    }
-    if (minDR < 0.4) Gidx = -1; // don't use low-DR photons
-    if ((Gidx != -1 || Zidx != -1) && lep2idx==-1) {
-      if (Zidx == -1) Zidx = Gidx;
-      V.SetPtEtaPhiM(t.genStat23_pt[Zidx], t.genStat23_eta[Zidx], t.genStat23_phi[Zidx], t.genStat23_mass[Zidx]);
-    }
-    if (Zidx != -1 || Gidx != -1 || lep2idx!=-1) {
-      float Vrapidity = V.Rapidity();
-      plot1D("h_VpT"+s,       V.Pt(),   evtweight_, h_1d, "; p_{T}^{V} [GeV]", n_ptVbins, ptVbins);
-      if (fabs(Vrapidity) < 1.4 ) plot1D("h_VpTcentral"+s,      V.Pt(),   evtweight_, h_1d, "; p_{T}^{V} [GeV]", n_ptVbins, ptVbins);
-      if (genHT>200) plot1D("h_VpT_genHT200"+s,      V.Pt(),   evtweight_, h_1d, "; p_{T}^{V} [GeV]", n_ptVbins, ptVbins);
-      if (fabs(Vrapidity) < 1.4 && genHT>200) plot1D("h_VpTcentral_genHT200"+s,       V.Pt(),   evtweight_, h_1d, "; p_{T}^{V} [GeV]", n_ptVbins, ptVbins);
-      if (t.ht>200) plot1D("h_VpT_HT200"+s,      V.Pt(),   evtweight_, h_1d, "; p_{T}^{V} [GeV]", 300, 0, 1500);
-
-    }
-
-  } // nocut region only
 
   if (isSignal_) {
     plot3D("h_mt2bins_sigscan"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);

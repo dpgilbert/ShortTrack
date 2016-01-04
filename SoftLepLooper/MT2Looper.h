@@ -41,6 +41,7 @@ class MT2Looper {
   ~MT2Looper();
 
   void SetSignalRegions();
+  void storeHistWithCutValues(std::vector<SR> & srvector, TString SR);
   void loop(TChain* chain, std::string sample, std::string output_dir);
   void fillHistosSRBase();
   void fillHistosInclusive();
