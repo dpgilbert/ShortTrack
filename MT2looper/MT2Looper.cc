@@ -81,9 +81,9 @@ bool applyLeptonSF = true;
 // turn on to apply reweighting to ttbar based on top pt
 bool applyTopPtReweight = true;
 // turn on to apply lepton sf to central value for 0L sample in fastsim
-bool applyLeptonSFfastsim = false;
+bool applyLeptonSFfastsim = true;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
-bool doSystVariationPlots = false;
+bool doSystVariationPlots = true;
 // turn on to apply Nvtx reweighting to MC
 bool doNvtxReweight = false;
 // turn on to apply json file to data
@@ -97,7 +97,7 @@ bool doBlindData = false;
 // make variation histograms for tau efficiency
 bool doGenTauVars = false;
 // make variation histograms for e+mu efficiency
-bool doLepEffVars = false;
+bool doLepEffVars = true;
 // make only minimal hists needed for results
 bool doMinimalPlots = false;
 
@@ -695,7 +695,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //      const float lumi = 0.209;
       //      const float lumi = 0.579;
       //      const float lumi = 1.264;
-      const float lumi = 2.11;
+      //      const float lumi = 2.11;
+      const float lumi = 2.155;
 
       evtweight_ = 1.;
 
@@ -765,7 +766,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	for (int ijet = 0; ijet < t.njet; ++ijet) {
 	  if (fabs(t.jet_eta[ijet]) > 2.5) continue;
 	  if (t.jet_pt[ijet] < 200.) continue;
-	  if (t.jet_id[ijet] >= 4) passMonojetId_ = true;
+	  if (isSignal_ || (t.jet_id[ijet] >= 4)) passMonojetId_ = true;
 	  break;
 	}
       }
