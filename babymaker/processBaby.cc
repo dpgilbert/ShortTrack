@@ -210,6 +210,7 @@ int main(int argc, char **argv) {
   else if (infile.Contains("Run2015D")) bx = 25; 
   else if (infile.Contains("50ns")) bx = 50;
   else if (infile.Contains("25ns")) bx = 25;
+  else if (infile.Contains("FSPremix")) bx = 25;
 
   bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns"));
   
