@@ -39,7 +39,7 @@ void makeDataRatio( TFile* fData , TFile* fPurity , TFile* fTop, string output_n
   inclPlots.push_back("h_nbjbins");
   inclPlots.push_back("h_htbins");
   inclPlots.push_back("h_htbins2");
-  //inclPlots.push_back("h_mt2bins");
+  inclPlots.push_back("h_mt2bins");
 
   for ( unsigned int incl = 0; incl < inclPlots.size(); ++incl ) {
     

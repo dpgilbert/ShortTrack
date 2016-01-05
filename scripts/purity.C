@@ -741,6 +741,7 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   additionalRegions.push_back("baseM");
   additionalRegions.push_back("baseH");
   additionalRegions.push_back("baseUH");
+  additionalRegions.push_back("baseIncl");
   for(int i = 0; i< (int) additionalRegions.size(); i++){
    srName = additionalRegions.at(i);
     makePred(f_out, f_gq, f_q, f_g, srName, h_FR, 0, ""); //FR using passSieie, LooseNotTight Fakes + 0 qcdPrompt
@@ -775,6 +776,7 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   additionalRegions.push_back("baseM");
   additionalRegions.push_back("baseH");
   additionalRegions.push_back("baseUH");
+  additionalRegions.push_back("baseIncl");
   for(int i = 0; i< (int) additionalRegions.size(); i++){
     srName = additionalRegions.at(i);
     purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, srName, "");
