@@ -126,10 +126,12 @@ int sampleID (const string& name) {
     if (name.find("SMS-T1tttt") != string::npos) return 1001;
     else if (name.find("SMS-T1qqqq") != string::npos) return 1010;
     else if (name.find("SMS-T1bbbb") != string::npos) return 1020;
+    else if (name.find("SMS-T1ttbb") != string::npos) return 1030;
 
     else if (name.find("SMS-T2tt") != string::npos) return 1101;
     else if (name.find("SMS-T2qq") != string::npos) return 1110;
     else if (name.find("SMS-T2bb") != string::npos) return 1120;
+    else if (name.find("SMS-T2cc") != string::npos) return 1130;
   }
 
   cout << "sampleID: WARNING: sample not recognized!  " << name << endl;
