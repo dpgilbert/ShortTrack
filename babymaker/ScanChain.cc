@@ -402,8 +402,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	else t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3); // never apply variations to data
 	met_pt  = t1met.first;
 	met_phi = t1met.second;
-	met_rawPt  = cms3.evt_METToolbox_pfmet_raw();
-	met_rawPhi = cms3.evt_METToolbox_pfmetPhi_raw();
+	// hack for fastsim v1
+	if (isFastsim) { 
+	  met_rawPt  = cms3.evt_pfmet_raw();
+	  met_rawPhi = cms3.evt_pfmetPhi_raw();
+	}
+	else {
+	  met_rawPt  = cms3.evt_METToolbox_pfmet_raw();
+	  met_rawPhi = cms3.evt_METToolbox_pfmetPhi_raw();
+	}
       } else {
 	met_pt  = cms3.evt_pfmet();
 	met_phi = cms3.evt_pfmetPhi();
