@@ -275,7 +275,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   // Photon yield (includes GJetPrompt+QCDPrompt+QCDFake, or Data)
   TH1D* h_zinv_cryield = (TH1D*) f_purity->Get(fullhistname);
-  if (h_zinv_cryield != 0 && h_zinv_cryield->GetBinContent(mt2bin) != 0) {
+  if (h_zinv_cryield != 0) {
     n_zinv_cr = round(h_zinv_cryield->GetBinContent(mt2bin));
     if (integratedZinvEstimate)  n_zinv_cr = round(h_zinv_cryield->Integral(0,-1));
   }
@@ -595,13 +595,13 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
 
   // ---- QCD systs
-  ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_qcd_crstat.Data(),n_qcd_cr,qcd_crstat)  << endl;
+  ofile <<  Form("%s        gmN %.0f    -    -    -   %.5f",name_qcd_crstat.Data(),n_qcd_cr,qcd_crstat)  << endl;
   if (njets_LOW == 1) {
-    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_qcd_alphaerr.Data(),qcd_alphaerr)  << endl;
+    ofile <<  Form("%s        lnN    -    -    -   %.3f",name_qcd_alphaerr.Data(),qcd_alphaerr)  << endl;
   } else {
-    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_qcd_fjrbsyst.Data(),qcd_fjrbsyst)  << endl;
-    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_qcd_fitstat.Data(),qcd_fitstat)  << endl;
-    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_qcd_fitsyst.Data(),qcd_fitsyst)  << endl;
+    ofile <<  Form("%s        lnN    -    -    -   %.3f",name_qcd_fjrbsyst.Data(),qcd_fjrbsyst)  << endl;
+    ofile <<  Form("%s        lnN    -    -    -   %.3f",name_qcd_fitstat.Data(),qcd_fitstat)  << endl;
+    ofile <<  Form("%s        lnN    -    -    -   %.3f",name_qcd_fitsyst.Data(),qcd_fitsyst)  << endl;
   }
 
   ofile.close();
@@ -633,7 +633,7 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
 
   f_sig = new TFile(Form("%s/%s.root",input_dir.c_str(),signal.c_str()));
 
-  if (doData) f_data = new TFile(Form("%s/data_Run2015D.root",input_dir.c_str()));
+  if (doData) f_data = new TFile(Form("%s/data_Run2015CD.root",input_dir.c_str()));
 
   if( f_lostlep->IsZombie() || f_zinv->IsZombie() || f_purity->IsZombie() || f_qcd->IsZombie() || f_sig->IsZombie() || f_zgratio ->IsZombie() || (doData && f_data->IsZombie()) ) {
   // Trick to look at estimates even if QCD prediction is broken
