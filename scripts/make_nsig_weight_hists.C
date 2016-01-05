@@ -11,8 +11,8 @@ void make_nsig_weight_hists(TString dir, TString sample) {
 
   TFile* fout = new TFile(Form("nsig_weights_%s.root",sample.Data()),"RECREATE");
   
-  // assuming here: 25 GeV binning, m1 from 400-2000, m2 from 0-1600
-  TH2D* h_nsig = new TH2D("h_nsig",";mass1 [GeV];mass2 [GeV]", 65, 387.5, 2012.5, 65, -12.5, 1612.5);
+  // assuming here: 25 GeV binning, m1 from 0-2000, m2 from 0-1600
+  TH2D* h_nsig = new TH2D("h_nsig",";mass1 [GeV];mass2 [GeV]", 81, -12.5, 2012.5, 65, -12.5, 1612.5);
   TH2D* h_avg_weight_btagsf = (TH2D*) h_nsig->Clone("h_avg_weight_btagsf");
   TH2D* h_avg_weight_btagsf_heavy_UP = (TH2D*) h_nsig->Clone("h_avg_weight_btagsf_heavy_UP");
   TH2D* h_avg_weight_btagsf_light_UP = (TH2D*) h_nsig->Clone("h_avg_weight_btagsf_light_UP");
