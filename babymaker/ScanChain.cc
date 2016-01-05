@@ -252,7 +252,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     // determine which susy particle is being produced
     TString sparticle = "";
     if (baby_name.find("T1") != std::string::npos) sparticle = "gluino";
-    else if ((baby_name.find("T2tt") != std::string::npos) || (baby_name.find("T2bb") != std::string::npos)) sparticle = "stop";
+    else if ((baby_name.find("T2tt") != std::string::npos) || (baby_name.find("T2bb") != std::string::npos) || (baby_name.find("T2cc") != std::string::npos)) sparticle = "stop";
     else if (baby_name.find("T2qq") != std::string::npos) sparticle = "squark";
     if (sparticle == "") std::cout << "WARNING: didn't recognize signal sample from name: " << baby_name << std::endl;
     
@@ -572,6 +572,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               ++nHardScatter;
             }
             if (nHardScatter > 2) std::cout << "WARNING: found too many sbottoms in T2bb MC!" << std::endl;
+          }
+          else if (evt_id >= 1130 && evt_id < 1140) {
+            // SMS T2cc - stops (decaying to charm + LSP)
+            if (isLastCopy == 1 && pdgId == 1000006) {
+              recoil += cms3.genps_p4().at(iGen);
+              ++nHardScatter;
+            }
+            if (nHardScatter > 2) std::cout << "WARNING: found too many stops in T2cc MC!" << std::endl;
           }
 
           int motherId = abs(cms3.genps_id_simplemother().at(iGen));
