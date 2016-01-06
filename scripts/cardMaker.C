@@ -386,7 +386,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   if (n_lostlep_cr > 0.) {
     lostlep_crstat = n_lostlep / n_lostlep_cr > 0 ? n_lostlep / n_lostlep_cr : last_lostlep_transfer;
-    if (lostlep_crstat > 2.) lostlep_crstat = 2.; // hard bound to avoid statistical fluctuations
+    if (lostlep_crstat > 3.) lostlep_crstat = 3.; // hard bound to avoid statistical fluctuations
     if (lostlep_crstat > 0.) last_lostlep_transfer = lostlep_crstat;
   }
   else {
