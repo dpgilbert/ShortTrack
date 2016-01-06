@@ -1,21 +1,26 @@
 #!/bin/bash
 
-INDIR=/home/users/olivito/mt2_74x_dev/MT2Analysis/MT2looper/output/V00-01-07_25ns_miniaodv2_skim_base_1p26fb_mt2gt200_crqcd/
+INDIR=/home/users/jgran/limits_for_paper/MT2Analysis/MT2looper/output/V00-01-09_25ns_skim_base_mt2gt200_ZinvV3_2p2fb/
+#INDIR=/home/users/olivito/mt2_74x_dev/MT2Analysis/MT2looper/output/V00-01-07_25ns_miniaodv2_skim_base_1p26fb_mt2gt200_crqcd/
 #INDIR=/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-01-07_25ns_miniaodv2_Summer15_25nsV6_2p1fb_skim_base_mt2gt200_ZinvV3/
 THISDIR=`pwd`
 
 ## to use data for lostlepton
-LOSTLEPFILE=data_Run2015D
+LOSTLEPFILE=data_Run2015CD
+#LOSTLEPFILE=data_Run2015D
 ## to use MC for lostlepton
 #LOSTLEPFILE=lostlep
 
-GJETFILE=data_Run2015D
+GJETFILE=data_Run2015CD
+#GJETFILE=data_Run2015D
 #GJETFILE=qcdplusgjet
 
-RLFILE=data_Run2015D
+RLFILE=data_Run2015CD
+#RLFILE=data_Run2015D
 #RLFILE=removedlep
 
-QCDFILE=data_Run2015D
+QCDFILE=data_Run2015CD
+#QCDFILE=data_Run2015D
 #QCDFILE=qcd_ht
 
 if [ ! -d "$INDIR" ]; then
