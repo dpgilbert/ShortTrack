@@ -534,7 +534,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   ofile <<  "imax 1  number of channels"                                                    << endl;
   ofile <<  "jmax 3  number of backgrounds"                                                 << endl;
-  ofile <<  Form("kmax %d  number of nuisance parameters",n_syst)                           << endl;
+  ofile <<  "kmax *"                                                                        << endl;
   ofile <<  "------------"                                                                  << endl;
   ofile <<  Form("bin         %s",channel.c_str())                                          << endl;
   ofile <<  Form("observation %.0f",n_data)                                                 << endl;
