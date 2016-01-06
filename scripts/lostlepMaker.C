@@ -79,6 +79,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     //   need to do something fancier if we normalize to different TRs
     double norm = 1.;
     if (h_data_cr && h_lostlepMC_cr) norm = h_data_cr->Integral(0,-1)/h_lostlepMC_cr->Integral(0,-1);
+    else if (!h_data_cr) norm = 0;
     h_lostlepDD_sr->Scale(norm);
 
     // Make directory and plot(s) in the output file
