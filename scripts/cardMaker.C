@@ -93,6 +93,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   double n_lostlep(0.);
   double n_lostlep_cr(0.);
+  double lostlep_alpha(0.);
   double err_lostlep_mcstat(0.);
   double n_zinv(0.);
   double n_zinv_cr(0.);
@@ -251,6 +252,13 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TH1D* h_lostlep_cryield = (TH1D*) f_lostlep->Get(fullhistnameCRyield);
   if (h_lostlep_cryield != 0) 
     n_lostlep_cr = round(h_lostlep_cryield->Integral(0,-1));
+  // note that this alpha value does NOT match our prediction, it's only for bins with 0 CR events
+  //   this alpha is:                 N_MC^SR(MT2) / N_MC^CR(MT2)
+  //   our prediction normally uses:  N_MC^SR(MT2) * N_Data^CR / N_MC^CR
+  //     where the last two values are integrated over MT2
+  TH1D* h_lostlep_alpha = (TH1D*) f_lostlep->Get(fullhistnameAlpha);
+  if (h_lostlep_alpha != 0) 
+    lostlep_alpha = h_lostlep_alpha->GetBinContent(mt2bin);
 
   
   TH1D* h_zinv = (TH1D*) f_zinv->Get(fullhistname);
@@ -370,7 +378,6 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   int n_syst = 0;
   // ----- lost lepton bkg uncertainties
   double lostlep_shape = 1.0;
-  double lostlep_crstat = 1; // transfer factor
   double lostlep_mcstat = 1. + err_lostlep_mcstat; // transfer factor stat uncertainty
   double lostlep_alphaerr = 1. + 0.05; // transfer factor syst uncertainty
   double lostlep_lepeff = 1.15;
@@ -384,14 +391,14 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_lostlep_lepeff = Form("llep_lepeff_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   TString name_lostlep_bTag = Form("llep_bTag_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
 
+  // if nonzero CR stats: compute alpha for this bin based on CR yield and SR pred
+  // note that if n_lostlep_cr == 0, we will just use lostlep_alpha (straight from MC) in the datacard
   if (n_lostlep_cr > 0.) {
-    lostlep_crstat = n_lostlep / n_lostlep_cr > 0 ? n_lostlep / n_lostlep_cr : last_lostlep_transfer;
-    if (lostlep_crstat > 3.) lostlep_crstat = 3.; // hard bound to avoid statistical fluctuations
-    if (lostlep_crstat > 0.) last_lostlep_transfer = lostlep_crstat;
+    lostlep_alpha = n_lostlep / n_lostlep_cr;
+    if (lostlep_alpha > 3.) lostlep_alpha = 3.; // hard bound to avoid statistical fluctuations
   }
-  else {
-    lostlep_crstat = last_lostlep_transfer;
-  }
+  if (lostlep_alpha > 0.) last_lostlep_transfer = lostlep_alpha; // cache last good alpha value
+  else lostlep_alpha = last_lostlep_transfer;   // if alpha is 0: use alpha from previous (MT2) bin
   n_syst += 4; // lostlep_crstat, lostlep_mcstat, lostlep_alphaerr, lostlep_lepeff
 
   if (n_mt2bins > 1) {
@@ -585,7 +592,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   // ---- lostlep systs
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_lepeff.Data(),lostlep_lepeff)  << endl;
-  ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_lostlep_crstat.Data(),n_lostlep_cr,lostlep_crstat)  << endl;
+  ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_lostlep_crstat.Data(),n_lostlep_cr,lostlep_alpha)  << endl;
   if ( njets_LOW == 7 && nbjets_LOW >= 1) 
     ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_bTag.Data(),lostlep_bTag)  << endl;
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mcstat.Data(),lostlep_mcstat)  << endl;
