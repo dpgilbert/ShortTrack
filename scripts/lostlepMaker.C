@@ -16,6 +16,13 @@
 
 using namespace std;
 
+const int n_htbins = 5;
+const float htbins[n_htbins+1] = {200, 450., 575., 1000., 1500., 3000.};
+const int n_njbins = 4;
+const float njbins[n_njbins+1] = {1, 2, 4, 7, 12};
+const int n_nbjbins = 4;
+const float nbjbins[n_nbjbins+1] = {0, 1, 2, 3, 6};
+
 //_______________________________________________________________________________
 void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs, string output_name ) {
 
@@ -31,6 +38,10 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     TString n_mt2bins_name = directory + "/h_n_mt2bins";
     TString crdir = "crsl"+TString(dirs.at(idir));
     TString fullhistnameSL = crdir+"/h_mt2bins";
+    TString fullhistnameSLfinebin = crdir+"/h_mt2";
+    TString fullhistnameSLHT = crdir+"/h_htbins";
+    TString fullhistnameSLNj = crdir+"/h_njbins";
+    TString fullhistnameSLNb = crdir+"/h_nbjbins";
 
     TH1D* h_lostlepMC_sr = (TH1D*) f_lostlep->Get(fullhistname);
     
@@ -43,18 +54,23 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     }
 
     TH1D* h_lostlepDD_sr = 0;
+    TH1D* alphaHist = 0;
     if(h_lostlepMC_sr) {
       h_lostlepDD_sr = (TH1D*) h_lostlepMC_sr->Clone("h_mt2binsSR");
+      alphaHist = (TH1D*) h_lostlepMC_sr->Clone("h_mt2binsAlpha");
     } else {
       cout<<"couldn't find lostlep MC SR hist: "<<fullhistname<<endl;
       // make empty histogram
       h_lostlepDD_sr = new TH1D("h_mt2binsSR", "h_mt2binsSR", n_mt2bins, mt2bins);
+      alphaHist = new TH1D("h_mt2binsAlpha", "h_mt2binsAlpha", n_mt2bins, mt2bins);
     }
 
     TH1D* h_lostlepMC_cr = (TH1D*) f_lostlep->Get(fullhistnameSL);
     // check that histograms exist
     if (!h_lostlepMC_cr) {
       cout << "couldn't find lostlep MC CR hist: " << fullhistnameSL << endl;
+    } else {
+      alphaHist->Divide(h_lostlepMC_cr);
     }
 
     TH1D* h_lostlepDD_cr = 0;
@@ -66,6 +82,92 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
       // make empty histogram
       h_lostlepDD_cr = new TH1D("h_mt2binsCRyield", "h_mt2binsCRyield", n_mt2bins, mt2bins);
     }
+    
+    // ------------------------------------------
+    //  added to compare after normalizing MC
+    
+    TH1D* h_lostlepMC_cr_finebin = (TH1D*) f_lostlep->Get(fullhistnameSLfinebin);
+    TH1D* h_lostlepMC_rescaled_cr_finebin = 0;
+    if(h_lostlepMC_cr_finebin) {
+      h_lostlepMC_rescaled_cr_finebin = (TH1D*) h_lostlepMC_cr_finebin->Clone("h_mt2CRMCrescaled");
+    } else {
+      cout<<"couldn't find lostlep MC CR finebin hist: "<<fullhistnameSLfinebin<<endl;
+      // make empty histogram
+      h_lostlepMC_rescaled_cr_finebin = new TH1D("h_mt2", "h_mt2", 150, 0, 1500);
+    }
+
+    TH1D* h_htbins_lostlepMC_cr = (TH1D*) f_lostlep->Get(fullhistnameSLHT);
+    TH1D* h_htbins_lostlepMC_rescaled_cr = 0;
+    if(h_htbins_lostlepMC_cr) {
+      h_htbins_lostlepMC_rescaled_cr = (TH1D*) h_htbins_lostlepMC_cr->Clone("h_htbinsCRMCrescaled");
+    } else {
+      cout<<"couldn't find lostlep MC CR finebin hist: "<<fullhistnameSLHT<<endl;
+      // make empty histogram
+      h_htbins_lostlepMC_rescaled_cr = new TH1D("h_htbins", "h_htbins", n_htbins, htbins);
+    }
+
+    TH1D* h_njbins_lostlepMC_cr = (TH1D*) f_lostlep->Get(fullhistnameSLNj);
+    TH1D* h_njbins_lostlepMC_rescaled_cr = 0;
+    if(h_njbins_lostlepMC_cr) {
+      h_njbins_lostlepMC_rescaled_cr = (TH1D*) h_njbins_lostlepMC_cr->Clone("h_njbinsCRMCrescaled");
+    } else {
+      cout<<"couldn't find lostlep MC CR finebin hist: "<<fullhistnameSLNj<<endl;
+      // make empty histogram
+      h_njbins_lostlepMC_rescaled_cr = new TH1D("h_njbins", "h_njbins", n_njbins, njbins);
+    }
+
+    TH1D* h_nbjbins_lostlepMC_cr = (TH1D*) f_lostlep->Get(fullhistnameSLNb);
+    TH1D* h_nbjbins_lostlepMC_rescaled_cr = 0;
+    if(h_nbjbins_lostlepMC_cr) {
+      h_nbjbins_lostlepMC_rescaled_cr = (TH1D*) h_nbjbins_lostlepMC_cr->Clone("h_nbjbinsCRMCrescaled");
+    } else {
+      cout<<"couldn't find lostlep MC CR finebin hist: "<<fullhistnameSLNb<<endl;
+      // make empty histogram
+      h_nbjbins_lostlepMC_rescaled_cr = new TH1D("h_nbjbins", "h_nbjbins", n_nbjbins, nbjbins);
+    }
+
+
+    TH1D* h_data_cr_finebin = (TH1D*) f_data->Get(fullhistnameSLfinebin);
+    TH1D* h_data_cr_finebin_save = 0;
+    if (h_data_cr_finebin) {
+      h_data_cr_finebin_save = (TH1D*) h_data_cr_finebin->Clone("h_mt2CRyield");
+    } else {
+      cout << "couldn't find data CR finebin hist: " << fullhistnameSLfinebin << endl;
+      // make empty histogram
+      h_data_cr_finebin_save = new TH1D("h_mt2CRyield", "h_mt2CRyield", 150, 0, 1500);
+    }
+
+    TH1D* h_htbins_data_cr = (TH1D*) f_data->Get(fullhistnameSLHT);
+    TH1D* h_htbins_data_cr_save = 0;
+    if (h_htbins_data_cr) {
+      h_htbins_data_cr_save = (TH1D*) h_htbins_data_cr->Clone("h_htbinsCRyield");
+    } else {
+      cout << "couldn't find data CR finebin hist: " << fullhistnameSLHT << endl;
+      // make empty histogram
+      h_htbins_data_cr_save = new TH1D("h_htbinsCRyield", "h_htbinsCRyield", n_htbins, htbins);
+    }
+    
+    TH1D* h_njbins_data_cr = (TH1D*) f_data->Get(fullhistnameSLNj);
+    TH1D* h_njbins_data_cr_save = 0;
+    if (h_njbins_data_cr) {
+      h_njbins_data_cr_save = (TH1D*) h_njbins_data_cr->Clone("h_njbinsCRyield");
+    } else {
+      cout << "couldn't find data CR finebin hist: " << fullhistnameSLNj << endl;
+      // make empty histogram
+      h_njbins_data_cr_save = new TH1D("h_njbinsCRyield", "h_njbinsCRyield", n_njbins, njbins);
+    }
+    
+    TH1D* h_nbjbins_data_cr = (TH1D*) f_data->Get(fullhistnameSLNb);
+    TH1D* h_nbjbins_data_cr_save = 0;
+    if (h_nbjbins_data_cr) {
+      h_nbjbins_data_cr_save = (TH1D*) h_nbjbins_data_cr->Clone("h_nbjbinsCRyield");
+    } else {
+      cout << "couldn't find data CR finebin hist: " << fullhistnameSLNb << endl;
+      // make empty histogram
+      h_nbjbins_data_cr_save = new TH1D("h_nbjbinsCRyield", "h_nbjbinsCRyield", n_nbjbins, nbjbins);
+    }
+    
+    // ------------------------------------------
 
     // only needed if we have to create an empty histogram for the prediction
     delete mt2bins;
@@ -76,11 +178,14 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     }
     
     // data-driven part: use data to normalize MC SR prediction
-    //   need to do something fancier if we normalize to different TRs
     double norm = 1.;
     if (h_data_cr && h_lostlepMC_cr) norm = h_data_cr->Integral(0,-1)/h_lostlepMC_cr->Integral(0,-1);
     else if (!h_data_cr) norm = 0;
     h_lostlepDD_sr->Scale(norm);
+    h_lostlepMC_rescaled_cr_finebin->Scale(norm);
+    h_htbins_lostlepMC_rescaled_cr->Scale(norm);
+    h_njbins_lostlepMC_rescaled_cr->Scale(norm);
+    h_nbjbins_lostlepMC_rescaled_cr->Scale(norm);
 
     // Make directory and plot(s) in the output file
     TDirectory* dir = 0;
@@ -109,6 +214,16 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     Syst->Write();
     h_lostlepDD_cr->Write();
     MCStat->Write();
+    alphaHist->Write();
+    h_lostlepMC_rescaled_cr_finebin->Write();
+    h_data_cr_finebin_save->Write();
+    
+    h_htbins_lostlepMC_rescaled_cr->Write();
+    h_njbins_lostlepMC_rescaled_cr->Write();
+    h_nbjbins_lostlepMC_rescaled_cr->Write();
+    h_htbins_data_cr_save->Write();
+    h_njbins_data_cr_save->Write();
+    h_nbjbins_data_cr_save->Write();
 
     // also save bin boundary hists for CR
     TH1D* h_ht_LOW = (TH1D*) f_lostlep->Get(crdir+"/h_ht_LOW");
