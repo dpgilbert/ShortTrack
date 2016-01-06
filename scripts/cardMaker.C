@@ -395,7 +395,10 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // note that if n_lostlep_cr == 0, we will just use lostlep_alpha (straight from MC) in the datacard
   if (n_lostlep_cr > 0.) {
     lostlep_alpha = n_lostlep / n_lostlep_cr;
-    if (lostlep_alpha > 3.) lostlep_alpha = 3.; // hard bound to avoid statistical fluctuations
+    if (lostlep_alpha > 3.) {
+      lostlep_alpha = 3.; // hard bound to avoid statistical fluctuations
+      n_lostlep = n_lostlep_cr * lostlep_alpha;
+    }
   }
   if (lostlep_alpha > 0.) last_lostlep_transfer = lostlep_alpha; // cache last good alpha value
   else lostlep_alpha = last_lostlep_transfer;   // if alpha is 0: use alpha from previous (MT2) bin
