@@ -672,7 +672,7 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
       int n_mt2bins = h_n_mt2bins->GetBinContent(1);
       for (int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {//Make a separate card for each MT2 bin.
 	if (isScan) {
-	  for (int im1 = 400; im1 <= 2000; im1 += 25) {
+	  for (int im1 = 0; im1 <= 2000; im1 += 25) {
 	    for (int im2 = 0; im2 <= 1600; im2 += 25) {
 	      int result = printCard(k->GetTitle(), imt2, signal, output_dir, im1, im2);   //MT2 and scan bins with no entries are handled by printCard function.
 	      if (result > 0) signal_points.insert( make_pair(im1,im2) ); 
