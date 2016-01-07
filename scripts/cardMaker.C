@@ -410,7 +410,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
       float increment = 0.;
       for (int ibin=1; ibin<h_lostlep->GetNbinsX(); ibin++) 
 	increment += 0.4 / (n_mt2bins - 1) * (ibin - 1) * h_lostlep->GetBinContent(ibin);
-      lostlep_shape = 1. - increment/n_zinv;
+      lostlep_shape = 1. - increment/n_lostlep;
     }
     else
       lostlep_shape = 1. + 0.4 / (n_mt2bins - 1) * (mt2bin - 1);
