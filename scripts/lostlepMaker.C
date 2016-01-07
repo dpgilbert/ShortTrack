@@ -35,6 +35,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
     TString directory = "sr"+dirs.at(idir);
     TString fullhistname = directory + "/h_mt2bins";
+    TString fullhistnameFinebin = directory + "/h_mt2";
     TString n_mt2bins_name = directory + "/h_n_mt2bins";
     TString crdir = "crsl"+TString(dirs.at(idir));
     TString fullhistnameSL = crdir+"/h_mt2bins";
@@ -65,6 +66,16 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
       alphaHist = new TH1D("h_mt2binsAlpha", "h_mt2binsAlpha", n_mt2bins, mt2bins);
     }
 
+    TH1D* h_lostlepMC_sr_finebin = (TH1D*) f_lostlep->Get(fullhistnameFinebin);
+    TH1D* h_lostlepDD_sr_finebin = 0;
+    if(h_lostlepMC_sr_finebin) {
+      h_lostlepDD_sr_finebin = (TH1D*) h_lostlepMC_sr_finebin->Clone("h_mt2SR");
+    } else {
+      cout<<"couldn't find lostlep MC SR finebin hist: "<<fullhistnameFinebin<<endl;
+      // make empty histogram
+      h_lostlepDD_sr_finebin = new TH1D("h_mt2SR", "h_mt2SR", 150, 0, 1500);
+    }
+    
     TH1D* h_lostlepMC_cr = (TH1D*) f_lostlep->Get(fullhistnameSL);
     // check that histograms exist
     if (!h_lostlepMC_cr) {
@@ -182,6 +193,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     if (h_data_cr && h_lostlepMC_cr) norm = h_data_cr->Integral(0,-1)/h_lostlepMC_cr->Integral(0,-1);
     else if (!h_data_cr) norm = 0;
     h_lostlepDD_sr->Scale(norm);
+    h_lostlepDD_sr_finebin->Scale(norm);
     h_lostlepMC_rescaled_cr_finebin->Scale(norm);
     h_htbins_lostlepMC_rescaled_cr->Scale(norm);
     h_njbins_lostlepMC_rescaled_cr->Scale(norm);
@@ -203,6 +215,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
 
     // don't do anything special for errors for now on pred hist
     TH1D* pred = (TH1D*) h_lostlepDD_sr->Clone("h_mt2bins");
+    TH1D* pred_finebin = (TH1D*) h_lostlepDD_sr_finebin->Clone("h_mt2");
     // for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
     //   Syst->SetBinError(ibin, 0.);
     //   double quadrature = Stat->GetBinError(ibin)*Stat->GetBinError(ibin) + Syst->GetBinError(ibin)*Syst->GetBinError(ibin);
@@ -211,6 +224,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     //pred->Print("all");
 
     pred->Write();
+    pred_finebin->Write();
     Syst->Write();
     h_lostlepDD_cr->Write();
     MCStat->Write();
