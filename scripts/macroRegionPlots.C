@@ -56,19 +56,117 @@ void macroRegionPlots(TString dir = "/Users/giovannizevidellaporta/UCSD/MT2/Zinv
   std::vector<std::vector<TString>> regionsSet;
   std::vector<TString> namesSet;
 
-  std::vector<TString> r1;
+//  std::vector<TString> r0;
+//  r0.push_back("sr1VL");
+//  r0.push_back("sr1L");
+//  r0.push_back("sr1M");
+//  regionsSet.push_back(r0);
+//  namesSet.push_back("srMacroHT1NJ1NB1orig");
+  
+  
+  std::vector<TString> r9; // HT all, NJ [1], NB [0]
+  r9.push_back("sr1J");
+  r9.push_back("sr2J");
+  r9.push_back("sr3J");
+  r9.push_back("sr4J");
+  r9.push_back("sr5J");
+  r9.push_back("sr6J");
+  r9.push_back("sr7J");
+  regionsSet.push_back(r9);
+  namesSet.push_back("srMacroHT0NJ0NB1");
+  
+  std::vector<TString> r10; // HT all, NJ [1], NB [0]
+  r10.push_back("sr11J");
+  r10.push_back("sr12J");
+  r10.push_back("sr13J");
+  r10.push_back("sr14J");
+  r10.push_back("sr15J");
+  regionsSet.push_back(r10);
+  namesSet.push_back("srMacroHT0NJ0NB2");
+  
+  std::vector<TString> r1; // HT [200,1000], NJ [2, 3], NB [0]
   r1.push_back("sr1VL");
   r1.push_back("sr1L");
   r1.push_back("sr1M");
   regionsSet.push_back(r1);
-  namesSet.push_back("srMacro1");
+  namesSet.push_back("srMacroHT1NJ1NB1");
   
-  std::vector<TString> r2;
+  std::vector<TString> r2; // HT [200,1000], NJ [2, 3], NB [1, inf]
   r2.push_back("sr2VL");
   r2.push_back("sr2L");
   r2.push_back("sr2M");
+  r2.push_back("sr3VL");
+  r2.push_back("sr3L");
+  r2.push_back("sr3M");
   regionsSet.push_back(r2);
-  namesSet.push_back("srMacro2");
+  namesSet.push_back("srMacroHT1NJ1NB2");
+  
+  std::vector<TString> r3; // HT [200,1000], NJ [4, inf], NB [0]
+  r3.push_back("sr4VL");
+  r3.push_back("sr4L");
+  r3.push_back("sr4M");
+  r3.push_back("sr7VL");
+  r3.push_back("sr7L");
+  r3.push_back("sr7M");
+  regionsSet.push_back(r3);
+  namesSet.push_back("srMacroHT1NJ2NB1");
+  
+  std::vector<TString> r4; // HT [200,1000], NJ [4, inf], NB [1, inf]
+  r4.push_back("sr5VL");
+  r4.push_back("sr5L");
+  r4.push_back("sr5M");
+  r4.push_back("sr6VL");
+  r4.push_back("sr6L");
+  r4.push_back("sr6M");
+  r4.push_back("sr8VL");
+  r4.push_back("sr8L");
+  r4.push_back("sr8M");
+  r4.push_back("sr9VL");
+  r4.push_back("sr9L");
+  r4.push_back("sr9M");
+  r4.push_back("sr11VL");
+  r4.push_back("sr11L");
+  r4.push_back("sr11M"); // leaving out region 10: 2-6 J, >3 B, since it does not quite belong
+  regionsSet.push_back(r4);
+  namesSet.push_back("srMacroHT1NJ2NB2");
+  
+  std::vector<TString> r5; // HT [1000, inf], NJ [2, 3], NB [0]
+  r5.push_back("sr1H");
+  r5.push_back("sr1UH");
+  regionsSet.push_back(r5);
+  namesSet.push_back("srMacroHT2NJ1NB1");
+  
+  std::vector<TString> r6; // HT [1000, inf], NJ [2, 3], NB [1, inf]
+  r6.push_back("sr2H");
+  r6.push_back("sr2UH");
+  r6.push_back("sr3H");
+  r6.push_back("sr3UH");
+  regionsSet.push_back(r6);
+  namesSet.push_back("srMacroHT2NJ1NB2");
+  
+  std::vector<TString> r7; // HT [1000, inf], NJ [4, inf], NB [0]
+  r7.push_back("sr4H");
+  r7.push_back("sr4UH");
+  r7.push_back("sr7H");
+  r7.push_back("sr7UH");
+  regionsSet.push_back(r7);
+  namesSet.push_back("srMacroHT2NJ2NB1");
+  
+  std::vector<TString> r8; // HT [1000, inf], NJ [4, inf], NB [1, inf]
+  r8.push_back("sr5H");
+  r8.push_back("sr5UH");
+  r8.push_back("sr6H");
+  r8.push_back("sr6UH");
+  r8.push_back("sr8H");
+  r8.push_back("sr8UH");
+  r8.push_back("sr9H");
+  r8.push_back("sr9UH");
+  r8.push_back("sr11H");
+  r8.push_back("sr11UH"); // leaving out region 10: 2-6 J, >3 B, since it does not quite belong
+  regionsSet.push_back(r8);
+  namesSet.push_back("srMacroHT2NJ2NB2");
+  
+
 
   fillFileWithPlots(dir+"/data_Run2015CD.root", dir+"/MacroData.root", regionsSet, namesSet);
   fillFileWithPlots(dir+"/purity.root",         dir+"/MacroZinv.root", regionsSet, namesSet);

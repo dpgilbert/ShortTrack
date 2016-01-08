@@ -34,7 +34,7 @@ const int iPeriod = 4; // 13 tev
 // mode generally : 
 //   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
 const int iPos = 3;
-
+bool found_data = false;
 //______________________________________________________________________________
 // returns the error on C = A*B (or C = A/B)
 float err_mult(float A, float B, float errA, float errB, float C) {
@@ -50,7 +50,7 @@ void addOverflow(TH1* h) {
 }
 
 //_______________________________________________________________________________
-TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names , const string& histdir , const string& histname , const string& xtitle , const string& ytitle , float xmin , float xmax , int rebin = 1 , bool logplot = true, bool printplot = false, float scalesig = -1., bool doRatio = false, bool scaleBGtoData = false ) {
+TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names , const string& histdir , const string& histname , const string& xtitle , const string& ytitle , float xmin , float xmax , int rebin = 1 , bool logplot = true, bool printplot = false, float scalesig = -1., bool doRatio = false, bool scaleBGtoData = false, bool drawBand = false) {
 
   
   cout << "-- plotting histdir: " << histdir << ", histname: " << histname << endl;
@@ -269,6 +269,28 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   h_axes->Draw();
 
   t->Draw("hist same");
+  if (drawBand) {
+    // first add the shape uncertainty: 0-40%, then readjust firts bin to compensate
+    int nbins = h_bgtot->GetNbinsX();
+    float firstBinUnc = 0;
+    float origerrbin1 = h_bgtot->GetBinError( 1 );
+    for (unsigned int k = 1; k <= h_bgtot->GetNbinsX(); k++) {
+      float cont = h_bgtot->GetBinContent(k);
+      float origerr = h_bgtot->GetBinError(k);
+      float percenterr = 0.4 / (nbins-1) * (k-1);
+      if (k>1) {
+        h_bgtot->SetBinError( k, sqrt( percenterr*cont*percenterr*cont + origerr*origerr ) );
+        firstBinUnc += percenterr*cont;
+      }
+    }
+    if (firstBinUnc > h_bgtot->GetBinContent(1)) firstBinUnc = h_bgtot->GetBinContent(1); // max to 100%
+    h_bgtot->SetBinError( 1,  sqrt(firstBinUnc*firstBinUnc + origerrbin1*origerrbin1) );
+    // then draw
+    h_bgtot->SetMarkerSize(0);
+    h_bgtot->SetFillColor (kGray+2);
+    h_bgtot->SetFillStyle (3244);
+    h_bgtot->Draw("E2,same");
+  }
 
   // add signal hists
   for (unsigned int isig = 0; isig < sig_hists.size(); ++isig) {
@@ -355,6 +377,20 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     else region_label_line2 = "";
   }
 
+  // Macro Regions
+  if (histdir.find("Macro") != std::string::npos) {
+    ht_label = "";
+    region_label_line2 = "";
+    if (histdir.find("HT1") != std::string::npos) { ht_label = "H_{T} [200, 1000] GeV"; }
+    if (histdir.find("HT2") != std::string::npos) { ht_label = "H_{T} #geq 1000 GeV"; }
+    if (histdir.find("NJ1NB1") != std::string::npos) { region_label = "2-3 j, 0 b"; }
+    if (histdir.find("NJ1NB2") != std::string::npos) { region_label = "2-3 j, #geq 1 b"; }
+    if (histdir.find("NJ2NB1") != std::string::npos) { region_label = "#geq 4 j, 0 b"; }
+    if (histdir.find("NJ2NB2") != std::string::npos) { region_label = "#geq 4 j, #geq 1 b"; }
+    if (histdir.find("NJ0NB1") != std::string::npos) { region_label = "1 j, 0 b"; }
+    if (histdir.find("NJ0NB2") != std::string::npos) { region_label = "1 j, #geq 1 b"; }
+  }
+  
   if (ht_label.Length() > 0) label.DrawLatex(label_x_start,label_y_start,ht_label);
   if (region_label.Length() > 0) label.DrawLatex(label_x_start,label_y_start - label_y_spacing,region_label);
   if (region_label_line2.Length() > 0) label.DrawLatex(label_x_start,label_y_start - 2 * label_y_spacing,region_label_line2);
@@ -394,7 +430,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     TH1D* h_ratio = (TH1D*) data_hist->Clone(Form("ratio_%s",data_hist->GetName()));
     h_ratio->Sumw2();
     h_bgtot->Sumw2();
-    h_ratio->Divide(h_bgtot);
+
     
     // draw axis only
     TH1F* h_axis_ratio = new TH1F(Form("%s_axes",h_ratio->GetName()),"",100,xmin,xmax);
@@ -415,6 +451,24 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     line1->SetLineStyle(2);
     line1->Draw("same");
 
+    if (!drawBand) h_ratio->Divide(h_bgtot); // let Divide combine the uncertainties
+    else {
+      //make ratio with only Data uncertainty
+      TH1D* h_bgtotNoErr = (TH1D*) h_bgtot->Clone("bgtotNoErr");
+      for (int ibin=0; ibin < h_bgtotNoErr->GetNbinsX(); ++ibin) {
+        h_bgtotNoErr->SetBinError(ibin, 0.);
+      }
+      h_ratio->Divide(h_bgtotNoErr);
+      // then draw the background uncertainty: just divide the histogram by the no-error version of itself
+      TH1D* h_bgtotFlat = (TH1D*) h_bgtot->Clone("bgtotFlat");
+      h_bgtotFlat->Divide(h_bgtotNoErr);
+      h_bgtotFlat->SetMarkerSize(0);
+      h_bgtotFlat->SetFillColor (kGray+2);
+      h_bgtotFlat->SetFillStyle (3244);
+      h_bgtotFlat->Draw("E2,same");
+    }
+    
+    
     TGraphErrors* g_ratio = new TGraphErrors(h_ratio);
     g_ratio->SetName(Form("%s_graph",h_ratio->GetName()));
     for (int ibin=0; ibin < h_ratio->GetNbinsX(); ++ibin) {
@@ -1390,6 +1444,69 @@ void plotMakerCRSL(){
     }
   }
 }
+
+//_______________________________________________________________________________
+void plotMakerMacroRegions(){
+  
+  //  gROOT->LoadMacro("CMS_lumi.C");
+  cmsText = "CMS";
+  cmsTextSize = 0.5;
+  lumiTextSize = 0.4;
+  writeExtraText = false;
+  lumi_13TeV = "2.2 fb^{-1}";
+  
+  string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-09_25ns_skim_base_mt2gt200_ZinvV3";
+  
+  
+  // ----------------------------------------
+  //  samples definition
+  // ----------------------------------------
+  
+  // get input files
+  TFile* f_zinv = new TFile(Form("%s/MacroZinv.root",input_dir.c_str())); //hadd'ing of ttbar, ttw, ttz, tth, singletop
+  TFile* f_lostl = new TFile(Form("%s/MacroLL.root",input_dir.c_str()));
+  TFile* f_qcd = new TFile(Form("%s/MacroQCD.root",input_dir.c_str()));
+  TFile* f_data = new TFile(Form("%s/MacroData.root",input_dir.c_str()));
+  
+  vector<TFile*> samples;
+  vector<string>  names;
+  
+  samples.push_back(f_qcd); names.push_back("multijet");
+  samples.push_back(f_lostl); names.push_back("lostl");
+  samples.push_back(f_zinv); names.push_back("zinv");
+  samples.push_back(f_data); names.push_back("data");
+  
+  // ----------------------------------------
+  //  plots definitions
+  // ----------------------------------------
+  
+  float scalesig = -1.;
+  //float scalesig = 50.;
+  bool printplots = true;
+  bool doRatio = true;
+  bool scaleBGtoData = false;
+  bool drawBand = true;
+  
+  if(printplots){
+    TIter it(f_lostl->GetListOfKeys());
+    TKey* k;
+    std::string cr_skip = "cr";
+    std::string sr_skip = "sr";
+    while ((k = (TKey *)it())) {
+      //if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
+      //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
+      std::string dir_name = k->GetTitle();
+      //if(dir_name != "crslmubase" && dir_name != "crslelbase") continue; //to do only this dir
+      if (TString(dir_name).Contains("HT1") || TString(dir_name).Contains("HT0"))
+          makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 50 GeV" , 200 , 1000 , 5 , true, printplots, scalesig, doRatio, scaleBGtoData, drawBand );
+      if (TString(dir_name).Contains("HT2"))
+          makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 50 GeV" , 200 , 1500 , 5 , true, printplots, scalesig, doRatio, scaleBGtoData, drawBand );
+
+      
+    }
+  }
+}
+
   
 //_______________________________________________________________________________
 void plotMaker(){
@@ -1399,6 +1516,7 @@ void plotMaker(){
   //plotMakerGJets(); return;
   //plotMakerRemovedLep(); return;
   //plotMakerCRSL(); return;
+  plotMakerMacroRegions(); return;
 
   //  gROOT->LoadMacro("CMS_lumi.C");
   cmsText = "CMS Preliminary";
