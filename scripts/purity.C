@@ -405,7 +405,7 @@ void makePredOneBinFR(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TS
 }
 
 
-void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TFile* f_zinv, TString sr, TString FR_type, TString plotname = "mt2bins")
+void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TFile* f_zinv, TFile* f_zOrig, TString sr, TString FR_type, TString plotname = "mt2bins")
 
 {
   if (verbose) cout<<__LINE__<<" Making plots for region "<<sr<<", FR_type "<<FR_type<<", plotname "<<plotname<<" **************************"<<endl;
@@ -523,6 +523,7 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
   TH1F* h_predZ = (TH1F*) h_estimate->Clone("h_"+plotname+"predZ"+FR_type);
   h_predZ->SetName("h_"+plotname+"predZ"+FR_type);
   if (h_ratio) h_predZ->Multiply(h_predZ,h_ratio,1,1,"B");
+  h_predZ->Scale(0.95); // correction based on double-ratio
   
   // tricky, let's add some R(Z/Gamma) uncertainties, which are the only ones missing at this point
   // most of this code is taken from cardMaker.C
@@ -580,6 +581,25 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
     
   }// end of R(Z/Gamma) uncertainties
   h_predZwithUncBin->Print("all");
+
+  // add fine-binned MT2 histograms for macro plots
+  if (TString(h_predZwithUncInt->GetName()).Contains("mt2binspredZFailSieieDatawithRuncInt")){
+    TH1F* h_trueZinv = (TH1F*) f_zOrig->Get(srdir+"/h_mt2");
+    if (!h_trueZinv) { cout<<"could not find "<<srdir<<"/h_mt2. Exiting... "<<endl; return; }
+    if (h_trueZinv->Integral(0, -1) == 0) { cout<<"integral of "<<srdir<<"/h_mt2 is 0. Exiting... "<<endl; return; }
+    TH1F* h_trueZinvScaled = (TH1F*) h_trueZinv->Clone("h_mt2");
+    double interr;
+    float newNorm = h_predZwithUncInt->IntegralAndError(0, -1, interr);
+    h_trueZinvScaled->Scale( newNorm / h_trueZinv->Integral(0, -1) );
+    for (int ibin = 1; ibin <= h_trueZinvScaled->GetNbinsX(); ibin++) {
+      float olderr = h_trueZinvScaled->GetBinError(ibin);
+      float newerr = interr / newNorm * h_trueZinvScaled->GetBinContent(ibin);
+      h_trueZinvScaled->SetBinError(ibin, sqrt(olderr*olderr + newerr*newerr));
+    }
+    
+    h_trueZinvScaled->Write();
+  }
+
   
   //write hists to output file
   h_purityFR->Write();
@@ -641,6 +661,7 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   TFile* f_g = new TFile(Form("%s/gjet_ht.root",input_dir.c_str())); //gjet file
   TFile* f_q = new TFile(Form("%s/qcd_ht.root",input_dir.c_str())); //qcd file
   TFile* f_z = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str())); //zinv pred from ZinvMaker.C, contains ratio
+  TFile* f_zOrig = new TFile(Form("%s/zinv_ht.root",input_dir.c_str())); //zinv file out of the box
   if(f_g->IsZombie() || f_q->IsZombie() || f_gq->IsZombie() || f_data->IsZombie() || f_z->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
     return;
@@ -759,14 +780,14 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   for(int i = 0; i< (int) SRVec.size(); i++){
     TString srName = SRVec[i].GetName();
 //    purityPlots(f_out, f_g, f_q, f_z, SRVec[i].GetName());
-    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, srName, "");
-    purityPlotsNew(f_out, f_data, f_g, f_q, f_z, srName, "FailSieieData"); // This needs to be done last (it overwrites previous histograms)
+    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName, "");
+    purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, srName, "FailSieieData"); // This needs to be done last (it overwrites previous histograms)
   }
   for(int i = 0; i< (int) SRVec2.size(); i++){
     TString srName = SRVec2[i].GetName();
     //    purityPlots(f_out, f_g, f_q, f_z, SRVec[i].GetName());
-    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, srName, "");
-    purityPlotsNew(f_out, f_data, f_g, f_q, f_z, srName, "FailSieieData"); // This needs to be done last (it overwrites previous histograms)
+    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName, "");
+    purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, srName, "FailSieieData"); // This needs to be done last (it overwrites previous histograms)
   }
   additionalRegions.clear();
   additionalRegions.push_back("base");
@@ -779,9 +800,9 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   additionalRegions.push_back("baseIncl");
   for(int i = 0; i< (int) additionalRegions.size(); i++){
     srName = additionalRegions.at(i);
-    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, srName, "");
-    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, srName, "FailSieie"); // This needs to be done last (it overwrites previous histograms)
-    purityPlotsNew(f_out, f_data, f_g, f_q, f_z, srName, "FailSieieData"); // This needs to be done last (it overwrites previous histograms)
+    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName, "");
+    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName, "FailSieie"); // This needs to be done last (it overwrites previous histograms)
+    purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, srName, "FailSieieData"); // This needs to be done last (it overwrites previous histograms)
   }
   vector<TString> additionalPlots;
   additionalPlots.push_back("htbins");
@@ -791,12 +812,12 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   for(int i = 0; i< (int) additionalPlots.size(); i++){
     srName = "base";
     TString plot = additionalPlots.at(i);
-    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, srName, "", plot);
-    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, srName, "FailSieie", plot); // This needs to be done last (it overwrites previous histograms)
-    purityPlotsNew(f_out, f_data, f_g, f_q, f_z, srName, "FailSieieData", plot); // This needs to be done last (it overwrites previous histograms)
-    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, srName+"Incl", "", plot);
-    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, srName+"Incl", "FailSieie", plot); // This needs to be done last (it overwrites previous histograms)
-    purityPlotsNew(f_out, f_data, f_g, f_q, f_z, srName+"Incl", "FailSieieData", plot); // This needs to be done last (it overwrites previous histograms)
+    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName, "", plot);
+    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName, "FailSieie", plot); // This needs to be done last (it overwrites previous histograms)
+    purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, srName, "FailSieieData", plot); // This needs to be done last (it overwrites previous histograms)
+    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName+"Incl", "", plot);
+    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName+"Incl", "FailSieie", plot); // This needs to be done last (it overwrites previous histograms)
+    purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, srName+"Incl", "FailSieieData", plot); // This needs to be done last (it overwrites previous histograms)
   }
   //save and write
   cout << "Saving and closing..." << endl;
