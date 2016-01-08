@@ -190,7 +190,11 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     
     // data-driven part: use data to normalize MC SR prediction
     double norm = 1.;
-    if (h_data_cr && h_lostlepMC_cr) norm = h_data_cr->Integral(0,-1)/h_lostlepMC_cr->Integral(0,-1);
+    double data_cr_yield = 0;
+    if (h_data_cr && h_lostlepMC_cr) {
+      data_cr_yield = h_data_cr->Integral(0,-1);
+      norm = data_cr_yield/h_lostlepMC_cr->Integral(0,-1);
+    }
     else if (!h_data_cr) norm = 0;
     h_lostlepDD_sr->Scale(norm);
     h_lostlepDD_sr_finebin->Scale(norm);
@@ -223,6 +227,35 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     // }
     //pred->Print("all");
 
+    // also save bin boundary hists for CR
+    TH1D* h_ht_LOW = (TH1D*) f_lostlep->Get(crdir+"/h_ht_LOW");
+    TH1D* h_ht_HI = (TH1D*) f_lostlep->Get(crdir+"/h_ht_HI");
+    TH1D* h_nbjets_LOW = (TH1D*) f_lostlep->Get(crdir+"/h_nbjets_LOW");
+    TH1D* h_nbjets_HI = (TH1D*) f_lostlep->Get(crdir+"/h_nbjets_HI");
+    TH1D* h_njets_LOW = (TH1D*) f_lostlep->Get(crdir+"/h_njets_LOW");
+    TH1D* h_njets_HI = (TH1D*) f_lostlep->Get(crdir+"/h_njets_HI");
+    
+    int njets_LOW = h_njets_LOW->GetBinContent(1);
+    int nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
+
+    // set uncertainties on finebin prediction hist
+    // - MC stat (already included)
+    // - data CR stat -> use just sqrt(N) instead of (correct) poisson uncertainties
+    // - 15% for lepton efficiency
+    // - 5% transfer factor error for most bins, additional 20% for 7j,>=1b
+    // - not including MT2 shape uncertainty at this point
+    // NOTE that this sets uncertainty to 0 for bins with 0 data CR stats (i.e. pred = 0)... 
+    for ( int ibin = 1; ibin <= pred_finebin->GetNbinsX(); ++ibin) {
+      float val = pred_finebin->GetBinContent(ibin);
+      if (val <= 0.) continue;
+      float err_mcstat = h_lostlepMC_sr_finebin->GetBinError(ibin)/h_lostlepMC_sr_finebin->GetBinContent(ibin);
+      float err_datastat = (data_cr_yield > 0) ? sqrt(data_cr_yield)/data_cr_yield : 0.; // should never get 0 data CR yield and nonzero pred
+      float quadrature = err_mcstat*err_mcstat + err_datastat*err_datastat + 0.15*0.15 + 0.05*0.05;
+      if (njets_LOW >= 7 && nbjets_LOW >= 1) quadrature += 0.2*0.2;
+      pred_finebin->SetBinError(ibin,val*sqrt(quadrature));
+    }
+    //    pred_finebin->Print("all");
+
     pred->Write();
     pred_finebin->Write();
     Syst->Write();
@@ -238,14 +271,6 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     h_htbins_data_cr_save->Write();
     h_njbins_data_cr_save->Write();
     h_nbjbins_data_cr_save->Write();
-
-    // also save bin boundary hists for CR
-    TH1D* h_ht_LOW = (TH1D*) f_lostlep->Get(crdir+"/h_ht_LOW");
-    TH1D* h_ht_HI = (TH1D*) f_lostlep->Get(crdir+"/h_ht_HI");
-    TH1D* h_nbjets_LOW = (TH1D*) f_lostlep->Get(crdir+"/h_nbjets_LOW");
-    TH1D* h_nbjets_HI = (TH1D*) f_lostlep->Get(crdir+"/h_nbjets_HI");
-    TH1D* h_njets_LOW = (TH1D*) f_lostlep->Get(crdir+"/h_njets_LOW");
-    TH1D* h_njets_HI = (TH1D*) f_lostlep->Get(crdir+"/h_njets_HI");
 
     h_ht_LOW->Write();
     h_ht_HI->Write();
