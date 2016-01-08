@@ -127,6 +127,7 @@ int sampleID (const string& name) {
     else if (name.find("SMS-T1qqqq") != string::npos) return 1010;
     else if (name.find("SMS-T1bbbb") != string::npos) return 1020;
     else if (name.find("SMS-T1ttbb") != string::npos) return 1030;
+    else if (name.find("SMS-T5qqqqVV") != string::npos) return 1040;
 
     else if (name.find("SMS-T2tt") != string::npos) return 1101;
     else if (name.find("SMS-T2qq") != string::npos) return 1110;

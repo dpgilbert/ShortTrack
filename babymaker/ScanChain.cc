@@ -251,7 +251,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   if ((baby_name.find("T1") != std::string::npos) || (baby_name.find("T2") != std::string::npos)) {
     // determine which susy particle is being produced
     TString sparticle = "";
-    if (baby_name.find("T1") != std::string::npos) sparticle = "gluino";
+    if ((baby_name.find("T1") != std::string::npos) || (baby_name.find("T5") != std::string::npos)) sparticle = "gluino";
     else if ((baby_name.find("T2tt") != std::string::npos) || (baby_name.find("T2bb") != std::string::npos) || (baby_name.find("T2cc") != std::string::npos)) sparticle = "stop";
     else if (baby_name.find("T2qq") != std::string::npos) sparticle = "squark";
     if (sparticle == "") std::cout << "WARNING: didn't recognize signal sample from name: " << baby_name << std::endl;
@@ -477,7 +477,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	
         if (verbose) cout << "before sparm values" << endl;
 
-	// T1 models
+	// T1 and T5 models
         if (evt_id >= 1000 && evt_id < 1100) {
           for (unsigned int i=0; i<sparm_values().size(); ++i) {
             if (sparm_names().at(i).Contains("mGluino")) GenSusyMScan1 = sparm_values().at(i);
@@ -542,7 +542,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
             if (nHardScatter > 1) std::cout << "WARNING: found too many Ws in Wjets MC!" << std::endl;
           }
           else if (evt_id >= 1000 && evt_id < 1100) {
-            // SMS T1 models - gluinos
+            // SMS T1 and T5 models - gluinos
             if (isLastCopy == 1 && pdgId == 1000021) {
               recoil += cms3.genps_p4().at(iGen);
               ++nHardScatter;
