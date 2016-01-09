@@ -68,7 +68,7 @@ def printMacroRegionYields( datacard_list ):
                 if nuis_type == 'lnN':
                     if nuis_name.startswith('zinv'):
                         nuis_val = float(nuis_tokens[3])
-                        abserr = (1. - nuis_val) * val_zinv
+                        abserr = (nuis_val - 1.) * val_zinv
                         if nuis_name in dict_zinv_nuisances_up:
                             dict_zinv_nuisances_up[nuis_name] += abserr
                             dict_zinv_nuisances_dn[nuis_name] += abserr
@@ -77,7 +77,7 @@ def printMacroRegionYields( datacard_list ):
                             dict_zinv_nuisances_dn[nuis_name] = abserr
                     elif nuis_name.startswith('llep'):
                         nuis_val = float(nuis_tokens[4])
-                        abserr = (1. - nuis_val) * val_llep
+                        abserr = (nuis_val - 1.) * val_llep
                         if nuis_name in dict_llep_nuisances_up:
                             dict_llep_nuisances_up[nuis_name] += abserr
                             dict_llep_nuisances_dn[nuis_name] += abserr
@@ -86,7 +86,8 @@ def printMacroRegionYields( datacard_list ):
                             dict_llep_nuisances_dn[nuis_name] = abserr
                     elif nuis_name.startswith('qcd'):
                         nuis_val = float(nuis_tokens[5])
-                        abserr = (1. - nuis_val) * val_qcd
+                        abserr = (nuis_val - 1.) * val_qcd
+                        #print '    qcd err: %s: %.3f %.3f'%(nuis_name, nuis_val, abserr)
                         if nuis_name in dict_qcd_nuisances_up:
                             dict_qcd_nuisances_up[nuis_name] += abserr
                             dict_qcd_nuisances_dn[nuis_name] += abserr
@@ -124,6 +125,7 @@ def printMacroRegionYields( datacard_list ):
                         alpha = float(nuis_tokens[6])
                         abserr_up = (cr_yield_up - cr_yield)*alpha
                         abserr_dn = (cr_yield - cr_yield_dn)*alpha
+                        #print '    qcd err: %s: %.3f %.3f'%(nuis_name, abserr_up, abserr_dn)
                         if nuis_name in dict_qcd_nuisances_up:
                             dict_qcd_nuisances_up[nuis_name] += abserr_up
                             dict_qcd_nuisances_dn[nuis_name] += abserr_dn
