@@ -257,7 +257,7 @@ def main():
         'HT1500toInf_j7toInf_b3toInf_m200toInf',
         ]
 
-    # 4j small: HT > 1500, MT2 > 400 || HT > 1000, MT2 > 600
+    # 4j small: (4-6j, HT > 1500, MT2 > 600) || (>=7j, HT > 1500, MT2 > 400) || (>=4j, HT > 1000, MT2 > 600)
     datacards_4j_small = [
         'HT1000to1500_j4to6_b0_m600to800',
         'HT1000to1500_j4to6_b0_m800to1000',
@@ -270,13 +270,10 @@ def main():
         'HT1000to1500_j7toInf_b1_m600toInf',
         'HT1000to1500_j7toInf_b2_m400toInf',
         'HT1000to1500_j7toInf_b3toInf_m400toInf',
-        'HT1500toInf_j4to6_b0_m400to600',
         'HT1500toInf_j4to6_b0_m600to800',
         'HT1500toInf_j4to6_b0_m800to1000',
         'HT1500toInf_j4to6_b0_m1000toInf',
-        'HT1500toInf_j4to6_b1_m400to600',
         'HT1500toInf_j4to6_b1_m600toInf',
-        'HT1500toInf_j4to6_b2_m400to600',
         'HT1500toInf_j4to6_b2_m600toInf',
         'HT1500toInf_j2to6_b3toInf_m200toInf',
         'HT1500toInf_j7toInf_b0_m400toInf',
