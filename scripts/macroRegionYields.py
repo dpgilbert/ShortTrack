@@ -5,8 +5,38 @@ import ROOT
 import math
 
 datacard_dir = 'cards_all_macroregions_try2'
+output_dir = 'cards_for_macroregions'
 # signal point is irrelevant since we ignore signal, but it appears in the names
 signal_point = '_T2tt_700_0'
+
+#__________________________________________________
+# writes a datacard for a macroregion
+def makeMacroRegionDatacard( region, n_obs, n_bkg, abserr_bkg_up, abserr_bkg_dn ):
+    rel_nuis_up = 1. + (abserr_bkg_up/n_bkg)
+    rel_nuis_dn = 1. - (abserr_bkg_dn/n_bkg)
+    sig_val = 1.
+    sig_nuis = 1.15 # arbitrary choice
+
+    filename = '%s/datacard_macroregion_%s.txt' % (output_dir, region)
+    outf = open(filename, 'w')
+    outf.write('''imax 1
+jmax 1
+kmax 2
+-------------
+
+bin  %s
+observation  %d
+-------------
+
+bin 	%s	%s	
+process 	 sig 	 bkg
+process 	 0 	 1 
+rate 	 1.00 	 %.3f 
+-------------
+sig_syst    lnN    %.2f -
+bkg_syst    lnN    - %.2f/%.2f
+''' % (region, n_obs, region, region, n_bkg, sig_nuis, rel_nuis_up, rel_nuis_dn) )
+    outf.close()
 
 #__________________________________________________
 # fills nuisance dictionary for lnN uncertainties
@@ -177,6 +207,8 @@ def printMacroRegionYields( region, datacard_list ):
     print 'zinv: %.3f + %.3f - %.3f' % (n_zinv, abserr_sum_zinv_up, abserr_sum_zinv_dn)
     print 'llep: %.3f + %.3f - %.3f' % (n_llep, abserr_sum_llep_up, abserr_sum_llep_dn)
     print ' qcd: %.3f + %.3f - %.3f' % (n_qcd, abserr_sum_qcd_up, abserr_sum_qcd_dn)
+
+    makeMacroRegionDatacard( region, n_obs, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn )
 
 #__________________________________________________
 def main():
@@ -550,6 +582,10 @@ def main():
         '3b_medium' : datacards_3b_medium,
     }
 
+    # make output directory
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)    
+    
     for region, datacard_list in all_regions.items():
         print '--------------------------'
         print 'running on macro region: %s' % (region)
