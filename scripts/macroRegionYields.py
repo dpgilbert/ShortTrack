@@ -4,10 +4,12 @@ import os
 import ROOT
 import math
 
-datacard_dir = 'cards_all_macroregions_try2'
+#datacard_dir = 'cards_all_macroregions_try2'
+datacard_dir = 'datacards_2p26ifb_fromMario/EventYields_data_Run2015_25nsGolden_2p3ifb/datacard_templates'
 output_dir = 'cards_for_macroregions'
 # signal point is irrelevant since we ignore signal, but it appears in the names
-signal_point = '_T2tt_700_0'
+#signal_point = '_T2tt_700_0'
+signal_point = ''
 
 #__________________________________________________
 # writes a datacard for a macroregion
@@ -47,7 +49,7 @@ def fillNuisanceDictLNN( dict_nuis_up, dict_nuis_dn, nuis_name, nuis_val_string,
     # read nuisance values
     # first case: asymmetric, separated by /
     if nuis_val_string.count('/'):
-        nuis_asym = nuis_tokens[3].split('/')
+        nuis_asym = nuis_val_string.split('/')
         nuis_val_up = float(nuis_asym[0])
         abserr_up = (nuis_val_up - 1.) * val_cent
         nuis_val_dn = float(nuis_asym[1])
@@ -120,12 +122,12 @@ def printMacroRegionYields( region, datacard_list ):
 
         for i, line in enumerate(lines):
             line = line.replace('\n','')
-            # observation: line 5
+            # observation line
             # 'observation 14'
             if line.startswith('observation'):
-                n_obs += int(line.split()[1])
+                n_obs += int(float(line.split()[1]))
 
-            # prediction values: line 10
+            # prediction values line
             # 'rate            0.034    7.232      2.789      0.037'
             elif line.startswith('rate'):
                 pred_vals_tokens = line.split()
@@ -138,10 +140,12 @@ def printMacroRegionYields( region, datacard_list ):
                 n_qcd += val_qcd
                 #print '    bkgs: %.3f  %.3f  %.3f'%(val_zinv, val_llep, val_qcd)
 
-            # lines 12 and beyond: nuisances
+            # lines for nuisances
             # 'zinv_ZGratio_nj_j2to3      lnN    -   1.028    -    -'
-            elif i > 11:
+            elif line.startswith('zinv') or line.startswith('llep') or line.startswith('qcd'):
                 nuis_tokens = line.split()
+                if len(nuis_tokens) < 3:
+                    continue
                 nuis_name = nuis_tokens[0]
                 nuis_type = nuis_tokens[1]
                 if nuis_type == 'lnN':
