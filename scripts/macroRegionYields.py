@@ -1,5 +1,6 @@
 #!/bin/python
 
+import os
 import ROOT
 import math
 
@@ -8,8 +9,56 @@ datacard_dir = 'cards_all_macroregions_try2'
 signal_point = '_T2tt_700_0'
 
 #__________________________________________________
+# fills nuisance dictionary for lnN uncertainties
+def fillNuisanceDictLNN( dict_nuis_up, dict_nuis_dn, nuis_name, nuis_val_string, val_cent ):
+    abserr_up = 0.
+    abserr_dn = 0.
+    
+    # read nuisance values
+    # first case: asymmetric, separated by /
+    if nuis_val_string.count('/'):
+        nuis_asym = nuis_tokens[3].split('/')
+        nuis_val_up = float(nuis_asym[0])
+        abserr_up = (nuis_val_up - 1.) * val_cent
+        nuis_val_dn = float(nuis_asym[1])
+        abserr_dn = (1. - nuis_val_dn) * val_cent
+    # default case: single number
+    else:
+        nuis_val = float(nuis_val_string)
+        abserr_up = (nuis_val - 1.) * val_cent
+        abserr_dn = abserr_up
+        
+    # fill nuisance dict
+    if nuis_name in dict_nuis_up:
+        dict_nuis_up[nuis_name] += abserr_up
+        dict_nuis_dn[nuis_name] += abserr_dn
+    else:
+        dict_nuis_up[nuis_name] = abserr_up
+        dict_nuis_dn[nuis_name] = abserr_dn
+    return
+
+#__________________________________________________
+# fills nuisance dictionary for gmN uncertainties
+def fillNuisanceDictGMN( dict_nuis_up, dict_nuis_dn, nuis_name, cr_yield, alpha ):
+    # get poisson uncertainties on yield
+    cr_yield_up = ROOT.Double()
+    cr_yield_dn = ROOT.Double()
+    ROOT.RooHistError.instance().getPoissonInterval(cr_yield,cr_yield_dn,cr_yield_up,1.)
+    abserr_up = (cr_yield_up - cr_yield)*alpha
+    abserr_dn = (cr_yield - cr_yield_dn)*alpha
+    
+    # fill nuisance dict
+    if nuis_name in dict_nuis_up:
+        dict_nuis_up[nuis_name] += abserr_up
+        dict_nuis_dn[nuis_name] += abserr_dn
+    else:
+        dict_nuis_up[nuis_name] = abserr_up
+        dict_nuis_dn[nuis_name] = abserr_dn
+    return
+
+#__________________________________________________
 # reads in a list of input datacard files and prints integrated yields with uncertainties
-def printMacroRegionYields( datacard_list ):
+def printMacroRegionYields( region, datacard_list ):
 
     # for each background:
     # - sum up central values
@@ -67,71 +116,24 @@ def printMacroRegionYields( datacard_list ):
                 nuis_type = nuis_tokens[1]
                 if nuis_type == 'lnN':
                     if nuis_name.startswith('zinv'):
-                        nuis_val = float(nuis_tokens[3])
-                        abserr = (nuis_val - 1.) * val_zinv
-                        if nuis_name in dict_zinv_nuisances_up:
-                            dict_zinv_nuisances_up[nuis_name] += abserr
-                            dict_zinv_nuisances_dn[nuis_name] += abserr
-                        else:
-                            dict_zinv_nuisances_up[nuis_name] = abserr
-                            dict_zinv_nuisances_dn[nuis_name] = abserr
+                        fillNuisanceDictLNN( dict_zinv_nuisances_up, dict_zinv_nuisances_dn, nuis_name, nuis_tokens[3], val_zinv )
                     elif nuis_name.startswith('llep'):
-                        nuis_val = float(nuis_tokens[4])
-                        abserr = (nuis_val - 1.) * val_llep
-                        if nuis_name in dict_llep_nuisances_up:
-                            dict_llep_nuisances_up[nuis_name] += abserr
-                            dict_llep_nuisances_dn[nuis_name] += abserr
-                        else:
-                            dict_llep_nuisances_up[nuis_name] = abserr
-                            dict_llep_nuisances_dn[nuis_name] = abserr
+                        fillNuisanceDictLNN( dict_llep_nuisances_up, dict_llep_nuisances_dn, nuis_name, nuis_tokens[4], val_llep )
                     elif nuis_name.startswith('qcd'):
-                        nuis_val = float(nuis_tokens[5])
-                        abserr = (nuis_val - 1.) * val_qcd
-                        #print '    qcd err: %s: %.3f %.3f'%(nuis_name, nuis_val, abserr)
-                        if nuis_name in dict_qcd_nuisances_up:
-                            dict_qcd_nuisances_up[nuis_name] += abserr
-                            dict_qcd_nuisances_dn[nuis_name] += abserr
-                        else:
-                            dict_qcd_nuisances_up[nuis_name] = abserr
-                            dict_qcd_nuisances_dn[nuis_name] = abserr
+                        fillNuisanceDictLNN( dict_qcd_nuisances_up, dict_qcd_nuisances_dn, nuis_name, nuis_tokens[5], val_qcd )
                 # gamma function: get poisson uncertainty based on CR count
                 # 'zinv_CRstat_HT1000to1500_j2to3_b0     gmN 105    -  0.06888   -   -'
                 elif nuis_type == 'gmN':
                     cr_yield = int(nuis_tokens[2])
-                    cr_yield_up = ROOT.Double()
-                    cr_yield_dn = ROOT.Double()
-                    ROOT.RooHistError.instance().getPoissonInterval(cr_yield,cr_yield_dn,cr_yield_up,1.)
                     if nuis_name.startswith('zinv'):
                         alpha = float(nuis_tokens[4])
-                        abserr_up = (cr_yield_up - cr_yield)*alpha
-                        abserr_dn = (cr_yield - cr_yield_dn)*alpha
-                        if nuis_name in dict_zinv_nuisances_up:
-                            dict_zinv_nuisances_up[nuis_name] += abserr_up
-                            dict_zinv_nuisances_dn[nuis_name] += abserr_dn
-                        else:
-                            dict_zinv_nuisances_up[nuis_name] = abserr_up
-                            dict_zinv_nuisances_dn[nuis_name] = abserr_dn
+                        fillNuisanceDictGMN( dict_zinv_nuisances_up, dict_zinv_nuisances_dn, nuis_name, cr_yield, alpha )
                     if nuis_name.startswith('llep'):
                         alpha = float(nuis_tokens[5])
-                        abserr_up = (cr_yield_up - cr_yield)*alpha
-                        abserr_dn = (cr_yield - cr_yield_dn)*alpha
-                        if nuis_name in dict_llep_nuisances_up:
-                            dict_llep_nuisances_up[nuis_name] += abserr_up
-                            dict_llep_nuisances_dn[nuis_name] += abserr_dn
-                        else:
-                            dict_llep_nuisances_up[nuis_name] = abserr_up
-                            dict_llep_nuisances_dn[nuis_name] = abserr_dn
+                        fillNuisanceDictGMN( dict_llep_nuisances_up, dict_llep_nuisances_dn, nuis_name, cr_yield, alpha )
                     if nuis_name.startswith('qcd'):
                         alpha = float(nuis_tokens[6])
-                        abserr_up = (cr_yield_up - cr_yield)*alpha
-                        abserr_dn = (cr_yield - cr_yield_dn)*alpha
-                        #print '    qcd err: %s: %.3f %.3f'%(nuis_name, abserr_up, abserr_dn)
-                        if nuis_name in dict_qcd_nuisances_up:
-                            dict_qcd_nuisances_up[nuis_name] += abserr_up
-                            dict_qcd_nuisances_dn[nuis_name] += abserr_dn
-                        else:
-                            dict_qcd_nuisances_up[nuis_name] = abserr_up
-                            dict_qcd_nuisances_dn[nuis_name] = abserr_dn
+                        fillNuisanceDictGMN( dict_qcd_nuisances_up, dict_qcd_nuisances_dn, nuis_name, cr_yield, alpha )
 
 
     # done with loop on datacards: sum up nuisances    
@@ -556,7 +558,7 @@ def main():
             fullcard = '%s/datacard_%s%s.txt' % (datacard_dir,card,signal_point)
             fulldatacard_list.append(fullcard)
         #print 'using datacards:',fulldatacard_list
-        printMacroRegionYields(fulldatacard_list)
+        printMacroRegionYields(region, fulldatacard_list)
         print ''
 
 #__________________________________________________
