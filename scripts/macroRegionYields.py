@@ -3,9 +3,9 @@
 import ROOT
 import math
 
-datacard_dir = 'cards_all_macroregions_try1'
+datacard_dir = 'cards_all_macroregions_try2'
 # signal point is irrelevant since we ignore signal, but it appears in the names
-signal_point = 'T2tt_700_0'
+signal_point = '_T2tt_700_0'
 
 #__________________________________________________
 # reads in a list of input datacard files and prints integrated yields with uncertainties
@@ -429,7 +429,7 @@ def main():
     #           (Nj=2-3 && Nb=0,1 && HT>1500 && MT2 > 400) ||
     #           (Nj=2-3 && Nb=2 && HT>1500 && MT2 > 200)
     datacards_1j_small = [
-        # HT1000toInf ? didn't see card
+        'HT1000toInf_j1_b0_m0toInf',
         'HT575toInf_j1_b1toInf_m0toInf',
         'HT575to1000_j2to3_b0_m800toInf',
         'HT575to1000_j2to3_b1_m600to800',
@@ -454,7 +454,7 @@ def main():
     datacards_1j_medium = [
         'HT575to700_j1_b0_m0toInf',
         'HT700to1000_j1_b0_m0toInf',
-        # HT1000toInf ? didn't see card
+        'HT1000toInf_j1_b0_m0toInf',
         'HT575toInf_j1_b1toInf_m0toInf',
         'HT575to1000_j2to3_b0_m600to800',
         'HT575to1000_j2to3_b0_m800toInf',
@@ -491,7 +491,7 @@ def main():
         'HT450to575_j1_b0_m0toInf',
         'HT575to700_j1_b0_m0toInf',
         'HT700to1000_j1_b0_m0toInf',
-        # HT1000toInf ? didn't see card
+        'HT1000toInf_j1_b0_m0toInf',
         'HT450to575_j1_b1toInf_m0toInf',
         'HT575toInf_j1_b1toInf_m0toInf',
         'HT450to575_j2to3_b0_m400to500',
@@ -553,7 +553,7 @@ def main():
         print 'running on macro region: %s' % (region)
         fulldatacard_list = []
         for card in datacard_list:
-            fullcard = '%s/datacard_%s_%s.txt' % (datacard_dir,card,signal_point)
+            fullcard = '%s/datacard_%s%s.txt' % (datacard_dir,card,signal_point)
             fulldatacard_list.append(fullcard)
         #print 'using datacards:',fulldatacard_list
         printMacroRegionYields(fulldatacard_list)
