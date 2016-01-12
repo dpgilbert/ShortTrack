@@ -206,11 +206,18 @@ def printMacroRegionYields( region, datacard_list ):
     abserr_sum_bkg_up = math.sqrt(abserr_sum_zinv_up*abserr_sum_zinv_up + abserr_sum_llep_up*abserr_sum_llep_up + abserr_sum_qcd_up*abserr_sum_qcd_up)
     abserr_sum_bkg_dn = math.sqrt(abserr_sum_zinv_dn*abserr_sum_zinv_dn + abserr_sum_llep_dn*abserr_sum_llep_dn + abserr_sum_qcd_dn*abserr_sum_qcd_dn)
 
-    print ' obs: %d' % (n_obs)
-    print ' bkg: %.3f + %.3f - %.3f' % (n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn)
-    print 'zinv: %.3f + %.3f - %.3f' % (n_zinv, abserr_sum_zinv_up, abserr_sum_zinv_dn)
-    print 'llep: %.3f + %.3f - %.3f' % (n_llep, abserr_sum_llep_up, abserr_sum_llep_dn)
-    print ' qcd: %.3f + %.3f - %.3f' % (n_qcd, abserr_sum_qcd_up, abserr_sum_qcd_dn)
+    # print ' obs: %d' % (n_obs)
+    # print ' bkg: %.3f + %.3f - %.3f' % (n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn)
+    # print 'zinv: %.3f + %.3f - %.3f' % (n_zinv, abserr_sum_zinv_up, abserr_sum_zinv_dn)
+    # print 'llep: %.3f + %.3f - %.3f' % (n_llep, abserr_sum_llep_up, abserr_sum_llep_dn)
+    # print ' qcd: %.3f + %.3f - %.3f' % (n_qcd, abserr_sum_qcd_up, abserr_sum_qcd_dn)
+
+    region_print = region.replace('_',' ')
+    if n_bkg > 100:
+        print '%s & $%.0f^{+%.0f}_{-%.0f}$ & %d &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_obs)
+    else:
+        print '%s & $%.1f^{+%.1f}_{-%.1f}$ & %d &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_obs)
+        
 
     makeMacroRegionDatacard( region, n_obs, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn )
 
@@ -591,15 +598,15 @@ def main():
         os.makedirs(output_dir)    
     
     for region, datacard_list in all_regions.items():
-        print '--------------------------'
-        print 'running on macro region: %s' % (region)
+        #print '--------------------------'
+        #print 'running on macro region: %s' % (region)
         fulldatacard_list = []
         for card in datacard_list:
             fullcard = '%s/datacard_%s%s.txt' % (datacard_dir,card,signal_point)
             fulldatacard_list.append(fullcard)
         #print 'using datacards:',fulldatacard_list
         printMacroRegionYields(region, fulldatacard_list)
-        print ''
+        #print ''
 
 #__________________________________________________
 if __name__ == "__main__":
