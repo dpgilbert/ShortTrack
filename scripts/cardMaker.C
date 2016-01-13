@@ -150,11 +150,12 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   if (!h_sig) {
     if (verbose) cout<<"No signal found in this region"<<endl;
-    return 0;
+    if (suppressZeroBins || suppressZeroTRs) return 0;
+  } else {
+    n_sig = h_sig->GetBinContent(mt2bin);
+    n_sig_TR = h_sig->Integral(0,-1);
+    err_sig_mcstat = h_sig->GetBinError(mt2bin);
   }
-  n_sig = h_sig->GetBinContent(mt2bin);
-  n_sig_TR = h_sig->Integral(0,-1);
-  err_sig_mcstat = h_sig->GetBinError(mt2bin);
   if (h_sig_btagsf_heavy_UP) n_sig_btagsf_heavy_UP = h_sig_btagsf_heavy_UP->GetBinContent(mt2bin);
   if (h_sig_btagsf_light_UP) n_sig_btagsf_light_UP = h_sig_btagsf_light_UP->GetBinContent(mt2bin);
   if (h_sig_lepeff_UP) n_sig_lepeff_UP = h_sig_lepeff_UP->GetBinContent(mt2bin);
@@ -177,8 +178,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   int njets_LOW = h_njets_LOW->GetBinContent(1);
   int njets_HI = h_njets_HI->GetBinContent(1);
 
-  int mt2_LOW = h_sig->GetBinLowEdge(mt2bin);
-  int mt2_HI = mt2_LOW + h_sig->GetBinWidth(mt2bin);
+  int mt2_LOW = h_sig ? h_sig->GetBinLowEdge(mt2bin) : 0;
+  int mt2_HI = h_sig ? mt2_LOW + h_sig->GetBinWidth(mt2bin) : 1500;
   // hardcode the current edge of our highest bin..
   if (mt2_HI == 1500) mt2_HI = -1;
 
