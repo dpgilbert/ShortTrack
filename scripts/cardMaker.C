@@ -381,7 +381,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double lostlep_shape = 1.0;
   double lostlep_mcstat = 1. + err_lostlep_mcstat; // transfer factor stat uncertainty
   double lostlep_alphaerr = 1. + 0.05; // transfer factor syst uncertainty
-  double lostlep_lepeff = 1.15;
+  double lostlep_lepeff = 1.07; // transfer factor uncertainty from lepton eff
   double lostlep_bTag = 1.2; // special for 7jets with b-tags
  
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
@@ -409,7 +409,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     if (mt2bin == 1 && n_lostlep > 0.) {
       // first bin needs to compensate normalization from the rest
       float increment = 0.;
-      for (int ibin=1; ibin<h_lostlep->GetNbinsX(); ibin++) 
+      for (int ibin=2; ibin<=h_lostlep->GetNbinsX(); ibin++) 
 	increment += 0.4 / (n_mt2bins - 1) * (ibin - 1) * h_lostlep->GetBinContent(ibin);
       lostlep_shape = 1. - increment/n_lostlep;
     }
@@ -469,7 +469,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
       if (mt2bin == 1 && n_zinv > 0) {
 	// first bin needs to compensate normalization from the rest
 	float increment = 0.;
-	for (int ibin=1; ibin<h_zinv->GetNbinsX(); ibin++) 
+	for (int ibin=2; ibin<=h_zinv->GetNbinsX(); ibin++) 
 	  increment += 0.4 / (n_mt2bins - 1) * (ibin - 1) * h_zinv->GetBinContent(ibin);
 	zinv_shape = 1. - increment/n_zinv;
       }
@@ -577,9 +577,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   else {
     ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_doubleRatioOffset.Data(),zinv_doubleRatioOffset )  << endl;
     if (fourNuisancesPerBinZGratio) {
+      ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_ht.Data() ,zinv_zgamma_ht )  << endl;
       ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nj.Data() ,zinv_zgamma_nj )  << endl;
       ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nb.Data() ,zinv_zgamma_nb )  << endl;
-      ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_ht.Data() ,zinv_zgamma_ht )  << endl;
       if (!integratedZinvEstimate)
         ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_mt2.Data(),zinv_zgamma_mt2)  << endl;
     }
@@ -589,9 +589,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_puritysyst.Data(),zinv_puritysyst)  << endl;
     ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_purityerr.Data(),zinv_purityerr)  << endl;
     ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr,zinv_alpha)  << endl;
-    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_alphaerr.Data(),zinv_alphaerr)  << endl;
     if (integratedZinvEstimate && n_mt2bins > 1)
       ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_shape.Data(),zinv_shape)  << endl;
+    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_alphaerr.Data(),zinv_alphaerr)  << endl;
   }
 
   // ---- lostlep systs
