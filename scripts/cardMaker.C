@@ -380,9 +380,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // ----- lost lepton bkg uncertainties
   double lostlep_shape = 1.0;
   double lostlep_mcstat = 1. + err_lostlep_mcstat; // transfer factor stat uncertainty
-  double lostlep_alphaerr = 1. + 0.05; // transfer factor syst uncertainty
+  double lostlep_alphaerr = 1. + 0.10; // transfer factor syst uncertainty
   double lostlep_lepeff = 1.07; // transfer factor uncertainty from lepton eff
-  double lostlep_bTag = 1.2; // special for 7jets with b-tags
  
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
   TString name_lostlep_shape = Form("llep_shape_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
@@ -390,7 +389,6 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_lostlep_mcstat = Form("llep_MCstat_%s", channel.c_str());
   TString name_lostlep_alphaerr = Form("llep_alpha_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   TString name_lostlep_lepeff = Form("llep_lepeff_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
-  TString name_lostlep_bTag = Form("llep_bTag_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
 
   // if nonzero CR stats: compute alpha for this bin based on CR yield and SR pred
   // note that if n_lostlep_cr == 0, we will just use lostlep_alpha (straight from MC) in the datacard
@@ -417,11 +415,10 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
       lostlep_shape = 1. + 0.4 / (n_mt2bins - 1) * (mt2bin - 1);
     n_syst++;  // lostlep_shape
   }
- 
-  if ( njets_LOW == 7 && nbjets_LOW >= 1) {
-    if (verbose) cout<<"special case with 7jets 1btag"<<endl;
-    n_syst++; // nBtag extrapolation
-  }
+
+  // special cases with larger alpha error
+  if ( ht_LOW == 200 && njets_LOW == 7) lostlep_alphaerr = 1.40; // due to JES
+  else if ( njets_LOW == 7 && nbjets_LOW >= 3) lostlep_alphaerr = 1.15; // due to btag eff
 
 
   // ----- zinv bkg uncertainties - depend on signal region, b selection
@@ -447,7 +444,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double zinv_alphaerr = 1. + err_zinv_mcstat;
   double zinv_purityerr = 1. + err_zinv_purity;
   double zinv_puritysyst = 1.10;
-  double zinv_doubleRatioOffset = 1.07;
+  double zinv_doubleRatioOffset = 1.11;
   double zinv_zgamma = -1.;
   double zinv_zgamma_nj = 1., zinv_zgamma_nb = 1., zinv_zgamma_ht = 1., zinv_zgamma_mt2 = 1.;
   double zinv_mcsyst = -1.;
@@ -597,8 +594,6 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // ---- lostlep systs
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_lepeff.Data(),lostlep_lepeff)  << endl;
   ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_lostlep_crstat.Data(),n_lostlep_cr,lostlep_alpha)  << endl;
-  if ( njets_LOW == 7 && nbjets_LOW >= 1) 
-    ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_bTag.Data(),lostlep_bTag)  << endl;
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mcstat.Data(),lostlep_mcstat)  << endl;
   if (n_mt2bins > 1)
     ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_shape.Data(),lostlep_shape)  << endl;
