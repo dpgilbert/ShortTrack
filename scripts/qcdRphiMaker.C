@@ -203,6 +203,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
       if (ht_LOW == 200) f_jets_dir = "f_jets_data_noPS";
       TH1D* h_fjets = (TH1D*) f_qcd->Get(Form("%s/%s/yield_%s_%s",f_jets_dir.c_str(),channel_htonly.c_str(),f_jets_dir.c_str(),channel_htonly.c_str()));
       TH1D* h_rb = (TH1D*) f_qcd->Get(Form("r_hat_data/%s/yield_r_hat_data_%s",channel_njonly.c_str(),channel_njonly.c_str()));
+      TH1D* h_purity = (TH1D*) f_qcd->Get(Form("qcdPurity/%s/yield_qcdPurity_%s",channel.c_str(),channel.c_str()));
 
       float fjets = h_fjets->GetBinContent( h_fjets->FindBin(njets_LOW) );
       float fjets_err = h_fjets->GetBinError( h_fjets->FindBin(njets_LOW) );
@@ -240,9 +241,19 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
 	if (verbose) std::cout << " reff: " << reff << " +/- " << reff_err << std::endl;
 	// get fit systematic error: is stored as a relative error
 	float fit_syst = h_fitsyst->GetBinContent(ibin);
+	float purity = h_purity->GetBinContent(ibin);
+	float purity_err = h_purity->GetBinError(ibin);
+	if (verbose) std::cout << " purity: " << purity << " +/- " << purity_err << std::endl;
 	float alpha = reff * fjets * rb;
 	float alpha_err = sqrt(fjets_err*fjets_err + rb_err*rb_err + reff_err*reff_err + fit_syst*fit_syst);
+	if (purity > 0.) {
+	  purity_err = purity_err / purity;
+	  alpha *= purity;
+	  alpha_err = sqrt(alpha_err*alpha_err + purity_err*purity_err);
+	  fjrb_err = sqrt(fjrb_err*fjrb_err + purity_err*purity_err);
+	}
 	if (verbose) std::cout << " alpha: " << alpha << " +/- " << alpha_err << std::endl;
+	if (verbose) std::cout << " fjrb_err: " << fjrb_err  << std::endl;
 
 	float pred = h_qcd_sr_pred->GetBinContent(ibin);
 	pred *= alpha;
