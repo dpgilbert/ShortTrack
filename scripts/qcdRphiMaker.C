@@ -207,7 +207,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
       float fjets = h_fjets->GetBinContent( h_fjets->FindBin(njets_LOW) );
       float fjets_err = h_fjets->GetBinError( h_fjets->FindBin(njets_LOW) );
       float rb = h_rb->GetBinContent( h_rb->FindBin(nbjets_LOW) );
-      float rb_err = h_rb->GetBinError( h_rb->FindBin(njets_LOW) );
+      float rb_err = h_rb->GetBinError( h_rb->FindBin(nbjets_LOW) );
 
       if (verbose) std::cout << "got fjets and rb " << std::endl;
 	
