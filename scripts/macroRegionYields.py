@@ -296,6 +296,18 @@ def main():
         'HT1500toInf_j7toInf_b3toInf_m200toInf',
         ]
 
+    # 7j verytight: (HT > 1000 && nb <= 1 && MT2 > 600) || (HT > 1000 && nb >= 2 && MT2 > 400) || (HT > 1500 && MT2 > 400) 
+    datacards_7j_verytight = [
+        'HT1000to1500_j7toInf_b0_m600toInf',
+        'HT1000to1500_j7toInf_b1_m600toInf',
+        'HT1000to1500_j7toInf_b2_m400toInf',
+        'HT1000to1500_j7toInf_b3toInf_m400toInf',
+        'HT1500toInf_j7toInf_b0_m400toInf',
+        'HT1500toInf_j7toInf_b1_m400toInf',
+        'HT1500toInf_j7toInf_b2_m400toInf',
+        'HT1500toInf_j7toInf_b3toInf_m200toInf',
+        ]
+
     # 7j tight: HT > 575, MT2 > 400
     datacards_7j_tight = [
         'HT575to1000_j7toInf_b0_m400toInf',
@@ -636,6 +648,7 @@ def main():
         '4j_tight'  : datacards_4j_tight,
         '7j_medium' : datacards_7j_medium,
         '7j_tight'  : datacards_7j_tight,
+        '7j_verytight'  : datacards_7j_verytight,
         '2b_medium' : datacards_2b_medium,
         '2b_tight'  : datacards_2b_tight,
         '2b_verytight'  : datacards_2b_verytight,
