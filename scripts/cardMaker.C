@@ -431,9 +431,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_zinv_puritysyst = integratedZinvEstimate ? "zinv_puritySyst_"+perTopoRegion : "zinv_puritySyst_"+perChannel;
   TString name_zinv_zgamma = "zinv_ZGratio";
   if (uncorrelatedZGratio) name_zinv_zgamma = Form("zinv_ZGratio_%s",channel.c_str());
-  TString name_zinv_zgamma_nj  = Form("zinv_ZGratio_nj_%s" , jet_str.c_str()  );
-  TString name_zinv_zgamma_nb  = Form("zinv_ZGratio_nb_%s" , bjet_str.c_str() );
-  TString name_zinv_zgamma_ht  = Form("zinv_ZGratio_ht_%s" , ht_str.c_str()   );
+  TString name_zinv_zgamma_nj  = Form("zinv_ZGratio_%s" , jet_str.c_str()  );
+  TString name_zinv_zgamma_nb  = Form("zinv_ZGratio_%s" , bjet_str.c_str() );
+  TString name_zinv_zgamma_ht  = Form("zinv_ZGratio_%s" , ht_str.c_str()   );
   // Only a low edge for MT2, since we want to maintain correlations between differently sized MT2 bins with the same lower edge
   TString name_zinv_zgamma_mt2 = "zinv_ZGratio_m" + to_string(mt2_LOW); 
   TString name_zinv_doubleRatioOffset = "zinv_doubleRatioOffset";
@@ -501,7 +501,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
  
   // fully uncorrelated for all except fit related, those are correlated within HT bins
   TString name_qcd_crstat = "qcd_CRstat_"+perChannel;
-  TString name_qcd_alphaerr = "qcd_alphaerr_"+perChannel;
+  TString name_qcd_alphaerr = "qcd_alphaErr_"+perChannel;
   TString name_qcd_fjrbsyst = "qcd_FJRBsyst_"+perChannel;
   TString name_qcd_fitstat = Form("qcd_RPHIstat_%s",ht_str.c_str());
   TString name_qcd_fitsyst = Form("qcd_RPHIsyst_%s",ht_str.c_str());
