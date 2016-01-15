@@ -1,22 +1,31 @@
 #!/bin/python
 
 import os
+import sys
 import ROOT
 import math
 
 #datacard_dir = 'cards_all_macroregions_try2'
 datacard_dir = 'datacards_2p26ifb_fromMario/EventYields_data_Run2015_25nsGolden_2p3ifb/datacard_templates'
-output_dir = 'cards_for_macroregions'
-# signal point is irrelevant since we ignore signal, but it appears in the names
+output_dir = 'cards_for_macroregions_verytight'
+
+# signal point may appear in name
 #signal_point = '_T2tt_700_0'
 signal_point = ''
 
+doSignal = False
+
 #__________________________________________________
 # writes a datacard for a macroregion
-def makeMacroRegionDatacard( region, n_obs, n_bkg, abserr_bkg_up, abserr_bkg_dn ):
-    rel_nuis_up = 1. + (abserr_bkg_up/n_bkg)
-    rel_nuis_dn = 1. - (abserr_bkg_dn/n_bkg)
+def makeMacroRegionDatacard( region, n_obs, n_bkg, abserr_bkg_up, abserr_bkg_dn, n_sig ):
+    rel_nuis_up = 1.
+    rel_nuis_dn = 1.
+    if n_bkg > 0.:
+        rel_nuis_up = 1. + (abserr_bkg_up/n_bkg)
+        rel_nuis_dn = 1. - (abserr_bkg_dn/n_bkg)
     sig_val = 1.
+    if doSignal:
+        sig_val = n_sig
     sig_nuis = 1.15 # arbitrary choice
 
     filename = '%s/datacard_macroregion_%s.txt' % (output_dir, region)
@@ -33,11 +42,11 @@ observation  %d
 bin 	%s	%s	
 process 	 sig 	 bkg
 process 	 0 	 1 
-rate 	 1.00 	 %.3f 
+rate 	 %.3f 	 %.3f 
 -------------
 sig_syst    lnN    %.2f -
 bkg_syst    lnN    - %.2f/%.2f
-''' % (region, n_obs, region, region, n_bkg, sig_nuis, rel_nuis_up, rel_nuis_dn) )
+''' % (region, n_obs, region, region, sig_val, n_bkg, sig_nuis, rel_nuis_up, rel_nuis_dn) )
     outf.close()
 
 #__________________________________________________
@@ -102,6 +111,7 @@ def printMacroRegionYields( region, datacard_list ):
     n_zinv = 0.
     n_llep = 0.
     n_qcd = 0.
+    n_sig = 0.
 
     dict_zinv_nuisances_up = {}
     dict_zinv_nuisances_dn = {}
@@ -112,13 +122,19 @@ def printMacroRegionYields( region, datacard_list ):
 
     for datacard_name in datacard_list:
         #print '  checking card:',datacard_name
-        f = open(datacard_name,'r')
-        lines = f.readlines()
-        f.close()
+        lines = []
+        try:
+            f = open(datacard_name,'r')
+            lines = f.readlines()
+            f.close()
+        except IOError:
+            print 'Could not open file, skipping:',datacard_name
+            continue
 
         val_zinv = 0.
         val_llep = 0.
         val_qcd = 0.
+        val_sig = 0.
 
         for i, line in enumerate(lines):
             line = line.replace('\n','')
@@ -134,10 +150,13 @@ def printMacroRegionYields( region, datacard_list ):
                 val_zinv = float(pred_vals_tokens[2])
                 val_llep = float(pred_vals_tokens[3])
                 val_qcd = float(pred_vals_tokens[4])
+                if (doSignal):
+                    val_sig = float(pred_vals_tokens[1])
 
                 n_zinv += val_zinv
                 n_llep += val_llep
                 n_qcd += val_qcd
+                n_sig += val_sig
                 #print '    bkgs: %.3f  %.3f  %.3f'%(val_zinv, val_llep, val_qcd)
 
             # lines for nuisances
@@ -206,27 +225,41 @@ def printMacroRegionYields( region, datacard_list ):
     abserr_sum_bkg_up = math.sqrt(abserr_sum_zinv_up*abserr_sum_zinv_up + abserr_sum_llep_up*abserr_sum_llep_up + abserr_sum_qcd_up*abserr_sum_qcd_up)
     abserr_sum_bkg_dn = math.sqrt(abserr_sum_zinv_dn*abserr_sum_zinv_dn + abserr_sum_llep_dn*abserr_sum_llep_dn + abserr_sum_qcd_dn*abserr_sum_qcd_dn)
 
+    region_print = region.replace('_',' ')
+
+    # print '--------------------------------------'
+    # print 'yields for',region_print
     # print ' obs: %d' % (n_obs)
     # print ' bkg: %.3f + %.3f - %.3f' % (n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn)
     # print 'zinv: %.3f + %.3f - %.3f' % (n_zinv, abserr_sum_zinv_up, abserr_sum_zinv_dn)
     # print 'llep: %.3f + %.3f - %.3f' % (n_llep, abserr_sum_llep_up, abserr_sum_llep_dn)
     # print ' qcd: %.3f + %.3f - %.3f' % (n_qcd, abserr_sum_qcd_up, abserr_sum_qcd_dn)
+    # print ' sig: %.3f' % (n_sig)
 
-    region_print = region.replace('_',' ')
     if n_bkg > 100:
         print '%s & $%.0f^{+%.0f}_{-%.0f}$ & %d &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_obs)
     else:
         print '%s & $%.1f^{+%.1f}_{-%.1f}$ & %d &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_obs)
         
 
-    makeMacroRegionDatacard( region, n_obs, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn )
+    makeMacroRegionDatacard( region, n_obs, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_sig )
 
 #__________________________________________________
 def main():
     # define macroregions here from subsets of existing datacards
 
-    # 3b small: HT > 575, MT2 > 200
-    datacards_3b_small = [
+    # 3b verytight: HT > 1000, MT2 > 200
+    datacards_3b_verytight = [
+        'HT1000to1500_j2to6_b3toInf_m200to400',
+        'HT1000to1500_j2to6_b3toInf_m400toInf',
+        'HT1000to1500_j7toInf_b3toInf_m200to400',
+        'HT1000to1500_j7toInf_b3toInf_m400toInf',
+        'HT1500toInf_j2to6_b3toInf_m200toInf',
+        'HT1500toInf_j7toInf_b3toInf_m200toInf',
+        ]
+
+    # 3b tight: HT > 575, MT2 > 200
+    datacards_3b_tight = [
         'HT575to1000_j2to6_b3toInf_m200to300',
         'HT575to1000_j2to6_b3toInf_m300to400',
         'HT575to1000_j2to6_b3toInf_m400toInf',
@@ -263,8 +296,8 @@ def main():
         'HT1500toInf_j7toInf_b3toInf_m200toInf',
         ]
 
-    # 7j small: HT > 575, MT2 > 400
-    datacards_7j_small = [
+    # 7j tight: HT > 575, MT2 > 400
+    datacards_7j_tight = [
         'HT575to1000_j7toInf_b0_m400toInf',
         'HT575to1000_j7toInf_b1_m400toInf',
         'HT575to1000_j7toInf_b2_m400toInf',
@@ -302,8 +335,8 @@ def main():
         'HT1500toInf_j7toInf_b3toInf_m200toInf',
         ]
 
-    # 4j small: (4-6j, HT > 1500, MT2 > 600) || (>=7j, HT > 1500, MT2 > 400) || (>=4j, HT > 1000, MT2 > 600)
-    datacards_4j_small = [
+    # 4j tight: (4-6j, HT > 1500, MT2 > 600) || (>=7j, HT > 1500, MT2 > 400) || (>=4j, HT > 1000, MT2 > 600)
+    datacards_4j_tight = [
         'HT1000to1500_j4to6_b0_m600to800',
         'HT1000to1500_j4to6_b0_m800to1000',
         'HT1000to1500_j4to6_b0_m1000toInf',
@@ -372,8 +405,24 @@ def main():
         'HT1500toInf_j7toInf_b3toInf_m200toInf',
         ]
 
-    # 2b small: HT > 575, MT2 > 400
-    datacards_2b_small = [
+    # 2b verytight: HT > 1000, MT2 > 400
+    datacards_2b_verytight = [
+        'HT1000to1500_j2to3_b2_m400toInf',
+        'HT1000to1500_j4to6_b2_m400to600',
+        'HT1000to1500_j4to6_b2_m600toInf',
+        'HT1000to1500_j2to6_b3toInf_m400toInf',
+        'HT1000to1500_j7toInf_b2_m400toInf',
+        'HT1000to1500_j7toInf_b3toInf_m400toInf',
+        'HT1500toInf_j2to3_b2_m200toInf',
+        'HT1500toInf_j4to6_b2_m400to600',
+        'HT1500toInf_j4to6_b2_m600toInf',
+        'HT1500toInf_j2to6_b3toInf_m200toInf',
+        'HT1500toInf_j7toInf_b2_m400toInf',
+        'HT1500toInf_j7toInf_b3toInf_m200toInf',
+        ]
+
+    # 2b tight: HT > 575, MT2 > 400
+    datacards_2b_tight = [
         'HT575to1000_j2to3_b2_m400to600',
         'HT575to1000_j2to3_b2_m600toInf',
         'HT575to1000_j4to6_b2_m400to600',
@@ -435,9 +484,9 @@ def main():
         'HT1500toInf_j7toInf_b3toInf_m200toInf',
         ]
 
-    # 2j small: HT>1000 && Njets < 7
+    # 2j tight: HT>1000 && Njets < 7
     #        && ( ( (NJ>=4 && ( (MT2 > 600 && HT>1500) || (MT2>800 && HT>1000) ) || (NJ<4 && ( (MT>400  && HT>1500) || (MT>600 && HT>1000) ) )
-    datacards_2j_small = [
+    datacards_2j_tight = [
         'HT1000to1500_j2to3_b0_m600to800',
         'HT1000to1500_j2to3_b0_m800to1000',
         'HT1000to1500_j2to3_b0_m1000toInf',
@@ -465,7 +514,7 @@ def main():
         'HT1500toInf_j2to6_b3toInf_m200toInf', 
         ]
 
-    # 1j small: (Nj=1 && Nb=1 && HT>575) ||
+    # 1j tight: (Nj=1 && Nb=1 && HT>575) ||
     #           (Nj=1 && Nb=0 && HT>1000) ||
     #           (Nj=2-3 && Nb=0 && HT=575-1000 && MT2 > 800) ||
     #           (Nj=2-3 && Nb=1,2 && HT=575-1000 && MT2 > 600) ||
@@ -473,7 +522,7 @@ def main():
     #           (Nj=2-3 && Nb=2 && HT=1000-1500 && MT2 > 400) ||
     #           (Nj=2-3 && Nb=0,1 && HT>1500 && MT2 > 400) ||
     #           (Nj=2-3 && Nb=2 && HT>1500 && MT2 > 200)
-    datacards_1j_small = [
+    datacards_1j_tight = [
         'HT1000toInf_j1_b0_m0toInf',
         'HT575toInf_j1_b1toInf_m0toInf',
         'HT575to1000_j2to3_b0_m800toInf',
@@ -528,11 +577,11 @@ def main():
         'HT1500toInf_j2to3_b2_m200toInf', 
         ]
 
-    # 1j large: (Nj=1 && HT>450)
+    # 1j loose: (Nj=1 && HT>450)
     #        || (Nj=2-3 && Nb=0,1,2 && HT=450-575 && MT2 > 400)
     #        || (Nj=2-3 && Nb=0,1,2 && HT=575-1000 && MT2 > 300)
     #        || (Nj=2-3 && Nb=0,1,2 && HT>1000 && MT2 > 200)
-    datacards_1j_large = [
+    datacards_1j_loose = [
         'HT450to575_j1_b0_m0toInf',
         'HT575to700_j1_b0_m0toInf',
         'HT700to1000_j1_b0_m0toInf',
@@ -579,23 +628,31 @@ def main():
         ]
 
     all_regions = {
-        '1j_small' : datacards_1j_small,
+        '1j_loose'  : datacards_1j_loose,
         '1j_medium' : datacards_1j_medium,
-        '1j_large' : datacards_1j_large,
-        '2j_small' : datacards_2j_small,
-        '4j_small' : datacards_4j_small,
+        '1j_tight'  : datacards_1j_tight,
+        '2j_tight'  : datacards_2j_tight,
         '4j_medium' : datacards_4j_medium,
-        '7j_small' : datacards_7j_small,
+        '4j_tight'  : datacards_4j_tight,
         '7j_medium' : datacards_7j_medium,
-        '2b_small' : datacards_2b_small,
+        '7j_tight'  : datacards_7j_tight,
         '2b_medium' : datacards_2b_medium,
-        '3b_small' : datacards_3b_small,
+        '2b_tight'  : datacards_2b_tight,
+        '2b_verytight'  : datacards_2b_verytight,
         '3b_medium' : datacards_3b_medium,
+        '3b_tight'  : datacards_3b_tight,
+        '3b_verytight'  : datacards_3b_verytight,
     }
 
     # make output directory
     if not os.path.exists(output_dir):
-        os.makedirs(output_dir)    
+        os.makedirs(output_dir)
+
+    # check if we should do signal
+    if len(sys.argv) > 1 and bool(sys.argv[1]):
+        print 'Will sum signal values'
+        global doSignal
+        doSignal = True
     
     for region, datacard_list in all_regions.items():
         #print '--------------------------'
