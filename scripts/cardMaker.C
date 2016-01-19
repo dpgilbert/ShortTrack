@@ -618,7 +618,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 }
 
 //_______________________________________________________________________________
-void cardMaker(string signal, string input_dir, string output_dir, bool isScan = false, bool doData = false){
+void cardMaker(string signal, string input_dir, string output_dir, bool isScan = false, bool doData = true){
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
