@@ -505,6 +505,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     // updated lists for full dataset
     metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/csc2015_Dec01.txt");
     metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/ecalscn1043093_Dec01.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/badResolutionTrack_Jan13.txt");
+    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/muonBadTrack_Jan13.txt");
     cout<<" ... finished!"<<endl;
   }
 
