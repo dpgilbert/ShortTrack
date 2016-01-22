@@ -1358,14 +1358,15 @@ std::vector<SR> getSignalRegionsMonojet(){
   SR baseSR;
 
   // define baseline selections commmon to all monojet regions
+  //  ETH doesn't explictly cut on jet1_pt for SR or CRSL, just ht, so we won't either for this iteration
   float mt2bins_monojet[2] = {0, 1500};
-  baseSR.SetVar("j1pt", 200, -1);
+  //baseSR.SetVar("j1pt", 200, -1);
   baseSR.SetVar("nlep", 0, 1);
   baseSR.SetVar("njets", 1, 2);
   baseSR.SetVar("met", 200, -1);
   baseSR.SetVar("deltaPhiMin", 0.3, -1);
   baseSR.SetVar("diffMetMhtOverMet", 0, 0.5);
-  baseSR.SetVarCRSL("j1pt", 200, -1);
+  //baseSR.SetVarCRSL("j1pt", 200, -1);
   baseSR.SetVarCRSL("nlep", 1, 2);
   baseSR.SetVarCRSL("njets", 1, 2);
   baseSR.SetVarCRSL("met", 200, -1);
