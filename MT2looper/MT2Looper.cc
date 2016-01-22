@@ -1685,7 +1685,7 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
   }
 
   // do monojet SRs
-  if (passMonojetId_ && (!t.isData || t.HLT_PFMETNoMu90_PFMHTNoMu90 || t.HLT_PFHT350_PFMET100)) {
+  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMETNoMu90_PFMHTNoMu90 || t.HLT_PFHT350_PFMET100)) {
 
     std::map<std::string, float> values_monojet;
     values_monojet["deltaPhiMin"] = t.deltaPhiMin;
@@ -1695,7 +1695,7 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
     values_monojet["j2pt"]        = t.jet2_pt;
     values_monojet["njets"]       = t.nJet30;
     values_monojet["nbjets"]      = t.nBJet20;
-    values_monojet["ht"]          = t.ht;
+    values_monojet["ht"]          = t.jet1_pt; // only count jet1_pt for binning
     values_monojet["met"]         = t.met_pt;
 
     for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
