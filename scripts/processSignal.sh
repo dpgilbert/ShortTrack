@@ -51,11 +51,11 @@ root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/T2cc.root\",2)"
 
 ### make signal contamination inputs for ETH
 
-echo "root -b -q makeSignalContam.C+(${INDIR},T1tttt)"
-root -b -q "makeSignalContam.C+(\"${INDIR}\",\"T1tttt\")"
+echo "root -b -q sigContamMaker.C+(${INDIR},T1tttt)"
+root -b -q "sigContamMaker.C+(\"${INDIR}\",\"T1tttt\")"
 
-echo "root -b -q makeSignalContam.C+(${INDIR},T2tt)"
-root -b -q "makeSignalContam.C+(\"${INDIR}\",\"T2tt\")"
+echo "root -b -q sigContamMaker.C+(${INDIR},T2tt)"
+root -b -q "sigContamMaker.C+(\"${INDIR}\",\"T2tt\")"
 
 ### make total signal inputs for ETH
 
