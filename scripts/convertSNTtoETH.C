@@ -74,7 +74,7 @@ TString getETHname(TFile* fin, TString directory) {
 void convertSNTtoETH(TString dir, TString sample) {
 
   TFile* fin = new TFile(dir+"/"+sample+".root","READ");
-  TFile* fout = new TFile(Form("%s_eth.root",sample.Data()),"RECREATE");
+  TFile* fout = new TFile(Form("%s/%s_eth.root",dir.Data(),sample.Data()),"RECREATE");
   TDirectory* dout_base = fout->mkdir(sample);
   
   TIter dir_it(fin->GetListOfKeys());
@@ -109,6 +109,20 @@ void convertSNTtoETH(TString dir, TString sample) {
       // 1d yield hist
       else if (hist_name == "h_mt2bins" && TString(hist_k->GetClassName()) == "TH1D") {
 	hist_name_eth = "yield_" + sample + "_" + dir_name_eth;
+	TH1D* h = (TH1D*)hist_k->ReadObj();
+	h->SetName(hist_name_eth);
+	dout->WriteObject(h,hist_name_eth);
+      }
+      // 1d crsl yield hist
+      else if (hist_name == "h_mt2bins_crsl" && TString(hist_k->GetClassName()) == "TH1D") {
+	hist_name_eth = "yield_crsl_" + sample + "_" + dir_name_eth;
+	TH1D* h = (TH1D*)hist_k->ReadObj();
+	h->SetName(hist_name_eth);
+	dout->WriteObject(h,hist_name_eth);
+      }
+      // 1d transfer factor hist
+      else if (hist_name == "h_mt2bins_alpha" && TString(hist_k->GetClassName()) == "TH1D") {
+	hist_name_eth = "yield_alpha_" + sample + "_" + dir_name_eth;
 	TH1D* h = (TH1D*)hist_k->ReadObj();
 	h->SetName(hist_name_eth);
 	dout->WriteObject(h,hist_name_eth);
