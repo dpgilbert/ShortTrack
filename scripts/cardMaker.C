@@ -43,6 +43,8 @@ const bool integratedZinvEstimate = true;
 
 const bool doDummySignalSyst = false;
 
+const bool subtractSignalContam = false;
+
 double last_zinv_ratio = 0.5;
 double last_lostlep_transfer = 2.;
 
@@ -84,6 +86,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString fullhistnameFJRB  = fullhistname+"FJRBsyst";
   TString fullhistnameFitStat  = fullhistname+"FitStat";
   TString fullhistnameFitSyst  = fullhistname+"FitSyst";
+  TString fullhistnameCRSL = TString(dir).ReplaceAll("sr","crsl") + "/h_mt2bins";
+  TString fullhistnameCRSLScan  = fullhistnameCRSL+"_sigscan";
 
   TString signame(signal);
   if (scanM1 >= 0 && scanM2 >= 0) {
@@ -113,6 +117,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   double n_sig(0.);
   double n_sig_TR(0.);
+  double n_sig_crsl_TR(0.);
   double err_sig_mcstat(0.);
   double n_sig_btagsf_heavy_UP(0.);
   double n_sig_btagsf_light_UP(0.);
@@ -120,6 +125,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double n_sig_isr_UP(0.);
 
   TH1D* h_sig(0);
+  TH1D* h_sig_crsl(0);
   TH1D* h_sig_btagsf_heavy_UP(0);
   TH1D* h_sig_btagsf_light_UP(0);
   TH1D* h_sig_lepeff_UP(0);
@@ -139,10 +145,15 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     if (h_sigscan_lepeff_UP) h_sig_lepeff_UP = h_sigscan_lepeff_UP->ProjectionX(Form("h_mt2bins_lepeff_UP_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),bin1,bin1,bin2,bin2);
     TH3D* h_sigscan_isr_UP = (TH3D*) f_sig->Get(fullhistnameScanIsr);
     if (h_sigscan_isr_UP) h_sig_isr_UP = h_sigscan_isr_UP->ProjectionX(Form("h_mt2bins_isr_UP_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),bin1,bin1,bin2,bin2);
+    if (subtractSignalContam) {
+      TH3D* h_sigscan_crsl = (TH3D*) f_sig->Get(fullhistnameCRSLScan);
+      if (h_sigscan_crsl) h_sig_crsl = h_sigscan_crsl->ProjectionX(Form("h_mt2bins_crsl_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),bin1,bin1,bin2,bin2);
+    }
   }
   // single point sample
   else {
     h_sig = (TH1D*) f_sig->Get(fullhistname);
+    if (subtractSignalContam) h_sig_crsl = (TH1D*) f_sig->Get(fullhistnameCRSL);
     // Trick to print out monojet regions even when running on signal without monojet events
     //    if (fullhistname.Contains("J")) 
     //      h_sig = (TH1D*) f_sig->Get("sr6M/h_mt2bins");
@@ -160,6 +171,11 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (h_sig_btagsf_light_UP) n_sig_btagsf_light_UP = h_sig_btagsf_light_UP->GetBinContent(mt2bin);
   if (h_sig_lepeff_UP) n_sig_lepeff_UP = h_sig_lepeff_UP->GetBinContent(mt2bin);
   if (h_sig_isr_UP) n_sig_isr_UP = h_sig_isr_UP->GetBinContent(mt2bin);
+  if (h_sig_crsl) {
+    n_sig_crsl_TR = h_sig_crsl->Integral(0,-1);
+  } else {
+    cout << "tried to subtract signal contamination but couldn't find sig_crsl hist" << endl;
+  }
   
   //Get variable boundaries for signal region.
   //Used to create datacard name.
@@ -253,10 +269,6 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TH1D* h_lostlep_cryield = (TH1D*) f_lostlep->Get(fullhistnameCRyield);
   if (h_lostlep_cryield != 0) 
     n_lostlep_cr = round(h_lostlep_cryield->Integral(0,-1));
-  // note that this alpha value does NOT match our prediction, it's only for bins with 0 CR events
-  //   this alpha is:                 N_MC^SR(MT2) / N_MC^CR(MT2)
-  //   our prediction normally uses:  N_MC^SR(MT2) * N_Data^CR / N_MC^CR
-  //     where the last two values are integrated over MT2
   TH1D* h_lostlep_alpha = (TH1D*) f_lostlep->Get(fullhistnameAlpha);
   if (h_lostlep_alpha != 0) 
     lostlep_alpha = h_lostlep_alpha->GetBinContent(mt2bin);
@@ -390,10 +402,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_lostlep_alphaerr = Form("llep_alpha_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   TString name_lostlep_lepeff = Form("llep_lepeff_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
 
-  // if nonzero CR stats: compute alpha for this bin based on CR yield and SR pred
   // note that if n_lostlep_cr == 0, we will just use lostlep_alpha (straight from MC) in the datacard
   if (n_lostlep_cr > 0.) {
-    lostlep_alpha = n_lostlep / n_lostlep_cr;
     if (lostlep_alpha > 3.) {
       lostlep_alpha = 3.; // hard bound to avoid statistical fluctuations
       n_lostlep = n_lostlep_cr * lostlep_alpha;
@@ -537,6 +547,20 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     if (isSignalWithLeptons) ++n_syst; // lepeff
   }
 
+  // correction for signal contamination:
+  //   find how much bkg prediction is increased for this MT2 bin by signal in CR (n_lostlep_extra)
+  //   subtract n_lostlep_extra from n_sig and use for reduced signal efficiency
+  if (subtractSignalContam && n_sig_crsl_TR > 0.) {
+    double n_lostlep_extra = n_sig_crsl_TR * lostlep_alpha;
+    double n_sig_cor = std::max(0.,n_sig - n_lostlep_extra);
+    if (verbose) {
+      cout << "correcting down signal yield from " << n_sig << " to " << n_sig_cor
+	   << ", n_sig_crsl_TR: " << n_sig_crsl_TR
+	   << ", alpha: " << lostlep_alpha << ", extra bkg pred: " << n_lostlep_extra << endl;
+    }
+    n_sig = n_sig_cor;
+  }
+
   ofstream ofile;
   ofile.open(cardname);
 
@@ -668,8 +692,10 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
       int n_mt2bins = h_n_mt2bins->GetBinContent(1);
       for (int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {//Make a separate card for each MT2 bin.
 	if (isScan) {
+	  int y_binwidth = 25;
+	  if (signal.find("T2cc") != std::string::npos) y_binwidth = 10;
 	  for (int im1 = 0; im1 <= 2000; im1 += 25) {
-	    for (int im2 = 0; im2 <= 1600; im2 += 25) {
+	    for (int im2 = 0; im2 <= 1600; im2 += y_binwidth) {
 	      int result = printCard(k->GetTitle(), imt2, signal, output_dir, im1, im2);   //MT2 and scan bins with no entries are handled by printCard function.
 	      if (result > 0) signal_points.insert( make_pair(im1,im2) ); 
 	    } // scanM2 loop
