@@ -154,9 +154,9 @@ TAG="V00-01-10_25ns_fastsim"
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_fastsim/SMS-T1qqqq_mGluino-925to975_mLSP-400to900_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15MiniAODv2-FastAsympt25ns_74X_mcRun2_asymptotic_v2-v1/V07-04-12/ ${TAG}_T1qqqq_mGluino-925to975_mLSP-400to900
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_fastsim/SMS-T1qqqq_mGluino-925to975_mLSP-950_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15MiniAODv2-FastAsympt25ns_74X_mcRun2_asymptotic_v2-v1/V07-04-12/ ${TAG}_T1qqqq_mGluino-925to975_mLSP-950
 
-#
-# T2tt
-#
+
+T2tt
+
 
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_fastsim_v1/SMS-T2tt_mStop-100-125_mLSP-1to50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1/V07-04-12_miniaodv1_FS/ ${TAG}_T2tt_mStop-100-125_mLSP-1to50
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_fastsim_v1/SMS-T2tt_mStop-150-175_mLSP-1to100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1/V07-04-12_miniaodv1_FS/ ${TAG}_T2tt_mStop-150-175_mLSP-1to100
@@ -169,6 +169,23 @@ TAG="V00-01-10_25ns_fastsim"
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_fastsim/SMS-T2tt_mStop-500-525-550_mLSP-1to425-325to450-1to475_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15MiniAODv2-FastAsympt25ns_74X_mcRun2_asymptotic_v2-v1/V07-04-12/ ${TAG}_T2tt_mStop-500-525-550_mLSP-1to425-325to450-1to475
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_fastsim/SMS-T2tt_mStop-600-950_mLSP-1to450_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15MiniAODv2-FastAsympt25ns_74X_mcRun2_asymptotic_v2-v1/V07-04-12/ ${TAG}_T2tt_mStop-600-950_mLSP-1to450
 
+#
+# T2bb
+#
+
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_fastsim/SMS-T2bb_mSbottom-300to400_0to375_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1/V07-04-12_miniaodv1_FS/ ${TAG}_T2bb_mSbottom-300to400_0to375
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_fastsim/SMS-T2bb_mSbottom-425to600_0to575_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1/V07-04-12_miniaodv1_FS/ ${TAG}_T2bb_mSbottom-425to600_0to575
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_fastsim/SMS-T2bb_mSbottom-625to1050_0to550_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1/V07-04-12_miniaodv1_FS/ ${TAG}_T2bb_mSbottom-625to1050_0to550
+
+#
+# T2cc
+#
+
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_fastsim/SMS-T2cc_mStop-175to225_mLSP-175to215_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1/V07-04-12_miniaodv1_FS/ ${TAG}_T2cc_mStop-175to225_mLSP-175to215
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_fastsim/SMS-T2cc_mStop-250to300_mLSP-170to290_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1/V07-04-12_miniaodv1_FS/ ${TAG}_T2cc_mStop-250to300_mLSP-170to290
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_fastsim/SMS-T2cc_mStop-400to450_mLSP-320to440_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1/V07-04-12_miniaodv1_FS/ ${TAG}_T2cc_mStop-400to450_mLSP-320to440
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_fastsim/SMS-T2cc_mStop-475to525_mLSP-395to515_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1/V07-04-12_miniaodv1_FS/ ${TAG}_T2cc_mStop-475to525_mLSP-395to515
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_fastsim/SMS-T2cc_mStop-550to600_mLSP-470to590_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1/V07-04-12_miniaodv1_FS/ ${TAG}_T2cc_mStop-550to600_mLSP-470to590
 
 
 # --- write submit script ---

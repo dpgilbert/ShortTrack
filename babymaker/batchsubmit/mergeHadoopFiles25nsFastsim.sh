@@ -188,3 +188,21 @@ run T2tt_mStop-300to375_mLSP-1to300
 run T2tt_mStop-400to475_mLSP-1to400
 run T2tt_mStop-500-525-550_mLSP-1to425-325to450-1to475
 run T2tt_mStop-600-950_mLSP-1to450
+
+#
+# T2bb
+#
+
+run T2bb_mSbottom-300to400_0to375
+run T2bb_mSbottom-425to600_0to575
+run T2bb_mSbottom-625to1050_0to550
+
+#
+# T2cc
+#
+
+run T2cc_mStop-175to225_mLSP-175to215
+run T2cc_mStop-250to300_mLSP-170to290
+run T2cc_mStop-400to450_mLSP-320to440
+run T2cc_mStop-475to525_mLSP-395to515
+run T2cc_mStop-550to600_mLSP-470to590
