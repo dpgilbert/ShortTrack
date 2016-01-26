@@ -47,6 +47,7 @@ std::string toString(float in){
 
 // generic binning for signal scans - need arrays since mt2 dimension will be variable
 //   assuming here: 25 GeV binning, m1 from 0-2000, m2 from 0-2000
+//   in Loop, also account for 10 GeV binning from 0-1000 in T2cc scan
 const int n_m1bins = 81;
 float m1bins[n_m1bins+1];
 const int n_m2bins = 81;
@@ -102,14 +103,6 @@ bool doLepEffVars = true;
 bool doMinimalPlots = false;
 
 MT2Looper::MT2Looper(){
-
-  // set up signal binning
-  for (int i = 0; i <= n_m1bins; ++i) {
-    m1bins[i] = i*25.;
-  }
-  for (int i = 0; i <= n_m2bins; ++i) {
-    m2bins[i] = i*25.;
-  }
 
 }
 MT2Looper::~MT2Looper(){
@@ -568,6 +561,16 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     setElSFfile_fastsim("../babymaker/lepsf/sf_el_vetoCB_mini01.root");  
     setMuSFfile_fastsim("../babymaker/lepsf/sf_mu_looseID_mini02.root");  
     setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt_mGluino-1500to1525.root");  
+  }
+  
+  // set up signal binning
+  for (int i = 0; i <= n_m1bins; ++i) {
+    m1bins[i] = i*25.;
+  }
+  for (int i = 0; i <= n_m2bins; ++i) {
+    // 10 GeV binning for T2cc
+    if (sample.find("T2cc") != std::string::npos) m2bins[i] = i*10.;
+    else m2bins[i] = i*25.;
   }
   
   cout << "[MT2Looper::loop] setting up histos" << endl;
