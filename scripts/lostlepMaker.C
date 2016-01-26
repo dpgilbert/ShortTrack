@@ -81,7 +81,8 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     if (!h_lostlepMC_cr) {
       cout << "couldn't find lostlep MC CR hist: " << fullhistnameSL << endl;
     } else {
-      alphaHist->Divide(h_lostlepMC_cr);
+      float cr_yield = h_lostlepMC_cr->Integral(0,-1);
+      alphaHist->Scale(1./cr_yield);
     }
 
     TH1D* h_lostlepDD_cr = 0;
@@ -93,7 +94,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
       // make empty histogram
       h_lostlepDD_cr = new TH1D("h_mt2binsCRyield", "h_mt2binsCRyield", n_mt2bins, mt2bins);
     }
-    
+
     // ------------------------------------------
     //  added to compare after normalizing MC
     
