@@ -1123,7 +1123,13 @@ void MT2Looper::fillHistosSRBase() {
   values["mt2"]         = t.mt2;
   values["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
-  if(SRBase.PassesSelection(values)) fillHistos(SRBase.srHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), SRBase.GetName(), "");
+  if(SRBase.PassesSelection(values)) {
+    fillHistos(SRBase.srHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), SRBase.GetName(), "");
+    if (t.isData && !doBlindData && t.met_pt > 2000.) {
+      std::cout << "WARNING: found event with high MET: " << t.run << ":" <<  t.lumi << ":" << t.evt
+		<< ", HT: " << t.ht << ", MET: " << t.met_pt << ", nJet30: " << t.nJet30 << ", mt2: " << t.mt2 << std::endl;
+    }
+  }
 
   // do monojet SRs
   bool passMonojet = false;
@@ -1137,7 +1143,13 @@ void MT2Looper::fillHistosSRBase() {
     values_monojet["met"]         = t.met_pt;
     
     if(SRBaseMonojet.PassesSelection(values_monojet)) passMonojet = true;
-    if (passMonojet) fillHistos(SRBaseMonojet.srHistMap, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.GetMT2Bins(), SRBaseMonojet.GetName(), "");
+    if (passMonojet) {
+      fillHistos(SRBaseMonojet.srHistMap, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.GetMT2Bins(), SRBaseMonojet.GetName(), "");
+      if (t.isData && !doBlindData && t.met_pt > 2000.) {
+	std::cout << "WARNING: found monojet event with high MET: " << t.run << ":" <<  t.lumi << ":" << t.evt
+		  << ", HT: " << t.ht << ", MET: " << t.met_pt << ", nJet30: " << t.nJet30 << ", mt2: " << t.mt2 << std::endl;
+      }
+    }
   }
   if ((SRBase.PassesSelection(values)) || (passMonojet)) {
     fillHistos(SRBaseIncl.srHistMap, SRBaseIncl.GetNumberOfMT2Bins(), SRBaseIncl.GetMT2Bins(), SRBaseIncl.GetName(), "");
