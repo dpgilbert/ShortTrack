@@ -693,9 +693,13 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
       for (int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {//Make a separate card for each MT2 bin.
 	if (isScan) {
 	  int y_binwidth = 25;
-	  if (signal.find("T2cc") != std::string::npos) y_binwidth = 10;
+	  int y_max = 1600;
+	  if (signal.find("T2cc") != std::string::npos) {
+	    y_binwidth = 5;
+	    y_max = 800;
+	  }
 	  for (int im1 = 0; im1 <= 2000; im1 += 25) {
-	    for (int im2 = 0; im2 <= 1600; im2 += y_binwidth) {
+	    for (int im2 = 0; im2 <= y_max; im2 += y_binwidth) {
 	      int result = printCard(k->GetTitle(), imt2, signal, output_dir, im1, im2);   //MT2 and scan bins with no entries are handled by printCard function.
 	      if (result > 0) signal_points.insert( make_pair(im1,im2) ); 
 	    } // scanM2 loop

@@ -47,11 +47,11 @@ std::string toString(float in){
 
 // generic binning for signal scans - need arrays since mt2 dimension will be variable
 //   assuming here: 25 GeV binning, m1 from 0-2000, m2 from 0-2000
-//   in Loop, also account for 10 GeV binning from 0-1000 in T2cc scan
-const int n_m1bins = 81;
-float m1bins[n_m1bins+1];
-const int n_m2bins = 81;
-float m2bins[n_m2bins+1];
+//   in Loop, also account for 5 GeV binning from 0-800 in T2cc scan
+int n_m1bins = 81;
+float* m1bins;
+int n_m2bins = 81;
+float* m2bins;
 
 const int n_htbins = 5;
 const float htbins[n_htbins+1] = {200, 450., 575., 1000., 1500., 3000.};
@@ -564,12 +564,19 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   }
   
   // set up signal binning
+  if (sample.find("T2cc") != std::string::npos) {
+    // 5 GeV binning up to 800 GeV
+    n_m2bins = 161;
+  }
+  m1bins = new float[n_m1bins+1];
+  m2bins = new float[n_m2bins+1];
+    
   for (int i = 0; i <= n_m1bins; ++i) {
     m1bins[i] = i*25.;
   }
   for (int i = 0; i <= n_m2bins; ++i) {
-    // 10 GeV binning for T2cc
-    if (sample.find("T2cc") != std::string::npos) m2bins[i] = i*10.;
+    // 5 GeV binning for T2cc
+    if (sample.find("T2cc") != std::string::npos) m2bins[i] = i*5.;
     else m2bins[i] = i*25.;
   }
   
@@ -1086,6 +1093,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   outfile_->Write();
   outfile_->Close();
   delete outfile_;
+
+  delete m1bins;
+  delete m2bins;
 
   bmark->Stop("benchmark");
   cout << endl;
