@@ -24,7 +24,7 @@ class babyMaker {
 
  public:
 
-  babyMaker() {};
+  babyMaker() : doRecomputeRawPFMET_(false) {};
   ~babyMaker() {
     delete BabyFile_;
     delete BabyTree_;
@@ -37,6 +37,8 @@ class babyMaker {
   void FillBabyNtuple();
   void CloseBabyNtuple();
 
+  void SetRecomputeRawPFMET(bool flag) {doRecomputeRawPFMET_ = flag;};
+
  private:
 
   float getBtagEffFromFile(float pt, float eta, int mcFlavour, bool isFastsim = false);
@@ -48,6 +50,7 @@ class babyMaker {
 
   bool isDataFromFileName;
   bool isPromptReco;
+  bool doRecomputeRawPFMET_;
 
   // for btag SFs
   BTagCalibration* calib;

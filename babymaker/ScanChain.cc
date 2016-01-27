@@ -121,6 +121,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     cout << "running on MC, based on file name" << endl;
   }
 
+  if (doRecomputeRawPFMET_) cout << "Will recompute rawPFMET using PF cands" << endl;
+
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
   // 25ns is hardcoded here, would need an option for 50ns
@@ -398,7 +400,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
       if (applyJECfromFile && recomputeT1MET) {
 	std::pair <float, float> t1met;
-	if (!isData) t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3, jetcorr_uncertainty, bool(applyJECunc == 1));
+	if (!isData) t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3, jetcorr_uncertainty, bool(applyJECunc == 1),doRecomputeRawPFMET_);
 	else t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3); // never apply variations to data
 	met_pt  = t1met.first;
 	met_phi = t1met.second;

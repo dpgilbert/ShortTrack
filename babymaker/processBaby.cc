@@ -216,6 +216,8 @@ int main(int argc, char **argv) {
   else if (infile.Contains("FSPremix")) bx = 25;
 
   bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns"));
+
+  bool isBadMiniAodV1 = bool(infile.Contains("V07-04-12_miniaodv1_FS"));
   
   if (bx == 0) {
     std::cout << "ERROR: couldn't figure out bx for sample!! filename was: " << infile << ". Exiting" << std::endl;
@@ -228,6 +230,7 @@ int main(int argc, char **argv) {
   //--------------------------------
   
   babyMaker *looper = new babyMaker();
+  if (isBadMiniAodV1) looper->SetRecomputeRawPFMET(true);
   looper->ScanChain(chain, sample, bx, isFastsim); 
   return 0;
 }
