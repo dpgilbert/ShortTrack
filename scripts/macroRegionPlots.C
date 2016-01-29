@@ -26,7 +26,7 @@ TH1F* sumMT2histograms(TString filein, std::vector<TString> regions){
     TString fullhistname = Form("%s/h_mt2", regions.at(j).Data());
     TH1F* h = (TH1F*) f1->Get(fullhistname);
     if (h) output->Add(h);
-    else cout<<"could not find h_mt2 histogram in "<<regions.at(j)<<endl;
+    else cout<<"Looking at file "<<filein<<". Could not find h_mt2 histogram in "<<regions.at(j)<<endl;
   }
   
   return output;
@@ -54,7 +54,7 @@ TH1F* sumMT2histogramsAndRebin(TString filein, std::vector<TString> regions, std
       TString fullhistname = Form("%s/h_mt2", regions.at(j).Data());
       TH1F* h = (TH1F*) f1->Get(fullhistname);
       if (h) output->Add(h);
-      else cout<<"could not find h_mt2 histogram in "<<regions.at(j)<<endl;
+      else cout<<"Looking at file "<<filein<<". Could not find h_mt2 histogram in "<<regions.at(j)<<endl;
   }
   
   // Now rebin:
@@ -104,7 +104,7 @@ void fillFileWithPlots(TString filein, TString fileout, std::vector<std::vector<
   
 }
 
-void macroRegionPlots(TString dir = "/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-09_25ns_skim_base_mt2gt200_ZinvV3") {
+void macroRegionPlots(TString dir = "/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-10_25ns_data_json_246908-260627_v2_skim_base_V4_mt2gt200_2p26fb_newtxtfilters_jet1ptqcd/") {
   
 
   
@@ -190,9 +190,12 @@ void macroRegionPlots(TString dir = "/Users/giovannizevidellaporta/UCSD/MT2/Zinv
   r4.push_back("sr9VL");
   r4.push_back("sr9L");
   r4.push_back("sr9M");
-  r4.push_back("sr11VL");
-  r4.push_back("sr11L");
-  r4.push_back("sr11M"); // leaving out region 10: 2-6 J, >3 B, since it does not quite belong
+//  r4.push_back("sr10VL");
+//  r4.push_back("sr10L");
+//  r4.push_back("sr10M"); // leaving out region 10: 2-6 J, >3 B, since it does not quite belong
+//  r4.push_back("sr11VL");
+//  r4.push_back("sr11L");
+//  r4.push_back("sr11M"); // leaving out region 10: 2-6 J, >3 B, since it does not quite belong
   regionsSet.push_back(r4);
   namesSet.push_back("srMacroHT1NJ2NB2");
   binsSet.push_back((std::vector<float>) {200, 300., 400., 600., 1000.});
@@ -231,11 +234,28 @@ void macroRegionPlots(TString dir = "/Users/giovannizevidellaporta/UCSD/MT2/Zinv
   r8.push_back("sr8UH");
   r8.push_back("sr9H");
   r8.push_back("sr9UH");
-  r8.push_back("sr11H");
-  r8.push_back("sr11UH"); // leaving out region 10: 2-6 J, >3 B, since it does not quite belong
+//  r8.push_back("sr10H");
+//  r8.push_back("sr10UH"); // leaving out region 10: 2-6 J, >3 B, since it does not quite belong
+//  r8.push_back("sr11H");
+//  r8.push_back("sr11UH"); // leaving out region 10: 7 J, >3 B, since it does not quite belong
   regionsSet.push_back(r8);
   namesSet.push_back("srMacroHT2NJ2NB2");
   binsSet.push_back((std::vector<float>) {200, 300., 400., 600., 800., 1000.});
+  
+  std::vector<TString> r9; // HT [1000, inf], NJ [4, inf], NB [1, inf]
+  r9.push_back("sr10VL");
+  r9.push_back("sr10L");
+  r9.push_back("sr10M");
+  r9.push_back("sr10H");
+  r9.push_back("sr10UH");
+  r9.push_back("sr11VL");
+  r9.push_back("sr11L");
+  r9.push_back("sr11M");
+  r9.push_back("sr11H");
+  r9.push_back("sr11UH");
+  regionsSet.push_back(r9);
+  namesSet.push_back("srMacroHT1NJ1NB3");
+  binsSet.push_back((std::vector<float>) {200, 300., 400., 600., 1000.});
 
 
 
