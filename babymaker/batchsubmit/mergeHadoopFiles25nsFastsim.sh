@@ -206,3 +206,13 @@ run T2cc_mStop-250to300_mLSP-170to290
 run T2cc_mStop-400to450_mLSP-320to440
 run T2cc_mStop-475to525_mLSP-395to515
 run T2cc_mStop-550to600_mLSP-470to590
+
+#
+# T2qq
+#
+
+run T2qq_mSq1300to1550_mLSP-0to1050
+run T2qq_mSq300to400_mLSP-0to350
+run T2qq_mSq450to550_mLSP-0to500
+run T2qq_mSq600to900_mLSP-0to850
+run T2qq_mSq950to1250_mLSP-0to1050
