@@ -6,4 +6,6 @@ source do_tar.sh to create tarballs containing the datacards for each point of t
 
 source submitAllJobs.sh to submit the condor jobs to compute the limits, one job per mass point. You may want to modify the OUTPUTDIR variable in submit.sh that defines where the output of the jobs goes.
 
-Once all jobs are done, source makePlotInput.sh in order to read the results of the limit jobs and create 2D smoothed histograms and contours. The output of this step will be called r-values_$MODEL.root and should be fed to the PlotSMS limit plotting package.
+Once all jobs are done, source makePlotInput.sh in order to read the results of the limit jobs and create 2D smoothed histograms and contours. The output of this step will be called r-values_$MODEL.root and will be fed to the PlotsSMS limit plotting package.
+
+Specify the model in makePlot.sh, then source makePlot.sh to get the nice plots from PlotsSMS.
