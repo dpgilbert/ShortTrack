@@ -334,6 +334,7 @@ public :
    Float_t         weight_pdfs_DN;
    Int_t           nLHEweight;
    Float_t         LHEweight_wgt[500];   //[nLHEweight]
+   Int_t           genProd_pdgId;
 
    // List of branches
    TBranch        *b_run;   //!
@@ -648,6 +649,7 @@ public :
    TBranch        *b_weight_pdfs_DN;   //!
    TBranch        *b_nLHEweight;   //!
    TBranch        *b_LHEweight_wgt;   //!
+   TBranch        *b_genProd_pdgId;   //!
 
    mt2tree(TTree *tree=0);
    virtual ~mt2tree();
@@ -1021,6 +1023,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("weight_pdfs_DN", &weight_pdfs_DN, &b_weight_pdfs_DN);
    fChain->SetBranchAddress("nLHEweight", &nLHEweight, &b_nLHEweight);
    fChain->SetBranchAddress("LHEweight_wgt", &LHEweight_wgt, &b_LHEweight_wgt);
+   fChain->SetBranchAddress("genProd_pdgId", &genProd_pdgId, &b_genProd_pdgId);
    Notify();
 }
 
