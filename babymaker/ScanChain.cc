@@ -560,6 +560,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           else if (evt_id >= 1000 && evt_id < 1100) {
             // SMS T1 and T5 models - gluinos
             if (isLastCopy == 1 && pdgId == 1000021) {
+	      genProd_pdgId = pdgId;
               recoil += cms3.genps_p4().at(iGen);
               ++nHardScatter;
             }
@@ -568,6 +569,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           else if (evt_id >= 1100 && evt_id < 1110) {
             // SMS T2tt - stops
             if (isLastCopy == 1 && pdgId == 1000006) {
+	      genProd_pdgId = pdgId;
               recoil += cms3.genps_p4().at(iGen);
               ++nHardScatter;
             }
@@ -576,6 +578,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           else if (evt_id >= 1110 && evt_id < 1120) {
             // SMS T2qq - squarks
             if (isLastCopy == 1 && ( (pdgId >= 1000001 && pdgId <= 1000004) || (pdgId >= 2000001 && pdgId <= 2000004) ) ) {
+	      genProd_pdgId = pdgId;
               recoil += cms3.genps_p4().at(iGen);
               ++nHardScatter;
             }
@@ -584,6 +587,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           else if (evt_id >= 1120 && evt_id < 1130) {
             // SMS T2bb - sbottoms
             if (isLastCopy == 1 && pdgId == 1000005) {
+	      genProd_pdgId = pdgId;
               recoil += cms3.genps_p4().at(iGen);
               ++nHardScatter;
             }
@@ -592,6 +596,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           else if (evt_id >= 1130 && evt_id < 1140) {
             // SMS T2cc - stops (decaying to charm + LSP)
             if (isLastCopy == 1 && pdgId == 1000006) {
+	      genProd_pdgId = pdgId;
               recoil += cms3.genps_p4().at(iGen);
               ++nHardScatter;
             }
@@ -2358,6 +2363,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("genRecoil_pt", &genRecoil_pt );
     BabyTree_->Branch("genTop_pt", &genTop_pt );
     BabyTree_->Branch("genTbar_pt", &genTbar_pt );
+    BabyTree_->Branch("genProd_pdgId", &genProd_pdgId );
 
     // also make counter histogram
     count_hist_ = new TH1D("Count","Count",1,0,2);
@@ -2557,6 +2563,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     genRecoil_pt = -999.;
     genTop_pt = -999.;
     genTbar_pt = -999.;
+    genProd_pdgId = -999;
     nLHEweight = -999;
 
     for(int i=0; i < max_nlep; i++){
