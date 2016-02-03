@@ -765,9 +765,70 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
             genLepFromTau_sourceId[ngenLepFromTau] = sourceId;
             ++ngenLepFromTau;
           }
-
+  
         } // loop over genPart
 
+
+        //calculate events weights for left/right polarization in stop->top+LSP decays
+        //adapted from https://github.com/cmstas/SingleLepton2012/blob/master/looper/singleLeptonLooper.cc#L46
+        weight_pol_L = 1.0;
+        weight_pol_R = 1.0;
+        if( (baby_name.find("T2tt") != std::string::npos) && (GenSusyMScan1 - GenSusyMScan2) >= 175.0){ //on shell stop decays
+          for(unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++){
+
+            if(abs(cms3.genps_id().at(iGen)) > 20) continue; // expect quarks or leptons from W decay
+            float status = cms3.genps_status().at(iGen);
+            if(status != 23 && status != 22 && status != 1) continue;
+
+            // Navigate upwards in the stop->top->W->fermion decay chain
+            int fermion_mother_idx = cms3.genps_idx_simplemother().at(iGen);
+            if(abs(cms3.genps_id().at(fermion_mother_idx))!=24) continue;
+            int w_mother_idx = cms3.genps_idx_simplemother().at(fermion_mother_idx);
+            while(abs(cms3.genps_id().at(w_mother_idx))==24){//go back far enough that the w is not its own mother
+              w_mother_idx = cms3.genps_idx_simplemother().at(w_mother_idx);
+            }
+            if(abs(cms3.genps_id().at(w_mother_idx))!=6) continue;
+
+            // We only care about the down-type fermion
+            if (cms3.genps_id().at(w_mother_idx)*cms3.genps_id().at(iGen)>0) continue;
+
+            // We also need a stop
+            int top_mother_idx = cms3.genps_idx_simplemother().at(w_mother_idx);
+            while(abs(cms3.genps_id().at(top_mother_idx))==6){//go back far enough that the top is not its own mother
+              top_mother_idx = cms3.genps_idx_simplemother().at(top_mother_idx);
+            }
+            if(abs(cms3.genps_id().at(top_mother_idx))!=1000006) continue;
+
+            // Move top and fermion to the stop center-of-mass frame
+            TLorentzVector stop4;
+            stop4.SetPtEtaPhiE(cms3.genps_p4().at(top_mother_idx).pt(), cms3.genps_p4().at(top_mother_idx).eta(), cms3.genps_p4().at(top_mother_idx).phi(), cms3.genps_p4().at(top_mother_idx).E());
+            TVector3 betaV(-stop4.Px()/stop4.Energy(),-stop4.Py()/stop4.Energy(),-stop4.Pz()/stop4.Energy());
+
+            TLorentzVector top4;
+            top4.SetPtEtaPhiE(cms3.genps_p4().at(w_mother_idx).pt(), cms3.genps_p4().at(w_mother_idx).eta(), cms3.genps_p4().at(w_mother_idx).phi(), cms3.genps_p4().at(w_mother_idx).E());
+            top4.Boost(betaV);
+
+            TLorentzVector ferm4;
+            ferm4.SetPtEtaPhiE(cms3.genps_p4().at(iGen).pt(), cms3.genps_p4().at(iGen).eta(), cms3.genps_p4().at(iGen).phi(), cms3.genps_p4().at(iGen).E());
+            ferm4.Boost(betaV);
+
+
+            // Do not reweight if by any reason top/fermion directions are undefined
+            // This should be pathological if things are fine
+            if (top4.P()<=0 || ferm4.P()<=0) {
+              printf("Warning: particles at rest, no weight applied: ptop: %.3e, pf: %.3e\n", top4.P(), ferm4.P());
+              continue; 
+            }
+
+            double costh = (top4.Px()*ferm4.Px()+top4.Py()*ferm4.Py()+top4.Pz()*ferm4.Pz())/top4.P()/ferm4.P();
+
+            double weight_L = (top4.Energy()+top4.P())*(1-costh);
+            double weight_R = (top4.Energy()-top4.P())*(1+costh);
+            weight_pol_L *= 2*weight_L/(weight_R+weight_L);
+            weight_pol_R *= 2*weight_R/(weight_R+weight_L);
+          }
+        }
+	
 	// top pt weight
 	if (evt_id >= 300 && evt_id < 400) {
 	  weight_toppt = topPtWeight(genTop_pt,genTbar_pt);
@@ -2364,6 +2425,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("genTop_pt", &genTop_pt );
     BabyTree_->Branch("genTbar_pt", &genTbar_pt );
     BabyTree_->Branch("genProd_pdgId", &genProd_pdgId );
+    BabyTree_->Branch("weight_pol_L", &weight_pol_L );
+    BabyTree_->Branch("weight_pol_R", &weight_pol_R );
 
     // also make counter histogram
     count_hist_ = new TH1D("Count","Count",1,0,2);
@@ -2565,6 +2628,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     genTbar_pt = -999.;
     genProd_pdgId = -999;
     nLHEweight = -999;
+    weight_pol_L = -999;
+    weight_pol_R = -999;
 
     for(int i=0; i < max_nlep; i++){
       lep_pt[i] = -999;

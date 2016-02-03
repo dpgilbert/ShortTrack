@@ -437,6 +437,8 @@ class babyMaker {
   Float_t         genTop_pt;
   Float_t         genTbar_pt;
   Int_t           genProd_pdgId;
+  Float_t         weight_pol_L;
+  Float_t         weight_pol_R;
 
 //----- MC SCALE AND PDF WEIGHTS
   static const int max_nLHEweight = 500;
