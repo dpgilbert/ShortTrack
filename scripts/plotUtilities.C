@@ -84,7 +84,7 @@ string getLegendName(const string& sample) {
   if (sample.find("fakephotonMC") != string::npos) return "Fake #gamma";
   if (sample.find("fakephotonData") != string::npos) return "Fake #gamma (data)";
   if (sample.find("fragphoton") != string::npos) return "Frag. #gamma";
-  if (sample.find("qcd") != string::npos) return "QCD";
+  if (sample.find("qcd") != string::npos) return "Multijet";
   if (sample.find("multijet") != string::npos) return "Multijet";
   if (sample.find("dyjets") != string::npos) return "Z+jets";
   if (sample.find("zjets") != string::npos) return "Z+jets";
