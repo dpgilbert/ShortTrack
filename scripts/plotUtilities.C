@@ -77,7 +77,7 @@ string getLegendName(const string& sample) {
   if (sample.find("fakedata") != string::npos) return "Fake Data";
   if (sample.find("data") != string::npos) return "Data";
   if (sample.find("ttbar") != string::npos) return "ttbar";
-  if (sample.find("top") != string::npos) return "Top";
+  if (sample.find("top") != string::npos) return "Top quark";
   if (sample.find("wjets") != string::npos) return "W+jets";
   if (sample.find("zinv") != string::npos) return "Invisible Z";//"Z #rightarrow #nu#nu";
   if (sample.find("gjet") != string::npos) return "Prompt #gamma";
