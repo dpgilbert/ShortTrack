@@ -79,7 +79,7 @@ string getLegendName(const string& sample) {
   if (sample.find("ttbar") != string::npos) return "ttbar";
   if (sample.find("top") != string::npos) return "Top quark";
   if (sample.find("wjets") != string::npos) return "W+jets";
-  if (sample.find("zinv") != string::npos) return "Invisible Z";//"Z #rightarrow #nu#nu";
+  if (sample.find("zinv") != string::npos) return "Z #rightarrow #nu#bar{#nu}";
   if (sample.find("gjet") != string::npos) return "Prompt #gamma";
   if (sample.find("fakephotonMC") != string::npos) return "Fake #gamma";
   if (sample.find("fakephotonData") != string::npos) return "Fake #gamma (data)";
@@ -88,7 +88,7 @@ string getLegendName(const string& sample) {
   if (sample.find("multijet") != string::npos) return "Multijet";
   if (sample.find("dyjets") != string::npos) return "Z+jets";
   if (sample.find("zjets") != string::npos) return "Z+jets";
-  if (sample.find("lostl") != string::npos) return "Lost Lepton";
+  if (sample.find("lostl") != string::npos) return "Lost lepton";
   if (sample.find("T1tttt_1500_100") != string::npos) return "T1tttt 1500, 100";
   if (sample.find("T1tttt_1200_800") != string::npos) return "T1tttt 1200, 800";
   if (sample.find("T1bbbb_1000_900") != string::npos) return "T1bbbb 1000, 900";
