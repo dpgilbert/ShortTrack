@@ -20,6 +20,7 @@
 
 #include "plotUtilities.C"
 #include "CMS_lumi.C"
+#include "Math/QuantFuncMathCore.h"
 
 using namespace std;
 
@@ -48,6 +49,101 @@ void addOverflow(TH1* h) {
   h->SetBinError(h->GetXaxis()->GetNbins(), err);
   return;
 }
+
+
+
+TGraphAsymmErrors* getPoissonGraph( TH1D* histo, bool drawZeros, const std::string& xerrType = "0", float nSigma = 1 ) {
+  
+  const double alpha = 1 - 0.6827;
+  
+  unsigned int nBins = histo->GetNbinsX();
+  int emptyBins=0;
+  for( unsigned i=1; i < nBins; ++i ) {
+    if( histo->GetBinContent(i)==0 ) emptyBins += 1;
+  }
+  if( (float)emptyBins/(float)nBins > 0.4 ) drawZeros=false;
+  
+  TGraphAsymmErrors* graph = new TGraphAsymmErrors(0);
+  
+  for( int iBin=1; iBin<(histo->GetXaxis()->GetNbins()+1); ++iBin ) {
+    
+    int y; // these are data histograms, so y has to be integer
+    double x, xerr, yerrplus, yerrminus;
+    x = histo->GetBinCenter(iBin);
+    if( xerrType=="0" )
+      xerr = 0.;
+    else if( xerrType=="binWidth" )
+      xerr = histo->GetBinWidth(iBin)/2.;
+    else if( xerrType=="sqrt12" )
+      xerr = histo->GetBinWidth(iBin)/sqrt(12.);
+    else {
+      std::cout << "[getPoissonGraph] Unkown xerrType '" << xerrType << "'. Setting to bin width." << std::endl;
+      xerr = histo->GetBinWidth(iBin);
+    }
+    
+    y = (int)histo->GetBinContent(iBin);
+    
+    if( y==0 && !drawZeros ) continue;
+    
+    double ym =  (y==0) ? 0  : (ROOT::Math::gamma_quantile(alpha/2,y,1.));
+    double yp =  ROOT::Math::gamma_quantile_c(alpha/2,y+1,1) ;
+    yerrplus = yp - y;
+    yerrminus = y - ym;
+
+    
+    int thisPoint = graph->GetN();
+    graph->SetPoint( thisPoint, x, y );
+    graph->SetPointError( thisPoint, xerr, xerr, yerrminus, yerrplus );
+    //cout<<"Point: "<<y<<" +"<<yerrplus<<" -"<<yerrminus<<endl;
+    
+  }
+  
+  return graph;
+  
+}
+
+
+
+TGraphAsymmErrors* getRatioGraph( TH1D* histo_data, TH1D* histo_mc ){
+  
+  if( !histo_data || !histo_mc ) return 0;
+  
+  TGraphAsymmErrors* graph  = new TGraphAsymmErrors();
+  
+  TGraphAsymmErrors* graph_data = getPoissonGraph(histo_data, false);
+  
+  for( int i=0; i < graph_data->GetN(); ++i){
+    
+    Double_t x_tmp, data;
+    graph_data->GetPoint( i, x_tmp, data );
+    
+    Double_t data_errUp = graph_data->GetErrorYhigh(i);
+    Double_t data_errDn = graph_data->GetErrorYlow(i);
+    
+    int iBin = histo_mc->FindBin(x_tmp);
+    float mc = histo_mc->GetBinContent(iBin);
+    float mc_err = histo_mc->GetBinError(iBin);
+    
+    
+    float ratio = data/mc;
+    float ratio_errUp = sqrt( data_errUp*data_errUp/(mc*mc) + mc_err*mc_err*data*data/(mc*mc*mc*mc) );
+    float ratio_errDn = sqrt( data_errDn*data_errDn/(mc*mc) + mc_err*mc_err*data*data/(mc*mc*mc*mc) );
+    
+    graph->SetPoint(i, x_tmp, ratio );
+    graph->SetPointEYhigh(i, ratio_errUp );
+    graph->SetPointEYlow(i, ratio_errDn );
+    
+    
+  }
+  
+  graph->SetLineColor(1);
+  graph->SetMarkerColor(1);
+  graph->SetMarkerStyle(20);
+  
+  return graph;
+  
+}
+
 
 //_______________________________________________________________________________
 TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names , const string& histdir , const string& histname , const string& xtitle , const string& ytitle , float xmin , float xmax , int rebin = 1 , bool logplot = true, bool printplot = false, float scalesig = -1., bool doRatio = false, bool scaleBGtoData = false, bool drawBand = false) {
@@ -142,15 +238,21 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     // fake data -> set error bars to correspond to data stats
     if (TString(data_name).Contains("fakedata")) {
       for (int ibin = 0; ibin <= data_hist->GetNbinsX(); ++ibin) {
-	data_hist->SetBinError( ibin, sqrt(data_hist->GetBinContent(ibin)) );
+        data_hist->SetBinError( ibin, sqrt(data_hist->GetBinContent(ibin)) );
       }
     } // if fakedata
-    
+
     // expect to only find 1 data hist
     break;
   }
 
-  if (data_hist) leg->AddEntry(data_hist,getLegendName(data_name).c_str(),"pe1");
+  TGraphAsymmErrors* graph_data = getPoissonGraph(data_hist, true);
+  graph_data->SetLineColor(kBlack);
+  graph_data->SetMarkerColor(kBlack);
+  graph_data->SetMarkerStyle(20);
+
+  
+  if (graph_data) leg->AddEntry(graph_data,getLegendName(data_name).c_str(),"pe1");
   
   THStack* t = new THStack(Form("stack_%s_%s",histdir.c_str(),histname.c_str()),Form("stack_%s_%s",histdir.c_str(),histname.c_str()));
   TH1D* h_bgtot = 0;
@@ -303,7 +405,8 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     leg->AddEntry(sig_hists.at(isig),legend_name,"l");
   }
 
-  if (data_hist) data_hist->Draw("pe1 x0 same");
+  //if (data_hist) data_hist->Draw("pe1 x0 same");
+  if (graph_data) graph_data->Draw("p same"); // POISSON
 
   TLatex label;
   label.SetNDC();
@@ -466,6 +569,9 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     line1->SetLineStyle(2);
     line1->Draw("same");
 
+    
+    // STANDARD ROOT UNCERTAINTIES
+    /*
     if (!drawBand) h_ratio->Divide(h_bgtot); // let Divide combine the uncertainties
     else {
       //make ratio with only Data uncertainty
@@ -483,18 +589,37 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
       h_bgtotFlat->Draw("E2,same");
     }
     
-    
     TGraphErrors* g_ratio = new TGraphErrors(h_ratio);
     g_ratio->SetName(Form("%s_graph",h_ratio->GetName()));
     for (int ibin=0; ibin < h_ratio->GetNbinsX(); ++ibin) {
       //      g_ratio->SetPointError(ibin, h_ratio->GetBinWidth(ibin+1)/2., h_ratio->GetBinError(ibin+1));
       g_ratio->SetPointError(ibin, 0., h_ratio->GetBinError(ibin+1));
     }
+     */
+    // END OF STANDARD ROOT UNCERTAINTIES
+
+    // POISSON UNCERTAINTIES
+    TGraphAsymmErrors* g_ratio = getRatioGraph( data_hist, h_bgtot );
+    if (drawBand) { // Remove MC uncertainties, since they are drawn in the band
+      TH1D* h_bgtotNoErr = (TH1D*) h_bgtot->Clone("bgtotNoErr");
+      for (int ibin=0; ibin < h_bgtotNoErr->GetNbinsX(); ++ibin) {
+        h_bgtotNoErr->SetBinError(ibin, 0.);
+      }
+      g_ratio = getRatioGraph( data_hist, h_bgtotNoErr );
+      // then draw the background uncertainty: just divide the histogram by the no-error version of itself
+      TH1D* h_bgtotFlat = (TH1D*) h_bgtot->Clone("bgtotFlat");
+      h_bgtotFlat->Divide(h_bgtotNoErr);
+      h_bgtotFlat->SetMarkerSize(0);
+      h_bgtotFlat->SetFillColor (kGray+2);
+      h_bgtotFlat->SetFillStyle (3244);
+      h_bgtotFlat->Draw("E2,same");
+    }
+    // END OF POISSON UNCERTAINTIES
+    
     g_ratio->SetLineColor(kBlack);
     g_ratio->SetMarkerColor(kBlack);
     g_ratio->SetMarkerStyle(20);
     g_ratio->Draw("p same");
-
   } // if (doRatio)
   
   gPad->Modified();
@@ -1548,7 +1673,7 @@ void plotMaker(){
   //plotMakerGJets(); //return;
   //plotMakerRemovedLep(); //return;
   //plotMakerCRSL(); return;
-  //plotMakerMacroRegions(); return;
+  plotMakerMacroRegions(); return;
 
   //  gROOT->LoadMacro("CMS_lumi.C");
   cmsText = "CMS Preliminary";
