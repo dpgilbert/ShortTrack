@@ -96,7 +96,7 @@ if (withMC)  legend->AddEntry( hestimate, "Z invisible MC", "PL" );
   
   //TPaveText* labelTop = new TPaveText(.72,.91,.95,.95, "NDC");
   TPaveText* labelTop = new TPaveText(.7,.91,.95,.95, "NDC");
-  labelTop->AddText("CMS Preliminary, 1.2 fb^{-1} at #sqrt{s} = 13 TeV");
+  labelTop->AddText("CMS Preliminary, 2.3 fb^{-1} at #sqrt{s} = 13 TeV");
   //labelTop->AddText("CMS Data, 0.579 fb^{-1} at #sqrt{s} = 13 TeV");
   labelTop->SetBorderSize(0);
   labelTop->SetFillColor(kWhite);

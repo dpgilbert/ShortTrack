@@ -66,9 +66,12 @@ void plotZinvYieldsBinned(TString HTregion = "VL"){
   std::vector<TString> regions;
   std::vector<int> mt2bins;
 
-  TFile* f1 = new TFile("/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-06_25ns_miniaodv1_skim_base_mt2gt200_ZinvV3_1fb/zinv_ht.root", "READ");
+//  TFile* f1 = new TFile("/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-06_25ns_miniaodv1_skim_base_mt2gt200_ZinvV3_1fb/zinv_ht.root", "READ");
+//  samples.push_back(f1);
+//  TFile* f2 = new TFile("/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-06_25ns_miniaodv1_skim_base_mt2gt200_ZinvV3_1fb/purity.root", "READ");
+  TFile* f1 = new TFile("/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-10_25ns_data_json_246908-260627_v2_skim_base_V4_mt2gt200_2p26fb_newtxtfilters_jet1ptqcd/zinv_ht.root", "READ");
   samples.push_back(f1);
-  TFile* f2 = new TFile("/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-06_25ns_miniaodv1_skim_base_mt2gt200_ZinvV3_1fb/purity.root", "READ");
+  TFile* f2 = new TFile("/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-10_25ns_data_json_246908-260627_v2_skim_base_V4_mt2gt200_2p26fb_newtxtfilters_jet1ptqcd/purity.root", "READ");
   samples.push_back(f2);
   samples.push_back(f2);
 
