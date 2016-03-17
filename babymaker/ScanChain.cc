@@ -50,15 +50,15 @@ using namespace tas;
 // turn on to add debugging statements (default false)
 const bool verbose = false;
 // turn on to apply JEC from text files (default true)
-const bool applyJECfromFile = true;
+const bool applyJECfromFile = false;
 // change to do JEC uncertainty variations. 0 = DEFAULT, 1 = UP, -1 = DN
 const int applyJECunc = 0;
 // change to do unclustered energy uncertainty MET variations. 0 = DEFAULT, 1 = UP, -1 = DN
 const int applyUnclusteredUnc = 0;
 // turn on to apply btag SFs (default true)
-const bool applyBtagSFs = true;
+const bool applyBtagSFs = false;
 // turn on to recompute type1 MET using JECs from file (default true)
-const bool recomputeT1MET = true;
+const bool recomputeT1MET = false;
 // turn on to save prunedGenParticle collection (default false)
 const bool saveGenParticles = false;
 // turn on to apply trigger cuts to ntuples -> OR of all triggers used (default false)
@@ -66,11 +66,11 @@ const bool applyTriggerCuts = false;
 // turn on to apply dummy weights for lepton SFs, btag SFs, etc (default false)
 const bool applyDummyWeights = false;
 // turn on to apply lepton SF
-const bool applyLeptonSFs = true;
+const bool applyLeptonSFs = false;
 // turn on to apply json file to data (default true)
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
-const bool removePostProcVars = false;
+const bool removePostProcVars = true;
 // for merging prompt reco with reMINIAOD (default true)
 const bool removeEarlyPromptReco = true;
 // turn on to remove jets overlapping with leptons (default true)
@@ -134,10 +134,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
   if (applyBtagSFs) {
     // setup btag calibration readers
-    calib = new BTagCalibration("csvv2", "btagsf/CSVv2.csv"); // 25s version of SFs
-    reader_heavy = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "mujets", "central"); // central
-    reader_heavy_UP = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "mujets", "up");  // sys up
-    reader_heavy_DN = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "mujets", "down");  // sys down
+    calib = new BTagCalibration("cmvav2", "btagsf/cMVAv2.csv"); // 76X version
+    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation76X
+    // the twiki above says "to be used only in ttbar jet pT regime". So these scale factors are probably not the final ones for us
+    reader_heavy = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "ttbar", "central"); // central
+    reader_heavy_UP = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "ttbar", "up");  // sys up
+    reader_heavy_DN = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "ttbar", "down");  // sys down
     reader_light = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "central");  // central
     reader_light_UP = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "up");  // sys up
     reader_light_DN = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "down");  // sys down
@@ -1601,7 +1603,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           jet_eta[njet]  = p4sCorrJets.at(iJet).eta();
           jet_phi[njet]  = p4sCorrJets.at(iJet).phi();
           jet_mass[njet] = cms3.pfjets_mass().at(iJet);
-          jet_btagCSV[njet] = cms3.pfjets_pfCombinedInclusiveSecondaryVertexV2BJetTag().at(iJet); 
+          jet_btagCSV[njet] = cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet); 
           if (!isData) {
 	    jet_mcPt[njet] = -1;
             if (cms3.pfjets_mc_p4().size() > 0) jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
@@ -1645,7 +1647,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               if (jet_pt[njet] > 40.) nJet40++;
             } // pt40
             //CSVv2IVFM
-            if(jet_btagCSV[njet] >= 0.890) {
+            if(jet_btagCSV[njet] >= 0.185) {
               nBJet20++; 
               // btag SF - not final yet
               if (!isData && applyBtagSFs) {
@@ -1754,7 +1756,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
                 gamma_nJet30++;
                 if (p4sCorrJets.at(iJet).pt() > 40.0) gamma_nJet40++;
               } // pt40
-              if(cms3.pfjets_pfCombinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.890) { //CSVv2IVFM
+              if(cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet) >= 0.185) { // CombinedMVAv2
                 gamma_nBJet20++; 
                 if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++; 
                 if (p4sCorrJets.at(iJet).pt() > 30.0) {
