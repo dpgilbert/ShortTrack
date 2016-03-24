@@ -1741,6 +1741,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           else if ( (jet_pt[njet] > 30.0) && (fabs(jet_eta[njet]) < 4.7) ) {
             p4sForDphi.push_back(p4sCorrJets.at(iJet));
             p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
+            p4sForDphiZllMT.push_back(p4sCorrJets.at(iJet));
+            p4sForDphiRl.push_back(p4sCorrJets.at(iJet));
           }
 
           // fill gamma_XXX variables before checking for lepton overlap. Why? Let's keep them consistent with the lepton-overlapped jets
@@ -1999,7 +2001,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         //GEN MT2
         vector<LorentzVector> goodGenJets;
         for(unsigned int iGenJet=0; iGenJet < cms3.genjets_p4NoMuNoNu().size(); iGenJet++){
-          if(cms3.genjets_p4NoMuNoNu().at(iGenJet).pt() < 40.0) continue;
+          if(cms3.genjets_p4NoMuNoNu().at(iGenJet).pt() < 30.0) continue;
           if(fabs(cms3.genjets_p4NoMuNoNu().at(iGenJet).eta()) > 2.5) continue;
           goodGenJets.push_back(cms3.genjets_p4NoMuNoNu().at(iGenJet));
         }
