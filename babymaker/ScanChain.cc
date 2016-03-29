@@ -70,7 +70,7 @@ const bool applyLeptonSFs = false;
 // turn on to apply json file to data (default true)
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
-const bool removePostProcVars = true;
+const bool removePostProcVars = false;
 // for merging prompt reco with reMINIAOD (default true)
 const bool removeEarlyPromptReco = true;
 // turn on to remove jets overlapping with leptons (default true)
@@ -1517,10 +1517,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       njet = 0;
       nJet30 = 0;
       nJet40 = 0;
-      nBJet20 = 0;
+      nBJet20 = 0;      // these are counted using cMVAv2 algorithm
       nBJet25 = 0;
       nBJet30 = 0;
       nBJet40 = 0;
+      nBJet20csv = 0;    // counters for 2 different algorithms
+      nBJet20mva = 0;
       nJet30FailId = 0;
       nJet100FailId = 0;
       minMTBMet = 999999.;
@@ -1603,7 +1605,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           jet_eta[njet]  = p4sCorrJets.at(iJet).eta();
           jet_phi[njet]  = p4sCorrJets.at(iJet).phi();
           jet_mass[njet] = cms3.pfjets_mass().at(iJet);
-          jet_btagCSV[njet] = cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet); 
+          jet_btagCSV[njet] = cms3.getbtagvalue("pfCombinedSecondaryVertexV2BJetTags",iJet);
+          jet_btagMVA[njet] = cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet); 
           if (!isData) {
 	    jet_mcPt[njet] = -1;
             if (cms3.pfjets_mc_p4().size() > 0) jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
@@ -1647,8 +1650,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               if (jet_pt[njet] > 40.) nJet40++;
             } // pt40
             //CSVv2IVFM
-            if(jet_btagCSV[njet] >= 0.185) {
+            if(jet_btagCSV[njet] >= 0.890){
+              nBJet20csv++;
+            }
+            if(jet_btagMVA[njet] >= 0.185) {
               nBJet20++; 
+              nBJet20mva++;
               // btag SF - not final yet
               if (!isData && applyBtagSFs) {
                 float eff = getBtagEffFromFile(jet_pt[njet], jet_eta[njet], jet_hadronFlavour[njet], isFastsim);
@@ -2137,6 +2144,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("nJet30", &nJet30 );
     BabyTree_->Branch("nJet40", &nJet40 );
     BabyTree_->Branch("nBJet20", &nBJet20 );
+    BabyTree_->Branch("nBJet20csv", &nBJet20csv );
+    BabyTree_->Branch("nBJet20mva", &nBJet20mva );
     BabyTree_->Branch("nBJet25", &nBJet25 );
     BabyTree_->Branch("nBJet30", &nBJet30 );
     BabyTree_->Branch("nBJet40", &nBJet40 );
@@ -2399,6 +2408,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("jet_phi", jet_phi, "jet_phi[njet]/F" );
     BabyTree_->Branch("jet_mass", jet_mass, "jet_mass[njet]/F" );
     BabyTree_->Branch("jet_btagCSV", jet_btagCSV, "jet_btagCSV[njet]/F" );
+    BabyTree_->Branch("jet_btagMVA", jet_btagMVA, "jet_btagMVA[njet]/F" );
     BabyTree_->Branch("jet_rawPt", jet_rawPt, "jet_rawPt[njet]/F" );
     BabyTree_->Branch("jet_mcPt", jet_mcPt, "jet_mcPt[njet]/F" );
     BabyTree_->Branch("jet_mcFlavour", jet_mcFlavour, "jet_mcFlavour[njet]/I" );
@@ -2458,6 +2468,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     nJet30 = -999;
     nJet40 = -999;
     nBJet20 = -999;
+    nBJet20csv = -999;
+    nBJet20mva = -999;
     nBJet25 = -999;
     nBJet30 = -999;
     nBJet40 = -999;
@@ -2772,6 +2784,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       jet_phi[i] = -999;
       jet_mass[i] = -999;
       jet_btagCSV[i] = -999;
+      jet_btagMVA[i] = -999;
       jet_rawPt[i] = -999;
       jet_mcPt[i] = -999;
       jet_mcFlavour[i] = -999;

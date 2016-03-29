@@ -18,4 +18,6 @@ make -j 8
 #./processBaby test_T2tt /hadoop/cms/store/group/snt/run2_fastsim_v1/SMS-T2tt_mStop-600-950_mLSP-1to450_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1/V07-04-12_miniaodv1_FS/merged_ntuple_1.root
 
 #./processBaby test_ttbar_76X /hadoop/cms/store/group/snt/run2_25ns_76MiniAODv2/TT/TTTo2L2Nu_13TeV-powheg/v1/CMS3_V07-06-03/merged_ntuple_1.root
-./processBaby test_ttbar_76X /home/users/gzevi/ntupling/CMSSW_7_6_3/src/CMS3/NtupleMaker/test/TTJets_SingleLeptFromT_25ns_76X_1000.root 
+#./processBaby test_ttbar_76X /home/users/gzevi/ntupling/CMSSW_7_6_3/src/CMS3/NtupleMaker/test/TTJets_SingleLeptFromT_25ns_76X_1000.root 
+./processBaby test_wjets_76X /hadoop/cms/store/group/snt/run2_25ns_76MiniAODv2/WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/V07-06-03_MC/merged_ntuple_1.root
+
