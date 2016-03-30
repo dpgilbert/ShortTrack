@@ -5,7 +5,7 @@ function run () {
     nohup nice -n 19 root -b -q mergeHadoopFiles.C\(\"${HADOOPDIR}/${TAG}_$1/\",\"${OUTPUTDIR}/$1.root\"\) >& log_merge_${TAG}_$1.txt &
 }
 
-TAG=V00-01-07_25ns_miniaodv2
+TAG=76x_miniaodv2_test_v4
 
 HADOOPDIR=/hadoop/cms/store/user/${USER}/mt2babies/
 OUTPUTDIR=/nfs-6/userdata/mt2/$TAG/
@@ -17,94 +17,81 @@ chmod -R a+wrx $OUTPUTDIR
 # DATA
 #
 
-run data_Run2015C_JetHT_05Oct2015
-run data_Run2015C_MET_05Oct2015
-run data_Run2015C_HTMHT_05Oct2015
-run data_Run2015C_SingleMuon_05Oct2015
-run data_Run2015C_SingleElectron_05Oct2015
-run data_Run2015C_SinglePhoton_05Oct2015
-run data_Run2015C_DoubleMuon_05Oct2015
-run data_Run2015C_DoubleEG_05Oct2015
-run data_Run2015C_MuonEG_05Oct2015
-
-run data_Run2015D_JetHT_05Oct2015
-run data_Run2015D_MET_05Oct2015
-run data_Run2015D_HTMHT_05Oct2015
-run data_Run2015D_SingleMuon_05Oct2015
-run data_Run2015D_SingleElectron_05Oct2015
-run data_Run2015D_SinglePhoton_05Oct2015
-run data_Run2015D_DoubleMuon_05Oct2015
-run data_Run2015D_DoubleEG_05Oct2015
-run data_Run2015D_MuonEG_05Oct2015
-
-run data_Run2015D_JetHT_PromptReco
-run data_Run2015D_MET_PromptReco
-run data_Run2015D_HTMHT_PromptReco
-run data_Run2015D_SingleMuon_PromptReco
-run data_Run2015D_SingleElectron_PromptReco
-run data_Run2015D_SinglePhoton_PromptReco
-run data_Run2015D_DoubleMuon_PromptReco
-run data_Run2015D_DoubleEG_PromptReco
-run data_Run2015D_MuonEG_PromptReco
+# run data_Run2015C_DoubleEG
+# run data_Run2015D_DoubleEG
+# run data_Run2015C_DoubleMuon
+# run data_Run2015D_DoubleMuon
+# run data_Run2015C_MuonEG
+# run data_Run2015D_MuonEG
+# run data_Run2015C_SingleElectron
+# run data_Run2015D_SingleElectron
+# run data_Run2015C_SingleMuon
+# run data_Run2015D_SingleMuon
 
 #
 # TTBAR
 #
 
+run ttdl_mg_lo
 run ttsl_mg_lo_top
 run ttsl_mg_lo_tbar
-run ttdl_mg_lo
+run ttjets_mg_lo
+# run tt_powheg
+# run tt2l2nu_powheg
 
 #
 # HIGH STATS TTBAR EXTENSION
 #
 
-# run ttsl_mg_lo_top_ext1
-# run ttsl_mg_lo_tbar_ext1
-# run ttdl_mg_lo_ext1
 
 #
 # W+JETS
 #
 
-# #run wjets_mg_lo
+#run wjets_bgen_wpt40toInf
 run wjets_ht100to200
+run wjets_ht1200to2500
 run wjets_ht200to400
+run wjets_ht2500toInf
 run wjets_ht400to600
 run wjets_ht600to800
+#run wjets_ht600toInf
 run wjets_ht800to1200
-run wjets_ht1200to2500
-run wjets_ht2500toInf
+#run wjets_mg_lo
 
 #
 # SINGLE TOP
 #
 
-run singletop_powheg_4f_ttchan_l
-run singletop_powheg_4f_tbartchan_l
-run singletop_amcatnlo_4f_schan
-run singletop_powheg_5f_tbarWchan
 run singletop_powheg_5f_tWchan
+run singletop_powheg_5f_tbarWchan
 
 #
 # DY+JETS
 #
 
-# #run zjets_mg_lo
 run dyjetsll_ht100to200
 run dyjetsll_ht200to400
 run dyjetsll_ht400to600
 run dyjetsll_ht600toInf
-
+# run dyjets_m50_ht200to400
+# run dyjets_m50_ht400to600
+# run dyjets_m50_mg_lo
+# run dyjets_m5to50_ht100to200
+# run dyjets_m5to50_ht200to400
+# run dyjets_m5to50_ht400to600
+# run dyjets_m5to50_ht600toInf
 
 #
 # GAMMA + JETS
 #
 
-run gjet_ht100to200
-run gjet_ht200to400
-run gjet_ht400to600
-run gjet_ht600toInf
+run gjets_ht100to200
+run gjets_ht200to400
+run gjets_ht400to600
+run gjets_ht40to100
+run gjets_ht600toInf
+
 
 #
 # Z INVISIBLE
@@ -115,29 +102,27 @@ run zinv_ht200to400
 run zinv_ht400to600
 run zinv_ht600toInf
 
-#
-# DIBOSON
-#
+# #
+# # DIBOSON
+# #
 
-#
-# TRIBOSON
-#
+# #
+# # TRIBOSON
+# #
 
-#
-# TTV
-#
+# #
+# # TTV
+# #
 
+run ttg_amcatnlo
 run ttw_lnu_amcatnlo
 run ttw_qq_amcatnlo
-run ttz_qq_amcatnlo
 run ttz_llnunu_amcatnlo
-run ttg_amcatnlo
-run tth_nonbb_amcatnlo
-run tth_bb_amcatnlo
+run ttz_qq_amcatnlo
 
-#
-# QCD
-#
+# #
+# # QCD
+# #
 
 # run qcd_pt120to170
 # run qcd_pt170to300
@@ -151,21 +136,21 @@ run tth_bb_amcatnlo
 # run qcd_pt2400to3200
 # run qcd_pt3200toInf
 
-run qcd_ht200to300
-run qcd_ht300to500
-run qcd_ht500to700
-run qcd_ht700to1000
-run qcd_ht1000to1500
-run qcd_ht1500to2000
-run qcd_ht2000toInf
+# run qcd_ht200to300
+# run qcd_ht300to500
+# run qcd_ht500to700
+# run qcd_ht700to1000
+# run qcd_ht1000to1500
+# run qcd_ht1500to2000
+# run qcd_ht2000toInf
 
-#
-# SIGNAL
-#
+# #
+# # SIGNAL
+# #
 
-run T1tttt_1500_100
-run T1tttt_1200_800
-run T1bbbb_1500_100
-run T1bbbb_1000_900
-run T1qqqq_1400_100
-run T1qqqq_1000_800
+# run T1tttt_1500_100
+# run T1tttt_1200_800
+# run T1bbbb_1500_100
+# run T1bbbb_1000_900
+# run T1qqqq_1400_100
+# run T1qqqq_1000_800
