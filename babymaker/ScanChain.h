@@ -99,6 +99,8 @@ class babyMaker {
   Int_t           nBJet25;
   Int_t           nBJet30;
   Int_t           nBJet40;
+  Int_t           nBJet20csv;
+  Int_t           nBJet20mva;
   Int_t           nJet30FailId;
   Int_t           nJet100FailId;
   Int_t           nMuons10;
@@ -398,6 +400,7 @@ class babyMaker {
   Float_t         jet_phi[max_njet];   //[njet]
   Float_t         jet_mass[max_njet];   //[njet]
   Float_t         jet_btagCSV[max_njet];   //[njet]
+  Float_t         jet_btagMVA[max_njet];   //[njet]
   Float_t         jet_rawPt[max_njet];   //[njet]
   Float_t         jet_mcPt[max_njet];   //[njet]
   Int_t           jet_mcFlavour[max_njet];   //[njet]
