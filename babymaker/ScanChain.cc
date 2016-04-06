@@ -475,7 +475,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	  if (evt_id == 502) evt_xsec = 1347.;
 	  else if (evt_id == 503) evt_xsec = 360.;
 	  else if (evt_id == 504) evt_xsec = 48.9;
-	  else if (evt_id == 505) evt_xsec = 18.77;
+          // the wjets ht_600to800 and 600toInf appear to have the same evt_id... this was breaking the 600to800 xsec
+	  else if (evt_id == 505){
+              if(((string)currentFile->GetTitle()).find("600toInf") != string::npos)
+                  evt_xsec = 18.77;
+              else
+                  evt_xsec = 12.05;
+          }
 	  evt_scale1fb = evt_xsec*evt_kfactor*1000.*evt_filter/(Double_t)evt_nEvts;
 	}
 	
@@ -1605,7 +1611,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           jet_eta[njet]  = p4sCorrJets.at(iJet).eta();
           jet_phi[njet]  = p4sCorrJets.at(iJet).phi();
           jet_mass[njet] = cms3.pfjets_mass().at(iJet);
-          jet_btagCSV[njet] = cms3.getbtagvalue("pfCombinedSecondaryVertexV2BJetTags",iJet);
+          jet_btagCSV[njet] = cms3.getbtagvalue("pfCombinedInclusiveSecondaryVertexV2BJetTags",iJet);
           jet_btagMVA[njet] = cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet); 
           if (!isData) {
 	    jet_mcPt[njet] = -1;
@@ -1650,10 +1656,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               if (jet_pt[njet] > 40.) nJet40++;
             } // pt40
             //CSVv2IVFM
-            if(jet_btagCSV[njet] >= 0.890){
+            if(jet_btagCSV[njet] >= 0.890) {
               nBJet20csv++;
             }
-            if(jet_btagMVA[njet] >= 0.185) {
+            if(jet_btagMVA[njet] >= 0.185){
               nBJet20++; 
               nBJet20mva++;
               // btag SF - not final yet
