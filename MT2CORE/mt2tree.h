@@ -43,6 +43,8 @@ public :
    Int_t           nJet30FailId;
    Int_t           nJet100FailId;
    Int_t           nBJet20;
+   Int_t           nBJet20csv;
+   Int_t           nBJet20mva;
    Int_t           nBJet25;
    Int_t           nBJet40;
    Int_t           nMuons10;
@@ -301,6 +303,7 @@ public :
    Float_t         jet_phi[100];   //[njet]
    Float_t         jet_mass[100];   //[njet]
    Float_t         jet_btagCSV[100];   //[njet]
+   Float_t         jet_btagMVA[100];   //[njet]
    Float_t         jet_rawPt[100];   //[njet]
    Float_t         jet_mcPt[100];   //[njet]
    Int_t           jet_mcFlavour[100];   //[njet]
@@ -358,6 +361,8 @@ public :
    TBranch        *b_nJet30FailId;   //!
    TBranch        *b_nJet100FailId;   //!
    TBranch        *b_nBJet20;   //!
+   TBranch        *b_nBJet20csv;   //!
+   TBranch        *b_nBJet20mva;   //!
    TBranch        *b_nBJet25;   //!
    TBranch        *b_nBJet40;   //!
    TBranch        *b_nMuons10;   //!
@@ -616,6 +621,7 @@ public :
    TBranch        *b_jet_phi;   //!
    TBranch        *b_jet_mass;   //!
    TBranch        *b_jet_btagCSV;   //!
+   TBranch        *b_jet_btagMVA;   //!
    TBranch        *b_jet_rawPt;   //!
    TBranch        *b_jet_mcPt;   //!
    TBranch        *b_jet_mcFlavour;   //!
@@ -732,6 +738,8 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("nJet30FailId", &nJet30FailId, &b_nJet30FailId);
    fChain->SetBranchAddress("nJet100FailId", &nJet100FailId, &b_nJet100FailId);
    fChain->SetBranchAddress("nBJet20", &nBJet20, &b_nBJet20);
+   fChain->SetBranchAddress("nBJet20csv", &nBJet20csv, &b_nBJet20csv);
+   fChain->SetBranchAddress("nBJet20mva", &nBJet20mva, &b_nBJet20mva);
    fChain->SetBranchAddress("nBJet25", &nBJet25, &b_nBJet25);
    fChain->SetBranchAddress("nBJet40", &nBJet40, &b_nBJet40);
    fChain->SetBranchAddress("nMuons10", &nMuons10, &b_nMuons10);
@@ -990,6 +998,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("jet_phi", jet_phi, &b_jet_phi);
    fChain->SetBranchAddress("jet_mass", jet_mass, &b_jet_mass);
    fChain->SetBranchAddress("jet_btagCSV", jet_btagCSV, &b_jet_btagCSV);
+   fChain->SetBranchAddress("jet_btagMVA", jet_btagMVA, &b_jet_btagMVA);
    fChain->SetBranchAddress("jet_rawPt", jet_rawPt, &b_jet_rawPt);
    fChain->SetBranchAddress("jet_mcPt", jet_mcPt, &b_jet_mcPt);
    fChain->SetBranchAddress("jet_mcFlavour", jet_mcFlavour, &b_jet_mcFlavour);
