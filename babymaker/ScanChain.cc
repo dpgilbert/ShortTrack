@@ -1656,7 +1656,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               if (jet_pt[njet] > 40.) nJet40++;
             } // pt40
             //CSVv2IVFM
-            if(jet_btagCSV[njet] >= 0.890) {
+            if(jet_btagCSV[njet] >= 0.800) {
               nBJet20csv++;
             }
             if(jet_btagMVA[njet] >= 0.185){
