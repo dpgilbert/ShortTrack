@@ -47,7 +47,7 @@
 using namespace std;
 using namespace tas;
 
-// turn on to add debugging statements (default false)
+// turn on to add debugging statements (default false) 
 const bool verbose = false;
 // turn on to apply JEC from text files (default true)
 const bool applyJECfromFile = true;
