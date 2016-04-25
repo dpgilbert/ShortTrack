@@ -50,7 +50,7 @@ using namespace tas;
 // turn on to add debugging statements (default false) 
 const bool verbose = false;
 // turn on to apply JEC from text files (default true)
-const bool applyJECfromFile = true;
+const bool applyJECfromFile = false;
 // change to do JEC uncertainty variations. 0 = DEFAULT, 1 = UP, -1 = DN
 const int applyJECunc = 0;
 // change to do unclustered energy uncertainty MET variations. 0 = DEFAULT, 1 = UP, -1 = DN
@@ -1612,7 +1612,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           jet_phi[njet]  = p4sCorrJets.at(iJet).phi();
           jet_mass[njet] = cms3.pfjets_mass().at(iJet);
           jet_btagCSV[njet] = cms3.getbtagvalue("pfCombinedInclusiveSecondaryVertexV2BJetTags",iJet);
-          jet_btagMVA[njet] = cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet); 
+          jet_btagMVA[njet] = cms3.getbtagvalue("pfCombinedMVAV2BJetTags",iJet);
+          // jet_btagMVA[njet] = cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet); 
           if (!isData) {
 	    jet_mcPt[njet] = -1;
             if (cms3.pfjets_mc_p4().size() > 0) jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
@@ -1771,7 +1772,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
                 gamma_nJet30++;
                 if (p4sCorrJets.at(iJet).pt() > 40.0) gamma_nJet40++;
               } // pt40
-              if(cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet) >= 0.185) { // CombinedMVAv2
+              if(jet_btagMVA[iJet] >= 0.185) { // CombinedMVAv2
                 gamma_nBJet20++; 
                 if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++; 
                 if (p4sCorrJets.at(iJet).pt() > 30.0) {
