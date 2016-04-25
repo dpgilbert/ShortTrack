@@ -1,13 +1,14 @@
 # setup:
 
 # environment on UAF:
-export SCRAM_ARCH=slc6_amd64_gcc491
-source /nfs-7/cmssoft/cms.cern.ch/cmssw/cmsset_default.sh
+export SCRAM_ARCH=slc6_amd64_gcc530
+source /cvmfs/cms.cern.ch/cmsset_default.sh
 
 git clone git@github.com:cmstas/MT2Analysis.git
 cd MT2Analysis
-cmsrel CMSSW_7_4_1_patch1
-cd CMSSW_7_4_1_patch1/src
+git checkout cmssw80x
+cmsrel CMSSW_8_0_5
+cd CMSSW_8_0_5/src
 cmsenv
 cd ../..
 git clone git@github.com:cmstas/CORE.git

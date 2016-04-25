@@ -839,7 +839,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	
 	// top pt weight
 	if (evt_id >= 300 && evt_id < 400) {
-	  weight_toppt = topPtWeight(genTop_pt,genTbar_pt);
+	  weight_toppt = topPtWeight_cutoff(genTop_pt,genTbar_pt);
 	}
 
         // recoil "ISR" weight
