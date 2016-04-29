@@ -4,8 +4,8 @@
 ## Instructions
 0) environment setup: see `MT2Analysis/README.txt`.  This setup sends the compiled libraries with the job so assumes that you're using a particular CMSSW/root version.
 
-1) copy files to run looper into job_input directory
-for example, from the babymaker directory
+1) copy files to run looper into `job_input` directory
+for example, from the `babymaker` directory
 ``` bash
 cp -r *.so jetCorrections jsons btagsf lepsf data processBaby batchsubmit/job_input/
 ```
