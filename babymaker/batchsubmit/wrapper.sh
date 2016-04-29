@@ -15,11 +15,11 @@ echo "[wrapper] COPYDIR   = " ${COPYDIR}
 #
 # set up environment
 #
-CMSSW_VERSION=CMSSW_8_0_1
+CMSSW_VERSION=CMSSW_8_0_5
 
 ###version using cvmfs install of CMSSW
 echo "[wrapper] setting env"
-export SCRAM_ARCH=slc6_amd64_gcc493
+export SCRAM_ARCH=slc6_amd64_gcc530
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 OLDDIR=`pwd`
 cd /cvmfs/cms.cern.ch/$SCRAM_ARCH/cms/cmssw/$CMSSW_VERSION/src
@@ -92,5 +92,3 @@ echo "[wrapper] cleaning up"
 for FILE in `find . -not -name "*stderr" -not -name "*stdout"`; do rm -rf $FILE; done
 echo "[wrapper] cleaned up"
 ls
-
-
