@@ -5,7 +5,7 @@ function run () {
     nohup nice -n 19 root -b -q mergeHadoopFiles.C\(\"${HADOOPDIR}/${TAG}_$1/\",\"${OUTPUTDIR}/$1.root\"\) >& log_merge_${TAG}_$1.txt &
 }
 
-TAG=76x_miniaodv2_test_v4
+TAG=80x_miniaodv1_test_v1
 
 HADOOPDIR=/hadoop/cms/store/user/${USER}/mt2babies/
 OUTPUTDIR=/nfs-6/userdata/mt2/$TAG/
@@ -32,12 +32,12 @@ chmod -R a+wrx $OUTPUTDIR
 # TTBAR
 #
 
-run ttdl_mg_lo
-run ttsl_mg_lo_top
-run ttsl_mg_lo_tbar
-run ttjets_mg_lo
-# run tt_powheg
-# run tt2l2nu_powheg
+# #run ttdl_mg_lo
+# run ttsl_mg_lo_top
+# run ttsl_mg_lo_tbar
+# #run ttjets_mg_lo
+# #run tt_powheg
+# #run tt2l2nu_powheg
 
 #
 # HIGH STATS TTBAR EXTENSION
@@ -48,59 +48,63 @@ run ttjets_mg_lo
 # W+JETS
 #
 
-#run wjets_bgen_wpt40toInf
-run wjets_ht100to200
-run wjets_ht1200to2500
-run wjets_ht200to400
+# run wjets_ht100to200
+# run wjets_ht200to400
+# run wjets_ht400to600
+# #run wjets_ht600to800
+# #run wjets_ht600toInf
+# run wjets_ht800to1200
+# run wjets_ht1200to2500
 run wjets_ht2500toInf
-run wjets_ht400to600
-run wjets_ht600to800
-#run wjets_ht600toInf
-run wjets_ht800to1200
-#run wjets_mg_lo
+# #run wjets_mg_lo
 
 #
 # SINGLE TOP
 #
 
-run singletop_powheg_5f_tWchan
-run singletop_powheg_5f_tbarWchan
+#run singletop_amcatnlo_4f_schan
+#run singletop_powheg_5f_tWchan
+# run singletop_powheg_5f_tbarWchan
 
 #
 # DY+JETS
 #
 
-run dyjetsll_ht100to200
-run dyjetsll_ht200to400
-run dyjetsll_ht400to600
-run dyjetsll_ht600toInf
-# run dyjets_m50_ht200to400
-# run dyjets_m50_ht400to600
-# run dyjets_m50_mg_lo
-# run dyjets_m5to50_ht100to200
-# run dyjets_m5to50_ht200to400
-# run dyjets_m5to50_ht400to600
-# run dyjets_m5to50_ht600toInf
+# run dyjetsll_ht100to200
+# run dyjetsll_ht200to400
+# run dyjetsll_ht400to600
+# run dyjetsll_ht600toInf
+# # run dyjets_m50_ht200to400
+# # run dyjets_m50_ht400to600
+# # run dyjets_m50_mg_lo
+# # run dyjets_m5to50_ht100to200
+# # run dyjets_m5to50_ht200to400
+# # run dyjets_m5to50_ht400to600
+# # run dyjets_m5to50_ht600toInf
 
 #
 # GAMMA + JETS
 #
 
-run gjets_ht100to200
-run gjets_ht200to400
-run gjets_ht400to600
-run gjets_ht40to100
-run gjets_ht600toInf
+# run gjets_ht100to200
+# run gjets_ht200to400
+# run gjets_ht400to600
+# run gjets_ht40to100
+# run gjets_ht600toInf
 
 
 #
 # Z INVISIBLE
 #
 
-run zinv_ht100to200
-run zinv_ht200to400
-run zinv_ht400to600
-run zinv_ht600toInf
+# run zinv_ht100to200
+# run zinv_ht200to400
+# run zinv_ht400to600
+# run zinv_ht600toInf
+# run zinv_ht600to800
+# run zinv_ht800to1200
+# run zinv_ht1200to2500
+# run zinv_ht2500toInf
 
 # #
 # # DIBOSON
@@ -114,11 +118,11 @@ run zinv_ht600toInf
 # # TTV
 # #
 
-run ttg_amcatnlo
-run ttw_lnu_amcatnlo
-run ttw_qq_amcatnlo
-run ttz_llnunu_amcatnlo
-run ttz_qq_amcatnlo
+# run ttg_amcatnlo
+# run ttw_lnu_amcatnlo
+# run ttw_qq_amcatnlo
+# run ttz_llnunu_amcatnlo
+# run ttz_qq_amcatnlo
 
 # #
 # # QCD
@@ -136,9 +140,9 @@ run ttz_qq_amcatnlo
 # run qcd_pt2400to3200
 # run qcd_pt3200toInf
 
-# run qcd_ht200to300
+# # run qcd_ht200to300
 # run qcd_ht300to500
-# run qcd_ht500to700
+# # run qcd_ht500to700
 # run qcd_ht700to1000
 # run qcd_ht1000to1500
 # run qcd_ht1500to2000
