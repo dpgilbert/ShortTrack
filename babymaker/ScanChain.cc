@@ -947,12 +947,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	    weight_lepsf *= weights.cent;
 	    weight_lepsf_UP *= weights.up;
 	    weight_lepsf_DN *= weights.dn;
-	    // if (isFastsim) {
-	    //   weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.els_p4().at(iEl).pt(), cms3.els_p4().at(iEl).eta(), 11);
-	    //   weight_lepsf *= weights_fastsim.cent;
-	    //   weight_lepsf_UP *= weights_fastsim.up;
-	    //   weight_lepsf_DN *= weights_fastsim.dn;
-	    // }
+	    if (isFastsim) {
+	      weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.els_p4().at(iEl).pt(), cms3.els_p4().at(iEl).eta(), 11);
+	      weight_lepsf *= weights_fastsim.cent;
+	      weight_lepsf_UP *= weights_fastsim.up;
+	      weight_lepsf_DN *= weights_fastsim.dn;
+	    }
 	  }
 
         } // if (pass_iso)
@@ -1012,12 +1012,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	    weight_lepsf *= weights.cent;
 	    weight_lepsf_UP *= weights.up;
 	    weight_lepsf_DN *= weights.dn;
-	    // if (isFastsim) {
-	    //   weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.mus_p4().at(iMu).pt(), cms3.mus_p4().at(iMu).eta(), 13);
-	    //   weight_lepsf *= weights_fastsim.cent;
-	    //   weight_lepsf_UP *= weights_fastsim.up;
-	    //   weight_lepsf_DN *= weights_fastsim.dn;
-	    // }
+	    if (isFastsim) {
+	      weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.mus_p4().at(iMu).pt(), cms3.mus_p4().at(iMu).eta(), 13);
+	      weight_lepsf *= weights_fastsim.cent;
+	      weight_lepsf_UP *= weights_fastsim.up;
+	      weight_lepsf_DN *= weights_fastsim.dn;
+	    }
 	  }
 
         } // if (pass_iso)
