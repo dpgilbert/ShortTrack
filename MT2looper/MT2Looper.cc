@@ -744,7 +744,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}
 	if (isSignal_ && applyLeptonSFfastsim && nlepveto_ == 0) {
 	  fillLepCorSRfastsim();
-	  evtweight_ *= (1. + cor_lepeff_sr_);
+	  evtweight_ *= cor_lepeff_sr_;
 	}
 	else if (doLepEffVars && nlepveto_ == 0) fillLepUncSR();
 	if (applyLeptonSF) evtweight_ *= t.weight_lepsf;
@@ -1930,17 +1930,17 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
 
     // if lepeff goes up, number of events in SR should go down. Already taken into account in unc_lepeff_sr_
     //  need to first remove lepeff SF
-    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ + unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ - unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot3D("h_mt2bins_sigscan_lepeff_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ + unc_lepeff_sr_), h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-    plot3D("h_mt2bins_sigscan_lepeff_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ - unc_lepeff_sr_), h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot3D("h_mt2bins_sigscan_lepeff_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_UP_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    plot3D("h_mt2bins_sigscan_lepeff_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_DN_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
     
   }
 
   else if (!t.isData && doLepEffVars && directoryname.Contains("sr")) {
     // if lepeff goes up, number of events in SR should go down. Already taken into account in unc_lepeff_sr_
-    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ * (1. + unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ * (1. - unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ * unc_lepeff_sr_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ * unc_lepeff_sr_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   }
   
   // lepton efficiency variation in control region: smallish uncertainty on leptons which ARE vetoed
@@ -2249,8 +2249,10 @@ void MT2Looper::fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, 
 void MT2Looper::fillLepUncSR() {
 
   // lepton efficiency variation in signal region for fastsim: large uncertainty on leptons NOT vetoed
-  cor_lepeff_sr_ = 0.;
-  unc_lepeff_sr_ = 0.;
+  // for now, do NOT apply correction to central value to 0L yields in fullsim
+  cor_lepeff_sr_ = 1.;
+  unc_lepeff_sr_UP_ = 1.;
+  unc_lepeff_sr_DN_ = 1.;
   if (t.ngenLep > 0 || t.ngenLepFromTau > 0) {
     // loop on gen e/mu
     for (int ilep = 0; ilep < t.ngenLep; ++ilep) {
@@ -2264,7 +2266,8 @@ void MT2Looper::fillLepUncSR() {
       float unc = sf_struct.up - sf;
       float vetoeff_unc_UP = vetoeff * (1. + unc);
       float unc_UP_0l = ( (1. - vetoeff_unc_UP) / (1. - vetoeff) ) - 1.;
-      unc_lepeff_sr_ += unc_UP_0l;
+      unc_lepeff_sr_UP_ *= (1. + unc_UP_0l);
+      unc_lepeff_sr_DN_ *= (1. - unc_UP_0l);
     }
     for (int ilep = 0; ilep < t.ngenLepFromTau; ++ilep) {
       // check acceptance for veto: pt > 5
@@ -2276,7 +2279,8 @@ void MT2Looper::fillLepUncSR() {
       float unc = sf_struct.up - sf;
       float vetoeff_unc_UP = vetoeff * (1. + unc);
       float unc_UP_0l = ( (1. - vetoeff_unc_UP) / (1. - vetoeff) ) - 1.;
-      unc_lepeff_sr_ += unc_UP_0l;
+      unc_lepeff_sr_UP_ *= (1. + unc_UP_0l);
+      unc_lepeff_sr_DN_ *= (1. - unc_UP_0l);
     }
   }
 
@@ -2286,8 +2290,9 @@ void MT2Looper::fillLepUncSR() {
 void MT2Looper::fillLepCorSRfastsim() {
 
   // lepton efficiency variation in signal region for fastsim: large uncertainty on leptons NOT vetoed
-  cor_lepeff_sr_ = 0.;
-  unc_lepeff_sr_ = 0.;
+  cor_lepeff_sr_ = 1.;
+  unc_lepeff_sr_UP_ = 1.;
+  unc_lepeff_sr_DN_ = 1.;
   if (t.ngenLep > 0 || t.ngenLepFromTau > 0) {
     // loop on gen e/mu
     for (int ilep = 0; ilep < t.ngenLep; ++ilep) {
@@ -2301,11 +2306,15 @@ void MT2Looper::fillLepCorSRfastsim() {
       // apply SF to vetoeff, then correction for 0L will be (1 - vetoeff_cor) / (1 - vetoeff) - 1.
       float vetoeff_cor = vetoeff * sf;
       float cor_0l = ( (1. - vetoeff_cor) / (1. - vetoeff) ) - 1.;
-      cor_lepeff_sr_ += cor_0l;
+      cor_lepeff_sr_ *= (1. + cor_0l);
       float unc = sf_struct.up - sf;
       float vetoeff_cor_unc_UP = vetoeff_cor * (1. + unc);
       float unc_UP_0l = ( (1. - vetoeff_cor_unc_UP) / (1. - vetoeff_cor) ) - 1.;
-      unc_lepeff_sr_ += unc_UP_0l;
+      unc_lepeff_sr_UP_ *= (1. + cor_0l + unc_UP_0l);
+      unc_lepeff_sr_DN_ *= (1. + cor_0l - unc_UP_0l);
+      // std::cout << "fastsim lep vetoeff: " << vetoeff << ", sf: " << sf << ", unc: " << unc
+      // 		<< ", correction for 0L central value: " << cor_0l
+      // 		<< ", uncertainty up 0L correction: " << unc_UP_0l << std::endl;
     }
     for (int ilep = 0; ilep < t.ngenLepFromTau; ++ilep) {
       // check acceptance for veto: pt > 5
@@ -2317,13 +2326,19 @@ void MT2Looper::fillLepCorSRfastsim() {
       // apply SF to vetoeff, then correction for 0L will be 1. - (1 - vetoeff_cor) / (1 - vetoeff)
       float vetoeff_cor = vetoeff * sf;
       float cor_0l = ( (1. - vetoeff_cor) / (1. - vetoeff) ) - 1.;
-      cor_lepeff_sr_ += cor_0l;
+      cor_lepeff_sr_ *= (1. + cor_0l);
       float unc = sf_struct.up - sf;
       float vetoeff_cor_unc_UP = vetoeff_cor * (1. + unc);
       float unc_UP_0l = ( (1. - vetoeff_cor_unc_UP) / (1. - vetoeff_cor) ) - 1.;
-      unc_lepeff_sr_ += unc_UP_0l;
+      unc_lepeff_sr_UP_ *= (1. + cor_0l + unc_UP_0l);
+      unc_lepeff_sr_DN_ *= (1. + cor_0l - unc_UP_0l);
+      // std::cout << "fastsim lep vetoeff: " << vetoeff << ", sf: " << sf << ", unc: " << unc
+      // 		<< ", correction for 0L central value: " << cor_0l
+      // 		<< ", uncertainty up 0L correction: " << unc_UP_0l << std::endl;
     }
   }
+  // std::cout << "fastsim lep correction for 0L: " << cor_lepeff_sr_
+  // 	    << ", unc up: " << unc_lepeff_sr_UP_ << ", unc dn: " << unc_lepeff_sr_DN_ << std::endl;
 
   return;
 }

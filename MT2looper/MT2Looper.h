@@ -97,7 +97,8 @@ class MT2Looper {
   TH2D* h_sig_avgweight_btagsf_light_DN_;
   TH2D* h_sig_avgweight_isr_;
   float cor_lepeff_sr_;
-  float unc_lepeff_sr_;
+  float unc_lepeff_sr_UP_;
+  float unc_lepeff_sr_DN_;
   
 };
 
