@@ -437,12 +437,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	Flag_eeBadScFilter                            = cms3.filt_eeBadSc();
 	// note: in CMS3, filt_cscBeamHalo and evt_cscTightHaloId are the same
 	Flag_CSCTightHaloFilter                       = cms3.filt_cscBeamHalo();
+	Flag_CSCTightHalo2015Filter                   = cms3.filt_cscBeamHalo2015();
 	// note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
-	//      Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
-	// recompute HBHE noise filter decision using CORE to avoid maxZeros issue
-	if (bx == 25) Flag_HBHENoiseFilter            = hbheNoiseFilter_25ns();
-	else Flag_HBHENoiseFilter                     = hbheNoiseFilter();
-	Flag_HBHEIsoNoiseFilter                       = hbheIsoNoiseFilter();
+	Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
+	// temporary workaround: flag not in first 80x MC production, so recompute
+	Flag_HBHENoiseIsoFilter                       = isData ? cms3.filt_hbheNoiseIso() : hbheIsoNoiseFilter();
 	// necessary?
 	Flag_METFilters                               = cms3.filt_metfilter();
       }
@@ -2200,7 +2199,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("Flag_trackingFailureFilter", &Flag_trackingFailureFilter );
     BabyTree_->Branch("Flag_CSCTightHaloFilter", &Flag_CSCTightHaloFilter );
     BabyTree_->Branch("Flag_HBHENoiseFilter", &Flag_HBHENoiseFilter );
-    BabyTree_->Branch("Flag_HBHEIsoNoiseFilter", &Flag_HBHEIsoNoiseFilter );
+    BabyTree_->Branch("Flag_HBHENoiseIsoFilter", &Flag_HBHENoiseIsoFilter );
     BabyTree_->Branch("Flag_goodVertices", &Flag_goodVertices );
     BabyTree_->Branch("Flag_eeBadScFilter", &Flag_eeBadScFilter );
     BabyTree_->Branch("Flag_METFilters", &Flag_METFilters );
@@ -2525,7 +2524,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     Flag_trackingFailureFilter = -999;
     Flag_CSCTightHaloFilter = -999;
     Flag_HBHENoiseFilter = -999;
-    Flag_HBHEIsoNoiseFilter = -999;
+    Flag_HBHENoiseIsoFilter = -999;
     Flag_goodVertices = -999;
     Flag_eeBadScFilter = -999;
     Flag_METFilters = -999;
