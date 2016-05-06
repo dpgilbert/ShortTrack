@@ -456,27 +456,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       ngenTau3Prong = 0;
       ngenLepFromTau = 0;
       if (!isData) {
-
-	// !!!!!!!!!!! HACK !!!!!!!!!!!!!
-	// fix xsec/kfactor for HT binned Wjets, Zinv, DYjets
-	if ((evt_id >= 502 && evt_id <= 505) || (evt_id >= 602 && evt_id <= 605) || (evt_id >= 702 && evt_id <= 705)) {
-	  if (evt_id >= 502 && evt_id <= 505) evt_kfactor = 1.21;
-	  else evt_kfactor = 1.23;
-	  
-	  if (evt_id == 502) evt_xsec = 1347.;
-	  else if (evt_id == 503) evt_xsec = 360.;
-	  else if (evt_id == 504) evt_xsec = 48.9;
-          // the wjets ht_600to800 and 600toInf appear to have the same evt_id... this was breaking the 600to800 xsec
-	  else if (evt_id == 505){
-              // 600toInf
-              if(((string)currentFile->GetTitle()).find("600toInf") != string::npos)
-                  evt_xsec = 18.77;
-              //600to800
-              else
-                  evt_xsec = 12.05;
-          }
-	  evt_scale1fb = evt_xsec*evt_kfactor*1000.*evt_filter/(Double_t)evt_nEvts;
-	}
 	
         if (verbose) cout << "before sparm values" << endl;
 
