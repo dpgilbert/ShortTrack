@@ -4,6 +4,7 @@ make -j12
 
 INDIR=/nfs-6/userdata/mt2/bemarsh_76X_test_skim
 OUTDIR=output/bemarsh_76X_test_skim
+LOGDIR=logs/
 
 #declare -a Samples=(data_Run2015C data_Run2015D)
 #declare -a Samples=(ttsl_mg_lo ttdl_mg_lo wjets_ht zinv_ht singletop qcd_ht ttw ttz ttg tth dyjetsll_ht gjet_ht)
@@ -14,8 +15,9 @@ declare -a Samples=(wjets_ht)
 #declare -a Samples=(T1bbbb)
 
 mkdir -p ${OUTDIR}
+mkdir -p ${LOGDIR}
 
 for SAMPLE in ${Samples[@]};
   do echo ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR}
-  nohup ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR} >& log_${SAMPLE}.txt &
+     nohup ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR} >& ${LOGDIR}/log_${SAMPLE}.txt &
 done
