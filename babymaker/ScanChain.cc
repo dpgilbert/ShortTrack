@@ -184,9 +184,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   if (applyLeptonSFs) {
     setElSFfile("lepsf/kinematicBinSFele.root");
     setMuSFfile("lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root");
+    setVetoEffFile_fullsim("lepsf/vetoeff_emu_etapt_lostlep.root");  
     if (isFastsim) {
       setElSFfile_fastsim("lepsf/sf_el_vetoCB_mini01.root");
       setMuSFfile_fastsim("lepsf/sf_mu_looseID_mini02.root");
+      setVetoEffFile_fastsim("lepsf/vetoeff_emu_etapt_T1tttt_mGluino-1500to1525.root");  
     }
   }
 
@@ -1224,6 +1226,64 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         float mt = MT(p4sUniqueLeptons.at(ilep).pt(),p4sUniqueLeptons.at(ilep).phi(),met_pt,met_phi);
         if (mt < 100.) ++nLepLowMT;
       }
+
+      if (verbose) cout << "before lost gen leptons" << endl;
+
+      weight_lepsf_0l = 1.;
+      weight_lepsf_0l_UP = 1.;
+      weight_lepsf_0l_DN = 1.;
+
+      // only fill these variables on MC and for events with 0 veto leptons
+      if (!isData && (nMuons10+nElectrons10+nPFLep5LowMT+nPFHad10LowMT == 0)) {
+	for (int ilep = 0; ilep < ngenLep+ngenLepFromTau; ++ilep) {
+	  float pt,eta,phi;
+	  int pdgId;
+	  if (ilep < ngenLep) {
+	    pt = genLep_pt[ilep];
+	    eta = genLep_eta[ilep];
+	    pdgId = genLep_pdgId[ilep];
+	  } else {
+	    pt = genLepFromTau_pt[ilep-ngenLep];
+	    eta = genLepFromTau_eta[ilep-ngenLep];
+	    pdgId = genLepFromTau_pdgId[ilep-ngenLep];
+	  }
+	  // check acceptance for veto: pt > 5, |eta| < 2.4
+	  if (pt < 5.) continue;
+	  if (fabs(eta) > 2.4) continue;
+
+	  if (isFastsim) {
+	    // look up SF and vetoeff, by flavor
+	    weightStruct sf_struct_fullsim = getLepSFFromFile(pt, eta, pdgId);
+	    weightStruct sf_struct_fastsim = getLepSFFromFile_fastsim(pt, eta, pdgId);
+	    float sf = sf_struct_fullsim.cent * sf_struct_fastsim.cent;
+	    float vetoeff = getLepVetoEffFromFile_fastsim(pt, eta, pdgId);
+	    // apply SF to vetoeff, then correction for 0L will be (1 - vetoeff_cor) / (1 - vetoeff) - 1.
+	    float vetoeff_cor = vetoeff * sf;
+	    float cor_0l = ( (1. - vetoeff_cor) / (1. - vetoeff) ) - 1.;
+	    weight_lepsf_0l *= (1. + cor_0l);
+	    float unc = (sf_struct_fullsim.up - sf_struct_fullsim.cent) + (sf_struct_fastsim.up - sf_struct_fastsim.cent);
+	    float vetoeff_cor_unc_UP = vetoeff_cor * (1. + unc);
+	    float unc_UP_0l = ( (1. - vetoeff_cor_unc_UP) / (1. - vetoeff_cor) ) - 1.;
+	    weight_lepsf_0l_UP *= (1. + cor_0l + unc_UP_0l);
+	    weight_lepsf_0l_DN *= (1. + cor_0l - unc_UP_0l);
+	  } // isFastsim
+
+	  else { // fullsim
+	    // don't apply correction to 0L central value for fullsim: saw that the effect was negligible
+	    weightStruct sf_struct = getLepSFFromFile(pt, eta, pdgId);
+	    float sf = sf_struct.cent;
+	    float vetoeff = getLepVetoEffFromFile_fullsim(pt, eta, pdgId);
+	    float unc = sf_struct.up - sf;
+	    float vetoeff_unc_UP = vetoeff * (1. + unc);
+	    float unc_UP_0l = ( (1. - vetoeff_unc_UP) / (1. - vetoeff) ) - 1.;
+	    weight_lepsf_0l_UP *= (1. + unc_UP_0l);
+	    weight_lepsf_0l_DN *= (1. - unc_UP_0l);
+	  }
+	  
+	} // loop over gen leptons
+      } // !isData && 0 veto leptons
+      
+      
 
       if (verbose) cout << "before photons" << endl;
 
@@ -2399,6 +2459,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("weight_lepsf", &weight_lepsf );
     BabyTree_->Branch("weight_lepsf_UP", &weight_lepsf_UP );
     BabyTree_->Branch("weight_lepsf_DN", &weight_lepsf_DN );
+    BabyTree_->Branch("weight_lepsf_0l", &weight_lepsf_0l );
+    BabyTree_->Branch("weight_lepsf_0l_UP", &weight_lepsf_0l_UP );
+    BabyTree_->Branch("weight_lepsf_0l_DN", &weight_lepsf_0l_DN );
     BabyTree_->Branch("weight_btagsf", &weight_btagsf );
     BabyTree_->Branch("weight_btagsf_heavy_UP", &weight_btagsf_heavy_UP );
     BabyTree_->Branch("weight_btagsf_light_UP", &weight_btagsf_light_UP );
@@ -2603,6 +2666,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     weight_lepsf = 1.;
     weight_lepsf_UP = 1.;
     weight_lepsf_DN = 1.;
+    weight_lepsf_0l = 1.;
+    weight_lepsf_0l_UP = 1.;
+    weight_lepsf_0l_DN = 1.;
     weight_btagsf = 1.;
     weight_btagsf_heavy_UP = 1.;
     weight_btagsf_light_UP = 1.;

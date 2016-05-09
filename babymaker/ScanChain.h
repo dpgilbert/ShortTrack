@@ -421,6 +421,9 @@ class babyMaker {
   Float_t         weight_lepsf;
   Float_t         weight_lepsf_UP;
   Float_t         weight_lepsf_DN;
+  Float_t         weight_lepsf_0l;
+  Float_t         weight_lepsf_0l_UP;
+  Float_t         weight_lepsf_0l_DN;
   Float_t         weight_btagsf;
   Float_t         weight_btagsf_heavy_UP;
   Float_t         weight_btagsf_light_UP;
