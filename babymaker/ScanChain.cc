@@ -1246,7 +1246,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       // only fill these variables on MC and for events with 0 veto leptons
       if (!isData && (nMuons10+nElectrons10+nPFLep5LowMT+nPFHad10LowMT == 0)) {
 	for (int ilep = 0; ilep < ngenLep+ngenLepFromTau; ++ilep) {
-	  float pt,eta,phi;
+	  float pt,eta;
 	  int pdgId;
 	  if (ilep < ngenLep) {
 	    pt = genLep_pt[ilep];
