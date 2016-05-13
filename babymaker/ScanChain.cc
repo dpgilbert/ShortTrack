@@ -1541,7 +1541,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
           int iJet = passJets.at(passIdx).first;
 
-          if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
+          if(p4sCorrJets.at(iJet).pt() < 20.0) continue;
           if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
 
           bool alreadyRemoved = false;
@@ -1813,8 +1813,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
                 p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
                 gamma_nJet30++;
                 if (p4sCorrJets.at(iJet).pt() > 40.0) gamma_nJet40++;
-              } // pt40
-              if(jet_btagMVA[iJet] >= 0.185) { // CombinedMVAv2
+              } // pt30
+              if(jet_btagMVA[njet] >= 0.185) { // CombinedMVAv2
                 gamma_nBJet20++; 
                 if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++; 
                 if (p4sCorrJets.at(iJet).pt() > 30.0) {
