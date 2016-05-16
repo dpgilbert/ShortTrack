@@ -163,44 +163,8 @@ int main(int argc, char **argv) {
   else if (infile.Contains("Run2015D") && infile.Contains("PromptReco"))     sample = Form("data_Run2015D_PromptReco_%s",  outfileid.Data());
   else if (infile.Contains("Run2015D") && infile.Contains("05Oct2015"))      sample = Form("data_Run2015D_05Oct2015_%s",  outfileid.Data());
   else if (infile.Contains("Run2015D"))                                      sample = Form("data_Run2015D_%s",  outfileid.Data());
-  // //single mu-had
-  // else if (infile.Contains("MuHad_Run2012A-recover-06Aug2012-v1_AOD"))          sample =  Form("MuHad2012A_recover06Aug2012v1V532_%s",     outfileid.Data());
-  // else if (infile.Contains("MuHad_Run2012A-13Jul2012-v1_AOD"))                  sample =  Form("MuHad2012A_13Jul2012v1V532_%s",            outfileid.Data());
-  // //single muon
-  // else if (infile.Contains("SingleMu_Run2012A-recover-06Aug2012-v1_AOD"))       sample =  Form("SingleMu2012A_recover06Aug2012v1V532_%s",     outfileid.Data());
-  // else if (infile.Contains("SingleMu_Run2012A-13Jul2012-v1_AOD"))       	sample =  Form("SingleMu2012A_13Jul2012v1V532_%s",            outfileid.Data());
-  // else if (infile.Contains("SingleMu_Run2012B-13Jul2012-v1_AOD"))       	sample =  Form("SingleMu2012B_13Jul2012v1V532_%s",            outfileid.Data());
-  // else if (infile.Contains("SingleMu_Run2012C-24Aug2012-v1_AOD"))      		sample =  Form("SingleMu2012C_24Aug2012v1V532_%s",            outfileid.Data());
-  // else if (infile.Contains("SingleMu_Run2012C-PromptReco-v2_AOD"))      	sample =  Form("SingleMu2012C_PromptRecov2V532_%s",           outfileid.Data());
-  // else if (infile.Contains("SingleMu_Run2012D-PromptReco-v1_AOD"))      	sample =  Form("SingleMu2012D_PromptRecov1V532_%s",           outfileid.Data());
-  // //single electron
-  // else if (infile.Contains("SingleElectron_Run2012A-recover-06Aug2012-v1_AOD")) sample =  Form("SingleElectron2012A_recover06Aug2012V532_%s", outfileid.Data());
-  // else if (infile.Contains("SingleElectron_Run2012A-13Jul2012-v1_AOD"))       	sample =  Form("SingleElectron2012A_13Jul2012v1V532_%s",      outfileid.Data());
-  // else if (infile.Contains("SingleElectron_Run2012B-13Jul2012-v1_AOD"))       	sample =  Form("SingleElectron2012B_13Jul2012v1V532_%s",      outfileid.Data());
-  // else if (infile.Contains("SingleElectron_Run2012C-24Aug2012-v1_AOD"))      	sample =  Form("SingleElectron2012C_24Aug2012v1V532_%s",      outfileid.Data());
-  // else if (infile.Contains("SingleElectron_Run2012C-PromptReco-v2_AOD"))      	sample =  Form("SingleElectron2012C_PromptRecov2V532_%s",     outfileid.Data());
-  // else if (infile.Contains("SingleElectron_Run2012D-PromptReco-v1_AOD"))      	sample =  Form("SingleElectron2012D_PromptRecov1V532_%s",     outfileid.Data());
-  // //dimuon 
-  // else if (infile.Contains("DoubleMu_Run2012A-recover-06Aug2012-v1_AOD")) 	sample =  Form("DoubleMu2012A_recover06Aug2012V532_%s", outfileid.Data());
-  // else if (infile.Contains("DoubleMu_Run2012A-13Jul2012-v1_AOD"))     		sample =  Form("DoubleMu2012A_13Jul2012v1V532_%s",            outfileid.Data());
-  // else if (infile.Contains("DoubleMu_Run2012B-13Jul2012-v4_AOD"))     		sample =  Form("DoubleMu2012B_13Jul2012v4V532_%s",            outfileid.Data());
-  // else if (infile.Contains("DoubleMu_Run2012C-24Aug2012-v1_AOD"))    		sample =  Form("DoubleMu2012C_24Aug2012v1V532_%s",            outfileid.Data());
-  // else if (infile.Contains("DoubleMu_Run2012C-PromptReco-v2_AOD"))    		sample =  Form("DoubleMu2012C_PromptRecov2V532_%s",           outfileid.Data());
-  // else if (infile.Contains("DoubleMu_Run2012D-PromptReco-v1_AOD"))    		sample =  Form("DoubleMu2012D_PromptRecov1V532_%s",           outfileid.Data());
-  // //electron+muon
-  // else if (infile.Contains("MuEG_Run2012A-recover-06Aug2012-v1_AOD"))      	sample =  Form("MuEG2012A_recover06Aug2012V532_%s",           outfileid.Data());
-  // else if (infile.Contains("MuEG_Run2012A-13Jul2012-v1_AOD"))      		sample =  Form("MuEG2012A_13Jul2012v1V532_%s",      	      outfileid.Data());
-  // else if (infile.Contains("MuEG_Run2012B-13Jul2012-v1_AOD"))      		sample =  Form("MuEG2012B_13Jul2012v1V532_%s",      	      outfileid.Data());
-  // else if (infile.Contains("MuEG_Run2012C-24Aug2012-v1_AOD"))     		sample =  Form("MuEG2012C_24Aug2012v1V532_%s",     	      outfileid.Data());
-  // else if (infile.Contains("MuEG_Run2012C-PromptReco-v2_AOD"))     		sample =  Form("MuEG2012C_PromptRecov2V532_%s",     	      outfileid.Data());
-  // else if (infile.Contains("MuEG_Run2012D-PromptReco-v1_AOD"))     		sample =  Form("MuEG2012D_PromptRecov1V532_%s",     	      outfileid.Data());
-  // //dielectron
-  // else if (infile.Contains("DoubleElectron_Run2012A-recover-06Aug2012-v1_AOD")) sample =  Form("DoubleElectron2012A_recover06Aug2012V532_%s", outfileid.Data());
-  // else if (infile.Contains("DoubleElectron_Run2012A-13Jul2012-v1_AOD"))      	sample =  Form("DoubleElectron2012A_13Jul2012v1V532_%s",      outfileid.Data());
-  // else if (infile.Contains("DoubleElectron_Run2012B-13Jul2012-v1_AOD"))      	sample =  Form("DoubleElectron2012B_13Jul2012v1V532_%s",      outfileid.Data());
-  // else if (infile.Contains("DoubleElectron_Run2012C-24Aug2012-v1_AOD"))     	sample =  Form("DoubleElectron2012C_24Aug2012v1V532_%s",      outfileid.Data());
-  // else if (infile.Contains("DoubleElectron_Run2012C-PromptReco-v2_AOD"))     	sample =  Form("DoubleElectron2012C_PromptRecov2V532_%s",     outfileid.Data());
-  // else if (infile.Contains("DoubleElectron_Run2012D-PromptReco-v1_AOD"))     	sample =  Form("DoubleElectron2012D_PromptRecov1V532_%s",     outfileid.Data());
+  else if (infile.Contains("Run2016B") && infile.Contains("PromptReco"))     sample = Form("data_Run2016B_PromptReco_%s",  outfileid.Data());
+  else if (infile.Contains("Run2016B"))                                      sample = Form("data_Run2016B_%s",  outfileid.Data());
   //otherwise
   else sample = Form("unknown_%s", outfileid.Data());
 
@@ -211,6 +175,7 @@ int main(int argc, char **argv) {
   if (infile.Contains("Run2015B")) bx = 50;
   else if (infile.Contains("Run2015C")) bx = 25; // will need to account for the 50ns run somehow..
   else if (infile.Contains("Run2015D")) bx = 25; 
+  else if (infile.Contains("Run2016B")) bx = 25; 
   else if (infile.Contains("50ns")) bx = 50;
   else if (infile.Contains("25ns")) bx = 25;
   else if (infile.Contains("FSPremix")) bx = 25;

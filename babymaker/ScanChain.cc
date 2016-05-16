@@ -50,7 +50,7 @@ using namespace tas;
 // turn on to add debugging statements (default false) 
 const bool verbose = false;
 // turn on to apply JEC from text files (default true)
-const bool applyJECfromFile = true;
+const bool applyJECfromFile = false;
 // change to do JEC uncertainty variations. 0 = DEFAULT, 1 = UP, -1 = DN
 const int applyJECunc = 0;
 // change to do unclustered energy uncertainty MET variations. 0 = DEFAULT, 1 = UP, -1 = DN
@@ -71,7 +71,7 @@ const bool applyLeptonSFs = false;
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
 const bool removePostProcVars = false;
-// for merging prompt reco with reMINIAOD (default true)
+// for merging prompt reco 2015 with reMINIAOD (default true)
 const bool removeEarlyPromptReco = true;
 // turn on to remove jets overlapping with leptons (default true)
 const bool doJetLepOverlapRemoval = true;
@@ -108,7 +108,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   }
 
   isPromptReco = false;
-  if (baby_name.find("data_Run2015") != std::string::npos) {
+  if (baby_name.find("data_Run201") != std::string::npos) {
     isDataFromFileName = true;
     cout << "running on DATA, based on file name" << endl;
     if (baby_name.find("PromptReco") != std::string::npos) {

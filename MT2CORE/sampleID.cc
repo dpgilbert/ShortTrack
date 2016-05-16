@@ -10,7 +10,7 @@ int sampleID (const string& name) {
 // sample ID numbers according to:
 //  https://mangano.web.cern.ch/mangano/public/MECCA/samples_50ns_miniaod.txt
 
-  if (name.find("data_Run2015") != string::npos) {
+  if ((name.find("data_Run201") != string::npos) || (name.find("run2_data") != string::npos)) {
     if (name.find("JetHT") != string::npos) return 1;
     else if (name.find("HTMHT") != string::npos) return 2;
     else if (name.find("MET") != string::npos) return 3;
