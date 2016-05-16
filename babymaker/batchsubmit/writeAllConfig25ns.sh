@@ -4,13 +4,21 @@
 # All MT2 related datasets available on hadoop
 #
 
-TAG="80x_miniaodv1_test_v1"
+TAG="V00-08-00"
 
 #
 # DATA
 #
 
-
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016B_JetHT_MINIAOD_PromptReco-v1/merged/V08-00-04 ${TAG}_data_Run2016B_JetHT_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016B_MET_MINIAOD_PromptReco-v1/merged/V08-00-04 ${TAG}_data_Run2016B_MET_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016B_HTMHT_MINIAOD_PromptReco-v1/merged/V08-00-04 ${TAG}_data_Run2016B_HTMHT_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016B_SingleElectron_MINIAOD_PromptReco-v1/merged/V08-00-04 ${TAG}_data_Run2016B_SingleElectron_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016B_SingleMuon_MINIAOD_PromptReco-v1/merged/V08-00-04 ${TAG}_data_Run2016B_SingleMuon_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016B_SinglePhoton_MINIAOD_PromptReco-v1/merged/V08-00-04 ${TAG}_data_Run2016B_SinglePhoton_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016B_DoubleEG_MINIAOD_PromptReco-v1/merged/V08-00-04 ${TAG}_data_Run2016B_DoubleEG_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016B_DoubleMuon_MINIAOD_PromptReco-v1/merged/V08-00-04 ${TAG}_data_Run2016B_DoubleMuon_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016B_MuonEG_MINIAOD_PromptReco-v1/merged/V08-00-04 ${TAG}_data_Run2016B_MuonEG_PromptReco
 
 #
 # TTBAR

@@ -5,7 +5,7 @@ function run () {
     nohup nice -n 19 root -b -q mergeHadoopFiles.C\(\"${HADOOPDIR}/${TAG}_$1/\",\"${OUTPUTDIR}/$1.root\"\) >& ${LOGDIR}/log_merge_${TAG}_$1.txt &
 }
 
-TAG=80x_miniaodv1_test_v1
+TAG=V00-08-00
 
 HADOOPDIR=/hadoop/cms/store/user/${USER}/mt2babies/
 OUTPUTDIR=/nfs-6/userdata/mt2/$TAG/
@@ -19,16 +19,15 @@ chmod -R a+wrx $OUTPUTDIR
 # DATA
 #
 
-# run data_Run2015C_DoubleEG
-# run data_Run2015D_DoubleEG
-# run data_Run2015C_DoubleMuon
-# run data_Run2015D_DoubleMuon
-# run data_Run2015C_MuonEG
-# run data_Run2015D_MuonEG
-# run data_Run2015C_SingleElectron
-# run data_Run2015D_SingleElectron
-# run data_Run2015C_SingleMuon
-# run data_Run2015D_SingleMuon
+# run data_Run2016B_JetHT
+# run data_Run2016B_MET
+# run data_Run2016B_HTMHT
+# run data_Run2016B_SingleElectron
+# run data_Run2016B_SingleMuon
+# run data_Run2016B_SinglePhoton
+# run data_Run2016B_DoubleEG
+# run data_Run2016B_DoubleMuon
+# run data_Run2016B_MuonEG
 
 #
 # TTBAR
