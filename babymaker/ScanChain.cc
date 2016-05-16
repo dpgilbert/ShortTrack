@@ -2246,6 +2246,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("Flag_trkPOG_logErrorTooManyClusters", &Flag_trkPOG_logErrorTooManyClusters );
     BabyTree_->Branch("Flag_trkPOGFilters", &Flag_trkPOGFilters );
     BabyTree_->Branch("Flag_trackingFailureFilter", &Flag_trackingFailureFilter );
+    BabyTree_->Branch("Flag_CSCTightHalo2015Filter", &Flag_CSCTightHalo2015Filter );
     BabyTree_->Branch("Flag_CSCTightHaloFilter", &Flag_CSCTightHaloFilter );
     BabyTree_->Branch("Flag_HBHENoiseFilter", &Flag_HBHENoiseFilter );
     BabyTree_->Branch("Flag_HBHENoiseIsoFilter", &Flag_HBHENoiseIsoFilter );
@@ -2581,6 +2582,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     Flag_trkPOGFilters = -999;
     Flag_trackingFailureFilter = -999;
     Flag_CSCTightHaloFilter = -999;
+    Flag_CSCTightHalo2015Filter = -999;
     Flag_HBHENoiseFilter = -999;
     Flag_HBHENoiseIsoFilter = -999;
     Flag_goodVertices = -999;
