@@ -70,7 +70,7 @@ const bool applyLeptonSFs = false;
 // turn on to apply json file to data (default true)
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
-const bool removePostProcVars = false;
+const bool removePostProcVars = true;
 // for merging prompt reco 2015 with reMINIAOD (default true)
 const bool removeEarlyPromptReco = true;
 // turn on to remove jets overlapping with leptons (default true)
@@ -1571,6 +1571,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       nBJet40 = 0;
       nBJet20csv = 0;    // counters for 2 different algorithms
       nBJet20mva = 0;
+      nBJet30csv = 0;    // counters for 2 different algorithms
+      nBJet30mva = 0;
       nJet30FailId = 0;
       nJet100FailId = 0;
       minMTBMet = 999999.;
@@ -1701,10 +1703,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
             //CSVv2IVFM
             if(jet_btagCSV[njet] >= 0.800) {
               nBJet20csv++;
+	      if (jet_pt[njet] > 30.0) nBJet30csv++;
             }
             if(jet_btagMVA[njet] >= 0.185){
               nBJet20++; 
               nBJet20mva++;
+	      if (jet_pt[njet] > 30.0) nBJet30mva++;
               // btag SF - not final yet
               if (!isData && applyBtagSFs) {
                 float eff = getBtagEffFromFile(jet_pt[njet], jet_eta[njet], jet_hadronFlavour[njet], isFastsim);
@@ -2197,6 +2201,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("nBJet20mva", &nBJet20mva );
     BabyTree_->Branch("nBJet25", &nBJet25 );
     BabyTree_->Branch("nBJet30", &nBJet30 );
+    BabyTree_->Branch("nBJet30csv", &nBJet30csv );
+    BabyTree_->Branch("nBJet30mva", &nBJet30mva );
     BabyTree_->Branch("nBJet40", &nBJet40 );
     BabyTree_->Branch("nJet30FailId", &nJet30FailId );
     BabyTree_->Branch("nJet100FailId", &nJet100FailId );
@@ -2531,6 +2537,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     nBJet20mva = -999;
     nBJet25 = -999;
     nBJet30 = -999;
+    nBJet30csv = -999;
+    nBJet30mva = -999;
     nBJet40 = -999;
     nJet30FailId = -999;
     nJet100FailId = -999;

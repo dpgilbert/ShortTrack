@@ -101,6 +101,8 @@ class babyMaker {
   Int_t           nBJet40;
   Int_t           nBJet20csv;
   Int_t           nBJet20mva;
+  Int_t           nBJet30csv;
+  Int_t           nBJet30mva;
   Int_t           nJet30FailId;
   Int_t           nJet100FailId;
   Int_t           nMuons10;
