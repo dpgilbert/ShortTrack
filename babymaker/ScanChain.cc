@@ -1261,34 +1261,36 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	  if (pt < 5.) continue;
 	  if (fabs(eta) > 2.4) continue;
 
-	  if (isFastsim) {
-	    // look up SF and vetoeff, by flavor
-	    weightStruct sf_struct_fullsim = getLepSFFromFile(pt, eta, pdgId);
-	    weightStruct sf_struct_fastsim = getLepSFFromFile_fastsim(pt, eta, pdgId);
-	    float sf = sf_struct_fullsim.cent * sf_struct_fastsim.cent;
-	    float vetoeff = getLepVetoEffFromFile_fastsim(pt, eta, pdgId);
-	    // apply SF to vetoeff, then correction for 0L will be (1 - vetoeff_cor) / (1 - vetoeff) - 1.
-	    float vetoeff_cor = vetoeff * sf;
-	    float cor_0l = ( (1. - vetoeff_cor) / (1. - vetoeff) ) - 1.;
-	    weight_lepsf_0l *= (1. + cor_0l);
-	    float unc = (sf_struct_fullsim.up - sf_struct_fullsim.cent) + (sf_struct_fastsim.up - sf_struct_fastsim.cent);
-	    float vetoeff_cor_unc_UP = vetoeff_cor * (1. + unc);
-	    float unc_UP_0l = ( (1. - vetoeff_cor_unc_UP) / (1. - vetoeff_cor) ) - 1.;
-	    weight_lepsf_0l_UP *= (1. + cor_0l + unc_UP_0l);
-	    weight_lepsf_0l_DN *= (1. + cor_0l - unc_UP_0l);
-	  } // isFastsim
+	  if (applyLeptonSFs) {
+	    if (isFastsim) {
+	      // look up SF and vetoeff, by flavor
+	      weightStruct sf_struct_fullsim = getLepSFFromFile(pt, eta, pdgId);
+	      weightStruct sf_struct_fastsim = getLepSFFromFile_fastsim(pt, eta, pdgId);
+	      float sf = sf_struct_fullsim.cent * sf_struct_fastsim.cent;
+	      float vetoeff = getLepVetoEffFromFile_fastsim(pt, eta, pdgId);
+	      // apply SF to vetoeff, then correction for 0L will be (1 - vetoeff_cor) / (1 - vetoeff) - 1.
+	      float vetoeff_cor = vetoeff * sf;
+	      float cor_0l = ( (1. - vetoeff_cor) / (1. - vetoeff) ) - 1.;
+	      weight_lepsf_0l *= (1. + cor_0l);
+	      float unc = (sf_struct_fullsim.up - sf_struct_fullsim.cent) + (sf_struct_fastsim.up - sf_struct_fastsim.cent);
+	      float vetoeff_cor_unc_UP = vetoeff_cor * (1. + unc);
+	      float unc_UP_0l = ( (1. - vetoeff_cor_unc_UP) / (1. - vetoeff_cor) ) - 1.;
+	      weight_lepsf_0l_UP *= (1. + cor_0l + unc_UP_0l);
+	      weight_lepsf_0l_DN *= (1. + cor_0l - unc_UP_0l);
+	    } // isFastsim
 
-	  else { // fullsim
-	    // don't apply correction to 0L central value for fullsim: saw that the effect was negligible
-	    weightStruct sf_struct = getLepSFFromFile(pt, eta, pdgId);
-	    float sf = sf_struct.cent;
-	    float vetoeff = getLepVetoEffFromFile_fullsim(pt, eta, pdgId);
-	    float unc = sf_struct.up - sf;
-	    float vetoeff_unc_UP = vetoeff * (1. + unc);
-	    float unc_UP_0l = ( (1. - vetoeff_unc_UP) / (1. - vetoeff) ) - 1.;
-	    weight_lepsf_0l_UP *= (1. + unc_UP_0l);
-	    weight_lepsf_0l_DN *= (1. - unc_UP_0l);
-	  }
+	    else { // fullsim
+	      // don't apply correction to 0L central value for fullsim: saw that the effect was negligible
+	      weightStruct sf_struct = getLepSFFromFile(pt, eta, pdgId);
+	      float sf = sf_struct.cent;
+	      float vetoeff = getLepVetoEffFromFile_fullsim(pt, eta, pdgId);
+	      float unc = sf_struct.up - sf;
+	      float vetoeff_unc_UP = vetoeff * (1. + unc);
+	      float unc_UP_0l = ( (1. - vetoeff_unc_UP) / (1. - vetoeff) ) - 1.;
+	      weight_lepsf_0l_UP *= (1. + unc_UP_0l);
+	      weight_lepsf_0l_DN *= (1. - unc_UP_0l);
+	    }
+	  } // if applyLeptonSFs
 	  
 	} // loop over gen leptons
       } // !isData && 0 veto leptons
