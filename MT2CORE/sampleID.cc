@@ -80,12 +80,10 @@ int sampleID (const string& name) {
 
   else if (name.find("TTJets") != string::npos) {
     if (name.find("TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 300;
-    else if ((name.find("TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) && (name.find("ext1") != string::npos)) return 304;
-    else if ((name.find("TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) && (name.find("ext1") != string::npos)) return 305;
-    else if ((name.find("TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) && (name.find("ext1") != string::npos)) return 306;
     else if (name.find("TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 301;
     else if (name.find("TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 302;
     else if (name.find("TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 303;
+    else if (name.find("TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8") != string::npos) return 306;
     
     else if (name.find("TTJets_HT-600to800") != string::npos) return 311;
     else if (name.find("TTJets_HT-800to1200") != string::npos) return 312;
