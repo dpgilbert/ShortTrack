@@ -41,6 +41,27 @@ echo
 
 echo "[wrapper] printing env"
 printenv
+echo 
+
+echo "[wrapper] hostname  = " `hostname`
+echo "[wrapper] date      = " `date`
+echo "[wrapper] linux timestamp = " `date +%s`
+echo "[wrapper] checking input file with ls"
+ls -alrth ${FILE}
+
+# catch exit code
+if [ $? -ne 0 ]; then
+    echo "[wrapper] could not find input file, trying xrootd instead"
+    FILESHORT=${FILE#/hadoop/cms}
+    xrdfs xrootd.t2.ucsd.edu ls ${FILESHORT}
+    if [ $? -ne 0 ]; then
+	echo "[wrapper] could not find input file with xrootd either, exiting"
+	exit 1
+    else
+	echo "[wrapper] found file with xrootd, will proceed"
+	FILE="root://xrootd.t2.ucsd.edu/"${FILESHORT}
+    fi
+fi
 
 #
 # untar input sandbox
