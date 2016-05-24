@@ -70,7 +70,7 @@ const bool applyLeptonSFs = false;
 // turn on to apply json file to data (default true)
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
-const bool removePostProcVars = true;
+const bool removePostProcVars = false;
 // for merging prompt reco 2015 with reMINIAOD (default true)
 const bool removeEarlyPromptReco = true;
 // turn on to remove jets overlapping with leptons (default true)
@@ -126,7 +126,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
   // 25ns is hardcoded here, would need an option for 50ns
-  const char* json_file = "jsons/DCSONLY_json_160516_snt.txt";
+  const char* json_file = "jsons/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -286,8 +286,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     evt_id = sampleID(currentFile->GetTitle());
 
     // Get File Content
-    TFile f( currentFile->GetTitle() );
-    TTree *tree = (TTree*)f.Get("Events");
+    TFile* f = TFile::Open( currentFile->GetTitle() );
+    TTree *tree = (TTree*)f->Get("Events");
     TTreeCache::SetLearnEntries(10);
     tree->SetCacheSize(128*1024*1024);
     cms3.Init(tree);
@@ -2130,7 +2130,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     }//end loop on events in a file
 
     delete tree;
-    f.Close();
+    f->Close();
     }//end loop on files
 
     cout << "Processed " << nEventsTotal << " events" << endl;
