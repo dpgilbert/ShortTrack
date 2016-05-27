@@ -90,6 +90,7 @@ public :
    Int_t           Flag_trkPOGFilters;
    Int_t           Flag_trackingFailureFilter;
    Int_t           Flag_CSCTightHaloFilter;
+   Int_t           Flag_CSCTightHalo2015Filter;
    Int_t           Flag_HBHENoiseFilter;
    Int_t           Flag_HBHEIsoNoiseFilter;
    Int_t           Flag_HBHENoiseIsoFilter;
@@ -415,6 +416,7 @@ public :
    TBranch        *b_Flag_trkPOGFilters;   //!
    TBranch        *b_Flag_trackingFailureFilter;   //!
    TBranch        *b_Flag_CSCTightHaloFilter;   //!
+   TBranch        *b_Flag_CSCTightHalo2015Filter;   //!
    TBranch        *b_Flag_HBHENoiseFilter;   //!
    TBranch        *b_Flag_HBHEIsoNoiseFilter;   //!
    TBranch        *b_Flag_HBHENoiseIsoFilter;   //!
@@ -799,6 +801,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("Flag_trkPOGFilters", &Flag_trkPOGFilters, &b_Flag_trkPOGFilters);
    fChain->SetBranchAddress("Flag_trackingFailureFilter", &Flag_trackingFailureFilter, &b_Flag_trackingFailureFilter);
    fChain->SetBranchAddress("Flag_CSCTightHaloFilter", &Flag_CSCTightHaloFilter, &b_Flag_CSCTightHaloFilter);
+   fChain->SetBranchAddress("Flag_CSCTightHalo2015Filter", &Flag_CSCTightHalo2015Filter, &b_Flag_CSCTightHalo2015Filter);
    fChain->SetBranchAddress("Flag_HBHENoiseFilter", &Flag_HBHENoiseFilter, &b_Flag_HBHENoiseFilter);
    fChain->SetBranchAddress("Flag_HBHEIsoNoiseFilter", &Flag_HBHEIsoNoiseFilter, &b_Flag_HBHEIsoNoiseFilter);
    fChain->SetBranchAddress("Flag_HBHENoiseIsoFilter", &Flag_HBHENoiseIsoFilter, &b_Flag_HBHENoiseIsoFilter);
