@@ -277,6 +277,8 @@ class babyMaker {
   Int_t           gamma_nJet30FailId;
   Int_t           gamma_nJet100FailId;
   Int_t           gamma_nBJet20;
+  Int_t           gamma_nBJet20csv;
+  Int_t           gamma_nBJet20mva;
   Int_t           gamma_nBJet25;
   Int_t           gamma_nBJet30;
   Int_t           gamma_nBJet40;

@@ -1586,6 +1586,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       gamma_nJet30FailId = 0;
       gamma_nJet100FailId = 0;
       gamma_nBJet20 = 0;
+      gamma_nBJet20csv = 0;
+      gamma_nBJet20mva = 0;
       gamma_nBJet25 = 0;
       gamma_nBJet30 = 0;
       gamma_nBJet40 = 0;
@@ -1820,8 +1822,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
                 gamma_nJet30++;
                 if (p4sCorrJets.at(iJet).pt() > 40.0) gamma_nJet40++;
               } // pt30
+              if(jet_btagCSV[njet] >= 0.800){
+                  gamma_nBJet20csv++;
+              }
               if(jet_btagMVA[njet] >= 0.185) { // CombinedMVAv2
                 gamma_nBJet20++; 
+                gamma_nBJet20mva++;
                 if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++; 
                 if (p4sCorrJets.at(iJet).pt() > 30.0) {
                   gamma_nBJet30++;
@@ -2355,6 +2361,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("gamma_nJet30FailId", &gamma_nJet30FailId );
     BabyTree_->Branch("gamma_nJet100FailId", &gamma_nJet100FailId );
     BabyTree_->Branch("gamma_nBJet20", &gamma_nBJet20 );
+    BabyTree_->Branch("gamma_nBJet20csv", &gamma_nBJet20csv );
+    BabyTree_->Branch("gamma_nBJet20mva", &gamma_nBJet20mva );
     BabyTree_->Branch("gamma_nBJet25", &gamma_nBJet25 );
     BabyTree_->Branch("gamma_nBJet30", &gamma_nBJet30 );
     BabyTree_->Branch("gamma_nBJet40", &gamma_nBJet40 );
@@ -2650,6 +2658,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     gamma_nJet30FailId = -999;
     gamma_nJet100FailId = -999;
     gamma_nBJet20 = -999;
+    gamma_nBJet20csv = -999;
+    gamma_nBJet20mva = -999;
     gamma_nBJet25 = -999;
     gamma_nBJet30 = -999;
     gamma_nBJet40 = -999;
