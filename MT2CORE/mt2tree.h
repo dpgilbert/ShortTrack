@@ -92,6 +92,7 @@ public :
    Int_t           Flag_CSCTightHaloFilter;
    Int_t           Flag_HBHENoiseFilter;
    Int_t           Flag_HBHEIsoNoiseFilter;
+   Int_t           Flag_HBHENoiseIsoFilter;
    Int_t           Flag_goodVertices;
    Int_t           Flag_eeBadScFilter;
    Int_t           Flag_METFilters;
@@ -102,11 +103,16 @@ public :
    Int_t           HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90;
    Int_t           HLT_PFMETNoMu120_PFMHTNoMu120;
    Int_t           HLT_PFMET90_PFMHT90;
+   Int_t           HLT_PFMET100_PFMHT100;
+   Int_t           HLT_PFMET110_PFMHT110;
+   Int_t           HLT_PFMET120_PFMHT120;
    Int_t           HLT_HT800;
    Int_t           HLT_HT900;
    Int_t           HLT_MET170;
    Int_t           HLT_ht350met100;
    Int_t           HLT_ht350met120;
+   Int_t           HLT_PFHT300_PFMET100;
+   Int_t           HLT_PFHT300_PFMET110;
    Int_t           HLT_PFHT350_PFMET100;
    Int_t           HLT_PFHT350_PFMET120;
    Int_t           HLT_SingleMu;   
@@ -123,6 +129,7 @@ public :
    Int_t           HLT_ht350prescale;   
    Int_t           HLT_ht475prescale;   
    Int_t           HLT_ht600prescale;   
+   Int_t           HLT_PFHT125_Prescale;   
    Int_t           HLT_PFHT200_Prescale;   
    Int_t           HLT_PFHT300_Prescale;   
    Int_t           HLT_PFHT350_Prescale;   
@@ -410,6 +417,7 @@ public :
    TBranch        *b_Flag_CSCTightHaloFilter;   //!
    TBranch        *b_Flag_HBHENoiseFilter;   //!
    TBranch        *b_Flag_HBHEIsoNoiseFilter;   //!
+   TBranch        *b_Flag_HBHENoiseIsoFilter;   //!
    TBranch        *b_Flag_goodVertices;   //!
    TBranch        *b_Flag_eeBadScFilter;   //!
    TBranch        *b_Flag_METFilters;   //!
@@ -423,8 +431,13 @@ public :
    TBranch        *b_HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90;   //!
    TBranch        *b_HLT_PFMETNoMu120_PFMHTNoMu120;   //!
    TBranch        *b_HLT_PFMET90_PFMHT90;   //!
+   TBranch        *b_HLT_PFMET100_PFMHT100;   //!
+   TBranch        *b_HLT_PFMET110_PFMHT110;   //!
+   TBranch        *b_HLT_PFMET120_PFMHT120;   //!
    TBranch        *b_HLT_ht350met100;   //!
    TBranch        *b_HLT_ht350met120;   //!
+   TBranch        *b_HLT_PFHT300_PFMET100;   //!
+   TBranch        *b_HLT_PFHT300_PFMET110;   //!
    TBranch        *b_HLT_PFHT350_PFMET100;   //!
    TBranch        *b_HLT_PFHT350_PFMET120;   //!
    TBranch        *b_HLT_SingleMu;   //!
@@ -441,6 +454,7 @@ public :
    TBranch        *b_HLT_ht350prescale;   //!
    TBranch        *b_HLT_ht475prescale;   //!
    TBranch        *b_HLT_ht600prescale;   //!
+   TBranch        *b_HLT_PFHT125_Prescale;   //!
    TBranch        *b_HLT_PFHT200_Prescale;   //!
    TBranch        *b_HLT_PFHT300_Prescale;   //!
    TBranch        *b_HLT_PFHT350_Prescale;   //!
@@ -787,6 +801,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("Flag_CSCTightHaloFilter", &Flag_CSCTightHaloFilter, &b_Flag_CSCTightHaloFilter);
    fChain->SetBranchAddress("Flag_HBHENoiseFilter", &Flag_HBHENoiseFilter, &b_Flag_HBHENoiseFilter);
    fChain->SetBranchAddress("Flag_HBHEIsoNoiseFilter", &Flag_HBHEIsoNoiseFilter, &b_Flag_HBHEIsoNoiseFilter);
+   fChain->SetBranchAddress("Flag_HBHENoiseIsoFilter", &Flag_HBHENoiseIsoFilter, &b_Flag_HBHENoiseIsoFilter);
    fChain->SetBranchAddress("Flag_goodVertices", &Flag_goodVertices, &b_Flag_goodVertices);
    fChain->SetBranchAddress("Flag_eeBadScFilter", &Flag_eeBadScFilter, &b_Flag_eeBadScFilter);
    fChain->SetBranchAddress("Flag_METFilters", &Flag_METFilters, &b_Flag_METFilters);
@@ -800,8 +815,13 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90", &HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90, &b_HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90);
    fChain->SetBranchAddress("HLT_PFMETNoMu120_PFMHTNoMu120", &HLT_PFMETNoMu120_PFMHTNoMu120, &b_HLT_PFMETNoMu120_PFMHTNoMu120);
    fChain->SetBranchAddress("HLT_PFMET90_PFMHT90", &HLT_PFMET90_PFMHT90, &b_HLT_PFMET90_PFMHT90);
+   fChain->SetBranchAddress("HLT_PFMET100_PFMHT100", &HLT_PFMET100_PFMHT100, &b_HLT_PFMET100_PFMHT100);
+   fChain->SetBranchAddress("HLT_PFMET110_PFMHT110", &HLT_PFMET110_PFMHT110, &b_HLT_PFMET110_PFMHT110);
+   fChain->SetBranchAddress("HLT_PFMET120_PFMHT120", &HLT_PFMET120_PFMHT120, &b_HLT_PFMET120_PFMHT120);
    fChain->SetBranchAddress("HLT_ht350met100", &HLT_ht350met100, &b_HLT_ht350met100);
    fChain->SetBranchAddress("HLT_ht350met120", &HLT_ht350met120, &b_HLT_ht350met120);
+   fChain->SetBranchAddress("HLT_PFHT300_PFMET100", &HLT_PFHT300_PFMET100, &b_HLT_PFHT300_PFMET100);
+   fChain->SetBranchAddress("HLT_PFHT300_PFMET110", &HLT_PFHT300_PFMET110, &b_HLT_PFHT300_PFMET110);
    fChain->SetBranchAddress("HLT_PFHT350_PFMET100", &HLT_PFHT350_PFMET100, &b_HLT_PFHT350_PFMET100);
    fChain->SetBranchAddress("HLT_PFHT350_PFMET120", &HLT_PFHT350_PFMET120, &b_HLT_PFHT350_PFMET120);
    fChain->SetBranchAddress("HLT_SingleMu", &HLT_SingleMu, &b_HLT_SingleMu);
@@ -818,6 +838,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_ht350prescale", &HLT_ht350prescale, &b_HLT_ht350prescale);
    fChain->SetBranchAddress("HLT_ht475prescale", &HLT_ht475prescale, &b_HLT_ht475prescale);
    fChain->SetBranchAddress("HLT_ht600prescale", &HLT_ht600prescale, &b_HLT_ht600prescale);
+   fChain->SetBranchAddress("HLT_PFHT125_Prescale", &HLT_PFHT125_Prescale, &b_HLT_PFHT125_Prescale);
    fChain->SetBranchAddress("HLT_PFHT200_Prescale", &HLT_PFHT200_Prescale, &b_HLT_PFHT200_Prescale);
    fChain->SetBranchAddress("HLT_PFHT300_Prescale", &HLT_PFHT300_Prescale, &b_HLT_PFHT300_Prescale);
    fChain->SetBranchAddress("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale, &b_HLT_PFHT350_Prescale);
