@@ -727,7 +727,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //      const float lumi = 1.264;
       //      const float lumi = 2.11;
       //const float lumi = 2.155;
-      const float lumi = 0.218;
+      const float lumi = 0.5893;
 
       evtweight_ = 1.;
 
