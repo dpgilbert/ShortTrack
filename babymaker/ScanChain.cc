@@ -126,7 +126,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
   // 25ns is hardcoded here, would need an option for 50ns
-  const char* json_file = "jsons/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T_snt.txt";
+  const char* json_file = "jsons/Cert_271036-273730_13TeV_PromptReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
