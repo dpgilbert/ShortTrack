@@ -161,6 +161,8 @@ class babyMaker {
   Int_t           Flag_trackingFailureFilter;
   Int_t           Flag_CSCTightHaloFilter;
   Int_t           Flag_CSCTightHalo2015Filter;
+  Int_t           Flag_globalTightHalo2016Filter;
+  Int_t           Flag_globalSuperTightHalo2016Filter;
   Int_t           Flag_HBHENoiseFilter;
   Int_t           Flag_HBHENoiseIsoFilter;
   Int_t           Flag_goodVertices;

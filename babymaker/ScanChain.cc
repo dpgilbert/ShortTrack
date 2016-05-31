@@ -450,6 +450,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	// note: in CMS3, filt_cscBeamHalo and evt_cscTightHaloId are the same
 	Flag_CSCTightHaloFilter                       = cms3.filt_cscBeamHalo();
 	Flag_CSCTightHalo2015Filter                   = cms3.filt_cscBeamHalo2015();
+	// not in latest CMS3 tag on data - will be added in next tag..
+	// Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
+	// Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
 	// note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
 	Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
 	// temporary workaround: flag not in first 80x MC production, so recompute
@@ -2262,6 +2265,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("Flag_trackingFailureFilter", &Flag_trackingFailureFilter );
     BabyTree_->Branch("Flag_CSCTightHalo2015Filter", &Flag_CSCTightHalo2015Filter );
     BabyTree_->Branch("Flag_CSCTightHaloFilter", &Flag_CSCTightHaloFilter );
+    BabyTree_->Branch("Flag_globalTightHalo2016Filter", &Flag_globalTightHalo2016Filter );
+    BabyTree_->Branch("Flag_globalSuperTightHalo2016Filter", &Flag_globalSuperTightHalo2016Filter );
     BabyTree_->Branch("Flag_HBHENoiseFilter", &Flag_HBHENoiseFilter );
     BabyTree_->Branch("Flag_HBHENoiseIsoFilter", &Flag_HBHENoiseIsoFilter );
     BabyTree_->Branch("Flag_goodVertices", &Flag_goodVertices );
@@ -2601,6 +2606,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     Flag_trackingFailureFilter = -999;
     Flag_CSCTightHaloFilter = -999;
     Flag_CSCTightHalo2015Filter = -999;
+    Flag_globalTightHalo2016Filter = -999;
+    Flag_globalSuperTightHalo2016Filter = -999;
     Flag_HBHENoiseFilter = -999;
     Flag_HBHENoiseIsoFilter = -999;
     Flag_goodVertices = -999;
