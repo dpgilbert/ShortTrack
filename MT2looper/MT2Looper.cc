@@ -77,15 +77,15 @@ bool useDRforGammaQCDMixing = true; // requires GenParticles
 // turn on to apply weights to central value
 bool applyWeights = false;
 // turn on to apply btag sf to central value
-bool applyBtagSF = true;
+bool applyBtagSF = false;
 // turn on to apply lepton sf to central value
-bool applyLeptonSF = true;
+bool applyLeptonSF = false;
 // turn on to apply reweighting to ttbar based on top pt
-bool applyTopPtReweight = true;
+bool applyTopPtReweight = false;
 // turn on to apply lepton sf to central value for 0L sample in fastsim
-bool applyLeptonSFfastsim = true;
+bool applyLeptonSFfastsim = false;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
-bool doSystVariationPlots = true;
+bool doSystVariationPlots = false;
 // turn on to apply Nvtx reweighting to MC
 bool doNvtxReweight = false;
 // turn on to apply json file to data
@@ -93,13 +93,13 @@ bool applyJSON = false;
 // veto on jets with pt > 30, |eta| > 3.0
 bool doHFJetVeto = false;
 // get signal scan nevents from file
-bool doScanWeights = true;
+bool doScanWeights = false;
 // doesn't plot data for MT2 > 200 in signal regions
 bool doBlindData = false;
 // make variation histograms for tau efficiency
 bool doGenTauVars = false;
 // make variation histograms for e+mu efficiency
-bool doLepEffVars = true;
+bool doLepEffVars = false;
 // make only minimal hists needed for results
 bool doMinimalPlots = false;
 
