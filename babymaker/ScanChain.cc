@@ -457,6 +457,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
 	// temporary workaround: flag not in first 80x MC production, so recompute
 	Flag_HBHENoiseIsoFilter                       = isData ? cms3.filt_hbheNoiseIso() : hbheIsoNoiseFilter();
+	// computed from CMS3, should eventually compute on miniAOD when available..
+	Flag_badChargedCandidateFilter                = badChargedCandidateFilter();
 	// necessary?
 	Flag_METFilters                               = cms3.filt_metfilter();
       }
@@ -2271,6 +2273,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("Flag_HBHENoiseIsoFilter", &Flag_HBHENoiseIsoFilter );
     BabyTree_->Branch("Flag_goodVertices", &Flag_goodVertices );
     BabyTree_->Branch("Flag_eeBadScFilter", &Flag_eeBadScFilter );
+    BabyTree_->Branch("Flag_badChargedCandidateFilter", &Flag_badChargedCandidateFilter );
     BabyTree_->Branch("Flag_METFilters", &Flag_METFilters );
     BabyTree_->Branch("HLT_PFHT800", &HLT_PFHT800 );
     BabyTree_->Branch("HLT_PFHT900", &HLT_PFHT900 );
@@ -2612,6 +2615,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     Flag_HBHENoiseIsoFilter = -999;
     Flag_goodVertices = -999;
     Flag_eeBadScFilter = -999;
+    Flag_badChargedCandidateFilter = -999;
     Flag_METFilters = -999;
     HLT_PFHT800 = -999;
     HLT_PFHT900 = -999;
