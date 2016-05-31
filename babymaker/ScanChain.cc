@@ -126,7 +126,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
   // 25ns is hardcoded here, would need an option for 50ns
-  const char* json_file = "jsons/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T_snt.txt";
+  const char* json_file = "jsons/Cert_271036-273730_13TeV_PromptReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -450,10 +450,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	// note: in CMS3, filt_cscBeamHalo and evt_cscTightHaloId are the same
 	Flag_CSCTightHaloFilter                       = cms3.filt_cscBeamHalo();
 	Flag_CSCTightHalo2015Filter                   = cms3.filt_cscBeamHalo2015();
+	// not in latest CMS3 tag on data - will be added in next tag..
+	// Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
+	// Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
 	// note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
 	Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
 	// temporary workaround: flag not in first 80x MC production, so recompute
 	Flag_HBHENoiseIsoFilter                       = isData ? cms3.filt_hbheNoiseIso() : hbheIsoNoiseFilter();
+	// computed from CMS3, should eventually compute on miniAOD when available..
+	Flag_badChargedCandidateFilter                = badChargedCandidateFilter();
 	// necessary?
 	Flag_METFilters                               = cms3.filt_metfilter();
       }
@@ -2262,10 +2267,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("Flag_trackingFailureFilter", &Flag_trackingFailureFilter );
     BabyTree_->Branch("Flag_CSCTightHalo2015Filter", &Flag_CSCTightHalo2015Filter );
     BabyTree_->Branch("Flag_CSCTightHaloFilter", &Flag_CSCTightHaloFilter );
+    BabyTree_->Branch("Flag_globalTightHalo2016Filter", &Flag_globalTightHalo2016Filter );
+    BabyTree_->Branch("Flag_globalSuperTightHalo2016Filter", &Flag_globalSuperTightHalo2016Filter );
     BabyTree_->Branch("Flag_HBHENoiseFilter", &Flag_HBHENoiseFilter );
     BabyTree_->Branch("Flag_HBHENoiseIsoFilter", &Flag_HBHENoiseIsoFilter );
     BabyTree_->Branch("Flag_goodVertices", &Flag_goodVertices );
     BabyTree_->Branch("Flag_eeBadScFilter", &Flag_eeBadScFilter );
+    BabyTree_->Branch("Flag_badChargedCandidateFilter", &Flag_badChargedCandidateFilter );
     BabyTree_->Branch("Flag_METFilters", &Flag_METFilters );
     BabyTree_->Branch("HLT_PFHT800", &HLT_PFHT800 );
     BabyTree_->Branch("HLT_PFHT900", &HLT_PFHT900 );
@@ -2601,10 +2609,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     Flag_trackingFailureFilter = -999;
     Flag_CSCTightHaloFilter = -999;
     Flag_CSCTightHalo2015Filter = -999;
+    Flag_globalTightHalo2016Filter = -999;
+    Flag_globalSuperTightHalo2016Filter = -999;
     Flag_HBHENoiseFilter = -999;
     Flag_HBHENoiseIsoFilter = -999;
     Flag_goodVertices = -999;
     Flag_eeBadScFilter = -999;
+    Flag_badChargedCandidateFilter = -999;
     Flag_METFilters = -999;
     HLT_PFHT800 = -999;
     HLT_PFHT900 = -999;
