@@ -124,11 +124,6 @@ TAG="V00-08-00_json_Cert_271036-273450"
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/V08-00-01 ${TAG}_qcd_ext_ht1000to1500
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v2/V08-00-01 ${TAG}_qcd_ext_ht2000toInf
 
-# #
-# # QCD extensions
-# #
-
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/V08-00-01 ${TAG}_qcd_ht200to300_ext1
 
 # #
 # # SIGNAL
