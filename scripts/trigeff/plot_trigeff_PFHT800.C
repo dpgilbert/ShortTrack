@@ -23,14 +23,14 @@ const int iPeriod = 4; // 13 tev
 //   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
 const int iPos = 3;
 
-void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-00_DCSONLY_json_160516/") {
+void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-00_json_Cert_271036-273730/") {
 
   cmsText = "CMS Preliminary";
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
   //  lumi_13TeV = "2.1 fb^{-1}";
-  lumi_13TeV = "";
+  lumi_13TeV = "589 pb^{-1}";
   
   gStyle->SetPadTopMargin(0.08);
   gStyle->SetPadBottomMargin(0.12);
@@ -61,13 +61,12 @@ void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-00
   c->SetGrid(1,1);
   c->cd();
 
-  //  TCut base = "nVert > 0 && nJet30 > 1 && Flag_CSCTightHalo2015Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices";
-  TCut base = "nVert > 0 && nJet30 > 1 && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices";
+  TCut base = "nVert > 0 && nJet30 > 1 && Flag_CSCTightHalo2015Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices";
   TCut had = base + "nElectrons10+nMuons10==0";
   TCut ele = base + "nElectrons10 > 0 && abs(lep_pdgId[0]) == 11 && lep_pt[0] > 25.";
 
-  t_jetht->Draw("ht>>h_ht_denom_ht475",had+"HLT_PFHT475_Prescale");
-  t_jetht->Draw("ht>>h_ht_num_ht475",had+"HLT_PFHT475_Prescale && HLT_PFHT800");
+  t_jetht->Draw("ht>>h_ht_denom_ht475",had+"met_pt > 250. && HLT_PFHT475_Prescale");
+  t_jetht->Draw("ht>>h_ht_num_ht475",had+"met_pt > 250. && HLT_PFHT475_Prescale && HLT_PFHT800");
 
   t_met->Draw("ht>>h_ht_denom_met170",had+"met_pt > 250. && HLT_PFMET170");
   t_met->Draw("ht>>h_ht_num_met170",had+"met_pt > 250. && HLT_PFMET170 && HLT_PFHT800");

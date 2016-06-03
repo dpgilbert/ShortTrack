@@ -23,7 +23,7 @@ const int iPeriod = 4; // 13 tev
 //   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
 const int iPos = 3;
 
-void plot_trigeff_PFMET90 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-00_json_Cert_271036-273730/") {
+void plot_trigeff_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-00_json_Cert_271036-273730/") {
 
   cmsText = "CMS Preliminary";
   cmsTextSize = 0.5;
@@ -50,7 +50,7 @@ void plot_trigeff_PFMET90 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-00
   t_muon->Add(Form("%s/*Run2016*SingleMuon*.root", indir.Data()));
   t_ele->Add(Form("%s/*Run2016*SingleElectron*.root", indir.Data()));
 
-  TFile* f_out = new TFile(Form("trigeff_PFMET90%s.root",suffix.Data()),"RECREATE");
+  TFile* f_out = new TFile(Form("trigeff_PFMET100%s.root",suffix.Data()),"RECREATE");
   
   TH1D* h_met_denom_ht800 = new TH1D("h_met_denom_ht800",";E_{T}^{miss} [GeV]",40,100,500);
   TH1D* h_met_num_ht800 = (TH1D*) h_met_denom_ht800->Clone("h_met_num_ht800");
@@ -70,15 +70,15 @@ void plot_trigeff_PFMET90 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-00
   TCut mu = base + "nMuons10 > 0 && abs(lep_pdgId[0]) == 13 && lep_pt[0] > 25. && lep_tightId[0] > 0 && lep_relIso03[0] < 0.1";
 
   // t_jetht->Draw("met_pt>>h_met_denom_ht800",had+"HLT_PFHT800");
-  // t_jetht->Draw("met_pt>>h_met_num_ht800",had+"HLT_PFHT800 && HLT_PFMET90");
+  // t_jetht->Draw("met_pt>>h_met_num_ht800",had+"HLT_PFHT800 && HLT_PFMET100");
 
   // t_muon->Draw("met_pt>>h_met_denom_mu20",mu+"HLT_SingleMu");
-  // t_muon->Draw("met_pt>>h_met_num_mu20",mu+"HLT_SingleMu && HLT_PFMET90_PFMHT90");
+  // t_muon->Draw("met_pt>>h_met_num_mu20",mu+"HLT_SingleMu && HLT_PFMET100_PFMHT100");
 
   t_ele->Draw("met_pt>>h_met_denom_ele23",ele+"HLT_SingleEl");
-  t_ele->Draw("met_pt>>h_met_num_ele23",ele+"HLT_SingleEl && HLT_PFMET90_PFMHT90");
+  t_ele->Draw("met_pt>>h_met_num_ele23",ele+"HLT_SingleEl && HLT_PFMET100_PFMHT100");
 
-  TH2F* h_axis = new TH2F("h_axis",";E_{T}^{miss} [GeV];Eff of HLT_PFMET90_etc",40,100,500,20,0,1);
+  TH2F* h_axis = new TH2F("h_axis",";E_{T}^{miss} [GeV];Eff of HLT_PFMET100_etc",40,100,500,20,0,1);
   h_axis->GetYaxis()->SetTitleOffset(0.98);
   h_axis->Draw();
   
@@ -115,8 +115,8 @@ void plot_trigeff_PFMET90 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-00
   leg->Draw("same");
 
   CMS_lumi( c, iPeriod, iPos );
-  c->SaveAs(Form("trigeff_PFMET90%s.pdf",suffix.Data()));
-  c->SaveAs(Form("trigeff_PFMET90%s.eps",suffix.Data()));
+  c->SaveAs(Form("trigeff_PFMET100%s.pdf",suffix.Data()));
+  c->SaveAs(Form("trigeff_PFMET100%s.eps",suffix.Data()));
 
   f_out->Write();
   f_out->Close();
