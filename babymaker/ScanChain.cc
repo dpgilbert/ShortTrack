@@ -1630,15 +1630,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         if(doJetLepOverlapRemoval && isOverlapJet) continue;
 
         bool isOverlapJetGamma = false;
-        if( ( p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ) { 
-          //check against list of jets that overlap with a photon
-          for(unsigned int j=0; j<removedJetsGamma.size(); j++){
-            if(iJet == removedJetsGamma.at(j)){
-              isOverlapJetGamma = true;
-              break;
-            }
-          }
-        } // pt 20 eta 2.5
+	//check against list of jets that overlap with a photon
+	for(unsigned int j=0; j<removedJetsGamma.size(); j++){
+	  if(iJet == removedJetsGamma.at(j)){
+	    isOverlapJetGamma = true;
+	    break;
+	  }
+	} 
 
         if (njet >= max_njet) {
           std::cout << "WARNING: attempted to fill more than " << max_njet << " jets" << std::endl;
