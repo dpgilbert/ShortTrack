@@ -81,6 +81,7 @@ int mergeFixScale1fb(const TString& indir, const TString& sample, const TString&
   }
   //-------------------------------------------------------------
 
+  clone->SetMaxTreeSize(5000000000LL); // ~5 GB
   clone->Write(); 
   out->Close();
 
