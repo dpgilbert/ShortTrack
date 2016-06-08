@@ -1707,15 +1707,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               nJet30++;
               if (jet_pt[njet] > 40.) nJet40++;
             } // pt40
-            //CSVv2IVFM
-            if(jet_btagCSV[njet] >= 0.800) {
-              nBJet20csv++;
-	      if (jet_pt[njet] > 30.0) nBJet30csv++;
-            }
-            if(jet_btagMVA[njet] >= 0.185){
-              nBJet20++; 
+            if(jet_btagMVA[njet] >= 0.185) {
               nBJet20mva++;
 	      if (jet_pt[njet] > 30.0) nBJet30mva++;
+            }
+            //CSVv2IVFM
+            if(jet_btagCSV[njet] >= 0.800){
+              nBJet20++; 
+              nBJet20csv++;
+	      if (jet_pt[njet] > 30.0) nBJet30csv++;
               // btag SF - not final yet
               if (!isData && applyBtagSFs) {
                 float eff = getBtagEffFromFile(jet_pt[njet], jet_eta[njet], jet_hadronFlavour[njet], isFastsim);
@@ -1825,12 +1825,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
                 gamma_nJet30++;
                 if (p4sCorrJets.at(iJet).pt() > 40.0) gamma_nJet40++;
               } // pt30
-              if(jet_btagCSV[njet] >= 0.800){
-                  gamma_nBJet20csv++;
+              if(jet_btagMVA[njet] >= 0.185){ // CombinedMVAv2
+                  gamma_nBJet20mva++;
               }
-              if(jet_btagMVA[njet] >= 0.185) { // CombinedMVAv2
+              if(jet_btagCSV[njet] >= 0.800) { 
                 gamma_nBJet20++; 
-                gamma_nBJet20mva++;
+                gamma_nBJet20csv++;
                 if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++; 
                 if (p4sCorrJets.at(iJet).pt() > 30.0) {
                   gamma_nBJet30++;
