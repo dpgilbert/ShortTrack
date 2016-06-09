@@ -1,6 +1,7 @@
 #!/bin/bash
 
 make -j12
+if [[ $? != 0 ]]; then return $?; fi
 
 INDIR=/nfs-6/userdata/mt2/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4
 OUTDIR=output/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4
