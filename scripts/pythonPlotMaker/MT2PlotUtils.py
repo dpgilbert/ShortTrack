@@ -55,3 +55,20 @@ def GetUnit(vn):
 
     return "GeV"
 
+def GetSubtitles(dirname):
+    if dirname[-1:]=="J":
+        return ["H_{T} > 200 GeV","M_{T2} > 200 GeV", "1j"]
+    if dirname[-2:]=="VL":
+        return ["200 < H_{T} < 450 GeV","M_{T2} > 200 GeV", "#geq 2j"]
+    if dirname[-1:]=="L":
+        return ["450 < H_{T} < 575 GeV","M_{T2} > 200 GeV", "#geq 2j"]
+    if dirname[-1:]=="M":
+        return ["575 < H_{T} < 1000 GeV","M_{T2} > 200 GeV", "#geq 2j"]
+    if dirname[-2:]=="UH":
+        return ["H_{T} > 1500 GeV","M_{T2} > 200 GeV", "#geq 2j"]
+    if dirname[-1:]=="H":
+        return ["1000 < H_{T} < 1500 GeV","M_{T2} > 200 GeV", "#geq 2j"]
+
+    return ["H_{T} > 200 GeV","M_{T2} > 200 GeV", "#geq 2j"]
+
+

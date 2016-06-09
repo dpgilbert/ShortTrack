@@ -67,7 +67,7 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
         title = utils.GetCRName(dirname)
         xAxisTitle = utils.GetVarName(vn)
         unit = utils.GetUnit(vn)
-        subtitles = ["H_{T} > 200 GeV","M_{T2} > 200 GeV", "#geq 2j"]
+        subtitles = utils.GetSubtitles(dirname)
         subLegText = ["MC scaled by {datamcsf}","# Data events: {ndata}"]
         sns = [utils.GetSampleName(s) for s in samples]
         for ext in exts:
@@ -78,4 +78,3 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
                            doMT2Colors=True, markerSize=markerSize, titleSize=0.035, subtitleSize=0.025,
                            subLegText=subLegText)
             
-
