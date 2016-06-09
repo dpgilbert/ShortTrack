@@ -2,7 +2,7 @@ import os
 import ROOT
 import pyRootPlotMaker as ppm
 import MT2PlotUtils as utils
-
+import MT2PlotDefs as pd
 
 def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["pdf"]):
     # rootdir contains output of MT2Looper, samples are names of the .root files,
@@ -72,7 +72,7 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
         sns = [utils.GetSampleName(s) for s in samples]
         for ext in exts:
             saveAs = os.path.join(output_dir,dirname,"{0}_{1}.{2}".format(dirname,vn,ext))
-            ppm.plotDataMC(h_bkg_vecs[i], sns, h_data[i], doPause=False, xAxisTitle=xAxisTitle, lumi=589, lumiUnit="pb",
+            ppm.plotDataMC(h_bkg_vecs[i], sns, h_data[i], doPause=False, xAxisTitle=xAxisTitle, lumi=pd.lumi, lumiUnit=pd.lumiUnit,
                            title=title, subtitles=subtitles, xRangeUser=plots[i][2], isLog=plots[i][1], saveAs=saveAs, 
                            scaleMCtoData=True, xAxisUnit=unit, userMin=userMin, userMax=userMax, doSort=False, 
                            doMT2Colors=True, markerSize=markerSize, titleSize=0.035, subtitleSize=0.025,

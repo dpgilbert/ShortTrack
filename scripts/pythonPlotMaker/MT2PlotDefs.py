@@ -4,6 +4,9 @@
 #     (var_name, isLog, (xmin,xmax), (ymin,ymax))
 # use None to use default params
 
+lumi = 804
+lumiUnit = "pb"
+
 rl_plots = [
     ("ht",True,(200,1500),None),
     ("met",True,(200,1000),None),
