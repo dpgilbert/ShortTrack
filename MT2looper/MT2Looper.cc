@@ -675,19 +675,21 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (t.nVert == 0) continue;
       if (verbose) cout<<__LINE__<<endl;
 
-      // MET filters (data and MC)
-      if (!t.Flag_goodVertices) continue;
-      if (!t.Flag_CSCTightHalo2015Filter) continue; // use txt files instead
-      if (verbose) cout<<__LINE__<<endl;
-      if (!t.Flag_eeBadScFilter) continue; // txt files are in addition to this flag
-      if (verbose) cout<<__LINE__<<endl;
-      if (!t.Flag_HBHENoiseFilter) continue;
-      if (verbose) cout<<__LINE__<<endl;
-      if (!t.Flag_HBHENoiseIsoFilter) continue;
-      if (verbose) cout<<__LINE__<<endl;
-      if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
-      if (verbose) cout<<__LINE__<<endl;
-
+      // MET filters (data and MC) -> not filled in miniaodV1 MC, IGNORE FOR NOW
+      if (t.isData) {
+	if (!t.Flag_goodVertices) continue;
+	if (!t.Flag_CSCTightHalo2015Filter) continue; // use txt files instead
+	if (verbose) cout<<__LINE__<<endl;
+	if (!t.Flag_eeBadScFilter) continue; // txt files are in addition to this flag
+	if (verbose) cout<<__LINE__<<endl;
+	if (!t.Flag_HBHENoiseFilter) continue;
+	if (verbose) cout<<__LINE__<<endl;
+	if (!t.Flag_HBHENoiseIsoFilter) continue;
+	if (verbose) cout<<__LINE__<<endl;
+	if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+	if (verbose) cout<<__LINE__<<endl;
+      }
+      
       // txt MET filters (data only)
       if (t.isData && metFilterTxt.eventFails(t.run, t.lumi, t.evt)) {
 	//cout<<"Found bad event in data: "<<t.run<<", "<<t.lumi<<", "<<t.evt<<endl;
