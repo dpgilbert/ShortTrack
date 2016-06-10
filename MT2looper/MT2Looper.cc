@@ -729,8 +729,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //      const float lumi = 1.264;
       //      const float lumi = 2.11;
       //const float lumi = 2.155;
-      const float lumi = 0.5893;
-
+      const float lumi = 0.804;
+    
       evtweight_ = 1.;
 
       // apply relevant weights to MC
@@ -866,10 +866,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // Variables for gamma+jets control region
       bool doGJplots = false;
-      // hack since the gjets babies have evt_id==-1 (DR_0p4 was added to the name and broke sampleID. need to fix)
-      if(sample=="gjets_ht"){
-          t.evt_id = 200;
-      }
       if (t.ngamma > 0) {
 	if (t.isData) {
 	  doGJplots = true;
