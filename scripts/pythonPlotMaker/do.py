@@ -7,9 +7,16 @@ if '-b' not in sys.argv:
 from MT2PlotMaker import MT2PlotMaker
 import MT2PlotDefs as pd
 
-input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-01_json_Cert_271036-274240_skim_base_mt2gt200_ZinvV5"
+pd.lumi = 2.1
+pd.lumiUnit = "fb"
+
+# 2.1/fb
+input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-01_json_Cert_271036-274421_skim_base_mt2gt200_ZinvV4"
+# 804/pb
+# input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-01_json_Cert_271036-274240_skim_base_mt2gt200_ZinvV5"
+# 589/pb
 #input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4"
-output_dir = "crplots/crplots804"
+output_dir = "crplots/crplots2070"
 
 exts = ["pdf","png"]
 
