@@ -50,7 +50,7 @@ using namespace tas;
 // turn on to add debugging statements (default false) 
 const bool verbose = false;
 // turn on to apply JEC from text files (default true)
-const bool applyJECfromFile = false;
+const bool applyJECfromFile = true;
 // change to do JEC uncertainty variations. 0 = DEFAULT, 1 = UP, -1 = DN
 const int applyJECunc = 0;
 // change to do unclustered energy uncertainty MET variations. 0 = DEFAULT, 1 = UP, -1 = DN
