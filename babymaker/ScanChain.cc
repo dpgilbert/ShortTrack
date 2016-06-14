@@ -126,7 +126,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
   // 25ns is hardcoded here, would need an option for 50ns
-  const char* json_file = "jsons/Cert_271036-274240_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  const char* json_file = "jsons/Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -220,20 +220,20 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     }
     else if (bx == 25) {
       if (isDataFromFileName) {
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV6_DATA_L1FastJet_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV6_DATA_L2Relative_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV6_DATA_L3Absolute_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV6_DATA_L2L3Residual_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV3_DATA_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV3_DATA_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV3_DATA_L3Absolute_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV3_DATA_L2L3Residual_AK4PFchs.txt");
       } else if (isFastsim) {
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/MCRUN2_74_V9_L1FastJet_AK4PFchs.txt");
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/MCRUN2_74_V9_L2Relative_AK4PFchs.txt");
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/MCRUN2_74_V9_L3Absolute_AK4PFchs.txt");
 	jetcorr_uncertainty_filename = "jetCorrections/MCRUN2_74_V9_Uncertainty_AK4PFchs.txt"; // not sure if these are correct..
       } else {
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV1_MC_L1FastJet_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV1_MC_L2Relative_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV1_MC_L3Absolute_AK4PFchs.txt");
-	jetcorr_uncertainty_filename = "jetCorrections/Spring16_25nsV1_MC_Uncertainty_AK4PFchs.txt";
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV3_MC_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV3_MC_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV3_MC_L3Absolute_AK4PFchs.txt");
+	jetcorr_uncertainty_filename = "jetCorrections/Spring16_25nsV3_MC_Uncertainty_AK4PFchs.txt";
       }
     }
 
