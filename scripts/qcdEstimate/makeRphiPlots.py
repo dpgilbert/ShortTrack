@@ -4,7 +4,7 @@
 import glob
 import os
 
-for i in glob.glob('rphi_hists/*newmcv6*.root'):
+for i in glob.glob('rphi_hists/*newmcv7*.root'):
     os.system("python rphiPlotMaker.py {0} -b".format(i))
 
 
