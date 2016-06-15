@@ -97,6 +97,7 @@ public :
    Int_t           Flag_goodVertices;
    Int_t           Flag_eeBadScFilter;
    Int_t           Flag_METFilters;
+   Int_t           Flag_badChargedCandidateFilter;
    Int_t           HLT_PFHT800;
    Int_t           HLT_PFHT900;
    Int_t           HLT_PFMET170;
@@ -423,6 +424,7 @@ public :
    TBranch        *b_Flag_goodVertices;   //!
    TBranch        *b_Flag_eeBadScFilter;   //!
    TBranch        *b_Flag_METFilters;   //!
+   TBranch        *b_Flag_badChargedCandidateFilter;   //!
    TBranch        *b_HLT_HT800;   //!
    TBranch        *b_HLT_HT900;   //!
    TBranch        *b_HLT_MET170;   //!
@@ -808,6 +810,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("Flag_goodVertices", &Flag_goodVertices, &b_Flag_goodVertices);
    fChain->SetBranchAddress("Flag_eeBadScFilter", &Flag_eeBadScFilter, &b_Flag_eeBadScFilter);
    fChain->SetBranchAddress("Flag_METFilters", &Flag_METFilters, &b_Flag_METFilters);
+   fChain->SetBranchAddress("Flag_badChargedCandidateFilter", &Flag_badChargedCandidateFilter, &b_Flag_badChargedCandidateFilter);
    fChain->SetBranchAddress("HLT_HT800", &HLT_HT800, &b_HLT_HT800);
    fChain->SetBranchAddress("HLT_HT900", &HLT_HT900, &b_HLT_HT900);
    fChain->SetBranchAddress("HLT_MET170", &HLT_MET170, &b_HLT_MET170);
