@@ -1374,7 +1374,7 @@ std::vector<SR> getSignalRegionsMonojet(){
   baseSR.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
   // QCD region: 2 jets, low deltaPhiMin, pt subleading between 30 and 60 GeV
   baseSR.SetVarCRQCD("j1pt", 200, -1);
-  baseSR.SetVarCRQCD("j2pt", 30, 60);
+  baseSR.SetVarCRQCD("j2pt", 30, -1);
   baseSR.SetVarCRQCD("nlep", 0, 1);
   baseSR.SetVarCRQCD("njets", 2, 3);
   baseSR.SetVarCRQCD("met", 200, -1);
@@ -1437,6 +1437,18 @@ std::vector<SR> getSignalRegionsMonojet(){
   fullSR1b.SetVarCRQCD("ht", 200, -1);
   fullSR1b.SetMT2Bins(nbins_monojet_1b, htbins_1b_forplot);
   SRVec.push_back(fullSR1b);
+
+  // full region, inclusive in both ht and nbjets
+  SR fullSR = baseSR;  
+  fullSR.SetName("baseJ");
+  fullSR.SetVar("nbjets", 0, -1);
+  fullSR.SetVarCRSL("nbjets", 0, -1);
+  fullSR.SetVarCRQCD("nbjets", 0, -1);
+  fullSR.SetVar("ht", 200, -1);
+  fullSR.SetVarCRSL("ht", 200, -1);
+  fullSR.SetVarCRQCD("ht", 200, -1);
+  fullSR.SetMT2Bins(nbins_monojet_0b, htbins_0b_forplot);
+  SRVec.push_back(fullSR);
 
   return SRVec;
 
