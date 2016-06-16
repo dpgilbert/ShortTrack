@@ -60,4 +60,4 @@ root -b -q cardMaker.C+  # to compile
 ```
 
 ### Run limits
-Need to add info here
+See instructions in `README` inside the `limits/batchsubmit` subdirectory.
