@@ -10,6 +10,7 @@ def GetCRName(cr):
              "crslttbar": "Single Lepton CR (ttbar)",
              "crslelbase": "Single Lepton CR (els)",
              "crslmubase": "Single Lepton CR (mus)",
+             "crqcdbaseJ": "QCD Monojet CR",
              }
 
     # use the above name if defined, otherwise use cr itself
@@ -20,6 +21,7 @@ def GetSampleName(sample):
              "wjets_incl": "W+Jets",
              "dyjetsll_ht": "Z(#font[12]{ll})+Jets",
              "dyjetsll_incl": "Z(#font[12]{ll})+Jets",
+             "zinv_ht": "Z(#nu#nu)+Jets",
              "top": "Top",
              "gjets_ht": "Prompt #gamma",
              "fakephoton": "Fake #gamma",
@@ -42,6 +44,7 @@ def GetVarName(var):
              "zllmass": "m_{#font[12]{ll}}",
              "gammaPt": "P_{T}(#gamma)",
              "gammaEta": "#eta(#gamma)",
+             "J1pt": "Subleading jet p_{T}",
              }
 
     # use the above name if defined, otherwise use var itself
@@ -56,6 +59,8 @@ def GetUnit(vn):
     return "GeV"
 
 def GetSubtitles(dirname):
+    if dirname=="crqcdbaseJ":
+        return ["p_{T}(jet1) > 200 GeV", "N(jet) = 2"]
     if dirname[-1:]=="J":
         return ["H_{T} > 200 GeV","M_{T2} > 200 GeV", "1j"]
     if dirname[-2:]=="VL":
@@ -71,4 +76,8 @@ def GetSubtitles(dirname):
 
     return ["H_{T} > 200 GeV","M_{T2} > 200 GeV", "#geq 2j"]
 
+def Rebin(h_bkg_vec, h_data, r):
+    for h in h_bkg_vec:
+        h.Rebin(r)
+    h_data.Rebin(r)
 

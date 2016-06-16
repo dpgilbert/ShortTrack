@@ -11,7 +11,7 @@ pd.lumi = 2.1
 pd.lumiUnit = "fb"
 
 # 2.1/fb
-input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-01_json_Cert_271036-274421_skim_base_mt2gt200_ZinvV4"
+input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-02_json_Cert_271036-274421_skim_base_mt2gt200_ZinvV4"
 # 804/pb
 # input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-01_json_Cert_271036-274240_skim_base_mt2gt200_ZinvV5"
 # 589/pb
@@ -41,4 +41,7 @@ MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016B", "crslbas
 MT2PlotMaker(input_dir, ["gjets_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbase", pd.gj_plots, output_dir, exts)
 
 # z->ll
-MT2PlotMaker(input_dir, ["dyjetsll_incl", "top"], "data_Run2016B", "crdybase", pd.dy_plots,output_dir, exts)
+MT2PlotMaker(input_dir, ["dyjetsll_incl", "top"], "data_Run2016B", "crdybase", pd.dy_plots, output_dir, exts)
+
+# QCD monojet
+MT2PlotMaker(input_dir, ["qcd_ht", "wjets_ht", "zinv_ht"], "data_Run2016B", "crqcdbaseJ", pd.qcdJ_plots, output_dir, exts)

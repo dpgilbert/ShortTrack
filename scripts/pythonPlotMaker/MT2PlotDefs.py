@@ -1,7 +1,7 @@
 # plot_defs.py
 # collect the plot definitions for the various control regions
 # format is:
-#     (var_name, isLog, (xmin,xmax), (ymin,ymax))
+#     (var_name, isLog, (xmin,xmax), (ymin,ymax), Rebin(optional), doOverflow(opt, def true))
 # use None to use default params
 
 lumi = 804
@@ -47,7 +47,7 @@ gj_plots = [
     ("mt2bins",True,None,None),
     ("nJet30",True,(0,14),None),
     ("nBJet20",True,(0,6),None),
-    ("gammaPt",True,None,None),
+    ("gammaPt",True,None,None,4),
     ("gammaEta",False,None,None),
     ("nlepveto",False,None,None),
     ("chisoLoose",True,(0,20),None),
@@ -60,6 +60,10 @@ gj_plots = [
     ("drMinParton_ht200to450",False,None,None),
     ("drMinParton_ht450to1000",False,None,None),
     ("drMinParton_ht1000toInf",False,None,None),
+]
+
+qcdJ_plots = [
+    ("J1pt",False,(30,330),None,1,False)
 ]
 
 mt2bins_only = [

@@ -63,6 +63,11 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
         if plots[i][3]!=None:
             userMin = plots[i][3][0]
             userMax = plots[i][3][1]
+        if len(plots[i]) >= 5:
+            utils.Rebin(h_bkg_vecs[i],h_data[i], plots[i][4])
+        doOverflow = True
+        if len(plots[i]) >= 6:
+            doOverflow = plots[i][5]
         markerSize=0.7
         title = utils.GetCRName(dirname)
         xAxisTitle = utils.GetVarName(vn)
@@ -76,5 +81,5 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
                            title=title, subtitles=subtitles, xRangeUser=plots[i][2], isLog=plots[i][1], saveAs=saveAs, 
                            scaleMCtoData=True, xAxisUnit=unit, userMin=userMin, userMax=userMax, doSort=False, 
                            doMT2Colors=True, markerSize=markerSize, titleSize=0.035, subtitleSize=0.025,
-                           subLegText=subLegText)
+                           subLegText=subLegText, doBkgError=True, doOverflow=doOverflow)
             
