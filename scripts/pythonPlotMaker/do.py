@@ -40,6 +40,12 @@ MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016B", "crslbas
 # photon+jets
 MT2PlotMaker(input_dir, ["gjets_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbase", pd.gj_plots, output_dir, exts)
 
+MT2PlotMaker(input_dir, ["gjets_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseVL", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["gjets_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseL", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["gjets_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseM", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["gjets_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseH", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["gjets_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseUH", pd.mt2_only, output_dir, exts)
+
 # z->ll
 MT2PlotMaker(input_dir, ["dyjetsll_incl", "top"], "data_Run2016B", "crdybase", pd.dy_plots, output_dir, exts)
 

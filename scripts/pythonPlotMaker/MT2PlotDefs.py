@@ -69,3 +69,8 @@ qcdJ_plots = [
 mt2bins_only = [
     ("mt2bins",True,None,None)
 ]
+
+mt2_only = [
+    ("mt2bins",True,None,None),
+    ("mt2",True,(200,1000),None,2)
+]

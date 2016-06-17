@@ -36,6 +36,7 @@ def GetVarName(var):
     names = {"ht": "H_{T}",
              "met": "E_{T}^{miss}",
              "mt2": "M_{T2}",
+             "mt2bins": "M_{T2}",
              "nJet30": "N(jet)",
              "nBJet20": "N(b jet)",
              "letppt": "P_{T}(lep)",
