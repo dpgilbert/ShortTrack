@@ -32,6 +32,8 @@ class QCDLooper {
   void SetSignalRegions();
   void loop(TChain* chain, std::string output_name = "test.root");
   void fillHistosRphi(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
+  void fillHistosFj(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
+  void fillHistosRb(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
 
  private:
 

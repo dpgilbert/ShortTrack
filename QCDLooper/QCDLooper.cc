@@ -51,7 +51,30 @@ void QCDLooper::SetSignalRegions(){
         sr.SetName("rphi_"+HTnames[i]);
         sr.SetVar("ht",HTcuts[i],HTcuts[i+1]);
         sr.SetVar("njets",2,-1);
+        sr.SetVar("mt2",50,-1);
+        sr.SetVar("deltaPhiMin",0,-1);
         SRVec_rphi.push_back(sr);
+        outfile_->mkdir(sr.GetName().c_str());
+
+        sr.SetName("fj_"+HTnames[i]);
+        sr.SetVar("ht",HTcuts[i],HTcuts[i+1]);
+        sr.SetVar("njets",2,-1);
+        sr.SetVar("mt2",100,200);
+        sr.SetVar("deltaPhiMin",0,0.3);
+        SRVec_fj.push_back(sr);
+        outfile_->mkdir(sr.GetName().c_str());
+    }
+
+    string NJnames[3] = {"23j","46j","g7j"};
+    int NJcuts[4] = {2,4,7,-1};
+    for(unsigned int i=0; i<3; i++){
+        SR sr;
+        sr.SetName("rb_"+NJnames[i]);
+        sr.SetVar("ht",200,-1);
+        sr.SetVar("njets",NJcuts[i],NJcuts[i+1]);
+        sr.SetVar("mt2",100,200);
+        sr.SetVar("deltaPhiMin",0,0.3);
+        SRVec_rb.push_back(sr);
         outfile_->mkdir(sr.GetName().c_str());
     }
 
@@ -184,9 +207,17 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
       std::map<std::string, float> values;
       values["njets"]        = t.nJet30;
       values["ht"]         = t.ht;
+      values["mt2"] = t.mt2;
+      values["deltaPhiMin"] = t.deltaPhiMin;
       for(unsigned int i=0; i<SRVec_rphi.size(); i++){
           if(SRVec_rphi.at(i).PassesSelection(values))
               fillHistosRphi(SRVec_rphi.at(i).srHistMap,SRVec_rphi.at(i).GetName().c_str());
+          if(SRVec_fj.at(i).PassesSelection(values))
+              fillHistosFj(SRVec_fj.at(i).srHistMap,SRVec_fj.at(i).GetName().c_str());
+      }
+      for(unsigned int i=0; i<SRVec_rb.size(); i++){
+          if(SRVec_rb.at(i).PassesSelection(values))
+              fillHistosRb(SRVec_rb.at(i).srHistMap,SRVec_rb.at(i).GetName().c_str());
       }
 
     }//end loop on events in a file
@@ -209,6 +240,10 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
   outfile_->cd();
   for(unsigned int i=0; i<SRVec_rphi.size(); i++){
       savePlotsDir(SRVec_rphi.at(i).srHistMap,outfile_,SRVec_rphi.at(i).GetName().c_str());
+      savePlotsDir(SRVec_fj.at(i).srHistMap,outfile_,SRVec_fj.at(i).GetName().c_str());
+  }
+  for(unsigned int i=0; i<SRVec_rb.size(); i++){
+      savePlotsDir(SRVec_rb.at(i).srHistMap,outfile_,SRVec_rb.at(i).GetName().c_str());
   }
 
   //---------------------
@@ -237,6 +272,39 @@ void QCDLooper::fillHistosRphi(std::map<std::string, TH1*>& h_1d, const std::str
     }else{
         plot1D("h_mt2_den"+s,        t.mt2,   evtweight_, h_1d, ";M_{T2} [GeV]",300,0,1500);
     }
+    
+    outfile_->cd();
+    return;
+}
+
+//_______________________________________
+void QCDLooper::fillHistosFj(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s) {
+
+    TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
+    if (dir == 0) {
+        dir = outfile_->mkdir(dirname.c_str());
+    } 
+    dir->cd();
+    
+    plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
+    plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
+    plot1D("h_njets"+s,        t.nJet30,   evtweight_, h_1d, "N(jet)",9,2,11);
+    
+    outfile_->cd();
+    return;
+}
+//_______________________________________
+void QCDLooper::fillHistosRb(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s) {
+
+    TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
+    if (dir == 0) {
+        dir = outfile_->mkdir(dirname.c_str());
+    } 
+    dir->cd();
+    
+    plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
+    plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
+    plot1D("h_nbjets"+s,        t.nBJet20,   evtweight_, h_1d, "N(jet)",9,2,11);
     
     outfile_->cd();
     return;
