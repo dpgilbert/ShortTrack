@@ -31,9 +31,33 @@ cd MT2Analysis/MT2looper
 make
 ```
 
-## Run analysis on the baby
-Go to `MT2looper` and modify `INDIR` and `Samples` in `do.sh`, then do:
+## Executing main analysis
+Starting from the (skimmed) babies:
+
+### Run MT2looper to produce root histogram files
+Go to `MT2looper` and modify `INDIR`, `OUTDIR`, and `Samples` in `do.sh`, then do:
 ``` bash
 . do.sh
 ```
+### Make the data driven backgrounds
+Go to `scripts` and modify `INDIR` in `makeDataDrivenEstimates.sh` to point to the output dir from `MT2looper`.  Then do:
+``` bash
+. makeDataDrivenEstimates.sh
+```
 
+### Merge histograms for signal scans, if necessary
+Go to `scripts` and modify `INDIR` in `processSignal.sh` to point to the output dir from `MT2looper`.  Also comment out any signal scans that you did not process.  Then do:
+``` bash
+. processSignal.sh
+```
+Note that this also creates histogram files translated to ETH's format, for sharing with them.
+
+### Create datacards
+Go to `scripts` and modify `INDIR`, `OUTDIR`, `DOFULLSCAN`, and `samples` in `makeAllCards.sh`.  Then do:
+``` bash
+root -b -q cardMaker.C+  # to compile
+. makeAllCards.sh
+```
+
+### Run limits
+See instructions in `README` inside the `limits/batchsubmit` subdirectory.
