@@ -44,7 +44,7 @@ QCDLooper::~QCDLooper(){
 //_______________________________________
 void QCDLooper::SetSignalRegions(){
 
-    string HTnames[5] = {"VL","L","M","H","UH"};
+    string HTnames[5] = {"ht200to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf"};
     double HTcuts[6] = {200,450,575,1000,1500,-1};
     for(unsigned int i=0; i<5; i++){
         SR sr;
@@ -65,7 +65,7 @@ void QCDLooper::SetSignalRegions(){
         outfile_->mkdir(sr.GetName().c_str());
     }
 
-    string NJnames[3] = {"23j","46j","g7j"};
+    string NJnames[3] = {"j2to3","j4to6","j7toInf"};
     int NJcuts[4] = {2,4,7,-1};
     for(unsigned int i=0; i<3; i++){
         SR sr;
@@ -185,7 +185,7 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
       // "spike rejection
       //-------------------
       int id = t.evt_id;
-      bool pass_spike = (id>150&&(id>151||t.ht<450)&&(id>152||t.ht<575)&&(id>153||t.ht<575)&&(id>154||t.ht<1000))||id>=200;
+      bool pass_spike = (id>150&&(id>151||t.ht<450)&&(id>152||t.ht<575)&&(id>153||t.ht<575)&&(id>154||t.ht<1000))||id>=200||id<100;
       if(!pass_spike) continue;
 
 
@@ -304,7 +304,7 @@ void QCDLooper::fillHistosRb(std::map<std::string, TH1*>& h_1d, const std::strin
     
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
     plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
-    plot1D("h_nbjets"+s,        t.nBJet20,   evtweight_, h_1d, "N(jet)",9,2,11);
+    plot1D("h_nbjets"+s,        t.nBJet20,   evtweight_, h_1d, "N(jet)",6,0,6);
     
     outfile_->cd();
     return;
