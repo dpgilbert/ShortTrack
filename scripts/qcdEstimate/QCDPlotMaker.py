@@ -17,7 +17,7 @@ def makeRbPlot(h_mc, h_data, nj_reg, outfile):
     c.SetLeftMargin(0.12)
     c.SetTopMargin(0.08)
 
-    h_mc.SetLineColor(ROOT.kRed)
+    h_mc.SetLineColor(ROOT.kRed+1)
     h_mc.SetLineWidth(2)
     h_mc.SetTitle("")
     h_mc.GetXaxis().SetTitle("N(bjets)")
@@ -47,6 +47,8 @@ def makeRbPlot(h_mc, h_data, nj_reg, outfile):
     leg.SetBorderSize(0)
     leg.Draw()
 
+    drawHeaders(c, True)
+
     c.SaveAs(outfile+".pdf")
     c.SaveAs(outfile+".png")
     
@@ -64,7 +66,7 @@ def makeFjPlot(h_mc, h_data, ht_reg, outfile):
     c.SetLeftMargin(0.12)
     c.SetTopMargin(0.08)
 
-    h_mc.SetLineColor(ROOT.kRed)
+    h_mc.SetLineColor(ROOT.kRed+1)
     h_mc.SetLineWidth(2)
     h_mc.SetTitle("")
     h_mc.GetXaxis().SetTitle("N(jets)")
@@ -94,6 +96,8 @@ def makeFjPlot(h_mc, h_data, ht_reg, outfile):
     leg.AddEntry(h_mc,"QCD MC",'l')
     leg.SetBorderSize(0)
     leg.Draw()
+
+    drawHeaders(c, True)
 
     c.SaveAs(outfile+".pdf")
     c.SaveAs(outfile+".png")
@@ -162,7 +166,28 @@ def makeRphiPlot(h_all, h_qcd, ht_reg, isData, outfile):
     leg.AddEntry(fit,"Fit",'l')
     leg.SetBorderSize(0)
     leg.Draw()
-    
+
+    drawHeaders(c, isData)
+
     c.SaveAs(outfile+".pdf")
     c.SaveAs(outfile+".png")
-    
+
+
+
+def drawHeaders(canvas, isData):
+    cmsText = "CMS Simulation"
+    text = ROOT.TLatex()
+    text.SetNDC(1)
+    #lumi
+    if(isData):
+        text.SetTextAlign(31)
+        text.SetTextSize(0.035)
+        text.SetTextFont(42)
+        text.DrawLatex(0.89,0.93,"{0} {1}^{{-1}} ({2} TeV)".format(2.1, 'fb', 13))
+        cmsText = "CMS Preliminary"
+    #CMS text
+    text.SetTextSize(0.035)
+    text.SetTextAlign(11)
+    text.SetTextFont(62)
+    text.DrawLatex(0.12,0.93,cmsText)
+        
