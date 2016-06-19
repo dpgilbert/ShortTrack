@@ -1,3 +1,15 @@
+#include "../CMS_lumi.C"
+
+const int iPeriod = 4; // 13 tev
+// iPos drives the position of the CMS logo in the plot
+// iPos=11 : top-left, left-aligned
+// iPos=33 : top-right, right-aligned
+// iPos=22 : center, centered
+// mode generally :
+//   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
+const int iPos = 3;
+
+
 void compareYieldZinvBinned( TString region = "L", bool withMC = false){
   
   //Once you have two histograms, with one bin per topological region (grouped 11 by 11, one block per HT region)
@@ -20,10 +32,10 @@ void compareYieldZinvBinned( TString region = "L", bool withMC = false){
   TH1F* h_Pull = (TH1F*)f1->Get("h_ratioData");
   TH1F* h_RatioMC = (TH1F*)f1->Get("h_ratioMC");
 
-  TCanvas* c2 = new TCanvas("c2", "", 1200, 600);
+  TCanvas* c2 = new TCanvas("c2", "", 1100, 600);
   c2->cd();
   
-  TPad *pad1 = new TPad("pad1","pad1",0,0.3-0.1,1,1);
+  TPad *pad1 = new TPad("pad1","pad1",0,0.33-0.1,1,1);
   pad1->SetBottomMargin(0.15);
   pad1->SetRightMargin(0.05);
   pad1->SetLeftMargin(0.15);
@@ -51,19 +63,21 @@ void compareYieldZinvBinned( TString region = "L", bool withMC = false){
     
   //hestimate->GetXaxis()->SetRangeUser(0, 68);
   hdata->GetYaxis()->SetRangeUser(yMin, yMax);
-  hdata->GetYaxis()->SetTitleOffset(0.7);
+  hdata->GetYaxis()->SetTitleOffset(0.95);
   hdata->GetYaxis()->SetTitleSize(0.052);
-  hdata->GetYaxis()->SetLabelSize(0.04);
+  hdata->GetYaxis()->SetLabelSize(0.042);
   hdata->GetYaxis()->SetTitle("Entries");
   hdata->GetXaxis()->LabelsOption("v");
+  hdata->GetXaxis()->SetLabelSize(0.04);
+  hdata->GetXaxis()->SetLabelFont(62);
   hdata->SetTitle("");
   hdata->Draw("PE");
 
 
   hdata->SetMarkerStyle(20);
   hdata->SetMarkerSize(1.0);
-  hdata->SetLineColor( kBlack );
-  hdata->SetMarkerColor( kBlack );
+  hdata->SetLineColor( kBlue );
+  hdata->SetMarkerColor( kBlue );
     hdataBin->SetMarkerStyle(20);
     hdataBin->SetMarkerSize(1.0);
     hdataBin->SetLineColor( kRed );
@@ -78,14 +92,20 @@ if (withMC)  hestimate->Draw("PE, same");
 
     hdataBin->Draw("PE,same");
 
-  TLegend* legend = new TLegend( 0.7, 0.9-(1+1)*0.06-0.06, 0.9, 0.9-0.06 );
+  TLatex labelZ;
+  labelZ.SetNDC();
+  labelZ.SetTextSize(0.039);
+  labelZ.SetTextFont(62);
+  labelZ.DrawLatex(0.7, 0.85, "Z #rightarrow #nu#bar{#nu} background");
+  
+  TLegend* legend = new TLegend( 0.7, 0.70, 0.93, 0.82 );
   legend->SetBorderSize(0);
-  legend->SetTextSize(0.038);
+  legend->SetTextSize(0.042);
   legend->SetTextFont(42);
   legend->SetFillColor(0);
   //legend->AddEntry( hdata, "RS Pred", "PL" );
-    legend->AddEntry( hdata, "data-driven (Standard)", "PL" );
-    legend->AddEntry( hdataBin, "data-driven (BinByBin)", "PL" );
+    legend->AddEntry( hdata, "Standard", "PL" );
+    legend->AddEntry( hdataBin, "Bin by bin", "PL" );
 if (withMC)  legend->AddEntry( hestimate, "Z invisible MC", "PL" );
   //legend->AddEntry( hestimate, "Data", "PL" );
 
@@ -95,13 +115,27 @@ if (withMC)  legend->AddEntry( hestimate, "Z invisible MC", "PL" );
   //labelTop->Draw("same");
   
   //TPaveText* labelTop = new TPaveText(.72,.91,.95,.95, "NDC");
-  TPaveText* labelTop = new TPaveText(.7,.91,.95,.95, "NDC");
-  labelTop->AddText("CMS Preliminary, 2.3 fb^{-1} at #sqrt{s} = 13 TeV");
-  //labelTop->AddText("CMS Data, 0.579 fb^{-1} at #sqrt{s} = 13 TeV");
-  labelTop->SetBorderSize(0);
-  labelTop->SetFillColor(kWhite);
-  labelTop->SetTextSize(0.038);
-  labelTop->Draw("same");
+//  TPaveText* labelTop = new TPaveText(.7,.91,.95,.95, "NDC");
+//  labelTop->AddText("CMS Unpublished, 2.3 fb^{-1} (13 TeV)");
+//  //labelTop->AddText("CMS Data, 0.579 fb^{-1} at #sqrt{s} = 13 TeV");
+//  labelTop->SetBorderSize(0);
+//  labelTop->SetFillColor(kWhite);
+//  labelTop->SetTextSize(0.038);
+//  labelTop->Draw("same");
+  
+  cmsText = "CMS Supplementary";
+  cmsTextSize = 0.5;
+  lumiTextSize = 0.4;
+  writeExtraText = false;
+  lumi_13TeV = "2.3 fb^{-1}";
+  CMS_lumi( pad1, iPeriod, iPos );
+
+  
+  TLatex labelA;
+  labelA.SetNDC();
+  labelA.SetTextSize(0.042);
+  labelA.SetTextFont(42);
+  labelA.DrawLatex(0.5, 0.92, "arXiv:1603.04053");
   
 //  TLine* lHT[5];
 //  for( int iHT=0; iHT < 5; iHT++ ){
@@ -142,11 +176,11 @@ if (withMC)  legend->AddEntry( hestimate, "Z invisible MC", "PL" );
   
   TString htRegion = "";
   if (region == "J") htRegion = "1 jet";
-  if (region == "VL") htRegion = "200 < HT < 450";
-  if (region == "L") htRegion = "450 < HT < 575";
-  if (region == "M") htRegion = "575 < HT < 1000";
-  if (region == "H") htRegion = "1000 < HT < 1500";
-  if (region == "UH") htRegion = "HT > 1500";
+  if (region == "VL") htRegion = "HT [200, 450] GeV";
+  if (region == "L") htRegion = "HT [450, 575] GeV";
+  if (region == "M") htRegion = "HT [575, 1000] GeV";
+  if (region == "H") htRegion = "HT [1000, 1500] GeV";
+  if (region == "UH") htRegion = "HT > 1500 GeV";
   TPaveText* htBox = new TPaveText(0.4, 0.83, 0.6, 0.85, "brNDC");
   htBox->AddText(htRegion);
   htBox->SetBorderSize(0);
@@ -189,11 +223,11 @@ if (withMC)  legend->AddEntry( hestimate, "Z invisible MC", "PL" );
   h2_axes_ratio->GetXaxis()->SetLabelSize(0.00);
   h2_axes_ratio->GetXaxis()->SetTickLength(0.09);
   h2_axes_ratio->GetYaxis()->SetNdivisions(5,5,0);
-  h2_axes_ratio->GetYaxis()->SetTitleSize(0.20);
-  h2_axes_ratio->GetYaxis()->SetTitleOffset(0.18);
+  h2_axes_ratio->GetYaxis()->SetTitleSize(0.18);
+  h2_axes_ratio->GetYaxis()->SetTitleOffset(0.26);
   h2_axes_ratio->GetYaxis()->SetLabelSize(0.17);
   //h2_axes_ratio->GetYaxis()->SetTitle("Pull");
-  h2_axes_ratio->GetYaxis()->SetTitle("Bin. / Std.");
+  h2_axes_ratio->GetYaxis()->SetTitle("Bin / Std.");
 
   //TLine* LineCentral = new TLine(0, 0., 44, 0.);
   TLine* LineCentral = new TLine(0, 1., NBins, 1.);
