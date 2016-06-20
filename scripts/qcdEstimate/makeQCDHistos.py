@@ -8,8 +8,8 @@ import sys
 import numpy as np
 import ROOT
 
-indir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/QCDLooper/output/test"
-outdir = "output/test"
+indir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/QCDLooper/output/test_prescale"
+outdir = "output/test_prescale"
 
 try:
     os.makedirs(outdir)

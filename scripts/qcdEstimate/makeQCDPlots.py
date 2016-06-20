@@ -8,8 +8,8 @@ import QCDPlotMaker as pm
 
 ROOT.gROOT.SetBatch(1)
 
-outdir = "rphi_plots/test"
-infile = "output/test/QCDhistos.root"
+outdir = "rphi_plots/test_prescale"
+infile = "output/test_prescale/QCDhistos.root"
 
 try:
     os.makedirs(outdir)

@@ -130,7 +130,7 @@ def makeRphiPlot(h_all, h_qcd, ht_reg, isData, outfile):
     h_all.SetLineColor(ROOT.kBlack)
 
     h_qcd.SetTitle("")
-    h_qcd.GetXaxis().SetRangeUser(50,1500)
+    h_qcd.GetXaxis().SetRangeUser(50,450)
     h_qcd.GetXaxis().SetTitle("M_{T2} [GeV]")
     h_qcd.GetXaxis().SetTitleOffset(1.3)
     h_qcd.GetYaxis().SetRangeUser(0.01,200)
@@ -153,7 +153,7 @@ def makeRphiPlot(h_all, h_qcd, ht_reg, isData, outfile):
     h_qcd.Draw("SAMEPE0")
     h_all.Draw("SAMEPE0")
 
-    leg = ROOT.TLegend(0.3,0.75,0.59,0.89)
+    leg = ROOT.TLegend(0.45,0.7,0.89,0.89)
     leg.SetFillStyle(0)
     leg.SetTextFont(62)
     leg.SetHeader("{0} < H_{{T}} < {1} GeV".format(*(ht_bounds[ht_reg])))

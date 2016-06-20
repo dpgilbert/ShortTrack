@@ -33,6 +33,9 @@ class SR;
 // turn on to apply json file to data
 bool applyJSON = true;
 
+// input effective prescales for PFHT125, PFHT350, PFHT475
+double eff_prescales[3] = {2120., 245.2, 61.5};
+
 //_______________________________________
 QCDLooper::QCDLooper(){
 }
@@ -70,7 +73,7 @@ void QCDLooper::SetSignalRegions(){
     for(unsigned int i=0; i<3; i++){
         SR sr;
         sr.SetName("rb_"+NJnames[i]);
-        sr.SetVar("ht",200,-1);
+        sr.SetVar("ht",1000,-1); // put cut at ht 1000 to allow use of unprescaled trigger PFHT800
         sr.SetVar("njets",NJcuts[i],NJcuts[i+1]);
         sr.SetVar("mt2",100,200);
         sr.SetVar("deltaPhiMin",0,0.3);
@@ -201,6 +204,7 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
 	evtweight_ = t.evt_scale1fb * lumi;
       } // !isData
 
+      
       //---------------------------
       // fill histograms
       //---------------------------
@@ -264,13 +268,17 @@ void QCDLooper::fillHistosRphi(std::map<std::string, TH1*>& h_1d, const std::str
         dir = outfile_->mkdir(dirname.c_str());
     } 
     dir->cd();
+
+    double prescale = getTriggerPrescale(dirname);
+    if(prescale < 0)
+        return;
     
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
-    plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
+    plot1D("h_Events_w"+s,  1,   evtweight_*prescale, h_1d, ";Events, Weighted", 1, 0, 2);
     if(t.deltaPhiMin>=0.3){
-        plot1D("h_mt2_num"+s,        t.mt2,   evtweight_, h_1d, ";M_{T2} [GeV]",300,0,1500);
+        plot1D("h_mt2_num"+s,        t.mt2,   evtweight_*prescale, h_1d, ";M_{T2} [GeV]",300,0,1500);
     }else{
-        plot1D("h_mt2_den"+s,        t.mt2,   evtweight_, h_1d, ";M_{T2} [GeV]",300,0,1500);
+        plot1D("h_mt2_den"+s,        t.mt2,   evtweight_*prescale, h_1d, ";M_{T2} [GeV]",300,0,1500);
     }
     
     outfile_->cd();
@@ -286,9 +294,13 @@ void QCDLooper::fillHistosFj(std::map<std::string, TH1*>& h_1d, const std::strin
     } 
     dir->cd();
     
+    double prescale = getTriggerPrescale(dirname);
+    if(prescale < 0)
+        return;
+
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
-    plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
-    plot1D("h_njets"+s,        t.nJet30,   evtweight_, h_1d, "N(jet)",9,2,11);
+    plot1D("h_Events_w"+s,  1,   evtweight_*prescale, h_1d, ";Events, Weighted", 1, 0, 2);
+    plot1D("h_njets"+s,        t.nJet30,   evtweight_*prescale, h_1d, "N(jet)",9,2,11);
     
     outfile_->cd();
     return;
@@ -301,11 +313,39 @@ void QCDLooper::fillHistosRb(std::map<std::string, TH1*>& h_1d, const std::strin
         dir = outfile_->mkdir(dirname.c_str());
     } 
     dir->cd();
-    
+
+    if (t.isData && !t.HLT_PFHT800)
+        return;
+
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
     plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
     plot1D("h_nbjets"+s,        t.nBJet20,   evtweight_, h_1d, "N(jet)",6,0,6);
     
     outfile_->cd();
     return;
+}
+
+double QCDLooper::getTriggerPrescale(std::string dirname) {
+    if(!t.isData)
+        return 1;
+
+    if(strstr(dirname.c_str(),"ht200to450") != NULL){
+        return t.HLT_PFHT125_Prescale==0 ? -1 : eff_prescales[0];
+    }
+    if(strstr(dirname.c_str(),"ht450to575") != NULL){
+        return t.HLT_PFHT350_Prescale==0 ? -1 : eff_prescales[1];
+    }
+    if(strstr(dirname.c_str(),"ht575to1000") != NULL){
+        return t.HLT_PFHT475_Prescale==0 ? -1 : eff_prescales[2];
+    }
+    if(strstr(dirname.c_str(),"ht1000to1500") != NULL){
+        return t.HLT_PFHT800==0 ? -1 : 1;
+    }
+    if(strstr(dirname.c_str(),"ht1500toInf") != NULL){
+        return t.HLT_PFHT800==0 ? -1 : 1;
+    }
+
+    std::cerr << "ERROR [getTriggerPrescale]: did not recognize dirname " << dirname << std::endl;
+
+    return -1;
 }
