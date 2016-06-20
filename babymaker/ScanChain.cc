@@ -68,7 +68,7 @@ const bool applyDummyWeights = false;
 // turn on to apply lepton SF
 const bool applyLeptonSFs = false;
 // turn on to apply json file to data (default true)
-const bool applyJSON = true;
+const bool applyJSON = false;
 // for testing purposes, running on unmerged files (default false)
 const bool removePostProcVars = false;
 // for merging prompt reco 2015 with reMINIAOD (default true)
@@ -225,10 +225,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV3_DATA_L3Absolute_AK4PFchs.txt");
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV3_DATA_L2L3Residual_AK4PFchs.txt");
       } else if (isFastsim) {
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/MCRUN2_74_V9_L1FastJet_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/MCRUN2_74_V9_L2Relative_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/MCRUN2_74_V9_L3Absolute_AK4PFchs.txt");
-	jetcorr_uncertainty_filename = "jetCorrections/MCRUN2_74_V9_Uncertainty_AK4PFchs.txt"; // not sure if these are correct..
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_FastSimV1_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_FastSimV1_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_FastSimV1_L3Absolute_AK4PFchs.txt");
+	jetcorr_uncertainty_filename = "jetCorrections/Spring16_FastSimV1_Uncertainty_AK4PFchs.txt"; 
       } else {
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV3_MC_L1FastJet_AK4PFchs.txt");
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV3_MC_L2Relative_AK4PFchs.txt");
