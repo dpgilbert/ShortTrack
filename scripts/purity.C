@@ -436,7 +436,7 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
   if (!plotname.Contains("mt2bins")) {
     h_ratio = (TH1F*) f_zinv->Get("h_"+plotname+"Ratio");
   }
-  if (!h_ratio) {cout<<"Ratio not found for plot "<<plotname<<endl;  }
+  if (!h_ratio) {cout<<"Ratio not found for plot. GIVING UP FOR THIS REGION. "<<plotname<<endl; return; }
   TH1F* h_trueZinv = (TH1F*) f_zinv->Get(srdir+"/h_"+plotname);
 
 
@@ -658,7 +658,7 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   if (datanamestring.Contains("Data") || datanamestring.Contains("data")) realData = true;
   TFile* f_data = new TFile(Form("%s/%s.root",input_dir.c_str(),dataname.c_str())); //data or qcd+gjets file
   TFile* f_gq = new TFile(Form("%s/qcdplusgjet.root",input_dir.c_str())); //qcd+gjets file
-  TFile* f_g = new TFile(Form("%s/gjet_ht.root",input_dir.c_str())); //gjet file
+  TFile* f_g = new TFile(Form("%s/gjets_ht.root",input_dir.c_str())); //gjet file
   TFile* f_q = new TFile(Form("%s/qcd_ht.root",input_dir.c_str())); //qcd file
   TFile* f_z = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str())); //zinv pred from ZinvMaker.C, contains ratio
   TFile* f_zOrig = new TFile(Form("%s/zinv_ht.root",input_dir.c_str())); //zinv file out of the box
