@@ -68,7 +68,7 @@ const bool applyDummyWeights = false;
 // turn on to apply lepton SF
 const bool applyLeptonSFs = false;
 // turn on to apply json file to data (default true)
-const bool applyJSON = true;
+const bool applyJSON = false;
 // for testing purposes, running on unmerged files (default false)
 const bool removePostProcVars = false;
 // for merging prompt reco 2015 with reMINIAOD (default true)
