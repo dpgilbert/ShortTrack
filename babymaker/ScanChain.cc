@@ -1319,6 +1319,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       vector<float> vec_gamma_sigmaIetaIeta;
       vector<float> vec_gamma_r9;
       vector<float> vec_gamma_hOverE;
+      vector<float> vec_gamma_hOverE015;
       vector<int>   vec_gamma_idCutBased;
 
       ngamma = 0;
@@ -1349,6 +1350,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         vec_gamma_phIso.push_back ( photons_recoPhotonIso().at(iGamma) );
         vec_gamma_r9.push_back (  photons_full5x5_r9().at(iGamma) );
         vec_gamma_hOverE.push_back (  photons_full5x5_hOverEtowBC().at(iGamma) );
+        vec_gamma_hOverE015.push_back (  photons_full5x5_hOverE().at(iGamma) );
         vec_gamma_idCutBased.push_back (  isTightPhoton(iGamma,analysis_t::HAD,3) ? 1 : 0 ); 
         if(pt > 20) nGammas20++;
 
@@ -1423,6 +1425,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         gamma_sigmaIetaIeta[i]  = vec_gamma_sigmaIetaIeta.at(it->first);
         gamma_r9[i]           = vec_gamma_r9.at(it->first);
         gamma_hOverE[i]       = vec_gamma_hOverE.at(it->first);
+        gamma_hOverE015[i]    = vec_gamma_hOverE015.at(it->first);
         gamma_idCutBased[i]   = vec_gamma_idCutBased.at(it->first);
         i++;
       }
@@ -2360,6 +2363,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("gamma_sigmaIetaIeta", gamma_sigmaIetaIeta, "gamma_sigmaIetaIeta[ngamma]/F" );
     BabyTree_->Branch("gamma_r9", gamma_r9, "gamma_r9[ngamma]/F" );
     BabyTree_->Branch("gamma_hOverE", gamma_hOverE, "gamma_hOverE[ngamma]/F" );
+    BabyTree_->Branch("gamma_hOverE015", gamma_hOverE015, "gamma_hOverE015[ngamma]/F" );
     BabyTree_->Branch("gamma_idCutBased", gamma_idCutBased, "gamma_idCutBased[ngamma]/I" );
     BabyTree_->Branch("gamma_mt2", &gamma_mt2 );
     BabyTree_->Branch("gamma_nJet30", &gamma_nJet30 );
@@ -2805,6 +2809,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       gamma_sigmaIetaIeta[i] = -999;
       gamma_r9[i] = -999;
       gamma_hOverE[i] = -999;
+      gamma_hOverE015[i] = -999;
       gamma_idCutBased[i] = -999;
     }
 
