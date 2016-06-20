@@ -180,7 +180,7 @@ int main(int argc, char **argv) {
   else if (infile.Contains("25ns")) bx = 25;
   else if (infile.Contains("FSPremix")) bx = 25;
 
-  bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns"));
+  bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns") || infile.Contains("Spring16Fast"));
 
   bool isBadMiniAodV1 = bool(infile.Contains("V07-04-12_miniaodv1_FS"));
   
