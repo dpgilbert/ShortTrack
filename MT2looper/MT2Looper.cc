@@ -89,7 +89,7 @@ bool doSystVariationPlots = false;
 // turn on to apply Nvtx reweighting to MC
 bool doNvtxReweight = false;
 // turn on to apply json file to data
-bool applyJSON = false;
+bool applyJSON = true;
 // veto on jets with pt > 30, |eta| > 3.0
 bool doHFJetVeto = false;
 // get signal scan nevents from file
@@ -487,7 +487,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
-  const char* json_file = "../babymaker/jsons/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_271036-274443_13TeV_PromptReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -729,7 +729,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //      const float lumi = 1.264;
       //      const float lumi = 2.11;
       //const float lumi = 2.155;
-      const float lumi = 2.070;
+      const float lumi = 2.60;
     
       evtweight_ = 1.;
 
