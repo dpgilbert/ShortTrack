@@ -1529,6 +1529,15 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
 	fillHistosGammaJets(SRBase.crgjHistMap, SRBase.crgjRooDataSetMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crgjbase", suffix+add);
       }
     }
+
+    //inclusive in Sieie to get sieie plots
+    if(iso<isoCutLoose){
+      add = "LooseAllSieie";
+      if(passBase && passPtMT2) {
+	fillHistosGammaJets(SRBase.crgjHistMap, SRBase.crgjRooDataSetMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crgjbase", suffix+add);
+      }
+    }
+
   }
       
 
@@ -2056,6 +2065,14 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
   plot1D("h_chisoW1"+s,      chiso,   1, h_1d, ";ch iso [GeV]", 100, 0, 50);
 
   plotRooDataSet("rds_chIso_"+s, x_, w_, evtweight_, datasets, "");
+
+  float Sieie = t.gamma_sigmaIetaIeta[0];
+  plot1D("h_SigmaIetaIeta"+s, Sieie, evtweight_, h_1d, "; Photon #sigma_{i#eta i#eta}", 160,0,0.04);
+  if(fabs(t.gamma_eta[0]) < 1.479)
+      plot1D("h_SigmaIetaIetaEB"+s, Sieie, evtweight_, h_1d, "; Photon #sigma_{i#eta i#eta}", 160,0,0.04);
+  else
+      plot1D("h_SigmaIetaIetaEE"+s, Sieie, evtweight_, h_1d, "; Photon #sigma_{i#eta i#eta}", 160,0,0.04);
+
 
   //for FR calculation
   //if( (t.evt_id>110 && t.evt_id<120) || t.isData){ //only use qcd samples with pt>=470 to compute FR
