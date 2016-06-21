@@ -180,6 +180,8 @@ class babyMaker {
   Int_t           HLT_PFHT350_PFMET120;   
   Int_t           HLT_PFMETNoMu90_PFMHTNoMu90;
   Int_t           HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90;
+  Int_t           HLT_PFMETNoMu100_PFMHTNoMu100;
+  Int_t           HLT_PFMETNoMu110_PFMHTNoMu110;
   Int_t           HLT_PFMETNoMu120_PFMHTNoMu120;
   Int_t           HLT_PFMET90_PFMHT90;
   Int_t           HLT_PFMET100_PFMHT100;
