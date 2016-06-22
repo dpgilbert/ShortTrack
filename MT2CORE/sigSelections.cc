@@ -1383,10 +1383,10 @@ std::vector<SR> getSignalRegionsMonojet(){
   baseSR.SetMT2Bins(1, mt2bins_monojet);
 
   // fine binning in HT
-  const int nbins_monojet_0b = 7;
+  const unsigned int nbins_monojet_0b = 7;
   float htbins_0b[nbins_monojet_0b+1] = {200, 250, 350, 450, 575, 700, 1000, -1};
   float htbins_0b_forplot[nbins_monojet_0b+1] = {200, 250, 350, 450, 575, 700, 1000, 1500};
-  const int nbins_monojet_1b = 5;
+  const unsigned int nbins_monojet_1b = 5;
   float htbins_1b[nbins_monojet_1b+1] = {200, 250, 350, 450, 575, -1};
   float htbins_1b_forplot[nbins_monojet_1b+1] = {200, 250, 350, 450, 575, 1500};
 
@@ -1437,18 +1437,6 @@ std::vector<SR> getSignalRegionsMonojet(){
   fullSR1b.SetVarCRQCD("ht", 200, -1);
   fullSR1b.SetMT2Bins(nbins_monojet_1b, htbins_1b_forplot);
   SRVec.push_back(fullSR1b);
-
-  // full region, inclusive in both ht and nbjets
-  SR fullSR = baseSR;  
-  fullSR.SetName("baseJ");
-  fullSR.SetVar("nbjets", 0, -1);
-  fullSR.SetVarCRSL("nbjets", 0, -1);
-  fullSR.SetVarCRQCD("nbjets", 0, -1);
-  fullSR.SetVar("ht", 200, -1);
-  fullSR.SetVarCRSL("ht", 200, -1);
-  fullSR.SetVarCRQCD("ht", 200, -1);
-  fullSR.SetMT2Bins(nbins_monojet_0b, htbins_0b_forplot);
-  SRVec.push_back(fullSR);
 
   return SRVec;
 

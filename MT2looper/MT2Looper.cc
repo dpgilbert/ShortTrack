@@ -363,6 +363,13 @@ void MT2Looper::SetSignalRegions(){
   SRBaseMonojet.SetVarCRSL("met", 200, -1);
   SRBaseMonojet.SetVarCRSL("deltaPhiMin", 0.3, -1);
   SRBaseMonojet.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
+  SRBaseMonojet.SetVarCRQCD("j1pt", 200, -1);
+  SRBaseMonojet.SetVarCRQCD("j2pt", 30, -1);
+  SRBaseMonojet.SetVarCRQCD("nlep", 0, 1);
+  SRBaseMonojet.SetVarCRQCD("njets", 2, 3);
+  SRBaseMonojet.SetVarCRQCD("met", 200, -1);
+  SRBaseMonojet.SetVarCRQCD("deltaPhiMin", 0., 0.3);
+  SRBaseMonojet.SetVarCRQCD("diffMetMhtOverMet", 0, 0.5);
   float SRBaseMonojet_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500};
   SRBaseMonojet.SetMT2Bins(7, SRBaseMonojet_mt2bins);
 
@@ -428,6 +435,22 @@ void MT2Looper::SetSignalRegions(){
   plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.crrlHistMap, "", 1, 0, 2);
   outfile_->cd();
 
+  vars = SRBaseMonojet.GetListOfVariablesCRQCD();
+  dir = (TDirectory*)outfile_->Get("crqcdbaseJ");
+  if (dir == 0) {
+    dir = outfile_->mkdir("crqcdbaseJ");
+  } 
+  dir->cd();
+  for(unsigned int j = 0; j < vars.size(); j++){
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet.GetLowerBoundCRQCD(vars.at(j)), SRBaseMonojet.crqcdHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet.GetUpperBoundCRQCD(vars.at(j)), SRBaseMonojet.crqcdHistMap, "", 1, 0, 2);
+  }
+  plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.crqcdHistMap, "", 1, 0, 2);
+  outfile_->cd();
+
+
+  
+  // inclusive in njets (mono+multi jet regions)
   SRBaseIncl.SetName("srbaseIncl");
   float SRBaseIncl_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500};
   SRBaseIncl.SetMT2Bins(7, SRBaseIncl_mt2bins);
@@ -729,7 +752,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //      const float lumi = 1.264;
       //      const float lumi = 2.11;
       //const float lumi = 2.155;
-      const float lumi = 2.60;
+      const float lumi = 3.99;
     
       evtweight_ = 1.;
 
