@@ -363,10 +363,12 @@ void MT2Looper::SetSignalRegions(){
   SRBaseMonojet.SetVarCRSL("met", 200, -1);
   SRBaseMonojet.SetVarCRSL("deltaPhiMin", 0.3, -1);
   SRBaseMonojet.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
+  SRBaseMonojet.SetVarCRQCD("ht", 200, -1);
   SRBaseMonojet.SetVarCRQCD("j1pt", 200, -1);
   SRBaseMonojet.SetVarCRQCD("j2pt", 30, -1);
   SRBaseMonojet.SetVarCRQCD("nlep", 0, 1);
   SRBaseMonojet.SetVarCRQCD("njets", 2, 3);
+  SRBaseMonojet.SetVarCRQCD("nbjets", 0, -1);
   SRBaseMonojet.SetVarCRQCD("met", 200, -1);
   SRBaseMonojet.SetVarCRQCD("deltaPhiMin", 0., 0.3);
   SRBaseMonojet.SetVarCRQCD("diffMetMhtOverMet", 0, 0.5);
@@ -1772,7 +1774,7 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
   }
 
   // do monojet SRs
-  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMET100_PFMHT100 || t.HLT_PFHT300_PFMET100)) {
+  if (passMonojetId_){
 
     std::map<std::string, float> values_monojet;
     values_monojet["deltaPhiMin"] = t.deltaPhiMin;
@@ -1791,6 +1793,11 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
 	//      break;//control regions are not necessarily orthogonal
       }
     }
+
+    if(SRBaseMonojet.PassesSelectionCRQCD(values_monojet)){
+        fillHistosQCD(SRBaseMonojet.crqcdHistMap, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.GetMT2Bins(), "crqcdbaseJ", suffix);
+    }
+
   } // monojet regions
   
   return;
