@@ -8,31 +8,31 @@ lumi = 804
 lumiUnit = "pb"
 
 rl_plots = [
-    ("ht",True,(200,1500),None),
-    ("met",True,(200,1000),None),
-    ("mt2",True,(200,1000),None),
+    ("ht",True,(200,1500),None,2),
+    ("met",True,(200,1000),None,2),
+    ("mt2",True,(200,1000),None,2),
     ("mt2bins",True,None,None),
     ("nJet30",True,(0,14),None),
     ("nBJet20",True,(0,6),None),
-    ("leppt",True,None,None),
+    ("leppt",True,None,None,4),
     ("lepeta",False,None,None),
     ("nlepveto",False,None,None),
 ]
 
 sl_plots = [
-    ("ht",True,(200,1500),None),
-    ("met",True,(200,1000),None),
-    ("mt2",True,(200,1000),None),
+    ("ht",True,(200,1500),None,2),
+    ("met",True,(200,1000),None,2),
+    ("mt2",True,(200,1000),None,2),
     ("mt2bins",True,None,None),
     ("nJet30",True,(0,14),None),
     ("nBJet20",True,(0,6),None),
-    ("leppt",True,(0,400),None),
+    ("leppt",True,(0,400),None,2),
 ]
 
 dy_plots = [
-    ("ht",True,(200,1500),None),
-    ("met",True,(200,1000),None),
-    ("mt2",True,(200,1000),None),
+    ("ht",True,(200,1500),None,2),
+    ("met",True,(200,1000),None,2),
+    ("mt2",True,(200,1000),None,2),
     ("mt2bins",True,None,None),
     ("nJet30",True,(0,14),None),
     ("nBJet20",True,(0,6),None),
@@ -41,9 +41,9 @@ dy_plots = [
 ]
 
 gj_plots = [
-    ("ht",True,(200,1500),None),
-    ("met",True,(200,1000),None),
-    ("mt2",True,(200,1000),None),
+    ("ht",True,(200,1500),None,2),
+    ("met",True,(200,1000),None,2),
+    ("mt2",True,(200,1000),None,2),
     ("mt2bins",True,None,None),
     ("nJet30",True,(0,14),None),
     ("nBJet20",True,(0,6),None),
@@ -60,17 +60,21 @@ gj_plots = [
     ("drMinParton_ht200to450",False,None,None),
     ("drMinParton_ht450to1000",False,None,None),
     ("drMinParton_ht1000toInf",False,None,None),
+    ("SigmaIetaIetaEBLooseAllSieie",False,(0.0075,0.015),None),
+    ("SigmaIetaIetaEELooseAllSieie",False,(0.02,0.0345),None,2),
 ]
 
 qcdJ_plots = [
     ("J1pt",False,(30,330),None,1,False)
 ]
 
-mt2bins_only = [
-    ("mt2bins",True,None,None)
-]
-
 mt2_only = [
     ("mt2bins",True,None,None),
     ("mt2",True,(200,1000),None,2)
+]
+
+ht_njet_plots = [
+    ("ht",True,(200,1500),None,2),
+    ("nJet30",True,(0,14),None),
+    ("nBJet20",True,(0,6),None),
 ]

@@ -3,9 +3,21 @@
 
 def GetCRName(cr):
     names = {"crrlbase": "Removed Lepton CR",
+             "crrlbaseJ": "Removed Lepton CR",
+             "crrlbaseIncl": "Removed Lepton CR",
              "crgjbase": "#gamma+jets CR",
+             "crgjbaseJ": "#gamma+jets CR",
+             "crgjbaseIncl": "#gamma+jets CR",
              "crdybase": "Z #rightarrow #font[12]{l}^{#plus}#font[12]{l}^{#minus} CR",
+             "crdybaseJ": "Z #rightarrow #font[12]{l}^{#plus}#font[12]{l}^{#minus} CR",
+             "crdybaseIncl": "Z #rightarrow #font[12]{l}^{#plus}#font[12]{l}^{#minus} CR",
              "crslbase": "Single Lepton CR",
+             "crslbaseJ": "Single Lepton CR",
+             "crslbaseVL": "Single Lepton CR",
+             "crslbaseL": "Single Lepton CR",
+             "crslbaseM": "Single Lepton CR",
+             "crslbaseH": "Single Lepton CR",
+             "crslbaseUH": "Single Lepton CR",
              "crslwjets": "Single Lepton CR (wjets)",
              "crslttbar": "Single Lepton CR (ttbar)",
              "crslelbase": "Single Lepton CR (els)",
@@ -39,7 +51,7 @@ def GetVarName(var):
              "mt2bins": "M_{T2}",
              "nJet30": "N(jet)",
              "nBJet20": "N(b jet)",
-             "letppt": "P_{T}(lep)",
+             "leppt": "P_{T}(lep)",
              "lepeta": "#eta(lep)",
              "nlepveto": "N(lep veto)",
              "zllmass": "m_{#font[12]{ll}}",
@@ -48,22 +60,29 @@ def GetVarName(var):
              "J1pt": "Subleading jet p_{T}",
              }
 
+    if "SigmaIetaIeta" in var:
+        return "Photon #sigma_{i#eta i#eta}"
+
     # use the above name if defined, otherwise use var itself
     return names.get(var,var)
 
 def GetUnit(vn):
-    noUnit = ["nJet","nBJet","eta","nlep","drMin","chiso"]
+    noUnit = ["nJet","nBJet","eta","nlep","drMin","SigmaIetaIeta"]
     for s in noUnit:
-        if s in vn:
+        if s.lower() in vn.lower():
             return None
 
     return "GeV"
 
 def GetSubtitles(dirname):
+    # do special cases first
     if dirname=="crqcdbaseJ":
         return ["p_{T}(jet1) > 200 GeV", "N(jet) = 2"]
+
+    if dirname[-4:]=="Incl":
+        return ["H_{T} > 200 GeV", "MET > 200 GeV (1j)", "M_{T2} > 200 GeV (#geq 2j)"]
     if dirname[-1:]=="J":
-        return ["H_{T} > 200 GeV","M_{T2} > 200 GeV", "1j"]
+        return ["H_{T} > 200 GeV", "1j"]
     if dirname[-2:]=="VL":
         return ["200 < H_{T} < 450 GeV","M_{T2} > 200 GeV", "#geq 2j"]
     if dirname[-1:]=="L":
