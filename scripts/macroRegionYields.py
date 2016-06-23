@@ -4,10 +4,12 @@ import os
 import sys
 import ROOT
 import math
+import collections
 
 #datacard_dir = 'cards_all_macroregions_try2'
-datacard_dir = 'datacards_2p26ifb_fromMario/EventYields_data_Run2015_25nsGolden_2p3ifb/datacard_templates'
-output_dir = 'cards_for_macroregions_verytight'
+#datacard_dir = 'datacards_2p26ifb_fromMario/EventYields_data_Run2015_25nsGolden_2p3ifb/datacard_templates'
+datacard_dir = 'datacards_4fb_eth'
+output_dir = 'cards_for_macroregions_4fb_sigunc15'
 
 # signal point may appear in name
 #signal_point = '_T2tt_700_0'
@@ -237,9 +239,9 @@ def printMacroRegionYields( region, datacard_list ):
     # print ' sig: %.3f' % (n_sig)
 
     if n_bkg > 100:
-        print '%s & $%.0f^{+%.0f}_{-%.0f}$ & %d &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_obs)
+        print '%s & $%.0f^{+%.0f}_{-%.0f}$ & %d &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_obs)
     else:
-        print '%s & $%.1f^{+%.1f}_{-%.1f}$ & %d &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_obs)
+        print '%s & $%.1f^{+%.1f}_{-%.1f}$ & %d &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_obs)
         
 
     makeMacroRegionDatacard( region, n_obs, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_sig )
@@ -254,8 +256,10 @@ def main():
         'HT1000to1500_j2to6_b3toInf_m400toInf',
         'HT1000to1500_j7toInf_b3toInf_m200to400',
         'HT1000to1500_j7toInf_b3toInf_m400toInf',
-        'HT1500toInf_j2to6_b3toInf_m200toInf',
-        'HT1500toInf_j7toInf_b3toInf_m200toInf',
+        'HT1500toInf_j2to6_b3toInf_m200to400',
+        'HT1500toInf_j2to6_b3toInf_m400toInf',
+        'HT1500toInf_j7toInf_b3toInf_m200to400',
+        'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
     # 3b tight: HT > 575, MT2 > 200
@@ -270,8 +274,10 @@ def main():
         'HT1000to1500_j2to6_b3toInf_m400toInf',
         'HT1000to1500_j7toInf_b3toInf_m200to400',
         'HT1000to1500_j7toInf_b3toInf_m400toInf',
-        'HT1500toInf_j2to6_b3toInf_m200toInf',
-        'HT1500toInf_j7toInf_b3toInf_m200toInf',
+        'HT1500toInf_j2to6_b3toInf_m200to400',
+        'HT1500toInf_j2to6_b3toInf_m400toInf',
+        'HT1500toInf_j7toInf_b3toInf_m200to400',
+        'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
     # 3b medium: HT > 200, MT2 > 200
@@ -292,8 +298,10 @@ def main():
         'HT1000to1500_j2to6_b3toInf_m400toInf',
         'HT1000to1500_j7toInf_b3toInf_m200to400',
         'HT1000to1500_j7toInf_b3toInf_m400toInf',
-        'HT1500toInf_j2to6_b3toInf_m200toInf',
-        'HT1500toInf_j7toInf_b3toInf_m200toInf',
+        'HT1500toInf_j2to6_b3toInf_m200to400',
+        'HT1500toInf_j2to6_b3toInf_m400toInf',
+        'HT1500toInf_j7toInf_b3toInf_m200to400',
+        'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
     # 7j verytight: (HT > 1000 && nb <= 1 && MT2 > 600) || (HT > 1000 && nb >= 2 && MT2 > 400) || (HT > 1500 && MT2 > 400) 
@@ -305,7 +313,7 @@ def main():
         'HT1500toInf_j7toInf_b0_m400toInf',
         'HT1500toInf_j7toInf_b1_m400toInf',
         'HT1500toInf_j7toInf_b2_m400toInf',
-        'HT1500toInf_j7toInf_b3toInf_m200toInf',
+        'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
     # 7j tight: HT > 575, MT2 > 400
@@ -323,7 +331,7 @@ def main():
         'HT1500toInf_j7toInf_b0_m400toInf',
         'HT1500toInf_j7toInf_b1_m400toInf',
         'HT1500toInf_j7toInf_b2_m400toInf',
-        'HT1500toInf_j7toInf_b3toInf_m200toInf',
+        'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
     # 7j medium: HT > 1500, MT2 > 200 || HT 575-1500, MT2 > 400
@@ -344,7 +352,8 @@ def main():
         'HT1500toInf_j7toInf_b1_m400toInf',
         'HT1500toInf_j7toInf_b2_m200to400',
         'HT1500toInf_j7toInf_b2_m400toInf',
-        'HT1500toInf_j7toInf_b3toInf_m200toInf',
+        'HT1500toInf_j7toInf_b3toInf_m200to400',
+        'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
     # 4j tight: (4-6j, HT > 1500, MT2 > 600) || (>=7j, HT > 1500, MT2 > 400) || (>=4j, HT > 1000, MT2 > 600)
@@ -365,11 +374,13 @@ def main():
         'HT1500toInf_j4to6_b0_m1000toInf',
         'HT1500toInf_j4to6_b1_m600toInf',
         'HT1500toInf_j4to6_b2_m600toInf',
-        'HT1500toInf_j2to6_b3toInf_m200toInf',
+        'HT1500toInf_j2to6_b3toInf_m200to400',
+        'HT1500toInf_j2to6_b3toInf_m400toInf',
         'HT1500toInf_j7toInf_b0_m400toInf',
         'HT1500toInf_j7toInf_b1_m400toInf',
         'HT1500toInf_j7toInf_b2_m400toInf',
-        'HT1500toInf_j7toInf_b3toInf_m200toInf',
+        'HT1500toInf_j7toInf_b3toInf_m200to400',
+        'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
     # 4j medium: HT > 575, MT2 > 400 (also includes 2-6j 3b)
@@ -410,11 +421,13 @@ def main():
         'HT1500toInf_j4to6_b1_m600toInf',
         'HT1500toInf_j4to6_b2_m400to600',
         'HT1500toInf_j4to6_b2_m600toInf',
-        'HT1500toInf_j2to6_b3toInf_m200toInf',
+        'HT1500toInf_j2to6_b3toInf_m200to400',
+        'HT1500toInf_j2to6_b3toInf_m400toInf',
         'HT1500toInf_j7toInf_b0_m400toInf',
         'HT1500toInf_j7toInf_b1_m400toInf',
         'HT1500toInf_j7toInf_b2_m400toInf',
-        'HT1500toInf_j7toInf_b3toInf_m200toInf',
+        'HT1500toInf_j7toInf_b3toInf_m200to400',
+        'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
     # 2b verytight: HT > 1000, MT2 > 400
@@ -428,9 +441,11 @@ def main():
         'HT1500toInf_j2to3_b2_m200toInf',
         'HT1500toInf_j4to6_b2_m400to600',
         'HT1500toInf_j4to6_b2_m600toInf',
-        'HT1500toInf_j2to6_b3toInf_m200toInf',
+        'HT1500toInf_j2to6_b3toInf_m200to400',
+        'HT1500toInf_j2to6_b3toInf_m400toInf',
         'HT1500toInf_j7toInf_b2_m400toInf',
-        'HT1500toInf_j7toInf_b3toInf_m200toInf',
+        'HT1500toInf_j7toInf_b3toInf_m200to400',
+        'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
     # 2b tight: HT > 575, MT2 > 400
@@ -451,9 +466,11 @@ def main():
         'HT1500toInf_j2to3_b2_m200toInf',
         'HT1500toInf_j4to6_b2_m400to600',
         'HT1500toInf_j4to6_b2_m600toInf',
-        'HT1500toInf_j2to6_b3toInf_m200toInf',
+        'HT1500toInf_j2to6_b3toInf_m200to400',
+        'HT1500toInf_j2to6_b3toInf_m400toInf',
         'HT1500toInf_j7toInf_b2_m400toInf',
-        'HT1500toInf_j7toInf_b3toInf_m200toInf',
+        'HT1500toInf_j7toInf_b3toInf_m200to400',
+        'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
     # 2b medium: HT > 575, MT2 > 200
@@ -490,10 +507,12 @@ def main():
         'HT1500toInf_j4to6_b2_m200to400',
         'HT1500toInf_j4to6_b2_m400to600',
         'HT1500toInf_j4to6_b2_m600toInf',
-        'HT1500toInf_j2to6_b3toInf_m200toInf',
+        'HT1500toInf_j2to6_b3toInf_m200to400',
+        'HT1500toInf_j2to6_b3toInf_m400toInf',
         'HT1500toInf_j7toInf_b2_m200to400',
         'HT1500toInf_j7toInf_b2_m400toInf',
-        'HT1500toInf_j7toInf_b3toInf_m200toInf',
+        'HT1500toInf_j7toInf_b3toInf_m200to400',
+        'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
     # 2j tight: HT>1000 && Njets < 7
@@ -523,7 +542,7 @@ def main():
         'HT1500toInf_j4to6_b1_m600toInf',
         'HT1500toInf_j4to6_b2_m400to600',
         'HT1500toInf_j4to6_b2_m600toInf',
-        'HT1500toInf_j2to6_b3toInf_m200toInf', 
+        'HT1500toInf_j2to6_b3toInf_m400toInf', 
         ]
 
     # 1j tight: (Nj=1 && Nb=1 && HT>575) ||
@@ -639,23 +658,23 @@ def main():
         'HT1500toInf_j2to3_b2_m200toInf', 
         ]
 
-    all_regions = {
-        '1j_loose'  : datacards_1j_loose,
-        '1j_medium' : datacards_1j_medium,
-        '1j_tight'  : datacards_1j_tight,
-        '2j_tight'  : datacards_2j_tight,
-        '4j_medium' : datacards_4j_medium,
-        '4j_tight'  : datacards_4j_tight,
-        '7j_medium' : datacards_7j_medium,
-        '7j_tight'  : datacards_7j_tight,
-        '7j_verytight'  : datacards_7j_verytight,
-        '2b_medium' : datacards_2b_medium,
-        '2b_tight'  : datacards_2b_tight,
-        '2b_verytight'  : datacards_2b_verytight,
-        '3b_medium' : datacards_3b_medium,
-        '3b_tight'  : datacards_3b_tight,
-        '3b_verytight'  : datacards_3b_verytight,
-    }
+    
+    all_regions = collections.OrderedDict()
+    all_regions['1j_loose'] = datacards_1j_loose
+    all_regions['1j_medium'] = datacards_1j_medium
+    all_regions['1j_tight']  = datacards_1j_tight
+    all_regions['2j_tight']  = datacards_2j_tight
+    all_regions['4j_medium'] = datacards_4j_medium
+    all_regions['4j_tight']  = datacards_4j_tight
+    all_regions['7j_medium'] = datacards_7j_medium
+    all_regions['7j_tight']  = datacards_7j_tight
+    all_regions['7j_verytight']  = datacards_7j_verytight
+    all_regions['2b_medium'] = datacards_2b_medium
+    all_regions['2b_tight']  = datacards_2b_tight
+    all_regions['2b_verytight']  = datacards_2b_verytight
+    all_regions['3b_medium'] = datacards_3b_medium
+    all_regions['3b_tight']  = datacards_3b_tight
+    all_regions['3b_verytight']  = datacards_3b_verytight
 
     # make output directory
     if not os.path.exists(output_dir):
