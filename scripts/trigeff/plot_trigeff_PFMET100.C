@@ -23,14 +23,14 @@ const int iPeriod = 4; // 13 tev
 //   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
 const int iPos = 3;
 
-void plot_trigeff_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-00_json_Cert_271036-273730/") {
+void plot_trigeff_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-02_json_Cert_271036-274421/") {
 
   cmsText = "CMS Preliminary";
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
-  //  lumi_13TeV = "2.1 fb^{-1}";
-  lumi_13TeV = "589 pb^{-1}";
+  lumi_13TeV = "2.1 fb^{-1}";
+  //lumi_13TeV = "589 pb^{-1}";
   
   gStyle->SetPadTopMargin(0.08);
   gStyle->SetPadBottomMargin(0.12);
@@ -50,7 +50,7 @@ void plot_trigeff_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-0
   t_muon->Add(Form("%s/*Run2016*SingleMuon*.root", indir.Data()));
   t_ele->Add(Form("%s/*Run2016*SingleElectron*.root", indir.Data()));
 
-  TFile* f_out = new TFile(Form("trigeff_PFMET100%s.root",suffix.Data()),"RECREATE");
+  TFile* f_out = new TFile(Form("trigeff_PFMET100_PFMHT100_IDTight%s.root",suffix.Data()),"RECREATE");
   
   TH1D* h_met_denom_ht800 = new TH1D("h_met_denom_ht800",";E_{T}^{miss} [GeV]",40,100,500);
   TH1D* h_met_num_ht800 = (TH1D*) h_met_denom_ht800->Clone("h_met_num_ht800");
@@ -115,8 +115,9 @@ void plot_trigeff_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-0
   leg->Draw("same");
 
   CMS_lumi( c, iPeriod, iPos );
-  c->SaveAs(Form("trigeff_PFMET100%s.pdf",suffix.Data()));
-  c->SaveAs(Form("trigeff_PFMET100%s.eps",suffix.Data()));
+  c->SaveAs(Form("trigeff_PFMET100_PFMHT100_IDTight%s.pdf",suffix.Data()));
+  c->SaveAs(Form("trigeff_PFMET100_PFMHT100_IDTight%s.eps",suffix.Data()));
+  c->SaveAs(Form("trigeff_PFMET100_PFMHT100_IDTight%s.png",suffix.Data()));
 
   f_out->Write();
   f_out->Close();

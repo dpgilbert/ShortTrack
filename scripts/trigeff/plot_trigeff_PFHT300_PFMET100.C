@@ -23,14 +23,14 @@ const int iPeriod = 4; // 13 tev
 //   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
 const int iPos = 3;
 
-void plot_trigeff_PFHT300_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-00_json_Cert_271036-273730/") {
+void plot_trigeff_PFHT300_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-02_json_Cert_271036-274421/") {
 
   cmsText = "CMS Preliminary";
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
-  //  lumi_13TeV = "2.1 fb^{-1}";
-  lumi_13TeV = "589 pb^{-1}";
+  lumi_13TeV = "2.1 fb^{-1}";
+  //lumi_13TeV = "589 pb^{-1}";
   
   gStyle->SetPadTopMargin(0.08);
   gStyle->SetPadBottomMargin(0.12);
@@ -126,6 +126,7 @@ void plot_trigeff_PFHT300_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/
   CMS_lumi( c_met, iPeriod, iPos );
   c_met->SaveAs(Form("trigeff_PFMET100_leg%s.pdf",suffix.Data()));
   c_met->SaveAs(Form("trigeff_PFMET100_leg%s.eps",suffix.Data()));
+  c_met->SaveAs(Form("trigeff_PFMET100_leg%s.png",suffix.Data()));
 
   TCanvas* c_ht = new TCanvas("c_ht","c_ht");
   c_ht->SetGrid(1,1);
@@ -143,6 +144,7 @@ void plot_trigeff_PFHT300_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/
   CMS_lumi( c_ht, iPeriod, iPos );
   c_ht->SaveAs(Form("trigeff_PFHT300_leg%s.pdf",suffix.Data()));
   c_ht->SaveAs(Form("trigeff_PFHT300_leg%s.eps",suffix.Data()));
+  c_ht->SaveAs(Form("trigeff_PFHT300_leg%s.png",suffix.Data()));
 
   f_out->Write();
   f_out->Close();
