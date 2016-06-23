@@ -71,7 +71,7 @@ chmod -R a+wrx $OUTPUTDIR
 # run dyjetsll_ht100to200
 # run dyjetsll_ht200to400
 # run dyjetsll_ht400to600
-# # run dyjetsll_ht600toInf
+# run dyjetsll_ht600toInf
 # run dyjetsll_incl
 
 
@@ -85,6 +85,11 @@ chmod -R a+wrx $OUTPUTDIR
 # run gjets_ht400to600
 # run gjets_ht600toInf
 
+# run gjets_dr0p05_ht40to100
+# run gjets_dr0p05_ht100to200
+# run gjets_dr0p05_ht200to400
+# run gjets_dr0p05_ht400to600
+# run gjets_dr0p05_ht600toInf
 
 #
 # Z INVISIBLE
@@ -120,17 +125,21 @@ chmod -R a+wrx $OUTPUTDIR
 # QCD
 #
 
-# # run qcd_pt120to170
-# # run qcd_pt170to300
-# # run qcd_pt300to470
-# # run qcd_pt470to600
-# # run qcd_pt600to800
-# # run qcd_pt800to1000
-# # run qcd_pt1000to1400
-# # run qcd_pt1400to1800
-# # run qcd_pt1800to2400
-# # run qcd_pt2400to3200
-# # run qcd_pt3200toInf
+# run qcd_pt80to120
+# run qcd_pt120to170
+# run qcd_pt170to300
+# run qcd_pt300to470
+# run qcd_pt470to600
+# run qcd_pt600to800
+# run qcd_pt800to1000
+# run qcd_pt1000to1400
+# run qcd_pt1400to1800
+# run qcd_pt1800to2400
+# run qcd_pt2400to3200
+# run qcd_pt3200toInf
+
+# run qcd_pt470to600_ext1
+# run qcd_pt600to800_ext1
 
 # # run qcd_ht200to300
 # run qcd_ht300to500
@@ -158,3 +167,10 @@ chmod -R a+wrx $OUTPUTDIR
 # run T1bbbb_1000_900
 # # run T1qqqq_1400_100
 # # run T1qqqq_1000_800
+
+#
+# SIGNAL SCANS
+#
+
+# run T1tttt
+# run T2bb
