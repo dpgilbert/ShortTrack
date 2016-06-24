@@ -88,14 +88,17 @@ void plot_trigeff_Photon165 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-
   h_axis->Draw();
   
   TEfficiency* h_pt_eff_jetht = new TEfficiency(*h_pt_num_jetht, *h_pt_denom_jetht);
+  h_pt_eff_jetht->SetName("h_pt_eff_jetht");
   h_pt_eff_jetht->SetLineColor(kRed);
   h_pt_eff_jetht->SetMarkerColor(kRed);
 
   TEfficiency* h_pt_eb_eff_jetht = new TEfficiency(*h_pt_eb_num_jetht, *h_pt_eb_denom_jetht);
+  h_pt_eb_eff_jetht->SetName("h_pt_eb_eff_jetht");
   h_pt_eb_eff_jetht->SetLineColor(kRed);
   h_pt_eb_eff_jetht->SetMarkerColor(kRed);
 
   TEfficiency* h_pt_ee_eff_jetht = new TEfficiency(*h_pt_ee_num_jetht, *h_pt_ee_denom_jetht);
+  h_pt_ee_eff_jetht->SetName("h_pt_ee_eff_jetht");
   h_pt_ee_eff_jetht->SetLineColor(kRed);
   h_pt_ee_eff_jetht->SetMarkerColor(kRed);
 
@@ -149,6 +152,9 @@ void plot_trigeff_Photon165 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-
   c_ee->SaveAs(Form("trigeff_Photon165_EE%s.png",suffix.Data()));
 
   f_out->Write();
+  h_pt_eff_jetht->Write();
+  h_pt_eb_eff_jetht->Write();
+  h_pt_ee_eff_jetht->Write();
   f_out->Close();
   
   return;
