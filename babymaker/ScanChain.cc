@@ -1590,6 +1590,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       nBJet30mva = 0;
       nJet30FailId = 0;
       nJet100FailId = 0;
+      nJet20BadFastsim = 0;
       minMTBMet = 999999.;
       jet1_pt = 0.;
       jet2_pt = 0.;
@@ -1655,6 +1656,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         if( (p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {
         //if( (p4sCorrJets.at(iJet).pt() > 10.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {//for RS
 
+	  // check for bad fastsim jets
+	  if (isFastsim && isBadFastsimJet(iJet)) ++nJet20BadFastsim;
+	  
           // first check jet ID - count the number of jets that fail.  Don't apply for fastsim
           if(!isLoosePFJet_50nsV1(iJet) && !isFastsim) {
             if (p4sCorrJets.at(iJet).pt() > 30.0) ++nJet30FailId;
@@ -2225,6 +2229,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("nBJet40", &nBJet40 );
     BabyTree_->Branch("nJet30FailId", &nJet30FailId );
     BabyTree_->Branch("nJet100FailId", &nJet100FailId );
+    BabyTree_->Branch("nJet20BadFastsim", &nJet20BadFastsim );
     BabyTree_->Branch("nMuons10", &nMuons10 );
     BabyTree_->Branch("nElectrons10", &nElectrons10 );
     BabyTree_->Branch("nLepLowMT", &nLepLowMT );
@@ -2570,6 +2575,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     nBJet40 = -999;
     nJet30FailId = -999;
     nJet100FailId = -999;
+    nJet20BadFastsim = -999;
     nMuons10 = -999;
     nElectrons10 = -999;
     nLepLowMT = -999;
