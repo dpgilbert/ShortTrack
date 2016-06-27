@@ -1374,7 +1374,7 @@ std::vector<SR> getSignalRegionsMonojet(){
   baseSR.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
   // QCD region: 2 jets, low deltaPhiMin, pt subleading between 30 and 60 GeV
   baseSR.SetVarCRQCD("j1pt", 200, -1);
-  baseSR.SetVarCRQCD("j2pt", 30, -1);
+  baseSR.SetVarCRQCD("j2pt", 30, 60);
   baseSR.SetVarCRQCD("nlep", 0, 1);
   baseSR.SetVarCRQCD("njets", 2, 3);
   baseSR.SetVarCRQCD("met", 200, -1);
