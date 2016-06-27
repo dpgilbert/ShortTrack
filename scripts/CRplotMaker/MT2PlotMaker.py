@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import ROOT
 import pyRootPlotMaker as ppm
 import MT2PlotUtils as utils
@@ -90,6 +91,57 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
             ppm.plotDataMC(h_bkg_vecs[i], sns, h_data[i], doPause=False, xAxisTitle=xAxisTitle, lumi=pd.lumi, lumiUnit=pd.lumiUnit,
                            title=title, subtitles=subtitles, xRangeUser=plots[i][2], isLog=plots[i][1], saveAs=saveAs, 
                            scaleMCtoData=True, xAxisUnit=unit, userMin=userMin, userMax=userMax, doSort=False, 
-                           doMT2Colors=True, markerSize=markerSize, titleSize=0.035, subtitleSize=0.025,
+                           doMT2Colors=True, markerSize=markerSize, titleSize=0.035, subtitleSize=0.03,
                            subLegText=subLegText, doBkgError=True, doOverflow=doOverflow)
             
+
+
+def makeNormalizedLostLep(indir, lostlep_name="lostlepFromCRs", outdir='.', exts=['png','pdf']):
+    ## Takes the output from lostlepMaker.C and makes plots of CR yields
+    ## after MC is normalized in each HT, Nj, Nb bin separately
+
+    f_LL = ROOT.TFile(os.path.join(indir,lostlep_name+".root"), "READ")
+
+    regions_0b = ["sr1","sr4","sr7"]
+    regions_ge1b = ["sr2","sr3","sr5","sr6","sr8","sr10"]
+    regions_incl = regions_0b + regions_ge1b
+    
+    regions = [regions_0b, regions_ge1b, regions_incl]
+    region_names = ["0b","ge1b","incl"]
+
+    mt2bins = [200, 300, 400, 500, 600, 800, 1000, 1500]
+    mt2bins = np.array(mt2bins, dtype=float)
+
+    try:
+        os.makedirs(os.path.join(outdir, "lostlep"))
+    except:
+        pass
+
+    #loop over sets of regions (0b, >=1b, inclusive)
+    for iregs,regs in enumerate(regions):
+        # loop over set of SRs within the given region
+        for isr, sr in enumerate(regs):
+            for ht_reg in ["VL","L","M","H","UH"]:
+                if isr == 0 and ht_reg == "VL":
+                    h_mt2_mc       = f_LL.Get("{0}{1}/h_mt2CRMCrescaled".format(sr,ht_reg)).Clone("h_mt2_mc")
+                    h_mt2_data     = f_LL.Get("{0}{1}/h_mt2CRyield".format(sr,ht_reg)).Clone("h_mt2_data")
+                else:
+                    h_mt2_mc.Add(      f_LL.Get("{0}{1}/h_mt2CRMCrescaled".format(sr,ht_reg)))
+                    h_mt2_data.Add(    f_LL.Get("{0}{1}/h_mt2CRyield".format(sr,ht_reg)))
+
+        h_mt2bins_mc = h_mt2_mc.Rebin(mt2bins.size-1, "h_mt2bins_mc", mt2bins)
+        h_mt2bins_data = h_mt2_data.Rebin(mt2bins.size-1, "h_mt2bins_data", mt2bins)
+
+        subtitles = ["#geq 2j, 1 lepton", "M_{T2} > 200 GeV"]
+        if iregs==0:
+            subtitles[0] = "#geq 2j, 0b, 1 lepton"
+        if iregs==1:
+            subtitles[0] = "#geq 2j, #geq 1b, 1 lepton"
+            
+        for ext in exts:
+            saveAs = os.path.join(outdir, "lostlep", "lostlep_{0}_mt2bins.{1}".format(region_names[iregs],ext))
+            ppm.plotDataMC([h_mt2bins_mc], ["Lost Lepton"], h_mt2bins_data, doPause=False, xAxisTitle="M_{T2}",
+                           lumi=pd.lumi, lumiUnit=pd.lumiUnit, title=None, subtitles=subtitles, isLog=True,
+                           saveAs=saveAs, scaleMCtoData=False, xAxisUnit="GeV", doSort=False, doMT2Colors=True,
+                           markerSize=1.0, subtitleSize=0.030, doBkgError=True, doOverflow=False)
+

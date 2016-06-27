@@ -4,14 +4,14 @@ import ROOT
 # run in batch mode to suppress plot windows
 ROOT.gROOT.SetBatch(1)
 
-from MT2PlotMaker import MT2PlotMaker
+from MT2PlotMaker import *
 import MT2PlotDefs as pd
 
 pd.lumi = 4.0
 pd.lumiUnit = "fb"
 
 ## 3.99/fb
-input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/eth_json_271036-275125_3p99fb"
+input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-02_nojson_skim_base_mt2gt200_ZinvV4_3p99fb"
 ## 2.6/fb
 # input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-02_nojson_skim_base_mt2gt200_ZinvV4_2p6fb"
 ## 2.1/fb
@@ -46,22 +46,27 @@ MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016B", "crslbas
 MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016B", "crslbaseUH", pd.mt2_only, output_dir, exts)
 
 # photon+jets
-MT2PlotMaker(input_dir, ["gjets_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbase", pd.gj_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbase", pd.gj_plots, output_dir, exts)
  
-MT2PlotMaker(input_dir, ["gjets_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseJ", pd.ht_njet_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["gjets_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseIncl", pd.ht_njet_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseJ", pd.ht_njet_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseIncl", pd.ht_njet_plots, output_dir, exts)
 
-MT2PlotMaker(input_dir, ["gjets_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseVL", pd.mt2_only, output_dir, exts)
-MT2PlotMaker(input_dir, ["gjets_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseL", pd.mt2_only, output_dir, exts)
-MT2PlotMaker(input_dir, ["gjets_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseM", pd.mt2_only, output_dir, exts)
-MT2PlotMaker(input_dir, ["gjets_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseH", pd.mt2_only, output_dir, exts)
-MT2PlotMaker(input_dir, ["gjets_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseUH", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseVL", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseL", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseM", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseH", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseUH", pd.mt2_only, output_dir, exts)
 
 # z->ll
-MT2PlotMaker(input_dir, ["dyjetsll_incl", "top"], "data_Run2016B", "crdybase", pd.dy_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016B", "crdybase", pd.dy_plots, output_dir, exts)
 
-MT2PlotMaker(input_dir, ["dyjetsll_incl", "top"], "data_Run2016B", "crdybaseJ", pd.ht_njet_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["dyjetsll_incl", "top"], "data_Run2016B", "crdybaseIncl", pd.ht_njet_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016B", "crdybaseJ", pd.ht_njet_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016B", "crdybaseIncl", pd.ht_njet_plots, output_dir, exts)
 
 # QCD monojet
 MT2PlotMaker(input_dir, ["qcd_ht", "wjets_ht", "zinv_ht"], "data_Run2016B", "crqcdbaseJ", pd.qcdJ_plots, output_dir, exts)
+
+# Lost Lepton MT2 plots, normalized in each HT, nj, nb bin
+# only make if we have run lostlepMaker.C and have the corresponding output
+if os.path.isfile(os.path.join(input_dir, "lostlepFromCRs.root")):
+    makeNormalizedLostLep(input_dir, outdir=output_dir, exts=exts)
