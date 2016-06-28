@@ -5,7 +5,7 @@ function run () {
     nohup nice -n 19 root -b -q mergeHadoopFiles.C\(\"${HADOOPDIR}/${TAG}_$1/\",\"${OUTPUTDIR}/$1.root\"\) >& ${LOGDIR}/log_merge_${TAG}_$1.txt &
 }
 
-TAG=V00-08-02_json_Cert_271036-274421
+TAG=V00-08-03_MiniAODv2_nojson
 
 HADOOPDIR=/hadoop/cms/store/user/${USER}/mt2babies/
 OUTPUTDIR=/nfs-6/userdata/mt2/$TAG/
@@ -41,19 +41,33 @@ chmod -R a+wrx $OUTPUTDIR
 # HIGH STATS TTBAR EXTENSION
 #
 
+# #run ttdl_mg_lo_ext1
+# run ttsl_mg_lo_top_ext1
+# run ttsl_mg_lo_tbar_ext1
 
 #
 # W+JETS
 #
 
-# run wjets_ht100to200
+# #run wjets_ht100to200
 # run wjets_ht200to400
 # run wjets_ht400to600
 # run wjets_ht600to800
 # run wjets_ht800to1200
 # run wjets_ht1200to2500
 # run wjets_ht2500toInf
-# # run wjets_mg_lo
+
+# run wjets_ht100to200_ext1
+# run wjets_ht200to400_ext1
+# #run wjets_ht400to600_ext1
+# #run wjets_ht600to800_ext1
+# run wjets_ht800to1200_ext1
+# run wjets_ht1200to2500_ext1
+# #run wjets_ht2500toInf_ext1
+
+
+
+# # run wjets_incl
 
 #
 # SINGLE TOP
@@ -62,28 +76,36 @@ chmod -R a+wrx $OUTPUTDIR
 # run singletop_amcatnlo_4f_schan
 # run singletop_powheg_5f_tWchan
 # run singletop_powheg_5f_tbarWchan
+# #run singletop_powheg_4f_ttchan_l
 # run singletop_powheg_4f_tbartchan_l
 
 #
 # DY+JETS
 #
 
-# run dyjetsll_ht100to200
-# run dyjetsll_ht200to400
-# run dyjetsll_ht400to600
+# #run dyjetsll_ht100to200
+# #run dyjetsll_ht200to400
+# #run dyjetsll_ht400to600
 # run dyjetsll_ht600toInf
-# run dyjetsll_incl
+
+# run dyjetsll_ht100to200_ext1
+# run dyjetsll_ht200to400_ext1
+# run dyjetsll_ht400to600_ext1
+# run dyjetsll_ht600toInf_ext1
+
+
+# #run dyjetsll_incl
 
 
 #
 # GAMMA + JETS
 #
 
-# run gjets_ht40to100
-# run gjets_ht100to200
-# run gjets_ht200to400
-# run gjets_ht400to600
-# run gjets_ht600toInf
+# run gjets_dr0p4_ht40to100
+# run gjets_dr0p4_ht100to200
+# run gjets_dr0p4_ht200to400
+# run gjets_dr0p4_ht400to600
+# run gjets_dr0p4_ht600toInf
 
 # run gjets_dr0p05_ht40to100
 # run gjets_dr0p05_ht100to200
@@ -96,12 +118,20 @@ chmod -R a+wrx $OUTPUTDIR
 #
 
 # # run zinv_ht100to200
-# run zinv_ht200to400
+# # run zinv_ht200to400
 # # run zinv_ht400to600
 # run zinv_ht600to800
 # run zinv_ht800to1200
 # run zinv_ht1200to2500
 # run zinv_ht2500toInf
+
+# run zinv_ht100to200_ext1
+# # run zinv_ht200to400_ext1
+# # run zinv_ht400to600_ext1
+# # run zinv_ht600to800_ext1
+# # run zinv_ht800to1200_ext1
+# run zinv_ht1200to2500_ext1
+# # run zinv_ht2500toInf_ext1
 
 #
 # DIBOSON
@@ -143,13 +173,13 @@ chmod -R a+wrx $OUTPUTDIR
 
 # # run qcd_ht200to300
 # run qcd_ht300to500
-# run qcd_ht500to700
+# # run qcd_ht500to700
 # run qcd_ht700to1000
 # run qcd_ht1000to1500
 # run qcd_ht1500to2000
 # run qcd_ht2000toInf
 
-# run qcd_ht200to300_ext
+# # run qcd_ht200to300_ext
 # run qcd_ht300to500_ext
 # run qcd_ht500to700_ext
 # run qcd_ht700to1000_ext
@@ -174,3 +204,4 @@ chmod -R a+wrx $OUTPUTDIR
 
 # run T1tttt
 # run T2bb
+# run T2tt
