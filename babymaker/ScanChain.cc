@@ -454,15 +454,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	// note: in CMS3, filt_cscBeamHalo and evt_cscTightHaloId are the same
 	Flag_CSCTightHaloFilter                       = cms3.filt_cscBeamHalo();
 	Flag_CSCTightHalo2015Filter                   = cms3.filt_cscBeamHalo2015();
-	// not in latest CMS3 tag on data - will be added in next tag..
-	// Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
-	// Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
+	// in latest cms3 tag for data, not yet for MC
+	if (isData) {
+	  Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
+	  Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
+	}
 	// note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
 	Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
 	// temporary workaround: flag not in first 80x MC production, so recompute
 	Flag_HBHENoiseIsoFilter                       = isData ? cms3.filt_hbheNoiseIso() : hbheIsoNoiseFilter();
-	// computed from CMS3, should eventually compute on miniAOD when available..
-	//	Flag_badMuonFilter                            = badMuonFilter();
+	// inputs for badMuonFilters in latest cms3 tag for data, not yet for MC
+	if (isData) Flag_badMuonFilter                            = badMuonFilter();
 	Flag_badChargedHadronFilter                   = badChargedCandidateFilter();
 	// necessary?
 	Flag_METFilters                               = cms3.filt_metfilter();
