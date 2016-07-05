@@ -16,6 +16,7 @@ def makeRbPlot(h_mc, h_data, nj_reg, outfile):
     c = ROOT.TCanvas("c1","c1",600,650)
     c.SetLeftMargin(0.12)
     c.SetTopMargin(0.08)
+    c.SetLogy(1)
 
     h_mc.SetLineColor(ROOT.kRed+1)
     h_mc.SetLineWidth(2)
@@ -25,7 +26,7 @@ def makeRbPlot(h_mc, h_data, nj_reg, outfile):
     h_mc.GetXaxis().SetNdivisions(6)
     h_mc.GetYaxis().SetTitle("r_{b}")
     h_mc.GetYaxis().SetTitleOffset(1.4)
-    h_mc.GetYaxis().SetRangeUser(0,1.0)
+    h_mc.GetYaxis().SetRangeUser(1e-3,1.2)
 
     h_data.SetMarkerStyle(20)
     h_data.SetMarkerColor(ROOT.kBlack)
@@ -103,20 +104,17 @@ def makeFjPlot(h_mc, h_data, ht_reg, outfile):
     c.SaveAs(outfile+".png")
     
 
-def makeRphiPlot(h_all, h_qcd, ht_reg, isData, outfile):
+def makeRphiPlot(h_all, h_qcd, fit, ht_reg, isData, outfile):
     ht_reg = ["ht200to450","ht450to575","ht575to1000",
               "ht1000to1500","ht1500toInf"].index(ht_reg)
 
     ht_bounds = [(200,450),(450,575),(575,1000),(1000,1500),(1500,"Inf")]
 
-    
-    fit = ROOT.TF1("fitfunc","[0]*x^[1]",50,1500)
-    fit.SetParameter(0,20)
-    # fit was strangely converging to bad values in some cases, so restrict the values
-    fit.SetParLimits(0,10,1e9)
-    lowbound = 60 if ht_reg in [0,1,2] else 70
-    h_qcd.Fit("fitfunc","QN","goff",lowbound,100)
-    
+    # h_errBand = ROOT.TH1D("h_errBand","",294,30,1500)
+    # h_errBand.SetFillColor(ROOT.kGray)
+    # h_errBand.SetFillStyle(3001)
+    # ROOT.TVirtualFitter.GetFitter().GetConfidenceIntervals(h_errBand, 0.68)
+
     ROOT.gStyle.SetOptStat(0)
     c = ROOT.TCanvas("c1","c1",600,650)
     c.SetLogx(1)
@@ -130,7 +128,7 @@ def makeRphiPlot(h_all, h_qcd, ht_reg, isData, outfile):
     h_all.SetLineColor(ROOT.kBlack)
 
     h_qcd.SetTitle("")
-    h_qcd.GetXaxis().SetRangeUser(50,450)
+    h_qcd.GetXaxis().SetRangeUser(50,1200)
     h_qcd.GetXaxis().SetTitle("M_{T2} [GeV]")
     h_qcd.GetXaxis().SetTitleOffset(1.3)
     h_qcd.GetYaxis().SetRangeUser(0.01,200)
@@ -146,9 +144,11 @@ def makeRphiPlot(h_all, h_qcd, ht_reg, isData, outfile):
     line.SetLineColor(ROOT.kBlack)
     line.SetLineWidth(1)
     line.SetLineStyle(2)
+    lowbound = 60 if ht_reg in [0,1,2] else 70
     line.DrawLine(lowbound,0.01,lowbound,200)
     line.DrawLine(100,0.01,100,200)
     
+    # h_errBand.Draw("SAME E3")
     fit.Draw("SAME")
     h_qcd.Draw("SAMEPE0")
     h_all.Draw("SAMEPE0")
@@ -167,6 +167,14 @@ def makeRphiPlot(h_all, h_qcd, ht_reg, isData, outfile):
     leg.SetBorderSize(0)
     leg.Draw()
 
+    # text = ROOT.TLatex()
+    # text.SetNDC(1)
+    # text.SetTextFont(62)
+    # text.SetTextSize(0.035)
+    # text.SetTextAlign(13)
+    # text.DrawLatex(0.15,0.89,"a = {0:.1f} #pm {1:.1f}".format(fit.GetParameter(0),fit.GetParError(0)))
+    # text.DrawLatex(0.15,0.85,"b = {0:.2f} #pm {1:.2f}".format(fit.GetParameter(1),fit.GetParError(1)))
+
     drawHeaders(c, isData)
 
     c.SaveAs(outfile+".pdf")
@@ -183,7 +191,7 @@ def drawHeaders(canvas, isData):
         text.SetTextAlign(31)
         text.SetTextSize(0.035)
         text.SetTextFont(42)
-        text.DrawLatex(0.89,0.93,"{0} {1}^{{-1}} ({2} TeV)".format(2.1, 'fb', 13))
+        text.DrawLatex(0.89,0.93,"{0} {1}^{{-1}} ({2} TeV)".format(4.0, 'fb', 13))
         cmsText = "CMS Preliminary"
     #CMS text
     text.SetTextSize(0.035)

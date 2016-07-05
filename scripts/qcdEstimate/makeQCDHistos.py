@@ -8,8 +8,9 @@ import sys
 import numpy as np
 import ROOT
 
-indir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/QCDLooper/output/test_prescale"
-outdir = "output/test_prescale"
+indir = open('inputs.txt').readlines()[0].strip()
+tag = indir.split("/")[-1]
+outdir = "output/"+tag
 
 try:
     os.makedirs(outdir)
@@ -17,16 +18,16 @@ except:
     pass
 
 qcd_sample = "qcd_ht"
-nqcd_samples = ["wjets_ht","ttsl", "dyjetsll_incl","ttdl", "zinv_ht"]
+nqcd_samples = ["wjets_ht","top", "dyjetsll_ht", "zinv_ht", "gjets_dr0p05_ht"]
 data_sample = "data_Run2016B"
 
 ht_reg_names = ["ht200to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf"]
 nj_reg_names = ["j2to3","j4to6","j7toInf"]
 
-fout = ROOT.TFile(os.path.join(outdir,"QCDhistos.root"),"RECREATE")
+fout = ROOT.TFile(os.path.join(outdir,"qcdHistos.root"),"RECREATE")
 
 ## r_phi
-for reg in ht_reg_names:
+for ireg,reg in enumerate(ht_reg_names):
     print "Doing r_phi for region",reg
     
     dirname = "rphi_"+reg
@@ -56,29 +57,39 @@ for reg in ht_reg_names:
         raise Exception("ERROR: could not get histos from data file!!")
     fin.Close()
 
-    # MCall and non-qcd-subtracted data
-    h_mcall_num = ROOT.TH1D()
-    h_mcall_den = ROOT.TH1D()
-    h_datasub_num = ROOT.TH1D()
-    h_datasub_den = ROOT.TH1D()
-    h_qcd_num.Copy(h_mcall_num)
-    h_qcd_den.Copy(h_mcall_den)
-    h_data_num.Copy(h_datasub_num)
-    h_data_den.Copy(h_datasub_den)
+    # non-QCD MC
+    h_nonqcd_num = h_qcd_num.Clone("h_nonqcd_num")
+    h_nonqcd_num.Reset()
+    h_nonqcd_den = h_qcd_num.Clone("h_nonqcd_den")
+    h_nonqcd_den.Reset()
     for s in nqcd_samples:
         fin = ROOT.TFile(os.path.join(indir,s+".root"))
         try:
-            h_mcall_num.Add(fin.Get("rphi_{0}/h_mt2_num".format(reg)))
-            h_mcall_den.Add(fin.Get("rphi_{0}/h_mt2_den".format(reg)))
-            h_datasub_num.Add(fin.Get("rphi_{0}/h_mt2_num".format(reg)),-1)
-            h_datasub_den.Add(fin.Get("rphi_{0}/h_mt2_den".format(reg)),-1)
+            h_nonqcd_num.Add(fin.Get("rphi_{0}/h_mt2_num".format(reg)))
+            h_nonqcd_den.Add(fin.Get("rphi_{0}/h_mt2_den".format(reg)))
         except TypeError:
             ## sometimes some bkg process wont have any events, generates error
             print "WARNING: could not get {0} rphi hists for sample {1}".format(reg,s)
         fin.Close()
+
+
+    # MCall and non-qcd-subtracted data
+    h_mcall_num = h_qcd_num.Clone("h_mcall_num")
+    h_mcall_den = h_qcd_den.Clone("h_mcall_den")
+    h_datasub_num = h_data_num.Clone("h_datasub_num")
+    h_datasub_den = h_data_den.Clone("h_datasub_den")
+
+    h_mcall_num.Add(h_nonqcd_num)
+    h_mcall_den.Add(h_nonqcd_den)
+
+    ## GET DATA/MC RATIO
+    dataMCsf = h_data_num.Integral(0,-1)/h_mcall_num.Integral(0,-1)
+    
+    h_datasub_num.Add(h_nonqcd_num,-1*dataMCsf)
+    h_datasub_den.Add(h_nonqcd_den,-1*dataMCsf)
    
     #rebin using the following bin edges    
-    mt2bins = [50,55,60,65,70,75,80,90,100,120,200,300,450,800,1500]
+    mt2bins = [50,55,60,65,70,75,80,90,100,125,200,300,450,800,1500]
     mt2bins = np.array(mt2bins, dtype=float)
     
     h_qcd_num = h_qcd_num.Rebin(mt2bins.size-1, "h_qcd_num", mt2bins)
@@ -100,20 +111,34 @@ for reg in ht_reg_names:
     h_datasub_rphi = h_datasub_num.Clone("h_datasub_rphi")
     h_datasub_rphi.Divide(h_datasub_den)
 
+    # perform the fits
+    fit_mc = ROOT.TF1("fit_mc","[0]*x^[1]",30,1500)
+    fit_mc.SetParameter(0,100)
+    fit_mc.SetParLimits(0,20,1e9)
+    fit_data = ROOT.TF1("fit_data","[0]*x^[1]",30,1500)
+    fit_data.SetParameter(0,100)
+    fit_data.SetParLimits(0,20,1e9)
+    lowbound = 60 if ireg in [0,1,2] else 70
+    highbound = 100
+    h_qcd_rphi.Fit("fit_mc","QN","goff",lowbound,100)
+    h_datasub_rphi.Fit("fit_data","QN","goff",lowbound,100)
+
     # write to directory
     tdir.cd()
     h_qcd_rphi.Write()
     h_data_rphi.Write()
     h_mcall_rphi.Write()
     h_datasub_rphi.Write()
-    h_qcd_num.Write()
-    h_data_num.Write()
-    h_mcall_num.Write()
-    h_datasub_num.Write()
-    h_qcd_den.Write()
-    h_data_den.Write()
-    h_mcall_den.Write()
-    h_datasub_den.Write()
+    fit_mc.Write()
+    fit_data.Write()
+    # h_qcd_num.Write()
+    # h_data_num.Write()
+    # h_mcall_num.Write()
+    # h_datasub_num.Write()
+    # h_qcd_den.Write()
+    # h_data_den.Write()
+    # h_mcall_den.Write()
+    # h_datasub_den.Write()
 
 # f_j
 for reg in ht_reg_names:
@@ -138,18 +163,51 @@ for reg in ht_reg_names:
         raise Exception("ERROR: could not get {0} fj data from data sample!!".format(reg))
     fin.Close()
 
+    # non-QCD MC
+    h_nonqcd_fj = h_qcd_fj.Clone("h_nonqcd_num")
+    h_nonqcd_fj.Reset()
+    for s in nqcd_samples:
+        fin = ROOT.TFile(os.path.join(indir,s+".root"))
+        try:
+            h_nonqcd_fj.Add(fin.Get("fj_{0}/h_njets".format(reg)))
+        except TypeError:
+            ## sometimes some bkg process wont have any events, generates error
+            print "WARNING: could not get {0} fj hists for sample {1}".format(reg,s)
+        fin.Close()
+
+
+    # MCall and non-qcd-subtracted data
+    h_mcall_fj = h_qcd_fj.Clone("h_mcall_fj")
+    h_datasub_fj = h_data_fj.Clone("h_datasub_fj")
+
+    h_mcall_fj.Add(h_nonqcd_fj)
+
+    ## GET DATA/MC RATIO
+    dataMCsf = h_data_fj.Integral(0,-1)/h_mcall_fj.Integral(0,-1)
+    
+    h_datasub_fj.Add(h_nonqcd_fj,-1*dataMCsf)
+
+    #normalize to get proportions
     h_qcd_fj.Scale(1.0/h_qcd_fj.Integral(0,-1))
     h_data_fj.Scale(1.0/h_data_fj.Integral(0,-1))
+    h_mcall_fj.Scale(1.0/h_mcall_fj.Integral(0,-1))
+    h_datasub_fj.Scale(1.0/h_datasub_fj.Integral(0,-1))
 
+    # rebin
     njbins = [2,4,7,11]
     njbins = np.array(njbins, dtype=float)
 
     h_qcd_fj = h_qcd_fj.Rebin(njbins.size-1, "h_qcd_fj", njbins)
     h_data_fj = h_data_fj.Rebin(njbins.size-1, "h_data_fj", njbins)
+    h_mcall_fj = h_mcall_fj.Rebin(njbins.size-1, "h_mcall_fj", njbins)
+    h_datasub_fj = h_datasub_fj.Rebin(njbins.size-1, "h_datasub_fj", njbins)
 
     tdir.cd()
     h_qcd_fj.Write()
     h_data_fj.Write()
+    h_mcall_fj.Write()
+    h_datasub_fj.Write()
+
 
 # r_b
 for reg in nj_reg_names:
@@ -174,21 +232,48 @@ for reg in nj_reg_names:
         raise Exception("ERROR: could not get {0} rb data from data sample!!".format(reg))
     fin.Close()
 
+    # non-QCD MC
+    h_nonqcd_rb = h_qcd_rb.Clone("h_nonqcd_num")
+    h_nonqcd_rb.Reset()
+    for s in nqcd_samples:
+        fin = ROOT.TFile(os.path.join(indir,s+".root"))
+        try:
+            h_nonqcd_rb.Add(fin.Get("rb_{0}/h_nbjets".format(reg)))
+        except TypeError:
+            ## sometimes some bkg process wont have any events, generates error
+            print "WARNING: could not get {0} rb hists for sample {1}".format(reg,s)
+        fin.Close()
+
+
+    # MCall and non-qcd-subtracted data
+    h_mcall_rb = h_qcd_rb.Clone("h_mcall_rb")
+    h_datasub_rb = h_data_rb.Clone("h_datasub_rb")
+
+    h_mcall_rb.Add(h_nonqcd_rb)
+
+    ## GET DATA/MC RATIO
+    dataMCsf = h_data_rb.Integral(0,-1)/h_mcall_rb.Integral(0,-1)
+    
+    h_datasub_rb.Add(h_nonqcd_rb,-1*dataMCsf)
+
+    # normalize to get proportion
     h_qcd_rb.Scale(1.0/h_qcd_rb.Integral(0,-1))
     h_data_rb.Scale(1.0/h_data_rb.Integral(0,-1))
+    h_mcall_rb.Scale(1.0/h_mcall_rb.Integral(0,-1))
+    h_datasub_rb.Scale(1.0/h_datasub_rb.Integral(0,-1))
 
     nbjbins = [0,1,2,3,6]
     nbjbins = np.array(nbjbins, dtype=float)
 
     h_qcd_rb = h_qcd_rb.Rebin(nbjbins.size-1, "h_qcd_rb", nbjbins)
     h_data_rb = h_data_rb.Rebin(nbjbins.size-1, "h_data_rb", nbjbins)
+    h_mcall_rb = h_mcall_rb.Rebin(nbjbins.size-1, "h_mcall_rb", nbjbins)
+    h_datasub_rb = h_datasub_rb.Rebin(nbjbins.size-1, "h_datasub_rb", nbjbins)
 
     tdir.cd()
     h_qcd_rb.Write()
     h_data_rb.Write()
-
-
-fout.Close()
-
+    h_mcall_rb.Write()
+    h_datasub_rb.Write()
 
 
