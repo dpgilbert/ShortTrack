@@ -1,7 +1,8 @@
 First run the QCDLooper to get necessary inputs.
 See `MT2Analysis/QCDLooper` directory for instructions.
 
-Edit `inputs.txt` with the following lines
+Edit `inputs.txt` with the following lines:
+
 1. Output directory of QCDLooper
 2. Output directory of MT2Looper
 
