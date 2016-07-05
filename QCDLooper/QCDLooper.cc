@@ -33,8 +33,10 @@ class SR;
 // turn on to apply json file to data
 bool applyJSON = true;
 
+const float lumi = 3.990;
+
 // input effective prescales for PFHT125, PFHT350, PFHT475
-double eff_prescales[3] = {2120., 245.2, 61.5};
+double eff_prescales[3] = {2564., 294.9, 73.9};
 
 //_______________________________________
 QCDLooper::QCDLooper(){
@@ -92,7 +94,7 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
 
   outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
 
-  const char* json_file = "../babymaker/jsons/Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_271036-274443_13TeV_PromptReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -167,9 +169,12 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
       // MET filters (data only)
       if (t.isData) {
 	if (!t.Flag_goodVertices) continue;
-	if (!t.Flag_CSCTightHaloFilter) continue;
+	if (!t.Flag_CSCTightHalo2015Filter) continue;
 	if (!t.Flag_eeBadScFilter) continue;
 	if (!t.Flag_HBHENoiseFilter) continue;
+        if (!t.Flag_HBHENoiseIsoFilter) continue;
+        if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+
       }
       if (!t.Flag_badChargedCandidateFilter) continue;
       
@@ -184,19 +189,22 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
       if(t.nJet30FailId!=0) continue;
       if(t.nJet30 < 2) continue;
 
-      //-------------------
-      // "spike rejection
-      //-------------------
-      int id = t.evt_id;
-      bool pass_spike = (id>150&&(id>151||t.ht<450)&&(id>152||t.ht<575)&&(id>153||t.ht<575)&&(id>154||t.ht<1000))||id>=200||id<100;
-      if(!pass_spike) continue;
-
+      // //-------------------
+      // // "spike rejection"
+      // //-------------------
+      // int id = t.evt_id;
+      // bool pass_spike = (id>150&&(id>151||t.ht<450)&&(id>152||t.ht<575)&&(id>153||t.ht<575)&&(id>154||t.ht<1000))||id>=200||id<100;
+      // if(!pass_spike) continue;
+      
+      //----------------------
+      // try pfmet/calomet cut
+      //----------------------
+      if(t.met_pt/t.met_caloPt >= 5) continue;
 
       //---------------------
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      const float lumi = 2.070;
       evtweight_ = 1.;
 
       // apply relevant weights to MC
@@ -280,6 +288,7 @@ void QCDLooper::fillHistosRphi(std::map<std::string, TH1*>& h_1d, const std::str
     }else{
         plot1D("h_mt2_den"+s,        t.mt2,   evtweight_*prescale, h_1d, ";M_{T2} [GeV]",300,0,1500);
     }
+    plot1D("h_pfmetOverCalomet"+s, t.met_pt/t.met_caloPt, evtweight_*prescale, h_1d, ";pfMet/caloMet",60,0,6);
     
     outfile_->cd();
     return;
