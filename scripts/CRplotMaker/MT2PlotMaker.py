@@ -96,14 +96,16 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
             
 
 
-def makeNormalizedLostLep(indir, lostlep_name="lostlepFromCRs", outdir='.', exts=['png','pdf']):
-    ## Takes the output from lostlepMaker.C and makes plots of CR yields
-    ## after MC is normalized in each HT, Nj, Nb bin separately
+def makeNormalizedLostLep(indir, samples, data, outdir='.', exts=['png','pdf']):
+    ## makes plots of lost lepton CR (crsl) yields after MC is normalized in
+    ## each HT, Njet, Nbjet bin separately. Makes 0b, 1b, inclusive plots
+    ## and puts in directory called "lostlep"
 
-    f_LL = ROOT.TFile(os.path.join(indir,lostlep_name+".root"), "READ")
+    fmc = [ROOT.TFile(os.path.join(indir,s+".root"), "READ") for s in samples]
+    fdata = ROOT.TFile(os.path.join(indir,data+".root"), "READ")
 
-    regions_0b = ["sr1","sr4","sr7"]
-    regions_ge1b = ["sr2","sr3","sr5","sr6","sr8","sr10"]
+    regions_0b = ["1","4","7"]
+    regions_ge1b = ["2","3","5","6","8","10"]
     regions_incl = regions_0b + regions_ge1b
     
     regions = [regions_0b, regions_ge1b, regions_incl]
@@ -112,6 +114,8 @@ def makeNormalizedLostLep(indir, lostlep_name="lostlepFromCRs", outdir='.', exts
     mt2bins = [200, 300, 400, 500, 600, 800, 1000, 1500]
     mt2bins = np.array(mt2bins, dtype=float)
 
+    bkg_names = [utils.GetSampleName(s) for s in samples]
+
     try:
         os.makedirs(os.path.join(outdir, "lostlep"))
     except:
@@ -119,18 +123,44 @@ def makeNormalizedLostLep(indir, lostlep_name="lostlepFromCRs", outdir='.', exts
 
     #loop over sets of regions (0b, >=1b, inclusive)
     for iregs,regs in enumerate(regions):
+        h_mt2_mc_cr_vec = [None for s in samples]
+        h_mt2_data_cr = None
         # loop over set of SRs within the given region
         for isr, sr in enumerate(regs):
             for ht_reg in ["VL","L","M","H","UH"]:
-                if isr == 0 and ht_reg == "VL":
-                    h_mt2_mc       = f_LL.Get("{0}{1}/h_mt2CRMCrescaled".format(sr,ht_reg)).Clone("h_mt2_mc")
-                    h_mt2_data     = f_LL.Get("{0}{1}/h_mt2CRyield".format(sr,ht_reg)).Clone("h_mt2_data")
-                else:
-                    h_mt2_mc.Add(      f_LL.Get("{0}{1}/h_mt2CRMCrescaled".format(sr,ht_reg)))
-                    h_mt2_data.Add(    f_LL.Get("{0}{1}/h_mt2CRyield".format(sr,ht_reg)))
+                
+                # get the data/mc CR yields
+                mc_cr_yield = 0.0
+                data_cr_yield = 0.0
+                for i in range(0,len(fmc)):
+                    mc_cr_yield += fmc[i].Get("crsl{0}{1}/h_mt2".format(sr,ht_reg)).Integral(0,-1)
+                # sometimes we get 0 data events in a CR bin, so handle appropriately
+                try:
+                    data_cr_yield += fdata.Get("crsl{0}{1}/h_mt2".format(sr,ht_reg)).Integral(0,-1)
+                except AttributeError:
+                    pass
 
-        h_mt2bins_mc = h_mt2_mc.Rebin(mt2bins.size-1, "h_mt2bins_mc", mt2bins)
-        h_mt2bins_data = h_mt2_data.Rebin(mt2bins.size-1, "h_mt2bins_data", mt2bins)
+                scalefactor = data_cr_yield/mc_cr_yield
+
+                # form the appropriately scaled histograms
+                for i in range(len(fmc)):
+                    if h_mt2_mc_cr_vec[i] == None:
+                        h_mt2_mc_cr_vec[i] = fmc[i].Get("crsl{0}{1}/h_mt2".format(sr,ht_reg)).Clone("h_mt2_mc_cr_"+str(i))
+                        h_mt2_mc_cr_vec[i].Scale(scalefactor)
+                    else:
+                        h_mt2_mc_cr_vec[i].Add(fmc[i].Get("crsl{0}{1}/h_mt2".format(sr,ht_reg)), scalefactor)
+
+                # again, somtimes 0 events in data CR
+                try:
+                    if h_mt2_data_cr == None:
+                        h_mt2_data_cr = fdata.Get("crsl{0}{1}/h_mt2".format(sr,ht_reg)).Clone("h_mt2_data_cr")
+                    else:
+                        h_mt2_data_cr.Add(fdata.Get("crsl{0}{1}/h_mt2".format(sr,ht_reg)))
+                except TypeError:
+                    pass
+
+        h_mt2bins_mc_vec = [h.Rebin(mt2bins.size-1, "h_mt2bins_mc_"+str(i), mt2bins) for h in h_mt2_mc_cr_vec]
+        h_mt2bins_data = h_mt2_data_cr.Rebin(mt2bins.size-1, "h_mt2bins_data", mt2bins)
 
         subtitles = ["#geq 2j, 1 lepton", "M_{T2} > 200 GeV"]
         if iregs==0:
@@ -140,8 +170,13 @@ def makeNormalizedLostLep(indir, lostlep_name="lostlepFromCRs", outdir='.', exts
             
         for ext in exts:
             saveAs = os.path.join(outdir, "lostlep", "lostlep_{0}_mt2bins.{1}".format(region_names[iregs],ext))
-            ppm.plotDataMC([h_mt2bins_mc], ["Lost Lepton"], h_mt2bins_data, doPause=False, xAxisTitle="M_{T2}",
+            ppm.plotDataMC(h_mt2bins_mc_vec, bkg_names, h_mt2bins_data, doPause=False, xAxisTitle="M_{T2}",
                            lumi=pd.lumi, lumiUnit=pd.lumiUnit, title=None, subtitles=subtitles, isLog=True,
                            saveAs=saveAs, scaleMCtoData=False, xAxisUnit="GeV", doSort=False, doMT2Colors=True,
-                           markerSize=1.0, subtitleSize=0.030, doBkgError=True, doOverflow=False)
+                           markerSize=1.0, subtitleSize=0.040, doBkgError=True, doOverflow=False,
+                           cmsTextSize=0.040)
+
+    for i in range(len(fmc)):
+        fmc[i].Close()
+    fdata.Close()
 

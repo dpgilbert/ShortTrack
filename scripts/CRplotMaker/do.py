@@ -67,6 +67,4 @@ MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016B", "crdybaseIncl",
 MT2PlotMaker(input_dir, ["qcd_ht", "wjets_ht", "zinv_ht"], "data_Run2016B", "crqcdbaseJ", pd.qcdJ_plots, output_dir, exts)
 
 # Lost Lepton MT2 plots, normalized in each HT, nj, nb bin
-# only make if we have run lostlepMaker.C and have the corresponding output
-if os.path.isfile(os.path.join(input_dir, "lostlepFromCRs.root")):
-    makeNormalizedLostLep(input_dir, outdir=output_dir, exts=exts)
+makeNormalizedLostLep(input_dir, ["wjets_ht", "top"], "data_Run2016B", output_dir, exts)
