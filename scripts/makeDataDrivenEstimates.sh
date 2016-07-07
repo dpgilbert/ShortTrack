@@ -2,25 +2,22 @@
 
 #INDIR=/home/users/jgran/limits_for_paper/MT2Analysis/MT2looper/output/V00-01-09_25ns_skim_base_mt2gt200_ZinvV3_2p2fb/
 #INDIR=/home/users/olivito/mt2_74x_dev/MT2Analysis/MT2looper/output/V00-01-07_25ns_miniaodv2_skim_base_1p26fb_mt2gt200_crqcd/
-INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/Bennett_V00-08-02_json_Cert_271036-274421_skim_base_mt2gt200_ZinvV4/
+#INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/Bennett_V00-08-02_json_Cert_271036-274421_skim_base_mt2gt200_ZinvV4/
+INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V00-08-02_nojson_skim_base_mt2gt200_ZinvV4
 THISDIR=`pwd`
 
 ## to use data for lostlepton
 LOSTLEPFILE=data_Run2016
-#LOSTLEPFILE=data_Run2015D
 ## to use MC for lostlepton
 #LOSTLEPFILE=lostlep
 
 GJETFILE=data_Run2016
-#GJETFILE=data_Run2015D
 #GJETFILE=qcdplusgjet
 
 RLFILE=data_Run2016
-#RLFILE=data_Run2015D
 #RLFILE=removedlep
 
 QCDFILE=data_Run2016
-#QCDFILE=data_Run2015D
 #QCDFILE=qcd_ht
 
 if [ ! -d "$INDIR" ]; then
@@ -56,8 +53,8 @@ root -b -q "lostlepMaker.C+(\"${INDIR}\",\"${LOSTLEPFILE}\")" >> dataDrivenEstim
 echo "root -b -q ZinvMaker.C+(${INDIR})"
 root -b -q "ZinvMaker.C+(\"${INDIR}\")" >> dataDrivenEstimates.log
 cd $INDIR
-echo "hadd qcdplusgjet.root gjets_ht.root qcd_ht.root"
-hadd -f qcdplusgjet.root gjets_ht.root qcd_ht.root  >> $THISDIR/dataDrivenEstimates.log
+echo "hadd qcdplusgjet.root 2015gjets_ht.root 2015qcd_ht.root"
+hadd -f qcdplusgjet.root 2015gjets_ht.root 2015qcd_ht.root  >> $THISDIR/dataDrivenEstimates.log
 echo "hadd CRRLbkg.root ttsl.root ttdl.root singletop.root" # should probably include QCD here
 hadd -f CRRLbkg.root ttsl.root ttdl.root singletop.root  >> $THISDIR/dataDrivenEstimates.log
 hadd -f removedlep.root wjets_ht.root CRRLbkg.root >> $THISDIR/dataDrivenEstimates.log

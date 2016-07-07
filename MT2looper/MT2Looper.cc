@@ -103,6 +103,8 @@ bool doLepEffVars = false;
 // make only minimal hists needed for results
 bool doMinimalPlots = false;
 
+TString stringsample;
+
 MT2Looper::MT2Looper(){
 
 }
@@ -519,7 +521,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   }
 
   eventFilter metFilterTxt;
-  TString stringsample = sample;
+  stringsample = sample;
   if (stringsample.Contains("data")) {
     cout<<"Loading bad event files ..."<<endl;
     // updated lists for full dataset
@@ -660,6 +662,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       
       t.GetEntry(event);
 
+      //if (verbose && t.evt!=351710276) continue; 
+
       //---------------------
       // bookkeeping and progress report
       //---------------------
@@ -731,7 +735,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (t.evt_id >= 100 && t.evt_id < 109) continue;
       // remove low HT QCD samples 
       if (t.evt_id >= 120 && t.evt_id < 123) continue;
-      if (t.evt_id >= 151 && t.evt_id < 154) continue;
+      int maxQCD = 154;
+      if (  stringsample.Contains("2015") ) maxQCD = 153; // For photon purity, include a lower HT bin
+      if (t.evt_id >= 151 && t.evt_id < maxQCD) continue;
 
       // flag signal samples
       if (t.evt_id >= 1000) isSignal_ = true;
@@ -890,6 +896,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       } // for 1L control region
 
       // Variables for gamma+jets control region
+      if ( stringsample.Contains("gjet") ) t.evt_id = 201; //protection for samples with broken evt_id
+
       bool doGJplots = false;
       if (t.ngamma > 0) {
 	if (t.isData) {
@@ -982,7 +990,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  //  if (t.evt_id < 200 && t.gamma_drMinParton[0]<0.05) fillHistosCRGJ("crgj", "FragGJ");
 	  //}
 	  //// End of Madgraph fragmentation tests //
-	  
 	  if ( t.gamma_mcMatchId[0] > 0 || t.isData) fillHistosCRGJ("crgj"); // Prompt photon 
 	  else fillHistosCRGJ("crgj", "Fake");
 	}
@@ -1415,7 +1422,7 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   if (t.ngamma==0) return;
 
   // trigger requirement
-  if (t.isData && !t.HLT_Photon165_HE10) return;
+  if ( ( t.isData || stringsample.Contains("2015")) && !t.HLT_Photon165_HE10) return;
   
   bool passSieie = t.gamma_idCutBased[0] ? true : false; // just deal with the standard case now. Worry later about sideband in sieie
 
@@ -1472,7 +1479,7 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   //float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
   float iso = t.gamma_chHadIso[0];
   float isoCutTight = 2.5;
-  float isoCutLoose = 20.;
+  float isoCutLoose = 10.;
   if (t.gamma_ht > 200) fillHistosGammaJets(SRNoCut.crgjHistMap, SRNoCut.crgjRooDataSetMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), prefix+SRNoCut.GetName(), suffix+add+"All");
 
   if (iso>isoCutTight && iso < isoCutLoose) add += "LooseNotTight";
@@ -2077,8 +2084,12 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
   //bins for FR
   const int n_FRhtbins = 6;
   const int n_FRptbins = 5;
+  const int n_FRptbinsOne = 1;
+  const int n_FRetabins = 2;
   const float FRhtbins[n_FRhtbins+1] = {0,200,450,1000,1500,2000,3000};
   const float FRptbins[n_FRptbins+1] = {0,150,300,450,600,1500};
+  const float FRptbinsOne[n_FRptbinsOne+1] = {0,1500};
+  const float FRetabins[n_FRetabins+1] = {0, 1.479, 2.5};
 
   float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
   float chiso = t.gamma_chHadIso[0];
@@ -2106,14 +2117,11 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
 
   //for FR calculation
   //if( (t.evt_id>110 && t.evt_id<120) || t.isData){ //only use qcd samples with pt>=470 to compute FR
-  if(t.gamma_idCutBased[0]){ //passSieie
     plot2D("h2d_gammaht_gammapt"+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",n_FRhtbins,FRhtbins,n_FRptbins,FRptbins);
-    plot2D("h2d_gammaht_gammaptW1"+s, t.gamma_ht, t.gamma_pt[0], 1, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",n_FRhtbins,FRhtbins,n_FRptbins,FRptbins);
-  }
-  if(!t.gamma_idCutBased[0]){ //!passSieie
+    //plot2D("h2d_gammaht_gammaptW1"+s, t.gamma_ht, t.gamma_pt[0], 1, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",n_FRhtbins,FRhtbins,n_FRptbins,FRptbins);
     plot2D("h2d_gammaht_gammaptSingleBin"+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",1,0,3000,1,0,1500);
-    plot2D("h2d_gammaht_gammaptSingleBinW1"+s, t.gamma_ht, t.gamma_pt[0], 1, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",1,0,3000,1,0,1500);
-  }
+    //plot2D("h2d_gammaht_gammaptSingleBinW1"+s, t.gamma_ht, t.gamma_pt[0], 1, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",1,0,3000,1,0,1500);
+    plot2D("h2d_gammaht_gammaptDoubleBin"+s, fabs(t.gamma_eta[0]), t.gamma_pt[0], evtweight_, h_1d, ";gamma eta;gamma p_{T} [GeV]",n_FRetabins, FRetabins,n_FRptbinsOne,FRptbinsOne);
   //  }
     float gamma_mt2_temp = t.gamma_mt2;
   // workaround for monojet bins
@@ -2133,7 +2141,7 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
   for (int i = 0; i < n_mt2bins; i++) {
     if ( gamma_mt2_temp > mt2bins[i] &&  gamma_mt2_temp < mt2bins[i+1]) {
       plotRooDataSet("rds_chIso_"+toString(mt2bins[i])+s, x_, w_, evtweight_, datasets, "");
-      plot1D("h_chiso_mt2bin"+toString(mt2bins[i])+s,  iso,  evtweight_, h_1d, "; iso", 100, 0, 50);
+      //plot1D("h_chiso_mt2bin"+toString(mt2bins[i])+s,  iso,  evtweight_, h_1d, "; iso", 100, 0, 50);
       plot2D("h2d_gammaht_gammapt"+toString(mt2bins[i])+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",n_FRhtbins,FRhtbins,n_FRptbins,FRptbins);
       //plot2D("h2d_gammaht_gammaptW1"+toString(mt2bins[i])+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",n_FRhtbins,FRhtbins,n_FRptbins,FRptbins);	
       plot2D("h2d_gammaht_gammaptSingleBin"+toString(mt2bins[i])+s, t.gamma_ht, t.gamma_pt[0], evtweight_, h_1d, ";H_{T} [GeV];gamma p_{T} [GeV]",1,0,3000,1,0,1500);
@@ -2225,7 +2233,7 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     plot1D("h_nlepveto"+s,     t.nLepLowMT,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
     plot1D("h_htbins"+s,       t.zll_ht,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins, htbins);
     plot1D("h_htbins2"+s,       t.zll_ht,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins2, htbins2);
-    if (t.nJet30>7) cout<<"event "<<t.evt<<" in run "<<t.run<<" has njets "<<t.nJet30<<" and ht "<<t.zll_ht<<endl;
+    //    if (t.nJet30>7) cout<<"event "<<t.evt<<" in run "<<t.run<<" has njets "<<t.nJet30<<" and ht "<<t.zll_ht<<endl;
     plot1D("h_njbins"+s,       t.nJet30,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
     plot1D("h_nbjbins"+s,       t.nBJet20,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
     plot1D("h_leppt1"+s,      t.lep_pt[0],   evtweight_, h_1d, ";p_{T}(lep1) [GeV]", 50, 0, 200);
