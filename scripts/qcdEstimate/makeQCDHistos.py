@@ -18,7 +18,7 @@ except:
     pass
 
 qcd_sample = "qcd_ht"
-nqcd_samples = ["wjets_ht","top", "dyjetsll_ht", "zinv_ht", "gjets_dr0p05_ht"]
+nqcd_samples = ["nonqcd"]
 data_sample = "data_Run2016B"
 
 ht_reg_names = ["ht200to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf"]
@@ -202,6 +202,12 @@ for reg in ht_reg_names:
     h_mcall_fj = h_mcall_fj.Rebin(njbins.size-1, "h_mcall_fj", njbins)
     h_datasub_fj = h_datasub_fj.Rebin(njbins.size-1, "h_datasub_fj", njbins)
 
+    hists = [h_qcd_fj, h_data_fj, h_mcall_fj, h_datasub_fj]
+    for h in hists:
+        h.SetBinError(1, ROOT.TMath.Sqrt(h.GetBinError(1)**2 + (0.25*h.GetBinContent(1))**2))
+        h.SetBinError(2, ROOT.TMath.Sqrt(h.GetBinError(2)**2 + (0.07*h.GetBinContent(2))**2))
+        h.SetBinError(3, ROOT.TMath.Sqrt(h.GetBinError(3)**2 + (0.20*h.GetBinContent(3))**2))
+
     tdir.cd()
     h_qcd_fj.Write()
     h_data_fj.Write()
@@ -269,6 +275,13 @@ for reg in nj_reg_names:
     h_data_rb = h_data_rb.Rebin(nbjbins.size-1, "h_data_rb", nbjbins)
     h_mcall_rb = h_mcall_rb.Rebin(nbjbins.size-1, "h_mcall_rb", nbjbins)
     h_datasub_rb = h_datasub_rb.Rebin(nbjbins.size-1, "h_datasub_rb", nbjbins)
+
+    hists = [h_qcd_rb, h_data_rb, h_mcall_rb, h_datasub_rb]
+    for h in hists:
+        h.SetBinError(1, ROOT.TMath.Sqrt(h.GetBinError(1)**2 + (0.08*h.GetBinContent(1))**2))
+        h.SetBinError(2, ROOT.TMath.Sqrt(h.GetBinError(2)**2 + (0.20*h.GetBinContent(2))**2))
+        h.SetBinError(3, ROOT.TMath.Sqrt(h.GetBinError(3)**2 + (0.35*h.GetBinContent(3))**2))
+        h.SetBinError(4, ROOT.TMath.Sqrt(h.GetBinError(4)**2 + (0.70*h.GetBinContent(4))**2))
 
     tdir.cd()
     h_qcd_rb.Write()

@@ -17,6 +17,7 @@ def makeRbPlot(h_mc, h_data, nj_reg, outfile):
     c.SetLeftMargin(0.12)
     c.SetTopMargin(0.08)
     c.SetLogy(1)
+    c.SetTicky(1)
 
     h_mc.SetLineColor(ROOT.kRed+1)
     h_mc.SetLineWidth(2)
@@ -66,6 +67,7 @@ def makeFjPlot(h_mc, h_data, ht_reg, outfile):
     c = ROOT.TCanvas("c1","c1",600,650)
     c.SetLeftMargin(0.12)
     c.SetTopMargin(0.08)
+    c.SetTicky(1)
 
     h_mc.SetLineColor(ROOT.kRed+1)
     h_mc.SetLineWidth(2)
@@ -121,6 +123,7 @@ def makeRphiPlot(h_all, h_qcd, fit, ht_reg, isData, outfile):
     c.SetLogy(1)
     c.SetLeftMargin(0.12)
     c.SetTopMargin(0.08)
+    c.SetTicky(1)
     
     h_qcd.SetMarkerStyle(24)
     h_qcd.SetLineColor(ROOT.kBlack)
