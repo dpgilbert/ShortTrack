@@ -1704,7 +1704,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
 
           // use pt20 for bjet counting, pt30 for everything else
-          if( (jet_pt[njet] > 20.0) && (fabs(jet_eta[njet]) < 2.5) ){ 
+          if( (jet_pt[njet] > 20.0) && (fabs(jet_eta[njet]) < 2.4) ){ 
             if (jet_pt[njet] > 30.0) {
               // store leading/subleading central jet pt.
               //  jets should be pt-ordered before entering this loop
@@ -1817,7 +1817,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
                 btagprob_err_heavy_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
               }
             } // fail med btag
-          } // pt 20 eta 2.5
+          } // pt 20 eta 2.4
           // accept jets out to eta 4.7 for dphi
           else if ( (jet_pt[njet] > 30.0) && (fabs(jet_eta[njet]) < 4.7) ) {
             p4sForDphi.push_back(p4sCorrJets.at(iJet));
@@ -1827,7 +1827,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           }
 
           // fill gamma_XXX variables before checking for lepton overlap. Why? Let's keep them consistent with the lepton-overlapped jets
-          if( ( p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ) { 
+          if( ( p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.4) ) { 
             if(!isOverlapJetGamma) {
               if (p4sCorrJets.at(iJet).pt() > 30.0) {
                 // store leading/subleading central jet pt.
@@ -1854,7 +1854,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
                 } // pt30
               } // pass med btag  
             } // not overlap with photon
-          } // pt 20 eta 2.5 
+          } // pt 20 eta 2.4 
           // accept jets out to eta 4.7 for dphi
           else if ( (p4sCorrJets.at(iJet).pt() > 30.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {
             //check against list of jets that overlap with a photon
@@ -2087,7 +2087,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         vector<LorentzVector> goodGenJets;
         for(unsigned int iGenJet=0; iGenJet < cms3.genjets_p4NoMuNoNu().size(); iGenJet++){
           if(cms3.genjets_p4NoMuNoNu().at(iGenJet).pt() < 30.0) continue;
-          if(fabs(cms3.genjets_p4NoMuNoNu().at(iGenJet).eta()) > 2.5) continue;
+          if(fabs(cms3.genjets_p4NoMuNoNu().at(iGenJet).eta()) > 2.4) continue;
           goodGenJets.push_back(cms3.genjets_p4NoMuNoNu().at(iGenJet));
         }
         if(goodGenJets.size() > 1){
