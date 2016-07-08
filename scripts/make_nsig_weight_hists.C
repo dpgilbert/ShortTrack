@@ -11,13 +11,13 @@ void make_nsig_weight_hists(TString dir, TString sample) {
 
   TFile* fout = new TFile(Form("nsig_weights_%s.root",sample.Data()),"RECREATE");
 
-  // default: 25 GeV binning, m1 from 0-2000, m2 from 0-1600
-  int x_nbins = 81;
+  // default: 25 GeV binning, m1 from 0-2500, m2 from 0-2100
+  int x_nbins = 101;
   float x_min = -12.5;
-  float x_max = 2012.5;
-  int y_nbins = 65;
+  float x_max = 2512.5;
+  int y_nbins = 85;
   float y_min = -12.5;
-  float y_max = 1612.5;
+  float y_max = 2112.5;
 
   // for T2cc: 25 GeV in x, 5 GeV in y binning, m1 from 0-2000, m2 from 0-1000
   if (sample.Contains("T2cc")) {
