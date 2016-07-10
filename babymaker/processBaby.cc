@@ -165,30 +165,18 @@ int main(int argc, char **argv) {
   else if (infile.Contains("Run2015D"))                                      sample = Form("data_Run2015D_%s",  outfileid.Data());
   else if (infile.Contains("Run2016B") && infile.Contains("PromptReco"))     sample = Form("data_Run2016B_PromptReco_%s",  outfileid.Data());
   else if (infile.Contains("Run2016B"))                                      sample = Form("data_Run2016B_%s",  outfileid.Data());
+  else if (infile.Contains("Run2016C") && infile.Contains("PromptReco"))     sample = Form("data_Run2016C_PromptReco_%s",  outfileid.Data());
+  else if (infile.Contains("Run2016C"))                                      sample = Form("data_Run2016C_%s",  outfileid.Data());
+  else if (infile.Contains("Run2016D") && infile.Contains("PromptReco"))     sample = Form("data_Run2016D_PromptReco_%s",  outfileid.Data());
+  else if (infile.Contains("Run2016D"))                                      sample = Form("data_Run2016D_%s",  outfileid.Data());
   //otherwise
   else sample = Form("unknown_%s", outfileid.Data());
 
   std::cout<<"sample is "<<sample<<std::endl;
 
-  // get bx value (for JEC etc)
-  int bx = 0;
-  if (infile.Contains("Run2015B")) bx = 50;
-  else if (infile.Contains("Run2015C")) bx = 25; // will need to account for the 50ns run somehow..
-  else if (infile.Contains("Run2015D")) bx = 25; 
-  else if (infile.Contains("Run2016B")) bx = 25; 
-  else if (infile.Contains("50ns")) bx = 50;
-  else if (infile.Contains("25ns")) bx = 25;
-  else if (infile.Contains("FSPremix")) bx = 25;
-
   bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns") || infile.Contains("Spring16Fast"));
 
   bool isBadMiniAodV1 = bool(infile.Contains("V07-04-12_miniaodv1_FS"));
-  
-  if (bx == 0) {
-    std::cout << "ERROR: couldn't figure out bx for sample!! filename was: " << infile << ". Exiting" << std::endl;
-    return 3;
-  }
-  else std::cout << "found bx value: " << bx << std::endl;
   
   //--------------------------------
   // run
@@ -196,6 +184,6 @@ int main(int argc, char **argv) {
   
   babyMaker *looper = new babyMaker();
   if (isBadMiniAodV1) looper->SetRecomputeRawPFMET(true);
-  looper->ScanChain(chain, sample, bx, isFastsim); 
+  looper->ScanChain(chain, sample, isFastsim); 
   return 0;
 }
