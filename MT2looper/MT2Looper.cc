@@ -706,23 +706,22 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // MET filters (first 2 only in data)
       if (t.isData) {
+	if (!t.Flag_goodVertices) continue;
 	if (!t.Flag_globalTightHalo2016Filter) continue; 
+	if (verbose) cout<<__LINE__<<endl;
+	if (!t.Flag_eeBadScFilter) continue; 
+	if (verbose) cout<<__LINE__<<endl;
+	if (!t.Flag_HBHENoiseFilter) continue;
+	if (verbose) cout<<__LINE__<<endl;
+	if (!t.Flag_HBHENoiseIsoFilter) continue;
+	if (verbose) cout<<__LINE__<<endl;
+	if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
 	if (verbose) cout<<__LINE__<<endl;
 	if (!t.Flag_badMuonFilter) continue;
 	if (verbose) cout<<__LINE__<<endl;
+	if (!t.Flag_badChargedHadronFilter) continue;
+	if (verbose) cout<<__LINE__<<endl;
       }
-      if (!t.Flag_goodVertices) continue;
-      if (verbose) cout<<__LINE__<<endl;
-      if (!t.Flag_eeBadScFilter) continue; // txt files are in addition to this flag
-      if (verbose) cout<<__LINE__<<endl;
-      if (!t.Flag_HBHENoiseFilter) continue;
-      if (verbose) cout<<__LINE__<<endl;
-      if (!t.Flag_HBHENoiseIsoFilter) continue;
-      if (verbose) cout<<__LINE__<<endl;
-      if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
-      if (verbose) cout<<__LINE__<<endl;
-      if(!t.Flag_badChargedHadronFilter) continue;
-      if (verbose) cout<<__LINE__<<endl;
 
       // txt MET filters (data only)
       if (t.isData && metFilterTxt.eventFails(t.run, t.lumi, t.evt)) {
@@ -765,7 +764,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //      const float lumi = 1.264;
       //      const float lumi = 2.11;
       //const float lumi = 2.155;
-      const float lumi = 5.9;
+      const float lumi = 7.65;
     
       evtweight_ = 1.;
 
