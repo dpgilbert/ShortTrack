@@ -7,11 +7,13 @@ ROOT.gROOT.SetBatch(1)
 from MT2PlotMaker import *
 import MT2PlotDefs as pd
 
-pd.lumi = 4.0
+pd.lumi = 5.9
 pd.lumiUnit = "fb"
 
-## 3.99/fb
-input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-02_nojson_skim_base_mt2gt200_ZinvV4_3p99fb"
+## 5.9/fb
+input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-04_MiniAODv2_nojson_skim_base_mt2gt200_ZinvV4_5p9fb"
+## 4.0/fb
+# input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-02_nojson_skim_base_mt2gt200_ZinvV4_3p99fb"
 ## 2.6/fb
 # input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-02_nojson_skim_base_mt2gt200_ZinvV4_2p6fb"
 ## 2.1/fb
@@ -21,7 +23,7 @@ input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/outp
 ## 589/pb
 #input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4"
 
-output_dir = "crplots/crplots3990"
+output_dir = "crplots/crplots_5p9fb"
 
 exts = ["pdf","png"]
 

@@ -156,7 +156,7 @@ def makeNormalizedLostLep(indir, samples, data, outdir='.', exts=['png','pdf']):
                         h_mt2_data_cr = fdata.Get("crsl{0}{1}/h_mt2".format(sr,ht_reg)).Clone("h_mt2_data_cr")
                     else:
                         h_mt2_data_cr.Add(fdata.Get("crsl{0}{1}/h_mt2".format(sr,ht_reg)))
-                except TypeError:
+                except (TypeError, AttributeError):
                     pass
 
         h_mt2bins_mc_vec = [h.Rebin(mt2bins.size-1, "h_mt2bins_mc_"+str(i), mt2bins) for h in h_mt2_mc_cr_vec]
