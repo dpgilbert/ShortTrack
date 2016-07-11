@@ -23,7 +23,7 @@ const int iPeriod = 4; // 13 tev
 //   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
 const int iPos = 3;
 
-void plot_trigeff_Photon165 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-02_json_Cert_271036-274421/") {
+void plot_trigeff_Photon165_purity (const TString& indir = "/nfs-6/userdata/mt2/V00-08-02_json_Cert_271036-274421/") {
 
   cmsText = "CMS Preliminary";
   cmsTextSize = 0.5;
@@ -39,8 +39,7 @@ void plot_trigeff_Photon165 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-
 
   TH1::SetDefaultSumw2();
 
-  //TString suffix = "_hovere001";
-  TString suffix = "_zmet2016";
+  TString suffix = "_purity";
   //  TString suffix = "";
   
   TChain* t_jetht = new TChain("mt2");
@@ -58,17 +57,33 @@ void plot_trigeff_Photon165 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-
 				    400, 450, 500, 550, 600, 700, 800, 1000};
   
   TH1D* h_pt_denom_jetht = new TH1D("h_pt_denom_jetht",";#gamma p_{T} [GeV]",n_ptbins,ptbins);
+  TH1D* h_pt_denom_failiso_jetht = (TH1D*) h_pt_denom_jetht->Clone("h_pt_denom_failiso_jetht");
+  TH1D* h_pt_denom_cor_jetht = (TH1D*) h_pt_denom_jetht->Clone("h_pt_denom_cor_jetht");
   TH1D* h_pt_num_jetht = (TH1D*) h_pt_denom_jetht->Clone("h_pt_num_jetht");
+  TH1D* h_pt_num_failiso_jetht = (TH1D*) h_pt_num_jetht->Clone("h_pt_num_failiso_jetht");
+  TH1D* h_pt_num_cor_jetht = (TH1D*) h_pt_num_jetht->Clone("h_pt_num_cor_jetht");
+  
   TH1D* h_pt_eb_denom_jetht = (TH1D*) h_pt_denom_jetht->Clone("h_pt_eb_denom_jetht");
+  TH1D* h_pt_eb_denom_failiso_jetht = (TH1D*) h_pt_denom_jetht->Clone("h_pt_eb_denom_failiso_jetht");
+  TH1D* h_pt_eb_denom_cor_jetht = (TH1D*) h_pt_denom_jetht->Clone("h_pt_eb_denom_cor_jetht");
   TH1D* h_pt_eb_num_jetht = (TH1D*) h_pt_num_jetht->Clone("h_pt_eb_num_jetht");
+  TH1D* h_pt_eb_num_failiso_jetht = (TH1D*) h_pt_num_jetht->Clone("h_pt_eb_num_failiso_jetht");
+  TH1D* h_pt_eb_num_cor_jetht = (TH1D*) h_pt_num_jetht->Clone("h_pt_eb_num_cor_jetht");
+  
   TH1D* h_pt_ee_denom_jetht = (TH1D*) h_pt_denom_jetht->Clone("h_pt_ee_denom_jetht");
+  TH1D* h_pt_ee_denom_failiso_jetht = (TH1D*) h_pt_denom_jetht->Clone("h_pt_ee_denom_failiso_jetht");
+  TH1D* h_pt_ee_denom_cor_jetht = (TH1D*) h_pt_denom_jetht->Clone("h_pt_ee_denom_cor_jetht");
   TH1D* h_pt_ee_num_jetht = (TH1D*) h_pt_num_jetht->Clone("h_pt_ee_num_jetht");
+  TH1D* h_pt_ee_num_failiso_jetht = (TH1D*) h_pt_num_jetht->Clone("h_pt_ee_num_failiso_jetht");
+  TH1D* h_pt_ee_num_cor_jetht = (TH1D*) h_pt_num_jetht->Clone("h_pt_ee_num_cor_jetht");
 
   TCanvas* c = new TCanvas("c","c");
   c->SetGrid(1,1);
   c->cd();
 
-  TCut base = "nVert > 0 && Flag_CSCTightHalo2015Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && ngamma > 0 && gamma_idCutBased[0] > 0 && gamma_chHadIso[0] < 2.5 ";
+  TCut base = "nVert > 0 && Flag_CSCTightHalo2015Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && ngamma > 0 && gamma_idCutBased[0] > 0";
+  TCut passiso = "gamma_chHadIso[0] < 2.5";
+  TCut failiso = "gamma_chHadIso[0] > 2.5 && gamma_chHadIso[0] < 10.";
   //  TCut base = "nVert > 0 && Flag_CSCTightHalo2015Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && ngamma > 0 && gamma_idCutBased[0] > 0 && gamma_chHadIso[0] < 2.5 && gamma_hOverE[0] < 0.01 ";
   // -- cuts for ZMET 2016, or as close as I can get..
   //  TCut base = "nVert > 0 && Flag_CSCTightHalo2015Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && nElectrons10 == 0 && ngamma > 0 && gamma_idCutBased[0] > 0 && ( (fabs(gamma_eta[0]) < 1.442 && gamma_chHadIso[0] < 3.32 && (gamma_neuHadIso[0] < 1.92 + 0.014  * gamma_pt[0] + 0.000019*pow(gamma_pt[0],2)) && gamma_phIso[0] < 0.81 + 0.0053 * gamma_pt[0]) || ((fabs(gamma_eta[0]) > 1.566 && fabs(gamma_eta[0]) < 2.4 && gamma_chHadIso[0] < 1.97 && (gamma_neuHadIso[0] < 11.86 + 0.0139  * gamma_pt[0] + 0.000025*pow(gamma_pt[0],2)) && gamma_phIso[0] < 0.83 + 0.0034 * gamma_pt[0]) ) ) ";
@@ -78,29 +93,45 @@ void plot_trigeff_Photon165 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-
   //  TCut had = base + "ht > 900";
   TCut muon = base + "nMuons10 > 0 && abs(lep_pdgId[0]) == 13 && lep_pt[0] > 25.";
 
-  t_jetht->Draw("gamma_pt[0]>>h_pt_denom_jetht",had);
-  t_jetht->Draw("gamma_pt[0]>>h_pt_num_jetht",had+"HLT_Photon165_HE10");
-  t_jetht->Draw("gamma_pt[0]>>h_pt_eb_denom_jetht",had+eb);
-  t_jetht->Draw("gamma_pt[0]>>h_pt_eb_num_jetht",had+eb+"HLT_Photon165_HE10");
-  t_jetht->Draw("gamma_pt[0]>>h_pt_ee_denom_jetht",had+ee);
-  t_jetht->Draw("gamma_pt[0]>>h_pt_ee_num_jetht",had+ee+"HLT_Photon165_HE10");
+  t_jetht->Draw("gamma_pt[0]>>h_pt_denom_jetht",had+passiso);
+  t_jetht->Draw("gamma_pt[0]>>h_pt_denom_failiso_jetht",had+failiso);
+  t_jetht->Draw("gamma_pt[0]>>h_pt_num_jetht",had+passiso+"HLT_Photon165_HE10");
+  t_jetht->Draw("gamma_pt[0]>>h_pt_num_failiso_jetht",had+failiso+"HLT_Photon165_HE10");
+  
+  t_jetht->Draw("gamma_pt[0]>>h_pt_eb_denom_jetht",had+passiso+eb);
+  t_jetht->Draw("gamma_pt[0]>>h_pt_eb_denom_failiso_jetht",had+failiso+eb);
+  t_jetht->Draw("gamma_pt[0]>>h_pt_eb_num_jetht",had+passiso+eb+"HLT_Photon165_HE10");
+  t_jetht->Draw("gamma_pt[0]>>h_pt_eb_num_failiso_jetht",had+failiso+eb+"HLT_Photon165_HE10");
+  
+  t_jetht->Draw("gamma_pt[0]>>h_pt_ee_denom_jetht",had+passiso+ee);
+  t_jetht->Draw("gamma_pt[0]>>h_pt_ee_denom_failiso_jetht",had+failiso+ee);
+  t_jetht->Draw("gamma_pt[0]>>h_pt_ee_num_jetht",had+passiso+ee+"HLT_Photon165_HE10");
+  t_jetht->Draw("gamma_pt[0]>>h_pt_ee_num_failiso_jetht",had+failiso+ee+"HLT_Photon165_HE10");
 
   TH2F* h_axis = new TH2F("h_axis",";#gamma p_{T} [GeV];Efficiency of HLT_Photon165_HE10",45,100,1000,20,0,1);
   //TH2F* h_axis = new TH2F("h_axis",";H_{T} [GeV];Efficiency of HLT_PFJETHT",38,600,2500,20,0,1);
   h_axis->GetYaxis()->SetTitleOffset(0.98);
   h_axis->Draw();
+
+  // use (fake rate * failiso) to correct for purity
+  h_pt_denom_cor_jetht->Add(h_pt_denom_jetht,h_pt_denom_failiso_jetht,1.,-0.48);
+  h_pt_num_cor_jetht->Add(h_pt_num_jetht,h_pt_num_failiso_jetht,1.,-0.48);
+  h_pt_eb_denom_cor_jetht->Add(h_pt_eb_denom_jetht,h_pt_eb_denom_failiso_jetht,1.,-0.45);
+  h_pt_eb_num_cor_jetht->Add(h_pt_eb_num_jetht,h_pt_eb_num_failiso_jetht,1.,-0.45);
+  h_pt_ee_denom_cor_jetht->Add(h_pt_ee_denom_jetht,h_pt_ee_denom_failiso_jetht,1.,-0.72);
+  h_pt_ee_num_cor_jetht->Add(h_pt_ee_num_jetht,h_pt_ee_num_failiso_jetht,1.,-0.72);
   
-  TEfficiency* h_pt_eff_jetht = new TEfficiency(*h_pt_num_jetht, *h_pt_denom_jetht);
+  TEfficiency* h_pt_eff_jetht = new TEfficiency(*h_pt_num_cor_jetht, *h_pt_denom_cor_jetht);
   h_pt_eff_jetht->SetName("h_pt_eff_jetht");
   h_pt_eff_jetht->SetLineColor(kRed);
   h_pt_eff_jetht->SetMarkerColor(kRed);
 
-  TEfficiency* h_pt_eb_eff_jetht = new TEfficiency(*h_pt_eb_num_jetht, *h_pt_eb_denom_jetht);
+  TEfficiency* h_pt_eb_eff_jetht = new TEfficiency(*h_pt_eb_num_cor_jetht, *h_pt_eb_denom_cor_jetht);
   h_pt_eb_eff_jetht->SetName("h_pt_eb_eff_jetht");
   h_pt_eb_eff_jetht->SetLineColor(kRed);
   h_pt_eb_eff_jetht->SetMarkerColor(kRed);
 
-  TEfficiency* h_pt_ee_eff_jetht = new TEfficiency(*h_pt_ee_num_jetht, *h_pt_ee_denom_jetht);
+  TEfficiency* h_pt_ee_eff_jetht = new TEfficiency(*h_pt_ee_num_cor_jetht, *h_pt_ee_denom_cor_jetht);
   h_pt_ee_eff_jetht->SetName("h_pt_ee_eff_jetht");
   h_pt_ee_eff_jetht->SetLineColor(kRed);
   h_pt_ee_eff_jetht->SetMarkerColor(kRed);
