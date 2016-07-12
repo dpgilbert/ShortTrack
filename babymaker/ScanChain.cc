@@ -56,7 +56,7 @@ const int applyJECunc = 0;
 // change to do unclustered energy uncertainty MET variations. 0 = DEFAULT, 1 = UP, -1 = DN
 const int applyUnclusteredUnc = 0;
 // turn on to apply btag SFs (default true)
-const bool applyBtagSFs = false;
+const bool applyBtagSFs = true;
 // turn on to recompute type1 MET using JECs from file (default true)
 const bool recomputeT1MET = true;
 // turn on to save prunedGenParticle collection (default false)
@@ -129,15 +129,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
 
   if (applyBtagSFs) {
     // setup btag calibration readers
-    calib = new BTagCalibration("cmvav2", "btagsf/cMVAv2.csv"); // 76X version
-    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation76X
-    // the twiki above says "to be used only in ttbar jet pT regime". So these scale factors are probably not the final ones for us
-    reader_heavy = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "ttbar", "central"); // central
-    reader_heavy_UP = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "ttbar", "up");  // sys up
-    reader_heavy_DN = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "ttbar", "down");  // sys down
-    reader_light = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "central");  // central
-    reader_light_UP = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "up");  // sys up
-    reader_light_DN = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "down");  // sys down
+    calib = new BTagCalibration("csvv2", "btagsf/CSVv2_4invfb.csv"); // 80X 4/fb version
+    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80X
+    reader_heavy = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "central"); // central
+    reader_heavy_UP = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "up");  // sys up
+    reader_heavy_DN = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "down");  // sys down
+    reader_light = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "incl", "central");  // central
+    reader_light_UP = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "incl", "up");  // sys up
+    reader_light_DN = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "incl", "down");  // sys down
 
     // get btag efficiencies
     TFile* f_btag_eff = new TFile("btagsf/btageff__ttbar_powheg_pythia8_25ns.root");
