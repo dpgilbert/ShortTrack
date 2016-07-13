@@ -5,7 +5,7 @@ function run () {
     nohup nice -n 19 root -b -q mergeHadoopFiles.C\(\"${HADOOPDIR}/${TAG}_$1/\",\"${OUTPUTDIR}/$1.root\"\) >& ${LOGDIR}/log_merge_${TAG}_$1.txt &
 }
 
-TAG=V00-08-03_MiniAODv2_nojson
+TAG=V00-08-05_nojson
 
 HADOOPDIR=/hadoop/cms/store/user/${USER}/mt2babies/
 OUTPUTDIR=/nfs-6/userdata/mt2/$TAG/
@@ -29,6 +29,16 @@ chmod -R a+wrx $OUTPUTDIR
 # run data_Run2016B_DoubleMuon_PromptReco
 # run data_Run2016B_MuonEG_PromptReco
 
+# run data_Run2016C_JetHT_PromptReco
+# run data_Run2016C_MET_PromptReco
+# run data_Run2016C_HTMHT_PromptReco
+# run data_Run2016C_SingleElectron_PromptReco
+# run data_Run2016C_SingleMuon_PromptReco
+# run data_Run2016C_SinglePhoton_PromptReco
+# run data_Run2016C_DoubleEG_PromptReco
+# run data_Run2016C_DoubleMuon_PromptReco
+# run data_Run2016C_MuonEG_PromptReco
+
 #
 # TTBAR
 #
@@ -41,8 +51,8 @@ chmod -R a+wrx $OUTPUTDIR
 # HIGH STATS TTBAR EXTENSION
 #
 
-# #run ttdl_mg_lo_ext1
-# run ttsl_mg_lo_top_ext1
+# run ttdl_mg_lo_ext1
+# #run ttsl_mg_lo_top_ext1
 # run ttsl_mg_lo_tbar_ext1
 
 #
@@ -92,7 +102,6 @@ chmod -R a+wrx $OUTPUTDIR
 # run dyjetsll_ht200to400_ext1
 # run dyjetsll_ht400to600_ext1
 # run dyjetsll_ht600toInf_ext1
-
 
 # #run dyjetsll_incl
 
@@ -148,7 +157,7 @@ chmod -R a+wrx $OUTPUTDIR
 # run ttg_amcatnlo
 # run ttw_lnu_amcatnlo
 # run ttw_qq_amcatnlo
-# # run ttz_llnunu_amcatnlo
+# run ttz_nunu_amcatnlo
 # run ttz_qq_amcatnlo
 
 #
@@ -191,8 +200,8 @@ chmod -R a+wrx $OUTPUTDIR
 # SIGNAL
 #
 
-# # run T1tttt_1500_100
-# # run T1tttt_1200_800
+# run T1tttt_1500_100
+# run T1tttt_1200_800
 # run T1bbbb_1500_100
 # run T1bbbb_1000_900
 # # run T1qqqq_1400_100
@@ -203,5 +212,11 @@ chmod -R a+wrx $OUTPUTDIR
 #
 
 # run T1tttt
+# run T1bbbb
+# run T1qqqq
+# run T5qqqqVV
 # run T2bb
-# run T2tt
+# run T2tt_mStop-400to1200
+# run T2tt_mStop-150to250
+# run T2tt_mStop-250to350
+# run T2tt_mStop-350to400
