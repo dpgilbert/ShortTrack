@@ -1599,11 +1599,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
       // for applying btagging SFs, using Method 1a from the twiki below:
       //   https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
       //   https://twiki.cern.ch/twiki/pub/CMS/BTagSFMethods/Method1aExampleCode_CSVM.cc.txt
+      //   - have changed from the above example:
+      //    - treat heavy and light flavor separately
+      //    - use multiplicative weights for uncertainties instead of additive, to avoid negative uncertainty weights
       float btagprob_data = 1.;
-      float btagprob_err_heavy_UP = 0.;
-      float btagprob_err_heavy_DN = 0.;
-      float btagprob_err_light_UP = 0.;
-      float btagprob_err_light_DN = 0.;
+      float btagprob_heavy_UP = 1.;
+      float btagprob_heavy_DN = 1.;
+      float btagprob_light_UP = 1.;
+      float btagprob_light_DN = 1.;
       float btagprob_mc = 1.;
 
       if (verbose) cout << "before main jet loop" << endl;
@@ -1739,14 +1742,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
 		}
                 btagprob_data *= weight_cent * eff;
                 btagprob_mc *= eff;
-                float abserr_UP = weight_UP - weight_cent;
-                float abserr_DN = weight_cent - weight_DN;
 		if (flavor == BTagEntry::FLAV_UDSG) {
-                  btagprob_err_light_UP += abserr_UP/weight_cent;
-                  btagprob_err_light_DN += abserr_DN/weight_cent;
+		  btagprob_light_UP *= weight_UP * eff;
+		  btagprob_light_DN *= weight_DN * eff;
+		  btagprob_heavy_UP *= weight_cent * eff;
+		  btagprob_heavy_DN *= weight_cent * eff;
 		} else {
-                  btagprob_err_heavy_UP += abserr_UP/weight_cent;
-                  btagprob_err_heavy_DN += abserr_DN/weight_cent;
+		  btagprob_light_UP *= weight_cent * eff;
+		  btagprob_light_DN *= weight_cent * eff;
+		  btagprob_heavy_UP *= weight_UP * eff;
+		  btagprob_heavy_DN *= weight_DN * eff;
                 }
               }
               if (jet_pt[njet] > 25.0) nBJet25++; 
@@ -1790,14 +1795,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
 	      }
               btagprob_data *= (1. - weight_cent * eff);
               btagprob_mc *= (1. - eff);
-              float abserr_UP = weight_UP - weight_cent;
-              float abserr_DN = weight_cent - weight_DN;
 	      if (flavor == BTagEntry::FLAV_UDSG) {
-                btagprob_err_light_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
-                btagprob_err_light_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
+		btagprob_light_UP *= (1. - weight_UP * eff);
+		btagprob_light_DN *= (1. - weight_DN * eff);
+		btagprob_heavy_UP *= (1. - weight_cent * eff);
+		btagprob_heavy_DN *= (1. - weight_cent * eff);
               } else {
-                btagprob_err_heavy_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
-                btagprob_err_heavy_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
+		btagprob_light_UP *= (1. - weight_cent * eff);
+		btagprob_light_DN *= (1. - weight_cent * eff);
+		btagprob_heavy_UP *= (1. - weight_UP * eff);
+		btagprob_heavy_DN *= (1. - weight_DN * eff);
               }
             } // fail med btag
           } // pt 20 eta 2.4
@@ -1862,10 +1869,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
       // compute event level btag weights
       if (!isData && applyBtagSFs) {
         weight_btagsf = btagprob_data / btagprob_mc;
-        weight_btagsf_heavy_UP = weight_btagsf + btagprob_err_heavy_UP*weight_btagsf;
-        weight_btagsf_light_UP = weight_btagsf + btagprob_err_light_UP*weight_btagsf;
-        weight_btagsf_heavy_DN = weight_btagsf - btagprob_err_heavy_DN*weight_btagsf;
-        weight_btagsf_light_DN = weight_btagsf - btagprob_err_light_DN*weight_btagsf;
+        weight_btagsf_heavy_UP = btagprob_heavy_UP / btagprob_mc;
+        weight_btagsf_heavy_DN = btagprob_heavy_DN / btagprob_mc;
+        weight_btagsf_light_UP = btagprob_light_UP / btagprob_mc;
+        weight_btagsf_light_DN = btagprob_light_DN / btagprob_mc;
       }
 
       if (verbose) cout << "before hemispheres" << endl;
