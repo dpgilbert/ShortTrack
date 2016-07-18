@@ -77,13 +77,15 @@ bool useDRforGammaQCDMixing = true; // requires GenParticles
 // turn on to apply weights to central value
 bool applyWeights = false;
 // turn on to apply btag sf to central value
-bool applyBtagSF = false;
+bool applyBtagSF = true;
 // turn on to apply lepton sf to central value
 bool applyLeptonSF = false;
 // turn on to apply reweighting to ttbar based on top pt
 bool applyTopPtReweight = false;
 // turn on to apply lepton sf to central value for 0L sample in fastsim
 bool applyLeptonSFfastsim = false;
+// add weights to correct for photon trigger efficiencies
+bool applyPhotonTriggerWeights = true;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
 bool doSystVariationPlots = false;
 // turn on to apply Nvtx reweighting to MC
@@ -706,22 +708,22 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // MET filters (first 2 only in data)
       if (t.isData) {
-	if (!t.Flag_goodVertices) continue;
-	if (!t.Flag_globalTightHalo2016Filter) continue; 
-	if (verbose) cout<<__LINE__<<endl;
-	if (!t.Flag_eeBadScFilter) continue; 
-	if (verbose) cout<<__LINE__<<endl;
-	if (!t.Flag_HBHENoiseFilter) continue;
-	if (verbose) cout<<__LINE__<<endl;
-	if (!t.Flag_HBHENoiseIsoFilter) continue;
-	if (verbose) cout<<__LINE__<<endl;
-	if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
-	if (verbose) cout<<__LINE__<<endl;
-	if (!t.Flag_badMuonFilter) continue;
-	if (verbose) cout<<__LINE__<<endl;
-	if (!t.Flag_badChargedHadronFilter) continue;
+        if (!t.Flag_globalTightHalo2016Filter) continue; 
+        if (verbose) cout<<__LINE__<<endl;
+        if (!t.Flag_badMuonFilter) continue;
 	if (verbose) cout<<__LINE__<<endl;
       }
+      if (!t.Flag_goodVertices) continue;
+      if (!t.Flag_eeBadScFilter) continue; 
+      if (verbose) cout<<__LINE__<<endl;
+      if (!t.Flag_HBHENoiseFilter) continue;
+      if (verbose) cout<<__LINE__<<endl;
+      if (!t.Flag_HBHENoiseIsoFilter) continue;
+      if (verbose) cout<<__LINE__<<endl;
+      if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+      if (verbose) cout<<__LINE__<<endl;
+      if (!t.Flag_badChargedHadronFilter) continue;
+      if (verbose) cout<<__LINE__<<endl;
 
       // txt MET filters (data only)
       if (t.isData && metFilterTxt.eventFails(t.run, t.lumi, t.evt)) {
@@ -806,6 +808,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	if (applyTopPtReweight && t.evt_id >= 300 && t.evt_id < 400) {
 	  evtweight_ *= t.weight_toppt;
 	}
+        if (applyPhotonTriggerWeights && t.ngamma > 0){
+          evtweight_ *= getPhotonTriggerWeight(t.gamma_eta[0], t.gamma_pt[0]);
+        }
       } // !isData
 
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);

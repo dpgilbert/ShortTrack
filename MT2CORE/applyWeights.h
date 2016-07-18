@@ -39,5 +39,6 @@ TH2D* h_muVetoEff_fastsim = 0;
 bool setVetoEffFile_fastsim(TString filename);
 float getLepVetoEffFromFile_fastsim(float pt, float eta, int pdgId);
 
+float getPhotonTriggerWeight(float eta, float pt);
 
 #endif
