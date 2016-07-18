@@ -671,16 +671,16 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //---------------------
       ++nEventsTotal;
       if (nEventsTotal%10000==0) {
-	ULong64_t i_permille = (int)floor(1000 * nEventsTotal / float(nEventsChain));
-	if (isatty(1)) {
-	  printf("\015\033[32m ---> \033[1m\033[31m%4.1f%%"
-		 "\033[0m\033[32m <---\033[0m\015", i_permille/10.);
-	  fflush(stdout);
-	}
-	else {
-	  cout<<i_permille/10.<<" ";
-	  if (nEventsTotal%100000==0) cout<<endl;
-	}
+       ULong64_t i_permille = (int)floor(1000 * nEventsTotal / float(nEventsChain));
+       if (isatty(1)) {
+         printf("\015\033[32m ---> \033[1m\033[31m%4.1f%%"
+                "\033[0m\033[32m <---\033[0m\015", i_permille/10.);
+         fflush(stdout);
+       }
+       else {
+         cout<<i_permille/10.<<" ";
+         if (nEventsTotal%100000==0) cout<<endl;
+       }
       }
       if (verbose) cout<<__LINE__<<endl;
 
@@ -808,9 +808,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	if (applyTopPtReweight && t.evt_id >= 300 && t.evt_id < 400) {
 	  evtweight_ *= t.weight_toppt;
 	}
-        if (applyPhotonTriggerWeights && t.ngamma > 0){
-          evtweight_ *= getPhotonTriggerWeight(t.gamma_eta[0], t.gamma_pt[0]);
-        }
       } // !isData
 
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
@@ -1432,6 +1429,11 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
 
   // trigger requirement
   if ( ( t.isData || stringsample.Contains("2015")) && !t.HLT_Photon165_HE10) return;
+
+  // apply trigger weights to mc
+  if (applyPhotonTriggerWeights){
+      evtweight_ *= getPhotonTriggerWeight(t.gamma_eta[0], t.gamma_pt[0]);
+  }
   
   bool passSieie = t.gamma_idCutBased[0] ? true : false; // just deal with the standard case now. Worry later about sideband in sieie
 
