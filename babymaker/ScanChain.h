@@ -114,7 +114,9 @@ class babyMaker {
   Int_t           nPFCHCand3;
 
   Float_t         deltaPhiMin;
+  Float_t         deltaPhiMin_genmet;
   Float_t         diffMetMht;
+  Float_t         diffMetMht_genmet;
   Float_t         minMTBMet;
   Float_t         gamma_minMTBMet;
   Float_t         zll_minMTBMet;
@@ -123,6 +125,7 @@ class babyMaker {
   Float_t         ht;
   Float_t         mt2;
   Float_t         mt2_gen;
+  Float_t         mt2_genmet;
 
   Float_t         jet1_pt;
   Float_t         jet2_pt;

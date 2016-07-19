@@ -1903,7 +1903,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
 
       // min(dphi) of 4 leading objects
       for (unsigned int ip4 = 0; ip4 < p4sForDphi.size(); ++ip4) {
-        if(ip4 < 4) deltaPhiMin = min(deltaPhiMin, DeltaPhi( met_phi, p4sForDphi.at(ip4).phi() ));
+        if(ip4 < 4) {
+	  deltaPhiMin = min(deltaPhiMin, DeltaPhi( met_phi, p4sForDphi.at(ip4).phi() ));
+	  if (!isData) deltaPhiMin_genmet = min(deltaPhiMin, DeltaPhi( met_genPhi, p4sForDphi.at(ip4).phi() ));
+	}
       }
 
       vector<LorentzVector> hemJets;
@@ -1912,6 +1915,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
         hemJets = getHemJets(p4sForHems);  
 
         mt2 = HemMT2(met_pt, met_phi, hemJets.at(0), hemJets.at(1));
+        if (!isData) mt2_genmet = HemMT2(met_genPt, met_genPhi, hemJets.at(0), hemJets.at(1));
 
         // order hemispheres by pt for saving
         int idx_lead = 0;
@@ -1937,6 +1941,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
       TVector2 mhtVector = TVector2(mht_pt*cos(mht_phi), mht_pt*sin(mht_phi));
       TVector2 metVector = TVector2(met_pt*cos(met_phi), met_pt*sin(met_phi));
       diffMetMht = (mhtVector - metVector).Mod();
+      if (!isData) {
+	TVector2 genmetVector = TVector2(met_genPt*cos(met_genPhi), met_genPt*sin(met_genPhi));
+	diffMetMht_genmet = (mhtVector - genmetVector).Mod();
+      }
 
       // HT, MT2 and MHT for photon+jets regions
       //  note that leptons are NOT included in this MT2 calculation
@@ -2229,13 +2237,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
     BabyTree_->Branch("nGammas20", &nGammas20 );
     BabyTree_->Branch("nPFCHCand3", &nPFCHCand3 );
     BabyTree_->Branch("deltaPhiMin", &deltaPhiMin );
+    BabyTree_->Branch("deltaPhiMin_genmet", &deltaPhiMin_genmet );
     BabyTree_->Branch("diffMetMht", &diffMetMht );
+    BabyTree_->Branch("diffMetMht_genmet", &diffMetMht_genmet );
     BabyTree_->Branch("minMTBMet", &minMTBMet );
     BabyTree_->Branch("zll_minMTBMet", &zll_minMTBMet );
     BabyTree_->Branch("gamma_minMTBMet", &gamma_minMTBMet );
     BabyTree_->Branch("ht", &ht );
     BabyTree_->Branch("mt2", &mt2 );
     BabyTree_->Branch("mt2_gen", &mt2_gen );
+    BabyTree_->Branch("mt2_genmet", &mt2_genmet );
     BabyTree_->Branch("jet1_pt", &jet1_pt );
     BabyTree_->Branch("jet2_pt", &jet2_pt );
     BabyTree_->Branch("gamma_jet1_pt", &gamma_jet1_pt );
@@ -2579,7 +2590,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
     nGammas20 = -999;
     nPFCHCand3 = -999;
     deltaPhiMin = -999.0;
+    deltaPhiMin_genmet = -999.0;
     diffMetMht = -999.0;
+    diffMetMht_genmet = -999.0;
     minMTBMet = -999.0;
     zll_minMTBMet = -999.0;
     rl_minMTBMet = -999.0;
@@ -2587,6 +2600,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
     ht = -999.0;
     mt2 = -999.0;
     mt2_gen = -999.0;
+    mt2_genmet = -999.0;
     jet1_pt = 0.0;
     jet2_pt = 0.0;
     gamma_jet1_pt = 0.0;
