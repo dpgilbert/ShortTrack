@@ -821,11 +821,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
 	  weight_toppt = topPtWeight_cutoff(genTop_pt,genTbar_pt);
 	}
 
-        // recoil "ISR" weight
+        // recoil pt - no longer used for "ISR" weight
 	genRecoil_pt = recoil.pt();
-	weight_isr = 1.;
-	if (genRecoil_pt > 400. && genRecoil_pt < 600.)  weight_isr = 0.85;
-	else if (genRecoil_pt > 600.)                    weight_isr = 0.70;
 
 	// store LHE weight variations
 	if (saveLHEweights || saveLHEweightsScaleOnly) {
@@ -1881,7 +1878,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
       }
 
       // get number of reco jets matched to gen ISR jets
-      if (!isData) nisrMatch = get_nisrMatch(p4sLeptonCleanedJets);
+      if (!isData) {
+	nisrMatch = get_nisrMatch(p4sLeptonCleanedJets);
+	weight_isr = get_isrWeight(nisrMatch);
+	float unc_isr = get_isrUnc(nisrMatch);
+	weight_isr_UP = weight_isr + unc_isr;
+	weight_isr_DN = weight_isr - unc_isr;
+      }
 
       if (verbose) cout << "before hemispheres" << endl;
 
@@ -2543,6 +2546,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
     BabyTree_->Branch("weight_phottrigsf", &weight_phottrigsf );
     BabyTree_->Branch("weight_pu", &weight_pu );
     BabyTree_->Branch("weight_isr", &weight_isr );
+    BabyTree_->Branch("weight_isr_UP", &weight_isr_UP );
+    BabyTree_->Branch("weight_isr_DN", &weight_isr_DN );
     BabyTree_->Branch("weight_scales_UP", &weight_scales_UP );
     BabyTree_->Branch("weight_scales_DN", &weight_scales_DN );
     BabyTree_->Branch("weight_pdfs_UP", &weight_pdfs_UP );
@@ -2776,6 +2781,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
     weight_phottrigsf = 1.;
     weight_pu = 1.;
     weight_isr = 1.;
+    weight_isr_UP = 1.;
+    weight_isr_DN = 1.;
     weight_scales_UP = 1.;
     weight_scales_DN = 1.;
     weight_pdfs_UP = 1.;
