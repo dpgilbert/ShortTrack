@@ -1977,7 +1977,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
 	// check acceptance for veto: pt > 10
        if (t.genTau_leadTrackPt[itau] < 10.) continue;
        if (t.genTau_decayMode[itau] == 1) unc_tau1p += 0.14; // 14% relative uncertainty for missing a 1-prong tau
-       else if (t.genTau_decayMode[itau] == 3) unc_tau3p += 0.06; // 6% relative uncertainty for missing a 3-prong tau
+       else if (t.genTau_decayMode[itau] == 3) unc_tau3p += 0.08; // 8% relative uncertainty for missing a 3-prong tau
       }
     }
     
