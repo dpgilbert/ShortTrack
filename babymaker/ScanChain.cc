@@ -1609,6 +1609,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
       float btagprob_light_DN = 1.;
       float btagprob_mc = 1.;
 
+      // store corrected p4 for jets passing: pt > 30, |eta| < 2.4, Loose PF ID, lepton overlap
+      // - to use for nisrMatch calculation
+      vector<LorentzVector> p4sLeptonCleanedJets; 
+      
       if (verbose) cout << "before main jet loop" << endl;
 
       //now fill variables for jets that pass baseline selections and don't overlap with a lepton
@@ -1704,6 +1708,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
               p4sForDphiZllMT.push_back(p4sCorrJets.at(iJet));
               p4sForHemsRl.push_back(p4sCorrJets.at(iJet));
               p4sForDphiRl.push_back(p4sCorrJets.at(iJet));
+	      p4sLeptonCleanedJets.push_back(p4sCorrJets.at(iJet));
               nJet30++;
               if (jet_pt[njet] > 40.) nJet40++;
             } // pt40
@@ -1874,6 +1879,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
         weight_btagsf_light_UP = btagprob_light_UP / btagprob_mc;
         weight_btagsf_light_DN = btagprob_light_DN / btagprob_mc;
       }
+
+      // get number of reco jets matched to gen ISR jets
+      if (!isData) nisrMatch = get_nisrMatch(p4sLeptonCleanedJets);
 
       if (verbose) cout << "before hemispheres" << endl;
 
@@ -2546,6 +2554,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
     BabyTree_->Branch("genProd_pdgId", &genProd_pdgId );
     BabyTree_->Branch("weight_pol_L", &weight_pol_L );
     BabyTree_->Branch("weight_pol_R", &weight_pol_R );
+    BabyTree_->Branch("nisrMatch", &nisrMatch );
 
     // also make counter histogram
     count_hist_ = new TH1D("Count","Count",1,0,2);
@@ -2779,6 +2788,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
     nLHEweight = -999;
     weight_pol_L = -999;
     weight_pol_R = -999;
+    nisrMatch = -999;
 
     for(int i=0; i < max_nlep; i++){
       lep_pt[i] = -999;

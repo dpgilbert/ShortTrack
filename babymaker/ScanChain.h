@@ -459,6 +459,8 @@ class babyMaker {
   Float_t         weight_phottrigsf;
   Float_t         weight_pu;
   Float_t         weight_isr;
+  Float_t         weight_isr_UP;
+  Float_t         weight_isr_DN;
   Float_t         weight_scales_UP;
   Float_t         weight_scales_DN;
   Float_t         weight_pdfs_UP;
@@ -471,6 +473,7 @@ class babyMaker {
   Int_t           genProd_pdgId;
   Float_t         weight_pol_L;
   Float_t         weight_pol_R;
+  Int_t           nisrMatch;
 
 //----- MC SCALE AND PDF WEIGHTS
   static const int max_nLHEweight = 500;
