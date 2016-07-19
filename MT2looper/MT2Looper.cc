@@ -87,7 +87,7 @@ bool applyLeptonSFfastsim = false;
 // add weights to correct for photon trigger efficiencies
 bool applyPhotonTriggerWeights = true;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
-bool doSystVariationPlots = false;
+bool doSystVariationPlots = true;
 // turn on to apply Nvtx reweighting to MC
 bool doNvtxReweight = false;
 // turn on to apply json file to data
@@ -95,7 +95,7 @@ bool applyJSON = true;
 // veto on jets with pt > 30, |eta| > 3.0
 bool doHFJetVeto = false;
 // get signal scan nevents from file
-bool doScanWeights = false;
+bool doScanWeights = true;
 // doesn't plot data for MT2 > 200 in signal regions
 bool doBlindData = false;
 // make variation histograms for tau efficiency
@@ -737,6 +737,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //if (t.nJet30FailId > 0) continue;
       if (t.nJet30FailId > 0) passJetID = false;
 
+      // filter for bad fastsim jets
+      if (isSignal_ && t.nJet20BadFastsim > 0) continue;
+      
       // remove low pt QCD samples 
       if (t.evt_id >= 100 && t.evt_id < 109) continue;
       // remove low HT QCD samples 
@@ -744,6 +747,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       int maxQCD = 154;
       if (  stringsample.Contains("2015") ) maxQCD = 153; // For photon purity, include a lower HT bin
       if (t.evt_id >= 151 && t.evt_id < maxQCD) continue;
+      // note that ETH has an offset in QCD numbering..
 
       // flag signal samples
       if (t.evt_id >= 1000) isSignal_ = true;
