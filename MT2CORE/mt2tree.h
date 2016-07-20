@@ -42,6 +42,7 @@ public :
    Int_t           nJet40;
    Int_t           nJet30FailId;
    Int_t           nJet100FailId;
+   Int_t           nJet20BadFastsim;
    Int_t           nBJet20;
    Int_t           nBJet20csv;
    Int_t           nBJet20mva;
@@ -120,6 +121,7 @@ public :
    Int_t           HLT_PFHT350_PFMET100;
    Int_t           HLT_PFHT350_PFMET120;
    Int_t           HLT_SingleMu;   
+   Int_t           HLT_SingleMu_NonIso;   
    Int_t           HLT_SingleEl;   
    Int_t           HLT_DoubleEl;   
    Int_t           HLT_DoubleEl33;   
@@ -127,6 +129,7 @@ public :
    Int_t           HLT_MuX_Ele12;   
    Int_t           HLT_Mu8_EleX;   
    Int_t           HLT_DoubleMu;   
+   Int_t           HLT_DoubleMu_NonIso;   
    Int_t           HLT_Photons;   
    Int_t           HLT_Photon120;   
    Int_t           HLT_Photon165_HE10;   
@@ -371,6 +374,7 @@ public :
    TBranch        *b_nJet40;   //!
    TBranch        *b_nJet30FailId;   //!
    TBranch        *b_nJet100FailId;   //!
+   TBranch        *b_nJet20BadFastsim;   //!
    TBranch        *b_nBJet20;   //!
    TBranch        *b_nBJet20csv;   //!
    TBranch        *b_nBJet20mva;   //!
@@ -449,6 +453,7 @@ public :
    TBranch        *b_HLT_PFHT350_PFMET100;   //!
    TBranch        *b_HLT_PFHT350_PFMET120;   //!
    TBranch        *b_HLT_SingleMu;   //!
+   TBranch        *b_HLT_SingleMu_NonIso;   //!
    TBranch        *b_HLT_SingleEl;   //!
    TBranch        *b_HLT_DoubleEl;   //!
    TBranch        *b_HLT_DoubleEl33;   //!
@@ -456,6 +461,7 @@ public :
    TBranch        *b_HLT_MuX_Ele12;   //!
    TBranch        *b_HLT_Mu8_EleX;   //!
    TBranch        *b_HLT_DoubleMu;   //!
+   TBranch        *b_HLT_DoubleMu_NonIso;   //!
    TBranch        *b_HLT_Photons;   //!
    TBranch        *b_HLT_Photon120;   //!
    TBranch        *b_HLT_Photon165_HE10;   //!
@@ -759,6 +765,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("nJet40", &nJet40, &b_nJet40);
    fChain->SetBranchAddress("nJet30FailId", &nJet30FailId, &b_nJet30FailId);
    fChain->SetBranchAddress("nJet100FailId", &nJet100FailId, &b_nJet100FailId);
+   fChain->SetBranchAddress("nJet20BadFastsim", &nJet20BadFastsim, &b_nJet20BadFastsim);
    fChain->SetBranchAddress("nBJet20", &nBJet20, &b_nBJet20);
    fChain->SetBranchAddress("nBJet20csv", &nBJet20csv, &b_nBJet20csv);
    fChain->SetBranchAddress("nBJet20mva", &nBJet20mva, &b_nBJet20mva);
@@ -837,6 +844,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_PFHT350_PFMET100", &HLT_PFHT350_PFMET100, &b_HLT_PFHT350_PFMET100);
    fChain->SetBranchAddress("HLT_PFHT350_PFMET120", &HLT_PFHT350_PFMET120, &b_HLT_PFHT350_PFMET120);
    fChain->SetBranchAddress("HLT_SingleMu", &HLT_SingleMu, &b_HLT_SingleMu);
+   fChain->SetBranchAddress("HLT_SingleMu_NonIso", &HLT_SingleMu_NonIso, &b_HLT_SingleMu_NonIso);
    fChain->SetBranchAddress("HLT_SingleEl", &HLT_SingleEl, &b_HLT_SingleEl);
    fChain->SetBranchAddress("HLT_DoubleEl", &HLT_DoubleEl, &b_HLT_DoubleEl);
    fChain->SetBranchAddress("HLT_DoubleEl33", &HLT_DoubleEl33, &b_HLT_DoubleEl33);
@@ -844,6 +852,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_MuX_Ele12", &HLT_MuX_Ele12, &b_HLT_MuX_Ele12);
    fChain->SetBranchAddress("HLT_Mu8_EleX", &HLT_Mu8_EleX, &b_HLT_Mu8_EleX);
    fChain->SetBranchAddress("HLT_DoubleMu", &HLT_DoubleMu, &b_HLT_DoubleMu);
+   fChain->SetBranchAddress("HLT_DoubleMu_NonIso", &HLT_DoubleMu_NonIso, &b_HLT_DoubleMu_NonIso);
    fChain->SetBranchAddress("HLT_Photons", &HLT_Photons, &b_HLT_Photons);
    fChain->SetBranchAddress("HLT_Photon120", &HLT_Photon120, &b_HLT_Photon120);
    fChain->SetBranchAddress("HLT_Photon165_HE10", &HLT_Photon165_HE10, &b_HLT_Photon165_HE10);
