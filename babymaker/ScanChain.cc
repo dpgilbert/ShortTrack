@@ -466,34 +466,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
 	
         if (verbose) cout << "before sparm values" << endl;
 
-	// T1 and T5 models
-        if (evt_id >= 1000 && evt_id < 1100) {
-          for (unsigned int i=0; i<sparm_values().size(); ++i) {
-            if (sparm_names().at(i).Contains("mGluino")) GenSusyMScan1 = sparm_values().at(i);
-            if (sparm_names().at(i).Contains("mLSP")) GenSusyMScan2 = sparm_values().at(i);
-          }
-        }
-	// T2 models: T2tt and T2cc
-        else if ((evt_id >= 1100 && evt_id < 1110) || (evt_id >= 1130 && evt_id < 1140)) {
-          for (unsigned int i=0; i<sparm_values().size(); ++i) {
-            if (sparm_names().at(i).Contains("mStop")) GenSusyMScan1 = sparm_values().at(i);
-            if (sparm_names().at(i).Contains("mLSP")) GenSusyMScan2 = sparm_values().at(i);
-          }
-        }
-	// T2 models: T2qq
-        else if (evt_id >= 1110 && evt_id < 1120) {
-          for (unsigned int i=0; i<sparm_values().size(); ++i) {
-            if (sparm_names().at(i).Contains("mSq")) GenSusyMScan1 = sparm_values().at(i);
-            if (sparm_names().at(i).Contains("mLSP")) GenSusyMScan2 = sparm_values().at(i);
-          }
-        }
-	// T2 models: T2bb
-        else if (evt_id >= 1120 && evt_id < 1130) {
-          for (unsigned int i=0; i<sparm_values().size(); ++i) {
-            if (sparm_names().at(i).Contains("mStop")) GenSusyMScan1 = sparm_values().at(i);
-            if (sparm_names().at(i).Contains("mLSP")) GenSusyMScan2 = sparm_values().at(i);
-          }
-        }
+	// assume that first sparm value is parent mass, second is LSP mass
+	if ((evt_id >= 1000 && evt_id < 1200) && (sparm_values().size() == 2)) {
+	  GenSusyMScan1 = sparm_values().at(0);
+	  GenSusyMScan2 = sparm_values().at(1);
+	}
+	else {
+	  std::cout << "WARNING: expected to find 2 sparm values, found instead " << sparm_values().size() << std::endl;
+	}
 
 	// use sparm values to look up xsec
 	if (evt_id >= 1000 && evt_id < 1200) evt_xsec = h_sig_xsec->GetBinContent(h_sig_xsec->FindBin(GenSusyMScan1));
