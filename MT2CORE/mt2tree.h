@@ -55,11 +55,14 @@ public :
    Int_t           nGammas20;
    Int_t           nPFCHCand3;
    Float_t         deltaPhiMin;
+   Float_t         deltaPhiMin_genmet;
    Float_t         diffMetMht;
+   Float_t         diffMetMht_genmet;
    Float_t         minMTBMet;
    Float_t         ht;
    Float_t         mt2;
    Float_t         mt2_gen;
+   Float_t         mt2_genmet;
    Float_t         jet1_pt;
    Float_t         jet2_pt;
    Float_t         gamma_jet1_pt;
@@ -387,11 +390,14 @@ public :
    TBranch        *b_nGammas20;   //!
    TBranch        *b_nPFCHCand3;   //!
    TBranch        *b_deltaPhiMin;   //!
+   TBranch        *b_deltaPhiMin_genmet;   //!
    TBranch        *b_diffMetMht;   //!
+   TBranch        *b_diffMetMht_genmet;   //!
    TBranch        *b_minMTBMet;   //!
    TBranch        *b_ht;   //!
    TBranch        *b_mt2;   //!
    TBranch        *b_mt2_gen;   //!
+   TBranch        *b_mt2_genmet;   //!
    TBranch        *b_jet1_pt;   //!
    TBranch        *b_jet2_pt;   //!
    TBranch        *b_gamma_jet1_pt;   //!
@@ -778,11 +784,14 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("nGammas20", &nGammas20, &b_nGammas20);
    fChain->SetBranchAddress("nPFCHCand3", &nPFCHCand3, &b_nPFCHCand3);
    fChain->SetBranchAddress("deltaPhiMin", &deltaPhiMin, &b_deltaPhiMin);
+   fChain->SetBranchAddress("deltaPhiMin_genmet", &deltaPhiMin_genmet, &b_deltaPhiMin_genmet);
    fChain->SetBranchAddress("diffMetMht", &diffMetMht, &b_diffMetMht);
+   fChain->SetBranchAddress("diffMetMht_genmet", &diffMetMht_genmet, &b_diffMetMht_genmet);
    fChain->SetBranchAddress("minMTBMet", &minMTBMet, &b_minMTBMet);
    fChain->SetBranchAddress("ht", &ht, &b_ht);
    fChain->SetBranchAddress("mt2", &mt2, &b_mt2);
    fChain->SetBranchAddress("mt2_gen", &mt2_gen, &b_mt2_gen);
+   fChain->SetBranchAddress("mt2_genmet", &mt2_genmet, &b_mt2_genmet);
    fChain->SetBranchAddress("jet1_pt", &jet1_pt, &b_jet1_pt);
    fChain->SetBranchAddress("jet2_pt", &jet2_pt, &b_jet2_pt);
    fChain->SetBranchAddress("gamma_jet1_pt", &gamma_jet1_pt, &b_gamma_jet1_pt);
