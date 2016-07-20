@@ -46,11 +46,11 @@ std::string toString(float in){
 }
 
 // generic binning for signal scans - need arrays since mt2 dimension will be variable
-//   assuming here: 25 GeV binning, m1 from 0-2000, m2 from 0-2000
+//   assuming here: 25 GeV binning, m1 from 0-2300, m2 from 0-2300
 //   in Loop, also account for 5 GeV binning from 0-800 in T2cc scan
-int n_m1bins = 81;
+int n_m1bins = 93;
 float* m1bins;
-int n_m2bins = 81;
+int n_m2bins = 93;
 float* m2bins;
 
 const int n_htbins = 5;
