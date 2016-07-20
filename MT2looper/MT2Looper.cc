@@ -713,17 +713,19 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         if (!t.Flag_badMuonFilter) continue;
 	if (verbose) cout<<__LINE__<<endl;
       }
-      if (!t.Flag_goodVertices) continue;
-      if (!t.Flag_eeBadScFilter) continue; 
-      if (verbose) cout<<__LINE__<<endl;
-      if (!t.Flag_HBHENoiseFilter) continue;
-      if (verbose) cout<<__LINE__<<endl;
-      if (!t.Flag_HBHENoiseIsoFilter) continue;
-      if (verbose) cout<<__LINE__<<endl;
-      if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
-      if (verbose) cout<<__LINE__<<endl;
-      if (!t.Flag_badChargedHadronFilter) continue;
-      if (verbose) cout<<__LINE__<<endl;
+      if (!stringsample.Contains("2015")) { // several filters are not in 2015 MC
+	if (!t.Flag_goodVertices) continue;
+	if (!t.Flag_eeBadScFilter) continue; 
+	if (verbose) cout<<__LINE__<<endl;
+	if (!t.Flag_HBHENoiseFilter) continue;
+	if (verbose) cout<<__LINE__<<endl;
+	if (!t.Flag_HBHENoiseIsoFilter) continue;
+	if (verbose) cout<<__LINE__<<endl;
+	if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+	if (verbose) cout<<__LINE__<<endl;
+	if (!t.Flag_badChargedHadronFilter) continue; 
+	if (verbose) cout<<__LINE__<<endl;
+      }
 
       // txt MET filters (data only)
       if (t.isData && metFilterTxt.eventFails(t.run, t.lumi, t.evt)) {
@@ -943,9 +945,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	     && (abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1]) )
              && (abs(t.lep_pdgId[0]) == 13 ||  t.lep_tightId[0] > 0 )
              && (abs(t.lep_pdgId[1]) == 13 ||  t.lep_tightId[1] > 0 )
-	     && (fabs(t.zll_mass - 90) < 10 ) 
+	     && (fabs(t.zll_mass - 91.19) < 10 ) 
 	     && t.lep_pt[0] > 25 && t.lep_pt[1] > 20
-	     && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10)
+	     // && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10)// OLDTRIGS
+	     && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso) //NEWTRIGS
 	     ) {
 	  // no additional explicit lepton veto
 	  // i.e. implicitly allow 3rd PF lepton or hadron
@@ -1651,7 +1654,10 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
       }
     }
   }
-  if(passBase || passBaseJ) fillHistosDY(SRBaseIncl.crdyHistMap, SRBaseIncl.GetNumberOfMT2Bins(), SRBaseIncl.GetMT2Bins(), "crdybaseIncl", suffix);
+  if(passBase || passBaseJ) {
+    //cout<<t.run<<" "<<t.lumi<<" "<<t.evt<<endl;
+    fillHistosDY(SRBaseIncl.crdyHistMap, SRBaseIncl.GetNumberOfMT2Bins(), SRBaseIncl.GetMT2Bins(), "crdybaseIncl", suffix);
+  }
 
 
 
@@ -2251,8 +2257,8 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     //    if (t.nJet30>7) cout<<"event "<<t.evt<<" in run "<<t.run<<" has njets "<<t.nJet30<<" and ht "<<t.zll_ht<<endl;
     plot1D("h_njbins"+s,       t.nJet30,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
     plot1D("h_nbjbins"+s,       t.nBJet20,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
-    plot1D("h_leppt1"+s,      t.lep_pt[0],   evtweight_, h_1d, ";p_{T}(lep1) [GeV]", 50, 0, 200);
-    plot1D("h_leppt2"+s,      t.lep_pt[1],   evtweight_, h_1d, ";p_{T}(lep2) [GeV]", 50, 0, 200);
+    plot1D("h_leppt1"+s,      t.lep_pt[0],   evtweight_, h_1d, ";p_{T}(lep1) [GeV]", 20, 0, 500);
+    plot1D("h_leppt2"+s,      t.lep_pt[1],   evtweight_, h_1d, ";p_{T}(lep2) [GeV]", 20, 0, 500);
     plot1D("h_zllmass"+s,      t.zll_mass,   evtweight_, h_1d, ";m_{ll} [GeV]", 60, 0, 120);
     if (abs(t.lep_pdgId[0])==11) plot1D("h_zllmassEle"+s,      t.zll_mass,   evtweight_, h_1d, ";m_{ll} [GeV]", 60, 0, 120);
     if (abs(t.lep_pdgId[0])==13) plot1D("h_zllmassMu"+s,      t.zll_mass,   evtweight_, h_1d, ";m_{ll} [GeV]", 60, 0, 120);
