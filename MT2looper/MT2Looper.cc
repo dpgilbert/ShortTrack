@@ -1310,6 +1310,50 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
     }
   } // monojet regions
 
+  // genmet version of signal regions, for fastsim unc
+  if (isSignal_ && doSystVariationPlots) {
+
+    std::map<std::string, float> values_genmet;
+    values_genmet["deltaPhiMin"] = t.deltaPhiMin_genmet;
+    values_genmet["diffMetMhtOverMet"]  = t.diffMetMht_genmet/t.met_genPt;
+    values_genmet["nlep"]        = nlepveto_;
+    values_genmet["j1pt"]        = t.jet1_pt;
+    values_genmet["j2pt"]        = t.jet2_pt;
+    values_genmet["njets"]       = t.nJet30;
+    values_genmet["nbjets"]      = t.nBJet20;
+    values_genmet["mt2"]         = t.mt2_genmet;
+    values_genmet["ht"]          = t.ht;
+    values_genmet["met"]         = t.met_genPt;
+
+    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+      if(SRVec.at(srN).PassesSelection(values_genmet)){
+	fillHistosGenMET(SRVec.at(srN).srHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
+	break;//signal regions are orthogonal, event cannot be in more than one
+      }
+    }
+  
+    // do monojet SRs
+    if (passMonojetId_) {
+      std::map<std::string, float> values_monojet_genmet;
+      values_monojet_genmet["deltaPhiMin"] = t.deltaPhiMin_genmet;
+      values_monojet_genmet["diffMetMhtOverMet"]  = t.diffMetMht_genmet/t.met_genPt;
+      values_monojet_genmet["nlep"]        = nlepveto_;
+      //values_monojet_genmet["j1pt"]        = t.jet1_pt; // ETH doesn't cut on jet1_pt
+      values_monojet_genmet["njets"]       = t.nJet30;
+      values_monojet_genmet["nbjets"]      = t.nBJet20;
+      values_monojet_genmet["ht"]          = t.ht;
+      values_monojet_genmet["met"]         = t.met_genPt;
+
+      for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
+	if(SRVecMonojet.at(srN).PassesSelection(values_monojet_genmet)){
+	  fillHistosGenMET(SRVecMonojet.at(srN).srHistMap, SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix);
+	  //break;//signal regions are orthogonal, event cannot be in more than one --> not true for Monojet, since we have inclusive regions
+	}
+      }
+    } // monojet regions
+    
+  } // if(isSignal_ && doSystVariationPlots)
+
   return;
 }
 
@@ -1425,6 +1469,54 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
       }
     }
   } // monojet regions
+
+
+  // genmet version of signal regions, for fastsim unc
+  if (isSignal_ && doSystVariationPlots) {
+
+    // topological regions
+    std::map<std::string, float> values_genmet;
+    values_genmet["deltaPhiMin"] = t.deltaPhiMin_genmet;
+    values_genmet["diffMetMhtOverMet"]  = t.diffMetMht_genmet/t.met_genPt;
+    values_genmet["nlep"]        = t.nLepLowMT;
+    values_genmet["j1pt"]        = t.jet1_pt;
+    values_genmet["j2pt"]        = t.jet2_pt;
+    values_genmet["njets"]       = t.nJet30;
+    values_genmet["nbjets"]      = t.nBJet20;
+    values_genmet["mt2"]         = t.mt2_genmet;
+    values_genmet["ht"]          = t.ht;
+    values_genmet["met"]         = t.met_genPt;
+
+    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+      if(SRVec.at(srN).PassesSelectionCRSL(values_genmet)){
+	if(prefix=="crsl")    fillHistosGenMET(SRVec.at(srN).crslHistMap,    SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
+	//      break;//control regions are not necessarily orthogonal
+      }
+    }
+
+    // do monojet SRs
+    if (passMonojetId_) {
+
+      std::map<std::string, float> values_monojet_genmet;
+      values_monojet_genmet["deltaPhiMin"] = t.deltaPhiMin_genmet;
+      values_monojet_genmet["diffMetMhtOverMet"]  = t.diffMetMht_genmet/t.met_genPt;
+      values_monojet_genmet["nlep"]        = t.nLepLowMT;
+      //values_monojet_genmet["j1pt"]        = t.jet1_pt; // ETH doesn't cut on jet1_pt..
+      values_monojet_genmet["njets"]       = t.nJet30;
+      values_monojet_genmet["nbjets"]      = t.nBJet20;
+      values_monojet_genmet["ht"]          = t.ht;
+      values_monojet_genmet["met"]         = t.met_genPt;
+
+      for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
+	if(SRVecMonojet.at(srN).PassesSelectionCRSL(values_monojet_genmet)){
+	  if(prefix=="crsl")    fillHistosGenMET(SRVecMonojet.at(srN).crslHistMap,    SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix);
+	  //      break;//control regions are not necessarily orthogonal
+	}
+      }
+    } // monojet regions
+    
+  } // if(isSignal_ && doSystVariationPlots)
+
   
   return;
 }
@@ -2456,5 +2548,22 @@ void MT2Looper::fillLepCorSRfastsim() {
   // std::cout << "fastsim lep correction for 0L: " << cor_lepeff_sr_
   // 	    << ", unc up: " << unc_lepeff_sr_UP_ << ", unc dn: " << unc_lepeff_sr_DN_ << std::endl;
 
+  return;
+}
+
+void MT2Looper::fillHistosGenMET(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
+  TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
+  if (dir == 0) {
+    dir = outfile_->mkdir(dirname.c_str());
+  } 
+  dir->cd();
+
+  // workaround for monojet bins
+  float mt2_temp = t.mt2;
+  if (t.nJet30 == 1) mt2_temp = t.ht;
+
+  plot1D("h_mt2bins_genmet"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+
+  outfile_->cd();
   return;
 }
