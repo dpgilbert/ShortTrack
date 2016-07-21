@@ -2564,6 +2564,10 @@ void MT2Looper::fillHistosGenMET(std::map<std::string, TH1*>& h_1d, int n_mt2bin
 
   plot1D("h_mt2bins_genmet"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
 
+  if (isSignal_) {
+    plot3D("h_mt2bins_sigscan_genmet"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+  }
+  
   outfile_->cd();
   return;
 }
