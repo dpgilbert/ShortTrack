@@ -22,7 +22,7 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
 
         # get the root file for the given sample. This assumes that frag/fake photons come from qcd_ht.root
         if samples[isamp] in ["fragphoton","fakephoton"]:
-            fn = os.path.join(rootdir,"qcd_ht.root")
+            fn = os.path.join(rootdir,"2015qcd_ht.root")
         else:
             fn = os.path.join(rootdir,samples[isamp]+".root")        
         fid = ROOT.TFile(fn)
@@ -46,6 +46,9 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
             # handle the case with more than one directory
             for idir in range(1, len(dirnames)):
                 h_bkg_vecs[iplot][-1].Add(fid.Get(dirnames[idir]+"/h_"+vn))
+
+            # if samples[isamp].startswith("2015"):
+            #     h_bkg_vecs[iplot][-1].Scale(pd.lumi/3.99)
 
         fid.Close()
 
@@ -90,13 +93,14 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
             saveAs = os.path.join(output_dir,dirname,"{0}_{1}.{2}".format(dirname,vn,ext))
             ppm.plotDataMC(h_bkg_vecs[i], sns, h_data[i], doPause=False, xAxisTitle=xAxisTitle, lumi=pd.lumi, lumiUnit=pd.lumiUnit,
                            title=title, subtitles=subtitles, xRangeUser=plots[i][2], isLog=plots[i][1], saveAs=saveAs, 
-                           scaleMCtoData=True, xAxisUnit=unit, userMin=userMin, userMax=userMax, doSort=False, 
-                           doMT2Colors=True, markerSize=markerSize, titleSize=0.035, subtitleSize=0.03,
-                           subLegText=subLegText, doBkgError=True, doOverflow=doOverflow)
+                           scaleMCtoData=True, xAxisUnit=unit, userMin=userMin, userMax=userMax, doSort=False, doMT2Colors=True, 
+                           markerSize=markerSize, titleSize=0.035, subtitleSize=0.033, legCoords=(0.60,0.70,0.87,0.895),
+                           subLegText=subLegText, subLegTextSize=0.036, doBkgError=True, doOverflow=doOverflow, cmsTextSize=0.04,
+                           convertToPoisson=True, drawZeros=False)
             
 
 
-def makeNormalizedLostLep(indir, samples, data, outdir='.', exts=['png','pdf']):
+def makeNormalizedLostLep(indir, samples, data, outdir='.', exts=['png','pdf'], ht_regs=None):
     ## makes plots of lost lepton CR (crsl) yields after MC is normalized in
     ## each HT, Njet, Nbjet bin separately. Makes 0b, 1b, inclusive plots
     ## and puts in directory called "lostlep"
@@ -110,6 +114,9 @@ def makeNormalizedLostLep(indir, samples, data, outdir='.', exts=['png','pdf']):
     
     regions = [regions_0b, regions_ge1b, regions_incl]
     region_names = ["0b","ge1b","incl"]
+
+    if ht_regs == None:
+        ht_regs = ["VL","L","M","H","UH"]
 
     mt2bins = [200, 300, 400, 500, 600, 800, 1000, 1500]
     mt2bins = np.array(mt2bins, dtype=float)
@@ -127,7 +134,7 @@ def makeNormalizedLostLep(indir, samples, data, outdir='.', exts=['png','pdf']):
         h_mt2_data_cr = None
         # loop over set of SRs within the given region
         for isr, sr in enumerate(regs):
-            for ht_reg in ["VL","L","M","H","UH"]:
+            for ht_reg in ht_regs:
                 
                 # get the data/mc CR yields
                 mc_cr_yield = 0.0
@@ -162,11 +169,24 @@ def makeNormalizedLostLep(indir, samples, data, outdir='.', exts=['png','pdf']):
         h_mt2bins_mc_vec = [h.Rebin(mt2bins.size-1, "h_mt2bins_mc_"+str(i), mt2bins) for h in h_mt2_mc_cr_vec]
         h_mt2bins_data = h_mt2_data_cr.Rebin(mt2bins.size-1, "h_mt2bins_data", mt2bins)
 
-        subtitles = ["#geq 2j, 1 lepton", "M_{T2} > 200 GeV"]
+        nbins = h_mt2bins_data.GetNbinsX()
+        systs = [0 for i in range(nbins)]
+        ## get systematic in first bin
+        incr = 0
+        for ibin in range(2,nbins+1):
+            incr += 0.4 / (nbins-1) * (ibin-1) * h_mt2bins_data.GetBinContent(i)
+        systs[0] = incr/h_mt2bins_data.GetBinContent(1)
+        ## get systematics in other bins
+        for ibin in range(2,nbins+1):
+            systs[ibin-1] = 0.4 / (nbins-1) * (ibin-1)
+
+        subtitles = ["#geq 2j, 1 lepton", "M_{T2} > 200 GeV","H_{T} > 200 GeV"]
         if iregs==0:
             subtitles[0] = "#geq 2j, 0b, 1 lepton"
         if iregs==1:
             subtitles[0] = "#geq 2j, #geq 1b, 1 lepton"
+        if ht_regs[0]=="L":
+            subtitles[2] = "H_{T} > 450 GeV"
             
         for ext in exts:
             saveAs = os.path.join(outdir, "lostlep", "lostlep_{0}_mt2bins.{1}".format(region_names[iregs],ext))
@@ -174,7 +194,8 @@ def makeNormalizedLostLep(indir, samples, data, outdir='.', exts=['png','pdf']):
                            lumi=pd.lumi, lumiUnit=pd.lumiUnit, title=None, subtitles=subtitles, isLog=True,
                            saveAs=saveAs, scaleMCtoData=False, xAxisUnit="GeV", doSort=False, doMT2Colors=True,
                            markerSize=1.0, subtitleSize=0.040, doBkgError=True, doOverflow=False,
-                           cmsTextSize=0.040)
+                           cmsTextSize=0.040, doPull=False, convertToPoisson=True, drawSystematicBand=True,
+                           systematics=systs)
 
     for i in range(len(fmc)):
         fmc[i].Close()

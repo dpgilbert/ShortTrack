@@ -36,6 +36,7 @@ def GetSampleName(sample):
              "zinv_ht": "Z(#nu#nu)+Jets",
              "top": "Top",
              "gjets_ht": "Prompt #gamma",
+             "2015gjets_ht": "Prompt #gamma",
              "gjets_dr0p05_ht": "Prompt #gamma",
              "fakephoton": "Fake #gamma",
              "fragphoton": "Frag. #gamma",

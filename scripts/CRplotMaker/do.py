@@ -7,11 +7,14 @@ ROOT.gROOT.SetBatch(1)
 from MT2PlotMaker import *
 import MT2PlotDefs as pd
 
-pd.lumi = 5.9
+pd.lumi = 7.65
 pd.lumiUnit = "fb"
 
+## 7.65/fb
+input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-05_nojson_skim_base_mt2gt200_ZinvV4_7p65fb"
+# input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-04_MiniAODv2_nojson_skim_base_mt2gt200_ZinvV4_7p65fb"
 ## 5.9/fb
-input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-04_MiniAODv2_nojson_skim_base_mt2gt200_ZinvV4_5p9fb"
+# input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-04_MiniAODv2_nojson_skim_base_mt2gt200_ZinvV4_5p9fb"
 ## 4.0/fb
 # input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-02_nojson_skim_base_mt2gt200_ZinvV4_3p99fb"
 ## 2.6/fb
@@ -23,50 +26,51 @@ input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/outp
 ## 589/pb
 #input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4"
 
-output_dir = "crplots/crplots_5p9fb"
+output_dir = "crplots/crplots_7p65fb_V00-08-05"
 
 exts = ["pdf","png"]
 
 # removed lepton
-MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016B", "crrlbase", pd.rl_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crrlbase", pd.rl_plots, output_dir, exts)
 
-MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016B", "crrlbaseJ", pd.ht_njet_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016B", "crrlbaseIncl", pd.ht_njet_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crrlbaseJ", pd.ht_njet_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crrlbaseIncl", pd.ht_njet_plots, output_dir, exts)
 
 # single lepton
-MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016B", "crslbase", pd.sl_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016B", "crslwjets", pd.sl_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["top", "wjets_ht", "qcd_ht"], "data_Run2016B", "crslttbar", pd.sl_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016B", "crslelbase", pd.sl_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016B", "crslmubase", pd.sl_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslbase", pd.sl_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslwjets", pd.sl_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["top", "wjets_ht", "qcd_ht"], "data_Run2016", "crslttbar", pd.sl_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslelbase", pd.sl_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslmubase", pd.sl_plots, output_dir, exts)
 
-MT2PlotMaker(input_dir, ["wjets_ht", "top"], "data_Run2016B", "crslbaseJ", pd.mt2_only, output_dir, exts)
-MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016B", "crslbaseVL", pd.mt2_only, output_dir, exts)
-MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016B", "crslbaseL", pd.mt2_only, output_dir, exts)
-MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016B", "crslbaseM", pd.mt2_only, output_dir, exts)
-MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016B", "crslbaseH", pd.mt2_only, output_dir, exts)
-MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016B", "crslbaseUH", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["wjets_ht", "top"], "data_Run2016", "crslbaseJ", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslbaseVL", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslbaseL", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslbaseM", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslbaseH", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslbaseUH", pd.mt2_only, output_dir, exts)
 
 # photon+jets
-MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbase", pd.gj_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["2015gjets_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjbase", pd.gj_plots, output_dir, exts)
  
-MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseJ", pd.ht_njet_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseIncl", pd.ht_njet_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["2015gjets_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjbaseJ", pd.ht_njet_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["2015gjets_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjbaseIncl", pd.gamma_vars_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["2015gjets_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjbaseIncl", pd.ht_njet_plots, output_dir, exts)
 
-MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseVL", pd.mt2_only, output_dir, exts)
-MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseL", pd.mt2_only, output_dir, exts)
-MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseM", pd.mt2_only, output_dir, exts)
-MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseH", pd.mt2_only, output_dir, exts)
-MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016B", "crgjbaseUH", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["2015gjets_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjbaseVL", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["2015gjets_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjbaseL", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["2015gjets_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjbaseM", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["2015gjets_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjbaseH", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["2015gjets_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjbaseUH", pd.mt2_only, output_dir, exts)
 
 # z->ll
-MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016B", "crdybase", pd.dy_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdybase", pd.dy_plots, output_dir, exts)
 
-MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016B", "crdybaseJ", pd.ht_njet_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016B", "crdybaseIncl", pd.ht_njet_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdybaseJ", pd.ht_njet_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdybaseIncl", pd.ht_njet_plots, output_dir, exts)
 
 # QCD monojet
-MT2PlotMaker(input_dir, ["qcd_ht", "wjets_ht", "zinv_ht"], "data_Run2016B", "crqcdbaseJ", pd.qcdJ_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["qcd_ht", "wjets_ht", "zinv_ht"], "data_Run2016", "crqcdbaseJ", pd.qcdJ_plots, output_dir, exts)
 
 # Lost Lepton MT2 plots, normalized in each HT, nj, nb bin
-makeNormalizedLostLep(input_dir, ["wjets_ht", "top"], "data_Run2016B", output_dir, exts)
+makeNormalizedLostLep(input_dir, ["wjets_ht", "top"], "data_Run2016", output_dir, exts, ht_regs=["VL","L","M","H","UH"])
