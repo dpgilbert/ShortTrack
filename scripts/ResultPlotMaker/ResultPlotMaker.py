@@ -172,7 +172,7 @@ def MakePlot(ht_reg, datacard_dir, datacard_name, outdir, userMax=None):
 
     # Draw the CMS and luminosity text
     ppmUtils.DrawCmsText(pads[0],text="CMS Preliminary",textSize=0.038)
-    ppmUtils.DrawLumiText(pads[0],lumi=7.7,textSize=0.038)
+    ppmUtils.DrawLumiText(pads[0],lumi=utils.lumi,textSize=0.038)
 
     # draw the j/bj region labels
     ibin = 0

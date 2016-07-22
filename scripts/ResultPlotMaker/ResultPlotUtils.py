@@ -1,5 +1,7 @@
 import ROOT
 
+lumi = 7.7
+
 ## returns a list of yields, where the first is the data observation
 ## and the rest are background yields from the processes specified
 ## in bkg_names

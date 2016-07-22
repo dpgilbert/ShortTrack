@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 import ROOT
 from ResultPlotMaker import MakePlot
+import ResultPlotUtils as utils
 
 datacard_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/scripts/cards_test"
 
@@ -8,6 +9,8 @@ datacard_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/scripts/car
 datacard_name = "datacard_{0}_{1}_{2}_T1bbbb_1500_100.txt"
 
 outdir = "/home/users/bemarsh/public_html/mt2/result_plots"
+
+utils.lumi = 7.7
 
 MakePlot("HT200to450",datacard_dir, datacard_name, outdir, userMax=5e6)
 MakePlot("HT450to575",datacard_dir, datacard_name, outdir, userMax=7e5)
