@@ -52,18 +52,28 @@ bool setElSFfile(TString filename){
 }
 
 //_________________________________________________________
-bool setMuSFfile(TString filenameID, TString filenameISO){
+bool setMuSFfile(TString filenameID, TString filenameISO, TString filenameIP, TString filenameTRK){
   TFile * f1 = new TFile(filenameID);
   TFile * f2 = new TFile(filenameISO);
-  if (!f1->IsOpen()) { std::cout<<"applyWeights::setElSFfile: ERROR: Could not find ID scale factor file "<<filenameID<<std::endl; return 0;}
-  if (!f2->IsOpen()) { std::cout<<"applyWeights::setElSFfile: ERROR: Could not find ISO scale factor file "<<filenameISO<<std::endl; return 0;}
-  TH2D* h_id = (TH2D*) f1->Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_tag_IsoMu20_pass");
-  TH2D* h_iso = (TH2D*) f2->Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_PF_pass_&_tag_IsoMu20_pass");
-  if (!h_id || !h_iso) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find scale factor histogram"<<std::endl; return 0;}
+  TFile * f3 = new TFile(filenameIP);
+  TFile * f4 = new TFile(filenameTRK);
+  if (!f1->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find ID scale factor file "<<filenameID<<std::endl; return 0;}
+  if (!f2->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find ISO scale factor file "<<filenameISO<<std::endl; return 0;}
+  if (!f3->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find IP scale factor file "<<filenameIP<<std::endl; return 0;}
+  if (!f4->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find TRK scale factor file "<<filenameTRK<<std::endl; return 0;}
+  TH2D* h_id = (TH2D*) f1->Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0");
+  TH2D* h_iso = (TH2D*) f2->Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_PF_pass");
+  TH2D* h_ip = (TH2D*) f3->Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_PF_pass");
+  TH1D* h_trk_ptlt10 = (TH1D*) f4->Get("mutrksfptl10");
+  TH1D* h_trk_ptgt10 = (TH1D*) f4->Get("mutrksfptg10");
+  if (!h_id || !h_iso || !h_ip || !h_trk_ptlt10 || !h_trk_ptgt10) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find scale factor histogram"<<std::endl; return 0;}
   h_muSF = (TH2D*) h_id->Clone("h_muSF");
   h_muSF->SetDirectory(0);
   h_muSF->Multiply(h_iso);
+  h_muSF->Multiply(h_ip);
   //h_muSF->Print("all");
+  h_muSF_trk_ptlt10 = (TH1D*) h_trk_ptlt10->Clone("h_muSF_trk_ptlt10");
+  h_muSF_trk_ptgt10 = (TH1D*) h_trk_ptgt10->Clone("h_muSF_trk_ptgt10");
   return true;
 }
 
@@ -94,7 +104,10 @@ weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
     int binx = h_muSF->GetXaxis()->FindBin(pt_cutoff);
     int biny = h_muSF->GetYaxis()->FindBin(fabs(eta));
     float central = h_muSF->GetBinContent(binx,biny);
-    float err  = 0.014; // adding in quadrature 1% unc. on ID and 1% unc. on ISO
+    // get also trk sf
+    if (pt > 10) central *= h_muSF_trk_ptgt10->GetBinContent(h_muSF_trk_ptgt10->FindBin(eta));
+    else central *= h_muSF_trk_ptlt10->GetBinContent(h_muSF_trk_ptlt10->FindBin(eta));
+    float err  = 0.03; // suggested 3% uncert
     weights.cent = central;
     weights.up = central+err;
     weights.dn = central-err;
