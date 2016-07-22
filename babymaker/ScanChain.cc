@@ -467,16 +467,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
         if (verbose) cout << "before sparm values" << endl;
 
 	// assume that first sparm value is parent mass, second is LSP mass
-	if ((evt_id >= 1000 && evt_id < 1200) && (sparm_values().size() == 2)) {
-	  GenSusyMScan1 = sparm_values().at(0);
-	  GenSusyMScan2 = sparm_values().at(1);
+	if (evt_id >= 1000 && evt_id < 1200) {
+	  if (sparm_values().size() == 2) {
+	    GenSusyMScan1 = sparm_values().at(0);
+	    GenSusyMScan2 = sparm_values().at(1);
+	    // use sparm values to look up xsec
+	    evt_xsec = h_sig_xsec->GetBinContent(h_sig_xsec->FindBin(GenSusyMScan1));
+	  }
+	  else {
+	    std::cout << "WARNING: expected to find 2 sparm values, found instead " << sparm_values().size() << std::endl;
+	  }
 	}
-	else {
-	  std::cout << "WARNING: expected to find 2 sparm values, found instead " << sparm_values().size() << std::endl;
-	}
-
-	// use sparm values to look up xsec
-	if (evt_id >= 1000 && evt_id < 1200) evt_xsec = h_sig_xsec->GetBinContent(h_sig_xsec->FindBin(GenSusyMScan1));
 
         if (verbose) cout << "before gen particles" << endl;
 
