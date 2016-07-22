@@ -1,7 +1,9 @@
 Script to make result plots based on the yields and uncertainties in the datacards.
 Just edit the datacard directory and name format in do.py and run `python do.py`.
+Note that `cardMaker.C` must be run with `suppressZeroBins` and `suppressZeroTRs` to `False`
+so that cards will be printed even for 0 signal.
 
-Note that this uses the pyRootPlotMaker found here:
+This uses the pyRootPlotMaker found here:
 https://github.com/cmstas/Software/tree/master/pyRootPlotMaker
 
 Add that directory to your PYTHONPATH enviroment variable
