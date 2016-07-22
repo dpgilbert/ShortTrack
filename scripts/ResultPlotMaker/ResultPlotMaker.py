@@ -7,7 +7,7 @@ ROOT.gROOT.SetBatch(1)
 
 def MakePlot(ht_reg, datacard_dir, datacard_name, outdir, userMax=None):
     jbj_regs = utils.GetJBJregions(ht_reg)
-    
+
     #list of lists, one per jbj region, of low edges of MT2 bins
     mt2bins = utils.GetMT2bins(ht_reg)
 
@@ -20,22 +20,42 @@ def MakePlot(ht_reg, datacard_dir, datacard_name, outdir, userMax=None):
     h_bkg_vec = []
     for i,proc in enumerate(bkg_processes):
         h_bkg_vec.append(ROOT.TH1D("h_"+proc,"",nBinsTotal,0,nBinsTotal))
+    g_unc = ROOT.TGraphAsymmErrors() # graph to store prediction uncertainties
+    g_unc_ratio = ROOT.TGraphAsymmErrors() # graph to store prediction uncertainties
 
     ## fill histograms
     ibin = 0
     binLabels = []
+    
     for ijbj, jbj_reg in enumerate(jbj_regs):
         for imt2 in range(len(mt2bins[ijbj])-1):
             ibin += 1
             mt2left = mt2bins[ijbj][imt2]
             mt2right = mt2bins[ijbj][imt2+1]
             mt2name = utils.GetMT2name(mt2left,mt2right)
-            datacard_name2 = datacard_name.format(ht_reg,jbj_reg,mt2name)
-            yields = utils.GetYieldsFromDatacard(os.path.join(datacard_dir,datacard_name2),bkg_processes)
+            if ht_reg != "monojet":
+                datacard_name_fmt = datacard_name.format(ht_reg,jbj_reg,mt2name)
+            else:
+                ht_name = "HT{0}to{1}".format(mt2left,mt2right)
+                ht_name = ht_name.replace("-1","Inf")
+                datacard_name_fmt = datacard_name.format(ht_name,jbj_reg,"m0toInf")
 
+            # get yields. first entry is data, rest are background predictions
+            yields = utils.GetYieldsFromDatacard(os.path.join(datacard_dir,datacard_name_fmt),bkg_processes)
             h_data.SetBinContent(ibin, yields[0])
             for j in range(1,nBkgs+1):
                 h_bkg_vec[j-1].SetBinContent(ibin, yields[j])
+            tot_pred = sum(yields[1:])
+                
+            # get uncertainties
+            pred_unc = utils.GetUncertaintiesFromDatacard(os.path.join(datacard_dir,datacard_name_fmt),bkg_processes)
+            tot_unc_up   = ROOT.TMath.Sqrt(sum([(pred_unc[i][0]*yields[i+1])**2 for i in range(nBkgs)]))
+            tot_unc_down = ROOT.TMath.Sqrt(sum([(pred_unc[i][1]*yields[i+1])**2 for i in range(nBkgs)]))
+            thisPoint = g_unc.GetN()
+            g_unc.SetPoint(thisPoint, ibin-0.5, tot_pred)
+            g_unc.SetPointError(thisPoint, 0.5, 0.5, tot_unc_down, tot_unc_up)            
+            g_unc_ratio.SetPoint(thisPoint, ibin-0.5, 1)
+            g_unc_ratio.SetPointError(thisPoint, 0.5, 0.5, tot_unc_down/tot_pred, tot_unc_up/tot_pred)
 
             binLabels.append(utils.GetMT2label(mt2left,mt2right))
 
@@ -101,6 +121,11 @@ def MakePlot(ht_reg, datacard_dir, datacard_name, outdir, userMax=None):
     # draw the backgrounds
     stack.Draw("SAME HIST")
     
+    # draw the prediction uncertainties
+    g_unc.SetFillStyle(3244)
+    g_unc.SetFillColor(ROOT.kGray+3)
+    g_unc.Draw("SAME 2")
+
     # get a graph using proper asymmetric poissonian errors
     g_data = ROOT.TGraphAsymmErrors()
     ppmUtils.ConvertToPoissonGraph(h_data, g_data, drawZeros=True)
@@ -153,9 +178,6 @@ def MakePlot(ht_reg, datacard_dir, datacard_name, outdir, userMax=None):
     ibin = 0
     for ijbj,jbj_reg in enumerate(jbj_regs):
         xcenter = left + binWidth*(ibin+(len(mt2bins[ijbj])-1)*0.5)
-        y = bot+(1-top-bot)*0.85
-        if xcenter > 1-right-0.19:
-            y = 0.67
         lines = utils.GetJBJtitle(jbj_reg)
         text.SetTextAlign(23)
         text.SetTextFont(62)
@@ -164,6 +186,10 @@ def MakePlot(ht_reg, datacard_dir, datacard_name, outdir, userMax=None):
         if ijbj==len(jbj_regs)-1:
             text.SetTextAlign(13)
             xcenter = left + binWidth*ibin + 0.007
+            xcenter = max(xcenter, 1-right-0.25)
+        y = bot+(1-top-bot)*0.85
+        if xcenter > 1-right-0.19:
+            y = 0.67
         text.DrawLatex(xcenter,y,lines[0])
         text.DrawLatex(xcenter,y-text.GetTextSize()-0.001,lines[1])
 
@@ -202,7 +228,7 @@ def MakePlot(ht_reg, datacard_dir, datacard_name, outdir, userMax=None):
     h_pred = h_bkg_vec[0].Clone("h_pred")
     for i in range(1,nBkgs):
         h_pred.Add(h_bkg_vec[i])
-    ppmUtils.GetPoissonRatioGraph(h_pred, h_data, g_ratio, drawZeros=False, useMCErr=False)
+    ppmUtils.GetPoissonRatioGraph(h_pred, h_data, g_ratio, drawZeros=True, useMCErr=False)
     h_ratio.GetYaxis().SetRangeUser(0,2)
     h_ratio.GetYaxis().SetNdivisions(505)
     h_ratio.GetYaxis().SetTitle("Data/Pred.")
@@ -210,6 +236,7 @@ def MakePlot(ht_reg, datacard_dir, datacard_name, outdir, userMax=None):
     h_ratio.GetYaxis().SetTitleOffset(0.18)
     h_ratio.GetYaxis().SetLabelSize(0.13)
     h_ratio.GetYaxis().CenterTitle()
+    h_ratio.GetYaxis().SetTickLength(0.02)
     h_ratio.GetXaxis().SetLabelSize(0)
     h_ratio.GetXaxis().SetTitle("")
     h_ratio.GetXaxis().SetNdivisions(nBinsTotal,0,0)
@@ -218,8 +245,13 @@ def MakePlot(ht_reg, datacard_dir, datacard_name, outdir, userMax=None):
     g_ratio.SetMarkerSize(1.0)
     g_ratio.SetLineWidth(1)
 
+    g_unc_ratio.SetFillStyle(1001)
+    g_unc_ratio.SetFillColor(ROOT.kGray)
+    
     h_ratio.Draw()
-    g_ratio.Draw("SAME P")
+    g_unc_ratio.Draw("SAME 2")
+    h_ratio.Draw("SAME AXIS")
+    g_ratio.Draw("SAME P0")
 
     # draw line at 1
     line = ROOT.TLine()
