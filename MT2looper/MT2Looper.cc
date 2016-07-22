@@ -587,14 +587,17 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   if (doLepEffVars) {
     setElSFfile("../babymaker/lepsf/kinematicBinSFele.root");
-    setMuSFfile("../babymaker/lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","../babymaker/lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root");
+    setMuSFfile("../babymaker/lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
+		"../babymaker/lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
+		"../babymaker/lepsf/TnP_MuonID_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
+		"../babymaker/lepsf/general_tracks_and_early_general_tracks_corr_ratio.root");
     setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  
   }
   
   if (applyLeptonSFfastsim && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
     setElSFfile_fastsim("../babymaker/lepsf/sf_el_vetoCB_mini01.root");  
     setMuSFfile_fastsim("../babymaker/lepsf/sf_mu_looseID_mini02.root");  
-    setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt_mGluino-1500to1525.root");  
+    setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt.root");  
   }
     if (verbose) cout<<__LINE__<<endl;
 
