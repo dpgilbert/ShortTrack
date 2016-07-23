@@ -86,6 +86,8 @@ bool applyTopPtReweight = false;
 bool applyLeptonSFfastsim = false;
 // add weights to correct for photon trigger efficiencies
 bool applyPhotonTriggerWeights = true;
+// use 2016 ICHEP ISR weights based on nisrMatch, signal only
+bool applyISRWeights = true;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
 bool doSystVariationPlots = true;
 // turn on to apply Nvtx reweighting to MC
@@ -554,6 +556,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   h_sig_avgweight_btagsf_heavy_DN_ = 0;
   h_sig_avgweight_btagsf_light_DN_ = 0;
   h_sig_avgweight_isr_ = 0;
+  h_sig_avgweight_isr_UP_ = 0;
+  h_sig_avgweight_isr_DN_ = 0;
   if ((doScanWeights || applyBtagSF) && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
     std::string scan_name = sample;
     if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
@@ -566,6 +570,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     TH2D* h_sig_avgweight_btagsf_heavy_DN_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf_heavy_DN");
     TH2D* h_sig_avgweight_btagsf_light_DN_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf_light_DN");
     TH2D* h_sig_avgweight_isr_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_isr");
+    TH2D* h_sig_avgweight_isr_UP_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_isr_UP");
+    TH2D* h_sig_avgweight_isr_DN_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_isr_DN");
     h_sig_nevents_ = (TH2D*) h_sig_nevents_temp->Clone("h_sig_nevents");
     h_sig_avgweight_btagsf_ = (TH2D*) h_sig_avgweight_btagsf_temp->Clone("h_sig_avgweight_btagsf");
     h_sig_avgweight_btagsf_heavy_UP_ = (TH2D*) h_sig_avgweight_btagsf_heavy_UP_temp->Clone("h_sig_avgweight_btagsf_heavy_UP");
@@ -573,6 +579,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     h_sig_avgweight_btagsf_heavy_DN_ = (TH2D*) h_sig_avgweight_btagsf_heavy_DN_temp->Clone("h_sig_avgweight_btagsf_heavy_DN");
     h_sig_avgweight_btagsf_light_DN_ = (TH2D*) h_sig_avgweight_btagsf_light_DN_temp->Clone("h_sig_avgweight_btagsf_light_DN");
     h_sig_avgweight_isr_ = (TH2D*) h_sig_avgweight_isr_temp->Clone("h_sig_avgweight_isr");
+    h_sig_avgweight_isr_UP_ = (TH2D*) h_sig_avgweight_isr_UP_temp->Clone("h_sig_avgweight_isr_UP");
+    h_sig_avgweight_isr_DN_ = (TH2D*) h_sig_avgweight_isr_DN_temp->Clone("h_sig_avgweight_isr_DN");
     h_sig_nevents_->SetDirectory(0);
     h_sig_avgweight_btagsf_->SetDirectory(0);
     h_sig_avgweight_btagsf_heavy_UP_->SetDirectory(0);
@@ -580,6 +588,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     h_sig_avgweight_btagsf_heavy_DN_->SetDirectory(0);
     h_sig_avgweight_btagsf_light_DN_->SetDirectory(0);
     h_sig_avgweight_isr_->SetDirectory(0);
+    h_sig_avgweight_isr_UP_->SetDirectory(0);
+    h_sig_avgweight_isr_DN_->SetDirectory(0);
     f_nsig_weights->Close();
     delete f_nsig_weights;
   }
@@ -816,6 +826,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}
 	else if (doLepEffVars && nlepveto_ == 0) fillLepUncSR();
 	if (applyLeptonSF) evtweight_ *= t.weight_lepsf;
+	if (isSignal_ && applyISRWeights) {
+	  int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(t.GenSusyMScan1);
+	  int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(t.GenSusyMScan2);
+	  float avgweight_isr = h_sig_avgweight_isr_->GetBinContent(binx,biny);
+	  evtweight_ *= t.weight_isr / avgweight_isr;
+	}
 	if (applyTopPtReweight && t.evt_id >= 300 && t.evt_id < 400) {
 	  evtweight_ *= t.weight_toppt;
 	}
@@ -2025,18 +2041,17 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot3D("h_mt2bins_sigscan"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
   }
 
-  if (!t.isData && isSignal_ && doSystVariationPlots) {
+  if (!t.isData && isSignal_ && applyISRWeights && doSystVariationPlots) {
     int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(t.GenSusyMScan1);
     int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(t.GenSusyMScan2);
-    // stored ISR weight is for DN variation
-    float weight_isr_DN = t.weight_isr;
-    float avgweight_isr_DN = h_sig_avgweight_isr_->GetBinContent(binx,biny);
-    float weight_isr_UP = 2. - weight_isr_DN;
-    float avgweight_isr_UP = 2. - avgweight_isr_DN;
-    plot1D("h_mt2bins_isr_UP"+s,       mt2_temp,   evtweight_ * weight_isr_UP / avgweight_isr_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_isr_DN"+s,       mt2_temp,   evtweight_ * weight_isr_DN / avgweight_isr_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot3D("h_mt2bins_sigscan_isr_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ * weight_isr_UP / avgweight_isr_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-    plot3D("h_mt2bins_sigscan_isr_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ * weight_isr_DN / avgweight_isr_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    // remove central value ISR weight when doing variation
+    float avgweight_isr = h_sig_avgweight_isr_->GetBinContent(binx,biny);
+    float avgweight_isr_UP = h_sig_avgweight_isr_UP_->GetBinContent(binx,biny);
+    float avgweight_isr_DN = h_sig_avgweight_isr_DN_->GetBinContent(binx,biny);
+    plot1D("h_mt2bins_isr_UP"+s,       mt2_temp,   evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_UP / avgweight_isr_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_isr_DN"+s,       mt2_temp,   evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_DN / avgweight_isr_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot3D("h_mt2bins_sigscan_isr_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_UP / avgweight_isr_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    plot3D("h_mt2bins_sigscan_isr_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_DN / avgweight_isr_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
   }
 
   if (!t.isData && applyBtagSF && doSystVariationPlots) {
