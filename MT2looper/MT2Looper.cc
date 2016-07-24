@@ -89,7 +89,7 @@ bool applyPhotonTriggerWeights = true;
 // use 2016 ICHEP ISR weights based on nisrMatch, signal only
 bool applyISRWeights = true;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
-bool doSystVariationPlots = true;
+bool doSystVariationPlots = false;
 // turn on to apply Nvtx reweighting to MC
 bool doNvtxReweight = false;
 // turn on to apply json file to data
@@ -749,14 +749,20 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
       if (verbose) cout<<__LINE__<<endl;
 
+
+      // flag signal samples
+      if (t.evt_id >= 1000) isSignal_ = true;
+      else isSignal_ = false;
+      if (verbose) cout<<__LINE__<<endl;
+
       // Jet ID Veto
       bool passJetID = true;
       //if (t.nJet30FailId > 0) continue;
       if (t.nJet30FailId > 0) passJetID = false;
-
+      if (verbose) cout<<__LINE__<<endl;
       // filter for bad fastsim jets
       if (isSignal_ && t.nJet20BadFastsim > 0) continue;
-      
+      if (verbose) cout<<__LINE__<<endl;
       // remove low pt QCD samples 
       if (t.evt_id >= 100 && t.evt_id < 109) continue;
       // remove low HT QCD samples 
@@ -766,10 +772,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (t.evt_id >= 151 && t.evt_id < maxQCD) continue;
       // note that ETH has an offset in QCD numbering..
 
-      // flag signal samples
-      if (t.evt_id >= 1000) isSignal_ = true;
-      else isSignal_ = false;
-      if (verbose) cout<<__LINE__<<endl;
 
       //if (isSignal_ && (t.GenSusyMScan1 != 1600 || t.GenSusyMScan2 != 0)) continue;
       
@@ -986,13 +988,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if ( t.nlep == 1 && !isSignal_) {
 	if ( t.lep_pt[0] > 30 && fabs(t.lep_eta[0])<2.5 && t.nBJet20 == 0) { // raise threshold to avoid Ele23 in MC
 	  if (abs(t.lep_pdgId[0])==13) { // muons
-	    if (!t.isData || t.HLT_SingleMu)  doRLMUplots = true;
+	    if (!t.isData || t.HLT_SingleMu || t.HLT_SingleMu_NonIso )  doRLMUplots = true;
 	  }
 	  if (abs(t.lep_pdgId[0])==11) { // electrons
-	    if ( (!t.isData || t.HLT_SingleEl )   // Ele23 trigger not present in MC. Need to keep lepton threshold high
+	    if ( (!t.isData || t.HLT_SingleEl || t.HLT_SingleEl_NonIso )   // Ele23 trigger not present in MC. Need to keep lepton threshold high
 		 && t.lep_relIso03[0]<0.1 // tighter selection for electrons
 		 && t.lep_relIso03[0]*t.lep_pt[0]<5 // tighter selection for electrons
 		 && t.lep_tightId[0]>2
+		 && fabs(t.lep_eta[0])<2.1
 		 ) 
 	      doRLELplots = true;
 	  }
