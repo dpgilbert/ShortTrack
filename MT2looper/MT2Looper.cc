@@ -89,7 +89,7 @@ bool applyPhotonTriggerWeights = true;
 // use 2016 ICHEP ISR weights based on nisrMatch, signal only
 bool applyISRWeights = true;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
-bool doSystVariationPlots = false;
+bool doSystVariationPlots = true;
 // turn on to apply Nvtx reweighting to MC
 bool doNvtxReweight = false;
 // turn on to apply json file to data
