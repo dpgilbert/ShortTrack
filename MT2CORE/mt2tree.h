@@ -126,6 +126,7 @@ public :
    Int_t           HLT_SingleMu;   
    Int_t           HLT_SingleMu_NonIso;   
    Int_t           HLT_SingleEl;   
+   Int_t           HLT_SingleEl_NonIso;   
    Int_t           HLT_DoubleEl;   
    Int_t           HLT_DoubleEl33;   
    Int_t           HLT_MuEG;   
@@ -463,6 +464,7 @@ public :
    TBranch        *b_HLT_SingleMu;   //!
    TBranch        *b_HLT_SingleMu_NonIso;   //!
    TBranch        *b_HLT_SingleEl;   //!
+   TBranch        *b_HLT_SingleEl_NonIso;   //!
    TBranch        *b_HLT_DoubleEl;   //!
    TBranch        *b_HLT_DoubleEl33;   //!
    TBranch        *b_HLT_MuEG;   //!
@@ -859,6 +861,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_SingleMu", &HLT_SingleMu, &b_HLT_SingleMu);
    fChain->SetBranchAddress("HLT_SingleMu_NonIso", &HLT_SingleMu_NonIso, &b_HLT_SingleMu_NonIso);
    fChain->SetBranchAddress("HLT_SingleEl", &HLT_SingleEl, &b_HLT_SingleEl);
+   fChain->SetBranchAddress("HLT_SingleEl_NonIso", &HLT_SingleEl_NonIso, &b_HLT_SingleEl_NonIso);
    fChain->SetBranchAddress("HLT_DoubleEl", &HLT_DoubleEl, &b_HLT_DoubleEl);
    fChain->SetBranchAddress("HLT_DoubleEl33", &HLT_DoubleEl33, &b_HLT_DoubleEl33);
    fChain->SetBranchAddress("HLT_MuEG", &HLT_MuEG, &b_HLT_MuEG);
