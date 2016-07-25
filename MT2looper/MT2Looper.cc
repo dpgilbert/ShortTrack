@@ -596,7 +596,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   if (verbose) cout<<__LINE__<<endl;
 
   if (doLepEffVars) {
-    setElSFfile("../babymaker/lepsf/kinematicBinSFele.root");
+    setElSFfile("../babymaker/lepsf/scaleFactors_el_ichep_2016.root", "../babymaker/lepsf/egammaEffi_track_SF2D_ichep_2016.root" );
     setMuSFfile("../babymaker/lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
 		"../babymaker/lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
 		"../babymaker/lepsf/TnP_MuonID_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
