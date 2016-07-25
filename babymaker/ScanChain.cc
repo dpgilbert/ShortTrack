@@ -1256,15 +1256,19 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
 	    } // isFastsim
 
 	    else { // fullsim
-	      // don't apply correction to 0L central value for fullsim: saw that the effect was negligible
+	      // save correction also for 0L central value for fullsim
 	      weightStruct sf_struct = getLepSFFromFile(pt, eta, pdgId);
 	      float sf = sf_struct.cent;
 	      float vetoeff = getLepVetoEffFromFile_fullsim(pt, eta, pdgId);
+	      // apply SF to vetoeff, then correction for 0L will be (1 - vetoeff_cor) / (1 - vetoeff) - 1.
+	      float vetoeff_cor = vetoeff * sf;
+	      float cor_0l = ( (1. - vetoeff_cor) / (1. - vetoeff) ) - 1.;
+	      weight_lepsf_0l *= (1. + cor_0l);
 	      float unc = sf_struct.up - sf;
-	      float vetoeff_unc_UP = vetoeff * (1. + unc);
-	      float unc_UP_0l = ( (1. - vetoeff_unc_UP) / (1. - vetoeff) ) - 1.;
-	      weight_lepsf_0l_UP *= (1. + unc_UP_0l);
-	      weight_lepsf_0l_DN *= (1. - unc_UP_0l);
+	      float vetoeff_cor_unc_UP = vetoeff_cor * (1. + unc);
+	      float unc_UP_0l = ( (1. - vetoeff_cor_unc_UP) / (1. - vetoeff_cor) ) - 1.;
+	      weight_lepsf_0l_UP *= (1. + cor_0l + unc_UP_0l);
+	      weight_lepsf_0l_DN *= (1. + cor_0l - unc_UP_0l);
 	    }
 	  } // if applyLeptonSFs
 	  
