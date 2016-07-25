@@ -38,16 +38,21 @@ weightStruct getLepSF(float pt, float, int pdgId) {
 }
 
 //_________________________________________________________
-bool setElSFfile(TString filename){
-  TFile * f = new TFile(filename);
-  if (!f->IsOpen()) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find scale factor file "<<filename<<std::endl;
-  TH2D* h_id = (TH2D*) f->Get("CutBasedVeto");
-  TH2D* h_iso = (TH2D*) f->Get("MiniIso0p1_vs_AbsEta");
-  if (!h_id || !h_iso) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find scale factor histogram"<<std::endl;
+bool setElSFfile(TString filenameIDISO, TString filenameTRK){
+  TFile * f1 = new TFile(filenameIDISO);
+  TFile * f2 = new TFile(filenameTRK);
+  if (!f1->IsOpen()) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find scale factor file "<<filenameIDISO<<std::endl;
+  if (!f2->IsOpen()) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find track scale factor file "<<filenameTRK<<std::endl;
+  TH2D* h_id = (TH2D*) f1->Get("GsfElectronToVeto");
+  TH2D* h_iso = (TH2D*) f1->Get("MVAVLooseElectronToMini");
+  TH2D* h_trk = (TH2D*) f2->Get("EGamma_SF2D");
+  if (!h_id || !h_iso || !h_trk) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find scale factor histogram"<<std::endl;
   h_elSF = (TH2D*) h_id->Clone("h_elSF");
   h_elSF->SetDirectory(0);
   h_elSF->Multiply(h_iso);
   //h_elSF->Print("all");
+  h_elSF_trk = (TH2D*) h_trk->Clone("h_elSF_trk");
+  h_elSF_trk->SetDirectory(0);
   return true;
 }
 
@@ -73,7 +78,9 @@ bool setMuSFfile(TString filenameID, TString filenameISO, TString filenameIP, TS
   h_muSF->Multiply(h_ip);
   //h_muSF->Print("all");
   h_muSF_trk_ptlt10 = (TH1D*) h_trk_ptlt10->Clone("h_muSF_trk_ptlt10");
+  h_muSF_trk_ptlt10->SetDirectory(0);
   h_muSF_trk_ptgt10 = (TH1D*) h_trk_ptgt10->Clone("h_muSF_trk_ptgt10");
+  h_muSF_trk_ptgt10->SetDirectory(0);
   return true;
 }
 
@@ -82,7 +89,7 @@ weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
 
   weightStruct weights;
 
-  if(!h_elSF || !h_muSF) {
+  if(!h_elSF || !h_muSF || !h_elSF_trk || !h_muSF_trk_ptgt10 || !h_muSF_trk_ptlt10) {
     std::cout << "applyWeights::getLepSFFromFile: ERROR: missing input hists" << std::endl;
     return weights;
   }
@@ -94,10 +101,17 @@ weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
     int biny = h_elSF->GetYaxis()->FindBin(fabs(eta));
     float central = h_elSF->GetBinContent(binx,biny);
     float err  = h_elSF->GetBinError(binx,biny);
+    // get also trk sf
+    int binx_trk = h_elSF_trk->GetXaxis()->FindBin(eta);
+    int biny_trk = 1; // hardcoding for now - only one bin in pt (hist starts at 20)
+    central *= h_elSF_trk->GetBinContent(binx_trk,biny_trk);
+    float trk_err = h_elSF_trk->GetBinError(binx_trk,biny_trk);
+    if (pt_cutoff < 20.) err = sqrt(err*err + trk_err*trk_err + 0.03*0.03); // extra 3% error for pt < 20
+    else err = sqrt(err*err + trk_err*trk_err); // otherwise just use histogram error
     weights.cent = central;
     weights.up = central+err;
     weights.dn = central-err;
-    if (central > 1.2 || central < 0.8) 
+    if (central > 1.3 || central < 0.3) 
       std::cout<<"STRANGE: Electron with pT/eta of "<<pt_cutoff<<"/"<<eta<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
   }
   else if (abs(pdgId) == 13) {

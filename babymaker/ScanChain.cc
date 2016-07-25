@@ -66,7 +66,7 @@ const bool applyTriggerCuts = false;
 // turn on to apply dummy weights for lepton SFs, btag SFs, etc (default false)
 const bool applyDummyWeights = false;
 // turn on to apply lepton SF
-const bool applyLeptonSFs = false;
+const bool applyLeptonSFs = true;
 // turn on to apply json file to data (default true)
 const bool applyJSON = false;
 // for testing purposes, running on unmerged files (default false)
@@ -176,7 +176,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
 
   // Lepton Scale Factors
   if (applyLeptonSFs) {
-    setElSFfile("lepsf/kinematicBinSFele.root");
+    setElSFfile("lepsf/scaleFactors_el_ichep_2016.root", "lepsf/egammaEffi_track_SF2D_ichep_2016.root" );
     setMuSFfile("lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
 		"lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
 		"lepsf/TnP_MuonID_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
