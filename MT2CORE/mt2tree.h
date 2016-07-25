@@ -336,6 +336,9 @@ public :
    Float_t         weight_lepsf;
    Float_t         weight_lepsf_UP;
    Float_t         weight_lepsf_DN;
+   Float_t         weight_lepsf_0l;
+   Float_t         weight_lepsf_0l_UP;
+   Float_t         weight_lepsf_0l_DN;
    Float_t         weight_btagsf;
    Float_t         weight_btagsf_UP;
    Float_t         weight_btagsf_heavy_UP;
@@ -674,6 +677,9 @@ public :
    TBranch        *b_weight_lepsf;   //!
    TBranch        *b_weight_lepsf_UP;   //!
    TBranch        *b_weight_lepsf_DN;   //!
+   TBranch        *b_weight_lepsf_0l;   //!
+   TBranch        *b_weight_lepsf_0l_UP;   //!
+   TBranch        *b_weight_lepsf_0l_DN;   //!
    TBranch        *b_weight_btagsf;   //!
    TBranch        *b_weight_btagsf_UP;   //!
    TBranch        *b_weight_btagsf_heavy_UP;   //!
@@ -1071,6 +1077,9 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("weight_lepsf", &weight_lepsf, &b_weight_lepsf);
    fChain->SetBranchAddress("weight_lepsf_UP", &weight_lepsf_UP, &b_weight_lepsf_UP);
    fChain->SetBranchAddress("weight_lepsf_DN", &weight_lepsf_DN, &b_weight_lepsf_DN);
+   fChain->SetBranchAddress("weight_lepsf_0l", &weight_lepsf_0l, &b_weight_lepsf_0l);
+   fChain->SetBranchAddress("weight_lepsf_0l_UP", &weight_lepsf_0l_UP, &b_weight_lepsf_0l_UP);
+   fChain->SetBranchAddress("weight_lepsf_0l_DN", &weight_lepsf_0l_DN, &b_weight_lepsf_0l_DN);
    fChain->SetBranchAddress("weight_btagsf", &weight_btagsf, &b_weight_btagsf);
    fChain->SetBranchAddress("weight_btagsf_UP", &weight_btagsf_UP, &b_weight_btagsf_UP);
    fChain->SetBranchAddress("weight_btagsf_heavy_UP", &weight_btagsf_heavy_UP, &b_weight_btagsf_heavy_UP);
