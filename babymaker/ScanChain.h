@@ -80,6 +80,7 @@ class babyMaker {
   Int_t           lumi;
   ULong64_t       evt;
   Int_t           isData;
+  Int_t           isGolden;
 
   Float_t         evt_scale1fb;
   Float_t         evt_xsec;

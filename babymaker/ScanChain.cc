@@ -68,7 +68,7 @@ const bool applyDummyWeights = false;
 // turn on to apply lepton SF
 const bool applyLeptonSFs = true;
 // turn on to apply json file to data (default true)
-const bool applyJSON = false;
+const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
 const bool removePostProcVars = false;
 // for merging prompt reco 2015 with reMINIAOD (default true)
@@ -121,7 +121,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
   // 25ns is hardcoded here, would need an option for 50ns
-  const char* json_file = "jsons/Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  const char* json_file = "jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -361,9 +361,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
       lumi = cms3.evt_lumiBlock();
       evt  = cms3.evt_event();
 
-      if ( applyJSON && isData && !goodrun(run, lumi) ) {
-        ++nFailJSON;
-        continue;
+      if ( isData && applyJSON ) {
+	if ( goodrun(run, lumi) ) isGolden = 1;
+	else isGolden = 0;
       }
 
       if ( isData && isPromptReco && removeEarlyPromptReco && (run <= 251562) ) {
@@ -2205,6 +2205,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
     BabyTree_->Branch("lumi", &lumi );
     BabyTree_->Branch("evt", &evt, "evt/l" );
     BabyTree_->Branch("isData", &isData );
+    BabyTree_->Branch("isGolden", &isGolden );
     BabyTree_->Branch("evt_scale1fb", &evt_scale1fb);
     BabyTree_->Branch("evt_xsec", &evt_xsec );
     BabyTree_->Branch("evt_kfactor", &evt_kfactor );
@@ -2561,6 +2562,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
     lumi   = -999;
     evt    = -999;
     isData = -999;
+    isGolden = -1;
     evt_scale1fb = 0;
     evt_xsec = -999.0;
     evt_kfactor = -999.0;

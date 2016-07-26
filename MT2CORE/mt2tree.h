@@ -26,6 +26,7 @@ public :
    Int_t           lumi;
    ULong64_t       evt;
    Int_t           isData;
+   Int_t           isGolden;
    Float_t         evt_scale1fb;
    Float_t         evt_xsec;
    Float_t         evt_kfactor;
@@ -367,6 +368,7 @@ public :
    TBranch        *b_lumi;   //!
    TBranch        *b_evt;   //!
    TBranch        *b_isData;   //!
+   TBranch        *b_isGolden;   //!
    TBranch        *b_evt_scale1fb;   //!
    TBranch        *b_evt_xsec;   //!
    TBranch        *b_evt_kfactor;   //!
@@ -767,6 +769,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("lumi", &lumi, &b_lumi);
    fChain->SetBranchAddress("evt", &evt, &b_evt);
    fChain->SetBranchAddress("isData", &isData, &b_isData);
+   fChain->SetBranchAddress("isGolden", &isGolden, &b_isGolden);
    fChain->SetBranchAddress("evt_scale1fb", &evt_scale1fb, &b_evt_scale1fb);
    fChain->SetBranchAddress("evt_xsec", &evt_xsec, &b_evt_xsec);
    fChain->SetBranchAddress("evt_kfactor", &evt_kfactor, &b_evt_kfactor);
