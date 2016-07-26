@@ -96,7 +96,7 @@ inline bool sortByValue(const std::pair<int,float>& pair1, const std::pair<int,f
 
 //--------------------------------------------------------------------
 
-void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
+void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, int max_events){
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
@@ -274,9 +274,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim){
     cms3.Init(tree);
 
     // Event Loop
-    unsigned int nEventsTree = tree->GetEntriesFast();
-    for( unsigned int event = 0; event < nEventsTree; ++event) {
-      //for( unsigned int event = 0; event < 1000; ++event) {
+    unsigned int nEventsToLoop = tree->GetEntriesFast();
+    if (max_events > 0) nEventsToLoop = (unsigned int) max_events;
+    for( unsigned int event = 0; event < nEventsToLoop; ++event) {
 
       // Get Event Content
       tree->LoadTree(event);

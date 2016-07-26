@@ -10,13 +10,17 @@
 int main(int argc, char **argv) {
 
   if (argc < 3) {
-    std::cout << "USAGE: processBaby <tag> <filename>" << std::endl;
+    std::cout << "USAGE: processBaby <tag> <filename> [<max_num_events>]" << std::endl;
     return 1;
   }
 
   TString outfileid(argv[1]); 
   TString infile(argv[2]); 
 
+  int max_events = -1;
+  if (argc >= 4) max_events = atoi(argv[3]);
+  std::cout << "set max number of events to: " << max_events << std::endl;
+  
   TChain *chain = new TChain("Events");
   chain->Add(infile.Data());
   if (chain->GetEntries() == 0) std::cout << "WARNING: no entries in chain. filename was: " << infile << std::endl;
@@ -184,6 +188,6 @@ int main(int argc, char **argv) {
   
   babyMaker *looper = new babyMaker();
   if (isBadMiniAodV1) looper->SetRecomputeRawPFMET(true);
-  looper->ScanChain(chain, sample, isFastsim); 
+  looper->ScanChain(chain, sample, isFastsim, max_events); 
   return 0;
 }
