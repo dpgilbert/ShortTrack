@@ -188,13 +188,13 @@ chmod -R a+wrx $OUTPUTDIR
 # run qcd_ht1500to2000
 # run qcd_ht2000toInf
 
-# # run qcd_ht200to300_ext
-# run qcd_ht300to500_ext
-# run qcd_ht500to700_ext
-# run qcd_ht700to1000_ext
-# run qcd_ht1000to1500_ext
-# run qcd_ht1500to2000_ext
-# run qcd_ht2000toInf_ext
+# # run qcd_ht200to300_ext1
+# run qcd_ht300to500_ext1
+# run qcd_ht500to700_ext1
+# run qcd_ht700to1000_ext1
+# run qcd_ht1000to1500_ext1
+# run qcd_ht1500to2000_ext1
+# run qcd_ht2000toInf_ext1
 
 #
 # SIGNAL
