@@ -861,6 +861,19 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	if (applyTopPtReweight && t.evt_id >= 300 && t.evt_id < 400) {
 	  evtweight_ *= t.weight_toppt;
 	}
+
+        // fix for 2015 dyjets xsecs
+        if(stringsample.Contains("2015dyjetsll")){
+            if(t.evt_id == 702) evtweight_ *= 1.0573;
+            if(t.evt_id == 703) evtweight_ *= 0.9588;
+            if(t.evt_id == 704) evtweight_ *= 1.0329;
+            if(t.evt_id == 705) evtweight_ *= 0.9945;
+        }
+        // fix for 2015 wjets xsecs
+        if(stringsample.Contains("2015wjets")){
+            if(t.evt_id == 505) evtweight_ *= 12.05 / 18.77;
+        }
+
       } // !isData
 
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
