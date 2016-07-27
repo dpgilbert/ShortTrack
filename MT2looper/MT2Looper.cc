@@ -608,7 +608,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   
   if (applyLeptonSFfromFiles && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
     setElSFfile_fastsim("../babymaker/lepsf/sf_el_vetoCB_mini01.root");  
-    setMuSFfile_fastsim("../babymaker/lepsf/sf_mu_looseID_mini02.root");  
+    setMuSFfile_fastsim("../babymaker/lepsf/sf_mu_loose.root",
+			"../babymaker/lepsf/sf_mu_looseID_mini02.root",
+			"../babymaker/lepsf/sf_mu_looseIP2D.root");
     setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt.root");  
   }
     if (verbose) cout<<__LINE__<<endl;

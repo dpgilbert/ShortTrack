@@ -29,7 +29,7 @@ weightStruct getLepSFFromFile(float pt, float eta, int pdgId);
 TH2D* h_elSF_fastsim = 0;
 TH2D* h_muSF_fastsim = 0;
 bool setElSFfile_fastsim(TString filename);
-bool setMuSFfile_fastsim(TString filename);
+bool setMuSFfile_fastsim(TString filenameID, TString filenameISO, TString filenameIP);
 weightStruct getLepSFFromFile_fastsim(float pt, float eta, int pdgId);
 
 TH2D* h_elVetoEff_fullsim = 0;

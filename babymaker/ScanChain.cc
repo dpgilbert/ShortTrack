@@ -184,7 +184,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     setVetoEffFile_fullsim("lepsf/vetoeff_emu_etapt_lostlep.root");  
     if (isFastsim) {
       setElSFfile_fastsim("lepsf/sf_el_vetoCB_mini01.root");
-      setMuSFfile_fastsim("lepsf/sf_mu_looseID_mini02.root");
+      setMuSFfile_fastsim("lepsf/sf_mu_loose.root",
+			  "lepsf/sf_mu_looseID_mini02.root",
+			  "lepsf/sf_mu_looseIP2D.root");
       setVetoEffFile_fastsim("lepsf/vetoeff_emu_etapt_T1tttt.root");  
     }
   }

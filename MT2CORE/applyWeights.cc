@@ -146,13 +146,21 @@ bool setElSFfile_fastsim(TString filename){
 }
 
 //_________________________________________________________
-bool setMuSFfile_fastsim(TString filename){
-  TFile * f = new TFile(filename);
-  if (!f->IsOpen()) { std::cout<<"applyWeights::setMuSFfile_fastsim: ERROR: Could not find scale factor file "<<filename<<std::endl; return 0;}
-  TH2D* h_eff = (TH2D*) f->Get("histo2D");
-  if (!h_eff) { std::cout<<"applyWeights::setMuSFfile_fastsim: ERROR: Could not find scale factor histogram"<<std::endl; return 0;}
-  h_muSF_fastsim = (TH2D*) h_eff->Clone("h_muSF_fastsim");
+bool setMuSFfile_fastsim(TString filenameID, TString filenameISO, TString filenameIP){
+  TFile * f1 = new TFile(filenameID);
+  TFile * f2 = new TFile(filenameISO);
+  TFile * f3 = new TFile(filenameIP);
+  if (!f1->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find ID scale factor file "<<filenameID<<std::endl; return 0;}
+  if (!f2->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find ISO scale factor file "<<filenameISO<<std::endl; return 0;}
+  if (!f3->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find IP scale factor file "<<filenameIP<<std::endl; return 0;}
+  TH2D* h_id = (TH2D*) f1->Get("histo2D");
+  TH2D* h_iso = (TH2D*) f2->Get("histo2D");
+  TH2D* h_ip = (TH2D*) f3->Get("histo2D");
+  if (!h_id || !h_iso || !h_ip) { std::cout<<"applyWeights::setMuSFfile_fastsim: ERROR: Could not find scale factor histogram"<<std::endl; return 0;}
+  h_muSF_fastsim = (TH2D*) h_id->Clone("h_muSF_fastsim");
   h_muSF_fastsim->SetDirectory(0);
+  h_muSF_fastsim->Multiply(h_iso);
+  h_muSF_fastsim->Multiply(h_ip);
   //h_muSF_fastsim->Print("all");
   return true;
 }
@@ -173,7 +181,7 @@ weightStruct getLepSFFromFile_fastsim(float pt, float eta, int pdgId) {
     int binx = h_elSF_fastsim->GetXaxis()->FindBin(pt_cutoff);
     int biny = h_elSF_fastsim->GetYaxis()->FindBin(fabs(eta));
     float central = h_elSF_fastsim->GetBinContent(binx,biny);
-    float err  = 0.05; // 5% for all pt
+    float err  = 0.02; // 2% for all pt
     weights.cent = central;
     weights.up = central+err;
     weights.dn = central-err;
@@ -184,8 +192,7 @@ weightStruct getLepSFFromFile_fastsim(float pt, float eta, int pdgId) {
     int binx = h_muSF_fastsim->GetXaxis()->FindBin(pt_cutoff);
     int biny = h_muSF_fastsim->GetYaxis()->FindBin(fabs(eta));
     float central = h_muSF_fastsim->GetBinContent(binx,biny);
-    float err  = 0.01; // 1% for pt > 20
-    if (pt_cutoff < 20.) err = 0.03; // 3% for pt < 20
+    float err  = 0.02; // 2% for all pt
     weights.cent = central;
     weights.up = central+err;
     weights.dn = central-err;
