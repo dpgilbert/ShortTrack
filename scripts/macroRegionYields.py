@@ -8,8 +8,8 @@ import collections
 
 #datacard_dir = 'cards_all_macroregions_try2'
 #datacard_dir = 'datacards_2p26ifb_fromMario/EventYields_data_Run2015_25nsGolden_2p3ifb/datacard_templates'
-datacard_dir = 'datacards_4fb_eth'
-output_dir = 'cards_for_macroregions_4fb_sigunc15'
+datacard_dir = 'datacard_templates_eth_12p9ifb_final'
+output_dir = 'cards_for_macroregions_12p9fb_test_sigunc15'
 
 # signal point may appear in name
 #signal_point = '_T2tt_700_0'
@@ -86,7 +86,7 @@ def fillNuisanceDictGMN( dict_nuis_up, dict_nuis_dn, nuis_name, cr_yield, alpha 
     # get poisson uncertainties on yield
     cr_yield_up = ROOT.Double()
     cr_yield_dn = ROOT.Double()
-    ROOT.RooHistError.instance().getPoissonInterval(cr_yield,cr_yield_dn,cr_yield_up,1.)
+#    ROOT.RooHistError.instance().getPoissonInterval(cr_yield,cr_yield_dn,cr_yield_up,1.)
     abserr_up = (cr_yield_up - cr_yield)*alpha
     abserr_dn = (cr_yield - cr_yield_dn)*alpha
     
@@ -250,26 +250,16 @@ def printMacroRegionYields( region, datacard_list ):
 def main():
     # define macroregions here from subsets of existing datacards
 
-    # 3b verytight: HT > 1000, MT2 > 200
+    # 3b verytight: HT > 1000, MT2 > 400
     datacards_3b_verytight = [
-        'HT1000to1500_j2to6_b3toInf_m200to400',
         'HT1000to1500_j2to6_b3toInf_m400toInf',
-        'HT1000to1500_j7toInf_b3toInf_m200to400',
         'HT1000to1500_j7toInf_b3toInf_m400toInf',
-        'HT1500toInf_j2to6_b3toInf_m200to400',
         'HT1500toInf_j2to6_b3toInf_m400toInf',
-        'HT1500toInf_j7toInf_b3toInf_m200to400',
         'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
-    # 3b tight: HT > 575, MT2 > 200
+    # 3b tight: HT > 1000, MT2 > 200
     datacards_3b_tight = [
-        'HT575to1000_j2to6_b3toInf_m200to300',
-        'HT575to1000_j2to6_b3toInf_m300to400',
-        'HT575to1000_j2to6_b3toInf_m400toInf',
-        'HT575to1000_j7toInf_b3toInf_m200to300',
-        'HT575to1000_j7toInf_b3toInf_m300to400',
-        'HT575to1000_j7toInf_b3toInf_m400toInf',
         'HT1000to1500_j2to6_b3toInf_m200to400',
         'HT1000to1500_j2to6_b3toInf_m400toInf',
         'HT1000to1500_j7toInf_b3toInf_m200to400',
@@ -280,14 +270,8 @@ def main():
         'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
-    # 3b medium: HT > 200, MT2 > 200
+    # 3b medium: HT > 575, MT2 > 200
     datacards_3b_medium = [
-        'HT200to450_j2to6_b3toInf_m200to300',
-        'HT200to450_j2to6_b3toInf_m300toInf',
-        'HT200to450_j7toInf_b3toInf_m200toInf',
-        'HT450to575_j2to6_b3toInf_m200to300',
-        'HT450to575_j2to6_b3toInf_m300toInf',
-        'HT450to575_j7toInf_b3toInf_m200toInf',
         'HT575to1000_j2to6_b3toInf_m200to300',
         'HT575to1000_j2to6_b3toInf_m300to400',
         'HT575to1000_j2to6_b3toInf_m400toInf',
@@ -304,27 +288,17 @@ def main():
         'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
-    # 7j verytight: (HT > 1000 && nb <= 1 && MT2 > 600) || (HT > 1000 && nb >= 2 && MT2 > 400) || (HT > 1500 && MT2 > 400) 
+    # 7j verytight: (HT > 1500 && MT2 > 400) 
     datacards_7j_verytight = [
-        'HT1000to1500_j7toInf_b0_m600toInf',
-        'HT1000to1500_j7toInf_b1_m600toInf',
-        'HT1000to1500_j7toInf_b2_m400toInf',
-        'HT1000to1500_j7toInf_b3toInf_m400toInf',
         'HT1500toInf_j7toInf_b0_m400toInf',
         'HT1500toInf_j7toInf_b1_m400toInf',
         'HT1500toInf_j7toInf_b2_m400toInf',
         'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
-
-    # 7j tight: HT > 575, MT2 > 400
+    
+    # 7j tight: (HT > 1000 && nb <= 1 && MT2 > 600) || (HT > 1000 && nb >= 2 && MT2 > 400) || (HT > 1500 && MT2 > 400) 
     datacards_7j_tight = [
-        'HT575to1000_j7toInf_b0_m400toInf',
-        'HT575to1000_j7toInf_b1_m400toInf',
-        'HT575to1000_j7toInf_b2_m400toInf',
-        'HT575to1000_j7toInf_b3toInf_m400toInf',
-        'HT1000to1500_j7toInf_b0_m400to600',
         'HT1000to1500_j7toInf_b0_m600toInf',
-        'HT1000to1500_j7toInf_b1_m400to600',
         'HT1000to1500_j7toInf_b1_m600toInf',
         'HT1000to1500_j7toInf_b2_m400toInf',
         'HT1000to1500_j7toInf_b3toInf_m400toInf',
@@ -334,7 +308,7 @@ def main():
         'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
-    # 7j medium: HT > 1500, MT2 > 200 || HT 575-1500, MT2 > 400
+    # 7j medium: HT > 575, MT2 > 400
     datacards_7j_medium = [
         'HT575to1000_j7toInf_b0_m400toInf',
         'HT575to1000_j7toInf_b1_m400toInf',
@@ -346,80 +320,43 @@ def main():
         'HT1000to1500_j7toInf_b1_m600toInf',
         'HT1000to1500_j7toInf_b2_m400toInf',
         'HT1000to1500_j7toInf_b3toInf_m400toInf',
-        'HT1500toInf_j7toInf_b0_m200to400',
         'HT1500toInf_j7toInf_b0_m400toInf',
-        'HT1500toInf_j7toInf_b1_m200to400',
         'HT1500toInf_j7toInf_b1_m400toInf',
-        'HT1500toInf_j7toInf_b2_m200to400',
         'HT1500toInf_j7toInf_b2_m400toInf',
-        'HT1500toInf_j7toInf_b3toInf_m200to400',
         'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
-    # 4j tight: (4-6j, HT > 1500, MT2 > 600) || (>=7j, HT > 1500, MT2 > 400) || (>=4j, HT > 1000, MT2 > 600)
+    # 4j tight: (4-6j, HT > 1500, MT2 > 600) || (>=7j, HT > 1500, MT2 > 400)
     datacards_4j_tight = [
-        'HT1000to1500_j4to6_b0_m600to800',
-        'HT1000to1500_j4to6_b0_m800to1000',
-        'HT1000to1500_j4to6_b0_m1000toInf',
-        'HT1000to1500_j4to6_b1_m600to800',
-        'HT1000to1500_j4to6_b1_m800toInf',
-        'HT1000to1500_j4to6_b2_m600toInf',
-        'HT1000to1500_j2to6_b3toInf_m400toInf',
-        'HT1000to1500_j7toInf_b0_m600toInf',
-        'HT1000to1500_j7toInf_b1_m600toInf',
-        'HT1000to1500_j7toInf_b2_m400toInf',
-        'HT1000to1500_j7toInf_b3toInf_m400toInf',
         'HT1500toInf_j4to6_b0_m600to800',
         'HT1500toInf_j4to6_b0_m800to1000',
         'HT1500toInf_j4to6_b0_m1000toInf',
         'HT1500toInf_j4to6_b1_m600toInf',
         'HT1500toInf_j4to6_b2_m600toInf',
-        'HT1500toInf_j2to6_b3toInf_m200to400',
         'HT1500toInf_j2to6_b3toInf_m400toInf',
         'HT1500toInf_j7toInf_b0_m400toInf',
         'HT1500toInf_j7toInf_b1_m400toInf',
         'HT1500toInf_j7toInf_b2_m400toInf',
-        'HT1500toInf_j7toInf_b3toInf_m200to400',
         'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
-    # 4j medium: HT > 575, MT2 > 400 (also includes 2-6j 3b)
+    # 4j medium: (4-6j, HT > 1500, MT2 > 600) || (>=7j, HT > 1500, MT2 > 400) || (>=4j, HT > 1000, MT2 > 600)
     datacards_4j_medium = [
-        'HT575to1000_j4to6_b0_m400to600',
-        'HT575to1000_j4to6_b0_m600to800',
-        'HT575to1000_j4to6_b0_m800toInf',
-        'HT575to1000_j4to6_b1_m400to600',
-        'HT575to1000_j4to6_b1_m600toInf',
-        'HT575to1000_j4to6_b2_m400to600',
-        'HT575to1000_j4to6_b2_m600toInf',
-        'HT575to1000_j2to6_b3toInf_m400toInf',
-        'HT575to1000_j7toInf_b0_m400toInf',
-        'HT575to1000_j7toInf_b1_m400toInf',
-        'HT575to1000_j7toInf_b2_m400toInf',
-        'HT575to1000_j7toInf_b3toInf_m400toInf',
-        'HT1000to1500_j4to6_b0_m400to600',
         'HT1000to1500_j4to6_b0_m600to800',
         'HT1000to1500_j4to6_b0_m800to1000',
         'HT1000to1500_j4to6_b0_m1000toInf',
-        'HT1000to1500_j4to6_b1_m400to600',
         'HT1000to1500_j4to6_b1_m600to800',
         'HT1000to1500_j4to6_b1_m800toInf',
-        'HT1000to1500_j4to6_b2_m400to600',
         'HT1000to1500_j4to6_b2_m600toInf',
         'HT1000to1500_j2to6_b3toInf_m400toInf',
-        'HT1000to1500_j7toInf_b0_m400to600',
         'HT1000to1500_j7toInf_b0_m600toInf',
-        'HT1000to1500_j7toInf_b1_m400to600',
         'HT1000to1500_j7toInf_b1_m600toInf',
         'HT1000to1500_j7toInf_b2_m400toInf',
         'HT1000to1500_j7toInf_b3toInf_m400toInf',
-        'HT1500toInf_j4to6_b0_m400to600',
         'HT1500toInf_j4to6_b0_m600to800',
         'HT1500toInf_j4to6_b0_m800to1000',
         'HT1500toInf_j4to6_b0_m1000toInf',
-        'HT1500toInf_j4to6_b1_m400to600',
         'HT1500toInf_j4to6_b1_m600toInf',
-        'HT1500toInf_j4to6_b2_m400to600',
         'HT1500toInf_j4to6_b2_m600toInf',
         'HT1500toInf_j2to6_b3toInf_m200to400',
         'HT1500toInf_j2to6_b3toInf_m400toInf',
@@ -430,33 +367,18 @@ def main():
         'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
-    # 2b verytight: HT > 1000, MT2 > 400
+    # 2b verytight: HT > 1500, MT2 > 400
     datacards_2b_verytight = [
-        'HT1000to1500_j2to3_b2_m400toInf',
-        'HT1000to1500_j4to6_b2_m400to600',
-        'HT1000to1500_j4to6_b2_m600toInf',
-        'HT1000to1500_j2to6_b3toInf_m400toInf',
-        'HT1000to1500_j7toInf_b2_m400toInf',
-        'HT1000to1500_j7toInf_b3toInf_m400toInf',
         'HT1500toInf_j2to3_b2_m200toInf',
         'HT1500toInf_j4to6_b2_m400to600',
         'HT1500toInf_j4to6_b2_m600toInf',
-        'HT1500toInf_j2to6_b3toInf_m200to400',
         'HT1500toInf_j2to6_b3toInf_m400toInf',
         'HT1500toInf_j7toInf_b2_m400toInf',
-        'HT1500toInf_j7toInf_b3toInf_m200to400',
         'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
-    # 2b tight: HT > 575, MT2 > 400
+    # 2b tight: HT > 1000, MT2 > 400
     datacards_2b_tight = [
-        'HT575to1000_j2to3_b2_m400to600',
-        'HT575to1000_j2to3_b2_m600toInf',
-        'HT575to1000_j4to6_b2_m400to600',
-        'HT575to1000_j4to6_b2_m600toInf',
-        'HT575to1000_j2to6_b3toInf_m400toInf',
-        'HT575to1000_j7toInf_b2_m400toInf',
-        'HT575to1000_j7toInf_b3toInf_m400toInf',
         'HT1000to1500_j2to3_b2_m400toInf',
         'HT1000to1500_j4to6_b2_m400to600',
         'HT1000to1500_j4to6_b2_m600toInf',
@@ -473,51 +395,57 @@ def main():
         'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
-    # 2b medium: HT > 575, MT2 > 200
+    # 2b medium: HT > 575, MT2 > 400
     datacards_2b_medium = [
-        'HT575to1000_j2to3_b2_m200to300',
-        'HT575to1000_j2to3_b2_m300to400',
         'HT575to1000_j2to3_b2_m400to600',
         'HT575to1000_j2to3_b2_m600toInf',
-        'HT575to1000_j4to6_b2_m200to300',
-        'HT575to1000_j4to6_b2_m300to400',
         'HT575to1000_j4to6_b2_m400to600',
         'HT575to1000_j4to6_b2_m600toInf',
-        'HT575to1000_j2to6_b3toInf_m200to300',
-        'HT575to1000_j2to6_b3toInf_m300to400',
         'HT575to1000_j2to6_b3toInf_m400toInf',
-        'HT575to1000_j7toInf_b2_m200to300',
-        'HT575to1000_j7toInf_b2_m300to400',
         'HT575to1000_j7toInf_b2_m400toInf',
-        'HT575to1000_j7toInf_b3toInf_m200to300',
-        'HT575to1000_j7toInf_b3toInf_m300to400',
         'HT575to1000_j7toInf_b3toInf_m400toInf',
-        'HT1000to1500_j2to3_b2_m200to400',
         'HT1000to1500_j2to3_b2_m400toInf',
-        'HT1000to1500_j4to6_b2_m200to400',
         'HT1000to1500_j4to6_b2_m400to600',
         'HT1000to1500_j4to6_b2_m600toInf',
-        'HT1000to1500_j2to6_b3toInf_m200to400',
         'HT1000to1500_j2to6_b3toInf_m400toInf',
-        'HT1000to1500_j7toInf_b2_m200to400',
         'HT1000to1500_j7toInf_b2_m400toInf',
-        'HT1000to1500_j7toInf_b3toInf_m200to400',
         'HT1000to1500_j7toInf_b3toInf_m400toInf',
         'HT1500toInf_j2to3_b2_m200toInf',
-        'HT1500toInf_j4to6_b2_m200to400',
         'HT1500toInf_j4to6_b2_m400to600',
         'HT1500toInf_j4to6_b2_m600toInf',
         'HT1500toInf_j2to6_b3toInf_m200to400',
         'HT1500toInf_j2to6_b3toInf_m400toInf',
-        'HT1500toInf_j7toInf_b2_m200to400',
         'HT1500toInf_j7toInf_b2_m400toInf',
         'HT1500toInf_j7toInf_b3toInf_m200to400',
         'HT1500toInf_j7toInf_b3toInf_m400toInf',
         ]
 
-    # 2j tight: HT>1000 && Njets < 7
-    #        && ( ( (NJ>=4 && ( (MT2 > 600 && HT>1500) || (MT2>800 && HT>1000) ) || (NJ<4 && ( (MT>400  && HT>1500) || (MT>600 && HT>1000) ) )
+    # 2j tight: 
+    #        (HT > 1000 && NJ 2-6 && NB = 0 && MT2 > 1000)
+    #     || (HT > 1000 && NJ 2-6 && NB = 1 && MT2 > 800)
+    #     || (HT > 1500 && NJ 2-6 && NB = 1 && MT2 > 600)
+    #     || (HT > 1000 && NJ 2-6 && NB = 2 && MT2 > 600)
+    #     || (HT > 1000 && NJ 2-6 && NB>= 3 && MT2 > 400)
     datacards_2j_tight = [
+        'HT1000to1500_j2to3_b0_m1000toInf',
+        'HT1000to1500_j2to3_b1_m800toInf',
+        'HT1000to1500_j2to3_b2_m400toInf', 
+        'HT1000to1500_j4to6_b0_m1000toInf',
+        'HT1000to1500_j4to6_b1_m800toInf',
+        'HT1000to1500_j4to6_b2_m600toInf',
+        'HT1000to1500_j2to6_b3toInf_m400toInf', 
+        'HT1500toInf_j2to3_b0_m1000toInf',
+        'HT1500toInf_j2to3_b1_m600toInf',
+        'HT1500toInf_j2to3_b2_m200toInf', 
+        'HT1500toInf_j4to6_b0_m1000toInf',
+        'HT1500toInf_j4to6_b1_m600toInf',
+        'HT1500toInf_j4to6_b2_m600toInf',
+        'HT1500toInf_j2to6_b3toInf_m400toInf', 
+        ]
+
+    # 2j medium: HT>1000 && Njets < 7
+    #        && ( ( (NJ>=4 && ( (MT2 > 600 && HT>1500) || (MT2>800 && HT>1000) ) || (NJ<4 && ( (MT>400  && HT>1500) || (MT>600 && HT>1000) ) )
+    datacards_2j_medium = [
         'HT1000to1500_j2to3_b0_m600to800',
         'HT1000to1500_j2to3_b0_m800to1000',
         'HT1000to1500_j2to3_b0_m1000toInf',
@@ -545,7 +473,7 @@ def main():
         'HT1500toInf_j2to6_b3toInf_m400toInf', 
         ]
 
-    # 1j tight: (Nj=1 && Nb=1 && HT>575) ||
+    # 1j medium: (Nj=1 && Nb=1 && HT>575) ||
     #           (Nj=1 && Nb=0 && HT>1000) ||
     #           (Nj=2-3 && Nb=0 && HT=575-1000 && MT2 > 800) ||
     #           (Nj=2-3 && Nb=1,2 && HT=575-1000 && MT2 > 600) ||
@@ -553,7 +481,7 @@ def main():
     #           (Nj=2-3 && Nb=2 && HT=1000-1500 && MT2 > 400) ||
     #           (Nj=2-3 && Nb=0,1 && HT>1500 && MT2 > 400) ||
     #           (Nj=2-3 && Nb=2 && HT>1500 && MT2 > 200)
-    datacards_1j_tight = [
+    datacards_1j_medium = [
         'HT1000toInf_j1_b0_m0toInf',
         'HT575toInf_j1_b1toInf_m0toInf',
         'HT575to1000_j2to3_b0_m800toInf',
@@ -573,68 +501,18 @@ def main():
         'HT1500toInf_j2to3_b2_m200toInf', 
         ]
 
-    # 1j medium: (Nj=1 && HT>575)
+    # 1j loose: (Nj=1 && HT>575)
     #        || (Nj=2-3 && Nb=0,1,2 && HT=575-1000 && MT2 > 600)
     #        || (Nj=2-3 && Nb=0,1,2 && HT>1000 && MT2 > 200)
-    datacards_1j_medium = [
-        'HT575to700_j1_b0_m0toInf',
-        'HT700to1000_j1_b0_m0toInf',
-        'HT1000toInf_j1_b0_m0toInf',
-        'HT575toInf_j1_b1toInf_m0toInf',
-        'HT575to1000_j2to3_b0_m600to800',
-        'HT575to1000_j2to3_b0_m800toInf',
-        'HT575to1000_j2to3_b1_m600to800',
-        'HT575to1000_j2to3_b1_m800toInf',
-        'HT575to1000_j2to3_b2_m600toInf',
-        'HT1000to1500_j2to3_b0_m200to400',
-        'HT1000to1500_j2to3_b0_m400to600',
-        'HT1000to1500_j2to3_b0_m600to800',
-        'HT1000to1500_j2to3_b0_m800to1000',
-        'HT1000to1500_j2to3_b0_m1000toInf',
-        'HT1000to1500_j2to3_b1_m200to400',
-        'HT1000to1500_j2to3_b1_m400to600',
-        'HT1000to1500_j2to3_b1_m600to800',
-        'HT1000to1500_j2to3_b1_m800toInf',
-        'HT1000to1500_j2to3_b2_m200to400',
-        'HT1000to1500_j2to3_b2_m400toInf', 
-        'HT1500toInf_j2to3_b0_m200to400',
-        'HT1500toInf_j2to3_b0_m400to600',
-        'HT1500toInf_j2to3_b0_m600to800',
-        'HT1500toInf_j2to3_b0_m800to1000',
-        'HT1500toInf_j2to3_b0_m1000toInf',
-        'HT1500toInf_j2to3_b1_m200to400',
-        'HT1500toInf_j2to3_b1_m400to600',
-        'HT1500toInf_j2to3_b1_m600toInf',
-        'HT1500toInf_j2to3_b2_m200toInf', 
-        ]
-
-    # 1j loose: (Nj=1 && HT>450)
-    #        || (Nj=2-3 && Nb=0,1,2 && HT=450-575 && MT2 > 400)
-    #        || (Nj=2-3 && Nb=0,1,2 && HT=575-1000 && MT2 > 300)
-    #        || (Nj=2-3 && Nb=0,1,2 && HT>1000 && MT2 > 200)
     datacards_1j_loose = [
-        'HT450to575_j1_b0_m0toInf',
         'HT575to700_j1_b0_m0toInf',
         'HT700to1000_j1_b0_m0toInf',
         'HT1000toInf_j1_b0_m0toInf',
-        'HT450to575_j1_b1toInf_m0toInf',
         'HT575toInf_j1_b1toInf_m0toInf',
-        'HT450to575_j2to3_b0_m400to500',
-        'HT450to575_j2to3_b0_m500toInf',
-        'HT450to575_j2to3_b1_m400to500',
-        'HT450to575_j2to3_b1_m500toInf',
-        'HT450to575_j2to3_b2_m400to500',
-        'HT450to575_j2to3_b2_m500toInf',
-        'HT575to1000_j2to3_b0_m300to400',
-        'HT575to1000_j2to3_b0_m400to600',
         'HT575to1000_j2to3_b0_m600to800',
         'HT575to1000_j2to3_b0_m800toInf',
-        'HT575to1000_j2to3_b1_m300to400',
-        'HT575to1000_j2to3_b1_m400to600',
         'HT575to1000_j2to3_b1_m600to800',
         'HT575to1000_j2to3_b1_m800toInf',
-        'HT575to1000_j2to3_b2_m300to400',
-        'HT575to1000_j2to3_b2_m400to600',
         'HT575to1000_j2to3_b2_m600toInf',
         'HT1000to1500_j2to3_b0_m200to400',
         'HT1000to1500_j2to3_b0_m400to600',
@@ -662,7 +540,7 @@ def main():
     all_regions = collections.OrderedDict()
     all_regions['1j_loose'] = datacards_1j_loose
     all_regions['1j_medium'] = datacards_1j_medium
-    all_regions['1j_tight']  = datacards_1j_tight
+    all_regions['2j_medium']  = datacards_2j_medium
     all_regions['2j_tight']  = datacards_2j_tight
     all_regions['4j_medium'] = datacards_4j_medium
     all_regions['4j_tight']  = datacards_4j_tight
