@@ -9,7 +9,7 @@ import collections
 #datacard_dir = 'cards_all_macroregions_try2'
 #datacard_dir = 'datacards_2p26ifb_fromMario/EventYields_data_Run2015_25nsGolden_2p3ifb/datacard_templates'
 datacard_dir = 'datacard_templates_eth_12p9ifb_final'
-output_dir = 'cards_for_macroregions_12p9fb_final_sigunc15'
+output_dir = 'cards_for_macroregions_12p9fb_new_sigunc15'
 
 # signal point may appear in name
 #signal_point = '_T2tt_700_0'
@@ -423,12 +423,11 @@ def main():
 
     # 2j tight: 
     #        (HT > 1000 && NJ 2-6 && NB = 0 && MT2 > 1000)
-    #     || (HT > 1000 && NJ 2-6 && NB = 1 && MT2 > 800)
-    #     || (HT > 1500 && NJ 2-6 && NB = 1 && MT2 > 600)
-    #     || (HT > 1000 && NJ 2-6 && NB = 2 && MT2 > 600)
+    #     || (HT > 1000 && NJ 2-6 && NB = 1-2 && MT2 > 600)
     #     || (HT > 1000 && NJ 2-6 && NB>= 3 && MT2 > 400)
     datacards_2j_tight = [
         'HT1000to1500_j2to3_b0_m1000toInf',
+        'HT1000to1500_j2to3_b1_m600to800',
         'HT1000to1500_j2to3_b1_m800toInf',
         'HT1000to1500_j2to3_b2_m400toInf', 
         'HT1000to1500_j4to6_b0_m1000toInf',
