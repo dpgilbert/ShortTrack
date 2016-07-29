@@ -9,7 +9,7 @@ import collections
 #datacard_dir = 'cards_all_macroregions_try2'
 #datacard_dir = 'datacards_2p26ifb_fromMario/EventYields_data_Run2015_25nsGolden_2p3ifb/datacard_templates'
 datacard_dir = 'datacard_templates_eth_12p9ifb_final'
-output_dir = 'cards_for_macroregions_12p9fb_test_sigunc15'
+output_dir = 'cards_for_macroregions_12p9fb_final_sigunc15'
 
 # signal point may appear in name
 #signal_point = '_T2tt_700_0'
@@ -29,6 +29,7 @@ def makeMacroRegionDatacard( region, n_obs, n_bkg, abserr_bkg_up, abserr_bkg_dn,
     if doSignal:
         sig_val = n_sig
     sig_nuis = 1.15 # arbitrary choice
+#    sig_nuis = 1.30 # arbitrary choice
 
     filename = '%s/datacard_macroregion_%s.txt' % (output_dir, region)
     outf = open(filename, 'w')
@@ -86,7 +87,7 @@ def fillNuisanceDictGMN( dict_nuis_up, dict_nuis_dn, nuis_name, cr_yield, alpha 
     # get poisson uncertainties on yield
     cr_yield_up = ROOT.Double()
     cr_yield_dn = ROOT.Double()
-#    ROOT.RooHistError.instance().getPoissonInterval(cr_yield,cr_yield_dn,cr_yield_up,1.)
+    ROOT.RooHistError.instance().getPoissonInterval(cr_yield,cr_yield_dn,cr_yield_up,1.)
     abserr_up = (cr_yield_up - cr_yield)*alpha
     abserr_dn = (cr_yield - cr_yield_dn)*alpha
     
