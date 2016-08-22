@@ -23,13 +23,13 @@ const int iPeriod = 4; // 13 tev
 //   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
 const int iPos = 3;
 
-void plot_trigeff_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-02_json_Cert_271036-274421/") {
+void plot_trigeff_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-07_nojson/trigdenom_json_271036-276811/") {
 
   cmsText = "CMS Preliminary";
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
-  lumi_13TeV = "2.1 fb^{-1}";
+  lumi_13TeV = "12.9 fb^{-1}";
   //lumi_13TeV = "589 pb^{-1}";
   
   gStyle->SetPadTopMargin(0.08);
@@ -42,12 +42,12 @@ void plot_trigeff_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-0
   TString suffix = "";
   //  TString suffix = "_2j";
   
-  TChain* t_jetht = new TChain("mt2");
-  TChain* t_muon = new TChain("mt2");
+  //  TChain* t_jetht = new TChain("mt2");
+  //  TChain* t_muon = new TChain("mt2");
   TChain* t_ele = new TChain("mt2");
 
-  t_jetht->Add(Form("%s/*Run2016*JetHT*.root", indir.Data()));
-  t_muon->Add(Form("%s/*Run2016*SingleMuon*.root", indir.Data()));
+  //  t_jetht->Add(Form("%s/*Run2016*JetHT*.root", indir.Data()));
+  //  t_muon->Add(Form("%s/*Run2016*SingleMuon*.root", indir.Data()));
   t_ele->Add(Form("%s/*Run2016*SingleElectron*.root", indir.Data()));
 
   TFile* f_out = new TFile(Form("trigeff_PFMET100_PFMHT100_IDTight%s.root",suffix.Data()),"RECREATE");
@@ -63,7 +63,8 @@ void plot_trigeff_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-0
   c->SetGrid(1,1);
   c->cd();
 
-  TCut base = "nVert > 0 && nJet30 > 1 && Flag_CSCTightHalo2015Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && ht > 200.";
+  //  TCut base = "nVert > 0 && nJet30 > 1 && Flag_CSCTightHalo2015Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && ht > 200.";
+  TCut base = "nVert > 0 && nJet30 > 1 && Flag_globalTightHalo2016Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && Flag_badMuonFilter && Flag_badChargedHadronFilter && ht > 200. && isGolden";
   //TCut base = "nVert > 0 && nJet30 > 3 && Flag_CSCTightHaloFilter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHEIsoNoiseFilter";
   TCut had = base + "nElectrons10+nMuons10==0 && ht > 1000. && deltaPhiMin > 0.3";
   TCut ele = base + "nElectrons10 > 0 && abs(lep_pdgId[0]) == 11 && lep_pt[0] > 25. && lep_tightId[0] > 2 && lep_relIso03[0] < 0.1";
@@ -111,7 +112,7 @@ void plot_trigeff_PFMET100 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-0
   TLegend* leg = new TLegend(0.55,0.15,0.95,0.45);
   //leg->AddEntry(h_met_eff_ht800,"HLT_PFHT800","pe");
   //leg->AddEntry(h_met_eff_mu20,"HLT_IsoMu20 || HLT_IsoTkMu20","pe");
-  leg->AddEntry(h_met_eff_ele23,"HLT_Ele23_WPLoose_Gsf","pe");
+  leg->AddEntry(h_met_eff_ele23,"HLT_Ele23 || HLT_Ele27","pe");
   leg->Draw("same");
 
   CMS_lumi( c, iPeriod, iPos );
