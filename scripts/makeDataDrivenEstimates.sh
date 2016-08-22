@@ -25,8 +25,8 @@ if [ ! -d "$INDIR" ]; then
 fi
 
 cd $INDIR
-echo "hadd -f data_Run2016.root data_Run2016B.root"
-hadd -f data_Run2016.root data_Run2016B.root > dataDrivenEstimates.log
+echo "hadd -f data_Run2016.root data_Run2016B.root data_Run2016C.root data_Run2016D.root"
+hadd -f data_Run2016.root data_Run2016B.root data_Run2016C.root data_Run2016D.root > dataDrivenEstimates.log
 
 ## (temporarily replaced tth with ttg, because of sample availability)
 echo "hadd -f top.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.root"
@@ -38,8 +38,8 @@ hadd -f lostlep.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.ro
 cd $THISDIR
 
 #this script scales the HI and LOW boundary histograms by 1/numSamples since we don't want these hadd'ed
-echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/data_Run2016.root,1)"
-root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/data_Run2016.root\",1)" >> dataDrivenEstimates.log
+echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/data_Run2016.root,3)"
+root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/data_Run2016.root\",3)" >> dataDrivenEstimates.log
 
 echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/top.root,6)"
 root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/top.root\",6)" >> dataDrivenEstimates.log
