@@ -136,7 +136,10 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString sr
 
 	  Float_t FRvalue   = h_FR->GetBinContent(FRbin); // get value of fake rate for this bin
 	  Float_t FRerror   = h_FR->GetBinError(FRbin);   // get error on fake rate for this bin	  
-
+	  if (FRvalue>0.9 || FRvalue<0) {
+	    cout<<"STRANGE: FRvalue is "<<FRvalue<<". Setting it to 0.5"<<endl;
+	    FRvalue = 0.5;
+	  }
 	  //shift nFOs by fragScale*QCDPrompt in LooseNotTight. (add fragmentation to sideband, unless looking at data)
 	  if(h_sidebandqcdPrompt && !realDataLocal) {
 	    float fragYield = h_sidebandqcdPrompt->Integral();
@@ -215,7 +218,7 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString sr
   h_pred->SetContent(preds);
   h_pred->SetError(predErrors);
   h_pred->Write();
-  
+  //h_pred->Print("all");
   return;
   
 }
@@ -682,7 +685,8 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   if (!h_qcdTight || !h_qcdLoose) cout<<"Could not find FR histograms in QCD MC"<<endl;
   h_qcdTight->SetName("h_qcdTight");
   h_qcdLoose->SetName("h_qcdLoose");
-  
+  h_qcdTight->ClearUnderflowAndOverflow();
+  h_qcdLoose->ClearUnderflowAndOverflow();
   
   //get hists for FR calc, Sieie Sideband
   TH2D* h_qcdTightFailSieie = (TH2D*) f_q->Get("crgjbase/h2d_gammaht_gammaptSingleBinFakeSieieSB");
@@ -690,6 +694,8 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   if (!h_qcdTightFailSieie || !h_qcdLooseFailSieie) cout<<"Could not find SieieSB FR histograms in QCD MC"<<endl;
   h_qcdTightFailSieie->SetName("h_qcdTightFailSieie");
   h_qcdLooseFailSieie->SetName("h_qcdLooseFailSieie");
+  h_qcdTightFailSieie->ClearUnderflowAndOverflow();
+  h_qcdLooseFailSieie->ClearUnderflowAndOverflow();
   
   //get hists for FR calc, Sieie Sideband (Data)
   TH2D* h_qcdTightFailSieieData = (TH2D*) f_data->Get("crgjbase/h2d_gammaht_gammaptSingleBinSieieSB");
@@ -702,7 +708,9 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
 
   h_qcdTightFailSieieData->SetName("h_qcdTightFailSieieData");
   h_qcdLooseFailSieieData->SetName("h_qcdLooseFailSieieData");
-  
+  h_qcdTightFailSieieData->ClearUnderflowAndOverflow();
+  h_qcdLooseFailSieieData->ClearUnderflowAndOverflow();  
+
   //instantiate output file here
   //TFile* f_out = new TFile("$CMSSW_BASE/../scripts/purity.root","RECREATE");
   TFile* f_out = new TFile(Form("%s/purity.root",input_dir.c_str()),"RECREATE");
