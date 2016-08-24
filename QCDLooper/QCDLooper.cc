@@ -33,10 +33,15 @@ class SR;
 // turn on to apply json file to data
 bool applyJSON = true;
 
-const float lumi = 3.990;
+const float lumi = 12.9;
 
 // input effective prescales for PFHT125, PFHT350, PFHT475
-double eff_prescales[3] = {2564., 294.9, 73.9};
+// 4/fb
+// double eff_prescales[3] = {2564., 294.9, 73.9};
+// // 7.65/fb
+// double eff_prescales[3] = {3628., 346.3, 86.8};
+// 12.9/fb
+double eff_prescales[3] = {4748., 377.5, 94.6};
 
 //_______________________________________
 QCDLooper::QCDLooper(){
@@ -94,7 +99,7 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
 
   outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
 
-  const char* json_file = "../babymaker/jsons/Cert_271036-274443_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -166,17 +171,17 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
 
       if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
 
-      // MET filters (data only)
+      // MET filters (first 2 data only)
       if (t.isData) {
-	if (!t.Flag_goodVertices) continue;
-	if (!t.Flag_CSCTightHalo2015Filter) continue;
-	if (!t.Flag_eeBadScFilter) continue;
-	if (!t.Flag_HBHENoiseFilter) continue;
-        if (!t.Flag_HBHENoiseIsoFilter) continue;
-        if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
-
+        if (!t.Flag_globalTightHalo2016Filter) continue; 
+        if (!t.Flag_badMuonFilter) continue;
       }
-      if (!t.Flag_badChargedCandidateFilter) continue;
+      if (!t.Flag_goodVertices) continue;
+      if (!t.Flag_eeBadScFilter) continue;
+      if (!t.Flag_HBHENoiseFilter) continue;
+      if (!t.Flag_HBHENoiseIsoFilter) continue;
+      if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+      if (!t.Flag_badChargedHadronFilter) continue;
       
 
       // some simple baseline selections

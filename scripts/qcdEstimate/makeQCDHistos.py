@@ -19,7 +19,7 @@ except:
 
 qcd_sample = "qcd_ht"
 nqcd_samples = ["nonqcd"]
-data_sample = "data_Run2016B"
+data_sample = "data_Run2016"
 
 ht_reg_names = ["ht200to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf"]
 nj_reg_names = ["j2to3","j4to6","j7toInf"]
@@ -89,7 +89,7 @@ for ireg,reg in enumerate(ht_reg_names):
     h_datasub_den.Add(h_nonqcd_den,-1*dataMCsf)
    
     #rebin using the following bin edges    
-    mt2bins = [50,55,60,65,70,75,80,90,100,125,200,300,450,800,1500]
+    mt2bins = [50,55,60,65,70,75,80,85,90,95,100,125,200,300,450,800,1500]
     mt2bins = np.array(mt2bins, dtype=float)
     
     h_qcd_num = h_qcd_num.Rebin(mt2bins.size-1, "h_qcd_num", mt2bins)

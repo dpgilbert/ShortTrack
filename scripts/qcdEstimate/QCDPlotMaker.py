@@ -194,7 +194,7 @@ def drawHeaders(canvas, isData):
         text.SetTextAlign(31)
         text.SetTextSize(0.035)
         text.SetTextFont(42)
-        text.DrawLatex(0.89,0.93,"{0} {1}^{{-1}} ({2} TeV)".format(4.0, 'fb', 13))
+        text.DrawLatex(0.89,0.93,"{0} {1}^{{-1}} ({2} TeV)".format(12.9, 'fb', 13))
         cmsText = "CMS Preliminary"
     #CMS text
     text.SetTextSize(0.035)

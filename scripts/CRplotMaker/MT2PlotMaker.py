@@ -5,7 +5,7 @@ import pyRootPlotMaker as ppm
 import MT2PlotUtils as utils
 import MT2PlotDefs as pd
 
-def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["pdf"]):
+def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["pdf"], tag=""):
     # rootdir contains output of MT2Looper, samples are names of the .root files,
     # data is the name of the data file, dirname is the directory within the root file
     # to extract plots from, plots are a list of plot definitions from MT2PlotDefs
@@ -47,8 +47,8 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
             for idir in range(1, len(dirnames)):
                 h_bkg_vecs[iplot][-1].Add(fid.Get(dirnames[idir]+"/h_"+vn))
 
-            # if samples[isamp].startswith("2015"):
-            #     h_bkg_vecs[iplot][-1].Scale(pd.lumi/3.99)
+            # if samples[isamp]=="zinv_ht":
+            #     h_bkg_vecs[iplot][-1].Scale(pd.lumi)
 
         fid.Close()
 
@@ -67,8 +67,8 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
     fid.Close()
 
     # make the output directory if it doesn't exist
-    if not os.path.isdir(os.path.join(output_dir,dirname)):
-        os.makedirs(os.path.join(output_dir,dirname))
+    if not os.path.isdir(os.path.join(output_dir,dirname+tag)):
+        os.makedirs(os.path.join(output_dir,dirname+tag))
 
     # make all of the plots
     for i in range(len(plots)):
@@ -84,13 +84,15 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
             doOverflow = plots[i][5]
         markerSize=0.8
         title = utils.GetCRName(dirname)
+        # title = None
         xAxisTitle = utils.GetVarName(vn)
         unit = utils.GetUnit(vn)
         subtitles = utils.GetSubtitles(dirname)
         subLegText = ["MC scaled by {datamcsf}","# Data events: {ndata}"]
+        # subLegText = None
         sns = [utils.GetSampleName(s) for s in samples]
         for ext in exts:
-            saveAs = os.path.join(output_dir,dirname,"{0}_{1}.{2}".format(dirname,vn,ext))
+            saveAs = os.path.join(output_dir,dirname+tag,"{0}_{1}.{2}".format(dirname,vn,ext))
             ppm.plotDataMC(h_bkg_vecs[i], sns, h_data[i], doPause=False, xAxisTitle=xAxisTitle, lumi=pd.lumi, lumiUnit=pd.lumiUnit,
                            title=title, subtitles=subtitles, xRangeUser=plots[i][2], isLog=plots[i][1], saveAs=saveAs, 
                            scaleMCtoData=True, xAxisUnit=unit, userMin=userMin, userMax=userMax, doSort=False, doMT2Colors=True, 

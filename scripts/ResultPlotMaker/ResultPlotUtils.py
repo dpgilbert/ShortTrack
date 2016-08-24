@@ -13,7 +13,7 @@ def GetYieldsFromDatacard(datacard_fname, bkg_names):
     obs = 0
     for line in lines:
         if line.startswith("observation"):
-            obs = int(line.split()[1])
+            obs = int(float(line.split()[1]))
         if line.startswith("process") and len(names)==0:
             names = line.split()[2:]
         if line.startswith("rate"):
@@ -58,7 +58,7 @@ def GetUncertaintiesFromDatacard(datacard_fname, bkg_names):
             x = None
             for s in lst:
                 try:
-                    xt = float(s)
+                    xt = float(s.split("/")[0])
                     x = xt
                 except:
                     continue

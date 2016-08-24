@@ -5,8 +5,10 @@ justplot = True
 if not justplot:
 
     c = ROOT.TChain("mt2")
-    # c.Add("/nfs-6/userdata/mt2/V00-08-02_json_Cert_271036-274421/data_Run2016B_JetHT*.root")
-    c.Add("/nfs-6/userdata/mt2/rphi_skims/data_for_prescale_meas.root")
+    c.Add("/nfs-6/userdata/mt2/V00-08-07_nojson/data_Run2016B_JetHT*.root")
+    c.Add("/nfs-6/userdata/mt2/V00-08-07_nojson/data_Run2016C_JetHT*.root")
+    c.Add("/nfs-6/userdata/mt2/V00-08-07_nojson/data_Run2016D_JetHT*.root")
+    # c.Add("/nfs-6/userdata/mt2/rphi_skims/data_for_prescale_meas.root")
 
     h_PFHT800 = ROOT.TH1D("h_PFHT800","PFHT800",80,0,2000)
     h_PFHT475 = ROOT.TH1D("h_PFHT475","PFHT475",80,0,2000)

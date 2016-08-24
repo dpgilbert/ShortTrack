@@ -30,10 +30,13 @@ def GetCRName(cr):
 
 def GetSampleName(sample):
     names = {"wjets_ht": "W+Jets",
+             "2015wjets_ht": "W+Jets",
              "wjets_incl": "W+Jets",
              "dyjetsll_ht": "Z(#font[12]{ll})+Jets",
+             "2015dyjetsll_ht": "Z(#font[12]{ll})+Jets",
              "dyjetsll_incl": "Z(#font[12]{ll})+Jets",
              "zinv_ht": "Z(#nu#nu)+Jets",
+             "2015zinv_ht": "Z(#nu#nu)+Jets",
              "top": "Top",
              "gjets_ht": "Prompt #gamma",
              "2015gjets_ht": "Prompt #gamma",
@@ -41,6 +44,7 @@ def GetSampleName(sample):
              "fakephoton": "Fake #gamma",
              "fragphoton": "Frag. #gamma",
              "qcd_ht": "QCD",
+             "2015qcd_ht": "QCD",
              }
 
     # use the above name if defined, otherwise use sample itself
