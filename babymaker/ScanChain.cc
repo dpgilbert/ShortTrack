@@ -51,8 +51,6 @@ using namespace tas;
 const bool verbose = false;
 // turn on to apply JEC from text files (default true)
 const bool applyJECfromFile = true;
-// change to do JEC uncertainty variations. 0 = DEFAULT, 1 = UP, -1 = DN
-const int applyJECunc = 0;
 // change to do unclustered energy uncertainty MET variations. 0 = DEFAULT, 1 = UP, -1 = DN
 const int applyUnclusteredUnc = 0;
 // turn on to apply btag SFs (default true)
@@ -227,8 +225,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
     jet_corrector_pfL1FastJetL2L3  = makeJetCorrector(jetcorr_filenames_pfL1FastJetL2L3);
 
-    if (!isDataFromFileName && applyJECunc != 0) {
-      cout << "applying JEC uncertainties with weight " << applyJECunc << " from file: " << endl
+    if (!isDataFromFileName) {
+      cout << "applying JEC uncertainties from file: " << endl
 	   << "   " << jetcorr_uncertainty_filename << endl;
       jetcorr_uncertainty = new JetCorrectionUncertainty(jetcorr_uncertainty_filename);
     }
@@ -412,11 +410,25 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       }
 
       if (applyJECfromFile && recomputeT1MET) {
+	std::pair <float, float> t1metUP;
+	std::pair <float, float> t1metDN;
 	std::pair <float, float> t1met;
-	if (!isData) t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3, jetcorr_uncertainty, bool(applyJECunc == 1),doRecomputeRawPFMET_);
-	else t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3); // never apply variations to data
+	if (!isData) {
+	  t1metUP = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3, jetcorr_uncertainty, 1,doRecomputeRawPFMET_);
+	  t1metDN = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3, jetcorr_uncertainty, 0,doRecomputeRawPFMET_);
+	  t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3, 0, 0,doRecomputeRawPFMET_);
+	}
+	else {
+	  t1metUP = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3); // never apply variations to data
+	  t1metDN = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3); // never apply variations to data
+	  t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3); // never apply variations to data
+	}
 	met_pt  = t1met.first;
 	met_phi = t1met.second;
+	met_ptJECup  = t1metUP.first;
+	met_phiJECup = t1metUP.second;
+	met_ptJECdn  = t1metDN.first;
+	met_phiJECdn = t1metDN.second;
       } else {
 	met_pt  = cms3.evt_pfmet();
 	met_phi = cms3.evt_pfmetPhi();
@@ -858,12 +870,19 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       vector<LorentzVector> p4sUniqueLeptons;
 
       vector<LorentzVector> p4sForHems;
+      vector<LorentzVector> p4sForHemsUP;
+      vector<LorentzVector> p4sForHemsDN;
+      vector<LorentzVector> p4sForHemsMHT;
+      vector<LorentzVector> p4sForHemsMHTUP;
+      vector<LorentzVector> p4sForHemsMHTDN;
       vector<LorentzVector> p4sForHemsGamma;
       vector<LorentzVector> p4sForHemsZll;
       vector<LorentzVector> p4sForHemsZllMT;
       vector<LorentzVector> p4sForHemsRl;
 
       vector<LorentzVector> p4sForDphi;
+      vector<LorentzVector> p4sForDphiUP;
+      vector<LorentzVector> p4sForDphiDN;
       vector<LorentzVector> p4sForDphiGamma;
       vector<LorentzVector> p4sForDphiZll;
       vector<LorentzVector> p4sForDphiZllMT;
@@ -917,6 +936,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           if (doJetLepOverlapRemoval) {
             p4sForHems.push_back(cms3.els_p4().at(iEl));
             p4sForDphi.push_back(cms3.els_p4().at(iEl));
+            p4sForHemsMHT.push_back(cms3.els_p4().at(iEl));
+            p4sForHemsMHTUP.push_back(cms3.els_p4().at(iEl));
+            p4sForHemsMHTDN.push_back(cms3.els_p4().at(iEl));
           }
 
 	  if (!isData && applyLeptonSFs) {
@@ -982,6 +1004,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           if (doJetLepOverlapRemoval) {
             p4sForHems.push_back(cms3.mus_p4().at(iMu));
             p4sForDphi.push_back(cms3.mus_p4().at(iMu));
+            p4sForHemsMHT.push_back(cms3.mus_p4().at(iMu));
+            p4sForHemsMHTUP.push_back(cms3.mus_p4().at(iMu));
+            p4sForHemsMHTDN.push_back(cms3.mus_p4().at(iMu));
           }
 	  
 	  if (!isData && applyLeptonSFs) {
@@ -1449,10 +1474,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
       //correct jets and check baseline selections
       vector<LorentzVector> p4sCorrJets; // store corrected p4 for ALL jets, so indices match CMS3 ntuple
+      vector<LorentzVector> p4sCorrJetsUP; // store corrected p4 for ALL jets with JEC up variation, so indices match CMS3 ntuple
+      vector<LorentzVector> p4sCorrJetsDN; // store corrected p4 for ALL jets with JEC dn variation, so indices match CMS3 ntuple
       vector<std::pair<int,float> > passJets; //index of jets that pass baseline selections with their corrected pt
       for(unsigned int iJet = 0; iJet < cms3.pfjets_p4().size(); iJet++){
 
-        LorentzVector pfjet_p4_cor = cms3.pfjets_p4().at(iJet);
+        LorentzVector pfjet_p4_cor   = cms3.pfjets_p4().at(iJet);
+        LorentzVector pfjet_p4_corUP = cms3.pfjets_p4().at(iJet);
+        LorentzVector pfjet_p4_corDN = cms3.pfjets_p4().at(iJet);
 
         if (applyJECfromFile) {
 
@@ -1473,19 +1502,25 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           }
 
 	  // include protections here on jet kinematics to prevent rare warnings/crashes
-	  double var = 1.;
-	  if (!isData && applyJECunc != 0 && pfjet_p4_uncor.pt()*corr > 0. && fabs(pfjet_p4_uncor.eta()) < 5.4) {
+	  double varUP = 1.;
+	  double varDN = 1.;
+	  if (!isData && pfjet_p4_uncor.pt()*corr > 0. && fabs(pfjet_p4_uncor.eta()) < 5.4) {
 	    jetcorr_uncertainty->setJetEta(pfjet_p4_uncor.eta());
 	    jetcorr_uncertainty->setJetPt(pfjet_p4_uncor.pt() * corr); // must use CORRECTED pt
 	    double unc = jetcorr_uncertainty->getUncertainty(true);
-	    var = (1. + applyJECunc * unc);
+	    varUP = (1. + unc);
+	    varDN = (1. - unc);
 	  }
 
           // apply new JEC to p4
-          pfjet_p4_cor = pfjet_p4_uncor * corr * var;
+          pfjet_p4_cor   = pfjet_p4_uncor * corr;
+          pfjet_p4_corUP = pfjet_p4_uncor * corr * varUP;
+          pfjet_p4_corDN = pfjet_p4_uncor * corr * varDN;
         }
 
         p4sCorrJets.push_back(pfjet_p4_cor);
+        p4sCorrJetsUP.push_back(pfjet_p4_corUP);
+        p4sCorrJetsDN.push_back(pfjet_p4_corDN);
 
         if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
         if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
@@ -1560,8 +1595,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
       njet = 0;
       nJet30 = 0;
+      nJet30JECup = 0;
+      nJet30JECdn = 0;
       nJet40 = 0;
       nBJet20 = 0;      // these are counted using cMVAv2 algorithm
+      nBJet20JECup = 0;
+      nBJet20JECdn = 0;
       nBJet25 = 0;
       nBJet30 = 0;
       nBJet40 = 0;
@@ -1575,6 +1614,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       minMTBMet = 999999.;
       jet1_pt = 0.;
       jet2_pt = 0.;
+      jet1_ptJECup = 0.;
+      jet2_ptJECup = 0.;
+      jet1_ptJECdn = 0.;
+      jet2_ptJECdn = 0.;
+      jet_failFSveto = 0.;
 
       gamma_nJet30 = 0;
       gamma_nJet40 = 0;
@@ -1661,6 +1705,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           jet_pt[njet]   = p4sCorrJets.at(iJet).pt();
           jet_eta[njet]  = p4sCorrJets.at(iJet).eta();
           jet_phi[njet]  = p4sCorrJets.at(iJet).phi();
+	  const float jet_ptUP  =  p4sCorrJetsUP.at(iJet).pt();
+	  const float jet_etaUP =  p4sCorrJetsUP.at(iJet).eta();
+	  const float jet_ptDN  =  p4sCorrJetsDN.at(iJet).pt();
+	  const float jet_etaDN =  p4sCorrJetsDN.at(iJet).eta();
           jet_mass[njet] = cms3.pfjets_mass().at(iJet);
           jet_btagCSV[njet] = cms3.getbtagvalue("pfCombinedInclusiveSecondaryVertexV2BJetTags",iJet);
           jet_btagMVA[njet] = cms3.getbtagvalue("pfCombinedMVAV2BJetTags",iJet);
@@ -1816,6 +1864,52 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
             p4sForDphiZllMT.push_back(p4sCorrJets.at(iJet));
             p4sForDphiRl.push_back(p4sCorrJets.at(iJet));
           }
+	  
+	  //repeat for JEC up
+	  // use pt20 for bjet counting, pt30 for everything else
+          if( (jet_ptUP > 20.0) && (fabs(jet_etaUP) < 2.5) ){ 
+            if (jet_ptUP > 30.0) {
+              // store leading/subleading central jet pt.
+              //  jets should be pt-ordered before entering this loop
+              if (jet1_ptJECup < 0.1) jet1_ptJECup = p4sCorrJetsUP.at(iJet).pt();
+              else if (jet2_ptJECup < 0.1) jet2_ptJECup = p4sCorrJetsUP.at(iJet).pt();
+              p4sForHemsUP.push_back(p4sCorrJetsUP.at(iJet));
+              p4sForHemsMHTUP.push_back(p4sCorrJetsUP.at(iJet));
+              p4sForDphiUP.push_back(p4sCorrJetsUP.at(iJet));
+              nJet30JECup++;
+            } // pt40
+            //CSVv2IVFM
+            if(jet_btagCSV[njet] >= 0.890) {
+              nBJet20JECup++;
+            } // pass med btag
+          } // pt 20 eta 2.5
+	  // accept jets out to eta 4.7 for dphi
+          else if ( (jet_ptUP > 30.0) && (fabs(jet_etaUP) < 4.7) ) {
+            p4sForDphiUP.push_back(p4sCorrJetsUP.at(iJet));
+          }
+	  
+	  //repeat for JEC dn
+	  // use pt20 for bjet counting, pt30 for everything else
+          if( (jet_ptDN > 20.0) && (fabs(jet_etaDN) < 2.5) ){ 
+            if (jet_ptDN > 30.0) {
+              // store leading/subleading central jet pt.
+              //  jets should be pt-ordered before entering this loop
+              if (jet1_ptJECdn < 0.1) jet1_ptJECdn = p4sCorrJetsDN.at(iJet).pt();
+              else if (jet2_ptJECdn < 0.1) jet2_ptJECdn = p4sCorrJetsDN.at(iJet).pt();
+              p4sForHemsDN.push_back(p4sCorrJetsDN.at(iJet));
+              p4sForHemsMHTDN.push_back(p4sCorrJetsDN.at(iJet));
+              p4sForDphiDN.push_back(p4sCorrJetsDN.at(iJet));
+              nJet30JECdn++;
+            } // pt40
+            //CSVv2IVFM
+            if(jet_btagCSV[njet] >= 0.890) {
+              nBJet20JECdn++;
+            } // pass med btag
+          } // pt 20 eta 2.5
+	  // accept jets out to eta 4.7 for dphi
+          else if ( (jet_ptDN > 30.0) && (fabs(jet_etaDN) < 4.7) ) {
+            p4sForDphiDN.push_back(p4sCorrJetsDN.at(iJet));
+          }
 
           // fill gamma_XXX variables before checking for lepton overlap. Why? Let's keep them consistent with the lepton-overlapped jets
           if( ( p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.4) ) { 
@@ -1889,7 +1983,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
       // sort vectors by pt for hemisphere calculation
       sort(p4sForHems.begin(), p4sForHems.end(), sortByPt);
+      sort(p4sForHemsUP.begin(), p4sForHemsUP.end(), sortByPt);
+      sort(p4sForHemsDN.begin(), p4sForHemsDN.end(), sortByPt);
+      sort(p4sForHemsMHT.begin(), p4sForHemsMHT.end(), sortByPt);
+      sort(p4sForHemsMHTUP.begin(), p4sForHemsMHTUP.end(), sortByPt);
+      sort(p4sForHemsMHTDN.begin(), p4sForHemsMHTDN.end(), sortByPt);
       sort(p4sForDphi.begin(), p4sForDphi.end(), sortByPt);
+      sort(p4sForDphiUP.begin(), p4sForDphiUP.end(), sortByPt);
+      sort(p4sForDphiDN.begin(), p4sForDphiDN.end(), sortByPt);
       sort(p4sForHemsGamma.begin(), p4sForHemsGamma.end(), sortByPt);
       sort(p4sForDphiGamma.begin(), p4sForDphiGamma.end(), sortByPt);
       sort(p4sForHemsZll.begin(), p4sForHemsZll.end(), sortByPt);
@@ -1900,8 +2001,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       sort(p4sForDphiRl.begin(), p4sForDphiRl.end(), sortByPt);
 
       ht = 0;
+      htJECup = 0;
+      htJECdn = 0;
       deltaPhiMin = 999;
+      deltaPhiMinJECup = 999;
+      deltaPhiMinJECdn = 999;
       LorentzVector sumMhtp4 = LorentzVector(0,0,0,0);
+      LorentzVector sumMhtp4UP = LorentzVector(0,0,0,0);
+      LorentzVector sumMhtp4DN = LorentzVector(0,0,0,0);
 
       // HT, MT2 and MHT
 
@@ -1910,6 +2017,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         ht += p4sForHems.at(ip4).pt();
         sumMhtp4 -= p4sForHems.at(ip4);
       }
+      for (unsigned int ip4 = 0; ip4 < p4sForHemsUP.size(); ++ip4) {
+        htJECup += p4sForHemsUP.at(ip4).pt();
+        sumMhtp4UP -= p4sForHemsMHTUP.at(ip4);
+      }
+      for (unsigned int ip4 = 0; ip4 < p4sForHemsDN.size(); ++ip4) {
+        htJECdn += p4sForHemsDN.at(ip4).pt();
+        sumMhtp4DN -= p4sForHemsMHTDN.at(ip4);
+      }
 
       // min(dphi) of 4 leading objects
       for (unsigned int ip4 = 0; ip4 < p4sForDphi.size(); ++ip4) {
@@ -1917,6 +2032,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  deltaPhiMin = min(deltaPhiMin, DeltaPhi( met_phi, p4sForDphi.at(ip4).phi() ));
 	  if (!isData) deltaPhiMin_genmet = min(deltaPhiMin, DeltaPhi( met_genPhi, p4sForDphi.at(ip4).phi() ));
 	}
+      }
+      for (unsigned int ip4 = 0; ip4 < p4sForDphiUP.size(); ++ip4) {
+        if(ip4 < 4) deltaPhiMinJECup = min(deltaPhiMinJECup, DeltaPhi( met_phiJECup, p4sForDphiUP.at(ip4).phi() ));
+      }
+      for (unsigned int ip4 = 0; ip4 < p4sForDphiDN.size(); ++ip4) {
+        if(ip4 < 4) deltaPhiMinJECdn = min(deltaPhiMinJECdn, DeltaPhi( met_phiJECdn, p4sForDphiDN.at(ip4).phi() ));
       }
 
       vector<LorentzVector> hemJets;
@@ -1944,9 +2065,63 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         pseudoJet2_phi  = hemJets.at(idx_subl).phi();
         pseudoJet2_mass = hemJets.at(idx_subl).mass();
       }
+      vector<LorentzVector> hemJetsUP;
+      if(p4sForHemsUP.size() > 1){
+        //Hemispheres used in MT2 calculation
+        hemJetsUP = getHemJets(p4sForHemsUP);  
+
+        mt2JECup = HemMT2(met_ptJECup, met_phiJECup, hemJetsUP.at(0), hemJetsUP.at(1));
+	//if (nlep > 0) sl_mt2 = HemMT2(lep_pt[0], lep_phi[0], hemJets.at(0), hemJets.at(1));
+
+        // // order hemispheres by pt for saving
+        // int idx_lead = 0;
+        // int idx_subl = 1;
+        // if (hemJets.at(1).pt() > hemJets.at(0).pt()) {
+        //   idx_lead = 1;
+        //   idx_subl = 0;
+        // }
+
+        // pseudoJet1_pt   = hemJets.at(idx_lead).pt();
+        // pseudoJet1_eta  = hemJets.at(idx_lead).eta();
+        // pseudoJet1_phi  = hemJets.at(idx_lead).phi();
+        // pseudoJet1_mass = hemJets.at(idx_lead).mass();
+        // pseudoJet2_pt   = hemJets.at(idx_subl).pt();
+        // pseudoJet2_eta  = hemJets.at(idx_subl).eta();
+        // pseudoJet2_phi  = hemJets.at(idx_subl).phi();
+        // pseudoJet2_mass = hemJets.at(idx_subl).mass();
+      }
+      vector<LorentzVector> hemJetsDN;
+      if(p4sForHemsDN.size() > 1){
+        //Hemispheres used in MT2 calculation
+        hemJetsDN = getHemJets(p4sForHemsDN);  
+
+        mt2JECdn = HemMT2(met_ptJECdn, met_phiJECdn, hemJetsDN.at(0), hemJetsDN.at(1));
+	//if (nlep > 0) sl_mt2 = HemMT2(lep_pt[0], lep_phi[0], hemJets.at(0), hemJets.at(1));
+
+        // // order hemispheres by pt for saving
+        // int idx_lead = 0;
+        // int idx_subl = 1;
+        // if (hemJets.at(1).pt() > hemJets.at(0).pt()) {
+        //   idx_lead = 1;
+        //   idx_subl = 0;
+        // }
+
+        // pseudoJet1_pt   = hemJets.at(idx_lead).pt();
+        // pseudoJet1_eta  = hemJets.at(idx_lead).eta();
+        // pseudoJet1_phi  = hemJets.at(idx_lead).phi();
+        // pseudoJet1_mass = hemJets.at(idx_lead).mass();
+        // pseudoJet2_pt   = hemJets.at(idx_subl).pt();
+        // pseudoJet2_eta  = hemJets.at(idx_subl).eta();
+        // pseudoJet2_phi  = hemJets.at(idx_subl).phi();
+        // pseudoJet2_mass = hemJets.at(idx_subl).mass();
+      }
 
       mht_pt  = sumMhtp4.pt();
       mht_phi = sumMhtp4.phi();
+      mht_ptJECup  = sumMhtp4UP.pt();
+      mht_phiJECup = sumMhtp4UP.phi();
+      mht_ptJECdn  = sumMhtp4DN.pt();
+      mht_phiJECdn = sumMhtp4DN.phi();
 
       TVector2 mhtVector = TVector2(mht_pt*cos(mht_phi), mht_pt*sin(mht_phi));
       TVector2 metVector = TVector2(met_pt*cos(met_phi), met_pt*sin(met_phi));
@@ -1955,6 +2130,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	TVector2 genmetVector = TVector2(met_genPt*cos(met_genPhi), met_genPt*sin(met_genPhi));
 	diffMetMht_genmet = (mhtVector - genmetVector).Mod();
       }
+      TVector2 mhtVectorUP = TVector2(mht_ptJECup*cos(mht_phiJECup), mht_ptJECup*sin(mht_phiJECup));
+      TVector2 metVectorUP = TVector2(met_ptJECup*cos(met_phiJECup), met_ptJECup*sin(met_phiJECup));
+      diffMetMhtJECup = (mhtVectorUP - metVectorUP).Mod();
+      TVector2 mhtVectorDN = TVector2(mht_ptJECdn*cos(mht_phiJECdn), mht_ptJECdn*sin(mht_phiJECdn));
+      TVector2 metVectorDN = TVector2(met_ptJECdn*cos(met_phiJECdn), met_ptJECdn*sin(met_phiJECdn));
+      diffMetMhtJECdn = (mhtVectorDN - metVectorDN).Mod();
 
       // HT, MT2 and MHT for photon+jets regions
       //  note that leptons are NOT included in this MT2 calculation
@@ -2192,7 +2373,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     }
 
     if (applyJECfromFile) delete jet_corrector_pfL1FastJetL2L3;
-    if (!isDataFromFileName && applyJECfromFile && applyJECunc != 0) delete jetcorr_uncertainty;
+    if (!isDataFromFileName && applyJECfromFile) delete jetcorr_uncertainty;
 
     bmark->Stop("benchmark");
     cout << endl;
@@ -2229,10 +2410,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("nTrueInt", &nTrueInt );
     BabyTree_->Branch("rho", &rho );
     BabyTree_->Branch("nJet30", &nJet30 );
+    BabyTree_->Branch("nJet30JECup", &nJet30JECup );
+    BabyTree_->Branch("nJet30JECdn", &nJet30JECdn );
     BabyTree_->Branch("nJet40", &nJet40 );
     BabyTree_->Branch("nBJet20", &nBJet20 );
     BabyTree_->Branch("nBJet20csv", &nBJet20csv );
     BabyTree_->Branch("nBJet20mva", &nBJet20mva );
+    BabyTree_->Branch("nBJet20JECup", &nBJet20JECup );
+    BabyTree_->Branch("nBJet20JECdn", &nBJet20JECdn );
     BabyTree_->Branch("nBJet25", &nBJet25 );
     BabyTree_->Branch("nBJet30", &nBJet30 );
     BabyTree_->Branch("nBJet30csv", &nBJet30csv );
@@ -2251,15 +2436,28 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("deltaPhiMin_genmet", &deltaPhiMin_genmet );
     BabyTree_->Branch("diffMetMht", &diffMetMht );
     BabyTree_->Branch("diffMetMht_genmet", &diffMetMht_genmet );
+    BabyTree_->Branch("deltaPhiMinJECup", &deltaPhiMinJECup );
+    BabyTree_->Branch("deltaPhiMinJECdn", &deltaPhiMinJECdn );
+    BabyTree_->Branch("diffMetMhtJECup", &diffMetMhtJECup );
+    BabyTree_->Branch("diffMetMhtJECdn", &diffMetMhtJECdn );
     BabyTree_->Branch("minMTBMet", &minMTBMet );
     BabyTree_->Branch("zll_minMTBMet", &zll_minMTBMet );
     BabyTree_->Branch("gamma_minMTBMet", &gamma_minMTBMet );
     BabyTree_->Branch("ht", &ht );
+    BabyTree_->Branch("htJECup", &htJECup );
+    BabyTree_->Branch("htJECdn", &htJECdn );
     BabyTree_->Branch("mt2", &mt2 );
+    BabyTree_->Branch("mt2JECup", &mt2JECup );
+    BabyTree_->Branch("mt2JECdn", &mt2JECdn );
     BabyTree_->Branch("mt2_gen", &mt2_gen );
     BabyTree_->Branch("mt2_genmet", &mt2_genmet );
     BabyTree_->Branch("jet1_pt", &jet1_pt );
     BabyTree_->Branch("jet2_pt", &jet2_pt );
+    BabyTree_->Branch("jet1_ptJECup", &jet1_ptJECup );
+    BabyTree_->Branch("jet2_ptJECup", &jet2_ptJECup );
+    BabyTree_->Branch("jet1_ptJECdn", &jet1_ptJECdn );
+    BabyTree_->Branch("jet2_ptJECdn", &jet2_ptJECdn );
+    BabyTree_->Branch("jet_failFSveto", &jet_failFSveto );
     BabyTree_->Branch("gamma_jet1_pt", &gamma_jet1_pt );
     BabyTree_->Branch("gamma_jet2_pt", &gamma_jet2_pt );
     BabyTree_->Branch("pseudoJet1_pt", &pseudoJet1_pt );
@@ -2272,8 +2470,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("pseudoJet2_mass", &pseudoJet2_mass );
     BabyTree_->Branch("mht_pt", &mht_pt );
     BabyTree_->Branch("mht_phi", &mht_phi );
+    BabyTree_->Branch("mht_ptJECup", &mht_ptJECup );
+    BabyTree_->Branch("mht_phiJECup", &mht_phiJECup );
+    BabyTree_->Branch("mht_ptJECdn", &mht_ptJECdn );
+    BabyTree_->Branch("mht_phiJECdn", &mht_phiJECdn );
     BabyTree_->Branch("met_pt", &met_pt );
     BabyTree_->Branch("met_phi", &met_phi );
+    BabyTree_->Branch("met_ptJECup", &met_ptJECup );
+    BabyTree_->Branch("met_phiJECup", &met_phiJECup );
+    BabyTree_->Branch("met_ptJECdn", &met_ptJECdn );
+    BabyTree_->Branch("met_phiJECdn", &met_phiJECdn );
     BabyTree_->Branch("met_rawPt",  &met_rawPt );
     BabyTree_->Branch("met_rawPhi", &met_rawPhi );
     BabyTree_->Branch("met_caloPt",  &met_caloPt );
@@ -2589,10 +2795,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     nTrueInt = -999;
     rho = -999.0;
     nJet30 = -999;
+    nJet30JECup = -999;
+    nJet30JECdn = -999;
     nJet40 = -999;
     nBJet20 = -999;
     nBJet20csv = -999;
     nBJet20mva = -999;
+    nBJet20JECup = -999;
+    nBJet20JECdn = -999;
     nBJet25 = -999;
     nBJet30 = -999;
     nBJet30csv = -999;
@@ -2611,16 +2821,29 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     deltaPhiMin_genmet = -999.0;
     diffMetMht = -999.0;
     diffMetMht_genmet = -999.0;
+    deltaPhiMinJECup = -999.0;
+    deltaPhiMinJECdn = -999.0;
+    diffMetMhtJECup = -999.0;
+    diffMetMhtJECdn = -999.0;
     minMTBMet = -999.0;
     zll_minMTBMet = -999.0;
     rl_minMTBMet = -999.0;
     gamma_minMTBMet = -999.0;
     ht = -999.0;
+    htJECup = -999.0;
+    htJECdn = -999.0;
     mt2 = -999.0;
+    mt2JECup = -999.0;
+    mt2JECdn = -999.0;
     mt2_gen = -999.0;
     mt2_genmet = -999.0;
     jet1_pt = 0.0;
     jet2_pt = 0.0;
+    jet1_ptJECup = 0.0;
+    jet2_ptJECup = 0.0;
+    jet1_ptJECdn = 0.0;
+    jet2_ptJECdn = 0.0;
+    jet_failFSveto = 0.0;
     gamma_jet1_pt = 0.0;
     gamma_jet2_pt = 0.0;
     pseudoJet1_pt = 0.0;
@@ -2633,8 +2856,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     pseudoJet2_mass = 0.0;
     mht_pt = -999.0;
     mht_phi = -999.0;
+    mht_ptJECup = -999.0;
+    mht_phiJECup = -999.0;
+    mht_ptJECdn = -999.0;
+    mht_phiJECdn = -999.0;
     met_pt = -999.0;
     met_phi = -999.0;
+    met_ptJECup = -999.0;
+    met_phiJECup = -999.0;
+    met_ptJECdn = -999.0;
+    met_phiJECdn = -999.0;
     met_rawPt = -999.0;
     met_rawPhi = -999.0;
     met_caloPt = -999.0;

@@ -95,8 +95,12 @@ class babyMaker {
   Float_t         rho;
 
   Int_t           nJet30;
+  Int_t           nJet30JECup;
+  Int_t           nJet30JECdn;
   Int_t           nJet40;
   Int_t           nBJet20;
+  Int_t           nBJet20JECup;
+  Int_t           nBJet20JECdn;
   Int_t           nBJet25;
   Int_t           nBJet30;
   Int_t           nBJet40;
@@ -118,18 +122,31 @@ class babyMaker {
   Float_t         deltaPhiMin_genmet;
   Float_t         diffMetMht;
   Float_t         diffMetMht_genmet;
+  Float_t         deltaPhiMinJECup;
+  Float_t         deltaPhiMinJECdn;
+  Float_t         diffMetMhtJECup;
+  Float_t         diffMetMhtJECdn;
   Float_t         minMTBMet;
   Float_t         gamma_minMTBMet;
   Float_t         zll_minMTBMet;
   Float_t         rl_minMTBMet;
 
   Float_t         ht;
+  Float_t         htJECup;
+  Float_t         htJECdn;
   Float_t         mt2;
+  Float_t         mt2JECup;
+  Float_t         mt2JECdn;
   Float_t         mt2_gen;
   Float_t         mt2_genmet;
 
   Float_t         jet1_pt;
   Float_t         jet2_pt;
+  Float_t         jet1_ptJECup;
+  Float_t         jet2_ptJECup;
+  Float_t         jet1_ptJECdn;
+  Float_t         jet2_ptJECdn;
+  Int_t           jet_failFSveto;
   Float_t         gamma_jet1_pt;
   Float_t         gamma_jet2_pt;
 
@@ -143,9 +160,17 @@ class babyMaker {
   Float_t         pseudoJet2_mass;
 
   Float_t         mht_pt;
+  Float_t         mht_ptJECup;
+  Float_t         mht_ptJECdn;
   Float_t         mht_phi;
+  Float_t         mht_phiJECup;
+  Float_t         mht_phiJECdn;
   Float_t         met_pt;
+  Float_t         met_ptJECup;
+  Float_t         met_ptJECdn;
   Float_t         met_phi;
+  Float_t         met_phiJECup;
+  Float_t         met_phiJECdn;
   Float_t         met_rawPt;
   Float_t         met_rawPhi;
   Float_t         met_caloPt;
