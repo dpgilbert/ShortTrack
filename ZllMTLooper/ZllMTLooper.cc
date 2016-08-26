@@ -85,7 +85,7 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
 
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
-  const char* json_file = "../babymaker/jsons/Cert_271036-275125_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -185,11 +185,13 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
       if (t.isData) {
 	// MET filters (data and MC)
 	if (!t.Flag_goodVertices) continue;
-	if (!t.Flag_CSCTightHalo2015Filter) continue; // use txt files instead
-	if (!t.Flag_eeBadScFilter) continue; // txt files are in addition to this flag
+	if (!t.Flag_globalTightHalo2016Filter) continue; 
+	if (!t.Flag_eeBadScFilter) continue; 
 	if (!t.Flag_HBHENoiseFilter) continue;
 	if (!t.Flag_HBHENoiseIsoFilter) continue;
 	if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+	if (!t.Flag_badMuonFilter) continue;
+	if (!t.Flag_badChargedHadronFilter) continue;
       }
       
       // // txt MET filters (data only)
@@ -219,7 +221,7 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
       //      const float lumi = 4.;
       //      const float lumi = 0.042;
       //      const float lumi = 0.804;
-      const float lumi = 3.99;
+      const float lumi = 12.9;
       evtweight_ = 1.;
 
       // apply relevant weights to MC
