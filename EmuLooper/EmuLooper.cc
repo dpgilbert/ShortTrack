@@ -30,12 +30,16 @@ using namespace duplicate_removal;
 class mt2tree;
 class SR;
 
-// turn on to apply weights to central value
-bool applyWeights = false;
 // turn on to apply Nvtx reweighting to MC
 bool doNvtxReweight = false;
 // turn on to apply json file to data
-bool applyJSON = false;
+bool applyJSON = true;
+// turn on to apply btag sf to central value
+bool applyBtagSF = true;
+// turn on to apply lepton sf to central value - take from babies
+bool applyLeptonSFfromBabies = true;
+// turn on to enable plots with systematic variations applied. will only do variations for applied weights
+bool doSystVariationPlots = true;
 
 //_______________________________________
 EmuLooper::EmuLooper(){
@@ -68,7 +72,7 @@ void EmuLooper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
-  const char* json_file = "../babymaker/jsons/Cert_271036-274240_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -167,11 +171,13 @@ void EmuLooper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (t.isData) {
 	// MET filters (data and MC)
 	if (!t.Flag_goodVertices) continue;
-	if (!t.Flag_CSCTightHalo2015Filter) continue; // use txt files instead
-	if (!t.Flag_eeBadScFilter) continue; // txt files are in addition to this flag
+	if (!t.Flag_globalTightHalo2016Filter) continue; 
+	if (!t.Flag_eeBadScFilter) continue; 
 	if (!t.Flag_HBHENoiseFilter) continue;
 	if (!t.Flag_HBHENoiseIsoFilter) continue;
 	if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+	if (!t.Flag_badMuonFilter) continue;
+	if (!t.Flag_badChargedHadronFilter) continue;
       }
       
       // // txt MET filters (data only)
@@ -190,13 +196,12 @@ void EmuLooper::loop(TChain* chain, std::string sample, std::string output_dir){
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      const float lumi = 0.804;
+      const float lumi = 12.9;
       evtweight_ = 1.;
 
       // apply relevant weights to MC
       if (!t.isData) {
 	evtweight_ = t.evt_scale1fb * lumi;
-	if (applyWeights) evtweight_ *= t.weight_lepsf * t.weight_btagsf * t.weight_isr * t.weight_pu;
 	// get pu weight from hist, restrict range to nvtx 4-31
 	if (doNvtxReweight) {
 	  int nvtx_input = t.nVert;
@@ -205,6 +210,15 @@ void EmuLooper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  float puWeight = h_nvtx_weights_->GetBinContent(h_nvtx_weights_->FindBin(nvtx_input));
 	  evtweight_ *= puWeight;
 	}
+	if (applyBtagSF) {
+	  // remove events with 0 btag weight for now..
+	  if (fabs(t.weight_btagsf) < 0.001) continue;
+	  evtweight_ *= t.weight_btagsf;
+	}
+	if (applyLeptonSFfromBabies) {
+	  evtweight_ *= t.weight_lepsf;
+	}
+	
       } // !isData
 
       // basic dilepton emu selection: vertex, 2 leptons, dilepton trigger, MET 50, at least one btag
@@ -286,6 +300,14 @@ void EmuLooper::fillHistosEMU(std::map<std::string, TH1*>& h_1d, const std::stri
   plot1D("h_leppt1"+s,      t.lep_pt[0],   evtweight_, h_1d, ";p_{T}(lep1) [GeV]", 50, 0, 200);
   plot1D("h_leppt2"+s,      t.lep_pt[1],   evtweight_, h_1d, ";p_{T}(lep2) [GeV]", 50, 0, 200);
   plot1D("h_zllmass"+s,      t.zll_mass,   evtweight_, h_1d, ";m_{ll} [GeV]", 60, 0, 120);
+
+  if (!t.isData && doSystVariationPlots && applyBtagSF) {
+    // assume weights are already applied to central value
+    plot1D("h_nBJet20_btagsf_heavy_UP"+s,      t.nBJet20csv,  evtweight_ / t.weight_btagsf * t.weight_btagsf_heavy_UP, h_1d, ";N(bjets)", 6, 0, 6);
+    plot1D("h_nBJet20_btagsf_heavy_DN"+s,      t.nBJet20csv,  evtweight_ / t.weight_btagsf * t.weight_btagsf_heavy_DN, h_1d, ";N(bjets)", 6, 0, 6);
+    plot1D("h_nBJet20_btagsf_light_UP"+s,      t.nBJet20csv,  evtweight_ / t.weight_btagsf * t.weight_btagsf_light_UP, h_1d, ";N(bjets)", 6, 0, 6);
+    plot1D("h_nBJet20_btagsf_light_DN"+s,      t.nBJet20csv,  evtweight_ / t.weight_btagsf * t.weight_btagsf_light_DN, h_1d, ";N(bjets)", 6, 0, 6);
+  }
 
   outfile_->cd();
   return;
