@@ -118,7 +118,7 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString sr
       }
 	
       //skip this mt2bin if there are no fakes
-      if(!h_sideband) continue;
+      if(!h_sideband) {cout<<"crgj"<<srName<<"/h2d_gammaht_gammapt"<<bin<<mt2binsname[xbin]<<"LooseNotTight not found"<<endl; continue;}
 
       // Subtract prompt contamination in sideband (when looking at data)
       if (h_sidebandgjetPrompt && realDataLocal) {
@@ -136,7 +136,10 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString sr
 
 	  Float_t FRvalue   = h_FR->GetBinContent(FRbin); // get value of fake rate for this bin
 	  Float_t FRerror   = h_FR->GetBinError(FRbin);   // get error on fake rate for this bin	  
-
+	  if (FRvalue>0.9 || FRvalue<0) {
+	    cout<<"STRANGE: FRvalue is "<<FRvalue<<". Setting it to 0.5"<<endl;
+	    FRvalue = 0.5;
+	  }
 	  //shift nFOs by fragScale*QCDPrompt in LooseNotTight. (add fragmentation to sideband, unless looking at data)
 	  if(h_sidebandqcdPrompt && !realDataLocal) {
 	    float fragYield = h_sidebandqcdPrompt->Integral();
@@ -152,7 +155,8 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString sr
 	  const Float_t fr = FRvalue / (1 - FRvalue);
 	  const Float_t pred = fr * nFOs;
     
-    if (verbose && nFOs>0) cout<<"FR bin "<<FRbin<<" has FR "<<FRvalue<<", nFO "<<nFOs<<" and predicted "<<pred<<endl;
+	  //    if (verbose && nFOs>0) 
+	  cout<<"FR bin "<<FRbin<<" has FR "<<FRvalue<<", nFO "<<nFOs<<" and predicted "<<pred<<endl;
 	  
 	  // now, need to get errors on these terms, be careful
 	  // start with hardest part, error on fr
@@ -210,17 +214,17 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString sr
 
   TH1F* h_pred = (TH1F*) h_LooseNotTight->Clone();
   h_pred->Reset();
-  h_pred->SetName("h_pred"+s);
+  h_pred->SetName("h_predmt2bins"+s);
   h_pred->SetContent(preds);
   h_pred->SetError(predErrors);
   h_pred->Write();
-  
+  //h_pred->Print("all");
   return;
   
 }
 
 //this is all we need if the FR is a single number, thus we don't have to loop over 2-dimentional FR histograms
-void makePredOneBinFR(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString srName, TH2D* h_FR, const float fragScale = 1, TString s = "", TString plotname = "htbins")
+void makePredOneBinFR(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString srName, TH2D* h_FR, const float fragScale = 1, TString s = "", TString plotname = "mt2bins")
 {
   
   //sr name
@@ -329,7 +333,7 @@ void makePredOneBinFR(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TS
       const Float_t fr = FRvalue / (1 - FRvalue);
       const Float_t pred = fr * nFOs;
       
-      if (verbose && nFOs>0) cout<<"FR bin "<<FRbin<<" has FR "<<FRvalue<<", nFO "<<nFOs<<" and predicted "<<pred<<endl;
+      if (verbose ) cout<<"FR bin "<<FRbin<<" has FR "<<FRvalue<<", nFO "<<nFOs<<" and predicted "<<pred<<endl;
       
       // now, need to get errors on these terms, be careful
       // start with hardest part, error on fr
@@ -429,14 +433,14 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
   
   TString srdir = "sr"+sr;
   TH1F* h_predFakes = (TH1F*) f_out->Get(srdir+"/h_pred"+plotname+FR_type);
-  if (plotname.Contains("mt2bins")) {
-    h_predFakes = (TH1F*) f_out->Get(srdir+"/h_pred"+FR_type);
-  }
+//  if (plotname.Contains("mt2bins")) {
+//    h_predFakes = (TH1F*) f_out->Get(srdir+"/h_pred"+FR_type);
+//  }
   TH1F* h_ratio = (TH1F*) f_zinv->Get(srdir+"/h_"+plotname+"Ratio");
   if (!plotname.Contains("mt2bins")) {
     h_ratio = (TH1F*) f_zinv->Get("h_"+plotname+"Ratio");
   }
-  if (!h_ratio) {cout<<"Ratio not found for plot "<<plotname<<endl;  }
+  if (!h_ratio) {cout<<"Ratio not found for plot. GIVING UP FOR THIS REGION. "<<plotname<<endl; return; }
   TH1F* h_trueZinv = (TH1F*) f_zinv->Get(srdir+"/h_"+plotname);
 
 
@@ -485,6 +489,12 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
   }
   if(h_predFakes) h_numFR->Add(h_predFakes, -1.);
   h_purityFR->Divide(h_numFR,h_denFR,1,1,"B");
+  cout<<"CHECKING PURITY FOR "<<h_purityFR->GetName()<<endl;
+  if (h_predFakes) h_predFakes->Print("all");
+  else cout<<"h_predFakes not found"<<endl;
+  h_numFR->Print("all");
+  h_denFR->Print("all");
+  h_purityFR->Print("all");
 //  // add systematic uncertainty to purity if estimated from Sieie sideband
 //  for (int ibin = 1; ibin <= h_purityFR->GetNbinsX(); ibin++) {
 //    float fivepercent = 0.05*h_purityFR->GetBinContent(ibin);
@@ -658,10 +668,10 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   if (datanamestring.Contains("Data") || datanamestring.Contains("data")) realData = true;
   TFile* f_data = new TFile(Form("%s/%s.root",input_dir.c_str(),dataname.c_str())); //data or qcd+gjets file
   TFile* f_gq = new TFile(Form("%s/qcdplusgjet.root",input_dir.c_str())); //qcd+gjets file
-  TFile* f_g = new TFile(Form("%s/gjet_ht.root",input_dir.c_str())); //gjet file
-  TFile* f_q = new TFile(Form("%s/qcd_ht.root",input_dir.c_str())); //qcd file
+  TFile* f_g = new TFile(Form("%s/2015gjets_ht.root",input_dir.c_str())); //gjet file
+  TFile* f_q = new TFile(Form("%s/2015qcd_ht.root",input_dir.c_str())); //qcd file
   TFile* f_z = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str())); //zinv pred from ZinvMaker.C, contains ratio
-  TFile* f_zOrig = new TFile(Form("%s/zinv_ht.root",input_dir.c_str())); //zinv file out of the box
+  TFile* f_zOrig = new TFile(Form("%s/2015zinv_ht.root",input_dir.c_str())); //zinv file out of the box
   if(f_g->IsZombie() || f_q->IsZombie() || f_gq->IsZombie() || f_data->IsZombie() || f_z->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
     return;
@@ -675,7 +685,8 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   if (!h_qcdTight || !h_qcdLoose) cout<<"Could not find FR histograms in QCD MC"<<endl;
   h_qcdTight->SetName("h_qcdTight");
   h_qcdLoose->SetName("h_qcdLoose");
-  
+  h_qcdTight->ClearUnderflowAndOverflow();
+  h_qcdLoose->ClearUnderflowAndOverflow();
   
   //get hists for FR calc, Sieie Sideband
   TH2D* h_qcdTightFailSieie = (TH2D*) f_q->Get("crgjbase/h2d_gammaht_gammaptSingleBinFakeSieieSB");
@@ -683,6 +694,8 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   if (!h_qcdTightFailSieie || !h_qcdLooseFailSieie) cout<<"Could not find SieieSB FR histograms in QCD MC"<<endl;
   h_qcdTightFailSieie->SetName("h_qcdTightFailSieie");
   h_qcdLooseFailSieie->SetName("h_qcdLooseFailSieie");
+  h_qcdTightFailSieie->ClearUnderflowAndOverflow();
+  h_qcdLooseFailSieie->ClearUnderflowAndOverflow();
   
   //get hists for FR calc, Sieie Sideband (Data)
   TH2D* h_qcdTightFailSieieData = (TH2D*) f_data->Get("crgjbase/h2d_gammaht_gammaptSingleBinSieieSB");
@@ -695,7 +708,9 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
 
   h_qcdTightFailSieieData->SetName("h_qcdTightFailSieieData");
   h_qcdLooseFailSieieData->SetName("h_qcdLooseFailSieieData");
-  
+  h_qcdTightFailSieieData->ClearUnderflowAndOverflow();
+  h_qcdLooseFailSieieData->ClearUnderflowAndOverflow();  
+
   //instantiate output file here
   //TFile* f_out = new TFile("$CMSSW_BASE/../scripts/purity.root","RECREATE");
   TFile* f_out = new TFile(Form("%s/purity.root",input_dir.c_str()),"RECREATE");
@@ -755,6 +770,14 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   makePredOneBinFR(f_out, f_data, f_q, f_g, srName+"Incl", h_FRFailSieieData, 0, "FailSieieData", "htbins2"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_data, f_q, f_g, srName+"Incl", h_FRFailSieieData, 0, "FailSieieData", "njbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_data, f_q, f_g, srName+"Incl", h_FRFailSieieData, 0, "FailSieieData", "nbjbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
+  makePredOneBinFR(f_out, f_gq, f_q, f_g, srName, h_FRFailSieie, 0, "FailSieie", "htbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
+  makePredOneBinFR(f_out, f_gq, f_q, f_g, srName, h_FRFailSieie, 0, "FailSieie", "htbins2"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
+  makePredOneBinFR(f_out, f_gq, f_q, f_g, srName, h_FRFailSieie, 0, "FailSieie", "njbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
+  makePredOneBinFR(f_out, f_gq, f_q, f_g, srName, h_FRFailSieie, 0, "FailSieie", "nbjbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
+  makePredOneBinFR(f_out, f_gq, f_q, f_g, srName+"Incl", h_FRFailSieie, 0, "FailSieie", "htbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
+  makePredOneBinFR(f_out, f_gq, f_q, f_g, srName+"Incl", h_FRFailSieie, 0, "FailSieie", "htbins2"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
+  makePredOneBinFR(f_out, f_gq, f_q, f_g, srName+"Incl", h_FRFailSieie, 0, "FailSieie", "njbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
+  makePredOneBinFR(f_out, f_gq, f_q, f_g, srName+"Incl", h_FRFailSieie, 0, "FailSieie", "nbjbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   vector<TString> additionalRegions;
   additionalRegions.push_back("baseJ");
   additionalRegions.push_back("baseVL");

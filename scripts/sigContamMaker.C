@@ -66,10 +66,20 @@ void sigContamMaker(TString dir, TString sample) {
       h_mt2bins_sigscan_crsl->SetName("h_mt2bins_sigscan_crsl");
       dout->WriteObject(h_mt2bins_sigscan_crsl,"h_mt2bins_sigscan_crsl");
     }
+    TH3D* h_mt2bins_sigscan_crsl_genmet = (TH3D*) fin->Get(dir_name_crsl+"/h_mt2bins_sigscan_genmet");
+    if (h_mt2bins_sigscan_crsl_genmet) {
+      h_mt2bins_sigscan_crsl_genmet->SetName("h_mt2bins_sigscan_crsl_genmet");
+      dout->WriteObject(h_mt2bins_sigscan_crsl_genmet,"h_mt2bins_sigscan_crsl_genmet");
+    }
     TH1D* h_mt2bins_crsl = (TH1D*) fin->Get(dir_name_crsl+"/h_mt2bins");
     if (h_mt2bins_crsl) {
       h_mt2bins_crsl->SetName("h_mt2bins_crsl");
       dout->WriteObject(h_mt2bins_crsl,"h_mt2bins_crsl");
+    }
+    TH1D* h_mt2bins_crsl_genmet = (TH1D*) fin->Get(dir_name_crsl+"/h_mt2bins_genmet");
+    if (h_mt2bins_crsl_genmet) {
+      h_mt2bins_crsl_genmet->SetName("h_mt2bins_crsl_genmet");
+      dout->WriteObject(h_mt2bins_crsl_genmet,"h_mt2bins_crsl_genmet");
     }
 
     // get transfer factor from lostlep file, save hist

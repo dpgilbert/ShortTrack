@@ -11,13 +11,13 @@ void make_nsig_weight_hists(TString dir, TString sample) {
 
   TFile* fout = new TFile(Form("nsig_weights_%s.root",sample.Data()),"RECREATE");
 
-  // default: 25 GeV binning, m1 from 0-2000, m2 from 0-1600
-  int x_nbins = 81;
+  // default: 25 GeV binning, m1 from 0-2500, m2 from 0-2100
+  int x_nbins = 101;
   float x_min = -12.5;
-  float x_max = 2012.5;
-  int y_nbins = 65;
+  float x_max = 2512.5;
+  int y_nbins = 85;
   float y_min = -12.5;
-  float y_max = 1612.5;
+  float y_max = 2112.5;
 
   // for T2cc: 25 GeV in x, 5 GeV in y binning, m1 from 0-2000, m2 from 0-1000
   if (sample.Contains("T2cc")) {
@@ -33,6 +33,8 @@ void make_nsig_weight_hists(TString dir, TString sample) {
   TH2D* h_avg_weight_btagsf_heavy_DN = (TH2D*) h_nsig->Clone("h_avg_weight_btagsf_heavy_DN");
   TH2D* h_avg_weight_btagsf_light_DN = (TH2D*) h_nsig->Clone("h_avg_weight_btagsf_light_DN");
   TH2D* h_avg_weight_isr = (TH2D*) h_nsig->Clone("h_avg_weight_isr");
+  TH2D* h_avg_weight_isr_UP = (TH2D*) h_nsig->Clone("h_avg_weight_isr_UP");
+  TH2D* h_avg_weight_isr_DN = (TH2D*) h_nsig->Clone("h_avg_weight_isr_DN");
 
   t->Draw("GenSusyMScan2:GenSusyMScan1>>h_nsig");
   t->Draw("GenSusyMScan2:GenSusyMScan1>>h_avg_weight_btagsf","(met_pt > -1.)*weight_btagsf" );
@@ -41,6 +43,8 @@ void make_nsig_weight_hists(TString dir, TString sample) {
   t->Draw("GenSusyMScan2:GenSusyMScan1>>h_avg_weight_btagsf_heavy_DN","(met_pt > -1.)*weight_btagsf_heavy_DN" );
   t->Draw("GenSusyMScan2:GenSusyMScan1>>h_avg_weight_btagsf_light_DN","(met_pt > -1.)*weight_btagsf_light_DN" );
   t->Draw("GenSusyMScan2:GenSusyMScan1>>h_avg_weight_isr","(met_pt > -1.)*weight_isr" );
+  t->Draw("GenSusyMScan2:GenSusyMScan1>>h_avg_weight_isr_UP","(met_pt > -1.)*weight_isr_UP" );
+  t->Draw("GenSusyMScan2:GenSusyMScan1>>h_avg_weight_isr_DN","(met_pt > -1.)*weight_isr_DN" );
 
   h_avg_weight_btagsf->Divide(h_nsig);
   h_avg_weight_btagsf_heavy_UP->Divide(h_nsig);
@@ -48,6 +52,8 @@ void make_nsig_weight_hists(TString dir, TString sample) {
   h_avg_weight_btagsf_heavy_DN->Divide(h_nsig);
   h_avg_weight_btagsf_light_DN->Divide(h_nsig);
   h_avg_weight_isr->Divide(h_nsig);
+  h_avg_weight_isr_UP->Divide(h_nsig);
+  h_avg_weight_isr_DN->Divide(h_nsig);
   
   fout->Write();
   fout->Close();

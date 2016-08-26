@@ -61,8 +61,10 @@ class MT2Looper {
 			      const std::string& dir = "", const std::string& suffix = ""); 
   void fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 			      const std::string& dir = "", const std::string& suffix = "");
-  void fillLepUncSR();
-  void fillLepCorSRfastsim();
+  void fillLepCorSRfromFile();
+  void fillLepSFWeightsFromFile();
+  void fillHistosGenMET(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
+			const std::string& dir = "", const std::string& suffix = ""); 
   
  private:
 
@@ -96,8 +98,14 @@ class MT2Looper {
   TH2D* h_sig_avgweight_btagsf_heavy_DN_;
   TH2D* h_sig_avgweight_btagsf_light_DN_;
   TH2D* h_sig_avgweight_isr_;
+  TH2D* h_sig_avgweight_isr_UP_;
+  TH2D* h_sig_avgweight_isr_DN_;
   float cor_lepeff_sr_;
-  float unc_lepeff_sr_;
+  float unc_lepeff_sr_UP_;
+  float unc_lepeff_sr_DN_;
+  float weight_lepsf_cr_;
+  float weight_lepsf_cr_UP_;
+  float weight_lepsf_cr_DN_;
   
 };
 

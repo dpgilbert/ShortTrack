@@ -23,13 +23,14 @@ const int iPeriod = 4; // 13 tev
 //   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
 const int iPos = 3;
 
-void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-07_25ns_miniaodv2_Summer15_25nsV6_2p1fb/") {
+void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-07_nojson/trigdenom_json_271036-276811/") {
 
   cmsText = "CMS Preliminary";
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
-  lumi_13TeV = "2.1 fb^{-1}";
+  lumi_13TeV = "12.9 fb^{-1}";
+  //lumi_13TeV = "589 pb^{-1}";
   
   gStyle->SetPadTopMargin(0.08);
   gStyle->SetPadBottomMargin(0.12);
@@ -40,11 +41,11 @@ void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-07
   
   TChain* t_jetht = new TChain("mt2");
   TChain* t_met = new TChain("mt2");
-  TChain* t_ele = new TChain("mt2");
+  //  TChain* t_ele = new TChain("mt2");
 
-  t_jetht->Add(Form("%s/*Run2015*JetHT*.root", indir.Data()));
-  t_met->Add(Form("%s/*Run2015*MET*.root", indir.Data()));
-  t_ele->Add(Form("%s/*Run2015*SingleElectron*.root", indir.Data()));
+  t_jetht->Add(Form("%s/*Run2016*JetHT*.root", indir.Data()));
+  t_met->Add(Form("%s/*Run2016*MET*.root", indir.Data()));
+  //  t_ele->Add(Form("%s/*Run2016*SingleElectron*.root", indir.Data()));
 
   TFile* f_out = new TFile("trigeff_PFHT800.root","RECREATE");
   
@@ -60,15 +61,16 @@ void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-07
   c->SetGrid(1,1);
   c->cd();
 
-  TCut base = "nVert > 0 && nJet30 > 1 && Flag_CSCTightHaloFilter && Flag_eeBadScFilter && Flag_HBHENoiseFilter";
+  //  TCut base = "nVert > 0 && nJet30 > 1 && Flag_CSCTightHalo2015Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices";
+  TCut base = "nVert > 0 && nJet30 > 1 && Flag_globalTightHalo2016Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && Flag_badMuonFilter && Flag_badChargedHadronFilter && isGolden";
   TCut had = base + "nElectrons10+nMuons10==0";
   TCut ele = base + "nElectrons10 > 0 && abs(lep_pdgId[0]) == 11 && lep_pt[0] > 25.";
 
   t_jetht->Draw("ht>>h_ht_denom_ht475",had+"HLT_PFHT475_Prescale");
   t_jetht->Draw("ht>>h_ht_num_ht475",had+"HLT_PFHT475_Prescale && HLT_PFHT800");
 
-  t_met->Draw("ht>>h_ht_denom_met170",had+"met_pt > 200. && HLT_PFMET170");
-  t_met->Draw("ht>>h_ht_num_met170",had+"met_pt > 200. && HLT_PFMET170 && HLT_PFHT800");
+  t_met->Draw("ht>>h_ht_denom_met170",had+"met_pt > 250. && HLT_PFMET170");
+  t_met->Draw("ht>>h_ht_num_met170",had+"met_pt > 250. && HLT_PFMET170 && HLT_PFHT800");
 
   // t_ele->Draw("ht>>h_ht_denom_ele23",ele+"HLT_SingleEl");
   // t_ele->Draw("ht>>h_ht_num_ele23",ele+"HLT_SingleEl && HLT_PFHT800");
@@ -104,6 +106,7 @@ void plot_trigeff_PFHT800 (const TString& indir = "/nfs-6/userdata/mt2/V00-01-07
   CMS_lumi( c, iPeriod, iPos );
   c->SaveAs("trigeff_PFHT800.pdf");
   c->SaveAs("trigeff_PFHT800.eps");
+  c->SaveAs("trigeff_PFHT800.png");
 
   f_out->Write();
   f_out->Close();

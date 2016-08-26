@@ -15,4 +15,7 @@ make -j 8
 #./processBaby test_data_JetHT_1k /nfs-7/userdata/olivito/mt2/run2_25ns_MiniAODv2/ntuple_data_Run2015D_JetHT_PromptReco-v4_1k.root
 #./processBaby test_data_JetHT_10k /nfs-7/userdata/olivito/mt2/run2_25ns_MiniAODv2/ntuple_data_Run2015D_JetHT_PromptReco-v4_10k.root
 
-./processBaby test_T2tt /hadoop/cms/store/group/snt/run2_fastsim_v1/SMS-T2tt_mStop-600-950_mLSP-1to450_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1/V07-04-12_miniaodv1_FS/merged_ntuple_1.root
+#./processBaby test_T2tt /hadoop/cms/store/group/snt/run2_fastsim_v1/SMS-T2tt_mStop-600-950_mLSP-1to450_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1/V07-04-12_miniaodv1_FS/merged_ntuple_1.root
+
+./processBaby test_ttbar_80X /nfs-7/userdata/bemarsh/scratch/TTJets_SingleLeptFromT_25ns_80X_All.root
+

@@ -3,6 +3,9 @@
 INDIR=/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-12_binsHI/
 OUTDIR=cards_test
 
+## set to 1 if doing full signal scans (instead of benchmark signal points)
+DOFULLSCAN=0
+
 if [ ! -d "$OUTDIR" ]; then
   mkdir -p $OUTDIR
 fi
@@ -12,7 +15,5 @@ declare -a samples=(T1tttt_1500_100 )
 
 for i in "${samples[@]}"
 do
-  nohup root -b -q "cardMaker.C+(\"$i\",\"${INDIR}\",\"${OUTDIR}\")" > make_cards_$i.log 2>&1 &
-### option for full scans
-#  nohup root -b -q "cardMaker.C+(\"$i\",\"${INDIR}\",\"${OUTDIR}\",1)" > make_cards_$i.log 2>&1 &
+  nohup root -b -q "cardMaker.C+(\"$i\",\"${INDIR}\",\"${OUTDIR}\",${DOFULLSCAN})" > make_cards_$i.log 2>&1 &
 done

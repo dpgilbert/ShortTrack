@@ -10,7 +10,7 @@ int sampleID (const string& name) {
 // sample ID numbers according to:
 //  https://mangano.web.cern.ch/mangano/public/MECCA/samples_50ns_miniaod.txt
 
-  if (name.find("data_Run2015") != string::npos) {
+  if ((name.find("data_Run201") != string::npos) || (name.find("run2_data") != string::npos)) {
     if (name.find("JetHT") != string::npos) return 1;
     else if (name.find("HTMHT") != string::npos) return 2;
     else if (name.find("MET") != string::npos) return 3;
@@ -42,9 +42,12 @@ int sampleID (const string& name) {
     else if ((name.find("QCD_Pt-2400to3200") != string::npos) || (name.find("QCD_Pt_2400to3200") != string::npos)) return 117;
     else if ((name.find("QCD_Pt-3200") != string::npos) || (name.find("QCD_Pt_3200") != string::npos)) return 118;
 
-    else if ((name.find("QCD_HT_250To500") != string::npos) && (name.find("ext1") != string::npos)) return 162;
-    else if ((name.find("QCD_HT_500To1000") != string::npos) && (name.find("ext1") != string::npos)) return 163;
-    else if ((name.find("QCD_HT_1000") != string::npos) && (name.find("ext1") != string::npos)) return 164;
+    else if (name.find("QCD_HT300To500_GenJets5") != string::npos) return 163;
+    else if (name.find("QCD_HT500to700_GenJets5") != string::npos) return 164;
+    else if (name.find("QCD_HT700to1000_GenJets5") != string::npos) return 165;
+    else if (name.find("QCD_HT1000to1500_GenJets5") != string::npos) return 166;
+    else if (name.find("QCD_HT1500to2000_GenJets5") != string::npos) return 167;
+    else if (name.find("QCD_HT2000toInf_GenJets5") != string::npos) return 168;
 
     else if (name.find("QCD_HT-100to200") != string::npos) return 151;
     else if (name.find("QCD_HT_200to300") != string::npos) return 152;
@@ -68,20 +71,24 @@ int sampleID (const string& name) {
 
   else if (name.find("GJet") != string::npos) {
     if (name.find("GJet_Pt-15to3000") != string::npos) return 200;
-    else if ((name.find("GJets_HT-100to200") != string::npos) || (name.find("GJets_HT-100To200") != string::npos)) return 202;
-    else if ((name.find("GJets_HT-200to400") != string::npos) || (name.find("GJets_HT-200To400") != string::npos)) return 203;
-    else if ((name.find("GJets_HT-400to600") != string::npos) || (name.find("GJets_HT-400To600") != string::npos)) return 204;
-    else if ((name.find("GJets_HT-600toInf") != string::npos) || (name.find("GJets_HT-600ToInf") != string::npos)) return 205;
+    else if (name.find("GJets_DR-0p4_HT-40To100") != string::npos || name.find("GJets_HT-40To100") != string::npos) return 201;
+    else if (name.find("GJets_DR-0p4_HT-100To200") != string::npos || name.find("GJets_HT-100To200") != string::npos) return 202;
+    else if (name.find("GJets_DR-0p4_HT-200To400") != string::npos || name.find("GJets_HT-200To400") != string::npos) return 203;
+    else if (name.find("GJets_DR-0p4_HT-400To600") != string::npos || name.find("GJets_HT-400To600") != string::npos) return 204;
+    else if (name.find("GJets_DR-0p4_HT-600ToInf") != string::npos || name.find("GJets_HT-600ToInf") != string::npos) return 205;
   }
 
   else if (name.find("TTJets") != string::npos) {
     if (name.find("TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 300;
-    else if ((name.find("TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) && (name.find("ext1") != string::npos)) return 304;
-    else if ((name.find("TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) && (name.find("ext1") != string::npos)) return 305;
-    else if ((name.find("TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) && (name.find("ext1") != string::npos)) return 306;
     else if (name.find("TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 301;
     else if (name.find("TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 302;
     else if (name.find("TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 303;
+    else if (name.find("TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8") != string::npos) return 306;
+    
+    else if (name.find("TTJets_HT-600to800") != string::npos) return 311;
+    else if (name.find("TTJets_HT-800to1200") != string::npos) return 312;
+    else if (name.find("TTJets_HT-1200to2500") != string::npos) return 313;
+    else if (name.find("TTJets_HT-2500toInf") != string::npos) return 314;
   }
 
   // 400 block: single top, ttV
@@ -91,8 +98,8 @@ int sampleID (const string& name) {
   else if (name.find("TBarToLeptons_s-channel") != string::npos) return 403;
   else if (name.find("TBarToLeptons_t-channel") != string::npos) return 404;
   else if (name.find("Tbar_tW-channel") != string::npos) return 405;
-  else if (name.find("TTWJets") != string::npos) return 410;
-  else if (name.find("TTZJets") != string::npos) return 412;
+  else if ((name.find("TTWJets") != string::npos) || (name.find("ttWJets") != string::npos)) return 410;
+  else if ((name.find("TTZJets") != string::npos) || (name.find("ttZJets") != string::npos)) return 411;
   else if (name.find("TTbarH") != string::npos) return 412;
 
   else if (name.find("WJets") != string::npos) {
@@ -110,11 +117,15 @@ int sampleID (const string& name) {
     if ((name.find("ZJetsToNuNu_HT-100to200") != string::npos) || (name.find("ZJetsToNuNu_HT-100To200") != string::npos)) return 602;
     else if ((name.find("ZJetsToNuNu_HT-200to400") != string::npos) || (name.find("ZJetsToNuNu_HT-200To400") != string::npos)) return 603;
     else if ((name.find("ZJetsToNuNu_HT-400to600") != string::npos) || (name.find("ZJetsToNuNu_HT-400To600") != string::npos)) return 604;
-    else if ((name.find("ZJetsToNuNu_HT-600toInf") != string::npos) || (name.find("ZJetsToNuNu_HT-600ToInf") != string::npos)) return 605;
+    else if ((name.find("ZJetsToNuNu_HT-600to800") != string::npos) || (name.find("ZJetsToNuNu_HT-600To800") != string::npos)) return 605;
+    else if ((name.find("ZJetsToNuNu_HT-800to1200") != string::npos) || (name.find("ZJetsToNuNu_HT-800To1200") != string::npos)) return 606;
+    else if ((name.find("ZJetsToNuNu_HT-1200to2500") != string::npos) || (name.find("ZJetsToNuNu_HT-1200To2500") != string::npos)) return 607;
+    else if ((name.find("ZJetsToNuNu_HT-2500toInf") != string::npos) || (name.find("ZJetsToNuNu_HT-2500ToInf") != string::npos)) return 608;
   }
 
   else if (name.find("DYJets") != string::npos) {
-    if ((name.find("DYJetsToLL_M-50_HT-100to200")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-100To200")  != string::npos)) return 702;
+    if (name.find("DYJetsToLL_M-50_TuneCUETP8M1") != string::npos) return 701;
+    else if ((name.find("DYJetsToLL_M-50_HT-100to200")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-100To200") != string::npos)) return 702;
     else if ((name.find("DYJetsToLL_M-50_HT-200to400")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-200To400") != string::npos)) return 703;
     else if ((name.find("DYJetsToLL_M-50_HT-400to600")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-400To600") != string::npos)) return 704;
     else if ((name.find("DYJetsToLL_M-50_HT-600toInf")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-600ToInf") != string::npos)) return 705;

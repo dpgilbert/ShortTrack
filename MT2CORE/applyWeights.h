@@ -18,15 +18,18 @@ float getBtagEff(float pt, float eta, int pdgId);
 
 
 TH2D* h_elSF = 0;
+TH2D* h_elSF_trk = 0;
 TH2D* h_muSF = 0;
-bool setElSFfile(TString filename);
-bool setMuSFfile(TString filenameID, TString filenameISO);
+TH1D* h_muSF_trk_ptlt10 = 0;
+TH1D* h_muSF_trk_ptgt10 = 0;
+bool setElSFfile(TString filenameIDISO, TString filenameTRK);
+bool setMuSFfile(TString filenameID, TString filenameISO, TString filenameIP, TString filenameTRK);
 weightStruct getLepSFFromFile(float pt, float eta, int pdgId);
 
 TH2D* h_elSF_fastsim = 0;
 TH2D* h_muSF_fastsim = 0;
 bool setElSFfile_fastsim(TString filename);
-bool setMuSFfile_fastsim(TString filename);
+bool setMuSFfile_fastsim(TString filenameID, TString filenameISO, TString filenameIP);
 weightStruct getLepSFFromFile_fastsim(float pt, float eta, int pdgId);
 
 TH2D* h_elVetoEff_fullsim = 0;
@@ -39,5 +42,6 @@ TH2D* h_muVetoEff_fastsim = 0;
 bool setVetoEffFile_fastsim(TString filename);
 float getLepVetoEffFromFile_fastsim(float pt, float eta, int pdgId);
 
+float getPhotonTriggerWeight(float eta, float pt);
 
 #endif

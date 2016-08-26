@@ -393,7 +393,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double lostlep_shape = 1.0;
   double lostlep_mcstat = 1. + err_lostlep_mcstat; // transfer factor stat uncertainty
   double lostlep_alphaerr = 1. + 0.10; // transfer factor syst uncertainty
-  double lostlep_lepeff = 1.07; // transfer factor uncertainty from lepton eff
+  double lostlep_lepeff = 1.12; // transfer factor uncertainty from lepton eff
  
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
   TString name_lostlep_shape = Form("llep_shape_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
@@ -427,8 +427,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   }
 
   // special cases with larger alpha error
-  if ( ht_LOW == 200 && njets_LOW == 7) lostlep_alphaerr = 1.40; // due to JES
-  else if ( njets_LOW == 7 && nbjets_LOW >= 3) lostlep_alphaerr = 1.15; // due to btag eff
+  if ( njets_LOW == 7 && nbjets_LOW >= 3) lostlep_alphaerr = 1.18; // due to btag eff
 
 
   // ----- zinv bkg uncertainties - depend on signal region, b selection

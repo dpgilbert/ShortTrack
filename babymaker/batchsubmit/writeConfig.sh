@@ -5,6 +5,9 @@ do echo "No Proxy found issuing \"voms-proxy-init -voms cms\""
    voms-proxy-init -hours 168 -voms cms
 done
 
+DATADIR=$1
+COPYDIRBASE=$2
+
 UNIVERSE="grid"
 #UNIVERSE="vanilla"
 EXE="wrapper.sh"
@@ -16,8 +19,8 @@ JOBLOGDIR="${PWD}/job_logs"
 PROXY=$(voms-proxy-info -path)
 USERNAME=$(whoami)
 
-LOGDIR="/data/tmp/$USER/$COPYDIRBASE/submit_logs"
-OUTDIR="/data/tmp/$USER/$COPYDIRBASE/job_logs"
+LOGDIR="/data/tmp/$USER/condor_submit_logs/$COPYDIRBASE"
+OUTDIR="/data/tmp/$USER/condor_job_logs/$COPYDIRBASE"
 LOG="${LOGDIR}/condor_`date "+%m_%d_%Y"`.log"
 OUT="${OUTDIR}/1e.\$(Cluster).\$(Process).out"
 ERR="${OUTDIR}/1e.\$(Cluster).\$(Process).err"
@@ -43,9 +46,6 @@ tar -hcf ${DIR}/job_input/input.tar job_input/*
 gzip ${DIR}/job_input/input.tar
 cd ${DIR}
 
-
-DATADIR=$1
-COPYDIRBASE=$2
 COPYDIR=/hadoop/cms/store/user/${USERNAME}/mt2babies/${COPYDIRBASE}
 echo "[writeConfig] running on dataset ${DATADIR}"
 echo "[writeConfig] copying output to ${COPYDIR}"

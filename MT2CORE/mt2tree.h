@@ -26,6 +26,7 @@ public :
    Int_t           lumi;
    ULong64_t       evt;
    Int_t           isData;
+   Int_t           isGolden;
    Float_t         evt_scale1fb;
    Float_t         evt_xsec;
    Float_t         evt_kfactor;
@@ -42,7 +43,10 @@ public :
    Int_t           nJet40;
    Int_t           nJet30FailId;
    Int_t           nJet100FailId;
+   Int_t           nJet20BadFastsim;
    Int_t           nBJet20;
+   Int_t           nBJet20csv;
+   Int_t           nBJet20mva;
    Int_t           nBJet25;
    Int_t           nBJet40;
    Int_t           nMuons10;
@@ -52,11 +56,14 @@ public :
    Int_t           nGammas20;
    Int_t           nPFCHCand3;
    Float_t         deltaPhiMin;
+   Float_t         deltaPhiMin_genmet;
    Float_t         diffMetMht;
+   Float_t         diffMetMht_genmet;
    Float_t         minMTBMet;
    Float_t         ht;
    Float_t         mt2;
    Float_t         mt2_gen;
+   Float_t         mt2_genmet;
    Float_t         jet1_pt;
    Float_t         jet2_pt;
    Float_t         gamma_jet1_pt;
@@ -90,9 +97,14 @@ public :
    Int_t           Flag_CSCTightHaloFilter;
    Int_t           Flag_HBHENoiseFilter;
    Int_t           Flag_HBHEIsoNoiseFilter;
+   Int_t           Flag_HBHENoiseIsoFilter;
    Int_t           Flag_goodVertices;
    Int_t           Flag_eeBadScFilter;
    Int_t           Flag_METFilters;
+   Int_t           Flag_globalTightHalo2016Filter;
+   Int_t           Flag_globalSuperTightHalo2016Filter;
+   Int_t           Flag_badMuonFilter;
+   Int_t           Flag_badChargedHadronFilter;
    Int_t           HLT_PFHT800;
    Int_t           HLT_PFHT900;
    Int_t           HLT_PFMET170;
@@ -100,27 +112,36 @@ public :
    Int_t           HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90;
    Int_t           HLT_PFMETNoMu120_PFMHTNoMu120;
    Int_t           HLT_PFMET90_PFMHT90;
+   Int_t           HLT_PFMET100_PFMHT100;
+   Int_t           HLT_PFMET110_PFMHT110;
+   Int_t           HLT_PFMET120_PFMHT120;
    Int_t           HLT_HT800;
    Int_t           HLT_HT900;
    Int_t           HLT_MET170;
    Int_t           HLT_ht350met100;
    Int_t           HLT_ht350met120;
+   Int_t           HLT_PFHT300_PFMET100;
+   Int_t           HLT_PFHT300_PFMET110;
    Int_t           HLT_PFHT350_PFMET100;
    Int_t           HLT_PFHT350_PFMET120;
    Int_t           HLT_SingleMu;   
+   Int_t           HLT_SingleMu_NonIso;   
    Int_t           HLT_SingleEl;   
+   Int_t           HLT_SingleEl_NonIso;   
    Int_t           HLT_DoubleEl;   
    Int_t           HLT_DoubleEl33;   
    Int_t           HLT_MuEG;   
    Int_t           HLT_MuX_Ele12;   
    Int_t           HLT_Mu8_EleX;   
    Int_t           HLT_DoubleMu;   
+   Int_t           HLT_DoubleMu_NonIso;   
    Int_t           HLT_Photons;   
    Int_t           HLT_Photon120;   
    Int_t           HLT_Photon165_HE10;   
    Int_t           HLT_ht350prescale;   
    Int_t           HLT_ht475prescale;   
    Int_t           HLT_ht600prescale;   
+   Int_t           HLT_PFHT125_Prescale;   
    Int_t           HLT_PFHT200_Prescale;   
    Int_t           HLT_PFHT300_Prescale;   
    Int_t           HLT_PFHT350_Prescale;   
@@ -301,6 +322,7 @@ public :
    Float_t         jet_phi[100];   //[njet]
    Float_t         jet_mass[100];   //[njet]
    Float_t         jet_btagCSV[100];   //[njet]
+   Float_t         jet_btagMVA[100];   //[njet]
    Float_t         jet_rawPt[100];   //[njet]
    Float_t         jet_mcPt[100];   //[njet]
    Int_t           jet_mcFlavour[100];   //[njet]
@@ -315,6 +337,9 @@ public :
    Float_t         weight_lepsf;
    Float_t         weight_lepsf_UP;
    Float_t         weight_lepsf_DN;
+   Float_t         weight_lepsf_0l;
+   Float_t         weight_lepsf_0l_UP;
+   Float_t         weight_lepsf_0l_DN;
    Float_t         weight_btagsf;
    Float_t         weight_btagsf_UP;
    Float_t         weight_btagsf_heavy_UP;
@@ -327,6 +352,8 @@ public :
    Float_t         weight_phottrigsf;
    Float_t         weight_pu;
    Float_t         weight_isr;
+   Float_t         weight_isr_UP;
+   Float_t         weight_isr_DN;
    Float_t         weight_toppt;
    Float_t         weight_scales_UP;
    Float_t         weight_scales_DN;
@@ -341,6 +368,7 @@ public :
    TBranch        *b_lumi;   //!
    TBranch        *b_evt;   //!
    TBranch        *b_isData;   //!
+   TBranch        *b_isGolden;   //!
    TBranch        *b_evt_scale1fb;   //!
    TBranch        *b_evt_xsec;   //!
    TBranch        *b_evt_kfactor;   //!
@@ -357,7 +385,10 @@ public :
    TBranch        *b_nJet40;   //!
    TBranch        *b_nJet30FailId;   //!
    TBranch        *b_nJet100FailId;   //!
+   TBranch        *b_nJet20BadFastsim;   //!
    TBranch        *b_nBJet20;   //!
+   TBranch        *b_nBJet20csv;   //!
+   TBranch        *b_nBJet20mva;   //!
    TBranch        *b_nBJet25;   //!
    TBranch        *b_nBJet40;   //!
    TBranch        *b_nMuons10;   //!
@@ -367,11 +398,14 @@ public :
    TBranch        *b_nGammas20;   //!
    TBranch        *b_nPFCHCand3;   //!
    TBranch        *b_deltaPhiMin;   //!
+   TBranch        *b_deltaPhiMin_genmet;   //!
    TBranch        *b_diffMetMht;   //!
+   TBranch        *b_diffMetMht_genmet;   //!
    TBranch        *b_minMTBMet;   //!
    TBranch        *b_ht;   //!
    TBranch        *b_mt2;   //!
    TBranch        *b_mt2_gen;   //!
+   TBranch        *b_mt2_genmet;   //!
    TBranch        *b_jet1_pt;   //!
    TBranch        *b_jet2_pt;   //!
    TBranch        *b_gamma_jet1_pt;   //!
@@ -405,9 +439,14 @@ public :
    TBranch        *b_Flag_CSCTightHaloFilter;   //!
    TBranch        *b_Flag_HBHENoiseFilter;   //!
    TBranch        *b_Flag_HBHEIsoNoiseFilter;   //!
+   TBranch        *b_Flag_HBHENoiseIsoFilter;   //!
    TBranch        *b_Flag_goodVertices;   //!
    TBranch        *b_Flag_eeBadScFilter;   //!
    TBranch        *b_Flag_METFilters;   //!
+   TBranch        *b_Flag_globalTightHalo2016Filter;   //!
+   TBranch        *b_Flag_globalSuperTightHalo2016Filter;   //!
+   TBranch        *b_Flag_badMuonFilter;   //!
+   TBranch        *b_Flag_badChargedHadronFilter;   //!
    TBranch        *b_HLT_HT800;   //!
    TBranch        *b_HLT_HT900;   //!
    TBranch        *b_HLT_MET170;   //!
@@ -418,24 +457,33 @@ public :
    TBranch        *b_HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90;   //!
    TBranch        *b_HLT_PFMETNoMu120_PFMHTNoMu120;   //!
    TBranch        *b_HLT_PFMET90_PFMHT90;   //!
+   TBranch        *b_HLT_PFMET100_PFMHT100;   //!
+   TBranch        *b_HLT_PFMET110_PFMHT110;   //!
+   TBranch        *b_HLT_PFMET120_PFMHT120;   //!
    TBranch        *b_HLT_ht350met100;   //!
    TBranch        *b_HLT_ht350met120;   //!
+   TBranch        *b_HLT_PFHT300_PFMET100;   //!
+   TBranch        *b_HLT_PFHT300_PFMET110;   //!
    TBranch        *b_HLT_PFHT350_PFMET100;   //!
    TBranch        *b_HLT_PFHT350_PFMET120;   //!
    TBranch        *b_HLT_SingleMu;   //!
+   TBranch        *b_HLT_SingleMu_NonIso;   //!
    TBranch        *b_HLT_SingleEl;   //!
+   TBranch        *b_HLT_SingleEl_NonIso;   //!
    TBranch        *b_HLT_DoubleEl;   //!
    TBranch        *b_HLT_DoubleEl33;   //!
    TBranch        *b_HLT_MuEG;   //!
    TBranch        *b_HLT_MuX_Ele12;   //!
    TBranch        *b_HLT_Mu8_EleX;   //!
    TBranch        *b_HLT_DoubleMu;   //!
+   TBranch        *b_HLT_DoubleMu_NonIso;   //!
    TBranch        *b_HLT_Photons;   //!
    TBranch        *b_HLT_Photon120;   //!
    TBranch        *b_HLT_Photon165_HE10;   //!
    TBranch        *b_HLT_ht350prescale;   //!
    TBranch        *b_HLT_ht475prescale;   //!
    TBranch        *b_HLT_ht600prescale;   //!
+   TBranch        *b_HLT_PFHT125_Prescale;   //!
    TBranch        *b_HLT_PFHT200_Prescale;   //!
    TBranch        *b_HLT_PFHT300_Prescale;   //!
    TBranch        *b_HLT_PFHT350_Prescale;   //!
@@ -616,6 +664,7 @@ public :
    TBranch        *b_jet_phi;   //!
    TBranch        *b_jet_mass;   //!
    TBranch        *b_jet_btagCSV;   //!
+   TBranch        *b_jet_btagMVA;   //!
    TBranch        *b_jet_rawPt;   //!
    TBranch        *b_jet_mcPt;   //!
    TBranch        *b_jet_mcFlavour;   //!
@@ -630,6 +679,9 @@ public :
    TBranch        *b_weight_lepsf;   //!
    TBranch        *b_weight_lepsf_UP;   //!
    TBranch        *b_weight_lepsf_DN;   //!
+   TBranch        *b_weight_lepsf_0l;   //!
+   TBranch        *b_weight_lepsf_0l_UP;   //!
+   TBranch        *b_weight_lepsf_0l_DN;   //!
    TBranch        *b_weight_btagsf;   //!
    TBranch        *b_weight_btagsf_UP;   //!
    TBranch        *b_weight_btagsf_heavy_UP;   //!
@@ -642,6 +694,8 @@ public :
    TBranch        *b_weight_phottrigsf;   //!
    TBranch        *b_weight_pu;   //!
    TBranch        *b_weight_isr;   //!
+   TBranch        *b_weight_isr_UP;   //!
+   TBranch        *b_weight_isr_DN;   //!
    TBranch        *b_weight_toppt;   //!
    TBranch        *b_weight_scales_UP;   //!
    TBranch        *b_weight_scales_DN;   //!
@@ -715,6 +769,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("lumi", &lumi, &b_lumi);
    fChain->SetBranchAddress("evt", &evt, &b_evt);
    fChain->SetBranchAddress("isData", &isData, &b_isData);
+   fChain->SetBranchAddress("isGolden", &isGolden, &b_isGolden);
    fChain->SetBranchAddress("evt_scale1fb", &evt_scale1fb, &b_evt_scale1fb);
    fChain->SetBranchAddress("evt_xsec", &evt_xsec, &b_evt_xsec);
    fChain->SetBranchAddress("evt_kfactor", &evt_kfactor, &b_evt_kfactor);
@@ -731,7 +786,10 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("nJet40", &nJet40, &b_nJet40);
    fChain->SetBranchAddress("nJet30FailId", &nJet30FailId, &b_nJet30FailId);
    fChain->SetBranchAddress("nJet100FailId", &nJet100FailId, &b_nJet100FailId);
+   fChain->SetBranchAddress("nJet20BadFastsim", &nJet20BadFastsim, &b_nJet20BadFastsim);
    fChain->SetBranchAddress("nBJet20", &nBJet20, &b_nBJet20);
+   fChain->SetBranchAddress("nBJet20csv", &nBJet20csv, &b_nBJet20csv);
+   fChain->SetBranchAddress("nBJet20mva", &nBJet20mva, &b_nBJet20mva);
    fChain->SetBranchAddress("nBJet25", &nBJet25, &b_nBJet25);
    fChain->SetBranchAddress("nBJet40", &nBJet40, &b_nBJet40);
    fChain->SetBranchAddress("nMuons10", &nMuons10, &b_nMuons10);
@@ -741,11 +799,14 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("nGammas20", &nGammas20, &b_nGammas20);
    fChain->SetBranchAddress("nPFCHCand3", &nPFCHCand3, &b_nPFCHCand3);
    fChain->SetBranchAddress("deltaPhiMin", &deltaPhiMin, &b_deltaPhiMin);
+   fChain->SetBranchAddress("deltaPhiMin_genmet", &deltaPhiMin_genmet, &b_deltaPhiMin_genmet);
    fChain->SetBranchAddress("diffMetMht", &diffMetMht, &b_diffMetMht);
+   fChain->SetBranchAddress("diffMetMht_genmet", &diffMetMht_genmet, &b_diffMetMht_genmet);
    fChain->SetBranchAddress("minMTBMet", &minMTBMet, &b_minMTBMet);
    fChain->SetBranchAddress("ht", &ht, &b_ht);
    fChain->SetBranchAddress("mt2", &mt2, &b_mt2);
    fChain->SetBranchAddress("mt2_gen", &mt2_gen, &b_mt2_gen);
+   fChain->SetBranchAddress("mt2_genmet", &mt2_genmet, &b_mt2_genmet);
    fChain->SetBranchAddress("jet1_pt", &jet1_pt, &b_jet1_pt);
    fChain->SetBranchAddress("jet2_pt", &jet2_pt, &b_jet2_pt);
    fChain->SetBranchAddress("gamma_jet1_pt", &gamma_jet1_pt, &b_gamma_jet1_pt);
@@ -779,9 +840,14 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("Flag_CSCTightHaloFilter", &Flag_CSCTightHaloFilter, &b_Flag_CSCTightHaloFilter);
    fChain->SetBranchAddress("Flag_HBHENoiseFilter", &Flag_HBHENoiseFilter, &b_Flag_HBHENoiseFilter);
    fChain->SetBranchAddress("Flag_HBHEIsoNoiseFilter", &Flag_HBHEIsoNoiseFilter, &b_Flag_HBHEIsoNoiseFilter);
+   fChain->SetBranchAddress("Flag_HBHENoiseIsoFilter", &Flag_HBHENoiseIsoFilter, &b_Flag_HBHENoiseIsoFilter);
    fChain->SetBranchAddress("Flag_goodVertices", &Flag_goodVertices, &b_Flag_goodVertices);
    fChain->SetBranchAddress("Flag_eeBadScFilter", &Flag_eeBadScFilter, &b_Flag_eeBadScFilter);
    fChain->SetBranchAddress("Flag_METFilters", &Flag_METFilters, &b_Flag_METFilters);
+   fChain->SetBranchAddress("Flag_globalTightHalo2016Filter", &Flag_globalTightHalo2016Filter, &b_Flag_globalTightHalo2016Filter);
+   fChain->SetBranchAddress("Flag_globalSuperTightHalo2016Filter", &Flag_globalSuperTightHalo2016Filter, &b_Flag_globalSuperTightHalo2016Filter);
+   fChain->SetBranchAddress("Flag_badMuonFilter", &Flag_badMuonFilter, &b_Flag_badMuonFilter);
+   fChain->SetBranchAddress("Flag_badChargedHadronFilter", &Flag_badChargedHadronFilter, &b_Flag_badChargedHadronFilter);
    fChain->SetBranchAddress("HLT_HT800", &HLT_HT800, &b_HLT_HT800);
    fChain->SetBranchAddress("HLT_HT900", &HLT_HT900, &b_HLT_HT900);
    fChain->SetBranchAddress("HLT_MET170", &HLT_MET170, &b_HLT_MET170);
@@ -792,24 +858,33 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90", &HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90, &b_HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90);
    fChain->SetBranchAddress("HLT_PFMETNoMu120_PFMHTNoMu120", &HLT_PFMETNoMu120_PFMHTNoMu120, &b_HLT_PFMETNoMu120_PFMHTNoMu120);
    fChain->SetBranchAddress("HLT_PFMET90_PFMHT90", &HLT_PFMET90_PFMHT90, &b_HLT_PFMET90_PFMHT90);
+   fChain->SetBranchAddress("HLT_PFMET100_PFMHT100", &HLT_PFMET100_PFMHT100, &b_HLT_PFMET100_PFMHT100);
+   fChain->SetBranchAddress("HLT_PFMET110_PFMHT110", &HLT_PFMET110_PFMHT110, &b_HLT_PFMET110_PFMHT110);
+   fChain->SetBranchAddress("HLT_PFMET120_PFMHT120", &HLT_PFMET120_PFMHT120, &b_HLT_PFMET120_PFMHT120);
    fChain->SetBranchAddress("HLT_ht350met100", &HLT_ht350met100, &b_HLT_ht350met100);
    fChain->SetBranchAddress("HLT_ht350met120", &HLT_ht350met120, &b_HLT_ht350met120);
+   fChain->SetBranchAddress("HLT_PFHT300_PFMET100", &HLT_PFHT300_PFMET100, &b_HLT_PFHT300_PFMET100);
+   fChain->SetBranchAddress("HLT_PFHT300_PFMET110", &HLT_PFHT300_PFMET110, &b_HLT_PFHT300_PFMET110);
    fChain->SetBranchAddress("HLT_PFHT350_PFMET100", &HLT_PFHT350_PFMET100, &b_HLT_PFHT350_PFMET100);
    fChain->SetBranchAddress("HLT_PFHT350_PFMET120", &HLT_PFHT350_PFMET120, &b_HLT_PFHT350_PFMET120);
    fChain->SetBranchAddress("HLT_SingleMu", &HLT_SingleMu, &b_HLT_SingleMu);
+   fChain->SetBranchAddress("HLT_SingleMu_NonIso", &HLT_SingleMu_NonIso, &b_HLT_SingleMu_NonIso);
    fChain->SetBranchAddress("HLT_SingleEl", &HLT_SingleEl, &b_HLT_SingleEl);
+   fChain->SetBranchAddress("HLT_SingleEl_NonIso", &HLT_SingleEl_NonIso, &b_HLT_SingleEl_NonIso);
    fChain->SetBranchAddress("HLT_DoubleEl", &HLT_DoubleEl, &b_HLT_DoubleEl);
    fChain->SetBranchAddress("HLT_DoubleEl33", &HLT_DoubleEl33, &b_HLT_DoubleEl33);
    fChain->SetBranchAddress("HLT_MuEG", &HLT_MuEG, &b_HLT_MuEG);
    fChain->SetBranchAddress("HLT_MuX_Ele12", &HLT_MuX_Ele12, &b_HLT_MuX_Ele12);
    fChain->SetBranchAddress("HLT_Mu8_EleX", &HLT_Mu8_EleX, &b_HLT_Mu8_EleX);
    fChain->SetBranchAddress("HLT_DoubleMu", &HLT_DoubleMu, &b_HLT_DoubleMu);
+   fChain->SetBranchAddress("HLT_DoubleMu_NonIso", &HLT_DoubleMu_NonIso, &b_HLT_DoubleMu_NonIso);
    fChain->SetBranchAddress("HLT_Photons", &HLT_Photons, &b_HLT_Photons);
    fChain->SetBranchAddress("HLT_Photon120", &HLT_Photon120, &b_HLT_Photon120);
    fChain->SetBranchAddress("HLT_Photon165_HE10", &HLT_Photon165_HE10, &b_HLT_Photon165_HE10);
    fChain->SetBranchAddress("HLT_ht350prescale", &HLT_ht350prescale, &b_HLT_ht350prescale);
    fChain->SetBranchAddress("HLT_ht475prescale", &HLT_ht475prescale, &b_HLT_ht475prescale);
    fChain->SetBranchAddress("HLT_ht600prescale", &HLT_ht600prescale, &b_HLT_ht600prescale);
+   fChain->SetBranchAddress("HLT_PFHT125_Prescale", &HLT_PFHT125_Prescale, &b_HLT_PFHT125_Prescale);
    fChain->SetBranchAddress("HLT_PFHT200_Prescale", &HLT_PFHT200_Prescale, &b_HLT_PFHT200_Prescale);
    fChain->SetBranchAddress("HLT_PFHT300_Prescale", &HLT_PFHT300_Prescale, &b_HLT_PFHT300_Prescale);
    fChain->SetBranchAddress("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale, &b_HLT_PFHT350_Prescale);
@@ -990,6 +1065,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("jet_phi", jet_phi, &b_jet_phi);
    fChain->SetBranchAddress("jet_mass", jet_mass, &b_jet_mass);
    fChain->SetBranchAddress("jet_btagCSV", jet_btagCSV, &b_jet_btagCSV);
+   fChain->SetBranchAddress("jet_btagMVA", jet_btagMVA, &b_jet_btagMVA);
    fChain->SetBranchAddress("jet_rawPt", jet_rawPt, &b_jet_rawPt);
    fChain->SetBranchAddress("jet_mcPt", jet_mcPt, &b_jet_mcPt);
    fChain->SetBranchAddress("jet_mcFlavour", jet_mcFlavour, &b_jet_mcFlavour);
@@ -1004,6 +1080,9 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("weight_lepsf", &weight_lepsf, &b_weight_lepsf);
    fChain->SetBranchAddress("weight_lepsf_UP", &weight_lepsf_UP, &b_weight_lepsf_UP);
    fChain->SetBranchAddress("weight_lepsf_DN", &weight_lepsf_DN, &b_weight_lepsf_DN);
+   fChain->SetBranchAddress("weight_lepsf_0l", &weight_lepsf_0l, &b_weight_lepsf_0l);
+   fChain->SetBranchAddress("weight_lepsf_0l_UP", &weight_lepsf_0l_UP, &b_weight_lepsf_0l_UP);
+   fChain->SetBranchAddress("weight_lepsf_0l_DN", &weight_lepsf_0l_DN, &b_weight_lepsf_0l_DN);
    fChain->SetBranchAddress("weight_btagsf", &weight_btagsf, &b_weight_btagsf);
    fChain->SetBranchAddress("weight_btagsf_UP", &weight_btagsf_UP, &b_weight_btagsf_UP);
    fChain->SetBranchAddress("weight_btagsf_heavy_UP", &weight_btagsf_heavy_UP, &b_weight_btagsf_heavy_UP);
@@ -1016,6 +1095,8 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("weight_phottrigsf", &weight_phottrigsf, &b_weight_phottrigsf);
    fChain->SetBranchAddress("weight_pu", &weight_pu, &b_weight_pu);
    fChain->SetBranchAddress("weight_isr", &weight_isr, &b_weight_isr);
+   fChain->SetBranchAddress("weight_isr_UP", &weight_isr_UP, &b_weight_isr_UP);
+   fChain->SetBranchAddress("weight_isr_DN", &weight_isr_DN, &b_weight_isr_DN);
    fChain->SetBranchAddress("weight_toppt", &weight_toppt, &b_weight_toppt);
    fChain->SetBranchAddress("weight_scales_UP", &weight_scales_UP, &b_weight_scales_UP);
    fChain->SetBranchAddress("weight_scales_DN", &weight_scales_DN, &b_weight_scales_DN);

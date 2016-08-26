@@ -34,9 +34,9 @@ class SR;
 // turn on to apply weights to central value
 bool applyWeights = false;
 // turn on to apply Nvtx reweighting to MC
-bool doNvtxReweight = true;
+bool doNvtxReweight = false;
 // turn on to apply json file to data
-bool applyJSON = false;
+bool applyJSON = true;
 
 //_______________________________________
 ZllMTLooper::ZllMTLooper(){
@@ -85,7 +85,7 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
 
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
-  const char* json_file = "../babymaker/jsons/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -95,8 +95,8 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
   if (doNvtxReweight) {
     //    TFile* f_weights = new TFile("../babymaker/data/hists_reweight_zjets_Run2015B.root");
     //    TH1D* h_nvtx_weights_temp = (TH1D*) f_weights->Get("h_nVert_ratio");
-    TFile* f_weights = new TFile("nvtx_ratio.root");
-    TH1D* h_nvtx_weights_temp = (TH1D*) f_weights->Get("h_vtx_ratio");
+    TFile* f_weights = new TFile("hists_reweight_zjets_2016B.root");
+    TH1D* h_nvtx_weights_temp = (TH1D*) f_weights->Get("h_nVert_ratio");
     outfile_->cd();
     h_nvtx_weights_ = (TH1D*) h_nvtx_weights_temp->Clone("h_nvtx_weights");
     f_weights->Close();
@@ -181,17 +181,24 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
 
       if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
 
-      // MET filters (data and MC)
-      if (!t.Flag_goodVertices) continue;
-      //if (!t.Flag_CSCTightHaloFilter) continue; // use txt files instead
-      if (!t.Flag_eeBadScFilter) continue;
-      if (!t.Flag_HBHENoiseFilter) continue;
-      if (!t.Flag_HBHEIsoNoiseFilter) continue;
-      // txt MET filters (data only)
-      if (t.isData && metFilterTxt.eventFails(t.run, t.lumi, t.evt)) {
-	//cout<<"Found bad event in data: "<<t.run<<", "<<t.lumi<<", "<<t.evt<<endl;
-	continue;
+      // MET filters - only apply to data for now, buggy in miniaodV1 MC
+      if (t.isData) {
+	// MET filters (data and MC)
+	if (!t.Flag_goodVertices) continue;
+	if (!t.Flag_globalTightHalo2016Filter) continue; 
+	if (!t.Flag_eeBadScFilter) continue; 
+	if (!t.Flag_HBHENoiseFilter) continue;
+	if (!t.Flag_HBHENoiseIsoFilter) continue;
+	if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+	if (!t.Flag_badMuonFilter) continue;
+	if (!t.Flag_badChargedHadronFilter) continue;
       }
+      
+      // // txt MET filters (data only)
+      // if (t.isData && metFilterTxt.eventFails(t.run, t.lumi, t.evt)) {
+      // 	//cout<<"Found bad event in data: "<<t.run<<", "<<t.lumi<<", "<<t.evt<<endl;
+      // 	continue;
+      // }
 
       //bool passJetID = true;
       if (t.nJet30FailId > 0) continue;
@@ -199,8 +206,8 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
       // basic dilepton selection: vertex, 2 leptons, dilepton trigger
       if (t.nVert == 0) continue;
       if (t.nlep < 2) continue;
-      //      if (t.isData && (!t.HLT_DoubleEl && !t.HLT_DoubleMu)) continue;
-      if (!t.HLT_DoubleEl && !t.HLT_DoubleMu) continue;
+      if (t.isData && (!t.HLT_DoubleEl && !t.HLT_DoubleMu)) continue;
+      //if (!t.HLT_DoubleEl && !t.HLT_DoubleMu) continue;
       // also allow single muon triggers
       //if (!t.HLT_DoubleEl && !t.HLT_DoubleMu && !t.HLT_SingleMu) continue;
 
@@ -213,7 +220,8 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
       outfile_->cd();
       //      const float lumi = 4.;
       //      const float lumi = 0.042;
-      const float lumi = 1.26;
+      //      const float lumi = 0.804;
+      const float lumi = 12.9;
       evtweight_ = 1.;
 
       // apply relevant weights to MC
@@ -223,8 +231,8 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
 	// get pu weight from hist, restrict range to nvtx 4-31
 	if (doNvtxReweight) {
 	  int nvtx_input = t.nVert;
-	  if (t.nVert > 31) nvtx_input = 31;
-	  if (t.nVert < 4) nvtx_input = 4;
+	  if (t.nVert > 34) nvtx_input = 34;
+	  if (t.nVert < 1) nvtx_input = 1;
 	  float puWeight = h_nvtx_weights_->GetBinContent(h_nvtx_weights_->FindBin(nvtx_input));
 	  evtweight_ *= puWeight;
 	}
@@ -237,9 +245,13 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
       if (fabs(t.zll_mass - 90.) > 20.) continue; // z mass
 
       // require 2 SF leptons, ID+iso
-      bool pass_electrons = bool(t.HLT_DoubleEl && abs(t.lep_pdgId[0]) == 11 && abs(t.lep_pdgId[1]) == 11 && t.lep_tightId[0] > 1 && t.lep_tightId[1] > 1 && t.lep_miniRelIso[0] < 0.1 && t.lep_miniRelIso[1] < 0.1);
+      // bool pass_electrons = bool(t.HLT_DoubleEl && abs(t.lep_pdgId[0]) == 11 && abs(t.lep_pdgId[1]) == 11 && t.lep_tightId[0] > 1 && t.lep_tightId[1] > 1 && t.lep_miniRelIso[0] < 0.1 && t.lep_miniRelIso[1] < 0.1);
     
-      bool pass_muons = bool((t.HLT_DoubleMu || t.HLT_SingleMu) && abs(t.lep_pdgId[0]) == 13 && abs(t.lep_pdgId[1]) == 13 && t.lep_tightId[0] > 0 && t.lep_tightId[1] > 0 && t.lep_miniRelIso[0] < 0.2 && t.lep_miniRelIso[1] < 0.2);
+      // bool pass_muons = bool((t.HLT_DoubleMu || t.HLT_SingleMu) && abs(t.lep_pdgId[0]) == 13 && abs(t.lep_pdgId[1]) == 13 && t.lep_tightId[0] > 0 && t.lep_tightId[1] > 0 && t.lep_miniRelIso[0] < 0.2 && t.lep_miniRelIso[1] < 0.2);
+
+      bool pass_electrons = bool(abs(t.lep_pdgId[0]) == 11 && abs(t.lep_pdgId[1]) == 11 && t.lep_tightId[0] > 1 && t.lep_tightId[1] > 1 && t.lep_miniRelIso[0] < 0.1 && t.lep_miniRelIso[1] < 0.1);
+    
+      bool pass_muons = bool(abs(t.lep_pdgId[0]) == 13 && abs(t.lep_pdgId[1]) == 13 && t.lep_tightId[0] > 0 && t.lep_tightId[1] > 0 && t.lep_miniRelIso[0] < 0.2 && t.lep_miniRelIso[1] < 0.2);
 
       if (!pass_electrons && !pass_muons) continue;
 
