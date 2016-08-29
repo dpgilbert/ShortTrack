@@ -1009,7 +1009,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	     && t.lep_pt[0] > 25 && t.lep_pt[1] > 20
 	     // && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10)// OLDTRIGS
 	     && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso) //NEWTRIGS
-	     ) {
+             ) {
 	  // no additional explicit lepton veto
 	  // i.e. implicitly allow 3rd PF lepton or hadron
 	  //nlepveto_ = 0; 
@@ -1025,11 +1025,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if ( t.nlep == 1 && !isSignal_) {
 	if ( t.lep_pt[0] > 30 && fabs(t.lep_eta[0])<2.5 && t.nBJet20 == 0) { // raise threshold to avoid Ele23 in MC
 	  if (abs(t.lep_pdgId[0])==13) { // muons
-	    if (!t.isData || t.HLT_SingleMu || t.HLT_SingleMu_NonIso )  doRLMUplots = true;
-	  }
+            if ( !t.isData || t.HLT_SingleMu || t.HLT_SingleMu_NonIso )  doRLMUplots = true;
+          }
 	  if (abs(t.lep_pdgId[0])==11) { // electrons
-	    if ( (!t.isData || t.HLT_SingleEl || t.HLT_SingleEl_NonIso )   // Ele23 trigger not present in MC. Need to keep lepton threshold high
-		 && t.lep_relIso03[0]<0.1 // tighter selection for electrons
+            if ( (!t.isData || t.HLT_SingleEl || t.HLT_SingleEl_NonIso )   // Ele23 trigger not present in MC. Need to keep lepton threshold high
+                 && t.lep_relIso03[0]<0.1 // tighter selection for electrons
 		 && t.lep_relIso03[0]*t.lep_pt[0]<5 // tighter selection for electrons
 		 && t.lep_tightId[0]>2
 		 && fabs(t.lep_eta[0])<2.1
@@ -1250,6 +1250,7 @@ void MT2Looper::fillHistosSRBase() {
   // trigger requirement on data
   if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET100_PFMHT100)) return;
 
+
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
@@ -1298,8 +1299,8 @@ void MT2Looper::fillHistosSRBase() {
 void MT2Looper::fillHistosInclusive() {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100)) return;
-  
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET100_PFMHT100)) return;
+
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
@@ -1523,7 +1524,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
 
     for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
       if(SRVecMonojet.at(srN).PassesSelectionCRSL(values_monojet)){
-	if(prefix=="crsl")    fillHistosSingleLepton(SRVecMonojet.at(srN).crslHistMap,    SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix);
+        if(prefix=="crsl") fillHistosSingleLepton(SRVecMonojet.at(srN).crslHistMap,    SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix);
 	else if(prefix=="crslmu")  fillHistosSingleLepton(SRVecMonojet.at(srN).crslmuHistMap,  SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix);
 	else if(prefix=="crslel")  fillHistosSingleLepton(SRVecMonojet.at(srN).crslelHistMap,  SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix);
 	//      break;//control regions are not necessarily orthogonal
@@ -1591,7 +1592,7 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   if ( ( t.isData || stringsample.Contains("2015")) && !t.HLT_Photon165_HE10) return;
 
   // apply trigger weights to mc
-  if (applyPhotonTriggerWeights){
+  if (!t.isData && applyPhotonTriggerWeights){
       evtweight_ *= getPhotonTriggerWeight(t.gamma_eta[0], t.gamma_pt[0]);
   }
   
@@ -1933,8 +1934,9 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
 // hists for single lepton control region
 void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& suffix) {
 
-  // trigger requirement on data
+  // trigger requirement on data (also require to come from JetHT, HTMHT, or MET PD to match ETH)
   if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET100_PFMHT100)) return;
+
   
   // topological regions
   std::map<std::string, float> values;
