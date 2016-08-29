@@ -81,15 +81,15 @@ chmod -R a+wrx $OUTPUTDIR
 # HIGH STATS TTBAR EXTENSION
 #
 
-# run ttdl_mg_lo_ext1
-# #run ttsl_mg_lo_top_ext1
+# run ttsl_mg_lo_top_ext1
 # run ttsl_mg_lo_tbar_ext1
+# run ttdl_mg_lo_ext1
 
 #
 # W+JETS
 #
 
-# #run wjets_ht100to200
+# run wjets_ht100to200
 # run wjets_ht200to400
 # run wjets_ht400to600
 # run wjets_ht600to800
@@ -99,13 +99,11 @@ chmod -R a+wrx $OUTPUTDIR
 
 # run wjets_ht100to200_ext1
 # run wjets_ht200to400_ext1
-# #run wjets_ht400to600_ext1
-# #run wjets_ht600to800_ext1
+# run wjets_ht400to600_ext1
+# run wjets_ht600to800_ext1
 # run wjets_ht800to1200_ext1
 # run wjets_ht1200to2500_ext1
-# #run wjets_ht2500toInf_ext1
-
-
+# run wjets_ht2500toInf_ext1
 
 # # run wjets_incl
 
@@ -116,16 +114,16 @@ chmod -R a+wrx $OUTPUTDIR
 # run singletop_amcatnlo_4f_schan
 # run singletop_powheg_5f_tWchan_l
 # run singletop_powheg_5f_tbarWchan_l
-# #run singletop_powheg_4f_ttchan_l
+# run singletop_powheg_4f_ttchan_l
 # run singletop_powheg_4f_tbartchan_l
 
 #
 # DY+JETS
 #
 
-# #run dyjetsll_ht100to200
-# #run dyjetsll_ht200to400
-# #run dyjetsll_ht400to600
+# run dyjetsll_ht100to200
+# run dyjetsll_ht200to400
+# run dyjetsll_ht400to600
 # run dyjetsll_ht600toInf
 
 # run dyjetsll_ht100to200_ext1
@@ -156,17 +154,17 @@ chmod -R a+wrx $OUTPUTDIR
 # Z INVISIBLE
 #
 
-# # run zinv_ht100to200
-# # run zinv_ht200to400
-# # run zinv_ht400to600
+# run zinv_ht100to200
+# run zinv_ht200to400
+# run zinv_ht400to600
 # run zinv_ht600to800
 # run zinv_ht800to1200
 # run zinv_ht1200to2500
 # run zinv_ht2500toInf
 
 # run zinv_ht100to200_ext1
-# # run zinv_ht200to400_ext1
-# # run zinv_ht400to600_ext1
+# run zinv_ht200to400_ext1
+# run zinv_ht400to600_ext1
 # # run zinv_ht600to800_ext1
 # # run zinv_ht800to1200_ext1
 # run zinv_ht1200to2500_ext1

@@ -73,7 +73,7 @@ TAG="V00-08-08_nojson"
 # HIGH STATS TTBAR EXTENSION
 #
 
-#./writeConfig.sh  ${TAG}_ttsl_mg_lo_top_ext1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-09/ ${TAG}_ttsl_mg_lo_top_ext1
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/ ${TAG}_ttsl_mg_lo_tbar_ext1
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/  ${TAG}_ttdl_mg_lo_ext1
 
@@ -81,7 +81,7 @@ TAG="V00-08-08_nojson"
 # W+JETS
 #
 
-#./writeConfig.sh  ${TAG}_wjets_ht100to200
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v3/V08-00-05/ ${TAG}_wjets_ht100to200
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_wjets_ht200to400
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_wjets_ht400to600
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-600To800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_wjets_ht600to800
@@ -89,17 +89,19 @@ TAG="V00-08-08_nojson"
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-1200To2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_wjets_ht1200to2500
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_wjets_ht2500toInf
 
+#./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_wjets_incl
+
 #
 # W+JETS extensions
 #
 
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/ ${TAG}_wjets_ht100to200_ext1
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/ ${TAG}_wjets_ht200to400_ext1
-#./writeConfig.sh  ${TAG}_wjets_ht400to600_ext1
-#./writeConfig.sh  ${TAG}_wjets_ht600to800_ext1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/ ${TAG}_wjets_ht400to600_ext1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-600To800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/ ${TAG}_wjets_ht600to800_ext1
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-800To1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/ ${TAG}_wjets_ht800to1200_ext1
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-1200To2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/ ${TAG}_wjets_ht1200to2500_ext1
-#./writeConfig.sh  ${TAG}_wjets_ht2500toInf_ext1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/ ${TAG}_wjets_ht2500toInf_ext1
 
 #
 # SINGLE TOP
@@ -108,16 +110,16 @@ TAG="V00-08-08_nojson"
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_singletop_amcatnlo_4f_schan
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_singletop_powheg_5f_tWchan_l
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_singletop_powheg_5f_tbarWchan_l
-#./writeConfig.sh  ${TAG}_singletop_powheg_4f_ttchan_l
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ST_t-channel_top_4f_leptonDecays_13TeV-powheg-pythia8_TuneCUETP8M1_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/  ${TAG}_singletop_powheg_4f_ttchan_l
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ST_t-channel_antitop_4f_leptonDecays_13TeV-powheg-pythia8_TuneCUETP8M1_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_singletop_powheg_4f_tbartchan_l
 
 #
 # DY+JETS
 #
 
-#./writeConfig.sh  ${TAG}_dyjetsll_ht100to200 
-#./writeConfig.sh  ${TAG}_dyjetsll_ht200to400 
-#./writeConfig.sh  ${TAG}_dyjetsll_ht400to600 
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_dyjetsll_ht100to200 
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/DYJetsToLL_M-50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_dyjetsll_ht200to400 
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/DYJetsToLL_M-50_HT-400to600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_dyjetsll_ht400to600 
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/DYJetsToLL_M-50_HT-600toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_dyjetsll_ht600toInf 
 
 #
@@ -153,9 +155,9 @@ TAG="V00-08-08_nojson"
 # Z INVISIBLE
 #
 
-#./writeConfig.sh  ${TAG}_zinv_ht100to200
-#./writeConfig.sh  ${TAG}_zinv_ht200to400
-#./writeConfig.sh  ${TAG}_zinv_ht400to600
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ZJetsToNuNu_HT-100To200_13TeV-madgraph_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_zinv_ht100to200
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ZJetsToNuNu_HT-200To400_13TeV-madgraph_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_zinv_ht200to400
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ZJetsToNuNu_HT-400To600_13TeV-madgraph_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_zinv_ht400to600
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ZJetsToNuNu_HT-600To800_13TeV-madgraph_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_zinv_ht600to800
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ZJetsToNuNu_HT-800To1200_13TeV-madgraph_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v3/V08-00-05/ ${TAG}_zinv_ht800to1200
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ZJetsToNuNu_HT-1200To2500_13TeV-madgraph_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_zinv_ht1200to2500
@@ -166,8 +168,8 @@ TAG="V00-08-08_nojson"
 #
 
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ZJetsToNuNu_HT-100To200_13TeV-madgraph_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/ ${TAG}_zinv_ht100to200_ext1
-#./writeConfig.sh  ${TAG}_zinv_ht200to400_ext1
-#./writeConfig.sh  ${TAG}_zinv_ht400to600_ext1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ZJetsToNuNu_HT-200To400_13TeV-madgraph_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/ ${TAG}_zinv_ht200to400_ext1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ZJetsToNuNu_HT-400To600_13TeV-madgraph_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/ ${TAG}_zinv_ht400to600_ext1
 #./writeConfig.sh  ${TAG}_zinv_ht600to800_ext1
 #./writeConfig.sh  ${TAG}_zinv_ht800to1200_ext1
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ZJetsToNuNu_HT-1200To2500_13TeV-madgraph_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/ ${TAG}_zinv_ht1200to2500_ext1
