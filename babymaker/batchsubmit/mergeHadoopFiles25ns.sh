@@ -114,8 +114,8 @@ chmod -R a+wrx $OUTPUTDIR
 #
 
 # run singletop_amcatnlo_4f_schan
-# run singletop_powheg_5f_tWchan
-# run singletop_powheg_5f_tbarWchan
+# run singletop_powheg_5f_tWchan_l
+# run singletop_powheg_5f_tbarWchan_l
 # #run singletop_powheg_4f_ttchan_l
 # run singletop_powheg_4f_tbartchan_l
 
