@@ -47,24 +47,24 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
             for idir in range(1, len(dirnames)):
                 h_bkg_vecs[iplot][-1].Add(fid.Get(dirnames[idir]+"/h_"+vn))
 
-            # if samples[isamp]=="zinv_ht":
-            #     h_bkg_vecs[iplot][-1].Scale(pd.lumi)
-
         fid.Close()
 
     ## get data histograms
-    data_file = os.path.join(rootdir, data+".root")
-    fid = ROOT.TFile(data_file)
-    for pl in plots:
-        vn = pl[0]
-        h_data.append( fid.Get(dirnames[0]+"/h_"+vn) )
-        if type(h_data[-1])==type(ROOT.TObject()):
-            raise Exception("No {0}/h_{1} histogram for {2}!".format(dirname, vn, data))
-        h_data[-1].SetDirectory(0)
-        # handle the case with more than one directory
-        for idir in range(1, len(dirnames)):
-            h_data[-1].Add(fid.Get(dirnames[idir]+"/h_"+vn))
-    fid.Close()
+    if data==None:
+        h_data = [None for i in plots]
+    else:
+        data_file = os.path.join(rootdir, data+".root")
+        fid = ROOT.TFile(data_file)
+        for pl in plots:
+            vn = pl[0]
+            h_data.append( fid.Get(dirnames[0]+"/h_"+vn) )
+            if type(h_data[-1])==type(ROOT.TObject()):
+                raise Exception("No {0}/h_{1} histogram for {2}!".format(dirname, vn, data))
+            h_data[-1].SetDirectory(0)
+            # handle the case with more than one directory
+            for idir in range(1, len(dirnames)):
+                h_data[-1].Add(fid.Get(dirnames[idir]+"/h_"+vn))
+        fid.Close()
 
     # make the output directory if it doesn't exist
     if not os.path.isdir(os.path.join(output_dir,dirname+tag)):
@@ -88,7 +88,10 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
         xAxisTitle = utils.GetVarName(vn)
         unit = utils.GetUnit(vn)
         subtitles = utils.GetSubtitles(dirname)
-        subLegText = ["MC scaled by {datamcsf}","# Data events: {ndata}"]
+        if h_data[i]!=None:
+            subLegText = ["MC scaled by {datamcsf}","# Data events: {ndata}"]
+        else:
+            subLegText = None
         # subLegText = None
         sns = [utils.GetSampleName(s) for s in samples]
         for ext in exts:

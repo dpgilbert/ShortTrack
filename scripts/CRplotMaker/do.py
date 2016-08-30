@@ -7,11 +7,13 @@ ROOT.gROOT.SetBatch(1)
 from MT2PlotMaker import *
 import MT2PlotDefs as pd
 
-pd.lumi = 12.9
+pd.lumi = 20.1
 pd.lumiUnit = "fb"
 
+## 20.1/fb
+input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-08_20p1fb"
 ## 12.9/fb
-input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6_12p9fb"
+# input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6_12p9fb"
 # input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-07_nojson_skim_base_mt2gt200_ZinvV6_12p9fb"
 ## 7.65/fb
 # input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-05_nojson_skim_base_mt2gt200_ZinvV4_7p65fb"
@@ -29,7 +31,7 @@ input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/outp
 ## 589/pb
 #input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4"
 
-output_dir = "crplots/crplots_12p9fb_aux"
+output_dir = "crplots/crplots_20p1fb"
 
 exts = ["pdf","png"]
 
@@ -76,3 +78,6 @@ MT2PlotMaker(input_dir, ["qcd_ht", "wjets_ht", "2015zinv_ht"], "data_Run2016", "
 
 # Lost Lepton MT2 plots, normalized in each HT, nj, nb bin
 makeNormalizedLostLep(input_dir, ["wjets_ht", "top"], "data_Run2016", output_dir, exts, ht_regs=["VL","L","M","H","UH"])
+
+# # example of using no data
+# MT2PlotMaker(input_dir, ["top","wjets_ht","qcd_ht"], None, "srbaseM", pd.mt2_only, output_dir, exts)

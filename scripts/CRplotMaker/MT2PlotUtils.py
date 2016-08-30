@@ -105,5 +105,7 @@ def GetSubtitles(dirname):
 def Rebin(h_bkg_vec, h_data, r):
     for h in h_bkg_vec:
         h.Rebin(r)
-    h_data.Rebin(r)
+    if h_data!=None:
+        h_data.Rebin(r)
+
 
