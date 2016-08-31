@@ -295,7 +295,7 @@ void EmuLooper::fillHistosEMU(std::map<std::string, TH1*>& h_1d, const std::stri
   plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
   plot1D("h_ht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
   plot1D("h_nJet30"+s,       t.nJet30,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
-  plot1D("h_nBJet20"+s,      t.nBJet20csv,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
+  plot1D("h_nBJet20"+s,      t.nBJet20,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
   plot1D("h_nlep"+s,     t.nlep,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
   plot1D("h_leppt1"+s,      t.lep_pt[0],   evtweight_, h_1d, ";p_{T}(lep1) [GeV]", 50, 0, 200);
   plot1D("h_leppt2"+s,      t.lep_pt[1],   evtweight_, h_1d, ";p_{T}(lep2) [GeV]", 50, 0, 200);
@@ -303,10 +303,10 @@ void EmuLooper::fillHistosEMU(std::map<std::string, TH1*>& h_1d, const std::stri
 
   if (!t.isData && doSystVariationPlots && applyBtagSF) {
     // assume weights are already applied to central value
-    plot1D("h_nBJet20_btagsf_heavy_UP"+s,      t.nBJet20csv,  evtweight_ / t.weight_btagsf * t.weight_btagsf_heavy_UP, h_1d, ";N(bjets)", 6, 0, 6);
-    plot1D("h_nBJet20_btagsf_heavy_DN"+s,      t.nBJet20csv,  evtweight_ / t.weight_btagsf * t.weight_btagsf_heavy_DN, h_1d, ";N(bjets)", 6, 0, 6);
-    plot1D("h_nBJet20_btagsf_light_UP"+s,      t.nBJet20csv,  evtweight_ / t.weight_btagsf * t.weight_btagsf_light_UP, h_1d, ";N(bjets)", 6, 0, 6);
-    plot1D("h_nBJet20_btagsf_light_DN"+s,      t.nBJet20csv,  evtweight_ / t.weight_btagsf * t.weight_btagsf_light_DN, h_1d, ";N(bjets)", 6, 0, 6);
+    plot1D("h_nBJet20_btagsf_heavy_UP"+s,      t.nBJet20,  evtweight_ / t.weight_btagsf * t.weight_btagsf_heavy_UP, h_1d, ";N(bjets)", 6, 0, 6);
+    plot1D("h_nBJet20_btagsf_heavy_DN"+s,      t.nBJet20,  evtweight_ / t.weight_btagsf * t.weight_btagsf_heavy_DN, h_1d, ";N(bjets)", 6, 0, 6);
+    plot1D("h_nBJet20_btagsf_light_UP"+s,      t.nBJet20,  evtweight_ / t.weight_btagsf * t.weight_btagsf_light_UP, h_1d, ";N(bjets)", 6, 0, 6);
+    plot1D("h_nBJet20_btagsf_light_DN"+s,      t.nBJet20,  evtweight_ / t.weight_btagsf * t.weight_btagsf_light_DN, h_1d, ";N(bjets)", 6, 0, 6);
   }
 
   outfile_->cd();
