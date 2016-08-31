@@ -14,10 +14,8 @@ pd.lumiUnit = "fb"
 input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-08_20p1fb"
 ## 12.9/fb
 # input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6_12p9fb"
-# input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-07_nojson_skim_base_mt2gt200_ZinvV6_12p9fb"
 ## 7.65/fb
 # input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-05_nojson_skim_base_mt2gt200_ZinvV4_7p65fb"
-# input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-04_MiniAODv2_nojson_skim_base_mt2gt200_ZinvV4_7p65fb"
 ## 5.9/fb
 # input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-04_MiniAODv2_nojson_skim_base_mt2gt200_ZinvV4_5p9fb"
 ## 4.0/fb
@@ -47,7 +45,7 @@ MT2PlotMaker(input_dir, ["top", "wjets_ht", "qcd_ht"], "data_Run2016", "crslttba
 MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslelbase", pd.sl_plots, output_dir, exts)
 MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslmubase", pd.sl_plots, output_dir, exts)
 
-MT2PlotMaker(input_dir, ["wjets_ht", "top"], "data_Run2016", "crslbaseJ", pd.mt2_only, output_dir, exts)
+MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslbaseJ", pd.mt2_only, output_dir, exts)
 MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslbaseVL", pd.mt2_only, output_dir, exts)
 MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslbaseL", pd.mt2_only, output_dir, exts)
 MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslbaseM", pd.mt2_only, output_dir, exts)
@@ -81,3 +79,5 @@ makeNormalizedLostLep(input_dir, ["wjets_ht", "top"], "data_Run2016", output_dir
 
 # # example of using no data
 # MT2PlotMaker(input_dir, ["top","wjets_ht","qcd_ht"], None, "srbaseM", pd.mt2_only, output_dir, exts)
+
+

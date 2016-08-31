@@ -39,16 +39,32 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
                     vn = vn.replace("AllIso","FakeAllIso")
 
             h_bkg_vecs[iplot].append( fid.Get(dirnames[0]+"/h_"+vn) )
+            # histogram won't exist if there are no events. Replace it with None, handle later
             if type(h_bkg_vecs[iplot][-1])==type(ROOT.TObject()):
-                raise Exception("No {0}/h_{1} histogram for sample {2}!".format(dirnames[0], vn, samples[isamp]))
-            h_bkg_vecs[iplot][-1].SetDirectory(0)
-
-            # handle the case with more than one directory
-            for idir in range(1, len(dirnames)):
-                h_bkg_vecs[iplot][-1].Add(fid.Get(dirnames[idir]+"/h_"+vn))
+                h_bkg_vecs[iplot][-1] = None
+            else:
+                h_bkg_vecs[iplot][-1].SetDirectory(0)
+                # handle the case with more than one directory
+                for idir in range(1, len(dirnames)):
+                    h_bkg_vecs[iplot][-1].Add(fid.Get(dirnames[idir]+"/h_"+vn))
 
         fid.Close()
 
+    # deal with nonexistent histograms
+    for i in range(len(plots)):
+        firstGood = -1
+        for isamp in range(len(samples)):
+            if h_bkg_vecs[i][isamp] != None:
+                firstGood = isamp
+                break
+        if firstGood==-1:
+            raise RuntimeError("all background histograms are empty for {0}/{1}!".format(dirname,plots[i][0]))
+        for isamp in range(len(samples)):
+            if h_bkg_vecs[i][isamp] == None:
+                h_bkg_vecs[i][isamp] = h_bkg_vecs[i][firstGood].Clone()
+                h_bkg_vecs[i][isamp].Reset()
+
+    
     ## get data histograms
     if data==None:
         h_data = [None for i in plots]
