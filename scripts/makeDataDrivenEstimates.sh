@@ -3,7 +3,8 @@
 #INDIR=/home/users/jgran/limits_for_paper/MT2Analysis/MT2looper/output/V00-01-09_25ns_skim_base_mt2gt200_ZinvV3_2p2fb/
 #INDIR=/home/users/olivito/mt2_74x_dev/MT2Analysis/MT2looper/output/V00-01-07_25ns_miniaodv2_skim_base_1p26fb_mt2gt200_crqcd/
 #INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/Bennett_V00-08-02_json_Cert_271036-274421_skim_base_mt2gt200_ZinvV4/
-INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V00-08-02_nojson_skim_base_mt2gt200_ZinvV4
+# INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V00-08-02_nojson_skim_base_mt2gt200_ZinvV4
+INDIR=/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6_12p9fb
 THISDIR=`pwd`
 
 ## to use data for lostlepton
@@ -20,11 +21,15 @@ RLFILE=data_Run2016
 QCDFILE=data_Run2016
 #QCDFILE=qcd_ht
 
+QCDESTIMATE=./inputs/qcdEstimateData_2016_ICHEP
+QCDMONOJET=./inputs/qcdEstimateMonojet_2016_ICHEP
+
 if [ ! -d "$INDIR" ]; then
   echo "Input directory does not exist" 
 fi
 
 cd $INDIR
+
 echo "hadd -f data_Run2016.root data_Run2016B.root data_Run2016C.root data_Run2016D.root"
 hadd -f data_Run2016.root data_Run2016B.root data_Run2016C.root data_Run2016D.root > dataDrivenEstimates.log
 
@@ -71,8 +76,8 @@ echo "root -b -q purityRL.C+(${INDIR}, ${RLFILE})"
 root -b -q "purityRL.C+(\"${INDIR}\",\"${RLFILE}\")" >> dataDrivenEstimates.log
 echo "root -b -q DataRZGammaRatioMaker.C+(${INDIR})"
 root -b -q "DataRZGammaRatioMaker.C+(\"${INDIR}\",\"${GJETFILE}\")" >> dataDrivenEstimates.log
-echo "root -b -q qcdRphiMaker.C+(${INDIR},${QCDFILE})"
-root -b -q "qcdRphiMaker.C+(\"${INDIR}\",\"${QCDFILE}\")" >> dataDrivenEstimates.log
+echo "root -b -q qcdRphiMaker.C+(${INDIR},${QCDFILE},${QCDESTIMATE},${QCDMONOJET})"
+root -b -q "qcdRphiMaker.C+(\"${INDIR}\",\"${QCDFILE}\",\"${QCDESTIMATE}\",\"${QCDMONOJET}\")" >> dataDrivenEstimates.log
 echo "done"
 
 
