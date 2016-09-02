@@ -31,12 +31,14 @@ using namespace duplicate_removal;
 class mt2tree;
 class SR;
 
-// turn on to apply weights to central value
-bool applyWeights = false;
 // turn on to apply Nvtx reweighting to MC
 bool doNvtxReweight = false;
 // turn on to apply json file to data
 bool applyJSON = true;
+// turn on to apply btag sf to central value
+bool applyBtagSF = true;
+// turn on to apply lepton sf to central value - take from babies
+bool applyLeptonSFfromBabies = true;
 
 //_______________________________________
 ZllMTLooper::ZllMTLooper(){
@@ -227,7 +229,6 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
       // apply relevant weights to MC
       if (!t.isData) {
 	evtweight_ = t.evt_scale1fb * lumi;
-	if (applyWeights) evtweight_ *= t.weight_lepsf * t.weight_btagsf * t.weight_isr * t.weight_pu;
 	// get pu weight from hist, restrict range to nvtx 4-31
 	if (doNvtxReweight) {
 	  int nvtx_input = t.nVert;
@@ -235,6 +236,14 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
 	  if (t.nVert < 1) nvtx_input = 1;
 	  float puWeight = h_nvtx_weights_->GetBinContent(h_nvtx_weights_->FindBin(nvtx_input));
 	  evtweight_ *= puWeight;
+	}
+	if (applyBtagSF) {
+	  // remove events with 0 btag weight for now..
+	  if (fabs(t.weight_btagsf) < 0.001) continue;
+	  evtweight_ *= t.weight_btagsf;
+	}
+	if (applyLeptonSFfromBabies) {
+	  evtweight_ *= t.weight_lepsf;
 	}
       } // !isData
 
