@@ -154,6 +154,8 @@ class babyMaker {
   Float_t         met_trkPhi;
   Float_t         met_genPt;
   Float_t         met_genPhi;
+  Float_t         met_miniaodPt;
+  Float_t         met_miniaodPhi;
 
 //----- MET FILTERS
   Int_t           Flag_EcalDeadCellTriggerPrimitiveFilter;

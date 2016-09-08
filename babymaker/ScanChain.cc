@@ -433,6 +433,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       metStruct trkmet = trackerMET(0.1);
       met_trkPt = trkmet.met;
       met_trkPhi = trkmet.metphi;
+      met_miniaodPt  = cms3.evt_pfmet();
+      met_miniaodPhi = cms3.evt_pfmetPhi();
 
       // MET FILTERS -- not present in fastsim
       if (!isFastsim) {
@@ -2280,6 +2282,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("met_trkPhi", &met_trkPhi );
     BabyTree_->Branch("met_genPt",  &met_genPt );
     BabyTree_->Branch("met_genPhi", &met_genPhi );
+    BabyTree_->Branch("met_miniaodPt",  &met_miniaodPt );
+    BabyTree_->Branch("met_miniaodPhi", &met_miniaodPhi );
     BabyTree_->Branch("Flag_EcalDeadCellTriggerPrimitiveFilter", &Flag_EcalDeadCellTriggerPrimitiveFilter );
     BabyTree_->Branch("Flag_trkPOG_manystripclus53X", &Flag_trkPOG_manystripclus53X );
     BabyTree_->Branch("Flag_ecalLaserCorrFilter", &Flag_ecalLaserCorrFilter );
@@ -2639,6 +2643,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     met_trkPhi = -999.0;
     met_genPt = -999.0;
     met_genPhi = -999.0;
+    met_miniaodPt = -999.0;
+    met_miniaodPhi = -999.0;
     Flag_EcalDeadCellTriggerPrimitiveFilter = -999;
     Flag_trkPOG_manystripclus53X = -999;
     Flag_ecalLaserCorrFilter = -999;
