@@ -193,6 +193,10 @@ TAG="V00-08-08_nojson"
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_ttz_nunu_amcatnlo
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/TTGJets_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_ttg_amcatnlo
 
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ttWJets_13TeV_madgraphMLM_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_ttw_mg_lo
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ttZJets_13TeV_madgraphMLM_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/ ${TAG}_ttz_mg_lo
+
+
 # #
 # # QCD HT BINS
 # #
