@@ -124,12 +124,16 @@ chmod -R a+wrx $OUTPUTDIR
 # run dyjetsll_ht100to200
 # run dyjetsll_ht200to400
 # run dyjetsll_ht400to600
-# run dyjetsll_ht600toInf
+# run dyjetsll_ht600to800
+# run dyjetsll_ht800to1200
+# run dyjetsll_ht1200to2500
+# run dyjetsll_ht2500toInf
+# #run dyjetsll_ht600toInf
 
 # run dyjetsll_ht100to200_ext1
 # run dyjetsll_ht200to400_ext1
 # run dyjetsll_ht400to600_ext1
-# run dyjetsll_ht600toInf_ext1
+# #run dyjetsll_ht600toInf_ext1
 
 # #run dyjetsll_incl
 
@@ -179,14 +183,25 @@ chmod -R a+wrx $OUTPUTDIR
 #
 
 #
-# TTV
+# TTV, TT+X
 #
 
 # run ttg_amcatnlo
-# run ttw_lnu_amcatnlo
-# run ttw_qq_amcatnlo
-# run ttz_nunu_amcatnlo
-# run ttz_qq_amcatnlo
+# #run ttw_lnu_amcatnlo
+# #run ttw_qq_amcatnlo
+# #run ttz_nunu_amcatnlo
+# #run ttz_qq_amcatnlo
+
+# run ttw_mg_lo
+# run ttz_mg_lo
+
+# run tttt
+# run ttbb
+# run ttbb_ext1
+
+
+# run tth_bb
+# run tth_nonbb
 
 #
 # QCD
@@ -210,7 +225,7 @@ chmod -R a+wrx $OUTPUTDIR
 
 # # run qcd_ht200to300
 # run qcd_ht300to500
-# # run qcd_ht500to700
+# run qcd_ht500to700
 # run qcd_ht700to1000
 # run qcd_ht1000to1500
 # run qcd_ht1500to2000
