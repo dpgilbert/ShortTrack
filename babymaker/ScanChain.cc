@@ -78,7 +78,7 @@ const bool applyLeptonIso = true;
 // turn on to save MC scale and PDF weights (default false, makes babies ~4x as large)
 const bool saveLHEweights = false;
 // turn on to save MC scale weights (default false, small size impact)
-const bool saveLHEweightsScaleOnly = false;
+const bool saveLHEweightsScaleOnly = true;
 
 //--------------------------------------------------------------------
 
