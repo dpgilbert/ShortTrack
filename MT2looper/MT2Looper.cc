@@ -103,7 +103,11 @@ bool doScanWeights = true;
 // doesn't plot data for MT2 > 200 in signal regions
 bool doBlindData = false;
 // make variation histograms for tau efficiency
-bool doGenTauVars = false;
+bool doGenTauVars = true;
+// make variation histograms for renormalization and factorization scales
+bool doRenormFactScaleReweight = true;
+// make variation histograms for JEC variations
+bool doJECVars = true;
 // make variation histograms for e+mu efficiency
 bool doLepEffVars = true;
 // make only minimal hists needed for results
@@ -789,6 +793,16 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       //if (isSignal_ && (t.GenSusyMScan1 != 1600 || t.GenSusyMScan2 != 0)) continue;
       
+      // if (isSignal_ 
+      // 	  && !(t.GenSusyMScan1 == 1400 && t.GenSusyMScan2 == 200 && sample  == "T1qqqq_1400_200")
+      // 	  && !(t.GenSusyMScan1 == 800 && t.GenSusyMScan2 == 600 && sample  == "T1qqqq_800_600")
+      // 	  && !(t.GenSusyMScan1 == 1000 && t.GenSusyMScan2 == 775 && sample  == "T1tttt_1000_775")
+      // 	  && !(t.GenSusyMScan1 == 1700 && t.GenSusyMScan2 == 600 && sample  == "T1tttt_1700_600")
+      // 	  && !(t.GenSusyMScan1 == 300 && t.GenSusyMScan2 == 200 && sample  == "T2tt_300_200")
+      // 	  && !(t.GenSusyMScan1 == 800 && t.GenSusyMScan2 == 350 && sample  == "T2tt_800_350")
+      // 	  && !(t.GenSusyMScan1 == 400 && t.GenSusyMScan2 == 200 && sample  == "T2qq_400_200")
+      //   ) continue;
+	  
       // note: this will double count some leptons, since reco leptons can appear as PFcands
       nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
 
@@ -886,6 +900,30 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       } // !isData
 
+      //weights for renorm/factorization scale variations
+      if (doRenormFactScaleReweight && t.LHEweight_wgt[0] != 0 && t.LHEweight_wgt[0] != -999) {
+	if (!isSignal_) { 
+	  evtweight_renormUp_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
+	  evtweight_renormDn_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[8];
+	}
+	else {
+	  
+	  evtweight_renormUp_ = evtweight_ ;
+	  evtweight_renormDn_ = evtweight_ ;
+	  
+	  //commented out until sig_avgweight histogram is added
+	  
+	  // int binx = h_sig_avgweight_renorm_DN_->GetXaxis()->FindBin(t.GenSusyMScan1);
+	  // int biny = h_sig_avgweight_renorm_DN_->GetYaxis()->FindBin(t.GenSusyMScan2);
+	  // float weight_renorm_UP = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
+	  // float avgweight_renorm_UP = h_sig_avgweight_renorm_UP_->GetBinContent(binx,biny);
+	  // float weight_renorm_DN = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[8];
+	  // float avgweight_renorm_DN = h_sig_avgweight_renorm_DN_->GetBinContent(binx,biny);      
+	  // evtweight_renormUp_ = weight_renorm_UP / avgweight_renorm_UP;
+	  // evtweight_renormDn_ = weight_renorm_DN / avgweight_renorm_DN;
+	}
+      }
+    
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
       plot1D("h_mt2",       t.mt2,       evtweight_, h_1d_global, ";M_{T2} [GeV]", 80, 0, 800);
 
@@ -2205,6 +2243,11 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     
   }
   
+  if ( !t.isData && doRenormFactScaleReweight) {      
+    plot1D("h_mt2bins_renorm_UP"+s,        mt2_temp,   evtweight_renormUp_ , h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_renorm_DN"+s,        mt2_temp,   evtweight_renormDn_ , h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+    
   outfile_->cd();
   return;
 }

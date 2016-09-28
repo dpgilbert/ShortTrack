@@ -106,6 +106,8 @@ class MT2Looper {
   float weight_lepsf_cr_;
   float weight_lepsf_cr_UP_;
   float weight_lepsf_cr_DN_;
+  float evtweight_renormUp_;
+  float evtweight_renormDn_;
   
 };
 
