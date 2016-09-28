@@ -40,11 +40,15 @@ public :
    Float_t         rho;
    Float_t         rho25;
    Int_t           nJet30;
+   Int_t           nJet30JECup;
+   Int_t           nJet30JECdn;
    Int_t           nJet40;
    Int_t           nJet30FailId;
    Int_t           nJet100FailId;
    Int_t           nJet20BadFastsim;
    Int_t           nBJet20;
+   Int_t           nBJet20JECup;
+   Int_t           nBJet20JECdn;
    Int_t           nBJet20csv;
    Int_t           nBJet20mva;
    Int_t           nBJet25;
@@ -56,16 +60,28 @@ public :
    Int_t           nGammas20;
    Int_t           nPFCHCand3;
    Float_t         deltaPhiMin;
+   Float_t         deltaPhiMinJECup;
+   Float_t         deltaPhiMinJECdn;
    Float_t         deltaPhiMin_genmet;
    Float_t         diffMetMht;
+   Float_t         diffMetMhtJECup;
+   Float_t         diffMetMhtJECdn;
    Float_t         diffMetMht_genmet;
    Float_t         minMTBMet;
    Float_t         ht;
+   Float_t         htJECup;
+   Float_t         htJECdn;
    Float_t         mt2;
+   Float_t         mt2JECup;
+   Float_t         mt2JECdn;
    Float_t         mt2_gen;
    Float_t         mt2_genmet;
    Float_t         jet1_pt;
+   Float_t         jet1_ptJECup;
+   Float_t         jet1_ptJECdn;
    Float_t         jet2_pt;
+   Float_t         jet2_ptJECup;
+   Float_t         jet2_ptJECdn;
    Float_t         gamma_jet1_pt;
    Float_t         gamma_jet2_pt;
    Float_t         pseudoJet1_pt;
@@ -77,9 +93,17 @@ public :
    Float_t         pseudoJet2_phi;
    Float_t         pseudoJet2_mass;
    Float_t         mht_pt;
+   Float_t         mht_ptJECup;
+   Float_t         mht_ptJECdn;
    Float_t         mht_phi;
+   Float_t         mht_phiJECup;
+   Float_t         mht_phiJECdn;
    Float_t         met_pt;
+   Float_t         met_ptJECup;
+   Float_t         met_ptJECdn;
    Float_t         met_phi;
+   Float_t         met_phiJECup;
+   Float_t         met_phiJECdn;
    Float_t         met_rawPt;
    Float_t         met_rawPhi;
    Float_t         met_caloPt;
@@ -382,11 +406,15 @@ public :
    TBranch        *b_rho;   //!
    TBranch        *b_rho25;   //!
    TBranch        *b_nJet30;   //!
+   TBranch        *b_nJet30JECup;   //!
+   TBranch        *b_nJet30JECdn;   //!
    TBranch        *b_nJet40;   //!
    TBranch        *b_nJet30FailId;   //!
    TBranch        *b_nJet100FailId;   //!
    TBranch        *b_nJet20BadFastsim;   //!
    TBranch        *b_nBJet20;   //!
+   TBranch        *b_nBJet20JECup;   //!
+   TBranch        *b_nBJet20JECdn;   //!
    TBranch        *b_nBJet20csv;   //!
    TBranch        *b_nBJet20mva;   //!
    TBranch        *b_nBJet25;   //!
@@ -398,16 +426,28 @@ public :
    TBranch        *b_nGammas20;   //!
    TBranch        *b_nPFCHCand3;   //!
    TBranch        *b_deltaPhiMin;   //!
+   TBranch        *b_deltaPhiMinJECup;   //!
+   TBranch        *b_deltaPhiMinJECdn;   //!
    TBranch        *b_deltaPhiMin_genmet;   //!
    TBranch        *b_diffMetMht;   //!
+   TBranch        *b_diffMetMhtJECup;   //!
+   TBranch        *b_diffMetMhtJECdn;   //!
    TBranch        *b_diffMetMht_genmet;   //!
    TBranch        *b_minMTBMet;   //!
    TBranch        *b_ht;   //!
+   TBranch        *b_htJECup;   //!
+   TBranch        *b_htJECdn;   //!
    TBranch        *b_mt2;   //!
+   TBranch        *b_mt2JECup;   //!
+   TBranch        *b_mt2JECdn;   //!
    TBranch        *b_mt2_gen;   //!
    TBranch        *b_mt2_genmet;   //!
    TBranch        *b_jet1_pt;   //!
+   TBranch        *b_jet1_ptJECup;   //!
+   TBranch        *b_jet1_ptJECdn;   //!
    TBranch        *b_jet2_pt;   //!
+   TBranch        *b_jet2_ptJECup;   //!
+   TBranch        *b_jet2_ptJECdn;   //!
    TBranch        *b_gamma_jet1_pt;   //!
    TBranch        *b_gamma_jet2_pt;   //!
    TBranch        *b_pseudoJet1_pt;   //!
@@ -419,9 +459,17 @@ public :
    TBranch        *b_pseudoJet2_phi;   //!
    TBranch        *b_pseudoJet2_mass;   //!
    TBranch        *b_mht_pt;   //!
+   TBranch        *b_mht_ptJECup;   //!
+   TBranch        *b_mht_ptJECdn;   //!
    TBranch        *b_mht_phi;   //!
+   TBranch        *b_mht_phiJECup;   //!
+   TBranch        *b_mht_phiJECdn;   //!
    TBranch        *b_met_pt;   //!
+   TBranch        *b_met_ptJECup;   //!
+   TBranch        *b_met_ptJECdn;   //!
    TBranch        *b_met_phi;   //!
+   TBranch        *b_met_phiJECup;   //!
+   TBranch        *b_met_phiJECdn;   //!
    TBranch        *b_met_rawPt;   //!
    TBranch        *b_met_rawPhi;   //!
    TBranch        *b_met_caloPt;   //!
@@ -783,11 +831,15 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("rho", &rho, &b_rho);
    fChain->SetBranchAddress("rho25", &rho25, &b_rho25);
    fChain->SetBranchAddress("nJet30", &nJet30, &b_nJet30);
+   fChain->SetBranchAddress("nJet30JECup", &nJet30JECup, &b_nJet30JECup);
+   fChain->SetBranchAddress("nJet30JECdn", &nJet30JECdn, &b_nJet30JECdn);
    fChain->SetBranchAddress("nJet40", &nJet40, &b_nJet40);
    fChain->SetBranchAddress("nJet30FailId", &nJet30FailId, &b_nJet30FailId);
    fChain->SetBranchAddress("nJet100FailId", &nJet100FailId, &b_nJet100FailId);
    fChain->SetBranchAddress("nJet20BadFastsim", &nJet20BadFastsim, &b_nJet20BadFastsim);
    fChain->SetBranchAddress("nBJet20", &nBJet20, &b_nBJet20);
+   fChain->SetBranchAddress("nBJet20JECup", &nBJet20JECup, &b_nBJet20JECup);
+   fChain->SetBranchAddress("nBJet20JECdn", &nBJet20JECdn, &b_nBJet20JECdn);
    fChain->SetBranchAddress("nBJet20csv", &nBJet20csv, &b_nBJet20csv);
    fChain->SetBranchAddress("nBJet20mva", &nBJet20mva, &b_nBJet20mva);
    fChain->SetBranchAddress("nBJet25", &nBJet25, &b_nBJet25);
@@ -799,16 +851,28 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("nGammas20", &nGammas20, &b_nGammas20);
    fChain->SetBranchAddress("nPFCHCand3", &nPFCHCand3, &b_nPFCHCand3);
    fChain->SetBranchAddress("deltaPhiMin", &deltaPhiMin, &b_deltaPhiMin);
+   fChain->SetBranchAddress("deltaPhiMinJECup", &deltaPhiMinJECup, &b_deltaPhiMinJECup);
+   fChain->SetBranchAddress("deltaPhiMinJECdn", &deltaPhiMinJECdn, &b_deltaPhiMinJECdn);
    fChain->SetBranchAddress("deltaPhiMin_genmet", &deltaPhiMin_genmet, &b_deltaPhiMin_genmet);
    fChain->SetBranchAddress("diffMetMht", &diffMetMht, &b_diffMetMht);
+   fChain->SetBranchAddress("diffMetMhtJECup", &diffMetMhtJECup, &b_diffMetMhtJECup);
+   fChain->SetBranchAddress("diffMetMhtJECdn", &diffMetMhtJECdn, &b_diffMetMhtJECdn);
    fChain->SetBranchAddress("diffMetMht_genmet", &diffMetMht_genmet, &b_diffMetMht_genmet);
    fChain->SetBranchAddress("minMTBMet", &minMTBMet, &b_minMTBMet);
    fChain->SetBranchAddress("ht", &ht, &b_ht);
+   fChain->SetBranchAddress("htJECup", &htJECup, &b_htJECup);
+   fChain->SetBranchAddress("htJECdn", &htJECdn, &b_htJECdn);
    fChain->SetBranchAddress("mt2", &mt2, &b_mt2);
+   fChain->SetBranchAddress("mt2JECup", &mt2JECup, &b_mt2JECup);
+   fChain->SetBranchAddress("mt2JECdn", &mt2JECdn, &b_mt2JECdn);
    fChain->SetBranchAddress("mt2_gen", &mt2_gen, &b_mt2_gen);
    fChain->SetBranchAddress("mt2_genmet", &mt2_genmet, &b_mt2_genmet);
    fChain->SetBranchAddress("jet1_pt", &jet1_pt, &b_jet1_pt);
+   fChain->SetBranchAddress("jet1_ptJECup", &jet1_ptJECup, &b_jet1_ptJECup);
+   fChain->SetBranchAddress("jet1_ptJECdn", &jet1_ptJECdn, &b_jet1_ptJECdn);
    fChain->SetBranchAddress("jet2_pt", &jet2_pt, &b_jet2_pt);
+   fChain->SetBranchAddress("jet2_ptJECup", &jet2_ptJECup, &b_jet2_ptJECup);
+   fChain->SetBranchAddress("jet2_ptJECdn", &jet2_ptJECdn, &b_jet2_ptJECdn);
    fChain->SetBranchAddress("gamma_jet1_pt", &gamma_jet1_pt, &b_gamma_jet1_pt);
    fChain->SetBranchAddress("gamma_jet2_pt", &gamma_jet2_pt, &b_gamma_jet2_pt);
    fChain->SetBranchAddress("pseudoJet1_pt", &pseudoJet1_pt, &b_pseudoJet1_pt);
@@ -820,9 +884,17 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("pseudoJet2_phi", &pseudoJet2_phi, &b_pseudoJet2_phi);
    fChain->SetBranchAddress("pseudoJet2_mass", &pseudoJet2_mass, &b_pseudoJet2_mass);
    fChain->SetBranchAddress("mht_pt", &mht_pt, &b_mht_pt);
+   fChain->SetBranchAddress("mht_ptJECup", &mht_ptJECup, &b_mht_ptJECup);
+   fChain->SetBranchAddress("mht_ptJECdn", &mht_ptJECdn, &b_mht_ptJECdn);
    fChain->SetBranchAddress("mht_phi", &mht_phi, &b_mht_phi);
+   fChain->SetBranchAddress("mht_phiJECup", &mht_phiJECup, &b_mht_phiJECup);
+   fChain->SetBranchAddress("mht_phiJECdn", &mht_phiJECdn, &b_mht_phiJECdn);
    fChain->SetBranchAddress("met_pt", &met_pt, &b_met_pt);
+   fChain->SetBranchAddress("met_ptJECup", &met_ptJECup, &b_met_ptJECup);
+   fChain->SetBranchAddress("met_ptJECdn", &met_ptJECdn, &b_met_ptJECdn);
    fChain->SetBranchAddress("met_phi", &met_phi, &b_met_phi);
+   fChain->SetBranchAddress("met_phiJECup", &met_phiJECup, &b_met_phiJECup);
+   fChain->SetBranchAddress("met_phiJECdn", &met_phiJECdn, &b_met_phiJECdn);
    fChain->SetBranchAddress("met_rawPt", &met_rawPt, &b_met_rawPt);
    fChain->SetBranchAddress("met_rawPhi", &met_rawPhi, &b_met_rawPhi);
    fChain->SetBranchAddress("met_caloPt", &met_caloPt, &b_met_caloPt);
