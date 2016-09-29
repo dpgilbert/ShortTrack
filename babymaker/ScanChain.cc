@@ -872,9 +872,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       vector<LorentzVector> p4sForHems;
       vector<LorentzVector> p4sForHemsUP;
       vector<LorentzVector> p4sForHemsDN;
-      vector<LorentzVector> p4sForHemsMHT;
-      vector<LorentzVector> p4sForHemsMHTUP;
-      vector<LorentzVector> p4sForHemsMHTDN;
       vector<LorentzVector> p4sForHemsGamma;
       vector<LorentzVector> p4sForHemsZll;
       vector<LorentzVector> p4sForHemsZllMT;
@@ -935,10 +932,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           // for mt2 and mht in lepton control region
           if (doJetLepOverlapRemoval) {
             p4sForHems.push_back(cms3.els_p4().at(iEl));
+            p4sForHemsUP.push_back(cms3.els_p4().at(iEl));
+            p4sForHemsDN.push_back(cms3.els_p4().at(iEl));
             p4sForDphi.push_back(cms3.els_p4().at(iEl));
-            p4sForHemsMHT.push_back(cms3.els_p4().at(iEl));
-            p4sForHemsMHTUP.push_back(cms3.els_p4().at(iEl));
-            p4sForHemsMHTDN.push_back(cms3.els_p4().at(iEl));
+            p4sForDphiUP.push_back(cms3.els_p4().at(iEl));
+            p4sForDphiDN.push_back(cms3.els_p4().at(iEl));
           }
 
 	  if (!isData && applyLeptonSFs) {
@@ -1003,10 +1001,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           // for mt2 and mht in lepton control region
           if (doJetLepOverlapRemoval) {
             p4sForHems.push_back(cms3.mus_p4().at(iMu));
+            p4sForHemsUP.push_back(cms3.mus_p4().at(iMu));
+            p4sForHemsDN.push_back(cms3.mus_p4().at(iMu));
             p4sForDphi.push_back(cms3.mus_p4().at(iMu));
-            p4sForHemsMHT.push_back(cms3.mus_p4().at(iMu));
-            p4sForHemsMHTUP.push_back(cms3.mus_p4().at(iMu));
-            p4sForHemsMHTDN.push_back(cms3.mus_p4().at(iMu));
+            p4sForDphiUP.push_back(cms3.mus_p4().at(iMu));
+            p4sForDphiDN.push_back(cms3.mus_p4().at(iMu));
           }
 	  
 	  if (!isData && applyLeptonSFs) {
@@ -1180,7 +1179,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
             p4sUniqueLeptons.push_back(cms3.pfcands_p4().at(ipf));
             if (doJetLepOverlapRemoval) {
               p4sForHems.push_back(cms3.pfcands_p4().at(ipf));
+              p4sForHemsUP.push_back(cms3.pfcands_p4().at(ipf));
+              p4sForHemsDN.push_back(cms3.pfcands_p4().at(ipf));
               p4sForDphi.push_back(cms3.pfcands_p4().at(ipf));
+              p4sForDphiUP.push_back(cms3.pfcands_p4().at(ipf));
+              p4sForDphiDN.push_back(cms3.pfcands_p4().at(ipf));
             }
 
 	    // // -------------- WORK IN PROGRESS -----------------
@@ -1874,7 +1877,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               if (jet1_ptJECup < 0.1) jet1_ptJECup = p4sCorrJetsUP.at(iJet).pt();
               else if (jet2_ptJECup < 0.1) jet2_ptJECup = p4sCorrJetsUP.at(iJet).pt();
               p4sForHemsUP.push_back(p4sCorrJetsUP.at(iJet));
-              p4sForHemsMHTUP.push_back(p4sCorrJetsUP.at(iJet));
               p4sForDphiUP.push_back(p4sCorrJetsUP.at(iJet));
               nJet30JECup++;
             } // pt40
@@ -1897,7 +1899,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               if (jet1_ptJECdn < 0.1) jet1_ptJECdn = p4sCorrJetsDN.at(iJet).pt();
               else if (jet2_ptJECdn < 0.1) jet2_ptJECdn = p4sCorrJetsDN.at(iJet).pt();
               p4sForHemsDN.push_back(p4sCorrJetsDN.at(iJet));
-              p4sForHemsMHTDN.push_back(p4sCorrJetsDN.at(iJet));
               p4sForDphiDN.push_back(p4sCorrJetsDN.at(iJet));
               nJet30JECdn++;
             } // pt40
@@ -1985,9 +1986,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       sort(p4sForHems.begin(), p4sForHems.end(), sortByPt);
       sort(p4sForHemsUP.begin(), p4sForHemsUP.end(), sortByPt);
       sort(p4sForHemsDN.begin(), p4sForHemsDN.end(), sortByPt);
-      sort(p4sForHemsMHT.begin(), p4sForHemsMHT.end(), sortByPt);
-      sort(p4sForHemsMHTUP.begin(), p4sForHemsMHTUP.end(), sortByPt);
-      sort(p4sForHemsMHTDN.begin(), p4sForHemsMHTDN.end(), sortByPt);
       sort(p4sForDphi.begin(), p4sForDphi.end(), sortByPt);
       sort(p4sForDphiUP.begin(), p4sForDphiUP.end(), sortByPt);
       sort(p4sForDphiDN.begin(), p4sForDphiDN.end(), sortByPt);
@@ -2019,11 +2017,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       }
       for (unsigned int ip4 = 0; ip4 < p4sForHemsUP.size(); ++ip4) {
         htJECup += p4sForHemsUP.at(ip4).pt();
-        sumMhtp4UP -= p4sForHemsMHTUP.at(ip4);
+        sumMhtp4UP -= p4sForHemsUP.at(ip4);
       }
       for (unsigned int ip4 = 0; ip4 < p4sForHemsDN.size(); ++ip4) {
         htJECdn += p4sForHemsDN.at(ip4).pt();
-        sumMhtp4DN -= p4sForHemsMHTDN.at(ip4);
+        sumMhtp4DN -= p4sForHemsDN.at(ip4);
       }
 
       // min(dphi) of 4 leading objects
