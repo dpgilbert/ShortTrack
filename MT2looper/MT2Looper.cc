@@ -68,6 +68,11 @@ float logstep(int i) {
 const float ptVbins[n_ptVbins+1] = {100, logstep(1), logstep(2), logstep(3), logstep(4), logstep(5), logstep(6), logstep(7), logstep(8), logstep(9), 
 				    logstep(10), logstep(11), logstep(12), logstep(13), logstep(14), logstep(15), logstep(16), logstep(17), 800, 1200};
 
+float doubleRatioWeight(float pTv) {
+  if (pTv < 200 || pTv > 400) return 1.;
+  else return (1/(0.79 + 0.00045*pTv));
+}
+
 //RooRealVars for unbinned data hist
 RooRealVar* x_ = new RooRealVar( "x", "", 0., 50.);
 RooRealVar* w_ = new RooRealVar( "w", "", 0., 1000.);
@@ -77,17 +82,17 @@ bool useDRforGammaQCDMixing = true; // requires GenParticles
 // turn on to apply weights to central value
 bool applyWeights = false;
 // turn on to apply btag sf to central value
-bool applyBtagSF = true;
+bool applyBtagSF = true; // default true
 // turn on to apply lepton sf to central value - take from babies
 bool applyLeptonSFfromBabies = false;
 // turn on to apply lepton sf to central value - reread from files
-bool applyLeptonSFfromFiles = true;
+bool applyLeptonSFfromFiles = true; // default true
 // turn on to apply lepton sf to central value also for 0L SR. values chosen by options above
 bool applyLeptonSFtoSR = false;
 // turn on to apply reweighting to ttbar based on top pt
 bool applyTopPtReweight = false;
 // add weights to correct for photon trigger efficiencies
-bool applyPhotonTriggerWeights = true;
+bool applyPhotonTriggerWeights = true; //default true
 // use 2016 ICHEP ISR weights based on nisrMatch, signal only
 bool applyISRWeights = true;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
@@ -112,6 +117,10 @@ bool doJECVars = true;
 bool doLepEffVars = true;
 // make only minimal hists needed for results
 bool doMinimalPlots = false;
+// apply shape correction to GJ as a function of pTV
+bool doubleRatioShapeCorrection = false;
+// ignore scale1fb to run over test samples
+bool ignoreScale1fb = false;
 
 TString stringsample;
 
@@ -771,7 +780,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // flag signal samples
       if (t.evt_id >= 1000) isSignal_ = true;
       else isSignal_ = false;
-      if (verbose) cout<<__LINE__<<endl;
+      if (verbose) cout<<__LINE__<<", signal "<<isSignal_<< endl;
+      //isSignal_ = false;  //GZ needed to run over ETH babies
 
       // Jet ID Veto
       bool passJetID = true;
@@ -785,12 +795,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (t.evt_id >= 100 && t.evt_id < 109) continue;
       // remove low HT QCD samples 
       if (t.evt_id >= 120 && t.evt_id < 123) continue;
-      int maxQCD = 154;
-      if (  stringsample.Contains("2015") ) maxQCD = 153; // For photon purity, include a lower HT bin
+      int maxQCD = 153; // We want to include 153 when making photon plots, but we start from 154 for everything else
       if (t.evt_id >= 151 && t.evt_id < maxQCD) continue;
       // note that ETH has an offset in QCD numbering..
 
-
+      if (verbose) cout<<__LINE__<<endl;
       //if (isSignal_ && (t.GenSusyMScan1 != 1600 || t.GenSusyMScan2 != 0)) continue;
       
       // if (isSignal_ 
@@ -817,10 +826,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //      const float lumi = 1.264;
       //      const float lumi = 2.11;
       //const float lumi = 2.155;
+      //const float lumi = 12.9; //ICHEP
       const float lumi = 20.1;
+      
     
       evtweight_ = 1.;
-
+      if (verbose) cout<<__LINE__<<endl;
       // apply relevant weights to MC
       if (!t.isData) {
 	if (isSignal_ && doScanWeights) {
@@ -829,8 +840,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  double nevents = h_sig_nevents_->GetBinContent(binx,biny);
 	  evtweight_ = lumi * t.evt_xsec*1000./nevents; // assumes xsec is already filled correctly
 	} else {
-	  evtweight_ = t.evt_scale1fb * lumi;
+	  if (!ignoreScale1fb) evtweight_ = t.evt_scale1fb * lumi;
 	}
+	if (verbose) cout<<__LINE__<<endl;
 	if (applyBtagSF) {
 	  // remove events with 0 btag weight for now..
 	  if (fabs(t.weight_btagsf) < 0.001) continue;
@@ -924,6 +936,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}
       }
     
+      if (verbose) cout<<__LINE__<<endl;
+
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
       plot1D("h_mt2",       t.mt2,       evtweight_, h_1d_global, ";M_{T2} [GeV]", 80, 0, 800);
 
@@ -933,7 +947,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       bool doSLELplots = false;
       leppt_ = -1.;
       mt_ = -1.;
-
+      if (verbose) cout<<__LINE__<<endl;
       // count number of forward jets
       nJet30Eta3_ = 0;
       for (int ijet = 0; ijet < t.njet; ++ijet) {
@@ -1120,6 +1134,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       if (!passJetID) continue;
       if (verbose) cout<<__LINE__<<endl;
+
+      maxQCD = 154; // We want to include 153 when making photon plots, but we start from 154 for everything else
+      if (t.evt_id >= 151 && t.evt_id < maxQCD) continue;
 
       if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
 	if (verbose) cout<<__LINE__<<endl;
@@ -1659,6 +1676,8 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
 
   float passPtMT2 = false;
   if (t.mt2 < 200 && t.gamma_pt[0]>180.) passPtMT2 = true;
+
+  if (doubleRatioShapeCorrection)  evtweight_ *=  doubleRatioWeight(t.gamma_pt[0]);
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.gamma_deltaPhiMin;
@@ -2354,7 +2373,7 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
   plot1D("h_nbjbins"+s,       t.gamma_nBJet20,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
 
   if ( (dirname=="crgjnocut" || TString(dirname).Contains("crgjbase") || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH") 
-       && (s=="" || s=="Fake" || s=="FragGJ" || s=="AllIso" || s=="LooseNotTight") )// Don't make these for Loose, NotLoose. SieieSB
+       && (s=="" || s=="Fake" || s=="FragGJ" || s=="AllIso" || s=="LooseNotTight" || s=="FakeLooseNotTight") )// Don't make these for Loose, NotLoose. SieieSB
     {
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
     plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
