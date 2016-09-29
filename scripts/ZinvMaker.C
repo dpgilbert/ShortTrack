@@ -34,6 +34,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
   inclPlots.push_back("h_htbins");
   inclPlots.push_back("h_htbins2");
   inclPlots.push_back("h_mt2bins");
+  inclPlots.push_back("h_bosonptbins");
 
   for ( unsigned int incl = 0; incl < inclPlots.size(); ++incl ) {
 
@@ -74,6 +75,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
     TString fullhistnameHT2 = directory + "/h_htbins2";
     TString fullhistnameNJ = directory + "/h_njbins";
     TString fullhistnameNB = directory + "/h_nbjbins";
+    //    TString fullhistnamePT = directory + "/h_bosonptbins";
     TString fullhistnameGJ = directoryGJ + "/h_mt2bins";
       
     TH1D* hGJet = (TH1D*) fGJet->Get(fullhistnameGJ);    
@@ -82,6 +84,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
     TH1D* hZinvHT2 = (TH1D*) fZinv->Get(fullhistnameHT2);
     TH1D* hZinvNJ = (TH1D*) fZinv->Get(fullhistnameNJ);
     TH1D* hZinvNB = (TH1D*) fZinv->Get(fullhistnameNB);
+    //    TH1D* hZinvPT = (TH1D*) fZinv->Get(fullhistnamePT);
     
     // If Zinv or GJet histograms are not filled, just leave (shouldn't happen when running on full stat MC)
     if(!hGJet ){
@@ -92,6 +95,10 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
       cout<<"could not find histogram "<<fullhistname<<endl;
       continue;
     }
+//    if(!hZinvPT){
+//      cout<<"could not find histogram "<<fullhistnamePT<<" in file "<<fZinv->GetName()<<endl;
+//      continue;
+//    }
     cout<<"Looking at histo "<<fullhistname<<endl;      
     if (hGJet->GetNbinsX() != hZinv->GetNbinsX() ) {
       cout<<"different binning for histograms "<<fullhistname<<endl;
@@ -184,6 +191,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
     hZinvHT2->Write();
     hZinvNJ->Write();
     hZinvNB->Write();
+    //    hZinvPT->Write();
   } // loop over signal regions
 
   return;
@@ -289,10 +297,10 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
   std::cout << "Writing to file: " << output_name << std::endl;
 
   // get input files
-  TFile* f_zinv = new TFile(Form("%s/2015zinv_ht.root",input_dir.c_str()));
-  TFile* f_gjet = new TFile(Form("%s/2015gjets_ht.root",input_dir.c_str()));
+  TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
+  TFile* f_gjet = new TFile(Form("%s/gjets_dr0p05_ht.root",input_dir.c_str()));
   //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
-  TFile* f_dy = new TFile(Form("%s/2015dyjetsll_ht.root",input_dir.c_str()));
+  TFile* f_dy = new TFile(Form("%s/dyjetsll_ht.root",input_dir.c_str()));
   //TFile* f_dy = new TFile(Form("%s/dyjetsll_incl.root",input_dir.c_str()));
 
 

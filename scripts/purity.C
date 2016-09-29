@@ -427,6 +427,7 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
   // now h_full includes purity and f
 
   TH1F* h_fullLooseNotTight = (TH1F*) f_data->Get("crgj"+sr+"/h_"+plotname+"FakeLooseNotTight");
+
   if (FR_type.Contains("Data") ) {
     h_fullLooseNotTight = (TH1F*) f_data->Get("crgj"+sr+"/h_"+plotname+"LooseNotTight"); // Can't have "Fake" in the name, if running on data
   }
@@ -442,12 +443,17 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
   }
   if (!h_ratio) {cout<<"Ratio not found for plot. GIVING UP FOR THIS REGION. "<<plotname<<endl; return; }
   TH1F* h_trueZinv = (TH1F*) f_zinv->Get(srdir+"/h_"+plotname);
+  bool foundZinv = true;
+  if (!h_trueZinv) {
+    cout<<"Forget about Zinv here, could not find the plot. Do the rest."<<endl;
+    foundZinv = false;
+  }
 
 
   if (verbose && h_gjet) cout<<__LINE__<<" f_gjet:crgj"<<sr<<"/h_"<<plotname<<" has integral "<<h_gjet->Integral()<<endl;
   if (verbose && h_gjet) cout<<__LINE__<<" f_full:crgj"<<sr<<"/h_"<<plotname<<" has integral "<<h_full->Integral()<<endl;
   if (verbose && h_fullLooseNotTight) cout<<__LINE__<<" h_fullLooseNotTight has integral "<<h_fullLooseNotTight->Integral()<<endl;
-  if (verbose && h_gjet) cout<<__LINE__<<" f_zinv:sr"<<sr<<"/h_"<<plotname<<" has integral "<<h_trueZinv->Integral()<<endl;
+  if (verbose && h_gjet && foundZinv) cout<<__LINE__<<" f_zinv:sr"<<sr<<"/h_"<<plotname<<" has integral "<<h_trueZinv->Integral()<<endl;
   if (verbose && h_gjet) cout<<__LINE__<<" f_zinv:sr"<<sr<<" ratio is "<<endl; h_ratio->GetBinContent(1);
   
   f_out->cd();
@@ -498,7 +504,7 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
 //  // add systematic uncertainty to purity if estimated from Sieie sideband
 //  for (int ibin = 1; ibin <= h_purityFR->GetNbinsX(); ibin++) {
 //    float fivepercent = 0.05*h_purityFR->GetBinContent(ibin);
-//    float err = h_purityFR->GetBinError(ibin);
+//    float err = h_purityFR->GetBinError(ibin);OA
 //    h_purityFR->SetBinError(ibin, TMath::Sqrt(err*err + fivepercent*fivepercent) );
 //  }
   
@@ -668,10 +674,10 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   if (datanamestring.Contains("Data") || datanamestring.Contains("data")) realData = true;
   TFile* f_data = new TFile(Form("%s/%s.root",input_dir.c_str(),dataname.c_str())); //data or qcd+gjets file
   TFile* f_gq = new TFile(Form("%s/qcdplusgjet.root",input_dir.c_str())); //qcd+gjets file
-  TFile* f_g = new TFile(Form("%s/2015gjets_ht.root",input_dir.c_str())); //gjet file
-  TFile* f_q = new TFile(Form("%s/2015qcd_ht.root",input_dir.c_str())); //qcd file
+  TFile* f_g = new TFile(Form("%s/gjets_dr0p05_ht.root",input_dir.c_str())); //gjet file
+  TFile* f_q = new TFile(Form("%s/qcd_ht.root",input_dir.c_str())); //qcd file
   TFile* f_z = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str())); //zinv pred from ZinvMaker.C, contains ratio
-  TFile* f_zOrig = new TFile(Form("%s/2015zinv_ht.root",input_dir.c_str())); //zinv file out of the box
+  TFile* f_zOrig = new TFile(Form("%s/zinv_ht.root",input_dir.c_str())); //zinv file out of the box
   if(f_g->IsZombie() || f_q->IsZombie() || f_gq->IsZombie() || f_data->IsZombie() || f_z->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
     return;
@@ -770,6 +776,7 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   makePredOneBinFR(f_out, f_data, f_q, f_g, srName+"Incl", h_FRFailSieieData, 0, "FailSieieData", "htbins2"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_data, f_q, f_g, srName+"Incl", h_FRFailSieieData, 0, "FailSieieData", "njbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_data, f_q, f_g, srName+"Incl", h_FRFailSieieData, 0, "FailSieieData", "nbjbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
+  makePredOneBinFR(f_out, f_data, f_q, f_g, srName+"Incl", h_FRFailSieieData, 0, "FailSieieData", "bosonptbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_gq, f_q, f_g, srName, h_FRFailSieie, 0, "FailSieie", "htbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_gq, f_q, f_g, srName, h_FRFailSieie, 0, "FailSieie", "htbins2"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_gq, f_q, f_g, srName, h_FRFailSieie, 0, "FailSieie", "njbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
@@ -778,6 +785,7 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   makePredOneBinFR(f_out, f_gq, f_q, f_g, srName+"Incl", h_FRFailSieie, 0, "FailSieie", "htbins2"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_gq, f_q, f_g, srName+"Incl", h_FRFailSieie, 0, "FailSieie", "njbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_gq, f_q, f_g, srName+"Incl", h_FRFailSieie, 0, "FailSieie", "nbjbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
+  makePredOneBinFR(f_out, f_gq, f_q, f_g, srName+"Incl", h_FRFailSieie, 0, "FailSieie", "bosonptbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   vector<TString> additionalRegions;
   additionalRegions.push_back("baseJ");
   additionalRegions.push_back("baseVL");
@@ -832,6 +840,7 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   additionalPlots.push_back("htbins2");
   additionalPlots.push_back("njbins");
   additionalPlots.push_back("nbjbins");
+  //  additionalPlots.push_back("bosonptbins");
   for(int i = 0; i< (int) additionalPlots.size(); i++){
     srName = "base";
     TString plot = additionalPlots.at(i);
@@ -842,6 +851,11 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
     purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName+"Incl", "FailSieie", plot); // This needs to be done last (it overwrites previous histograms)
     purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, srName+"Incl", "FailSieieData", plot); // This needs to be done last (it overwrites previous histograms)
   }
+  purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, "baseIncl", "", "bosonptbins"); // This needs to be done last (it overwrites previous histograms) 
+  purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, "baseIncl", "FailSieieData", "bosonptbins"); // This needs to be done last (it overwrites previous histograms)   
+
+
+
   //save and write
   cout << "Saving and closing..." << endl;
   //f_out->Write();

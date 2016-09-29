@@ -4,7 +4,12 @@
 #INDIR=/home/users/olivito/mt2_74x_dev/MT2Analysis/MT2looper/output/V00-01-07_25ns_miniaodv2_skim_base_1p26fb_mt2gt200_crqcd/
 #INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/Bennett_V00-08-02_json_Cert_271036-274421_skim_base_mt2gt200_ZinvV4/
 # INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V00-08-02_nojson_skim_base_mt2gt200_ZinvV4
-INDIR=/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6_12p9fb
+#INDIR=/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6_12p9fb
+#INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V00-08-04_MiniAODv2_nojson_skim_base_mt2gt200_ZinvV4_NewTrigPhotonHLT/
+#INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V00-08-07_nojson_skim_base_mt2gt200_ZinvV6/
+#INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6/
+INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6_DRcorr/
+
 THISDIR=`pwd`
 
 ## to use data for lostlepton
@@ -58,8 +63,8 @@ root -b -q "lostlepMaker.C+(\"${INDIR}\",\"${LOSTLEPFILE}\")" >> dataDrivenEstim
 echo "root -b -q ZinvMaker.C+(${INDIR})"
 root -b -q "ZinvMaker.C+(\"${INDIR}\")" >> dataDrivenEstimates.log
 cd $INDIR
-echo "hadd qcdplusgjet.root 2015gjets_ht.root 2015qcd_ht.root"
-hadd -f qcdplusgjet.root 2015gjets_ht.root 2015qcd_ht.root  >> $THISDIR/dataDrivenEstimates.log
+echo "hadd qcdplusgjet.root gjets_dr0p05_ht.root qcd_ht.root"
+hadd -f qcdplusgjet.root gjets_dr0p05_ht.root qcd_ht.root  >> $THISDIR/dataDrivenEstimates.log
 echo "hadd CRRLbkg.root ttsl.root ttdl.root singletop.root" # should probably include QCD here
 hadd -f CRRLbkg.root ttsl.root ttdl.root singletop.root  >> $THISDIR/dataDrivenEstimates.log
 hadd -f removedlep.root wjets_ht.root CRRLbkg.root >> $THISDIR/dataDrivenEstimates.log
