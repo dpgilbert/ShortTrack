@@ -106,7 +106,7 @@ def makeFjPlot(h_mc, h_data, ht_reg, outfile):
     c.SaveAs(outfile+".png")
     
 
-def makeRphiPlot(h_all, h_qcd, fit, ht_reg, isData, outfile):
+def makeRphiPlot(h_all, h_qcd, fit, ht_reg, isData, outfile, fit_systUp=None, fit_systDown=None):
     ht_reg = ["ht200to450","ht450to575","ht575to1000",
               "ht1000to1500","ht1500toInf"].index(ht_reg)
 
@@ -138,6 +138,14 @@ def makeRphiPlot(h_all, h_qcd, fit, ht_reg, isData, outfile):
     h_qcd.GetYaxis().SetTitle("r_{#phi}")
     h_qcd.GetYaxis().SetTitleOffset(1.4)
     
+    if fit_systUp != None:
+        fit_systUp.SetLineWidth(2)
+        fit_systUp.SetLineColor(ROOT.kBlue+1)
+
+    if fit_systDown != None:
+        fit_systDown.SetLineWidth(2)
+        fit_systDown.SetLineColor(ROOT.kGreen+2)
+
     fit.SetLineWidth(2)
     fit.SetLineColor(ROOT.kRed+1)
 
@@ -152,6 +160,10 @@ def makeRphiPlot(h_all, h_qcd, fit, ht_reg, isData, outfile):
     line.DrawLine(100,0.01,100,200)
     
     # h_errBand.Draw("SAME E3")
+    if fit_systUp != None:
+        fit_systUp.Draw("SAME")
+    if fit_systDown != None:
+        fit_systDown.Draw("SAME")
     fit.Draw("SAME")
     h_qcd.Draw("SAMEPE0")
     h_all.Draw("SAMEPE0")

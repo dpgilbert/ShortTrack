@@ -9,7 +9,9 @@ MT2indir    = open('inputs.txt').readlines()[1].strip()
 tag = indir.split("/")[-1]
 outdir = "output/"+tag
 
-data_sample = "data_Run2016D"
+data_sample = "data_Run2016"
+qcd_sample = "qcd_ht"
+nonqcd_samples = ["top","wjets_ht","zinv_ht","dyjetsll_ht"]
 
 ht_reg_names = ["ht200to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf"]
 nj_reg_names = ["j2to3","j4to6","j7toInf"]
@@ -58,8 +60,9 @@ for inj,nj_reg in enumerate(nj_reg_names):
     d.cd()
     rb_mc.Write()
 
-# Get rphi, CR yields and make estimate
+# Get rphi, CR yields, qcdPurity and make estimate
 nCR_dir = fout.mkdir("nCR")
+purity_dir = fout.mkdir("qcdPurity")
 rphi_data_dir = fout.mkdir("r_effective")
 rphi_mc_dir = fout.mkdir("r_effectiveMC")
 qcd_estimate_dir = fout.mkdir("qcdEstimate")
@@ -72,6 +75,16 @@ for iht,ht_reg in enumerate(ht_reg_names):
         
         print "Getting CR yields and forming QCD estimate in region",str(itop+1)+htAbbrev
         
+        #purity calc
+        fqcd = ROOT.TFile(os.path.join(MT2indir, qcd_sample+".root"))
+        h_purity = fqcd.Get("crqcd{0}{1}/h_mt2bins".format(itop+1,htAbbrev)).Clone("yield_qcdPurity_{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
+        h_denom = h_purity.Clone("h_denom")
+        for nqcd in nonqcd_samples:
+            fnqcd = ROOT.TFile(os.path.join(MT2indir, nqcd+".root"))
+            h_denom.Add(fnqcd.Get("crqcd{0}{1}/h_mt2bins".format(itop+1,htAbbrev)))
+            fnqcd.Close()
+        h_purity.Divide(h_denom)
+
         fin = ROOT.TFile(os.path.join(MT2indir, data_sample+".root"))
         h_mt2bins = fin.Get("crqcd{0}{1}/h_mt2bins".format(itop+1,htAbbrev))
         h_mt2bins.SetName("yield_nCR_{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
@@ -90,6 +103,10 @@ for iht,ht_reg in enumerate(ht_reg_names):
             h_rphi_mc.SetBinError(i,0)
             h_rphi_data.SetBinError(i,0)
         fin.Close()
+
+        d = purity_dir.mkdir("{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
+        d.cd()
+        h_purity.Write()
 
         d = nCR_dir.mkdir("{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
         d.cd()
