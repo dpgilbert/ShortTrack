@@ -14,6 +14,7 @@
 #include "TBenchmark.h"
 #include "TMath.h"
 #include "TLorentzVector.h"
+#include "TF1.h"
 
 #include "RooRealVar.h"
 #include "RooDataSet.h"
@@ -121,6 +122,13 @@ bool doMinimalPlots = false;
 bool doubleRatioShapeCorrection = false;
 // ignore scale1fb to run over test samples
 bool ignoreScale1fb = false;
+
+// load rphi fits to perform r_effective calculation.
+bool doReffCalculation = true;
+string rphi_file_name = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/scripts/qcdEstimate/output/V00-08-08_nojson_12p9fb/qcdHistos.root";
+TFile* rphi_file;
+vector<TF1*> rphi_fits_data;
+vector<TF1*> rphi_fits_mc;
 
 TString stringsample;
 
@@ -535,12 +543,31 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
-  const char* json_file = "../babymaker/jsons/Cert_271036-278808_13TeV_PromptReco_Collisions16_JSON_NoL1T_snt.txt";
+  // const char* json_file = "../babymaker/jsons/Cert_271036-278808_13TeV_PromptReco_Collisions16_JSON_NoL1T_snt.txt";
   // to reproduce ICHEP:
-  // const char* json_file = "../babymaker/jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
+  }
+
+  // store the fits in a vector if we are doing r_eff calculation
+  if(doReffCalculation){
+      rphi_file = new TFile(rphi_file_name.c_str());
+      if(rphi_file->IsZombie()){
+          cout << "WARNING: could not open rphi file: " << rphi_file_name << endl;
+          doReffCalculation = false;
+      }else{
+          string ht_strs[5] = {"ht200to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf"};
+          string syst_strs[3] = {"","_systUp","_systDown"};
+          for(int i=0; i<5; i++){
+              for(int j=0; j<3; j++){
+                  rphi_fits_data.push_back((TF1*)rphi_file->Get(Form("rphi_%s/fit_data%s",ht_strs[i].c_str(),syst_strs[j].c_str())));
+                  rphi_fits_mc.push_back((TF1*)rphi_file->Get(Form("rphi_%s/fit_mc%s",ht_strs[i].c_str(),syst_strs[j].c_str())));
+              }
+          }
+      }
+      
   }
 
   eventFilter metFilterTxt;
@@ -826,8 +853,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //      const float lumi = 1.264;
       //      const float lumi = 2.11;
       //const float lumi = 2.155;
-      //const float lumi = 12.9; //ICHEP
-      const float lumi = 20.1;
+      const float lumi = 12.9; //ICHEP
+      // const float lumi = 20.1;
       
     
       evtweight_ = 1.;
@@ -2555,6 +2582,34 @@ void MT2Looper::fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, 
     plot1D("h_J1pt"+s,       t.jet2_pt,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
   }
   
+  // perform r_effective calculation
+  if(t.isData && doReffCalculation && t.nJet30>=2 && t.ht>=200 && t.mt2>=200){
+
+      int ht_ind = 0;
+      if(t.ht>=450) ht_ind = 1;
+      if(t.ht>=575) ht_ind = 2;
+      if(t.ht>=1000) ht_ind = 3;
+      if(t.ht>=1500) ht_ind = 4;
+
+      vector<TF1*>* fits = &rphi_fits_data;
+      TF1 *fit = fits->at(3*ht_ind);
+      TF1 *fit_systUp = fits->at(3*ht_ind+1);
+      TF1 *fit_systDown = fits->at(3*ht_ind+2);
+      // cout << t.ht << " " << t.mt2 << " " << fit->Eval(t.mt2) << " " << fit_systUp->Eval(t.mt2) << " " << fit_systDown->Eval(t.mt2) << endl;
+      plot1D("h_sumRphi"+s,          t.mt2, evtweight_ * fit->Eval(t.mt2),          h_1d, ";Sum r_#phi", n_mt2bins, mt2bins);
+      plot1D("h_sumRphi_systUp"+s,   t.mt2, evtweight_ * fit_systUp->Eval(t.mt2),   h_1d, ";Sum r_#phi, syst up", n_mt2bins, mt2bins);
+      plot1D("h_sumRphi_systDown"+s, t.mt2, evtweight_ * fit_systDown->Eval(t.mt2), h_1d, ";Sum r_#phi, syst down", n_mt2bins, mt2bins);
+
+      fits = &rphi_fits_mc;
+      fit = fits->at(3*ht_ind);
+      fit_systUp = fits->at(3*ht_ind+1);
+      fit_systDown = fits->at(3*ht_ind+2);
+      plot1D("h_sumRphi_mc"+s,          t.mt2, evtweight_ * fit->Eval(t.mt2),          h_1d, ";Sum r_#phi", n_mt2bins, mt2bins);
+      plot1D("h_sumRphi_mc_systUp"+s,   t.mt2, evtweight_ * fit_systUp->Eval(t.mt2),   h_1d, ";Sum r_#phi, syst up", n_mt2bins, mt2bins);
+      plot1D("h_sumRphi_mc_systDown"+s, t.mt2, evtweight_ * fit_systDown->Eval(t.mt2), h_1d, ";Sum r_#phi, syst down", n_mt2bins, mt2bins);
+
+  }
+
   outfile_->cd();
   return;
 }

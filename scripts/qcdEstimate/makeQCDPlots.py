@@ -44,7 +44,7 @@ for reg in ht_reg_names:
     if type(h_qcd)!=type(ROOT.TH1D()) or type(h_all)!=type(ROOT.TH1D()):
         raise Exception("ERROR: could not get data rphi hists!!")
     outfile = os.path.join(outdir,"rphi_data_{0}".format(reg))
-    pm.makeRphiPlot(h_all, h_qcd, fit_data, reg, True, outfile, fit_systUp=fit_mc_systUp, fit_systDown=fit_mc_systDown)
+    pm.makeRphiPlot(h_all, h_qcd, fit_data, reg, True, outfile, fit_systUp=fit_data_systUp, fit_systDown=fit_data_systDown)
 
 ## f_j
 for reg in ht_reg_names:

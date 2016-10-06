@@ -120,8 +120,8 @@ for ireg,reg in enumerate(ht_reg_names):
     fit_data.SetParLimits(0,20,1e9)
     lowbound = 60 if ireg in [0,1,2] else 70
     highbound = 100
-    h_qcd_rphi.Fit("fit_mc","QN","goff",lowbound,100)
-    h_datasub_rphi.Fit("fit_data","QN","goff",lowbound,100)
+    h_qcd_rphi.Fit("fit_mc","QN","goff",lowbound,highbound)
+    h_datasub_rphi.Fit("fit_data","QN","goff",lowbound,highbound)
 
     # perform the fits with up variation
     fit_mc_systUp = ROOT.TF1("fit_mc_systUp","[0]*x^[1]",30,1500)
@@ -132,8 +132,8 @@ for ireg,reg in enumerate(ht_reg_names):
     fit_data_systUp.SetParLimits(0,20,1e9)
     lowbound = 60 if ireg in [0,1,2] else 70
     highbound = 125
-    h_qcd_rphi.Fit("fit_mc_systUp","QN","goff",lowbound,100)
-    h_datasub_rphi.Fit("fit_data_systUp","QN","goff",lowbound,100)
+    h_qcd_rphi.Fit("fit_mc_systUp","QN","goff",lowbound,highbound)
+    h_datasub_rphi.Fit("fit_data_systUp","QN","goff",lowbound,highbound)
 
     # perform the fits with down variation
     fit_mc_systDown = ROOT.TF1("fit_mc_systDown","[0]*x^[1]",30,1500)
@@ -144,8 +144,8 @@ for ireg,reg in enumerate(ht_reg_names):
     fit_data_systDown.SetParLimits(0,20,1e9)
     lowbound = 55 if ireg in [0,1,2] else 65
     highbound = 100
-    h_qcd_rphi.Fit("fit_mc_systDown","QN","goff",lowbound,100)
-    h_datasub_rphi.Fit("fit_data_systDown","QN","goff",lowbound,100)
+    h_qcd_rphi.Fit("fit_mc_systDown","QN","goff",lowbound,highbound)
+    h_datasub_rphi.Fit("fit_data_systDown","QN","goff",lowbound,highbound)
 
     # write to directory
     tdir.cd()
