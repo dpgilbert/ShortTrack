@@ -1881,7 +1881,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               nJet30JECup++;
             } // pt40
             //CSVv2IVFM
-            if(jet_btagCSV[njet] >= 0.890) {
+            if(jet_btagCSV[njet] >= 0.800) {
               nBJet20JECup++;
             } // pass med btag
           } // pt 20 eta 2.5
@@ -1903,7 +1903,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               nJet30JECdn++;
             } // pt40
             //CSVv2IVFM
-            if(jet_btagCSV[njet] >= 0.890) {
+            if(jet_btagCSV[njet] >= 0.800) {
               nBJet20JECdn++;
             } // pass med btag
           } // pt 20 eta 2.5
