@@ -88,6 +88,18 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
     if(nbjets_HI != -1) nbjets_HI_mod--;
     if(njets_HI != -1) njets_HI_mod--;
 
+    if (njets_LOW == 1 && njets_HI_mod == njets_LOW && nbjets_LOW == 0 && nbjets_HI_mod == nbjets_LOW)
+    {
+      if (ht_HI > 1000) ht_HI = -1;
+      if (ht_LOW > 1000) ht_LOW = 1000;
+    }
+
+    if (njets_LOW == 1 && njets_HI_mod == njets_LOW && nbjets_LOW == 1 && nbjets_HI_mod == -1)
+    {
+      if (ht_HI > 575) ht_HI = -1;
+      if (ht_LOW > 575) ht_LOW = 575;
+    }
+    
     std::string ht_str = "HT" + std::to_string(ht_LOW) + "to" + std::to_string(ht_HI);
     std::string jet_str = (njets_HI_mod == njets_LOW) ? "j" + std::to_string(njets_LOW) : "j" + std::to_string(njets_LOW) + "to" + std::to_string(njets_HI_mod);
     std::string bjet_str = (nbjets_HI_mod == nbjets_LOW) ? "b" + std::to_string(nbjets_LOW) : "b" + std::to_string(nbjets_LOW) + "to" + std::to_string(nbjets_HI_mod);
@@ -200,7 +212,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
       TH1D* h_reff = (TH1D*) f_qcd->Get(Form("r_effective/%s/yield_r_effective_%s",channel.c_str(),channel.c_str()));
       TH1D* h_fitsyst = (TH1D*) f_qcd->Get(Form("r_systFit/%s/yield_r_systFit_%s",channel.c_str(),channel.c_str()));
       string f_jets_dir = "f_jets_data";
-      if (ht_LOW == 200) f_jets_dir = "f_jets_data_noPS";
+      // if (ht_LOW == 200) f_jets_dir = "f_jets_data_noPS";
       TH1D* h_fjets = (TH1D*) f_qcd->Get(Form("%s/%s/yield_%s_%s",f_jets_dir.c_str(),channel_htonly.c_str(),f_jets_dir.c_str(),channel_htonly.c_str()));
       TH1D* h_rb = (TH1D*) f_qcd->Get(Form("r_hat_data/%s/yield_r_hat_data_%s",channel_njonly.c_str(),channel_njonly.c_str()));
       TH1D* h_purity = (TH1D*) f_qcd->Get(Form("qcdPurity/%s/yield_qcdPurity_%s",channel.c_str(),channel.c_str()));
