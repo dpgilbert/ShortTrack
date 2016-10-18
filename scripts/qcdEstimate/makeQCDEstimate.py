@@ -16,8 +16,8 @@ nonqcd_samples = ["top","wjets_ht","zinv_ht","dyjetsll_ht"]
 
 ht_reg_names = ["ht200to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf"]
 nj_reg_names = ["j2to3","j4to6","j7toInf"]
-top_reg_names = ["j2to3_0b","j2to3_1b","j2to3_2b","j4to6_0b","j4to6_1b","j4to6_2b",
-                 "j7toInf_0b","j7toInf_1b","j7toInf_2b","j2to6_b3toInf","j7toInf_b3toInf"]
+top_reg_names = ["j2to3_b0","j2to3_b1","j2to3_b2","j4to6_b0","j4to6_b1","j4to6_b2",
+                 "j7toInf_b0","j7toInf_b1","j7toInf_b2","j2to6_b3toInf","j7toInf_b3toInf"]
 
 fout = ROOT.TFile(os.path.join(outdir,"qcdEstimate.root"),"RECREATE")
 
@@ -40,7 +40,7 @@ for iht,ht_reg in enumerate(ht_reg_names):
     d = fj_mc_dir.mkdir("{0}_j2toInf_b0toInf".format(ht_reg.replace("ht","HT")))    
     d.cd()
     fj_mc.Write()
-
+    
 rb_data_dir = fout.mkdir("r_hat_data")
 rb_mc_dir = fout.mkdir("r_hat_mc")
 for inj,nj_reg in enumerate(nj_reg_names):
@@ -204,17 +204,17 @@ for iht,ht_reg in enumerate(ht_reg_names):
             raise RuntimeError("Unknown NJ region {0}!!".format(nj_reg))
 
 
-        if nb_reg == "0b":
+        if nb_reg == "b0":
             rb_data = h_rb_data.GetBinContent(1)
             rb_mc = h_rb_mc.GetBinContent(1)
             rb_data_err = h_rb_data.GetBinError(1)/rb_data
             rb_mc_err = h_rb_mc.GetBinError(1)/rb_mc
-        elif nb_reg == "1b":
+        elif nb_reg == "b1":
             rb_data = h_rb_data.GetBinContent(2)
             rb_mc = h_rb_mc.GetBinContent(2)
             rb_data_err = h_rb_data.GetBinError(2)/rb_data
             rb_mc_err = h_rb_mc.GetBinError(2)/rb_mc
-        elif nb_reg == "2b":
+        elif nb_reg == "b2":
             rb_data = h_rb_data.GetBinContent(3)
             rb_mc = h_rb_mc.GetBinContent(3)
             rb_data_err = h_rb_data.GetBinError(3)/rb_data
@@ -228,7 +228,7 @@ for iht,ht_reg in enumerate(ht_reg_names):
             raise RuntimeError("Unknown NB region {0}!!".format(nb_reg))
 
         qcdEstimate_data = h_mt2bins.Clone("yield_qcdEstimate_{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
-        qcdEstimate_mc   = h_mt2bins.Clone("yield_qcdEstimate_mc_{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
+        qcdEstimate_mc   = h_mt2bins.Clone("yield_qcdEstimate_{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
 
         qcdEstimate_data.Multiply(h_rphi_data)
         qcdEstimate_mc.Multiply(h_rphi_mc)
