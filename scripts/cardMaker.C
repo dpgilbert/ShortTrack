@@ -98,6 +98,19 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double n_lostlep(0.);
   double n_lostlep_cr(0.);
   double lostlep_alpha(0.);
+  double lostlep_alpha_topological(0.);
+  double lostlep_alpha_lepeff_UP(0.);
+  double lostlep_alpha_lepeff_DN(0.);
+  double lostlep_alpha_btagsf_heavy_UP(0.);
+  double lostlep_alpha_btagsf_heavy_DN(0.);
+  double lostlep_alpha_btagsf_light_UP(0.);
+  double lostlep_alpha_btagsf_light_DN(0.);
+  double lostlep_alpha_tau1p_UP(0.);
+  double lostlep_alpha_tau1p_DN(0.);
+  double lostlep_alpha_tau3p_UP(0.);
+  double lostlep_alpha_tau3p_DN(0.);
+  double lostlep_alpha_renorm_UP(0.);
+  double lostlep_alpha_renorm_DN(0.);
   double err_lostlep_mcstat(0.);
   double n_zinv(0.);
   double n_zinv_cr(0.);
@@ -174,7 +187,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (h_sig_crsl) {
     n_sig_crsl_TR = h_sig_crsl->Integral(0,-1);
   } else {
-    cout << "tried to subtract signal contamination but couldn't find sig_crsl hist" << endl;
+    if(subtractSignalContam) cout << "tried to subtract signal contamination but couldn't find sig_crsl hist" << endl;
   }
   
   //Get variable boundaries for signal region.
@@ -270,10 +283,82 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (h_lostlep_cryield != 0) 
     n_lostlep_cr = round(h_lostlep_cryield->Integral(0,-1));
   TH1D* h_lostlep_alpha = (TH1D*) f_lostlep->Get(fullhistnameAlpha);
-  if (h_lostlep_alpha != 0) 
+  if (h_lostlep_alpha != 0) {
     lostlep_alpha = h_lostlep_alpha->GetBinContent(mt2bin);
-
+    lostlep_alpha_topological = h_lostlep_alpha->Integral(0,-1);
+  }
+  TH1D* h_lostlep_alpha_lepeff_UP = (TH1D*) f_lostlep->Get(fullhistnameAlpha+"_lepeff_UP");
+  if (h_lostlep_alpha_lepeff_UP != 0) 
+    lostlep_alpha_lepeff_UP = h_lostlep_alpha_lepeff_UP->Integral(0,-1);
+  TH1D* h_lostlep_alpha_lepeff_DN = (TH1D*) f_lostlep->Get(fullhistnameAlpha+"_lepeff_DN");
+  if (h_lostlep_alpha_lepeff_DN != 0) 
+    lostlep_alpha_lepeff_DN = h_lostlep_alpha_lepeff_DN->Integral(0,-1);
+  TH1D* h_lostlep_alpha_btagsf_heavy_UP = (TH1D*) f_lostlep->Get(fullhistnameAlpha+"_btagsf_heavy_UP");
+  if (h_lostlep_alpha_btagsf_heavy_UP != 0) 
+    lostlep_alpha_btagsf_heavy_UP = h_lostlep_alpha_btagsf_heavy_UP->Integral(0,-1);
+  TH1D* h_lostlep_alpha_btagsf_heavy_DN = (TH1D*) f_lostlep->Get(fullhistnameAlpha+"_btagsf_heavy_DN");
+  if (h_lostlep_alpha_btagsf_heavy_DN != 0) 
+    lostlep_alpha_btagsf_heavy_DN = h_lostlep_alpha_btagsf_heavy_DN->Integral(0,-1);
+  TH1D* h_lostlep_alpha_btagsf_light_UP = (TH1D*) f_lostlep->Get(fullhistnameAlpha+"_btagsf_light_UP");
+  if (h_lostlep_alpha_btagsf_light_UP != 0) 
+    lostlep_alpha_btagsf_light_UP = h_lostlep_alpha_btagsf_light_UP->Integral(0,-1);
+  TH1D* h_lostlep_alpha_btagsf_light_DN = (TH1D*) f_lostlep->Get(fullhistnameAlpha+"_btagsf_light_DN");
+  if (h_lostlep_alpha_btagsf_light_DN != 0) 
+    lostlep_alpha_btagsf_light_DN = h_lostlep_alpha_btagsf_light_DN->Integral(0,-1);
+  TH1D* h_lostlep_alpha_tau1p_UP = (TH1D*) f_lostlep->Get(fullhistnameAlpha+"_tau1p_UP");
+  if (h_lostlep_alpha_tau1p_UP != 0) 
+    lostlep_alpha_tau1p_UP = h_lostlep_alpha_tau1p_UP->Integral(0,-1);
+  TH1D* h_lostlep_alpha_tau1p_DN = (TH1D*) f_lostlep->Get(fullhistnameAlpha+"_tau1p_DN");
+  if (h_lostlep_alpha_tau1p_DN != 0) 
+    lostlep_alpha_tau1p_DN = h_lostlep_alpha_tau1p_DN->Integral(0,-1);
+  TH1D* h_lostlep_alpha_tau3p_UP = (TH1D*) f_lostlep->Get(fullhistnameAlpha+"_tau3p_UP");
+  if (h_lostlep_alpha_tau3p_UP != 0) 
+    lostlep_alpha_tau3p_UP = h_lostlep_alpha_tau3p_UP->Integral(0,-1);
+  TH1D* h_lostlep_alpha_tau3p_DN = (TH1D*) f_lostlep->Get(fullhistnameAlpha+"_tau3p_DN");
+  if (h_lostlep_alpha_tau3p_DN != 0) 
+    lostlep_alpha_tau3p_DN = h_lostlep_alpha_tau3p_DN->Integral(0,-1);
+  TH1D* h_lostlep_alpha_renorm_UP = (TH1D*) f_lostlep->Get(fullhistnameAlpha+"_renorm_UP");
+  if (h_lostlep_alpha_renorm_UP != 0) 
+    lostlep_alpha_renorm_UP = h_lostlep_alpha_renorm_UP->Integral(0,-1);
+  TH1D* h_lostlep_alpha_renorm_DN = (TH1D*) f_lostlep->Get(fullhistnameAlpha+"_renorm_DN");
+  if (h_lostlep_alpha_renorm_DN != 0) 
+    lostlep_alpha_renorm_DN = h_lostlep_alpha_renorm_DN->Integral(0,-1);
   
+  //calculate lostlep_alpha errors
+  //lepeff
+  double lostlep_alpha_lepeff_ERR = 0;
+  const double lostlep_alpha_lepeff_ERRup = abs(1-lostlep_alpha_lepeff_UP/lostlep_alpha_topological);
+  const double lostlep_alpha_lepeff_ERRdn = abs(1-lostlep_alpha_lepeff_DN/lostlep_alpha_topological);
+  lostlep_alpha_lepeff_ERR = max(lostlep_alpha_lepeff_ERRup, lostlep_alpha_lepeff_ERRdn);
+
+  //btagsf heavy & light
+  double lostlep_alpha_btagsf_heavy_ERR = 0;
+  const double lostlep_alpha_btagsf_heavy_ERRup = abs(1-lostlep_alpha_btagsf_heavy_UP/lostlep_alpha_topological);
+  const double lostlep_alpha_btagsf_heavy_ERRdn = abs(1-lostlep_alpha_btagsf_heavy_DN/lostlep_alpha_topological);
+  lostlep_alpha_btagsf_heavy_ERR = max(lostlep_alpha_btagsf_heavy_ERRup, lostlep_alpha_btagsf_heavy_ERRdn);
+  double lostlep_alpha_btagsf_light_ERR = 0;
+  const double lostlep_alpha_btagsf_light_ERRup = abs(1-lostlep_alpha_btagsf_light_UP/lostlep_alpha_topological);
+  const double lostlep_alpha_btagsf_light_ERRdn = abs(1-lostlep_alpha_btagsf_light_DN/lostlep_alpha_topological);
+  lostlep_alpha_btagsf_light_ERR = max(lostlep_alpha_btagsf_light_ERRup, lostlep_alpha_btagsf_light_ERRdn);
+  const double lostlep_alpha_btagsf_ERR = max(lostlep_alpha_btagsf_heavy_ERR, lostlep_alpha_btagsf_light_ERR);
+
+  //tau 1p & 3p
+  double lostlep_alpha_tau1p_ERR = 0;
+  const double lostlep_alpha_tau1p_ERRup = abs(1-lostlep_alpha_tau1p_UP/lostlep_alpha_topological);
+  const double lostlep_alpha_tau1p_ERRdn = abs(1-lostlep_alpha_tau1p_DN/lostlep_alpha_topological);
+  lostlep_alpha_tau1p_ERR = max(lostlep_alpha_tau1p_ERRup, lostlep_alpha_tau1p_ERRdn);
+  double lostlep_alpha_tau3p_ERR = 0;
+  const double lostlep_alpha_tau3p_ERRup = abs(1-lostlep_alpha_tau3p_UP/lostlep_alpha_topological);
+  const double lostlep_alpha_tau3p_ERRdn = abs(1-lostlep_alpha_tau3p_DN/lostlep_alpha_topological);
+  lostlep_alpha_tau3p_ERR = max(lostlep_alpha_tau3p_ERRup, lostlep_alpha_tau3p_ERRdn);
+  const double lostlep_alpha_tau_ERR = max(lostlep_alpha_tau1p_ERR, lostlep_alpha_tau3p_ERR);
+
+  //renorm
+  double lostlep_alpha_renorm_ERR = 0;
+  const double lostlep_alpha_renorm_ERRup = abs(1-lostlep_alpha_renorm_UP/lostlep_alpha_topological);
+  const double lostlep_alpha_renorm_ERRdn = abs(1-lostlep_alpha_renorm_DN/lostlep_alpha_topological);
+  lostlep_alpha_renorm_ERR = max(lostlep_alpha_renorm_ERRup, lostlep_alpha_renorm_ERRdn);
+
   TH1D* h_zinv = (TH1D*) f_zinv->Get(fullhistname);
   int n_mt2bins = 1;
   if (h_zinv != 0) n_zinv = h_zinv->GetBinContent(mt2bin);
@@ -388,19 +473,41 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     n_data = n_bkg;
   }
 
+  //hack for scaling all errors
+  double scaleErr = 1.0;
+  
   int n_syst = 0;
   // ----- lost lepton bkg uncertainties
   double lostlep_shape = 1.0;
   double lostlep_mcstat = 1. + err_lostlep_mcstat; // transfer factor stat uncertainty
-  double lostlep_alphaerr = 1. + 0.10; // transfer factor syst uncertainty
-  double lostlep_lepeff = 1.12; // transfer factor uncertainty from lepton eff
+  //double lostlep_alphaerr = 1. + 0.10; // transfer factor syst uncertainty
+  //double lostlep_lepeff = 1.12; // transfer factor uncertainty from lepton eff
+  double lostlep_lepeff = 1.0 + lostlep_alpha_lepeff_ERR*scaleErr; // transfer factor uncertainty from lepton eff
+  double lostlep_mtcut = 1.03; // transfer factor uncertainty from mt cut
+  double lostlep_taueff = 1.0 + lostlep_alpha_tau_ERR*scaleErr; // transfer factor uncertainty from tau efficiency
+  double lostlep_btageff = 1.0 + lostlep_alpha_btagsf_ERR*scaleErr; // transfer factor uncertainty from btag efficiency
+  double lostlep_jec = 1.0 + 0.05*scaleErr; // transfer factor uncertainty from JEC unc
+  double lostlep_renorm = 1.0 + lostlep_alpha_renorm_ERR*scaleErr; // transfer factor uncertainty from renorm & factorization scales
+  //double lostlep_renorm = 1.10; // transfer factor uncertainty from renorm & factorization scales
  
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
-  TString name_lostlep_shape = Form("llep_shape_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
-  TString name_lostlep_crstat = Form("llep_CRstat_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
-  TString name_lostlep_mcstat = Form("llep_MCstat_%s", channel.c_str());
-  TString name_lostlep_alphaerr = Form("llep_alpha_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
-  TString name_lostlep_lepeff = Form("llep_lepeff_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
+  TString name_lostlep_shape      = Form("llep_shape_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
+  TString name_lostlep_crstat     = Form("llep_CRstat_%s_%s_%s"  , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
+  TString name_lostlep_mcstat     = Form("llep_MCstat_%s"        , channel.c_str());
+
+  TString name_lostlep_lepeff     = Form("llep_lepeff_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
+  TString name_lostlep_mtcut      = Form("llep_mtcut_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
+  TString name_lostlep_taueff     = Form("llep_taueff_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
+  TString name_lostlep_btageff    = Form("llep_btageff_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
+  TString name_lostlep_jec        = Form("llep_jec_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
+  TString name_lostlep_renorm     = Form("llep_renorm_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
+
+  //TString name_lostlep_lepeff     = Form("llep_lepeff");
+  //TString name_lostlep_mtcut      = Form("llep_mtcut_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
+  //TString name_lostlep_taueff     = Form("llep_taueff");
+  //TString name_lostlep_btageff    = Form("llep_btageff");
+  //TString name_lostlep_jec        = Form("llep_jec");
+  //TString name_lostlep_renorm     = Form("llep_renorm");
 
   // note that if n_lostlep_cr == 0, we will just use lostlep_alpha (straight from MC) in the datacard
   if (n_lostlep_cr > 0.) {
@@ -411,7 +518,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   }
   if (lostlep_alpha > 0.) last_lostlep_transfer = lostlep_alpha; // cache last good alpha value
   else lostlep_alpha = last_lostlep_transfer;   // if alpha is 0: use alpha from previous (MT2) bin
-  n_syst += 4; // lostlep_crstat, lostlep_mcstat, lostlep_alphaerr, lostlep_lepeff
+  n_syst += 8; // lostlep_crstat, lostlep_mcstat, lostlep_lepeff, lostlep_mtcut, lostlep_taueff, lostlep_btageff, lostlep_jec, lostlep_renorm
 
   if (n_mt2bins > 1) {
     if (mt2bin == 1 && n_lostlep > 0.) {
@@ -427,7 +534,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   }
 
   // special cases with larger alpha error
-  if ( njets_LOW == 7 && nbjets_LOW >= 3) lostlep_alphaerr = 1.18; // due to btag eff
+  //if ( njets_LOW == 7 && nbjets_LOW >= 3) lostlep_alphaerr = 1.18; // due to btag eff
 
 
   // ----- zinv bkg uncertainties - depend on signal region, b selection
@@ -616,11 +723,16 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   // ---- lostlep systs
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_lepeff.Data(),lostlep_lepeff)  << endl;
+  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mtcut.Data(),lostlep_mtcut)  << endl;
+  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_taueff.Data(),lostlep_taueff)  << endl;
+  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_btageff.Data(),lostlep_btageff)  << endl;
+  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_jec.Data(),lostlep_jec)  << endl;
+  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_renorm.Data(),lostlep_renorm)  << endl;
   ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_lostlep_crstat.Data(),n_lostlep_cr,lostlep_alpha)  << endl;
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mcstat.Data(),lostlep_mcstat)  << endl;
   if (n_mt2bins > 1)
     ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_shape.Data(),lostlep_shape)  << endl;
-  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_alphaerr.Data(),lostlep_alphaerr)  << endl;
+  //ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_alphaerr.Data(),lostlep_alphaerr)  << endl;
 
 
   // ---- QCD systs
@@ -641,7 +753,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 }
 
 //_______________________________________________________________________________
-void cardMaker(string signal, string input_dir, string output_dir, bool isScan = false, bool doData = true){
+void cardMaker(string signal, string input_dir, string output_dir, bool isScan = false, bool doData = false){
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
@@ -662,7 +774,7 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
 
   f_sig = new TFile(Form("%s/%s.root",input_dir.c_str(),signal.c_str()));
 
-  if (doData) f_data = new TFile(Form("%s/data_Run2015CD.root",input_dir.c_str()));
+  if (doData) f_data = new TFile(Form("%s/data_Run2016.root",input_dir.c_str()));
 
   if( f_lostlep->IsZombie() || f_zinv->IsZombie() || f_purity->IsZombie() || f_qcd->IsZombie() || f_sig->IsZombie() || f_zgratio ->IsZombie() || (doData && f_data->IsZombie()) ) {
   // Trick to look at estimates even if QCD prediction is broken
