@@ -72,6 +72,18 @@ class MT2Looper {
   mt2tree t;
   float evtweight_;
   int nlepveto_;
+  float mt2_;
+  float ht_;
+  float met_pt_;
+  float met_phi_;
+  float mht_pt_;
+  float mht_phi_;
+  float jet1_pt_;
+  float jet2_pt_;
+  float deltaPhiMin_;
+  float diffMetMht_;
+  int nJet30_;
+  int nBJet20_;
   float leppt_;
   float mt_;
   int nJet30Eta3_;
