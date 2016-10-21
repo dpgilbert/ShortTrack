@@ -473,22 +473,16 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     n_data = n_bkg;
   }
 
-  //hack for scaling all errors
-  double scaleErr = 1.0;
-  
   int n_syst = 0;
   // ----- lost lepton bkg uncertainties
   double lostlep_shape = 1.0;
   double lostlep_mcstat = 1. + err_lostlep_mcstat; // transfer factor stat uncertainty
-  //double lostlep_alphaerr = 1. + 0.10; // transfer factor syst uncertainty
-  //double lostlep_lepeff = 1.12; // transfer factor uncertainty from lepton eff
-  double lostlep_lepeff = 1.0 + lostlep_alpha_lepeff_ERR*scaleErr; // transfer factor uncertainty from lepton eff
+  double lostlep_lepeff = 1.0 + lostlep_alpha_lepeff_ERR; // transfer factor uncertainty from lepton eff
   double lostlep_mtcut = 1.03; // transfer factor uncertainty from mt cut
-  double lostlep_taueff = 1.0 + lostlep_alpha_tau_ERR*scaleErr; // transfer factor uncertainty from tau efficiency
-  double lostlep_btageff = 1.0 + lostlep_alpha_btagsf_ERR*scaleErr; // transfer factor uncertainty from btag efficiency
-  double lostlep_jec = 1.0 + 0.05*scaleErr; // transfer factor uncertainty from JEC unc
-  double lostlep_renorm = 1.0 + lostlep_alpha_renorm_ERR*scaleErr; // transfer factor uncertainty from renorm & factorization scales
-  //double lostlep_renorm = 1.10; // transfer factor uncertainty from renorm & factorization scales
+  double lostlep_taueff = 1.0 + lostlep_alpha_tau_ERR; // transfer factor uncertainty from tau efficiency
+  double lostlep_btageff = 1.0 + lostlep_alpha_btagsf_ERR; // transfer factor uncertainty from btag efficiency
+  double lostlep_jec = 1.0 + 0.05; // transfer factor uncertainty from JEC unc
+  double lostlep_renorm = 1.0 + lostlep_alpha_renorm_ERR; // transfer factor uncertainty from renorm & factorization scales
  
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
   TString name_lostlep_shape      = Form("llep_shape_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
