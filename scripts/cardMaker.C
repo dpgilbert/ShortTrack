@@ -510,6 +510,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     }
   }
   if (lostlep_alpha > 0.) last_lostlep_transfer = lostlep_alpha; // cache last good alpha value
+  else if (n_lostlep == 0) lostlep_alpha = 0;
   else lostlep_alpha = last_lostlep_transfer;   // if alpha is 0: use alpha from previous (MT2) bin
   n_syst += 8; // lostlep_crstat, lostlep_mcstat, lostlep_lepeff, lostlep_mtcut, lostlep_taueff, lostlep_btageff, lostlep_jec, lostlep_renorm
 
