@@ -494,20 +494,13 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_lostlep_shape      = Form("llep_shape_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   TString name_lostlep_crstat     = Form("llep_CRstat_%s_%s_%s"  , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   TString name_lostlep_mcstat     = Form("llep_MCstat_%s"        , channel.c_str());
-
-  TString name_lostlep_lepeff     = Form("llep_lepeff_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   TString name_lostlep_mtcut      = Form("llep_mtcut_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
-  TString name_lostlep_taueff     = Form("llep_taueff_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
-  TString name_lostlep_btageff    = Form("llep_btageff_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
-  TString name_lostlep_jec        = Form("llep_jec_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
-  TString name_lostlep_renorm     = Form("llep_renorm_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
 
-  //TString name_lostlep_lepeff     = Form("llep_lepeff");
-  //TString name_lostlep_mtcut      = Form("llep_mtcut_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
-  //TString name_lostlep_taueff     = Form("llep_taueff");
-  //TString name_lostlep_btageff    = Form("llep_btageff");
-  //TString name_lostlep_jec        = Form("llep_jec");
-  //TString name_lostlep_renorm     = Form("llep_renorm");
+  TString name_lostlep_lepeff     = Form("llep_lepeff");
+  TString name_lostlep_taueff     = Form("llep_taueff");
+  TString name_lostlep_btageff    = Form("llep_btageff");
+  TString name_lostlep_jec        = Form("llep_jec");
+  TString name_lostlep_renorm     = Form("llep_renorm");
 
   // note that if n_lostlep_cr == 0, we will just use lostlep_alpha (straight from MC) in the datacard
   if (n_lostlep_cr > 0.) {
