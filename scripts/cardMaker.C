@@ -70,6 +70,10 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (verbose) cout<<"Looking at region "<<dir_str<<", mt2 bin "<<mt2bin<<endl;
   TString dir = TString(dir_str);
   TString fullhistname = dir + "/h_mt2bins";
+  TString fullhistnameBtagsfHeavy  = fullhistname+"_btagsf_heavy_UP";
+  TString fullhistnameBtagsfLight  = fullhistname+"_btagsf_light_UP";
+  TString fullhistnameLepeff  = fullhistname+"_lepeff_UP";
+  TString fullhistnameIsr  = fullhistname+"_isr_UP";
   TString fullhistnameScan  = fullhistname+"_sigscan";
   TString fullhistnameScanBtagsfHeavy  = fullhistname+"_sigscan_btagsf_heavy_UP";
   TString fullhistnameScanBtagsfLight  = fullhistname+"_sigscan_btagsf_light_UP";
@@ -169,6 +173,10 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // single point sample
   else {
     h_sig = (TH1D*) f_sig->Get(fullhistname);
+    h_sig_btagsf_heavy_UP = (TH1D*) f_sig->Get(fullhistnameBtagsfHeavy);
+    h_sig_btagsf_light_UP = (TH1D*) f_sig->Get(fullhistnameBtagsfLight);
+    h_sig_lepeff_UP = (TH1D*) f_sig->Get(fullhistnameLepeff);
+    h_sig_isr_UP = (TH1D*) f_sig->Get(fullhistnameIsr);
     if (subtractSignalContam) h_sig_crsl = (TH1D*) f_sig->Get(fullhistnameCRSL);
     // Trick to print out monojet regions even when running on signal without monojet events
     //    if (fullhistname.Contains("J")) 
