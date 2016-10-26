@@ -7,7 +7,6 @@ git clone https://github.com/cmstas/MT2Analysis.git
 and then 
 ``` bash
 cd MT2Analysis
-git checkout cmssw80x
 source setup.sh
 ```
 
@@ -17,7 +16,7 @@ source setup.sh
 cd babymaker
 source doTest.sh
 ```
-### Babyming in batch mode
+### Babymaking in batch mode
 See further instructions in the `README.md` in folder
 ```
 babymaker/batchsubmit
