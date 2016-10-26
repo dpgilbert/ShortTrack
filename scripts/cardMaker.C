@@ -78,6 +78,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   //  TString fullhistnameStat  = fullhistname+"Stat";
   TString fullhistnameMCStat  = fullhistname+"MCStat";
   TString fullhistnameCRyield  = fullhistname+"CRyield";
+  TString fullhistnameCRyieldDatacard  = fullhistname+"CRyieldDatacard";
+  TString fullhistnameLastbinHybrid  = dir+"/h_lastbinHybrid";
   TString fullhistnameRatio  = fullhistname+"Ratio";
   TString fullhistnameRatioInt  = fullhistname+"RatioInt";
   TString fullhistnamePurity = dir + "/h_mt2binspurityFailSieieData";
@@ -127,6 +129,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double err_qcd_fitsyst(0.);
   double n_bkg(0.);
   double n_data(0.);
+  int lostlep_lastbin_hybrid(1);
 
   double n_sig(0.);
   double n_sig_TR(0.);
@@ -279,9 +282,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TH1D* h_lostlep_mcstat = (TH1D*) f_lostlep->Get(fullhistnameMCStat);
   if (h_lostlep_mcstat != 0 && h_lostlep_mcstat->GetBinContent(mt2bin) != 0) 
     err_lostlep_mcstat = h_lostlep_mcstat->GetBinError(mt2bin)/h_lostlep_mcstat->GetBinContent(mt2bin);
-  TH1D* h_lostlep_cryield = (TH1D*) f_lostlep->Get(fullhistnameCRyield);
+  TH1D* h_lostlep_cryield = (TH1D*) f_lostlep->Get(fullhistnameCRyieldDatacard);
   if (h_lostlep_cryield != 0) 
-    n_lostlep_cr = round(h_lostlep_cryield->Integral(0,-1));
+    n_lostlep_cr = round(h_lostlep_cryield->GetBinContent(mt2bin));
   TH1D* h_lostlep_alpha = (TH1D*) f_lostlep->Get(fullhistnameAlpha);
   if (h_lostlep_alpha != 0) {
     lostlep_alpha = h_lostlep_alpha->GetBinContent(mt2bin);
@@ -323,6 +326,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TH1D* h_lostlep_alpha_renorm_DN = (TH1D*) f_lostlep->Get(fullhistnameAlpha+"_renorm_DN");
   if (h_lostlep_alpha_renorm_DN != 0) 
     lostlep_alpha_renorm_DN = h_lostlep_alpha_renorm_DN->Integral(0,-1);
+  TH1D* h_lostlep_lastbin_hybrid = (TH1D*) f_lostlep->Get(fullhistnameLastbinHybrid);
+  if (h_lostlep_lastbin_hybrid != 0)
+    lostlep_lastbin_hybrid = h_lostlep_lastbin_hybrid->GetBinContent(1);
   
   //calculate lostlep_alpha errors
   //lepeff
@@ -484,17 +490,24 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double lostlep_jec = 1.0 + 0.05; // transfer factor uncertainty from JEC unc
   double lostlep_renorm = 1.0 + lostlep_alpha_renorm_ERR; // transfer factor uncertainty from renorm & factorization scales
  
-  // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
+  // nuisances decorrelated depending on extrapolation in hybrid method
   TString name_lostlep_shape      = Form("llep_shape_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   TString name_lostlep_crstat     = Form("llep_CRstat_%s_%s_%s"  , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
-  TString name_lostlep_mcstat     = Form("llep_MCstat_%s"        , channel.c_str());
-  TString name_lostlep_mtcut      = Form("llep_mtcut_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
+  if (mt2bin < lostlep_lastbin_hybrid) {
+    // bin-by-bin is used: no shape uncertainty, decorrelated CR uncertainty
+    name_lostlep_crstat     = Form("llep_CRstat_%s"  , channel.c_str());
+  }
 
+  // nuisances decorrelated across all bins
+  TString name_lostlep_mcstat     = Form("llep_MCstat_%s"        , channel.c_str());
+
+  // nuisances correlated across all bins
   TString name_lostlep_lepeff     = Form("llep_lepeff");
   TString name_lostlep_taueff     = Form("llep_taueff");
   TString name_lostlep_btageff    = Form("llep_btageff");
   TString name_lostlep_jec        = Form("llep_jec");
   TString name_lostlep_renorm     = Form("llep_renorm");
+  TString name_lostlep_mtcut      = Form("llep_mtcut");
 
   // note that if n_lostlep_cr == 0, we will just use lostlep_alpha (straight from MC) in the datacard
   if (n_lostlep_cr > 0.) {
@@ -508,16 +521,19 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   else lostlep_alpha = last_lostlep_transfer;   // if alpha is 0: use alpha from previous (MT2) bin
   n_syst += 8; // lostlep_crstat, lostlep_mcstat, lostlep_lepeff, lostlep_mtcut, lostlep_taueff, lostlep_btageff, lostlep_jec, lostlep_renorm
 
-  if (n_mt2bins > 1) {
-    if (mt2bin == 1 && n_lostlep > 0.) {
+  // in hybrid method, or normal extrapolation: shape uncertainty only for bins with MT2 extrapolation
+  const float last_bin_relerr_lostlep = 0.4;
+  int n_extrap_bins = n_mt2bins - lostlep_lastbin_hybrid;
+  if (n_extrap_bins > 0 && mt2bin >= lostlep_lastbin_hybrid) {
+    if (mt2bin == lostlep_lastbin_hybrid && n_lostlep > 0.) {
       // first bin needs to compensate normalization from the rest
       float increment = 0.;
-      for (int ibin=2; ibin<=h_lostlep->GetNbinsX(); ibin++) 
-	increment += 0.4 / (n_mt2bins - 1) * (ibin - 1) * h_lostlep->GetBinContent(ibin);
+      for (int ibin=lostlep_lastbin_hybrid+1; ibin<=h_lostlep->GetNbinsX(); ibin++) 
+	increment += last_bin_relerr_lostlep / (n_extrap_bins) * (ibin - lostlep_lastbin_hybrid) * h_lostlep->GetBinContent(ibin);
       lostlep_shape = 1. - increment/n_lostlep;
     }
     else
-      lostlep_shape = 1. + 0.4 / (n_mt2bins - 1) * (mt2bin - 1);
+      lostlep_shape = 1. + last_bin_relerr_lostlep / (n_extrap_bins) * (mt2bin - lostlep_lastbin_hybrid);
     n_syst++;  // lostlep_shape
   }
 
@@ -718,7 +734,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_renorm.Data(),lostlep_renorm)  << endl;
   ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_lostlep_crstat.Data(),n_lostlep_cr,lostlep_alpha)  << endl;
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mcstat.Data(),lostlep_mcstat)  << endl;
-  if (n_mt2bins > 1)
+  if (n_extrap_bins > 0 && mt2bin >= lostlep_lastbin_hybrid)
     ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_shape.Data(),lostlep_shape)  << endl;
   //ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_alphaerr.Data(),lostlep_alphaerr)  << endl;
 

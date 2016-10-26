@@ -19,6 +19,8 @@ using namespace std;
 
 //options
 bool verbose = true;
+bool doHybrid = false; // hybrid estimate: uses CR MT2 binning until the (MC) integral is less than the threshold below
+float hybrid_nevent_threshold = 50.;
 
 const int n_htbins = 5;
 const float htbins[n_htbins+1] = {200, 450., 575., 1000., 1500., 3000.};
@@ -26,6 +28,12 @@ const int n_njbins = 4;
 const float njbins[n_njbins+1] = {1, 2, 4, 7, 12};
 const int n_nbjbins = 4;
 const float nbjbins[n_nbjbins+1] = {0, 1, 2, 3, 6};
+
+//______________________________________________________________________________
+// returns the error on C = A*B (or C = A/B)
+float err_mult(float A, float B, float errA, float errB, float C) {
+  return sqrt(C*C*(pow(errA/A,2) + pow(errB/B,2)));
+}
 
 //_______________________________________________________________________________
 void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs, string output_name ) {
@@ -131,35 +139,84 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
       iter->second->SetName(iter->first.c_str());
     }
 
+    int lastbin_hybrid = 1; // hybrid: will integrate all MT2 bins INCLUDING this one
     // check that histograms exist
     if (!histMapCR["h_lostlepMC_cr"]) {
       cout << "couldn't find lostlep MC CR hist: " << fullhistnameSL << endl;
     } else {
 
+      if (doHybrid) {
+	// hybrid method: use nominal MC CR yield histogram to determine how many MT2 bins to use
+	//  by default: use all MT2 bins integrated (no bin-by-bin).
+	//  choose the last bin to try to have at least hybrid_nevent_threshold integrated events
+	for ( int ibin=1; ibin <= histMapCR["h_lostlepMC_cr"]->GetNbinsX(); ++ibin ) {
+	  if (histMapCR["h_lostlepMC_cr"]->Integral(ibin,-1) < hybrid_nevent_threshold) {
+	    if (ibin == 1) lastbin_hybrid = 1;
+	    else lastbin_hybrid = ibin-1;
+	    break;
+	  }
+	}
+      }
+
       for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
 	TString name   = TString(iter->first).ReplaceAll("h_lostlepMC_sr","alphaHist");
 	TString nameCR = TString(iter->first).ReplaceAll("h_lostlepMC_sr","h_lostlepMC_cr");
-	float cr_yield = histMapCR[nameCR.Data()]->Integral(0,-1);
-	alphaMap[name.Data()]->Scale(1./cr_yield);
+	if (doHybrid) {
+	  for ( int ibin=1; ibin <= histMapCR[nameCR.Data()]->GetNbinsX(); ++ibin ) {
+	    double cr_yield = 0.;
+	    double err_cr_yield = 0.;
+	    if (ibin < lastbin_hybrid) {
+	      cr_yield = histMapCR[nameCR.Data()]->GetBinContent(ibin);
+	      err_cr_yield = histMapCR[nameCR.Data()]->GetBinError(ibin);
+	    }
+	    else cr_yield = histMapCR[nameCR.Data()]->IntegralAndError(lastbin_hybrid,-1,err_cr_yield);
+	    double bin_val = alphaMap[name.Data()]->GetBinContent(ibin) / cr_yield;
+	    double bin_err = err_mult(cr_yield, alphaMap[name.Data()]->GetBinContent(ibin), err_cr_yield, alphaMap[name.Data()]->GetBinError(ibin), bin_val);
+	    alphaMap[name.Data()]->SetBinContent( ibin, bin_val );
+	    alphaMap[name.Data()]->SetBinError( ibin, bin_err );
+	  }
+	}
+	else {
+	  // not doing hybrid: can just scale entire hist by 1/cr_yield, with cr_yield integrated over full topological region
+	  //  note that this is neglecting the stat error on cr_yield
+	  float cr_yield = histMapCR[nameCR.Data()]->Integral(0,-1);
+	  alphaMap[name.Data()]->Scale(1./cr_yield);
+	}
       }
     }
     
     //hack to scale certain variations by fixed amount
     //can remove once weights added to looper
     alphaMap["alphaHist_mtcut"]->Scale(1.03);
+
+    // store info on which bin is the last used in hybrid method
+    TH1D* h_lastbinHybrid = new TH1D("h_lastbinHybrid",";last bin",1,0,1);
+    h_lastbinHybrid->SetBinContent(1,lastbin_hybrid);
     
+    double data_cr_totalyield = 0;
     TH1D* h_lostlepDD_cr = 0;
+    TH1D* h_lostlepDD_cr_datacard = 0;
     TH1D* h_data_cr = (TH1D*) f_data->Get(fullhistnameSL);
     if (h_data_cr) {
-      h_lostlepDD_cr = (TH1D*) h_data_cr->Clone("h_mt2binsCRyield");
+      h_lostlepDD_cr = (TH1D*) h_data_cr->Clone("h_mt2binsCRyield"); // actual number of CR events in each MT2 bin
+      h_lostlepDD_cr_datacard = (TH1D*) h_data_cr->Clone("h_mt2binsCRyieldDatacard"); // CR event yields, integrated above some MT2 bin
+      // if not doHybrid, this will integrate all the MT2 bins
+      double data_cr_totalyield = h_lostlepDD_cr->Integral(0,-1);
+      double err_cr_yield = 0.;
+      double cr_yield = h_lostlepDD_cr->IntegralAndError(lastbin_hybrid,-1,err_cr_yield);
+      for ( int ibin=lastbin_hybrid; ibin <= h_lostlepDD_cr_datacard->GetNbinsX(); ++ibin ) {
+	h_lostlepDD_cr_datacard->SetBinContent(ibin, cr_yield);
+	h_lostlepDD_cr_datacard->SetBinError(ibin, err_cr_yield);
+      }
     } else {
       cout << "couldn't find data CR hist: " << fullhistnameSL << endl;
       // make empty histogram
       h_lostlepDD_cr = new TH1D("h_mt2binsCRyield", "h_mt2binsCRyield", n_mt2bins, mt2bins);
+      h_lostlepDD_cr_datacard = new TH1D("h_mt2binsCRyieldDatacard", "h_mt2binsCRyieldDatacard", n_mt2bins, mt2bins);
     }
 
     // ------------------------------------------
-    //  added to compare after normalizing MC
+    //  added to compare after normalizing MC -- MAY NEED TO FIX FOR HYBRID APPROACH
     
     TH1D* h_lostlepMC_cr_finebin = (TH1D*) f_lostlep->Get(fullhistnameSLfinebin);
     TH1D* h_lostlepMC_rescaled_cr_finebin = 0;
@@ -253,14 +310,16 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     }
     
     // data-driven part: use data to normalize MC SR prediction
-    double norm = 1.;
-    double data_cr_yield = 0;
-    if (h_data_cr && histMapCR["h_lostlepMC_cr"]) {
-      data_cr_yield = h_data_cr->Integral(0,-1);
-      norm = data_cr_yield/histMapCR["h_lostlepMC_cr"]->Integral(0,-1);
+    if (h_lostlepDD_cr_datacard && alphaMap["alphaHist"]) {
+      // multiply CR yields by alpha to get prediction
+      h_lostlepDD_sr->Multiply(h_lostlepDD_cr_datacard,alphaMap["alphaHist"],1.,1.);
     }
-    else if (!h_data_cr) norm = 0;
-    h_lostlepDD_sr->Scale(norm);
+
+    // other histograms: just normalize based on total yield in topological region
+    double norm = 1.;
+    if (histMapCR["h_lostlepMC_cr"]) {
+      norm = data_cr_totalyield/histMapCR["h_lostlepMC_cr"]->Integral(0,-1);
+    }
     h_lostlepDD_sr_finebin->Scale(norm);
     h_lostlepMC_rescaled_cr_finebin->Scale(norm);
     h_htbins_lostlepMC_rescaled_cr->Scale(norm);
@@ -353,7 +412,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
       float val = pred_finebin->GetBinContent(ibin);
       if (val <= 0.) continue;
       float err_mcstat = h_lostlepMC_sr_finebin->GetBinError(ibin)/h_lostlepMC_sr_finebin->GetBinContent(ibin);
-      float err_datastat = (data_cr_yield > 0) ? sqrt(data_cr_yield)/data_cr_yield : 0.; // should never get 0 data CR yield and nonzero pred
+      float err_datastat = (data_cr_totalyield > 0) ? sqrt(data_cr_totalyield)/data_cr_totalyield : 0.; // should never get 0 data CR yield and nonzero pred
       float quadrature = err_mcstat*err_mcstat + err_datastat*err_datastat + 0.15*0.15 + 0.05*0.05;
       if (njets_LOW >= 7 && nbjets_LOW >= 1) quadrature += 0.2*0.2;
       pred_finebin->SetBinError(ibin,val*sqrt(quadrature));
@@ -366,6 +425,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     pred_finebin->Write();
     Syst->Write();
     h_lostlepDD_cr->Write();
+    h_lostlepDD_cr_datacard->Write();
     MCStat->Write();
     for ( std::map<string, TH1D*>::iterator iter = alphaMap.begin(); iter != alphaMap.end(); ++iter ) {
       iter->second->Write();
@@ -390,6 +450,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     h_nbjets_HI->Write();
     h_njets_LOW->Write();
     h_njets_HI->Write();
+    h_lastbinHybrid->Write();
     
   } // loop over signal regions
 
