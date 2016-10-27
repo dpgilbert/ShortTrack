@@ -179,6 +179,8 @@ int main(int argc, char **argv) {
   else if (infile.Contains("Run2016F"))                                      sample = Form("data_Run2016F_%s",  outfileid.Data());
   else if (infile.Contains("Run2016G") && infile.Contains("PromptReco"))     sample = Form("data_Run2016G_PromptReco_%s",  outfileid.Data());
   else if (infile.Contains("Run2016G"))                                      sample = Form("data_Run2016G_%s",  outfileid.Data());
+  else if (infile.Contains("Run2016H") && infile.Contains("PromptReco"))     sample = Form("data_Run2016H_PromptReco_%s",  outfileid.Data());
+  else if (infile.Contains("Run2016H"))                                      sample = Form("data_Run2016H_%s",  outfileid.Data());
   //otherwise
   else sample = Form("unknown_%s", outfileid.Data());
 
