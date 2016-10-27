@@ -4,7 +4,7 @@
 # All MT2 related datasets available on hadoop
 #
 
-TAG="V00-08-08_nojson"
+TAG="V00-08-09_json_271036-283059_NoL1T_31p24pb"
 
 #
 # DATA
@@ -69,6 +69,16 @@ TAG="V00-08-08_nojson"
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged/V08-00-12 ${TAG}_data_Run2016G_DoubleEG_PromptReco
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleMuon_MINIAOD_PromptReco-v1/merged/V08-00-12 ${TAG}_data_Run2016G_DoubleMuon_PromptReco
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016G_MuonEG_MINIAOD_PromptReco-v1/merged/V08-00-12 ${TAG}_data_Run2016G_MuonEG_PromptReco
+
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016H_JetHT_MINIAOD_PromptReco-v2/merged/V08-00-14 ${TAG}_data_Run2016H_JetHT_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016H_MET_MINIAOD_PromptReco-v2/merged/V08-00-14 ${TAG}_data_Run2016H_MET_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016H_HTMHT_MINIAOD_PromptReco-v2/merged/V08-00-14 ${TAG}_data_Run2016H_HTMHT_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016H_SingleElectron_MINIAOD_PromptReco-v2/merged/V08-00-14 ${TAG}_data_Run2016H_SingleElectron_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016H_SingleMuon_MINIAOD_PromptReco-v2/merged/V08-00-14 ${TAG}_data_Run2016H_SingleMuon_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016H_SinglePhoton_MINIAOD_PromptReco-v2/merged/V08-00-14 ${TAG}_data_Run2016H_SinglePhoton_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016H_DoubleEG_MINIAOD_PromptReco-v2/merged/V08-00-14 ${TAG}_data_Run2016H_DoubleEG_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016H_DoubleMuon_MINIAOD_PromptReco-v2/merged/V08-00-14 ${TAG}_data_Run2016H_DoubleMuon_PromptReco
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data/Run2016H_MuonEG_MINIAOD_PromptReco-v2/merged/V08-00-14 ${TAG}_data_Run2016H_MuonEG_PromptReco
 
 
 #

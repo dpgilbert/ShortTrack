@@ -69,6 +69,26 @@ chmod -R a+wrx $OUTPUTDIR
 # run data_Run2016F_DoubleMuon_PromptReco
 # run data_Run2016F_MuonEG_PromptReco
 
+# run data_Run2016G_JetHT_PromptReco
+# run data_Run2016G_MET_PromptReco
+# run data_Run2016G_HTMHT_PromptReco
+# run data_Run2016G_SingleElectron_PromptReco
+# run data_Run2016G_SingleMuon_PromptReco
+# run data_Run2016G_SinglePhoton_PromptReco
+# run data_Run2016G_DoubleEG_PromptReco
+# run data_Run2016G_DoubleMuon_PromptReco
+# run data_Run2016G_MuonEG_PromptReco
+
+# run data_Run2016H_JetHT_PromptReco
+# run data_Run2016H_MET_PromptReco
+# run data_Run2016H_HTMHT_PromptReco
+# run data_Run2016H_SingleElectron_PromptReco
+# run data_Run2016H_SingleMuon_PromptReco
+# run data_Run2016H_SinglePhoton_PromptReco
+# run data_Run2016H_DoubleEG_PromptReco
+# run data_Run2016H_DoubleMuon_PromptReco
+# run data_Run2016H_MuonEG_PromptReco
+
 #
 # TTBAR
 #
