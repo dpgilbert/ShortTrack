@@ -149,7 +149,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
 	// hybrid method: use nominal MC CR yield histogram to determine how many MT2 bins to use
 	//  by default: use all MT2 bins integrated (no bin-by-bin).
 	//  choose the last bin to try to have at least hybrid_nevent_threshold integrated events
-	for ( int ibin=1; ibin <= histMapCR["h_lostlepMC_cr"]->GetNbinsX(); ++ibin ) {
+	for ( int ibin=1; ibin <= histMapCR["h_lostlepMC_cr"]->GetNbinsX()+1; ++ibin ) {
 	  if (histMapCR["h_lostlepMC_cr"]->Integral(ibin,-1) < hybrid_nevent_threshold) {
 	    if (ibin == 1) lastbin_hybrid = 1;
 	    else lastbin_hybrid = ibin-1;
