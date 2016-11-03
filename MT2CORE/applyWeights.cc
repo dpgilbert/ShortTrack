@@ -38,12 +38,14 @@ weightStruct getLepSF(float pt, float, int pdgId) {
 }
 
 //_________________________________________________________
-bool setElSFfile(TString filenameIDISO, TString filenameTRK){
+bool setElSFfile(TString filenameIDISO, TString filenameTRK, bool useTight){
   TFile * f1 = new TFile(filenameIDISO);
   TFile * f2 = new TFile(filenameTRK);
   if (!f1->IsOpen()) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find scale factor file "<<filenameIDISO<<std::endl;
   if (!f2->IsOpen()) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find track scale factor file "<<filenameTRK<<std::endl;
-  TH2D* h_id = (TH2D*) f1->Get("GsfElectronToVeto");
+  TH2D* h_id = 0;
+  if (useTight) h_id = (TH2D*) f1->Get("GsfElectronToTight");
+  else h_id = (TH2D*) f1->Get("GsfElectronToVeto");
   TH2D* h_iso = (TH2D*) f1->Get("MVAVLooseElectronToMini");
   TH2D* h_trk = (TH2D*) f2->Get("EGamma_SF2D");
   if (!h_id || !h_iso || !h_trk) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find scale factor histogram"<<std::endl;
