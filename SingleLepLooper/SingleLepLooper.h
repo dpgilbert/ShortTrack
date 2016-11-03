@@ -32,6 +32,7 @@ class SingleLepLooper {
   void SetSignalRegions();
   void loop(TChain* chain, std::string output_name = "test.root");
   void fillHistos(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
+  void fillLepSFWeightsFromFile();
 
  private:
 
@@ -50,7 +51,13 @@ class SingleLepLooper {
   SR CRSLMET80MT30Nj2Nb2;
   SR CRSLMET50MT30to100Nj6Nb1;
   SR CRSLMET50MT30to100Nj7Nb1;
+  SR CRSLSUSWJETS; 
+  SR CRSLSUSTTBAR;
+  SR CRSLSUSTTBAR2;
   TH1D* h_nvtx_weights_;
+  float weight_lepsf_;
+  float weight_lepsf_UP_;
+  float weight_lepsf_DN_;
 };
 
 #endif
