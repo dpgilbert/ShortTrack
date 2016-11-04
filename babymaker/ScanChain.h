@@ -222,6 +222,7 @@ class babyMaker {
   Int_t           HLT_PFMET120_PFMHT120;
   Int_t           HLT_PFJet450;   
   Int_t           HLT_PFJet500;   
+  Int_t           HLT_ECALHT800;   
   Int_t           HLT_SingleMu;   
   Int_t           HLT_SingleMu_NonIso;   
   Int_t           HLT_SingleEl;   
@@ -236,6 +237,7 @@ class babyMaker {
   Int_t           HLT_DoubleMu_NonIso;   
   Int_t           HLT_Photon120;   
   Int_t           HLT_Photon165_HE10;   
+  Int_t           HLT_Photon250_NoHE;   
   Int_t           HLT_PFHT125_Prescale;   
   Int_t           HLT_PFHT200_Prescale;   
   Int_t           HLT_PFHT300_Prescale;   
