@@ -19,7 +19,7 @@ using namespace std;
 
 //options
 bool verbose = true;
-bool doHybrid = false; // hybrid estimate: uses CR MT2 binning until the (MC) integral is less than the threshold below
+bool doHybrid = true; // hybrid estimate: uses CR MT2 binning until the (MC) integral is less than the threshold below
 float hybrid_nevent_threshold = 50.;
 
 const int n_htbins = 5;
@@ -148,13 +148,11 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
       if (doHybrid) {
 	// hybrid method: use nominal MC CR yield histogram to determine how many MT2 bins to use
 	//  by default: use all MT2 bins integrated (no bin-by-bin).
-	//  choose the last bin to try to have at least hybrid_nevent_threshold integrated events
-	for ( int ibin=1; ibin <= histMapCR["h_lostlepMC_cr"]->GetNbinsX()+1; ++ibin ) {
-	  if (histMapCR["h_lostlepMC_cr"]->Integral(ibin,-1) < hybrid_nevent_threshold) {
-	    if (ibin == 1) lastbin_hybrid = 1;
-	    else lastbin_hybrid = ibin-1;
-	    break;
-	  }
+	//  start from the last bin and add bins at lower MT2 until we get above the hybrid_nevent_threshold
+	for ( int ibin = histMapCR["h_lostlepMC_cr"]->GetNbinsX()+1; ibin >= 1; --ibin ) {
+	  if (histMapCR["h_lostlepMC_cr"]->Integral(ibin,-1) < hybrid_nevent_threshold) continue;
+	  lastbin_hybrid = ibin;
+	  break;
 	}
       }
 
