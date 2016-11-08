@@ -1,21 +1,27 @@
 
-# Running All Hadronic MT2 Looper In Batch Mode 
+# Running MT2 Looper In Batch Mode and Processing Babies
 
-## Instructions
-0) environment setup: see `MT2Analysis/README.txt`.  This setup sends the compiled libraries with the job so assumes that you're using a particular CMSSW/root version.
+## Environment setup
 
-1) copy files to run looper into `job_input` directory
+See `MT2Analysis/README.txt`.  This setup sends the compiled libraries with the job so assumes that you're using a particular CMSSW/root version.
+
+## Prepare job input files
+
+Copy files to run looper into `job_input` directory
 for example, from the `babymaker` directory
 ``` bash
 cp -r *.so jetCorrections jsons btagsf lepsf data processBaby batchsubmit/job_input/
 ```
 *** note that after copying the latest source files into the job_input subdir, you must run one of the writeConfig scripts below to recreate the input tarball which is used for the batch jobs!
 
-2) modify writeConfig.sh script for personal setup. Variables that should be modified by the user are
+## Setup writeConfig.sh scrip
+
+Modify `writeConfig.sh` script for personal setup. Variables that should be modified by the user are
 PROXY (not nedded anymore unless you have a special location for your proxy file)
 COPYDIR to point to the desired output directory in hadoop ( default to `/hadoop/cms/store/user/${USERNAME}/mt2babies/`) where $USERNAME is your username
 
-3) now execute scripts!
+## Write condor configurations
+
 to run on only one dataset for example run the `writeConfig.sh` script 
 this takes two arguments, the dataset directory on hadoop and the name
 you want to give the output babies and the output directory. 
@@ -56,7 +62,9 @@ This should create a set of .cmd files and a submit script submitAll.sh
 the job .out and .err files should be located in the job_logs directory 
 the submission log should be in submit_logs
 
-4) To verify that jobs ran and produced all the output files, first run sweepRoot to check all output root files.
+## Verify outputs and resubmit as needed
+
+To verify that jobs ran and produced all the output files, first run sweepRoot to check all output root files.
 ``` bash
 git clone git@github.com:cmstas/NtupleTools.git
 cd NtupleTools/condorMergingTools/libC
@@ -83,7 +91,9 @@ condor_submit <NEWCMDFILE>
 
 You may have to iterate this process to get all jobs to converge.
 
-5) Once the jobs are done, merge the output with the mergeHadoopOutput script
+## Merge babies
+
+Once the jobs are done, merge the output with the mergeHadoopOutput script
 You can select which datasets to merge by editing the script below, then run it.
 Note that all the merge jobs run locally in parallel, so you may not want to merge
 everything at once
@@ -95,3 +105,42 @@ stored under:
 ``` bash
 /nfs-6/userdata/mt2/<VERSION>/
 ```
+
+## Merge samples with extended statistics
+
+Some MC samples have been produced in multiple datasets, that cover the exact same phase space but are statistically independent.
+For example, in `writeAllConfig25nsMiniAODv2.sh` the samples `ttsl_mg_lo_top` and `ttsl_mg_lo_top_ext1` are defined.
+
+We have a script to merge these and fix the `evt_scale1fb` variable to properly account for the full statistics of the merged sample:
+``` bash
+/nfs-6/userdata/mt2/mergeFixScale1fb.C
+```
+with a wrapper bash script to call this for multiple samples:
+``` bash
+/nfs-6/userdata/mt2/do_ext_merge.sh
+```
+Typically we create an additional subdirectory to hold these babies with the extensions merged in, like:
+``` bash
+/nfs-6/userdata/mt2/<VERSION>/extmerge/
+```
+To ensure that directory has a complete set of all babies, we can also use the script below to make soft links
+to the remaining babies that didn't have extensions:
+``` bash
+/nfs-6/userdata/mt2/make_links_extmerge.sh
+```
+
+## Skim babies
+
+For the standard MT2 analysis results, we apply a skim (i.e. remove some events) with a selection loose enough
+to retain all of the signal region and control region events.
+
+The script that does the skimming is here on the UAF:
+``` bash
+/nfs-6/userdata/mt2/skim_base_mt2_Zinv_v6_JECs.C
+```
+
+And we have a wrapper bash script to run this on multiple samples:
+``` bash
+/nfs-6/userdata/mt2/do_skim.sh
+```
+The directory also contains other skimming scripts for specific purposes.
