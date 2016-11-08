@@ -177,7 +177,7 @@ void purityRL(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/ou
   // TFile* f_q = new TFile(Form("%s/qcd_pt.root",input_dir.c_str())); //qcd file
   // TFile* f_t = new TFile(Form("%s/ttall.root",input_dir.c_str())); //ttbar file
   // TFile* f_s = new TFile(Form("%s/singletop.root",input_dir.c_str())); //singletop file
-  TFile* f_z = new TFile(Form("%s/2015zinv_ht.root",input_dir.c_str())); //zinv file
+  TFile* f_z = new TFile(Form("%s/zinv_ht.root",input_dir.c_str())); //zinv file
   TFile* f_bkg = new TFile(Form("%s/CRRLbkg.root",input_dir.c_str())); //qcd+ttall+singletop file
   if (verbose) cout<<__LINE__<<endl;
 

@@ -199,10 +199,9 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
 
 
 //_______________________________________________________________________________
-void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string output_name, int method = 0 ) {
+void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vector<string> dirs, string output_name ) {
 
   // Generate histogram file with Zinv prediction based on DYData * R(Zinv/DY)
-  // Method 0.  Just Poisson from DY: Zinv +/- Zinv/sqrt(DY)
 
   TFile * outfile = new TFile(output_name.c_str(),"RECREATE") ; 
   outfile->cd();
@@ -215,11 +214,13 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
     TString fullhistname = directory + "/h_mt2bins";
     TString fullhistnameDY = directoryDY + "/h_mt2bins";
 
-    TH1D* hDY = (TH1D*) fDY->Get(fullhistnameDY);    
+    TH1D* hData = (TH1D*) fData->Get(fullhistnameDY);    
+    TH1D* hDY   = (TH1D*) fDY->Get(fullhistnameDY);    
     TH1D* hZinv = (TH1D*) fZinv->Get(fullhistname);    
+    TH1D* hTop  = (TH1D*) fTop->Get(fullhistnameDY);    
     
     // If Zinv or DY histograms are not filled, just leave (shouldn't happen when running on full stat MC)
-    if(!hDY || !hZinv){
+    if(!hDY || !hZinv || !hData){
       cout<<"could not find histogram "<<fullhistname<<endl;
       continue;
     }
@@ -237,18 +238,29 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
     } 
     dir->cd();
 
-    TH1D* Stat = (TH1D*) hZinv->Clone("h_mt2binsStat");
     cout<<"Looking at histo "<<fullhistname<<endl;
-    if (method==0) { // --- Simple: Zinv +/- Zinv/sqrt(DY)
-      for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { // "<=" to deal with overflow bin
-	if (hDY->GetBinContent(ibin) > 0)
-	  Stat->SetBinError(ibin, hZinv->GetBinContent(ibin)/sqrt( hDY->GetBinContent(ibin) ));
-	else Stat->SetBinError(ibin, hZinv->GetBinContent(ibin));
-      }
-    }
 
+    
     TH1D* ratio = (TH1D*) hZinv->Clone("ratio");
     ratio->Divide(hDY);
+
+    TH1D* CRyield = (TH1D*) hData->Clone("h_mt2binsCRyield");
+
+    TH1D* purity = (TH1D*) hDY->Clone("h_mt2binsPurity");
+    purity->Add(hTop, -1);
+    purity->Divide(hDY);
+    
+    TH1D* Stat = (TH1D*) CRyield->Clone("h_mt2binsStat");
+    Stat->Multiply(purity);
+    Stat->Multiply(ratio);
+    // stat uncertainty should automatically take into account of MC stat and Data stat
+
+//    for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
+//      if (Stat->GetBinContent(ibin) > 0) {
+//	Stat->SetBinError(ibin, hZinv->GetBinContent(ibin)/sqrt( hDY->GetBinContent(ibin) ));
+//      }
+//      else Stat->SetBinError(ibin, hZinv->GetBinContent(ibin));
+//    }
 
     // MCStat: use relative bin error from ratio hist, normalized to Zinv MC prediction
     TH1D* MCStat = (TH1D*) hZinv->Clone("h_mt2binsMCStat");
@@ -260,17 +272,18 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
     TH1D* Syst = (TH1D*) Stat->Clone("h_mt2binsSyst");
     TH1D* pred = (TH1D*) Stat->Clone("h_mt2bins");
     for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
-      Syst->SetBinError(ibin, 0.);
+      Syst->SetBinError(ibin, (1-purity->GetBinContent(ibin))*0.5*Stat->GetBinContent(ibin));
       double quadrature = Stat->GetBinError(ibin)*Stat->GetBinError(ibin) + Syst->GetBinError(ibin)*Syst->GetBinError(ibin);
       pred->SetBinError(ibin, sqrt(quadrature));
     }
     //pred->Print("all");
 
-    TH1D* CRyield = (TH1D*) hDY->Clone("h_mt2binsCRyield");
 
     pred->Write();
     Stat->Write();
     Syst->Write();
+    purity->Write();
+    ratio->Write();
     CRyield->Write();
     MCStat->Write();
 
@@ -297,10 +310,12 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
   std::cout << "Writing to file: " << output_name << std::endl;
 
   // get input files
+  TFile* f_data = new TFile(Form("%s/data_Run2016.root",input_dir.c_str()));
   TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
   TFile* f_gjet = new TFile(Form("%s/gjets_dr0p05_ht.root",input_dir.c_str()));
   //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
   TFile* f_dy = new TFile(Form("%s/dyjetsll_ht.root",input_dir.c_str()));
+  TFile* f_top = new TFile(Form("%s/top.root",input_dir.c_str()));
   //TFile* f_dy = new TFile(Form("%s/dyjetsll_incl.root",input_dir.c_str()));
 
 
@@ -332,7 +347,7 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
 
    output_name = input_dir+"/zinvFromDY.root";
 
-  makeZinvFromDY( f_zinv , f_dy , dirs, output_name, 0 ); 
+   makeZinvFromDY( f_data, f_zinv , f_dy , f_top, dirs, output_name ); 
 
 
 }
