@@ -1151,6 +1151,24 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  doDYplots = true;
 	}
       } // nlep == 2
+
+      // Variables for OppositeFlavor control region
+      bool doOFplots = false;
+      if (t.nlep == 2 && !isSignal_) {
+	if ( (t.lep_charge[0] * t.lep_charge[1] == -1)
+	     && (abs(t.lep_pdgId[0]) != abs(t.lep_pdgId[1]) )
+             && (abs(t.lep_pdgId[0]) == 13 ||  t.lep_tightId[0] > 0 )
+             && (abs(t.lep_pdgId[1]) == 13 ||  t.lep_tightId[1] > 0 )
+	     && (fabs(t.zll_mass - 91.19) < 10 ) 
+	     && t.lep_pt[0] > 25 && t.lep_pt[1] > 20
+	     && (!t.isData || t.HLT_MuX_Ele12 || t.HLT_Mu8_EleX || t.HLT_Mu33_Ele33_NonIso) //X-Trigs
+             ) {
+	  // no additional explicit lepton veto
+	  // i.e. implicitly allow 3rd PF lepton or hadron
+	  //nlepveto_ = 0; 
+	  doOFplots = true;
+	}
+      } // nlep == 2
       
       // Variables for Removed single lepton (RL) region
       //muon only
@@ -1222,10 +1240,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	fillHistosInclusive();
       }
 
-      if (doDYplots) {
+      if (doDYplots || doOFplots) {
         saveDYplots = true;
 	if (verbose) cout<<__LINE__<<endl;
-        fillHistosCRDY("crdy");
+        if (doDYplots) fillHistosCRDY("crdy");
+        if (doOFplots) fillHistosCRDY("crdy", "emu");
       }
       if (doRLplots) {
         saveRLplots = true;
