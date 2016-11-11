@@ -15,7 +15,8 @@
 #include "TKey.h"
 
 using namespace std;
-
+bool doHybrid = true; // hybrid estimate: uses CR MT2 binning until the (MC) integral is less than the threshold below
+float hybrid_nevent_threshold = 20.;
 
 //_______________________________________________________________________________
 void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<string> dirs, string output_name, float kFactorGJetForRatio = 1.0 ) {
@@ -213,9 +214,11 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 
     TString fullhistname = directory + "/h_mt2bins";
     TString fullhistnameDY = directoryDY + "/h_mt2bins";
+    TString fullhistnameEM = directoryDY + "/h_mt2binsemu";
 
     TH1D* hData = (TH1D*) fData->Get(fullhistnameDY);    
     TH1D* hDY   = (TH1D*) fDY->Get(fullhistnameDY);    
+    TH1D* hDataEM   = (TH1D*) fDY->Get(fullhistnameEM);    
     TH1D* hZinv = (TH1D*) fZinv->Get(fullhistname);    
     TH1D* hTop  = (TH1D*) fTop->Get(fullhistnameDY);    
     
@@ -240,52 +243,111 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 
     cout<<"Looking at histo "<<fullhistname<<endl;
 
+    int lastbin_hybrid = 1;
+    if (doHybrid) {
+      // hybrid method: use nominal MC CR yield histogram to determine how many MT2 bins to use
+      //  by default: use all MT2 bins integrated (no bin-by-bin).
+      //  choose the last bin to try to have at least hybrid_nevent_threshold integrated events
+      for ( int ibin=1; ibin <= hData->GetNbinsX(); ++ibin ) {
+	float top = 0;
+	if (hDataEM) top = hDataEM->Integral(ibin,-1);
+	if (hData->Integral(ibin,-1) - top < hybrid_nevent_threshold) {
+	  if (ibin == 1) lastbin_hybrid = 1;
+	  else lastbin_hybrid = ibin-1;
+
+	  break;
+	}
+      }
+      cout<<"lastbin_hybrid "<<lastbin_hybrid<<endl;
+    }
     
+
     TH1D* ratio = (TH1D*) hZinv->Clone("ratio");
     ratio->Divide(hDY);
 
     TH1D* CRyield = (TH1D*) hData->Clone("h_mt2binsCRyield");
 
-    TH1D* purity = (TH1D*) hDY->Clone("h_mt2binsPurity");
-    purity->Add(hTop, -1);
-    purity->Divide(hDY);
+    TH1D* purityMC = (TH1D*) hDY->Clone("h_mt2binsPurityMC");
+    if (hTop) purityMC->Add(hTop, -1);
+    purityMC->Divide(hDY);
+
+    TH1D* purityData = (TH1D*) hData->Clone("h_mt2binsPurityData");
+    if (hDataEM) purityData->Add(hDataEM, -1);
+    purityData->Divide(purityData, hData, 1, 1, "B");
     
     TH1D* Stat = (TH1D*) CRyield->Clone("h_mt2binsStat");
-    Stat->Multiply(purity);
+    Stat->Multiply(purityData);
     Stat->Multiply(ratio);
-    // stat uncertainty should automatically take into account of MC stat and Data stat
-
-//    for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
-//      if (Stat->GetBinContent(ibin) > 0) {
-//	Stat->SetBinError(ibin, hZinv->GetBinContent(ibin)/sqrt( hDY->GetBinContent(ibin) ));
-//      }
-//      else Stat->SetBinError(ibin, hZinv->GetBinContent(ibin));
-//    }
-
-    // MCStat: use relative bin error from ratio hist, normalized to Zinv MC prediction
-    TH1D* MCStat = (TH1D*) hZinv->Clone("h_mt2binsMCStat");
-    for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
-      MCStat->SetBinError(ibin, MCStat->GetBinContent(ibin) * ratio->GetBinError(ibin) / ratio->GetBinContent(ibin) );
-    }
-
 
     TH1D* Syst = (TH1D*) Stat->Clone("h_mt2binsSyst");
     TH1D* pred = (TH1D*) Stat->Clone("h_mt2bins");
     for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
-      Syst->SetBinError(ibin, (1-purity->GetBinContent(ibin))*0.5*Stat->GetBinContent(ibin));
+      Syst->SetBinError(ibin, (1-purityData->GetBinContent(ibin))*0.2*Stat->GetBinContent(ibin));
       double quadrature = Stat->GetBinError(ibin)*Stat->GetBinError(ibin) + Syst->GetBinError(ibin)*Syst->GetBinError(ibin);
       pred->SetBinError(ibin, sqrt(quadrature));
     }
     //pred->Print("all");
 
+    // Inputs to cardMaker
+    TH1D* ratioCard  = (TH1D*) ratio->Clone("ratioCard");
+    TH1D* purityCard  = (TH1D*) purityData->Clone("purityCard");   
+    TH1D* CRyieldCard  = (TH1D*) CRyield->Clone("CRyieldCard");
+
+    if (doHybrid) {
+      // purity needs to be mofidied so the last N bins all describe the purity of the integrated yield
+      // ratio needs to be modified so that the last N bins include kMT2
+      // CRyield needs to be modified so that the last N bins have the same yield (which is the integral over those N bins)
+      for ( int ibin=1; ibin <= hZinv->GetNbinsX(); ++ibin ) {
+
+	if (ibin < lastbin_hybrid) continue;
+	
+	double integratedYieldErr = 0;
+	float integratedYield = CRyield->IntegralAndError(lastbin_hybrid,-1,integratedYieldErr);
+	CRyieldCard->SetBinContent(ibin, integratedYield);
+	CRyieldCard->SetBinError(ibin, integratedYieldErr);
+
+	float integratedDen = integratedYield;
+	float EM = 0;
+	if (hDataEM) EM =  hDataEM->Integral(lastbin_hybrid, -1);
+	float integratedNum = integratedDen - EM;
+	if (integratedNum < 0) integratedNum = 0;
+	float integratedPurity = integratedNum/integratedDen;
+	float integratedPurityErr = sqrt(integratedPurity*(1-integratedPurity)/integratedDen);// sqrt(e(1-e)/N)
+	purityCard->SetBinContent(ibin, integratedPurity);
+	purityCard->SetBinError(ibin, integratedPurityErr);
+
+	float integratedZinv = hZinv->Integral(lastbin_hybrid, -1);
+	float kMT2 = hZinv->GetBinContent(ibin) / integratedZinv;
+	ratioCard->SetBinContent(ibin, ratioCard->GetBinContent(ibin) * kMT2);
+	ratioCard->SetBinError(ibin, ratioCard->GetBinError(ibin) * kMT2 ); // just rescale the error by the same amount
+
+      }
+
+    }
+
+    TH1D* hybridEstimate  = (TH1D*) CRyieldCard->Clone("hybridEstimate");
+    hybridEstimate->Multiply(purityCard);
+    hybridEstimate->Multiply(ratioCard);
+    
+    
+    TH1D* h_lastbinHybrid = new TH1D("h_lastbinHybrid",";last bin",1,0,1);
+    h_lastbinHybrid->SetBinContent(1,lastbin_hybrid);
+
+
 
     pred->Write();
     Stat->Write();
     Syst->Write();
-    purity->Write();
+    purityMC->Write();
+    purityData->Write();
     ratio->Write();
     CRyield->Write();
-    MCStat->Write();
+
+    ratioCard->Write();
+    purityCard->Write();
+    CRyieldCard->Write();
+    h_lastbinHybrid->Write();
+    hybridEstimate->Write();
 
 
   } // loop over signal regions
