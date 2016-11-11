@@ -22,7 +22,7 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
 
         # get the root file for the given sample. This assumes that frag/fake photons come from qcd_ht.root
         if samples[isamp] in ["fragphoton","fakephoton"]:
-            fn = os.path.join(rootdir,"2015qcd_ht.root")
+            fn = os.path.join(rootdir,"qcd_ht.root")
         else:
             fn = os.path.join(rootdir,samples[isamp]+".root")        
         fid = ROOT.TFile(fn)
