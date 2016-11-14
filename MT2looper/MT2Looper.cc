@@ -94,7 +94,7 @@ bool applyLeptonSFtoSR = false;
 bool applyTopPtReweight = false;
 // add weights to correct for photon trigger efficiencies
 bool applyPhotonTriggerWeights = true; //default true
-// use 2016 ICHEP ISR weights based on nisrMatch, signal only
+// use 2016 ICHEP ISR weights based on nisrMatch, signal and ttbar only
 bool applyISRWeights = true;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
 bool doSystVariationPlots = true;
@@ -919,6 +919,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(t.GenSusyMScan1);
 	  int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(t.GenSusyMScan2);
 	  float avgweight_isr = h_sig_avgweight_isr_->GetBinContent(binx,biny);
+	  evtweight_ *= t.weight_isr / avgweight_isr;
+	}
+	else if (applyISRWeights && t.evt_id >= 301 && t.evt_id <= 303) {
+	  float avgweight_isr = getAverageISRWeight(t.evt_id, 0);
 	  evtweight_ *= t.weight_isr / avgweight_isr;
 	}
 	if (applyTopPtReweight && t.evt_id >= 300 && t.evt_id < 400) {
@@ -2289,6 +2293,16 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot3D("h_mt2bins_sigscan_isr_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_DN / avgweight_isr_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
   }
 
+  // ISR reweighting variation for ttbar
+  else if (!t.isData && applyISRWeights && t.evt_id >= 301 && t.evt_id <= 303 && doSystVariationPlots) {
+    // remove central value ISR weight when doing variation
+    float avgweight_isr = getAverageISRWeight(t.evt_id);
+    float avgweight_isr_UP = getAverageISRWeight(t.evt_id,1);
+    float avgweight_isr_DN = getAverageISRWeight(t.evt_id,-1);
+    plot1D("h_mt2bins_isr_UP"+s,       mt2_temp,   evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_UP / avgweight_isr_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_isr_DN"+s,       mt2_temp,   evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_DN / avgweight_isr_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+
   if (!t.isData && applyBtagSF && doSystVariationPlots) {
 
     int binx,biny;
@@ -2802,5 +2816,25 @@ void MT2Looper::fillHistosGenMET(std::map<std::string, TH1*>& h_1d, int n_mt2bin
   
   outfile_->cd();
   return;
+}
+
+float MT2Looper::getAverageISRWeight(const int evt_id, const int var) {
+
+  // madgraph ttsl, from RunIISpring16MiniAODv2
+  if (evt_id == 301 || evt_id == 302) {
+    if (var == 0) return 0.910; // nominal
+    else if (var == 1) return 0.955; // UP
+    else if (var == -1) return 0.865; // DN
+  }
+  // madgraph ttdl, from RunIISpring16MiniAODv2
+  else if (evt_id == 303) {
+    if (var == 0) return 0.897; // nominal
+    else if (var == 1) return 0.948; // UP
+    else if (var == -1) return 0.845; // DN
+  }
+
+  std::cout << "WARNING: MT2Looper::getAverageISRWeight: didn't recognize either evt_id: " << evt_id
+	    << " or variation: " << var << std::endl;
+  return 1.;
 }
 
