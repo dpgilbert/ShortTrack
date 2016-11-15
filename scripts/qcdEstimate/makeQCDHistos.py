@@ -21,8 +21,8 @@ qcd_sample = "qcd_ht"
 nqcd_samples = ["nonqcd"]
 data_sample = "data_Run2016"
 
-ht_reg_names = ["ht200to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf"]
-nj_reg_names = ["j2to3","j4to6","j7toInf"]
+ht_reg_names = ["ht250to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf"]
+nj_reg_names = ["j2to3","j4to6","j7toInf","j2to6","j4toInf","j2toInf"]
 
 fout = ROOT.TFile(os.path.join(outdir,"qcdHistos.root"),"RECREATE")
 

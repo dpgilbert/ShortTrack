@@ -1,3 +1,2 @@
-/home/users/bemarsh/analysis/mt2/current/MT2Analysis/QCDLooper/output/V00-08-08_nojson_12p9fb
-/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6_12p9fb
-
+/home/users/fgolf/mt2/devel/MT2Analysis/QCDLooper/output/test
+/home/users/fgolf/mt2/devel/MT2Analysis/MT2looper/output/test

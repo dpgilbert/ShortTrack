@@ -14,10 +14,12 @@ data_sample = "data_Run2016"
 qcd_sample = "qcd_ht"
 nonqcd_samples = ["top","wjets_ht","zinv_ht","dyjetsll_ht"]
 
-ht_reg_names = ["ht200to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf"]
-nj_reg_names = ["j2to3","j4to6","j7toInf"]
+ht_reg_names = ["ht250to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf"]
+nj_reg_names = ["j2to3","j4to6","j7toInf","j2to6","j4toInf","j2toInf"]
 top_reg_names = ["j2to3_b0","j2to3_b1","j2to3_b2","j4to6_b0","j4to6_b1","j4to6_b2",
                  "j7toInf_b0","j7toInf_b1","j7toInf_b2","j2to6_b3toInf","j7toInf_b3toInf"]
+vl_top_reg_names = ["j2to3_b0","j2to3_b1","j2to3_b2","j4toInf_b0","j4toInf_b1","j4toInf_b2","j2toInf_b3toInf"]
+vl_top_reg_nums = [1, 2, 3, 12, 13, 14, 15, 16]
 
 fout = ROOT.TFile(os.path.join(outdir,"qcdEstimate.root"),"RECREATE")
 
@@ -47,17 +49,17 @@ for inj,nj_reg in enumerate(nj_reg_names):
     print "Getting rb in NJ region",nj_reg
 
     fin = ROOT.TFile(os.path.join(outdir, "qcdHistos.root"))
-    rb_mc = fin.Get("rb_{0}/h_qcd_rb".format(nj_reg)).Clone("yield_r_hat_mc_HT200toInf_{0}_b0toInf".format(nj_reg))
-    rb_data = fin.Get("rb_{0}/h_datasub_rb".format(nj_reg)).Clone("yield_r_hat_data_HT200toInf_{0}_b0toInf".format(nj_reg))
+    rb_mc = fin.Get("rb_{0}/h_qcd_rb".format(nj_reg)).Clone("yield_r_hat_mc_HT250toInf_{0}_b0toInf".format(nj_reg))
+    rb_data = fin.Get("rb_{0}/h_datasub_rb".format(nj_reg)).Clone("yield_r_hat_data_HT250toInf_{0}_b0toInf".format(nj_reg))
     rb_mc.SetDirectory(0)
     rb_data.SetDirectory(0)
     fin.Close()
     
-    d = rb_data_dir.mkdir("HT200toInf_{0}_b0toInf".format(nj_reg))
+    d = rb_data_dir.mkdir("HT250toInf_{0}_b0toInf".format(nj_reg))
     d.cd()
     rb_data.Write()
 
-    d = rb_mc_dir.mkdir("HT200toInf_{0}_b0toInf".format(nj_reg))
+    d = rb_mc_dir.mkdir("HT250toInf_{0}_b0toInf".format(nj_reg))
     d.cd()
     rb_mc.Write()
 
@@ -70,7 +72,10 @@ rphi_mc_dir = fout.mkdir("r_effectiveMC")
 qcd_estimate_dir = fout.mkdir("qcdEstimate")
 qcd_estimate_mc_dir = fout.mkdir("qcdEstimate_mc")
 for iht,ht_reg in enumerate(ht_reg_names):
-    for itop,top_reg in enumerate(top_reg_names):
+    topo_reg_names = top_reg_names
+    if iht == 0:
+        topo_reg_names = vl_top_reg_names
+    for itop,top_reg in enumerate(topo_reg_names):
         nj_reg = top_reg.split('_')[0]
         nb_reg = top_reg.split('_')[1]
         htAbbrev = ["VL","L","M","H","UH"][iht]
@@ -79,17 +84,18 @@ for iht,ht_reg in enumerate(ht_reg_names):
         
         #purity calc
         fqcd = ROOT.TFile(os.path.join(MT2indir, qcd_sample+".root"))
-        h_purity = fqcd.Get("crqcd{0}{1}/h_mt2bins".format(itop+1,htAbbrev)).Clone("yield_qcdPurity_{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
+        topi = vl_top_reg_nums[itop] if iht == 0 else itop+1
+        h_purity = fqcd.Get("crqcd{0}{1}/h_mt2bins".format(topi,htAbbrev)).Clone("yield_qcdPurity_{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
         h_denom = h_purity.Clone("h_denom")
         for nqcd in nonqcd_samples:
             fnqcd = ROOT.TFile(os.path.join(MT2indir, nqcd+".root"))
-            h_denom.Add(fnqcd.Get("crqcd{0}{1}/h_mt2bins".format(itop+1,htAbbrev)))
+            h_denom.Add(fnqcd.Get("crqcd{0}{1}/h_mt2bins".format(topi,htAbbrev)))
             fnqcd.Close()
         h_purity.Divide(h_denom)
 
         # get nCR
         fin = ROOT.TFile(os.path.join(MT2indir, data_sample+".root"))
-        h_mt2bins = fin.Get("crqcd{0}{1}/h_mt2bins".format(itop+1,htAbbrev))
+        h_mt2bins = fin.Get("crqcd{0}{1}/h_mt2bins".format(topi,htAbbrev))
         h_mt2bins.SetName("yield_nCR_{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
         h_mt2bins.SetDirectory(0)
         
@@ -103,7 +109,7 @@ for iht,ht_reg in enumerate(ht_reg_names):
         h_r_systFit = h_mt2bins.Clone("yield_r_systFit_{0}_{1}".format(ht_reg.replace("ht","HT"), top_reg))
 
         for i in range(1,h_mt2bins.GetNbinsX()+1):
-            dname = "crqcd{0}{1}".format(itop+1,htAbbrev)
+            dname = "crqcd{0}{1}".format(topi,htAbbrev)
 
             sumRphi = fin.Get(dname+"/h_sumRphi").GetBinContent(i)
             sumRphi_err = fin.Get(dname+"/h_sumRphi").GetBinError(i)
@@ -168,12 +174,10 @@ for iht,ht_reg in enumerate(ht_reg_names):
         d = r_systfit_dir.mkdir("{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
         d.cd()
         h_r_systFit.Write()
-
+        
         ## FORM ESTIMATE
-        temp_nj_reg = nj_reg
-        if temp_nj_reg=="j2to6": temp_nj_reg="j2to3"
-        h_rb_data = rb_data_dir.Get("HT200toInf_{0}_b0toInf/yield_r_hat_data_HT200toInf_{0}_b0toInf".format(temp_nj_reg))
-        h_rb_mc = rb_mc_dir.Get("HT200toInf_{0}_b0toInf/yield_r_hat_mc_HT200toInf_{0}_b0toInf".format(temp_nj_reg))
+        h_rb_data = rb_data_dir.Get("HT250toInf_{0}_b0toInf/yield_r_hat_data_HT250toInf_{0}_b0toInf".format(nj_reg))
+        h_rb_mc = rb_mc_dir.Get("HT250toInf_{0}_b0toInf/yield_r_hat_mc_HT250toInf_{0}_b0toInf".format(nj_reg))
         h_fj_data = fj_data_dir.Get("{0}_j2toInf_b0toInf/yield_f_jets_data_{0}_j2toInf_b0toInf".format(ht_reg.replace("ht","HT")))
         h_fj_mc = fj_mc_dir.Get("{0}_j2toInf_b0toInf/yield_f_jets_mc_{0}_j2toInf_b0toInf".format(ht_reg.replace("ht","HT")))
 
@@ -198,6 +202,20 @@ for iht,ht_reg in enumerate(ht_reg_names):
             fj_mc_relerr = ROOT.Double(0)
             fj_data = h_fj_data.IntegralAndError(1,2,fj_data_relerr)
             fj_mc = h_fj_mc.IntegralAndError(1,2,fj_mc_relerr)
+            fj_data_relerr /= fj_data
+            fj_mc_relerr /= fj_mc
+        elif nj_reg == "j4toInf":
+            fj_data_relerr = ROOT.Double(0)
+            fj_mc_relerr = ROOT.Double(0)
+            fj_data = h_fj_data.IntegralAndError(2,3,fj_data_relerr)
+            fj_mc = h_fj_mc.IntegralAndError(2,3,fj_mc_relerr)
+            fj_data_relerr /= fj_data
+            fj_mc_relerr /= fj_mc
+        elif nj_reg == "j2toInf":
+            fj_data_relerr = ROOT.Double(0)
+            fj_mc_relerr = ROOT.Double(0)
+            fj_data = h_fj_data.IntegralAndError(1,3,fj_data_relerr)
+            fj_mc = h_fj_mc.IntegralAndError(1,3,fj_mc_relerr)
             fj_data_relerr /= fj_data
             fj_mc_relerr /= fj_mc
         else:
