@@ -1,64 +1,6 @@
 #! /bin/bash
 
 
-#INPATH=/nfs-6/userdata/mt2/bemarsh_V00-08-00
-#OUTPATH=/nfs-6/userdata/mt2/V00-08-00_json_Cert_271036-273450_skim_base_mt2gt200_ZinvV4
-
-# INPATH=/nfs-6/userdata/mt2/76x_miniaodv2_test_v5
-# OUTPATH=/nfs-6/userdata/mt2/bemarsh_76X_test_skim_tmp
-
-#INPATH=/nfs-6/userdata/mt2/V00-01-10_25ns_data_json_246908-260627_v2
-#OUTPATH=/nfs-6/userdata/mt2/V00-01-10_25ns_data_json_246908-260627_v2_skim_base_mt2gt200_ZinvV4
-
-#INPATH=/nfs-6/userdata/mt2/V00-08-01_json_Cert_271036-274421
-# OUTPATH=/nfs-6/userdata/mt2/V00-08-01_json_Cert_271036-274421_skim_base_mt2gt200_ZinvV4
-#OUTPATH=/nfs-6/userdata/mt2/bemarsh_test
-
-#INPATH=/nfs-6/userdata/mt2/V00-08-02_json_Cert_271036-274421
-#INPATH=/nfs-6/userdata/mt2/V00-08-02_json_Cert_271036-274421/extmerge
-#OUTPATH=/nfs-6/userdata/mt2/V00-08-02_json_Cert_271036-274421_skim_base_mt2gt200_ZinvV4
-
-# INPATH=/nfs-6/userdata/mt2/V00-08-02_nojson
-#INPATH=/nfs-6/userdata/mt2/V00-08-02_nojson/extmerge
-#INPATH=/hadoop/cms/store/user/olivito/mt2babies/V00-08-02_nojson_data_Run2016B_SingleElectron_PromptReco
-#OUTPATH=/nfs-6/userdata/mt2/V00-08-02_nojson_skim_base_mt2gt200_ZinvV4
-
-#INPATH=/nfs-6/userdata/mt2/V00-08-03_MiniAODv2_nojson
-#INPATH=/nfs-6/userdata/mt2/V00-08-04_MiniAODv2_nojson/extmerge
-#INPATH=/nfs-6/userdata/mt2/V00-08-05_nojson/extmerge
-#OUTPATH=/nfs-6/userdata/mt2/V00-08-05_nojson_skim_base_mt2gt200_ZinvV4
-#OUTPATH=/nfs-6/userdata/mt2/V00-08-05_nojson_skim_base_mt2gt100_ZinvV4
-
-#INPATH=/nfs-6/userdata/mt2/V00-08-04_MiniAODv2_nojson
-#OUTPATH=/nfs-6/userdata/mt2/V00-08-04_MiniAODv2_nojson_skim_base_mt2gt100_ZinvV4
-
-#INPATH=/nfs-6/userdata/mt2/V00-08-07_nojson
-#OUTPATH=/nfs-6/userdata/mt2/V00-08-07_nojson_skim_base_mt2gt200_ZinvV6
-
-# INPATH=/nfs-6/userdata/mt2/V00-08-06_nojson_bemarsh
-# OUTPATH=/nfs-6/userdata/mt2/V00-08-06_nojson_bemarsh_skim_base_mt2gt200_ZinvV4
-
-#INPATH=/nfs-6/userdata/mt2/2015results_eta2p4_v2
-#OUTPATH=/nfs-6/userdata/mt2/2015results_eta2p4_v2_skim_base_mt2gt200_ZinvV4
-
-#INPATH=/nfs-6/userdata/mt2/V00-08-07_nojson_jec_UP/extmerge
-#OUTPATH=/nfs-6/userdata/mt2/V00-08-07_nojson_jec_UP_skim_base_mt2gt200_ZinvV6
-
-#INPATH=/nfs-6/userdata/mt2/V00-08-07_nojson_fastsim_fixisrweight
-#OUTPATH=/nfs-6/userdata/mt2/V00-08-07_nojson_fastsim_fixisrweight_skim_base_mt2gt200_ZinvV6
-
-#INPATH=/nfs-6/userdata/mt2/V00-08-08_nojson/others
-#OUTPATH=/nfs-6/userdata/mt2/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6/others
-
-#INPATH=/nfs-6/userdata/mt2/V00-08-08_nojson_fastsim
-#OUTPATH=/nfs-6/userdata/mt2/V00-08-08_nojson_fastsim_skim_base_mt2gt200_ZinvV6
-
-#INPATH=/nfs-6/userdata/mt2/V00-08-08_json_271036-278808_NoL1T_20p1fb
-#OUTPATH=/nfs-6/userdata/mt2/V00-08-08_json_271036-278808_NoL1T_20p1fb_skim_base_mt2gt200_ZinvV6
-
-# INPATH=/nfs-6/userdata/mt2/V00-08-09_json_271036-280385_NoL1T_24p6fb
-# OUTPATH=/nfs-6/userdata/mt2/V00-08-09_json_271036-280385_NoL1T_24p6fb_skim_base_mt2gt200_ZinvV6
-
 INPATH=/nfs-6/userdata/mt2/V00-08-09_json_271036-283059_NoL1T_31p24pb
 OUTPATH=/nfs-6/userdata/mt2/V00-08-09_json_271036-283059_NoL1T_31p24pb_skim_base_mt2gt200_ZinvV6
 
@@ -107,12 +49,6 @@ declare -a Samples=(data_Run2016H_MuonEG data_Run2016H_MET data_Run2016H_HTMHT d
 mkdir -p skimLogs_$USER
 
 for SAMPLE in ${Samples[@]}
-  #do root -b -q -l skim_njets30_ht_met_mt2_Zinv.C\(\"$INPATH\",\"$OUTPATH\",\"$SAMPLE\"\) &
-  #do root -b -q -l skim_trig_njets30_ht_met_mt2_Zinv_v3.C\(\"$INPATH\",\"$OUTPATH\",\"$SAMPLE\"\) &
-  #do root -b -q -l skim_njets30_ht_met_mt2_Zinv_v3.C\(\"$INPATH\",\"$OUTPATH\",\"$SAMPLE\"\) &
-#   do nohup root -b -q -l skim_base_mt2_Zinv_v4.C\(\"$INPATH\",\"$OUTPATH\",\"$SAMPLE\"\) >& skimLogs_$USER/log_${SAMPLE}.txt &
-  do nohup root -b -q -l skim_base_mt2_Zinv_v6.C\(\"$INPATH\",\"$OUTPATH\",\"$SAMPLE\"\) >& skimLogs_$USER/log_${SAMPLE}.txt &
-  #do root -b -q -l skim_base_mt2_Zinv_v5.C\(\"$INPATH\",\"$OUTPATH\",\"$SAMPLE\"\) &
-  #do root -b -q -l skim_base_mt2_Zinv_v5_temp.C\(\"$INPATH\",\"$OUTPATH\",\"$SAMPLE\"\) &
+  do nohup root -b -q -l skim_base_mt2_Zinv_v6_JECs.C\(\"$INPATH\",\"$OUTPATH\",\"$SAMPLE\"\) >& skimLogs_$USER/log_${SAMPLE}.txt &
 done
 #wait

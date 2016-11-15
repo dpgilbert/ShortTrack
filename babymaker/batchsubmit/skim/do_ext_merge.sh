@@ -18,6 +18,8 @@ OUTPATH=/nfs-6/userdata/mt2/V00-08-10_JECandRenorm/extmerge
 #declare -a Samples=(  qcd_ht300to500 qcd_ht700to1000 qcd_ht1000to1500 qcd_ht1500to2000 qcd_ht2000toInf )
 declare -a Samples=( zinv_ht100to200 zinv_ht200to400 zinv_ht400to600  zinv_ht600to800 zinv_ht800to1200 zinv_ht_1200to2500 zinv_ht2500toInf)
 
+mkdir -p mergeLogs
+
 for SAMPLE in ${Samples[@]}
   do nohup nice -n 19 root -b -q mergeFixScale1fb.C+\(\"$INPATH\",\"$SAMPLE\",\"$OUTPATH\"\) >& mergeLogs/log_extmerge_$SAMPLE.txt &
 #  do nohup nice -n 19 root -b -q mergeFixScale1fb.C+\(\"$INPATH\",\"$SAMPLE\",\"$OUTPATH\",347700\) >& mergeLogs/log_extmerge_$SAMPLE.txt &
