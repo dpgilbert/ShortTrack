@@ -33,7 +33,7 @@ class SR;
 // turn on to apply json file to data
 bool applyJSON = true;
 
-const float lumi = 12.9;
+const float lumi = 40.;
 
 // input effective prescales for PFHT125, PFHT350, PFHT475
 // 4/fb
@@ -54,8 +54,8 @@ QCDLooper::~QCDLooper(){
 //_______________________________________
 void QCDLooper::SetSignalRegions(){
 
-    string HTnames[5] = {"ht200to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf"};
-    double HTcuts[6] = {200,450,575,1000,1500,-1};
+    string HTnames[5] = {"ht250to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf"};
+    double HTcuts[6] = {250,450,575,1000,1500,-1};
     for(unsigned int i=0; i<5; i++){
         SR sr;
         sr.SetName("rphi_"+HTnames[i]);
@@ -75,13 +75,20 @@ void QCDLooper::SetSignalRegions(){
         outfile_->mkdir(sr.GetName().c_str());
     }
 
-    string NJnames[3] = {"j2to3","j4to6","j7toInf"};
+    string NJnames[6] = {"j2to3","j4to6","j7toInf", "j2to6", "j4toInf", "j2toInf"};
     int NJcuts[4] = {2,4,7,-1};
-    for(unsigned int i=0; i<3; i++){
+    for(unsigned int i=0; i<6; i++){
         SR sr;
         sr.SetName("rb_"+NJnames[i]);
         sr.SetVar("ht",1000,-1); // put cut at ht 1000 to allow use of unprescaled trigger PFHT800
-        sr.SetVar("njets",NJcuts[i],NJcuts[i+1]);
+        if (i < 3)
+          sr.SetVar("njets",NJcuts[i],NJcuts[i+1]);
+        else if (i == 3)
+          sr.SetVar("njets",NJcuts[0],NJcuts[2]);
+        else if (i == 4)
+          sr.SetVar("njets",NJcuts[1],NJcuts[3]);
+        else if (i == 5)
+          sr.SetVar("njets",NJcuts[0],NJcuts[3]);
         sr.SetVar("mt2",100,200);
         sr.SetVar("deltaPhiMin",0,0.3);
         SRVec_rb.push_back(sr);
@@ -343,7 +350,7 @@ double QCDLooper::getTriggerPrescale(std::string dirname) {
     if(!t.isData)
         return 1;
 
-    if(strstr(dirname.c_str(),"ht200to450") != NULL){
+    if(strstr(dirname.c_str(),"ht250to450") != NULL){
         return t.HLT_PFHT125_Prescale==0 ? -1 : eff_prescales[0];
     }
     if(strstr(dirname.c_str(),"ht450to575") != NULL){
