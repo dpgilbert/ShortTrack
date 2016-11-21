@@ -21,6 +21,7 @@ using namespace std;
 
 TFile* f_lostlep = 0;
 TFile* f_zinv = 0;
+TFile* f_zinvDY = 0;
 TFile* f_zgratio = 0;
 TFile* f_purity = 0;
 TFile* f_qcd = 0;
@@ -45,8 +46,11 @@ const bool doDummySignalSyst = false;
 
 const bool subtractSignalContam = false;
 
+const bool doZinvFromDY = true; //if false, will take estimate from GJets
+
 double last_zinv_ratio = 0.5;
 double last_lostlep_transfer = 2.;
+double last_zinvDY_transfer = 2.;
 
 //_______________________________________________________________________________
 void ReplaceString(std::string& subject, const std::string& search, const std::string& replace) {
@@ -79,7 +83,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString fullhistnameScanBtagsfLight  = fullhistname+"_sigscan_btagsf_light_UP";
   TString fullhistnameScanLepeff  = fullhistname+"_sigscan_lepeff_UP";
   TString fullhistnameScanIsr  = fullhistname+"_sigscan_isr_UP";
-  //  TString fullhistnameStat  = fullhistname+"Stat";
+  TString fullhistnameStat  = fullhistname+"Stat";
   TString fullhistnameMCStat  = fullhistname+"MCStat";
   TString fullhistnameCRyield  = fullhistname+"CRyield";
   TString fullhistnameCRyieldDatacard  = fullhistname+"CRyieldDatacard";
@@ -134,6 +138,14 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double n_bkg(0.);
   double n_data(0.);
   int lostlep_lastbin_hybrid(1);
+  double n_zinvDY(0.);
+  double n_zinvDY_cr(0.);
+  double zinvDY_alpha(0.);
+  double zinvDY_alpha_topological(0.);
+  double err_zinvDY_mcstat(0.);
+  double err_zinvDY_purity(0.);
+  bool usingInclusiveTemplates(true);
+  int zinvDY_lastbin_hybrid(1);
 
   double n_sig(0.);
   double n_sig_TR(0.);
@@ -280,7 +292,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     if (verbose) std::cout << "Zero signal, card not printed: " << cardname << std::endl;
     return 0;
   }
- 
+
   // get yields for each sample
   // !!!!! HACK: set zero bins to 0.01 for now to make combine happy
   TH1D* h_lostlep = (TH1D*) f_lostlep->Get(fullhistname);
@@ -337,7 +349,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TH1D* h_lostlep_lastbin_hybrid = (TH1D*) f_lostlep->Get(fullhistnameLastbinHybrid);
   if (h_lostlep_lastbin_hybrid != 0)
     lostlep_lastbin_hybrid = h_lostlep_lastbin_hybrid->GetBinContent(1);
-  
+
   //calculate lostlep_alpha errors
   //lepeff
   double lostlep_alpha_lepeff_ERR = 0;
@@ -414,7 +426,51 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     zinv_purity *= h_zinv_purity->GetBinContent(mt2bin_tmp);
     err_zinv_purity = h_zinv_purity->GetBinError(mt2bin_tmp)/h_zinv_purity->GetBinContent(mt2bin_tmp);
   }
- 
+
+  //-----------------------------------
+  //----- Zinv Estimate using DY ------
+  //-----------------------------------
+  TH1D* h_zinvDY  = (TH1D*) f_zinvDY->Get(dir+"/hybridEstimate"); //the final hybrid estimate
+  TH1D* purityCard = (TH1D*) f_zinvDY->Get(dir+"/purityCard"); //purity histogram
+  TH1D* ratioCard  = (TH1D*) f_zinvDY->Get(dir+"/ratioCard"); //alpha histogram
+  TH1D* h_zinvDY_cryield = (TH1D*) f_zinvDY->Get(dir+"/CRyieldCard"); //CR yield histogram
+  if (h_zinvDY != 0) {
+    n_mt2bins = h_zinvDY->GetNbinsX();
+    n_zinvDY = h_zinvDY->GetBinContent(mt2bin);
+  }
+  //get mcstat from alpha histogram
+  //has additional uncertainties baked in from Zinvmaker
+  if (ratioCard != 0 && ratioCard->GetBinContent(mt2bin) != 0) 
+    err_zinvDY_mcstat = ratioCard->GetBinError(mt2bin)/ratioCard->GetBinContent(mt2bin);
+  if (h_zinvDY_cryield != 0) {
+    n_zinvDY_cr = round(h_zinvDY_cryield->GetBinContent(mt2bin)); 
+    //check if using inclusive templates by looking at content of CRyieldCard
+    //if all bins are not equal, not using inclusive templates
+    int crYieldFirstBin = -1;
+    for (int ibin = 1; ibin <  h_zinvDY_cryield->GetNbinsX(); ibin++) {
+      int thiscrYield = round(h_zinvDY_cryield->GetBinContent(ibin));
+      if (ibin == 1) crYieldFirstBin = round(h_zinvDY_cryield->GetBinContent(ibin));
+      if (crYieldFirstBin != thiscrYield) {
+	usingInclusiveTemplates = false;
+	break;
+      }
+    }
+  }
+  TH1D* h_zinvDY_alpha = (TH1D*) f_zinvDY->Get(dir+"/ratioCard");
+  if (h_zinvDY_alpha != 0) {
+    //multiply in purity histogram to get final alpha
+    if (purityCard != 0) {
+      h_zinvDY_alpha->Multiply(purityCard);
+      err_zinvDY_purity = purityCard->GetBinError(mt2bin)/purityCard->GetBinContent(mt2bin);
+    }
+    zinvDY_alpha = h_zinvDY_alpha->GetBinContent(mt2bin);
+    zinvDY_alpha_topological = h_zinvDY_alpha->Integral(0,-1);
+  }
+  TH1D* h_zinvDY_lastbin_hybrid = (TH1D*) f_zinvDY->Get(fullhistnameLastbinHybrid);
+  if (h_zinvDY_lastbin_hybrid != 0)
+    zinvDY_lastbin_hybrid = h_zinvDY_lastbin_hybrid->GetBinContent(1);
+
+  
   float zllgamma_nj = 1., zllgamma_nb = 1., zllgamma_ht = 1., zllgamma_ht2 = 1., zllgamma_mt2 = 1.;
   TString notFound = "";
   if (fourNuisancesPerBinZGratio) {
@@ -473,7 +529,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     err_qcd_fitsyst = h_qcd_fitsyst->GetBinContent(mt2bin); // multijet only
   }
 
-  n_bkg = n_lostlep+n_zinv+n_qcd;
+  if (doZinvFromDY)  n_bkg = n_lostlep+n_zinvDY+n_qcd;
+  else               n_bkg = n_lostlep+n_zinv+n_qcd;
+
   if (n_bkg < 0.001) n_qcd = 0.01;
 
   if (f_data) {
@@ -486,7 +544,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     // using only MC: take observation == total bkg
     n_data = n_bkg;
   }
-
+  
   int n_syst = 0;
   // ----- lost lepton bkg uncertainties
   double lostlep_shape = 1.0;
@@ -531,17 +589,17 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   // in hybrid method, or normal extrapolation: shape uncertainty only for bins with MT2 extrapolation
   const float last_bin_relerr_lostlep = 0.4;
-  int n_extrap_bins = n_mt2bins - lostlep_lastbin_hybrid;
-  if (n_extrap_bins > 0 && mt2bin >= lostlep_lastbin_hybrid) {
+  int n_extrap_bins_lostlep = n_mt2bins - lostlep_lastbin_hybrid;
+  if (n_extrap_bins_lostlep > 0 && mt2bin >= lostlep_lastbin_hybrid) {
     if (mt2bin == lostlep_lastbin_hybrid && n_lostlep > 0.) {
       // first bin needs to compensate normalization from the rest
       float increment = 0.;
       for (int ibin=lostlep_lastbin_hybrid+1; ibin<=h_lostlep->GetNbinsX(); ibin++) 
-	increment += last_bin_relerr_lostlep / (n_extrap_bins) * (ibin - lostlep_lastbin_hybrid) * h_lostlep->GetBinContent(ibin);
+	increment += last_bin_relerr_lostlep / (n_extrap_bins_lostlep) * (ibin - lostlep_lastbin_hybrid) * h_lostlep->GetBinContent(ibin);
       lostlep_shape = 1. - increment/n_lostlep;
     }
     else
-      lostlep_shape = 1. + last_bin_relerr_lostlep / (n_extrap_bins) * (mt2bin - lostlep_lastbin_hybrid);
+      lostlep_shape = 1. + last_bin_relerr_lostlep / (n_extrap_bins_lostlep) * (mt2bin - lostlep_lastbin_hybrid);
     n_syst++;  // lostlep_shape
   }
 
@@ -552,7 +610,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // ----- zinv bkg uncertainties - depend on signal region, b selection
   TString perChannel(channel.c_str());
   TString perTopoRegion(topologicalR.c_str());
-  
+
+  //zinv estimate from GJ nuisances
   TString name_zinv_crstat     = integratedZinvEstimate ? "zinv_CRstat_"    +perTopoRegion : "zinv_CRstat_"+perChannel    ;
   TString name_zinv_alphaerr   = integratedZinvEstimate ? "zinv_alphaErr_"  +perTopoRegion : "zinv_alphaErr_"+perChannel  ;
   TString name_zinv_purityerr  = integratedZinvEstimate ? "zinv_purity_"    +perTopoRegion : "zinv_purity_"+perChannel    ;
@@ -567,7 +626,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_zinv_doubleRatioOffset = "zinv_doubleRatioOffset";
   TString name_zinv_mcsyst = Form("zinv_MC_%s",channel.c_str());
   TString name_zinv_shape = "zinv_shape_"+perTopoRegion;
- 
+  
   double zinv_alpha = 1.;
   double zinv_alphaerr = 1. + err_zinv_mcstat;
   double zinv_purityerr = 1. + err_zinv_purity;
@@ -577,8 +636,52 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double zinv_zgamma_nj = 1., zinv_zgamma_nb = 1., zinv_zgamma_ht = 1., zinv_zgamma_mt2 = 1.;
   double zinv_mcsyst = -1.;
   double zinv_shape = 1.;
-  
 
+  //zinv Estimate from DY nuisances
+  // nuisances decorrelated across all bins
+  TString name_zinvDY_mcstat      = Form("zinvDY_MCstat_%s"        , channel.c_str());
+  // nuisances decorrelated depending on extrapolation in hybrid method
+  TString name_zinvDY_purity      = "zinvDY_purity_"+perTopoRegion;
+  TString name_zinvDY_shape       = "zinvDY_shape_"+perTopoRegion;
+  TString name_zinvDY_crstat      = "zinvDY_CRstat_"    +perTopoRegion;
+  if (mt2bin < zinvDY_lastbin_hybrid && !usingInclusiveTemplates) {
+    // bin-by-bin is used: no shape uncertainty, decorrelated CR uncertainty
+    name_zinvDY_crstat     = Form("zinvDY_CRstat_%s"  , channel.c_str());
+  }
+  //  double zinvDY_mcsyst = -1.;
+  double zinvDY_shape = 1.;
+  double zinvDY_purity = 1. + err_zinvDY_purity; // transfer factor stat uncertainty
+  double zinvDY_mcstat = 1. + err_zinvDY_mcstat; // transfer factor stat uncertainty
+
+  // note that if n_zinvDY_cr == 0, we will just use zinvDY_alpha (straight from MC) in the datacard
+  // if (n_zinvDY_cr > 0.) {
+  //   if (zinvDY_alpha > 3.) {
+  //     zinvDY_alpha = 3.; // hard bound to avoid statistical fluctuations
+  //     n_zinvDY = n_zinvDY_cr * zinvDY_alpha;
+  //   }
+  // }
+  if (zinvDY_alpha > 0.) last_zinvDY_transfer = zinvDY_alpha; // cache last good alpha value
+  else if (n_zinvDY == 0) zinvDY_alpha = 0;
+  else zinvDY_alpha = last_zinvDY_transfer;   // if alpha is 0: use alpha from previous (MT2) bin
+  n_syst += 2; // zinvDY_crstat, zinvDY_mcstat
+
+  // in hybrid method, or normal extrapolation: shape uncertainty only for bins with MT2 extrapolation
+  const float last_bin_relerr_zinvDY = 0.4;
+  int n_extrap_bins_zinvDY = n_mt2bins - zinvDY_lastbin_hybrid;
+  if (n_extrap_bins_zinvDY > 0 && mt2bin >= zinvDY_lastbin_hybrid) {
+    if (mt2bin == zinvDY_lastbin_hybrid && n_zinvDY > 0.) {
+      // first bin needs to compensate normalization from the rest
+      float increment = 0.;
+      for (int ibin=zinvDY_lastbin_hybrid+1; ibin<=h_zinvDY->GetNbinsX(); ibin++) 
+	increment += last_bin_relerr_zinvDY / (n_extrap_bins_zinvDY) * (ibin - zinvDY_lastbin_hybrid) * h_zinvDY->GetBinContent(ibin);
+      zinvDY_shape = 1. - increment/n_zinvDY;
+    }
+    else
+      zinvDY_shape = 1. + last_bin_relerr_zinvDY / (n_extrap_bins_zinvDY) * (mt2bin - zinvDY_lastbin_hybrid);
+    n_syst++;  // zinvDY_shape
+  }
+
+  
   // 2+b: pure MC estimate (not used when using integrated estimate)
   if ( !integratedZinvEstimate && nbjets_LOW >= 2 ) {
     zinv_mcsyst = 2.;
@@ -692,7 +795,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   ofile <<  Form("bin             %s   %s   %s   %s",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str()) << endl;
   ofile <<  "process          sig       zinv        llep      qcd"                                      << endl; 
   ofile <<  "process           0         1           2         3"                                      << endl;
-  ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig,n_zinv,n_lostlep,n_qcd) << endl;
+  if (doZinvFromDY) ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig,n_zinvDY,n_lostlep,n_qcd) << endl;
+  else ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig,n_zinv,n_lostlep,n_qcd) << endl;
   ofile <<  "------------"                                                                  << endl;
  
   // ---- sig systs
@@ -710,29 +814,38 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   }
 
   // ---- Zinv systs
-  if ( !integratedZinvEstimate && nbjets_LOW >= 2) {
-    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_mcsyst.Data(),zinv_mcsyst)  << endl;
+  if (doZinvFromDY) {
+    ofile <<  Form("%s        gmN %.0f    -   %.5f   -   - ",name_zinvDY_crstat.Data(),n_zinvDY_cr,zinvDY_alpha)  << endl;
+    ofile <<  Form("%s        lnN    -   %.3f   -   - ",name_zinvDY_mcstat.Data(),zinvDY_mcstat)  << endl;
+    ofile <<  Form("%s        lnN    -   %.3f   -   - ",name_zinvDY_purity.Data(),zinvDY_purity)  << endl;
+    if (n_extrap_bins_zinvDY > 0 && mt2bin >= zinvDY_lastbin_hybrid)
+      ofile <<  Form("%s    lnN    -   %.3f   -   - ",name_zinvDY_shape.Data(),zinvDY_shape)  << endl;
   }
   else {
-    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_doubleRatioOffset.Data(),zinv_doubleRatioOffset )  << endl;
-    if (fourNuisancesPerBinZGratio) {
-      ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_ht.Data() ,zinv_zgamma_ht )  << endl;
-      ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nj.Data() ,zinv_zgamma_nj )  << endl;
-      ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nb.Data() ,zinv_zgamma_nb )  << endl;
-      if (!integratedZinvEstimate)
-        ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_mt2.Data(),zinv_zgamma_mt2)  << endl;
+    if ( !integratedZinvEstimate && nbjets_LOW >= 2) {
+      ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_mcsyst.Data(),zinv_mcsyst)  << endl;
     }
     else {
-      ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;     
+      ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_doubleRatioOffset.Data(),zinv_doubleRatioOffset )  << endl;
+      if (fourNuisancesPerBinZGratio) {
+	ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_ht.Data() ,zinv_zgamma_ht )  << endl;
+	ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nj.Data() ,zinv_zgamma_nj )  << endl;
+	ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nb.Data() ,zinv_zgamma_nb )  << endl;
+	if (!integratedZinvEstimate)
+	  ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_mt2.Data(),zinv_zgamma_mt2)  << endl;
+      }
+      else {
+	ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;     
+      }
+      ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_puritysyst.Data(),zinv_puritysyst)  << endl;
+      ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_purityerr.Data(),zinv_purityerr)  << endl;
+      ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr,zinv_alpha)  << endl;
+      if (integratedZinvEstimate && n_mt2bins > 1)
+	ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_shape.Data(),zinv_shape)  << endl;
+      ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_alphaerr.Data(),zinv_alphaerr)  << endl;
     }
-    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_puritysyst.Data(),zinv_puritysyst)  << endl;
-    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_purityerr.Data(),zinv_purityerr)  << endl;
-    ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr,zinv_alpha)  << endl;
-    if (integratedZinvEstimate && n_mt2bins > 1)
-      ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_shape.Data(),zinv_shape)  << endl;
-    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_alphaerr.Data(),zinv_alphaerr)  << endl;
   }
-
+  
   // ---- lostlep systs
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_lepeff.Data(),lostlep_lepeff)  << endl;
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mtcut.Data(),lostlep_mtcut)  << endl;
@@ -742,7 +855,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_renorm.Data(),lostlep_renorm)  << endl;
   ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_lostlep_crstat.Data(),n_lostlep_cr,lostlep_alpha)  << endl;
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mcstat.Data(),lostlep_mcstat)  << endl;
-  if (n_extrap_bins > 0 && mt2bin >= lostlep_lastbin_hybrid)
+  if (n_extrap_bins_lostlep > 0 && mt2bin >= lostlep_lastbin_hybrid)
     ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_shape.Data(),lostlep_shape)  << endl;
   //ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_alphaerr.Data(),lostlep_alphaerr)  << endl;
 
@@ -779,6 +892,7 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
 
   f_lostlep = new TFile(Form("%s/lostlepFromCRs.root",input_dir.c_str()));
   f_zinv = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str()));
+  f_zinvDY = new TFile(Form("%s/zinvFromDY.root",input_dir.c_str()));
   f_zgratio = new TFile(Form("%s/doubleRatio.root",input_dir.c_str())); // zgratio from data
   //  f_zgratio = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str())); // zgratio from MC (with poisson uncertainty)
   f_purity = new TFile(Form("%s/purity.root",input_dir.c_str()));
@@ -786,9 +900,9 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
 
   f_sig = new TFile(Form("%s/%s.root",input_dir.c_str(),signal.c_str()));
 
-  if (doData) f_data = new TFile(Form("%s/data_Run2016.root",input_dir.c_str()));
+  //if (doData) f_data = new TFile(Form("%s/data_Run2016.root",input_dir.c_str()));
 
-  if( f_lostlep->IsZombie() || f_zinv->IsZombie() || f_purity->IsZombie() || f_qcd->IsZombie() || f_sig->IsZombie() || f_zgratio ->IsZombie() || (doData && f_data->IsZombie()) ) {
+  if( f_lostlep->IsZombie() || f_zinv->IsZombie() ||  f_zinvDY->IsZombie() || f_purity->IsZombie() || f_qcd->IsZombie() || f_sig->IsZombie() || f_zgratio ->IsZombie() || (doData && f_data->IsZombie()) ) {
   // Trick to look at estimates even if QCD prediction is broken
   //  if( f_lostlep->IsZombie() || f_zinv->IsZombie() || f_purity->IsZombie() || f_sig->IsZombie() || (doData && f_data->IsZombie()) ) {
     std::cout << "Input file does not exist" << std::endl;
