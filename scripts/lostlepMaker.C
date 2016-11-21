@@ -18,7 +18,7 @@
 using namespace std;
 
 //options
-bool verbose = true;
+bool verbose = false;
 bool doHybrid = true; // hybrid estimate: uses CR MT2 binning until the (MC) integral is less than the threshold below
 float hybrid_nevent_threshold = 50.;
 
