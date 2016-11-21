@@ -528,22 +528,6 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (h_qcd_fitsyst != 0) {
     err_qcd_fitsyst = h_qcd_fitsyst->GetBinContent(mt2bin); // multijet only
   }
-
-  if (doZinvFromDY)  n_bkg = n_lostlep+n_zinvDY+n_qcd;
-  else               n_bkg = n_lostlep+n_zinv+n_qcd;
-
-  if (n_bkg < 0.001) n_qcd = 0.01;
-
-  if (f_data) {
-    // n_data is 0 by default
-    TH1D* h_data = (TH1D*) f_data->Get(fullhistname);
-    if (h_data != 0) {
-      n_data = h_data->GetBinContent(mt2bin);
-    } 
-  } else {
-    // using only MC: take observation == total bkg
-    n_data = n_bkg;
-  }
   
   int n_syst = 0;
   // ----- lost lepton bkg uncertainties
@@ -782,6 +766,22 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     n_sig = n_sig_cor;
   }
 
+  if (doZinvFromDY)  n_bkg = n_lostlep+n_zinvDY+n_qcd;
+  else               n_bkg = n_lostlep+n_zinv+n_qcd;
+  
+  if (n_bkg < 0.001) n_qcd = 0.01;
+
+  if (f_data) {
+    // n_data is 0 by default
+    TH1D* h_data = (TH1D*) f_data->Get(fullhistname);
+    if (h_data != 0) {
+      n_data = h_data->GetBinContent(mt2bin);
+    } 
+  } else {
+    // using only MC: take observation == total bkg
+    n_data = n_bkg;
+  }
+  
   ofstream ofile;
   ofile.open(cardname);
 
