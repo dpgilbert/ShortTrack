@@ -787,7 +787,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	if (!t.Flag_badChargedHadronFilter) continue; 
 	if (verbose) cout<<__LINE__<<endl;
         // met/caloMet filter
-        // if (t.met_pt / t.met_caloPt > 5.0) continue;
+        if (t.met_pt / t.met_caloPt > 5.0) continue;
       }
 
       // random events with met=="inf" that don't get caught by the filters...
