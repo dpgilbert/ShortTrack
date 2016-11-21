@@ -900,7 +900,7 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
 
   f_sig = new TFile(Form("%s/%s.root",input_dir.c_str(),signal.c_str()));
 
-  //if (doData) f_data = new TFile(Form("%s/data_Run2016.root",input_dir.c_str()));
+  if (doData) f_data = new TFile(Form("%s/data_Run2016.root",input_dir.c_str()));
 
   if( f_lostlep->IsZombie() || f_zinv->IsZombie() ||  f_zinvDY->IsZombie() || f_purity->IsZombie() || f_qcd->IsZombie() || f_sig->IsZombie() || f_zgratio ->IsZombie() || (doData && f_data->IsZombie()) ) {
   // Trick to look at estimates even if QCD prediction is broken
