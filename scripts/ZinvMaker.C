@@ -15,8 +15,77 @@
 #include "TKey.h"
 
 using namespace std;
-bool doHybrid = true; // hybrid estimate: uses CR MT2 binning until the (MC) integral is less than the threshold below
-float hybrid_nevent_threshold = 20.;
+bool doHybridSimple = false; // hybrid estimate: uses CR MT2 binning until the (MC) integral is less than the threshold below
+bool doHybridInclusiveTemplate = true; // take kMT2 from inclusive templates
+float hybrid_nevent_threshold = 10.;
+
+int purityRandNorm(TH1D* h_template, TString name , TFile * fData, TFile * fZinv, TFile * fDY) {
+
+  //cout<<"purityRandNorm for template "<<name<<endl;
+  //h_template->Print("all");
+  int lastbin_hybrid = 0;
+  TString name_emu = name + "emu";
+  TString name_zinv = name;
+  name_zinv.ReplaceAll("crdy", "sr");
+  TH1D* hEMU   = (TH1D*) fData->Get(name_emu);    
+  TH1D* hDY    = (TH1D*) fDY->Get(name);    
+  TH1D* hZinv  = (TH1D*) fZinv->Get(name_zinv); 
+  if (h_template == 0) {
+    cout<<"ZinvMaker::purityAndRatio  :  could not finde input template";
+    return lastbin_hybrid;
+  }
+  if (hDY == 0 || hZinv == 0) {
+    cout<<"ZinvMaker::purityAndRatio  :  could not finde DY or Zinv MC histogram";
+    return lastbin_hybrid;
+  }
+  if (hEMU) h_template->Add(hEMU, -1);
+
+  // find the last bin
+  for ( int ibin=1; ibin <= h_template->GetNbinsX(); ++ibin ) {
+    float integratedYield = 0;
+    integratedYield = h_template->Integral(ibin,-1);
+    if (integratedYield < hybrid_nevent_threshold) {
+      if (ibin == 1) lastbin_hybrid = 1;
+      else lastbin_hybrid = ibin-1;
+      break;
+    }
+  }
+
+  // multiply R(Znn/Zll)
+  TH1D* ratio =   (TH1D*) hZinv->Clone("ratio");
+  ratio->Divide(hDY);
+
+  h_template->Multiply(ratio);
+
+  // Get the integrals to normalize the Zinv tails
+  // and the uncertainties on the CR yield (dominated by data stats in the last N bins)
+  double integratedYieldErrZinv = 0;
+  float integratedYieldZinv = hZinv->IntegralAndError(lastbin_hybrid, -1., integratedYieldErrZinv);
+  float relativeErrorZinv = integratedYieldErrZinv/integratedYieldZinv;
+  double integratedYieldErr = 0;
+  float integratedYield = h_template->IntegralAndError(lastbin_hybrid,-1,integratedYieldErr); 
+  float relativeError = integratedYieldErr/integratedYield;
+
+  // Hybridize the template: last N bins have a common stat uncertainty, and they follow the Zinv MC shape
+  for ( int ibin=1; ibin <= hZinv->GetNbinsX(); ++ibin ) {
+
+    if (ibin < lastbin_hybrid) continue;
+
+    float kMT2 = hZinv->GetBinContent(ibin) / integratedYieldZinv;
+    float err = sqrt( relativeError*relativeError + relativeErrorZinv*relativeErrorZinv);
+    h_template->SetBinContent(ibin, integratedYield * kMT2);
+    h_template->SetBinError(ibin, integratedYield * kMT2 * err );
+
+  }
+
+  // Normalize it: we just need a shape after all
+  h_template->Scale(1./h_template->Integral());
+
+  //h_template->Print("all");
+
+
+  return lastbin_hybrid;
+}
 
 //_______________________________________________________________________________
 void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<string> dirs, string output_name, float kFactorGJetForRatio = 1.0 ) {
@@ -207,6 +276,34 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
   TFile * outfile = new TFile(output_name.c_str(),"RECREATE") ; 
   outfile->cd();
   const unsigned int ndirs = dirs.size();
+
+  // Obtain inclusive templates
+  TH1D* h_TemplateVL23J      = (TH1D*) fData->Get("crdybaseVL/h_mt2bins23J"); 
+  int lastbin_VL23J = purityRandNorm(h_TemplateVL23J, "crdybaseVL/h_mt2bins23J", fData, fZinv, fDY);
+  TH1D* h_TemplateVL4J       = (TH1D*) fData->Get("crdybaseVL/h_mt2bins4J");  
+  int lastbin_VL4J  = purityRandNorm(h_TemplateVL4J, "crdybaseVL/h_mt2bins4J", fData, fZinv, fDY);  
+  TH1D* h_TemplateL23J       = (TH1D*) fData->Get("crdybaseL/h_mt2bins23J");
+  int lastbin_L23J  = purityRandNorm(h_TemplateL23J, "crdybaseL/h_mt2bins23J", fData, fZinv, fDY);    
+  TH1D* h_TemplateL46J       = (TH1D*) fData->Get("crdybaseL/h_mt2bins46J");   
+  int lastbin_L46J  = purityRandNorm(h_TemplateL46J, "crdybaseL/h_mt2bins46J", fData, fZinv, fDY); 
+  TH1D* h_TemplateL7J        = (TH1D*) fData->Get("crdybaseL/h_mt2bins7J");    
+  int lastbin_L7J   = purityRandNorm(h_TemplateL7J, "crdybaseL/h_mt2bins7J", fData, fZinv, fDY);
+  TH1D* h_TemplateM23J       = (TH1D*) fData->Get("crdybaseM/h_mt2bins23J");    
+  int lastbin_M23J  = purityRandNorm(h_TemplateM23J, "crdybaseM/h_mt2bins23J", fData, fZinv, fDY);
+  TH1D* h_TemplateM46J       = (TH1D*) fData->Get("crdybaseM/h_mt2bins46J");    
+  int lastbin_M46J  = purityRandNorm(h_TemplateM46J, "crdybaseM/h_mt2bins46J", fData, fZinv, fDY);
+  TH1D* h_TemplateM7J        = (TH1D*) fData->Get("crdybaseM/h_mt2bins7J");    
+  int lastbin_M7J   = purityRandNorm(h_TemplateM7J, "crdybaseM/h_mt2bins7J", fData, fZinv, fDY);
+  TH1D* h_TemplateH23J       = (TH1D*) fData->Get("crdybaseH/h_mt2bins23J");    
+  int lastbin_H23J  = purityRandNorm(h_TemplateH23J, "crdybaseH/h_mt2bins23J", fData, fZinv, fDY);
+  TH1D* h_TemplateH46J       = (TH1D*) fData->Get("crdybaseH/h_mt2bins46J");    
+  int lastbin_H46J  = purityRandNorm(h_TemplateH46J, "crdybaseH/h_mt2bins46J", fData, fZinv, fDY);
+  TH1D* h_TemplateH7J        = (TH1D*) fData->Get("crdybaseH/h_mt2bins7J");    
+  int lastbin_H7J   = purityRandNorm(h_TemplateH7J, "crdybaseH/h_mt2bins7J", fData, fZinv, fDY);
+  TH1D* h_TemplateUH        = (TH1D*) fData->Get("crdybaseL/h_mt2bins");    
+  int lastbin_UH    = purityRandNorm(h_TemplateUH, "crdybaseUH/h_mt2bins", fData, fZinv, fDY);
+
+
   
   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
     TString directory = "sr"+dirs.at(idir);
@@ -244,26 +341,77 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
     cout<<"Looking at histo "<<fullhistname<<endl;
 
     int lastbin_hybrid = 1;
-    if (doHybrid) {
+    int ht_LOW = 0, ht_HI = 0, njets_LOW = 0, njets_HI = 0;
+    TH1D* h_MT2Template = 0;    
+    if (doHybridInclusiveTemplate) {
+      //  Inclusive template: use inclusive template corresponding to this region
+      
+      //Get variable boundaries for signal region.
+      TH1D* h_ht_LOW = (TH1D*) fZinv->Get(directory+"/h_ht_LOW");
+      TH1D* h_ht_HI  = (TH1D*) fZinv->Get(directory+"/h_ht_HI");
+      if (h_ht_LOW) ht_LOW = h_ht_LOW->GetBinContent(1);
+      if (h_ht_HI)  ht_HI = h_ht_HI->GetBinContent(1);
+      TH1D* h_njets_LOW = (TH1D*) fZinv->Get(directory+"/h_njets_LOW");
+      TH1D* h_njets_HI  = (TH1D*) fZinv->Get(directory+"/h_njets_HI");
+      if (h_njets_LOW) njets_LOW = h_njets_LOW->GetBinContent(1);
+      if (h_njets_HI)  njets_HI = h_njets_HI->GetBinContent(1);
+      
+      //Determine which inclusive template to use
+      if (ht_LOW == 200) {
+	if (njets_LOW == 2) { h_MT2Template = h_TemplateVL23J; lastbin_hybrid = lastbin_VL23J; }
+	else if (njets_LOW == 4) { h_MT2Template = h_TemplateVL4J; lastbin_hybrid = lastbin_VL4J; }
+      }
+      else if (ht_LOW == 450) {
+	if (njets_LOW == 2) { h_MT2Template = h_TemplateL23J; lastbin_hybrid = lastbin_L23J; }
+	else if (njets_LOW == 4) { h_MT2Template = h_TemplateL46J; lastbin_hybrid = lastbin_L46J; }
+	else if (njets_LOW == 7) { h_MT2Template = h_TemplateL7J; lastbin_hybrid = lastbin_L7J; }
+      }
+      else if (ht_LOW == 575) {
+	if (njets_LOW == 2) { h_MT2Template = h_TemplateM23J; lastbin_hybrid = lastbin_M23J; }
+	else if (njets_LOW == 4) { h_MT2Template = h_TemplateM46J; lastbin_hybrid = lastbin_M46J; }
+	else if (njets_LOW == 7) { h_MT2Template = h_TemplateM7J; lastbin_hybrid = lastbin_M7J; }
+      }
+      else if (ht_LOW == 1000) {
+	if (njets_LOW == 2) { h_MT2Template = h_TemplateH23J; lastbin_hybrid = lastbin_H23J; }
+	else if (njets_LOW == 4) { h_MT2Template = h_TemplateH46J; lastbin_hybrid = lastbin_H46J; }
+	else if (njets_LOW == 7) { h_MT2Template = h_TemplateH7J; lastbin_hybrid = lastbin_H7J; }
+      }
+      else if (ht_LOW == 1500) { h_MT2Template = h_TemplateUH; lastbin_hybrid = lastbin_UH; }
+      if (h_MT2Template == 0) {
+	cout<< "Can't find template for: HT "<<ht_LOW<<"-"<<ht_HI<<" and NJ "<<njets_LOW<<"-"<<njets_HI<<endl;
+	lastbin_hybrid = 1;
+      }
+      else {
+	cout<< "Using inclusive template based on: HT "<<ht_LOW<<"-"<<ht_HI<<" and NJ "<<njets_LOW<<"-"<<njets_HI<<endl;  
+	h_MT2Template->Print("all");
+      }
+    }
+
+    // If there is no template for this region, go back to the standard hybrid
+    if (doHybridSimple || (doHybridInclusiveTemplate && h_MT2Template == 0)) {
       // hybrid method: use nominal MC CR yield histogram to determine how many MT2 bins to use
       //  by default: use all MT2 bins integrated (no bin-by-bin).
       //  choose the last bin to try to have at least hybrid_nevent_threshold integrated events
+
+      // Calculate last bin on local histogram
       for ( int ibin=1; ibin <= hData->GetNbinsX(); ++ibin ) {
-	float top = 0;
+	float top = 0, integratedYield = 0;
 	if (hDataEM) top = hDataEM->Integral(ibin,-1);
-	if (hData->Integral(ibin,-1) - top < hybrid_nevent_threshold) {
+	integratedYield = hData->Integral(ibin,-1) - top;
+	if (integratedYield < hybrid_nevent_threshold) {
 	  if (ibin == 1) lastbin_hybrid = 1;
 	  else lastbin_hybrid = ibin-1;
-
 	  break;
 	}
       }
-      cout<<"lastbin_hybrid "<<lastbin_hybrid<<endl;
+      cout<<"lastbin_hybrid for doHybridSimple: "<<lastbin_hybrid<<endl;
     }
+    
     
 
     TH1D* ratio = (TH1D*) hZinv->Clone("ratio");
     ratio->Divide(hDY);
+    float ratioValue = hZinv->Integral() / hDY->Integral();
 
     TH1D* CRyield = (TH1D*) hData->Clone("h_mt2binsCRyield");
 
@@ -292,13 +440,14 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
     TH1D* ratioCard  = (TH1D*) ratio->Clone("ratioCard");
     TH1D* purityCard  = (TH1D*) purityData->Clone("purityCard");   
     TH1D* CRyieldCard  = (TH1D*) CRyield->Clone("CRyieldCard");
-
-    if (doHybrid) {
+    
+    if (  doHybridSimple || (doHybridInclusiveTemplate && h_MT2Template==0) ) { 
       // purity needs to be mofidied so the last N bins all describe the purity of the integrated yield
       // ratio needs to be modified so that the last N bins include kMT2
       // CRyield needs to be modified so that the last N bins have the same yield (which is the integral over those N bins)
+      
       for ( int ibin=1; ibin <= hZinv->GetNbinsX(); ++ibin ) {
-
+	
 	if (ibin < lastbin_hybrid) continue;
 	
 	double integratedYieldErr = 0;
@@ -315,12 +464,40 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 	float integratedPurityErr = sqrt(integratedPurity*(1-integratedPurity)/integratedDen);// sqrt(e(1-e)/N)
 	purityCard->SetBinContent(ibin, integratedPurity);
 	purityCard->SetBinError(ibin, integratedPurityErr);
-
-	float integratedZinv = hZinv->Integral(lastbin_hybrid, -1);
-	float kMT2 = hZinv->GetBinContent(ibin) / integratedZinv;
+	
+	float integratedZinv = 1;
+	float kMT2 = 0;
+	integratedZinv = hZinv->Integral(lastbin_hybrid, -1);
+	kMT2 = hZinv->GetBinContent(ibin) / integratedZinv;
 	ratioCard->SetBinContent(ibin, ratioCard->GetBinContent(ibin) * kMT2);
 	ratioCard->SetBinError(ibin, ratioCard->GetBinError(ibin) * kMT2 ); // just rescale the error by the same amount
 
+      }
+    } 
+    else if (doHybridInclusiveTemplate && h_MT2Template!=0) {
+      // For Inclusive template: 
+      // CRyield: this is flat, just the integral
+      // purity: also flat
+      // ratio: this contains the normalized template scaled by the Zinv/DY ratio for this control region
+      
+      double integratedYieldErr = 0;
+      float integratedYield = CRyield->IntegralAndError(0,-1,integratedYieldErr);
+      
+      float integratedDen = integratedYield;
+      float EM = 0;
+      if (hDataEM) EM =  hDataEM->Integral(0, -1);
+      float integratedNum = integratedDen - EM;
+      if (integratedNum < 0) integratedNum = 0;
+      float integratedPurity = integratedNum/integratedDen;
+      float integratedPurityErr = sqrt(integratedPurity*(1-integratedPurity)/integratedDen);// sqrt(e(1-e)/N)
+
+      for ( int ibin=1; ibin <= hZinv->GetNbinsX(); ++ibin ) {
+	CRyieldCard->SetBinContent(ibin, integratedYield);
+	CRyieldCard->SetBinError(ibin,   integratedYieldErr);
+	ratioCard->SetBinContent(ibin, ratioValue * h_MT2Template->GetBinContent(ibin));
+	ratioCard->SetBinError(ibin,   ratioValue * h_MT2Template->GetBinError(ibin));
+	purityCard->SetBinContent(ibin, integratedPurity);
+	purityCard->SetBinError(ibin,   integratedPurityErr);
       }
 
     }
