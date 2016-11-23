@@ -914,9 +914,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         vec_lep_dz.push_back ( cms3.els_dzPV().at(iEl));
         vec_lep_tightId.push_back ( eleTightID(iEl,analysis_t::HAD,4) );
         vec_lep_heepId.push_back ( isHEEPV60(iEl) );
-        vec_lep_highPtFit_pt.push_back ( -1 );
-        vec_lep_highPtFit_eta.push_back ( -1 );
-        vec_lep_highPtFit_phi.push_back ( -1 );
+        vec_lep_highPtFit_pt.push_back ( -1. );
+        vec_lep_highPtFit_eta.push_back ( -1. );
+        vec_lep_highPtFit_phi.push_back ( -1. );
         vec_lep_relIso03.push_back (  eleRelIso03(iEl,analysis_t::HAD));
         vec_lep_relIso04.push_back ( 0);
         vec_lep_miniRelIso.push_back ( elMiniRelIsoCMS3_EA(iEl,1) );
@@ -967,6 +967,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
       if (verbose) cout << "before muons" << endl;
 
+      // check CMS3 version to see if all muon branches are present
+      bool do_highpt_muon_id = false;
+      TString cms3_version = cms3.evt_CMS3tag().at(0);
+      // convert last two digits of version number to int
+      int small_version = TString(cms3_version(cms3_version.Length()-2,cms3_version.Length())).Atoi();
+      if (cms3_version.Contains("V08-00") && small_version <= 12) do_highpt_muon_id = false;
+      else do_highpt_muon_id = true;
+      
       //MUONS
       nMuons10 = 0;
       for(unsigned int iMu = 0; iMu < cms3.mus_p4().size(); iMu++){
@@ -986,10 +994,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         vec_lep_dxy.push_back ( cms3.mus_dxyPV().at(iMu)); // this uses the silicon track. should we use best track instead?
         vec_lep_dz.push_back ( cms3.mus_dzPV().at(iMu)); // this uses the silicon track. should we use best track instead?
         vec_lep_tightId.push_back ( muTightID(iMu,analysis_t::HAD,4) );
-        vec_lep_heepId.push_back ( isHighPtMuonPOG(iMu) );
-        vec_lep_highPtFit_pt.push_back ( cms3.mus_bfit_p4().at(iMu).pt());
-        vec_lep_highPtFit_eta.push_back ( cms3.mus_bfit_p4().at(iMu).eta());
-        vec_lep_highPtFit_phi.push_back ( cms3.mus_bfit_p4().at(iMu).phi());
+	if (do_highpt_muon_id) {
+	  vec_lep_heepId.push_back ( isHighPtMuonPOG(iMu) );
+	  vec_lep_highPtFit_pt.push_back ( cms3.mus_bfit_p4().at(iMu).pt());
+	  vec_lep_highPtFit_eta.push_back ( cms3.mus_bfit_p4().at(iMu).eta());
+	  vec_lep_highPtFit_phi.push_back ( cms3.mus_bfit_p4().at(iMu).phi());
+	} else {
+	  vec_lep_heepId.push_back ( -1 );
+	  vec_lep_highPtFit_pt.push_back ( -1. );
+	  vec_lep_highPtFit_eta.push_back ( -1. );
+	  vec_lep_highPtFit_phi.push_back ( -1. );
+	}
         vec_lep_relIso03.push_back ( muRelIso03(iMu,analysis_t::HAD) );
         vec_lep_relIso04.push_back ( muRelIso04(iMu,analysis_t::HAD) );
         vec_lep_miniRelIso.push_back ( muMiniRelIsoCMS3_EA(iMu,1) );
