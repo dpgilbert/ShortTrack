@@ -1149,7 +1149,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	     && (t.zll_pt > 180 ) 
 	     && t.lep_pt[0] > 25 && t.lep_pt[1] > 20
 	     // && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10)// OLDTRIGS
-	     && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso) //NEWTRIGS
+	     // && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso) //NEWTRIGS
+	     && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso || t.HLT_DoubleEl33) // TRIGS for Moriond 2017
              ) {
 	  // no additional explicit lepton veto
 	  // i.e. implicitly allow 3rd PF lepton or hadron
