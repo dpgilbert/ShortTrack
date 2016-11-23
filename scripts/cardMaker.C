@@ -706,7 +706,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     }
     n_zinv = n_zinv_cr * zinv_alpha; // don't use Zinv MC as central value any more!
   }
- 
+
+  
   // ----- qcd bkg uncertainties from data driven rphi method (or monojet method)
   double qcd_crstat = qcd_alpha; // transfer factor
   double qcd_alphaerr = 1. + (err_qcd_alpha / qcd_alpha); // for 1j, 50%.  For multijet, not used
@@ -781,7 +782,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     // using only MC: take observation == total bkg
     n_data = n_bkg;
   }
-  
+ 
   ofstream ofile;
   ofile.open(cardname);
 

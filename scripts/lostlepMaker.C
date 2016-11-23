@@ -19,8 +19,8 @@ using namespace std;
 
 //options
 bool verbose = false;
-bool doHybrid = true; // hybrid estimate: uses CR MT2 binning until the (MC) integral is less than the threshold below
-float hybrid_nevent_threshold = 50.;
+bool doHybrid = true; // hybrid estimate: uses CR MT2 binning until the data CR integral is less than the threshold below
+float hybrid_nevent_threshold = 10.;
 
 const int n_htbins = 5;
 const float htbins[n_htbins+1] = {200, 450., 575., 1000., 1500., 3000.};
@@ -141,16 +141,18 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
 
     int lastbin_hybrid = 1; // hybrid: will integrate all MT2 bins INCLUDING this one
     // check that histograms exist
-    if (!histMapCR["h_lostlepMC_cr"]) {
-      cout << "couldn't find lostlep MC CR hist: " << fullhistnameSL << endl;
+    TH1D* h_data_cr = (TH1D*) f_data->Get(fullhistnameSL);
+    if (!histMapCR["h_lostlepMC_cr"] || !h_data_cr) {
+      if (!histMapCR["h_lostlepMC_cr"]) cout << "couldn't find lostlep MC CR hist: " << fullhistnameSL << endl;
+      if (!h_data_cr) cout << "couldn't find lostlep data CR hist: " << fullhistnameSL << endl;
     } else {
 
       if (doHybrid) {
-	// hybrid method: use nominal MC CR yield histogram to determine how many MT2 bins to use
+	// hybrid method: use data CR yield histogram to determine how many MT2 bins to use
 	//  by default: use all MT2 bins integrated (no bin-by-bin).
 	//  start from the last bin and add bins at lower MT2 until we get above the hybrid_nevent_threshold
-	for ( int ibin = histMapCR["h_lostlepMC_cr"]->GetNbinsX()+1; ibin >= 1; --ibin ) {
-	  if (histMapCR["h_lostlepMC_cr"]->Integral(ibin,-1) < hybrid_nevent_threshold) continue;
+	for ( int ibin = h_data_cr->GetNbinsX()+1; ibin >= 1; --ibin ) {
+	  if (h_data_cr->Integral(ibin,-1) < hybrid_nevent_threshold) continue;
 	  lastbin_hybrid = ibin;
 	  break;
 	}
@@ -194,7 +196,6 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     double data_cr_totalyield = 0;
     TH1D* h_lostlepDD_cr = 0;
     TH1D* h_lostlepDD_cr_datacard = 0;
-    TH1D* h_data_cr = (TH1D*) f_data->Get(fullhistnameSL);
     if (h_data_cr) {
       h_lostlepDD_cr = (TH1D*) h_data_cr->Clone("h_mt2binsCRyield"); // actual number of CR events in each MT2 bin
       h_lostlepDD_cr_datacard = (TH1D*) h_data_cr->Clone("h_mt2binsCRyieldDatacard"); // CR event yields, integrated above some MT2 bin

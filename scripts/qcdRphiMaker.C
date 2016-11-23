@@ -110,9 +110,9 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
     ReplaceString(bjet_str, "-1", "Inf");
 
     std::string channel = ht_str + "_" + jet_str + "_" + bjet_str;
-    std::string channel_njonly = std::string("HT200toInf_") + jet_str + "_b0toInf";
+    std::string channel_njonly = std::string("HT250toInf_") + jet_str + "_b0toInf";
     // special case for j2to6_b3toInf: use j4to6
-    if (nbjets_LOW == 3 && njets_LOW == 2) channel_njonly = "HT200toInf_j4to6_b0toInf";
+    if (nbjets_LOW == 3 && njets_LOW == 2) channel_njonly = "HT250toInf_j4to6_b0toInf";
     std::string channel_htonly = ht_str + "_j2toInf_b0toInf";
 
     if (verbose) std::cout << "channel is: " << channel << std::endl;
