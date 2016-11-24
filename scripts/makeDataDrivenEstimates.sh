@@ -35,27 +35,27 @@ fi
 
 cd $INDIR
 
-echo "hadd -f data_Run2016.root data_Run2016B.root data_Run2016C.root data_Run2016D.root"
-hadd -f data_Run2016.root data_Run2016B.root data_Run2016C.root data_Run2016D.root > dataDrivenEstimates.log
+echo "hadd -f data_Run2016.root data_Run2016B.root data_Run2016C.root data_Run2016D.root data_Run2016E.root data_Run2016F.root data_Run2016G.root data_Run2016H.root"
+hadd -f data_Run2016.root data_Run2016B.root data_Run2016C.root data_Run2016D.root data_Run2016E.root data_Run2016F.root data_Run2016G.root data_Run2016H.root > dataDrivenEstimates.log
 
 ## (temporarily replaced tth with ttg, because of sample availability)
 echo "hadd -f top.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.root"
 hadd -f top.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.root >> dataDrivenEstimates.log
 
 ## make "lostlep" from sum of MC lostlep backgrounds (except QCD, to avoid spikes)
-echo "hadd -f lostlep.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.root wjets_ht.root" ## (temporarily replaced tth with ttg, because of sample availability)
-hadd -f lostlep.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.root wjets_ht.root >> dataDrivenEstimates.log
+echo "hadd -f lostlep.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.root wjets_ht100to200.root wjets_ht200to400.root wjets_ht400to600.root wjets_ht600to800.root wjets_ht800to1200.root wjets_ht1200to2500.root wjets_ht2500toInf.root" ## (temporarily replaced tth with ttg, because of sample availability)
+hadd -f lostlep.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.root wjets_ht100to200.root wjets_ht200to400.root wjets_ht400to600.root wjets_ht600to800.root wjets_ht800to1200.root wjets_ht1200to2500.root wjets_ht2500toInf.root >> dataDrivenEstimates.log
 cd $THISDIR
 
 #this script scales the HI and LOW boundary histograms by 1/numSamples since we don't want these hadd'ed
-echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/data_Run2016.root,3)"
-root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/data_Run2016.root\",3)" >> dataDrivenEstimates.log
+echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/data_Run2016.root,7)"
+root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/data_Run2016.root\",7)" >> dataDrivenEstimates.log
 
 echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/top.root,6)"
 root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/top.root\",6)" >> dataDrivenEstimates.log
 
-echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/lostlep.root,7)"
-root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/lostlep.root\",7)" >> dataDrivenEstimates.log
+echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/lostlep.root,14)"
+root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/lostlep.root\",14)" >> dataDrivenEstimates.log
 
 # make the data driven background files
 echo "root -b -q lostlepMaker.C+(${INDIR},${LOSTLEPFILE})"
