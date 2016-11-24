@@ -543,9 +543,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
-  // const char* json_file = "../babymaker/jsons/Cert_271036-278808_13TeV_PromptReco_Collisions16_JSON_NoL1T_snt.txt";
-  // to reproduce ICHEP:
-  const char* json_file = "../babymaker/jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  // full 2016 dataset json, 36.26/fb:
+  const char* json_file = "../babymaker/jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
+  // to reproduce ICHEP, 12.9/fb:
+  //  const char* json_file = "../babymaker/jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -846,17 +847,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      //      const float lumi = 3;
-      //      const float lumi = 0.042;
-      //      const float lumi = 0.209;
-      //      const float lumi = 0.579;
-      //      const float lumi = 1.264;
-      //      const float lumi = 2.11;
-      //const float lumi = 2.155;
-      // const float lumi = 12.9; //ICHEP
-      const float lumi = 40.;
-      // const float lumi = 20.1;
-      
+      // const float lumi = 12.9; //ICHEP 2016
+      const float lumi = 36.26; // full 2016
     
       evtweight_ = 1.;
       if (verbose) cout<<__LINE__<<endl;
