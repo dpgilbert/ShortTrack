@@ -79,15 +79,21 @@ Delete the files reported as bad, then run checkAllConfig to see which output fi
 ```
 where <CONFIGDIR> is something like `configs_V00-00-01/`
 
-This creates resubmit configs for just the missing jobs, with names `*_resubmit.cmd`, in <CONFIGDIR>.
+This creates resubmit configs for just the missing jobs, with names `*_resubmit.cmd`, in a new directory <CONFIGDIR>_resubmit.
 To create the resubmit file for a single config:
 ``` bash
-./resubmitConfig.sh <CMDFILE>
+python checkConfig.py <CMDFILE>
 ```
 Then submit the jobs again as before:
 ``` bash
 condor_submit <NEWCMDFILE>
 ```
+
+Using a bash for loop can be useful here:
+``` bash
+for i in `/bin/ls <CONFIGDIR>_resubmit`; do condor_submit $i; done
+```
+
 
 You may have to iterate this process to get all jobs to converge.
 
