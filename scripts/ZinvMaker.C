@@ -209,7 +209,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
         ratioInt->SetBinContent(ibin, ratioInt->GetBinContent(ibin)/nGamma);
         float errOld = ratioInt->GetBinError(ibin)/nGamma;
         float errNew = (nGammaErr/nGamma) * ratioInt->GetBinContent(ibin);
-        cout<<nGamma<<" "<<nGammaErr<<" "<<errOld<<" "<<errNew<<endl;
+        //cout<<nGamma<<" "<<nGammaErr<<" "<<errOld<<" "<<errNew<<endl;
         ratioInt->SetBinError(ibin, sqrt( errOld*errOld + errNew*errNew ) );
       }
       else {
@@ -217,7 +217,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
         ratioInt->SetBinError(ibin, 0);
       }
     }
-    ratioInt->Print("all");
+    //ratioInt->Print("all");
 
     // MCStat: use relative bin error from ratio hist, normalized to Zinv MC prediction
     TH1D* MCStat = (TH1D*) hZinv->Clone("h_mt2binsMCStat");
@@ -356,23 +356,23 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       if (h_njets_LOW) njets_LOW = h_njets_LOW->GetBinContent(1);
       if (h_njets_HI)  njets_HI = h_njets_HI->GetBinContent(1);
       
-      //Determine which inclusive template to use
+      //Determine which inclusive template to use. If none works, this reverts to HybridSimple, taking template from its own TopoRegion 
       if (ht_LOW == 200) {
 	if (njets_LOW == 2) { h_MT2Template = h_TemplateVL23J; lastbin_hybrid = lastbin_VL23J; }
 	else if (njets_LOW == 4) { h_MT2Template = h_TemplateVL4J; lastbin_hybrid = lastbin_VL4J; }
       }
       else if (ht_LOW == 450) {
-	if (njets_LOW == 2) { h_MT2Template = h_TemplateL23J; lastbin_hybrid = lastbin_L23J; }
+	if (njets_LOW == 2 && njets_HI!=7) { h_MT2Template = h_TemplateL23J; lastbin_hybrid = lastbin_L23J; }
 	else if (njets_LOW == 4) { h_MT2Template = h_TemplateL46J; lastbin_hybrid = lastbin_L46J; }
 	else if (njets_LOW == 7) { h_MT2Template = h_TemplateL7J; lastbin_hybrid = lastbin_L7J; }
       }
       else if (ht_LOW == 575) {
-	if (njets_LOW == 2) { h_MT2Template = h_TemplateM23J; lastbin_hybrid = lastbin_M23J; }
+	if (njets_LOW == 2 && njets_HI!=7) { h_MT2Template = h_TemplateM23J; lastbin_hybrid = lastbin_M23J; }
 	else if (njets_LOW == 4) { h_MT2Template = h_TemplateM46J; lastbin_hybrid = lastbin_M46J; }
 	else if (njets_LOW == 7) { h_MT2Template = h_TemplateM7J; lastbin_hybrid = lastbin_M7J; }
       }
       else if (ht_LOW == 1000) {
-	if (njets_LOW == 2) { h_MT2Template = h_TemplateH23J; lastbin_hybrid = lastbin_H23J; }
+	if (njets_LOW == 2 && njets_HI!=7) { h_MT2Template = h_TemplateH23J; lastbin_hybrid = lastbin_H23J; }
 	else if (njets_LOW == 4) { h_MT2Template = h_TemplateH46J; lastbin_hybrid = lastbin_H46J; }
 	else if (njets_LOW == 7) { h_MT2Template = h_TemplateH7J; lastbin_hybrid = lastbin_H7J; }
       }
@@ -383,7 +383,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       }
       else {
 	cout<< "Using inclusive template based on: HT "<<ht_LOW<<"-"<<ht_HI<<" and NJ "<<njets_LOW<<"-"<<njets_HI<<endl;  
-	h_MT2Template->Print("all");
+	//h_MT2Template->Print("all");
       }
     }
 
@@ -445,7 +445,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       // purity needs to be mofidied so the last N bins all describe the purity of the integrated yield
       // ratio needs to be modified so that the last N bins include kMT2
       // CRyield needs to be modified so that the last N bins have the same yield (which is the integral over those N bins)
-      
+
       for ( int ibin=1; ibin <= hZinv->GetNbinsX(); ++ibin ) {
 	
 	if (ibin < lastbin_hybrid) continue;
@@ -480,6 +480,11 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       // purity: also flat
       // ratio: this contains the normalized template scaled by the Zinv/DY ratio for this control region
       
+      // MT2template needs to be rebinned for this topological region Rebin
+      double *TopoRegionBins = hZinv->GetXaxis()->GetXbins()->fArray;
+      int nTopoRegionBins    = hZinv->GetXaxis()->GetNbins();
+      TH1D* h_MT2TemplateRebin = (TH1D*) h_MT2Template->Rebin(nTopoRegionBins, "h_MT2TemplateRebin", TopoRegionBins);
+
       double integratedYieldErr = 0;
       float integratedYield = CRyield->IntegralAndError(0,-1,integratedYieldErr);
       
