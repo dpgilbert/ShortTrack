@@ -111,6 +111,8 @@ public :
    Float_t         met_caloPhi;
    Float_t         met_genPt;
    Float_t         met_genPhi;
+   Float_t         met_miniaodPt;
+   Float_t         met_miniaodPhi;
    Int_t           Flag_EcalDeadCellTriggerPrimitiveFilter;
    Int_t           Flag_trkPOG_manystripclus53X;
    Int_t           Flag_ecalLaserCorrFilter;
@@ -483,6 +485,8 @@ public :
    TBranch        *b_met_caloPhi;   //!
    TBranch        *b_met_genPt;   //!
    TBranch        *b_met_genPhi;   //!
+   TBranch        *b_met_miniaodPt;   //!
+   TBranch        *b_met_miniaodPhi;   //!
    TBranch        *b_Flag_EcalDeadCellTriggerPrimitiveFilter;   //!
    TBranch        *b_Flag_trkPOG_manystripclus53X;   //!
    TBranch        *b_Flag_ecalLaserCorrFilter;   //!
@@ -914,6 +918,8 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("met_caloPhi", &met_caloPhi, &b_met_caloPhi);
    fChain->SetBranchAddress("met_genPt", &met_genPt, &b_met_genPt);
    fChain->SetBranchAddress("met_genPhi", &met_genPhi, &b_met_genPhi);
+   fChain->SetBranchAddress("met_miniaodPt", &met_miniaodPt, &b_met_miniaodPt);
+   fChain->SetBranchAddress("met_miniaodPhi", &met_miniaodPhi, &b_met_miniaodPhi);
    fChain->SetBranchAddress("Flag_EcalDeadCellTriggerPrimitiveFilter", &Flag_EcalDeadCellTriggerPrimitiveFilter, &b_Flag_EcalDeadCellTriggerPrimitiveFilter);
    fChain->SetBranchAddress("Flag_trkPOG_manystripclus53X", &Flag_trkPOG_manystripclus53X, &b_Flag_trkPOG_manystripclus53X);
    fChain->SetBranchAddress("Flag_ecalLaserCorrFilter", &Flag_ecalLaserCorrFilter, &b_Flag_ecalLaserCorrFilter);
