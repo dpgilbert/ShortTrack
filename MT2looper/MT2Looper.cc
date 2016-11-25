@@ -791,18 +791,26 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         if (t.met_pt / t.met_caloPt > 5.0) continue;
       }
 
-      // random events with met=="inf" that don't get caught by the filters...
-      if(isinf(t.met_pt)){
-          cout << "WARNING: bad event with infinite MET! " << t.run << ":" << t.lumi << ":" << t.evt << ", met=" << t.met_pt << ", ht=" << t.ht << endl;
+      // random events with ht or met=="inf" or "nan" that don't get caught by the filters...
+      if(isinf(t.met_pt) || isnan(t.met_pt) || isinf(t.ht) || isnan(t.ht)){
+          cout << "WARNING: bad event with infinite MET/HT! " << t.run << ":" << t.lumi << ":" << t.evt
+	       << ", met=" << t.met_pt << ", ht=" << t.ht << endl;
           continue;
       }
 
-      // txt MET filters (data only)
-      if (t.isData && metFilterTxt.eventFails(t.run, t.lumi, t.evt)) {
-	//cout<<"Found bad event in data: "<<t.run<<", "<<t.lumi<<", "<<t.evt<<endl;
-	continue;
+      // catch events with unphysical jet pt
+      if(t.jet_pt[0] > 13000.){
+	cout << "WARNING: bad event with unphysical jet pt! " << t.run << ":" << t.lumi << ":" << t.evt
+	     << ", met=" << t.met_pt << ", ht=" << t.ht << ", jet_pt=" << t.jet_pt[0] << endl;
+          continue;
       }
-      if (verbose) cout<<__LINE__<<endl;
+
+      // // txt MET filters (data only)
+      // if (t.isData && metFilterTxt.eventFails(t.run, t.lumi, t.evt)) {
+      // 	//cout<<"Found bad event in data: "<<t.run<<", "<<t.lumi<<", "<<t.evt<<endl;
+      // 	continue;
+      // }
+      // if (verbose) cout<<__LINE__<<endl;
 
 
       // flag signal samples
