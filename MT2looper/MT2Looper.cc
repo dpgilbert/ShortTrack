@@ -253,8 +253,8 @@ void MT2Looper::SetSignalRegions(){
   SRBase.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
   SRBase.SetVarCRSL("nlep", 1, 2);
   SRBase.SetVarCRSL("passesHtMet", 1, 2);
-  float SRBase_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500}; 
-  SRBase.SetMT2Bins(7, SRBase_mt2bins);
+  float SRBase_mt2bins[10] = {200, 300, 400, 500, 600, 800, 1000, 1200, 1400, 1800}; 
+  SRBase.SetMT2Bins(9, SRBase_mt2bins);
 
   std::vector<std::string> vars = SRBase.GetListOfVariables();
   TDirectory * dir = (TDirectory*)outfile_->Get((SRBase.GetName()).c_str());
@@ -485,8 +485,8 @@ void MT2Looper::SetSignalRegions(){
   
   // inclusive in njets (mono+multi jet regions)
   SRBaseIncl.SetName("srbaseIncl");
-  float SRBaseIncl_mt2bins[9] = {200, 250, 300, 400, 500, 600, 800, 1000, 1500};
-  SRBaseIncl.SetMT2Bins(8, SRBaseIncl_mt2bins);
+  float SRBaseIncl_mt2bins[11] = {200, 250, 300, 400, 500, 600, 800, 1000, 1200, 1400, 1800};
+  SRBaseIncl.SetMT2Bins(10, SRBaseIncl_mt2bins);
 
   dir = (TDirectory*)outfile_->Get((SRBaseIncl.GetName()).c_str());
   if (dir == 0) {
@@ -680,8 +680,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   SetSignalRegions();
 
   SRNoCut.SetName("nocut");
-  float SRNoCut_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500}; 
-  SRNoCut.SetMT2Bins(7, SRNoCut_mt2bins);
+  float SRNoCut_mt2bins[10] = {200, 300, 400, 500, 600, 800, 1000, 1200, 1400, 1800};
+  SRNoCut.SetMT2Bins(9, SRNoCut_mt2bins);
 
   // These will be set to true if any SL GJ or DY control region plots are produced
   bool saveGJplots = false;
