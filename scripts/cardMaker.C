@@ -48,6 +48,10 @@ const bool subtractSignalContam = false;
 
 const bool doZinvFromDY = true; //if false, will take estimate from GJets
 
+const bool correlateLostlepNuisances = true; //if false, new lostlep nuisances will be decorrelated in all regions
+
+const bool doSimpleLostlepNuisances = false; //if true, reverts to ICHEP lostlep nuisances (only alpha & lepeff)
+
 double last_zinv_ratio = 0.5;
 double last_lostlep_transfer = 2.;
 double last_zinvDY_transfer = 2.;
@@ -539,10 +543,12 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double lostlep_btageff = 1.0 + lostlep_alpha_btagsf_ERR; // transfer factor uncertainty from btag efficiency
   double lostlep_jec = 1.0 + 0.05; // transfer factor uncertainty from JEC unc
   double lostlep_renorm = 1.0 + lostlep_alpha_renorm_ERR; // transfer factor uncertainty from renorm & factorization scales
+  double lostlep_alphaerr = 1. + 0.10; // only used if doSimpleLostlepNuisances
  
   // nuisances decorrelated depending on extrapolation in hybrid method
   TString name_lostlep_shape      = Form("llep_shape_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   TString name_lostlep_crstat     = Form("llep_CRstat_%s_%s_%s"  , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
+  TString name_lostlep_alphaerr = Form("llep_alpha_%s_%s_%s"     , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str()); // only used if doSimpleLostlepNuisances
   if (mt2bin < lostlep_lastbin_hybrid) {
     // bin-by-bin is used: no shape uncertainty, decorrelated CR uncertainty
     name_lostlep_crstat     = Form("llep_CRstat_%s"  , channel.c_str());
@@ -558,7 +564,22 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_lostlep_jec        = Form("llep_jec");
   TString name_lostlep_renorm     = Form("llep_renorm");
   TString name_lostlep_mtcut      = Form("llep_mtcut");
+  if (correlateLostlepNuisances) {
+    name_lostlep_lepeff     = Form("llep_lepeff_%s"      , channel.c_str());
+    name_lostlep_taueff     = Form("llep_taueff_%s"      , channel.c_str());
+    name_lostlep_btageff    = Form("llep_btageff_%s"     , channel.c_str());
+    name_lostlep_jec        = Form("llep_jec_%s"         , channel.c_str());
+    name_lostlep_renorm     = Form("llep_renorm_%s"      , channel.c_str());
+    name_lostlep_mtcut      = Form("llep_mtcut_%s"       , channel.c_str());
+  }
 
+  if (doSimpleLostlepNuisances) {
+    //overwrite lepeff nuisance to old version
+    TString name_lostlep_lepeff = Form("llep_lepeff_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
+    lostlep_lepeff = 1.0 + 0.12;
+    if ( njets_LOW == 7 && nbjets_LOW >= 3) lostlep_alphaerr = 1.18; // due to btag eff
+  }
+  
   // note that if n_lostlep_cr == 0, we will just use lostlep_alpha (straight from MC) in the datacard
   if (n_lostlep_cr > 0.) {
     if (lostlep_alpha > 3.) {
@@ -569,7 +590,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (lostlep_alpha > 0.) last_lostlep_transfer = lostlep_alpha; // cache last good alpha value
   else if (n_lostlep == 0) lostlep_alpha = 0;
   else lostlep_alpha = last_lostlep_transfer;   // if alpha is 0: use alpha from previous (MT2) bin
-  n_syst += 8; // lostlep_crstat, lostlep_mcstat, lostlep_lepeff, lostlep_mtcut, lostlep_taueff, lostlep_btageff, lostlep_jec, lostlep_renorm
+  if (doSimpleLostlepNuisances) n_syst += 4; // lostlep_crstat, lostlep_mcstat, lostlep_alphaerr, lostlep_lepeff
+  else n_syst += 8; // lostlep_crstat, lostlep_mcstat, lostlep_lepeff, lostlep_mtcut, lostlep_taueff, lostlep_btageff, lostlep_jec, lostlep_renorm
 
   // in hybrid method, or normal extrapolation: shape uncertainty only for bins with MT2 extrapolation
   const float last_bin_relerr_lostlep = 0.4;
@@ -848,12 +870,18 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   }
   
   // ---- lostlep systs
-  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_lepeff.Data(),lostlep_lepeff)  << endl;
-  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mtcut.Data(),lostlep_mtcut)  << endl;
-  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_taueff.Data(),lostlep_taueff)  << endl;
-  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_btageff.Data(),lostlep_btageff)  << endl;
-  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_jec.Data(),lostlep_jec)  << endl;
-  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_renorm.Data(),lostlep_renorm)  << endl;
+  if (doSimpleLostlepNuisances) {
+    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_lepeff.Data(),lostlep_lepeff)  << endl;
+    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_alphaerr.Data(),lostlep_alphaerr)  << endl;
+  }
+  else {
+    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_lepeff.Data(),lostlep_lepeff)  << endl;
+    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mtcut.Data(),lostlep_mtcut)  << endl;
+    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_taueff.Data(),lostlep_taueff)  << endl;
+    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_btageff.Data(),lostlep_btageff)  << endl;
+    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_jec.Data(),lostlep_jec)  << endl;
+    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_renorm.Data(),lostlep_renorm)  << endl;
+  }
   ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_lostlep_crstat.Data(),n_lostlep_cr,lostlep_alpha)  << endl;
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mcstat.Data(),lostlep_mcstat)  << endl;
   if (n_extrap_bins_lostlep > 0 && mt2bin >= lostlep_lastbin_hybrid)
