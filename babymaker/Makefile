@@ -42,7 +42,7 @@ CORESOURCES = $(wildcard ../CORE/*.cc) $(wildcard ../CORE/Tools/*.cc) $(wildcard
 COREOBJECTS = $(CORESOURCES:.cc=.o) 
 CORELIB = libBabymakerCORE.so
 
-MT2CORESOURCES = $(wildcard ../MT2CORE/*.cc) $(wildcard ../MT2CORE/Plotting/*.cc)
+MT2CORESOURCES = $(wildcard ../MT2CORE/*.cc) $(wildcard ../MT2CORE/Plotting/*.cc) $(wildcard ../MT2CORE/RebalSmear/*.cc)
 MT2COREOBJECTS = $(MT2CORESOURCES:.cc=.o) 
 MT2CORELIB = libBabymakerMT2CORE.so
 

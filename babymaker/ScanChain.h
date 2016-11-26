@@ -15,10 +15,14 @@
 #include "Math/LorentzVector.h"
 #include "Math/GenVector/LorentzVector.h"
 
+// TODO: add this file and get everything working
+#include "../MT2CORE/RebalSmear/JRTreader.h"
+
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
 
 class BTagCalibration;
 class BTagCalibrationReader;
+
 
 class babyMaker {
 
@@ -38,6 +42,9 @@ class babyMaker {
   void CloseBabyNtuple();
 
   void SetRecomputeRawPFMET(bool flag) {doRecomputeRawPFMET_ = flag;};
+
+  static void minuitFunction(int& nDim, double* gout, double& result, double par[], int flg);
+  JRTreader rebal_reader;
 
  private:
 
@@ -74,6 +81,7 @@ class babyMaker {
   TH2D* h_btag_eff_c_fastsim;
   TH2D* h_btag_eff_udsg_fastsim;
   
+
   //baby ntuple variables
 
   Int_t           run;
@@ -515,7 +523,20 @@ class babyMaker {
   static const int max_nLHEweight = 500;
   Int_t           nLHEweight;
   Float_t         LHEweight_wgt[max_nLHEweight];   //[nmcweights]
-  
+
+//----- REBALANCING VARIABLES
+  Int_t           rebal_status;
+  Int_t           nRebalJets;
+  Int_t           rebal_useJet[max_njet];
+  Float_t         rebal_jetpt[max_njet];
+  Float_t         rebal_jeteta[max_njet];
+  Float_t         rebal_jetphi[max_njet];
+  Float_t         rebal_jetbtagcsv[max_njet];
+  Float_t         rebal_factors[max_njet];
+  Float_t         rebal_met_pt;
+  Float_t         rebal_met_phi;
+  Float_t         rebal_pt_soft_x;
+  Float_t         rebal_pt_soft_y;
 };
 
 #endif

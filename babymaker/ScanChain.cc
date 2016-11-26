@@ -11,6 +11,7 @@
 #include "TBenchmark.h"
 #include "TLorentzVector.h"
 #include "TH2.h"
+#include "TMinuit.h"
 
 // CORE
 #include "../CORE/CMS3.h"
@@ -79,6 +80,10 @@ const bool applyLeptonIso = true;
 const bool saveLHEweights = false;
 // turn on to save MC scale weights (default false, small size impact)
 const bool saveLHEweightsScaleOnly = true;
+// do rebalancing and save rebalanced jet info in babies
+const bool doRebal = false;
+
+babyMaker *t; //little sketchy, but need a global pointer to babyMaker for use in minuitFunction (for doing rebalancing)
 
 //--------------------------------------------------------------------
 
@@ -122,6 +127,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
+  }
+
+  if(!isDataFromFileName && doRebal){
+      rebal_reader.Init("../MT2CORE/RebalSmear/JetResponseTemplates.root");
   }
 
   if (applyBtagSFs) {
@@ -1718,8 +1727,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         }
 
         // only save jets with pt 20 eta 4.7
-        if( (p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {
-        //if( (p4sCorrJets.at(iJet).pt() > 10.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {//for RS
+        float jetCutoff = 20.0;
+        // need lower jet threshold if doing rebalancing
+        if(doRebal)
+            jetCutoff = 10.0;
+        if( (p4sCorrJets.at(iJet).pt() > jetCutoff) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {
 
 	  // check for bad fastsim jets
 	  if (isFastsim && isBadFastsimJet(iJet)) ++nJet20BadFastsim;
@@ -2365,6 +2377,122 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
       if (verbose) cout << "before fill" << endl;
 
+      // do the rebalancing (only MC for now)
+      if(!isData && doRebal){
+          nRebalJets = 0;
+          if(njet < 2){
+              rebal_status = -1;
+          }else{
+              
+              float met_x = (met_pt)*cos(met_phi);
+              float met_y = (met_pt)*sin(met_phi);
+
+              float jet_x = 0;
+              float jet_y = 0;
+              for(int iJet=0; iJet<njet; iJet++){
+                  if(jet_pt[iJet] < 10.0){
+                      rebal_useJet[iJet] = 0;
+                      continue;
+                  }
+
+                  if(jet_pt[iJet] < 100.0 && jet_puId[iJet] < 1){
+                      rebal_useJet[iJet] = 0;
+                      met_x += (jet_pt[iJet])*cos(jet_phi[iJet]);//FIXME
+                      met_y += (jet_pt[iJet])*sin(jet_phi[iJet]);//FIXME
+                      continue;
+                  }
+
+                  jet_x += (jet_pt[iJet])*cos(jet_phi[iJet]);
+                  jet_y += (jet_pt[iJet])*sin(jet_phi[iJet]);
+                  rebal_useJet[iJet] = 1;
+                  rebal_jetpt[nRebalJets] = jet_pt[iJet];
+                  rebal_jeteta[nRebalJets] = jet_eta[iJet];
+                  rebal_jetphi[nRebalJets] = jet_phi[iJet];
+                  rebal_jetbtagcsv[nRebalJets] = jet_btagCSV[iJet];
+                  nRebalJets++;                  
+              }
+
+              if(nRebalJets<2){
+                  rebal_status = -1;
+              }else{
+
+                  rebal_pt_soft_x = -met_x - jet_x;
+                  rebal_pt_soft_y = -met_y - jet_y;
+                  rebal_status = 1;
+
+                  t = this;
+                  TMinuit* minimizer = new TMinuit(nRebalJets);
+                  minimizer->SetFCN(minuitFunction);
+                  int iflag = 0;
+                  Double_t arglist[10];
+
+                  // suppress warnings so the log files aren't multiple GB
+                  minimizer->SetPrintLevel(-1);
+                  minimizer->mnexcm("SET NOWarnings",0,0,iflag);
+
+                  arglist[0] = -1;
+                  minimizer->mnexcm("SET PRI", arglist, 1, iflag);
+
+                  arglist[0] = 1;
+                  minimizer->mnexcm("SET STRATEGY", arglist, 1, iflag);
+
+                  minimizer->SetErrorDef(0.5);
+
+                  for(int i=0; i<nRebalJets; i++){
+                      std::string name = Form("c%d", i);
+                      minimizer->mnparm(i,name,1.0,0.05,0.2,5,iflag);
+                  }
+
+                  arglist[0] = 10000;
+                  arglist[1] = 1.0;
+
+                  minimizer->mnexcm("MIGRAD", arglist, 2, iflag);
+                  std::cout << "MIGRAD iflag = " << iflag << std::endl;
+                  rebal_status = iflag;
+      
+                  if(iflag !=0){
+                      arglist[1] = 10.0;//easier threshold for convergence
+                      minimizer->mnexcm("MIGRAD", arglist, 2, iflag);
+                      std::cout << "second MIGRAD iflag = " << iflag << std::endl;
+                      rebal_status = iflag;
+                  }
+
+                  arglist[0] = 5000;
+                  arglist[1] = 0;
+                  arglist[2] = 1;
+
+                  if(iflag !=0){
+                      minimizer->mnexcm("MINOS", arglist, 3, iflag);
+                      rebal_status = iflag;
+                  }
+         
+                  for(int i=0; i<nRebalJets; i++){
+                      double par_value;
+                      double par_error;
+                      minimizer->GetParameter(i, par_value, par_error);
+                      par_value = 1.0/par_value;
+                      rebal_jetpt[i] *= par_value;
+                      rebal_factors[i] = par_value; 
+                  }
+
+                  delete minimizer;
+
+                  jet_x = 0;
+                  jet_y = 0;
+                  for(int i=0; i<nRebalJets; i++){
+                      jet_x += (rebal_jetpt[i])*cos(rebal_jetphi[i]);
+                      jet_y += (rebal_jetpt[i])*sin(rebal_jetphi[i]);
+                  }
+                  float new_met_x = -rebal_pt_soft_x - jet_x;
+                  float new_met_y = -rebal_pt_soft_y - jet_y;
+                  rebal_met_pt = sqrt(new_met_x*new_met_x + new_met_y*new_met_y);
+                  rebal_met_phi = atan2(new_met_y, new_met_x);
+
+              }
+          }
+      } // end rebalancing
+
+
       FillBabyNtuple();
 
     }//end loop on events in a file
@@ -2804,6 +2932,19 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("weight_pol_L", &weight_pol_L );
     BabyTree_->Branch("weight_pol_R", &weight_pol_R );
     BabyTree_->Branch("nisrMatch", &nisrMatch );
+    
+    if(doRebal){
+        BabyTree_->Branch("rebal_status", &rebal_status);
+        BabyTree_->Branch("nRebalJets", &nRebalJets);
+        BabyTree_->Branch("rebal_useJet", rebal_useJet, "rebal_useJet[njet]/I");
+        BabyTree_->Branch("rebal_jetpt", rebal_jetpt, "rebal_jetpt[nRebalJets]/F");
+        BabyTree_->Branch("rebal_jeteta", rebal_jeteta, "rebal_jeteta[nRebalJets]/F");
+        BabyTree_->Branch("rebal_jetphi", rebal_jetphi, "rebal_jetphi[nRebalJets]/F");
+        BabyTree_->Branch("rebal_jetbtagcsv", rebal_jetbtagcsv, "rebal_jetbtagcsv[nRebalJets]/F");
+        BabyTree_->Branch("rebal_factors", rebal_factors, "rebal_factors[nRebalJets]/F");
+        BabyTree_->Branch("rebal_met_pt", &rebal_met_pt);
+        BabyTree_->Branch("rebal_met_phi", &rebal_met_phi);
+    }
 
     // also make counter histogram
     count_hist_ = new TH1D("Count","Count",1,0,2);
@@ -3226,6 +3367,19 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       jet_puId[i] = -999;
     }
 
+    rebal_status = -999;
+    nRebalJets = -999;
+    rebal_met_pt = -999;
+    rebal_met_phi = -999;
+    for(int i=0; i < max_njet; i++){
+        rebal_useJet[i] = -999;
+        rebal_jetpt[i] = -999;
+        rebal_jeteta[i] = -999;
+        rebal_jetphi[i] = -999;
+        rebal_jetbtagcsv[i] = -999;
+        rebal_factors[i] = -999;
+    }
+
     if (saveLHEweights || saveLHEweightsScaleOnly) {
       for(int i=0; i < max_nLHEweight; i++){
 	LHEweight_wgt[i] = -999;
@@ -3279,3 +3433,26 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     return h->GetBinContent(binx,biny);
   }
 
+void babyMaker::minuitFunction(int& nDim, double* gout, double& result, double par[], int flg) {
+    float likelihood = 0;
+    float pt_constrained_x = 0.0;
+    float pt_constrained_y = 0.0;
+    float min_prob = 1E-20;
+    for(int i=0; i < t->nRebalJets; i++){
+        bool isBjet = (t->rebal_jetbtagcsv[i] > 0.800);
+        float prob = t->rebal_reader.GetValue(t->rebal_jetpt[i]/par[i], fabs(t->rebal_jeteta[i]), isBjet, par[i]);
+        prob = max(prob, min_prob);
+        likelihood += log(prob);
+        pt_constrained_x -= (t->rebal_jetpt[i])*cos(t->rebal_jetphi[i])/par[i];
+        pt_constrained_y -= (t->rebal_jetpt[i])*sin(t->rebal_jetphi[i])/par[i];
+    }
+    //float x1 = (pt_soft_x - pt_constrained_x)/sigma_soft;
+    //float x2 = (pt_soft_y - pt_constrained_y)/sigma_soft;
+    float x1 = (t->rebal_pt_soft_x - pt_constrained_x)/20.0;
+    float x2 = (t->rebal_pt_soft_y - pt_constrained_y)/20.0;
+    likelihood += -x1*x1/2;
+    likelihood += -x2*x2/2;
+
+    result = -likelihood;
+
+}
