@@ -130,7 +130,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
   }
 
   if(!isDataFromFileName && doRebal){
-      rebal_reader.Init("../MT2CORE/RebalSmear/JetResponseTemplates.root");
+      rebal_reader.Init("rebal/JetResponseTemplates.root");
   }
 
   if (applyBtagSFs) {
