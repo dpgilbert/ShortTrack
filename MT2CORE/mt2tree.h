@@ -394,6 +394,19 @@ public :
    Int_t           nLHEweight;
    Float_t         LHEweight_wgt[500];   //[nLHEweight]
    Int_t           genProd_pdgId;
+   // rebalancing stuff
+   Int_t           rebal_status;
+   Int_t           nRebalJets;
+   Int_t           rebal_useJet[100];
+   Float_t         rebal_jetpt[100];
+   Float_t         rebal_jeteta[100];
+   Float_t         rebal_jetphi[100];
+   Float_t         rebal_jetbtagcsv[100];
+   Float_t         rebal_factors[100];
+   Float_t         rebal_met_pt;
+   Float_t         rebal_met_phi;
+   Float_t         rebal_pt_soft_x;
+   Float_t         rebal_pt_soft_y;
 
    // List of branches
    TBranch        *b_run;   //!
@@ -768,6 +781,18 @@ public :
    TBranch        *b_nLHEweight;   //!
    TBranch        *b_LHEweight_wgt;   //!
    TBranch        *b_genProd_pdgId;   //!
+   TBranch        *b_rebal_status;
+   TBranch        *b_nRebalJets;
+   TBranch        *b_rebal_useJet;
+   TBranch        *b_rebal_jetpt;
+   TBranch        *b_rebal_jeteta;
+   TBranch        *b_rebal_jetphi;
+   TBranch        *b_rebal_jetbtagcsv;
+   TBranch        *b_rebal_factors;
+   TBranch        *b_rebal_met_pt;
+   TBranch        *b_rebal_met_phi;
+   TBranch        *b_rebal_pt_soft_x;
+   TBranch        *b_rebal_pt_soft_y;
 
    mt2tree(TTree *tree=0);
    virtual ~mt2tree();
@@ -1201,6 +1226,19 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("nLHEweight", &nLHEweight, &b_nLHEweight);
    fChain->SetBranchAddress("LHEweight_wgt", &LHEweight_wgt, &b_LHEweight_wgt);
    fChain->SetBranchAddress("genProd_pdgId", &genProd_pdgId, &b_genProd_pdgId);
+   fChain->SetBranchAddress("rebal_status", &rebal_status, &b_rebal_status);
+   fChain->SetBranchAddress("nRebalJets", &nRebalJets, &b_nRebalJets);
+   fChain->SetBranchAddress("rebal_useJet", rebal_useJet, &b_rebal_useJet);
+   fChain->SetBranchAddress("rebal_jetpt", rebal_jetpt, &b_rebal_jetpt);
+   fChain->SetBranchAddress("rebal_jeteta", rebal_jeteta, &b_rebal_jeteta);
+   fChain->SetBranchAddress("rebal_jetphi", rebal_jetphi, &b_rebal_jetphi);
+   fChain->SetBranchAddress("rebal_jetbtagcsv", rebal_jetbtagcsv, &b_rebal_jetbtagcsv);
+   fChain->SetBranchAddress("rebal_factors", rebal_factors, &b_rebal_factors);
+   fChain->SetBranchAddress("rebal_met_pt", &rebal_met_pt, &b_rebal_met_pt);
+   fChain->SetBranchAddress("rebal_met_phi", &rebal_met_phi, &b_rebal_met_phi);
+   fChain->SetBranchAddress("rebal_pt_soft_x", &rebal_pt_soft_x, &b_rebal_pt_soft_x);
+   fChain->SetBranchAddress("rebal_pt_soft_y", &rebal_pt_soft_y, &b_rebal_pt_soft_y);
+
    Notify();
 }
 
