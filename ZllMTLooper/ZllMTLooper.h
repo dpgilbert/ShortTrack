@@ -41,7 +41,7 @@ class ZllMTLooper {
   std::map<std::string, TH1*> h_1d_global;
   SR CRMTBase;
   SR CRMTNj2Nb0;
-  SR CRMTHT200;
+  SR CRMTHT250;
   SR CRMTHT450;
   TH1D* h_nvtx_weights_;
 };
