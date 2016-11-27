@@ -153,7 +153,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   double n_sig(0.);
   double n_sig_TR(0.);
-  double n_sig_crsl_TR(0.);
+  double n_sig_crsl(0.);
   double err_sig_mcstat(0.);
   double n_sig_btagsf_heavy_UP(0.);
   double n_sig_btagsf_light_UP(0.);
@@ -211,11 +211,6 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (h_sig_btagsf_light_UP) n_sig_btagsf_light_UP = h_sig_btagsf_light_UP->GetBinContent(mt2bin);
   if (h_sig_lepeff_UP) n_sig_lepeff_UP = h_sig_lepeff_UP->GetBinContent(mt2bin);
   if (h_sig_isr_UP) n_sig_isr_UP = h_sig_isr_UP->GetBinContent(mt2bin);
-  if (h_sig_crsl) {
-    n_sig_crsl_TR = h_sig_crsl->Integral(0,-1);
-  } else {
-    if(subtractSignalContam) cout << "tried to subtract signal contamination but couldn't find sig_crsl hist" << endl;
-  }
   
   //Get variable boundaries for signal region.
   //Used to create datacard name.
@@ -778,16 +773,26 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // correction for signal contamination:
   //   find how much bkg prediction is increased for this MT2 bin by signal in CR (n_lostlep_extra)
   //   subtract n_lostlep_extra from n_sig and use for reduced signal efficiency
-  if (subtractSignalContam && n_sig_crsl_TR > 0.) {
-    double n_lostlep_extra = n_sig_crsl_TR * lostlep_alpha;
-    double n_sig_cor = std::max(0.,n_sig - n_lostlep_extra);
-    if (verbose) {
-      cout << "correcting down signal yield from " << n_sig << " to " << n_sig_cor
-	   << ", n_sig_crsl_TR: " << n_sig_crsl_TR
-	   << ", alpha: " << lostlep_alpha << ", extra bkg pred: " << n_lostlep_extra << endl;
+  if (subtractSignalContam) {
+    if (h_sig_crsl) {
+      // integrated shape
+      if (mt2bin >= lostlep_lastbin_hybrid) n_sig_crsl = h_sig_crsl->Integral(lostlep_lastbin_hybrid,-1);
+      // bin-by-bin
+      else n_sig_crsl = h_sig_crsl->GetBinContent(mt2bin);
+      double n_lostlep_extra = n_sig_crsl * lostlep_alpha;
+      double n_sig_cor = std::max(0.,n_sig - n_lostlep_extra);
+      if (verbose) {
+	cout << "correcting down signal yield from " << n_sig << " to " << n_sig_cor
+	     << ", n_sig_crsl: " << n_sig_crsl
+	     << ", alpha: " << lostlep_alpha << ", extra bkg pred: " << n_lostlep_extra
+	     << ", lostlep_lastbin_hybrid: " << lostlep_lastbin_hybrid << endl;
+      }
+      n_sig = n_sig_cor;
     }
-    n_sig = n_sig_cor;
-  }
+    else {
+      cout << "tried to subtract signal contamination but couldn't find sig_crsl hist" << endl;
+    }
+  } // if (subtractSignalContam)
 
   if (doZinvFromDY)  n_bkg = n_lostlep+n_zinvDY+n_qcd;
   else               n_bkg = n_lostlep+n_zinv+n_qcd;
