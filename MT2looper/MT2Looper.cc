@@ -1764,6 +1764,9 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   // trigger requirement
   if ( ( t.isData || stringsample.Contains("2015")) && !t.HLT_Photon165_HE10) return;
 
+  // additional cleaning for fakes and HLT-emulation (2016)
+  if (fabs(t.gamma_eta[0])>2.4 || t.gamma_hOverE015[0]>0.1 ) return;
+
   // apply trigger weights to mc
   if (!t.isData && applyPhotonTriggerWeights){
       evtweight_ *= getPhotonTriggerWeight(t.gamma_eta[0], t.gamma_pt[0]);
