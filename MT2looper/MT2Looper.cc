@@ -2204,6 +2204,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     else plot1D("h_mt2bins4J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   }
   if (dirname=="srbaseL" || dirname=="srbaseM" || dirname=="srbaseH") {
+    if (nJet30_ < 7) plot1D("h_mt2bins26J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);  // used for 26J 3B
     if (nJet30_ < 4) plot1D("h_mt2bins23J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     else if (nJet30_ < 7) plot1D("h_mt2bins46J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     else plot1D("h_mt2bins7J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
@@ -2563,6 +2564,7 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     else plot1D("h_mt2bins4J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   }
   if (dirname=="crdybaseL" || dirname=="crdybaseM" || dirname=="crdybaseH") {
+    if (nJet30_ < 7) plot1D("h_mt2bins26J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);  // used for 26J 3B
     if (nJet30_ < 4) plot1D("h_mt2bins23J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     else if (nJet30_ < 7) plot1D("h_mt2bins46J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     else plot1D("h_mt2bins7J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);

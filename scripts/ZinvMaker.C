@@ -18,6 +18,8 @@ using namespace std;
 bool doHybridSimple = false; // hybrid estimate: uses CR MT2 binning until the (MC) integral is less than the threshold below
 bool doHybridInclusiveTemplate = true; // take kMT2 from inclusive templates
 float hybrid_nevent_threshold = 10.;
+float rSFOF = 1.11;
+float rSFOFerr = 0.15;
 
 int purityRandNorm(TH1D* h_template, TString name , TFile * fData, TFile * fZinv, TFile * fDY) {
 
@@ -38,7 +40,7 @@ int purityRandNorm(TH1D* h_template, TString name , TFile * fData, TFile * fZinv
     cout<<"ZinvMaker::purityAndRatio  :  could not finde DY or Zinv MC histogram";
     return lastbin_hybrid;
   }
-  if (hEMU) h_template->Add(hEMU, -1);
+  if (hEMU) h_template->Add(hEMU, -1*rSFOF);
 
   // find the last bin
   for ( int ibin=1; ibin <= h_template->GetNbinsX(); ++ibin ) {
@@ -280,22 +282,30 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
   // Obtain inclusive templates
   TH1D* h_TemplateVL23J      = (TH1D*) fData->Get("crdybaseVL/h_mt2bins23J"); 
   int lastbin_VL23J = purityRandNorm(h_TemplateVL23J, "crdybaseVL/h_mt2bins23J", fData, fZinv, fDY);
+  TH1D* h_TemplateVL2J       = (TH1D*) fData->Get("crdybaseVL/h_mt2bins"); 
+  int lastbin_VL2J  = purityRandNorm(h_TemplateVL23J, "crdybaseVL/h_mt2bins", fData, fZinv, fDY);
   TH1D* h_TemplateVL4J       = (TH1D*) fData->Get("crdybaseVL/h_mt2bins4J");  
   int lastbin_VL4J  = purityRandNorm(h_TemplateVL4J, "crdybaseVL/h_mt2bins4J", fData, fZinv, fDY);  
   TH1D* h_TemplateL23J       = (TH1D*) fData->Get("crdybaseL/h_mt2bins23J");
   int lastbin_L23J  = purityRandNorm(h_TemplateL23J, "crdybaseL/h_mt2bins23J", fData, fZinv, fDY);    
+  TH1D* h_TemplateL26J       = (TH1D*) fData->Get("crdybaseL/h_mt2bins26J");
+  int lastbin_L26J  = purityRandNorm(h_TemplateL26J, "crdybaseL/h_mt2bins26J", fData, fZinv, fDY);    
   TH1D* h_TemplateL46J       = (TH1D*) fData->Get("crdybaseL/h_mt2bins46J");   
   int lastbin_L46J  = purityRandNorm(h_TemplateL46J, "crdybaseL/h_mt2bins46J", fData, fZinv, fDY); 
   TH1D* h_TemplateL7J        = (TH1D*) fData->Get("crdybaseL/h_mt2bins7J");    
   int lastbin_L7J   = purityRandNorm(h_TemplateL7J, "crdybaseL/h_mt2bins7J", fData, fZinv, fDY);
   TH1D* h_TemplateM23J       = (TH1D*) fData->Get("crdybaseM/h_mt2bins23J");    
   int lastbin_M23J  = purityRandNorm(h_TemplateM23J, "crdybaseM/h_mt2bins23J", fData, fZinv, fDY);
+  TH1D* h_TemplateM26J       = (TH1D*) fData->Get("crdybaseM/h_mt2bins26J");    
+  int lastbin_M26J  = purityRandNorm(h_TemplateM26J, "crdybaseM/h_mt2bins26J", fData, fZinv, fDY);
   TH1D* h_TemplateM46J       = (TH1D*) fData->Get("crdybaseM/h_mt2bins46J");    
   int lastbin_M46J  = purityRandNorm(h_TemplateM46J, "crdybaseM/h_mt2bins46J", fData, fZinv, fDY);
   TH1D* h_TemplateM7J        = (TH1D*) fData->Get("crdybaseM/h_mt2bins7J");    
   int lastbin_M7J   = purityRandNorm(h_TemplateM7J, "crdybaseM/h_mt2bins7J", fData, fZinv, fDY);
   TH1D* h_TemplateH23J       = (TH1D*) fData->Get("crdybaseH/h_mt2bins23J");    
   int lastbin_H23J  = purityRandNorm(h_TemplateH23J, "crdybaseH/h_mt2bins23J", fData, fZinv, fDY);
+  TH1D* h_TemplateH26J       = (TH1D*) fData->Get("crdybaseH/h_mt2bins26J");    
+  int lastbin_H26J  = purityRandNorm(h_TemplateH26J, "crdybaseH/h_mt2bins26J", fData, fZinv, fDY);
   TH1D* h_TemplateH46J       = (TH1D*) fData->Get("crdybaseH/h_mt2bins46J");    
   int lastbin_H46J  = purityRandNorm(h_TemplateH46J, "crdybaseH/h_mt2bins46J", fData, fZinv, fDY);
   TH1D* h_TemplateH7J        = (TH1D*) fData->Get("crdybaseH/h_mt2bins7J");    
@@ -357,32 +367,36 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       if (h_njets_HI)  njets_HI = h_njets_HI->GetBinContent(1);
       
       //Determine which inclusive template to use. If none works, this reverts to HybridSimple, taking template from its own TopoRegion 
-      if (ht_LOW == 200) {
-	if (njets_LOW == 2) { h_MT2Template = h_TemplateVL23J; lastbin_hybrid = lastbin_VL23J; }
+      if (ht_LOW == 250) {
+	if (njets_LOW == 2 && njets_HI==4) { h_MT2Template = h_TemplateVL23J; lastbin_hybrid = lastbin_VL23J; }
+	else if (njets_LOW == 2) { h_MT2Template = h_TemplateVL2J; lastbin_hybrid = lastbin_VL2J; }
 	else if (njets_LOW == 4) { h_MT2Template = h_TemplateVL4J; lastbin_hybrid = lastbin_VL4J; }
       }
       else if (ht_LOW == 450) {
-	if (njets_LOW == 2 && njets_HI!=7) { h_MT2Template = h_TemplateL23J; lastbin_hybrid = lastbin_L23J; }
+	if (njets_LOW == 2 && njets_HI==7) { h_MT2Template = h_TemplateL26J; lastbin_hybrid = lastbin_L26J; }
+	else if (njets_LOW == 2) { h_MT2Template = h_TemplateL23J; lastbin_hybrid = lastbin_L23J; }
 	else if (njets_LOW == 4) { h_MT2Template = h_TemplateL46J; lastbin_hybrid = lastbin_L46J; }
 	else if (njets_LOW == 7) { h_MT2Template = h_TemplateL7J; lastbin_hybrid = lastbin_L7J; }
       }
       else if (ht_LOW == 575) {
-	if (njets_LOW == 2 && njets_HI!=7) { h_MT2Template = h_TemplateM23J; lastbin_hybrid = lastbin_M23J; }
+	if (njets_LOW == 2 && njets_HI==7) { h_MT2Template = h_TemplateM26J; lastbin_hybrid = lastbin_M26J; }
+	else if (njets_LOW == 2) { h_MT2Template = h_TemplateM23J; lastbin_hybrid = lastbin_M23J; }
 	else if (njets_LOW == 4) { h_MT2Template = h_TemplateM46J; lastbin_hybrid = lastbin_M46J; }
 	else if (njets_LOW == 7) { h_MT2Template = h_TemplateM7J; lastbin_hybrid = lastbin_M7J; }
       }
       else if (ht_LOW == 1000) {
-	if (njets_LOW == 2 && njets_HI!=7) { h_MT2Template = h_TemplateH23J; lastbin_hybrid = lastbin_H23J; }
+	if (njets_LOW == 2 && njets_HI==7) { h_MT2Template = h_TemplateH26J; lastbin_hybrid = lastbin_H26J; }
+	else if (njets_LOW == 2) { h_MT2Template = h_TemplateH23J; lastbin_hybrid = lastbin_H23J; }
 	else if (njets_LOW == 4) { h_MT2Template = h_TemplateH46J; lastbin_hybrid = lastbin_H46J; }
 	else if (njets_LOW == 7) { h_MT2Template = h_TemplateH7J; lastbin_hybrid = lastbin_H7J; }
       }
       else if (ht_LOW == 1500) { h_MT2Template = h_TemplateUH; lastbin_hybrid = lastbin_UH; }
       if (h_MT2Template == 0) {
-	cout<< "Can't find template for: HT "<<ht_LOW<<"-"<<ht_HI<<" and NJ "<<njets_LOW<<"-"<<njets_HI<<endl;
+	cout<< "Can't find template for region: HT "<<ht_LOW<<"-"<<ht_HI<<" and NJ "<<njets_LOW<<"-"<<njets_HI<<endl;
 	lastbin_hybrid = 1;
       }
       else {
-	cout<< "Using inclusive template based on: HT "<<ht_LOW<<"-"<<ht_HI<<" and NJ "<<njets_LOW<<"-"<<njets_HI<<endl;  
+	cout<< "Using inclusive template with lastbin_hybrid (before rebin) ="<<lastbin_hybrid<<" for region: HT "<<ht_LOW<<"-"<<ht_HI<<" and NJ "<<njets_LOW<<"-"<<njets_HI<<endl;  
 	//h_MT2Template->Print("all");
       }
     }
@@ -396,7 +410,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       // Calculate last bin on local histogram
       for ( int ibin=1; ibin <= hData->GetNbinsX(); ++ibin ) {
 	float top = 0, integratedYield = 0;
-	if (hDataEM) top = hDataEM->Integral(ibin,-1);
+	if (hDataEM) top = hDataEM->Integral(ibin,-1*rSFOF);
 	integratedYield = hData->Integral(ibin,-1) - top;
 	if (integratedYield < hybrid_nevent_threshold) {
 	  if (ibin == 1) lastbin_hybrid = 1;
@@ -420,7 +434,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
     purityMC->Divide(hDY);
 
     TH1D* purityData = (TH1D*) hData->Clone("h_mt2binsPurityData");
-    if (hDataEM) purityData->Add(hDataEM, -1);
+    if (hDataEM) purityData->Add(hDataEM, -1*rSFOFerr); // Will apply rSFOFerr as additional uncertainty in the cardMaker
     purityData->Divide(purityData, hData, 1, 1, "B");
     
     TH1D* Stat = (TH1D*) CRyield->Clone("h_mt2binsStat");
@@ -457,7 +471,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 
 	float integratedDen = integratedYield;
 	float EM = 0;
-	if (hDataEM) EM =  hDataEM->Integral(lastbin_hybrid, -1);
+	if (hDataEM) EM =  hDataEM->Integral(lastbin_hybrid, -1*rSFOF);
 	float integratedNum = integratedDen - EM;
 	if (integratedNum < 0) integratedNum = 0;
 	float integratedPurity = integratedNum/integratedDen;
@@ -490,7 +504,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       
       float integratedDen = integratedYield;
       float EM = 0;
-      if (hDataEM) EM =  hDataEM->Integral(0, -1);
+      if (hDataEM) EM =  hDataEM->Integral(0, -1*rSFOF);
       float integratedNum = integratedDen - EM;
       if (integratedNum < 0) integratedNum = 0;
       float integratedPurity = integratedNum/integratedDen;
