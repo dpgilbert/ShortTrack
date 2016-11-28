@@ -240,6 +240,7 @@ public :
    Float_t         gamma_sigmaIetaIeta[50];   //[ngamma]
    Float_t         gamma_r9[50];   //[ngamma]
    Float_t         gamma_hOverE[50];   //[ngamma]
+   Float_t         gamma_hOverE015[50];   //[ngamma]
    Int_t           gamma_idCutBased[50];   //[ngamma]
    Float_t         gamma_mt2;
    Int_t           gamma_nJet30;
@@ -627,6 +628,7 @@ public :
    TBranch        *b_gamma_sigmaIetaIeta;   //!
    TBranch        *b_gamma_r9;   //!
    TBranch        *b_gamma_hOverE;   //!
+   TBranch        *b_gamma_hOverE015;   //!
    TBranch        *b_gamma_idCutBased;   //!
    TBranch        *b_gamma_mt2;
    TBranch        *b_gamma_nJet30;
@@ -1072,6 +1074,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("gamma_sigmaIetaIeta", gamma_sigmaIetaIeta, &b_gamma_sigmaIetaIeta);
    fChain->SetBranchAddress("gamma_r9", gamma_r9, &b_gamma_r9);
    fChain->SetBranchAddress("gamma_hOverE", gamma_hOverE, &b_gamma_hOverE);
+   fChain->SetBranchAddress("gamma_hOverE015", gamma_hOverE015, &b_gamma_hOverE015);
    fChain->SetBranchAddress("gamma_idCutBased", gamma_idCutBased, &b_gamma_idCutBased);
    fChain->SetBranchAddress("gamma_mt2", &gamma_mt2, &b_gamma_mt2);
    fChain->SetBranchAddress("gamma_nJet30", &gamma_nJet30, &b_gamma_nJet30);
