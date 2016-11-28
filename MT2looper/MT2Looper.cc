@@ -1169,7 +1169,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	     && (fabs(t.zll_mass - 91.19) < 20 ) 
              && (t.zll_pt > 200 )
 	     && t.lep_pt[0] > 25 && t.lep_pt[1] > 20
-	     && (!t.isData || t.HLT_MuX_Ele12 || t.HLT_Mu8_EleX || t.HLT_Mu33_Ele33_NonIso) //X-Trigs
+	     && (!t.isData || t.HLT_MuX_Ele12 || t.HLT_Mu8_EleX || t.HLT_Mu30_Ele30_NonIso || t.HLT_Mu33_Ele33_NonIso) //X-Trigs
              ) {
 	  // no additional explicit lepton veto
 	  // i.e. implicitly allow 3rd PF lepton or hadron
