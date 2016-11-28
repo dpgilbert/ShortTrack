@@ -201,7 +201,7 @@ def makeNormalizedLostLep(indir, samples, data, outdir='.', exts=['png','pdf'], 
         for ibin in range(2,nbins+1):
             systs[ibin-1] = 0.4 / (nbins-1) * (ibin-1)
 
-        subtitles = ["#geq 2j, 1 lepton", "M_{T2} > 200 GeV","H_{T} > 200 GeV"]
+        subtitles = ["#geq 2j, 1 lepton", "M_{T2} > 200 GeV","H_{T} > 250 GeV"]
         if iregs==0:
             subtitles[0] = "#geq 2j, 0b, 1 lepton"
         if iregs==1:

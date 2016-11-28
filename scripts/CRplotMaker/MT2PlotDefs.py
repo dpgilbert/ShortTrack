@@ -8,7 +8,7 @@ lumi = 804
 lumiUnit = "pb"
 
 rl_plots = [
-    ("ht",True,(200,1500),None,2),
+    ("ht",True,(250,1500),None,2),
     ("met",True,(200,1000),None,2),
     ("mt2",True,(200,1000),None,2),
     ("mt2bins",True,None,None),
@@ -20,7 +20,7 @@ rl_plots = [
 ]
 
 sl_plots = [
-    ("ht",True,(200,1500),None,2),
+    ("ht",True,(250,1500),None,2),
     ("met",True,(200,1000),None,2),
     ("mt2",True,(200,1000),None,2),
     ("mt2bins",True,None,None),
@@ -30,7 +30,7 @@ sl_plots = [
 ]
 
 dy_plots = [
-    ("ht",True,(200,1500),None,2),
+    ("ht",True,(250,1500),None,2),
     ("met",True,(200,1000),None,2),
     ("mt2",True,(200,1000),None,2),
     ("mt2bins",True,None,None),
@@ -38,10 +38,19 @@ dy_plots = [
     ("nBJet20",True,(0,6),None),
     ("zllmass",True,(70,120),None),
     ("nlepveto",False,None,None),
+    ("htemu",True,(250,1500),None,2),
+    ("metemu",True,(200,1000),None,2),
+    ("mt2emu",True,(200,1000),None,2),
+    ("mt2binsemu",True,None,None),
+    ("nJet30emu",True,(0,14),None),
+    ("nBJet20emu",True,(0,6),None),
+    ("zllmassemu",True,(70,120),None),
+    ("nlepvetoemu",False,None,None),
+    # add zllpt plots once added to MT2looper
 ]
 
 gj_plots = [
-    ("ht",True,(200,1500),None,2),
+    ("ht",True,(250,1500),None,2),
     ("met",True,(200,1000),None,2),
     ("mt2",True,(200,1000),None,2),
     ("mt2bins",True,None,None),
@@ -57,7 +66,7 @@ gj_plots = [
     ("chisoEELooseSieieSB",True,(0,10),None),
     ("chisoEBLooseSieieSB",True,(0,10),None),
     ("drMinParton",False,None,None),
-    ("drMinParton_ht200to450",False,None,None),
+    ("drMinParton_ht250to450",False,None,None),
     ("drMinParton_ht450to1000",False,None,None),
     ("drMinParton_ht1000toInf",False,None,None),
     ("SigmaIetaIetaEBLooseAllSieie",False,(0.0075,0.015),None),
@@ -74,7 +83,7 @@ mt2_only = [
 ]
 
 ht_njet_plots = [
-    ("ht",True,(200,1500),None,2),
+    ("ht",True,(250,1500),None,2),
     ("nJet30",True,(0,14),None),
     ("nBJet20",True,(0,6),None),
 ]
