@@ -1,14 +1,8 @@
 #!/bin/bash
 
-#INDIR=/home/users/jgran/limits_for_paper/MT2Analysis/MT2looper/output/V00-01-09_25ns_skim_base_mt2gt200_ZinvV3_2p2fb/
-#INDIR=/home/users/olivito/mt2_74x_dev/MT2Analysis/MT2looper/output/V00-01-07_25ns_miniaodv2_skim_base_1p26fb_mt2gt200_crqcd/
-#INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/Bennett_V00-08-02_json_Cert_271036-274421_skim_base_mt2gt200_ZinvV4/
-# INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V00-08-02_nojson_skim_base_mt2gt200_ZinvV4
-#INDIR=/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6_12p9fb
-#INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V00-08-04_MiniAODv2_nojson_skim_base_mt2gt200_ZinvV4_NewTrigPhotonHLT/
-#INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V00-08-07_nojson_skim_base_mt2gt200_ZinvV6/
-#INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6/
-INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6_DRcorr/
+#INDIR=/home/users/olivito/mt2_80x/MT2Analysis/MT2looper/output/V00-08-10_JECandRenorm_skim_base_mt2gt200_ZinvV6_12p9fb_lostlepshape
+#INDIR=/home/users/olivito/mt2_80x/MT2Analysis/MT2looper/output/V00-08-10_JECandRenorm_skim_base_mt2gt200_ZinvV6_36p26fb_sigcontamtest
+INDIR=/home/users/olivito/mt2_80x/MT2Analysis/MT2looper/output/V00-08-12_json_271036-284044_23Sep2016ReReco_36p26fb_noB_SingleMuElePhot_MuonEG
 
 THISDIR=`pwd`
 
@@ -38,6 +32,10 @@ cd $INDIR
 echo "hadd -f data_Run2016.root data_Run2016B.root data_Run2016C.root data_Run2016D.root data_Run2016E.root data_Run2016F.root data_Run2016G.root data_Run2016H.root"
 hadd -f data_Run2016.root data_Run2016B.root data_Run2016C.root data_Run2016D.root data_Run2016E.root data_Run2016F.root data_Run2016G.root data_Run2016H.root > dataDrivenEstimates.log
 
+## combine wjets_ht bins
+echo "hadd -f wjets_ht.root wjets_ht100to200.root wjets_ht200to400.root wjets_ht400to600.root wjets_ht600to800.root wjets_ht800to1200.root wjets_ht1200to2500.root wjets_ht2500toInf.root"
+hadd -f wjets_ht.root wjets_ht100to200.root wjets_ht200to400.root wjets_ht400to600.root wjets_ht600to800.root wjets_ht800to1200.root wjets_ht1200to2500.root wjets_ht2500toInf.root >> dataDrivenEstimates.log
+
 ## (temporarily replaced tth with ttg, because of sample availability)
 echo "hadd -f top.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.root"
 hadd -f top.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.root >> dataDrivenEstimates.log
@@ -50,6 +48,9 @@ cd $THISDIR
 #this script scales the HI and LOW boundary histograms by 1/numSamples since we don't want these hadd'ed
 echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/data_Run2016.root,7)"
 root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/data_Run2016.root\",7)" >> dataDrivenEstimates.log
+
+echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/wjets_ht.root,7)"
+root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/wjets_ht.root\",7)" >> dataDrivenEstimates.log
 
 echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/top.root,6)"
 root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/top.root\",6)" >> dataDrivenEstimates.log
