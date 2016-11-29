@@ -2603,6 +2603,14 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
       }
   }
 
+  // lepton efficiency variation in control region: smallish uncertainty on leptons which ARE vetoed
+  if (!t.isData && doLepEffVars && (applyLeptonSFfromFiles || applyLeptonSFfromBabies)) {
+    // lepsf was already applied as a central value, take it back out
+    plot1D("h_mt2bins_lepeff_UP"+s,       zll_mt2_temp,   evtweight_ / weight_lepsf_cr_ * weight_lepsf_cr_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_lepeff_DN"+s,       zll_mt2_temp,   evtweight_ / weight_lepsf_cr_ * weight_lepsf_cr_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    
+  }
+  
   outfile_->cd();
   return;
 }
