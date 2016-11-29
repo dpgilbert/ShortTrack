@@ -335,7 +335,7 @@ void QCDLooper::fillHistosRb(std::map<std::string, TH1*>& h_1d, const std::strin
     } 
     dir->cd();
 
-    if (t.isData && !t.HLT_PFHT800)
+    if (t.isData && !t.HLT_PFHT900 && !t.HLT_PFJet450)
         return;
 
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
@@ -360,10 +360,10 @@ double QCDLooper::getTriggerPrescale(std::string dirname) {
         return t.HLT_PFHT475_Prescale==0 ? -1 : eff_prescales[2];
     }
     if(strstr(dirname.c_str(),"ht1000to1500") != NULL){
-        return t.HLT_PFHT800==0 ? -1 : 1;
+      return (t.HLT_PFHT900 || t.HLT_PFJet450)==0 ? -1 : 1;
     }
     if(strstr(dirname.c_str(),"ht1500toInf") != NULL){
-        return t.HLT_PFHT800==0 ? -1 : 1;
+      return (t.HLT_PFHT900 || t.HLT_PFJet450)==0 ? -1 : 1;
     }
 
     std::cerr << "ERROR [getTriggerPrescale]: did not recognize dirname " << dirname << std::endl;
