@@ -2044,6 +2044,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       htJECup = 0;
       htJECdn = 0;
       deltaPhiMin = 999;
+      deltaPhiMin_genmet = 999;
       deltaPhiMinJECup = 999;
       deltaPhiMinJECdn = 999;
       LorentzVector sumMhtp4 = LorentzVector(0,0,0,0);
@@ -2070,7 +2071,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       for (unsigned int ip4 = 0; ip4 < p4sForDphi.size(); ++ip4) {
         if(ip4 < 4) {
 	  deltaPhiMin = min(deltaPhiMin, DeltaPhi( met_phi, p4sForDphi.at(ip4).phi() ));
-	  if (!isData) deltaPhiMin_genmet = min(deltaPhiMin, DeltaPhi( met_genPhi, p4sForDphi.at(ip4).phi() ));
+	  if (!isData) deltaPhiMin_genmet = min(deltaPhiMin_genmet, DeltaPhi( met_genPhi, p4sForDphi.at(ip4).phi() ));
 	}
       }
       for (unsigned int ip4 = 0; ip4 < p4sForDphiUP.size(); ++ip4) {
