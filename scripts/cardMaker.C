@@ -654,13 +654,13 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double zinvDY_purity = 1. + err_zinvDY_purity; // transfer factor stat uncertainty
   double zinvDY_mcstat = 1. + err_zinvDY_mcstat; // transfer factor stat uncertainty
 
-  // note that if n_zinvDY_cr == 0, we will just use zinvDY_alpha (straight from MC) in the datacard
-  // if (n_zinvDY_cr > 0.) {
-  //   if (zinvDY_alpha > 3.) {
-  //     zinvDY_alpha = 3.; // hard bound to avoid statistical fluctuations
-  //     n_zinvDY = n_zinvDY_cr * zinvDY_alpha;
-  //   }
-  // }
+  //  note that if n_zinvDY_cr == 0, we will just use zinvDY_alpha (straight from MC) in the datacard
+  if (n_zinvDY_cr > 0.) {
+    if (zinvDY_alpha > 10.) {
+      zinvDY_alpha = 10.; // hard bound to avoid statistical fluctuations
+      n_zinvDY = n_zinvDY_cr * zinvDY_alpha;
+    }
+  }
   if (zinvDY_alpha > 0.) last_zinvDY_transfer = zinvDY_alpha; // cache last good alpha value
   else if (n_zinvDY == 0) zinvDY_alpha = 0;
   else zinvDY_alpha = last_zinvDY_transfer;   // if alpha is 0: use alpha from previous (MT2) bin
