@@ -518,6 +518,8 @@ class babyMaker {
   Float_t         weight_pol_L;
   Float_t         weight_pol_R;
   Int_t           nisrMatch;
+  Int_t           ngenLepFromZ;
+  Int_t           ngenNuFromZ;
 
 //----- MC SCALE AND PDF WEIGHTS
   static const int max_nLHEweight = 500;

@@ -500,6 +500,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       ngenTau1Prong = 0;
       ngenTau3Prong = 0;
       ngenLepFromTau = 0;
+      ngenLepFromZ = 0;
+      ngenNuFromZ = 0;
       if (!isData) {
 	
         if (verbose) cout << "before sparm values" << endl;
@@ -642,14 +644,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
             ++ngenGamma;
           }
 
-          // save lepton info
-          if ((pdgId != 11) && (pdgId != 13) && (pdgId != 15)) continue;
+          // save lepton / neutrino info
+          if (pdgId < 11 || pdgId > 16) continue;
 
           // reject leptons with direct parents of quarks or hadrons. 
           //  Allow SUSY parents - not explicitly checking for now though
           if (motherId <= 5 || (motherId > 100 && motherId < 1000000)) continue;
 
           bool goodLep = false;
+          bool goodLepFromZ = false;
           bool goodTau = false;
 	  int decayMode = 0;
 	  int neutralDaughters = 0;
@@ -663,13 +666,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
             if (status == 1 && motherId == pdgId && (cms3.genps_status().at(cms3.genps_idx_simplemother().at(iGen)) == 23)) {
               // don't save
             }
-            // leptons from taus
-            else if (motherId == 15 && (grandmotherId == 25 || grandmotherId == 24 || grandmotherId == 23 || grandmotherId == 15)) {
+            // leptons from taus -- also allow gluon grandparants for ttZ etc
+            else if (motherId == 15 && (grandmotherId == 25 || grandmotherId == 24 || grandmotherId == 23 || grandmotherId == 21 || grandmotherId == 15)) {
               goodLepFromTau = true;
             } 
-            // leptons from W/Z/H
-            else if (motherId == 25 || motherId == 24 || motherId == 23) {
+            // leptons from W/Z/H -- also allow gluons for ttZ etc
+            else if (motherId == 25 || motherId == 24 || motherId == 23 || motherId == 21) {
               goodLep = true;
+	      // leptons in ttZ can have gluon mothers..
+	      if (motherId == 23 || motherId == 21) goodLepFromZ = true;
             } 
           } // status 1 e or mu
 
@@ -679,9 +684,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
             if (status == 2 && motherId == pdgId && (cms3.genps_status().at(cms3.genps_idx_simplemother().at(iGen)) == 23)) {
               // don't save
             }
-            // leptons from W/Z/H
-            else if (motherId == 25 || motherId == 24 || motherId == 23) {
+            // leptons from W/Z/H -- also allow gluon grandparants for ttZ etc
+            else if (motherId == 25 || motherId == 24 || motherId == 23 || motherId == 21) {
               goodTau = true;
+	      // leptons in ttZ can have gluon mothers..
+	      if (motherId == 23 || motherId == 21) goodLepFromZ = true;
             }
 	    
 	    // find decay mode - only count charged daughters
@@ -724,9 +731,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	    
           } // status 2 tau
 
+	  // neutrinos -- counting based on decays in NLO ttZ sample
+	  if (pdgId == 12 || pdgId == 14 || pdgId == 16) {
+	    if ((status == 1 && motherId == 23) || (status == 23 && motherId == 21)) ++ngenNuFromZ;
+	  }
+
           if (goodLep || goodTau || goodLepFromTau) {
             sourceId = getSourceId(iGen);
           }
+
+	  if (goodLepFromZ) ++ngenLepFromZ;
 
           // save gen leptons (e/mu) directly from W/Z/H
           if (goodLep) {
@@ -856,6 +870,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	    ++nLHEweight;
 	  }
 	}
+
       } // !isData
 
       //LEPTONS
@@ -2879,6 +2894,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       BabyTree_->Branch("genLepFromTau_status", genLepFromTau_status, "genLepFromTau_status[ngenLepFromTau]/I" );
       BabyTree_->Branch("genLepFromTau_charge", genLepFromTau_charge, "genLepFromTau_charge[ngenLepFromTau]/F" );
       BabyTree_->Branch("genLepFromTau_sourceId", genLepFromTau_sourceId, "genLepFromTau_sourceId[ngenLepFromTau]/I" );
+      BabyTree_->Branch("ngenLepFromZ", &ngenLepFromZ, "ngenLepFromZ/I" );
+      BabyTree_->Branch("ngenNuFromZ", &ngenNuFromZ, "ngenNuFromZ/I" );
       BabyTree_->Branch("GenSusyMScan1", &GenSusyMScan1 );
       BabyTree_->Branch("GenSusyMScan2", &GenSusyMScan2 );
       BabyTree_->Branch("GenSusyMScan3", &GenSusyMScan3 );
@@ -3128,6 +3145,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     ngenTau1Prong = -999;
     ngenTau3Prong = -999;
     ngenLepFromTau = -999;
+    ngenLepFromZ = -999;
+    ngenNuFromZ = -999;
     njet = -999;
     gamma_mt2 = -999.0;
     gamma_nJet30 = -999;
