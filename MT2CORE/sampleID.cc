@@ -98,18 +98,18 @@ int sampleID (const string& name) {
   else if (name.find("TBarToLeptons_s-channel") != string::npos) return 403;
   else if (name.find("TBarToLeptons_t-channel") != string::npos) return 404;
   else if (name.find("Tbar_tW-channel") != string::npos) return 405;
-  // LO madgraph
-  else if ((name.find("TTWJets") != string::npos) || (name.find("ttWJets") != string::npos)) return 410;
-  else if ((name.find("TTZJets") != string::npos) || (name.find("ttZJets") != string::npos)) return 413;
   // amcatnlo
-  else if (name.find("TTWToLNu") != string::npos) return 410; // being reused intentionally(?) by ETH
+  else if (name.find("TTWToLNu") != string::npos) return 410; 
   else if (name.find("TTWToQQ") != string::npos) return 411; 
-  else if (name.find("TTZToLNu") != string::npos) return 412; 
-  else if (name.find("TTZToQQ") != string::npos) return 413; // being reused intentionally(?) by ETH
+  else if (name.find("TTZToLLNuNu") != string::npos) return 412; 
+  else if (name.find("TTZToQQ") != string::npos) return 413; 
   else if (name.find("TTGJets") != string::npos) return 414;
   // powheg
   else if (name.find("ttHTobb") != string::npos) return 415;
   else if (name.find("ttHToNonbb") != string::npos) return 416;
+  // LO madgraph
+  else if ((name.find("TTWJets") != string::npos) || (name.find("ttWJets") != string::npos)) return 450;
+  else if ((name.find("TTZJets") != string::npos) || (name.find("ttZJets") != string::npos)) return 452;
 
   else if (name.find("WJets") != string::npos) {
     if ((name.find("WJetsToLNu_HT-100to200") != string::npos) || (name.find("WJetsToLNu_HT-100To200") != string::npos)) return 502;
