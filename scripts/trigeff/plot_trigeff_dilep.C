@@ -113,12 +113,6 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   // t_ht->Draw("lep_pt[1]>>h_ee_sublpt_denom_ht",ee+trigs_ht+"ht > 200.");
   // t_ht->Draw("lep_pt[1]>>h_ee_sublpt_num_ht",ee+trigs_ht+"ht > 200."+trigs_ee);
 
-  // t_ht->Draw("lep_pt[1]:lep_pt[0]>>h_ee_pt_2d_denom_ht",ee+trigs_ht+"ht > 200.");
-  // t_ht->Draw("lep_pt[1]:lep_pt[0]>>h_ee_pt_2d_num_ht",ee+trigs_ht+"ht > 200."+trigs_ee);
-
-  // t_met->Draw("lep_pt[1]:lep_pt[0]>>h_ee_pt_2d_denom_met",ee+trigs_met+"met_pt > 250.");
-  // t_met->Draw("lep_pt[1]:lep_pt[0]>>h_ee_pt_2d_num_met",ee+trigs_met+"met_pt > 250."+trigs_ee);
-
   // TH2F* h_axis_ee = new TH2F("h_axis",";p_{T} [GeV];Trigger Efficiency",50,20,300,50,0,1);
   // h_axis_ee->GetYaxis()->SetTitleOffset(0.98);
   // h_axis_ee->Draw();
@@ -157,6 +151,12 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   // c_ee->SaveAs(Form("trigeff_dilep_ee%s.eps",suffix.Data()));
   // c_ee->SaveAs(Form("trigeff_dilep_ee%s.png",suffix.Data()));
 
+  t_ht->Draw("lep_pt[1]:lep_pt[0]>>h_ee_pt_2d_denom_ht",ee+trigs_ht+"ht > 200.");
+  t_ht->Draw("lep_pt[1]:lep_pt[0]>>h_ee_pt_2d_num_ht",ee+trigs_ht+"ht > 200."+trigs_ee);
+
+  t_met->Draw("lep_pt[1]:lep_pt[0]>>h_ee_pt_2d_denom_met",ee+trigs_met+"met_pt > 250.");
+  t_met->Draw("lep_pt[1]:lep_pt[0]>>h_ee_pt_2d_num_met",ee+trigs_met+"met_pt > 250."+trigs_ee);
+
   TCanvas* c_ee_2d_ht = new TCanvas("c_ee_2d_ht","c_ee_2d_ht");
   c_ee_2d_ht->SetLogx();
   c_ee_2d_ht->SetLogy();
@@ -174,22 +174,22 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   c_ee_2d_ht->SaveAs(Form("trigeff_dilep_ee_2d_ht%s.eps",suffix.Data()));
   c_ee_2d_ht->SaveAs(Form("trigeff_dilep_ee_2d_ht%s.png",suffix.Data()));
 
-  TCanvas* c_ee_2d_met = new TCanvas("c_ee_2d_met","c_ee_2d_met");
-  c_ee_2d_met->SetLogx();
-  c_ee_2d_met->SetLogy();
-  c_ee_2d_met->cd();
+  // TCanvas* c_ee_2d_met = new TCanvas("c_ee_2d_met","c_ee_2d_met");
+  // c_ee_2d_met->SetLogx();
+  // c_ee_2d_met->SetLogy();
+  // c_ee_2d_met->cd();
 
-  TH2D* h_ee_pt_2d_eff_met = (TH2D*) h_ee_pt_2d_num_met->Clone("h_ee_pt_2d_eff_met");
-  h_ee_pt_2d_eff_met->Divide(h_ee_pt_2d_denom_met);
-  h_ee_pt_2d_eff_met->GetXaxis()->SetMoreLogLabels();
-  h_ee_pt_2d_eff_met->GetYaxis()->SetMoreLogLabels();
-  h_ee_pt_2d_eff_met->GetYaxis()->SetTitleOffset(1.0);
-  h_ee_pt_2d_eff_met->Draw("col text");
+  // TH2D* h_ee_pt_2d_eff_met = (TH2D*) h_ee_pt_2d_num_met->Clone("h_ee_pt_2d_eff_met");
+  // h_ee_pt_2d_eff_met->Divide(h_ee_pt_2d_denom_met);
+  // h_ee_pt_2d_eff_met->GetXaxis()->SetMoreLogLabels();
+  // h_ee_pt_2d_eff_met->GetYaxis()->SetMoreLogLabels();
+  // h_ee_pt_2d_eff_met->GetYaxis()->SetTitleOffset(1.0);
+  // h_ee_pt_2d_eff_met->Draw("col text");
   
-  CMS_lumi( c_ee_2d_met, iPeriod, iPos );
-  c_ee_2d_met->SaveAs(Form("trigeff_dilep_ee_2d_met%s.pdf",suffix.Data()));
-  c_ee_2d_met->SaveAs(Form("trigeff_dilep_ee_2d_met%s.eps",suffix.Data()));
-  c_ee_2d_met->SaveAs(Form("trigeff_dilep_ee_2d_met%s.png",suffix.Data()));
+  // CMS_lumi( c_ee_2d_met, iPeriod, iPos );
+  // c_ee_2d_met->SaveAs(Form("trigeff_dilep_ee_2d_met%s.pdf",suffix.Data()));
+  // c_ee_2d_met->SaveAs(Form("trigeff_dilep_ee_2d_met%s.eps",suffix.Data()));
+  // c_ee_2d_met->SaveAs(Form("trigeff_dilep_ee_2d_met%s.png",suffix.Data()));
 
 
   
@@ -218,22 +218,22 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   c_mm_2d_ht->SaveAs(Form("trigeff_dilep_mm_2d_ht%s.eps",suffix.Data()));
   c_mm_2d_ht->SaveAs(Form("trigeff_dilep_mm_2d_ht%s.png",suffix.Data()));
 
-  TCanvas* c_mm_2d_met = new TCanvas("c_mm_2d_met","c_mm_2d_met");
-  c_mm_2d_met->SetLogx();
-  c_mm_2d_met->SetLogy();
-  c_mm_2d_met->cd();
+  // TCanvas* c_mm_2d_met = new TCanvas("c_mm_2d_met","c_mm_2d_met");
+  // c_mm_2d_met->SetLogx();
+  // c_mm_2d_met->SetLogy();
+  // c_mm_2d_met->cd();
 
-  TH2D* h_mm_pt_2d_eff_met = (TH2D*) h_mm_pt_2d_num_met->Clone("h_mm_pt_2d_eff_met");
-  h_mm_pt_2d_eff_met->Divide(h_mm_pt_2d_denom_met);
-  h_mm_pt_2d_eff_met->GetXaxis()->SetMoreLogLabels();
-  h_mm_pt_2d_eff_met->GetYaxis()->SetMoreLogLabels();
-  h_mm_pt_2d_eff_met->GetYaxis()->SetTitleOffset(1.0);
-  h_mm_pt_2d_eff_met->Draw("col text");
+  // TH2D* h_mm_pt_2d_eff_met = (TH2D*) h_mm_pt_2d_num_met->Clone("h_mm_pt_2d_eff_met");
+  // h_mm_pt_2d_eff_met->Divide(h_mm_pt_2d_denom_met);
+  // h_mm_pt_2d_eff_met->GetXaxis()->SetMoreLogLabels();
+  // h_mm_pt_2d_eff_met->GetYaxis()->SetMoreLogLabels();
+  // h_mm_pt_2d_eff_met->GetYaxis()->SetTitleOffset(1.0);
+  // h_mm_pt_2d_eff_met->Draw("col text");
   
-  CMS_lumi( c_mm_2d_met, iPeriod, iPos );
-  c_mm_2d_met->SaveAs(Form("trigeff_dilep_mm_2d_met%s.pdf",suffix.Data()));
-  c_mm_2d_met->SaveAs(Form("trigeff_dilep_mm_2d_met%s.eps",suffix.Data()));
-  c_mm_2d_met->SaveAs(Form("trigeff_dilep_mm_2d_met%s.png",suffix.Data()));
+  // CMS_lumi( c_mm_2d_met, iPeriod, iPos );
+  // c_mm_2d_met->SaveAs(Form("trigeff_dilep_mm_2d_met%s.pdf",suffix.Data()));
+  // c_mm_2d_met->SaveAs(Form("trigeff_dilep_mm_2d_met%s.eps",suffix.Data()));
+  // c_mm_2d_met->SaveAs(Form("trigeff_dilep_mm_2d_met%s.png",suffix.Data()));
   
 
   // --------- emu
@@ -261,22 +261,22 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   c_em_2d_ht->SaveAs(Form("trigeff_dilep_em_2d_ht%s.eps",suffix.Data()));
   c_em_2d_ht->SaveAs(Form("trigeff_dilep_em_2d_ht%s.png",suffix.Data()));
 
-  TCanvas* c_em_2d_met = new TCanvas("c_em_2d_met","c_em_2d_met");
-  c_em_2d_met->SetLogx();
-  c_em_2d_met->SetLogy();
-  c_em_2d_met->cd();
+  // TCanvas* c_em_2d_met = new TCanvas("c_em_2d_met","c_em_2d_met");
+  // c_em_2d_met->SetLogx();
+  // c_em_2d_met->SetLogy();
+  // c_em_2d_met->cd();
 
-  TH2D* h_em_pt_2d_eff_met = (TH2D*) h_em_pt_2d_num_met->Clone("h_em_pt_2d_eff_met");
-  h_em_pt_2d_eff_met->Divide(h_em_pt_2d_denom_met);
-  h_em_pt_2d_eff_met->GetXaxis()->SetMoreLogLabels();
-  h_em_pt_2d_eff_met->GetYaxis()->SetMoreLogLabels();
-  h_em_pt_2d_eff_met->GetYaxis()->SetTitleOffset(1.0);
-  h_em_pt_2d_eff_met->Draw("col text");
+  // TH2D* h_em_pt_2d_eff_met = (TH2D*) h_em_pt_2d_num_met->Clone("h_em_pt_2d_eff_met");
+  // h_em_pt_2d_eff_met->Divide(h_em_pt_2d_denom_met);
+  // h_em_pt_2d_eff_met->GetXaxis()->SetMoreLogLabels();
+  // h_em_pt_2d_eff_met->GetYaxis()->SetMoreLogLabels();
+  // h_em_pt_2d_eff_met->GetYaxis()->SetTitleOffset(1.0);
+  // h_em_pt_2d_eff_met->Draw("col text");
   
-  CMS_lumi( c_em_2d_met, iPeriod, iPos );
-  c_em_2d_met->SaveAs(Form("trigeff_dilep_em_2d_met%s.pdf",suffix.Data()));
-  c_em_2d_met->SaveAs(Form("trigeff_dilep_em_2d_met%s.eps",suffix.Data()));
-  c_em_2d_met->SaveAs(Form("trigeff_dilep_em_2d_met%s.png",suffix.Data()));
+  // CMS_lumi( c_em_2d_met, iPeriod, iPos );
+  // c_em_2d_met->SaveAs(Form("trigeff_dilep_em_2d_met%s.pdf",suffix.Data()));
+  // c_em_2d_met->SaveAs(Form("trigeff_dilep_em_2d_met%s.eps",suffix.Data()));
+  // c_em_2d_met->SaveAs(Form("trigeff_dilep_em_2d_met%s.png",suffix.Data()));
 
   f_out->Write();
   f_out->Close();
