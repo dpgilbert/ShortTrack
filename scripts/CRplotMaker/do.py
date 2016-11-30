@@ -80,6 +80,17 @@ MT2PlotMaker(input_dir, ["qcd_ht", "wjets_ht", "zinv_ht"], "data_Run2016", "crqc
 # Lost Lepton MT2 plots, normalized in each HT, nj, nb bin
 makeNormalizedLostLep(input_dir, ["wjets_ht", "top"], "data_Run2016", output_dir, exts, ht_regs=["VL","L","M","H","UH"])
 
+# # Lost Lepton Hybrid MT2 plots
+# makeLostLepHybrid(input_dir, ["lostlepFromCRs"], "data_Run2016", output_dir, exts, ht_regs=["VL","L","M","H","UH"])
+# makeLostLepHybrid(input_dir, ["lostlepFromCRs"], "data_Run2016", output_dir, exts, ht_regs=["L","M","H","UH"])
+# makeLostLepHybrid(input_dir, ["lostlepFromCRs"], "data_Run2016", output_dir, exts, ht_regs=["M","H","UH"])
+# makeLostLepHybrid(input_dir, ["lostlepFromCRs"], "data_Run2016", output_dir, exts, ht_regs=["H","UH"])
+# makeLostLepHybrid(input_dir, ["lostlepFromCRs"], "data_Run2016", output_dir, exts, ht_regs=["VL"])
+# makeLostLepHybrid(input_dir, ["lostlepFromCRs"], "data_Run2016", output_dir, exts, ht_regs=["L"])
+# makeLostLepHybrid(input_dir, ["lostlepFromCRs"], "data_Run2016", output_dir, exts, ht_regs=["M"])
+# makeLostLepHybrid(input_dir, ["lostlepFromCRs"], "data_Run2016", output_dir, exts, ht_regs=["H"])
+# makeLostLepHybrid(input_dir, ["lostlepFromCRs"], "data_Run2016", output_dir, exts, ht_regs=["UH"])
+
 # # example of using no data
 # MT2PlotMaker(input_dir, ["top","wjets_ht","qcd_ht"], None, "srbaseM", pd.mt2_only, output_dir, exts)
 

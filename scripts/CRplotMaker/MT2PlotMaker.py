@@ -222,3 +222,115 @@ def makeNormalizedLostLep(indir, samples, data, outdir='.', exts=['png','pdf'], 
         fmc[i].Close()
     fdata.Close()
 
+def makeLostLepHybrid(indir, samples=['lostlepFromCRs'], data='data_Run2016', outdir='.', exts=['png','pdf'], ht_regs=None):
+    ## makes plots of lost lepton CR (crsl) hybrid MT2 yields integrated over HT, Njet, Nbjet bins
+    ## Makes 0b, 1b, inclusive plots and puts in directory called "lostlepHybrid"
+
+    fmc = [ROOT.TFile(os.path.join(indir,s+".root"), "READ") for s in samples]
+    fdata = ROOT.TFile(os.path.join(indir,data+".root"), "READ")
+
+    regions_0b = ["1","4","7","12"]
+    regions_ge1b = ["2","3","5","6","8","10","13","14","15"]
+    regions_incl = regions_0b + regions_ge1b
+    
+    regions = [regions_0b, regions_ge1b, regions_incl]
+    region_names = ["0b","ge1b","incl"]
+
+    if ht_regs == None:
+        ht_regs = ["VL","L","M","H","UH"]
+
+    suffix = ''
+
+    bkg_names = [utils.GetSampleName(s) for s in samples]
+
+    try:
+        os.makedirs(os.path.join(outdir, "lostlepHybrid"))
+    except:
+        pass
+
+    #loop over sets of regions (0b, >=1b, inclusive)
+    for iregs,regs in enumerate(regions):
+        h_mt2binsAll_mc_cr_vec = [None for s in samples]
+        h_mt2binsAll_data_cr = None
+        # loop over set of SRs within the given region
+        for isr, sr in enumerate(regs):
+            for ht_reg in ht_regs:
+                if ht_reg == "VL" and sr in ["4","5","6","7","8","10"]:
+                    continue
+                elif ht_reg in ["L","M","H","UH"] and sr in ["12","13","14","15"]:
+                    continue
+                # this bin appears to be empty in data and MC..
+                elif ht_reg == "UH" and sr == "3":
+                    continue
+                
+                # form the aggregated histograms
+                for i in range(len(fmc)):
+                    if h_mt2binsAll_mc_cr_vec[i] == None:
+                        h_mt2binsAll_mc_cr_vec[i] = fmc[i].Get("sr{0}{1}/h_mt2binsAllCRMChybrid".format(sr,ht_reg)).Clone("h_mt2binsAll_mc_cr_"+str(i))
+                    else:
+                        h_mt2binsAll_mc_cr_vec[i].Add(fmc[i].Get("sr{0}{1}/h_mt2binsAllCRMChybrid".format(sr,ht_reg)))
+
+                # somtimes 0 events in data CR
+                try:
+                    if h_mt2binsAll_data_cr == None:
+                        h_mt2binsAll_data_cr = fdata.Get("crsl{0}{1}/h_mt2binsAll".format(sr,ht_reg)).Clone("h_mt2binsAll_data_cr")
+                    else:
+                        h_mt2binsAll_data_cr.Add(fdata.Get("crsl{0}{1}/h_mt2binsAll".format(sr,ht_reg)))
+                except (TypeError, AttributeError):
+                    pass
+
+        nbins = h_mt2binsAll_data_cr.GetNbinsX()
+        systs = [0 for i in range(nbins)]
+        # ## get systematic in first bin
+        # incr = 0
+        # for ibin in range(2,nbins+1):
+        #     incr += 0.4 / (nbins-1) * (ibin-1) * h_mt2bins_data.GetBinContent(i)
+        # systs[0] = incr/h_mt2bins_data.GetBinContent(1)
+        # ## get systematics in other bins
+        # for ibin in range(2,nbins+1):
+        #     systs[ibin-1] = 0.4 / (nbins-1) * (ibin-1)
+
+        subtitles = ["#geq 2j, 1 lepton", "M_{T2} > 200 GeV","H_{T} > 250 GeV"]
+        if iregs==0:
+            subtitles[0] = "#geq 2j, 0b, 1 lepton"
+        if iregs==1:
+            subtitles[0] = "#geq 2j, #geq 1b, 1 lepton"
+        if ht_regs[0]=="VL" and len(ht_regs) == 1:
+            subtitles[2] = "250 < H_{T} < 450 GeV"
+            suffix = "_HT250to450"
+        elif ht_regs[0]=="L" and len(ht_regs) == 1:
+            subtitles[2] = "450 < H_{T} < 575 GeV"
+            suffix = "_HT450to575"
+        elif ht_regs[0]=="L":
+            subtitles[2] = "H_{T} > 450 GeV"
+            suffix = "_HTge450"
+        elif ht_regs[0]=="M" and len(ht_regs) == 1:
+            subtitles[2] = "575 < H_{T} < 1000 GeV"
+            suffix = "_HT575to1000"
+        elif ht_regs[0]=="M":
+            subtitles[2] = "H_{T} > 575 GeV"
+            suffix = "_HTge575"
+        elif ht_regs[0]=="H" and len(ht_regs) == 1:
+            subtitles[2] = "1000 < H_{T} < 1500 GeV"
+            suffix = "_HT1000to1500"
+        elif ht_regs[0]=="H":
+            subtitles[2] = "H_{T} > 1000 GeV"
+            suffix = "_HTge1000"
+        elif ht_regs[0]=="UH":
+            subtitles[2] = "H_{T} > 1500 GeV"
+            suffix = "_HTge1500"
+            
+        for ext in exts:
+            saveAs = os.path.join(outdir, "lostlepHybrid", "lostlepHybrid_{0}{1}_mt2bins.{2}".format(region_names[iregs],suffix,ext))
+            ppm.plotDataMC(h_mt2binsAll_mc_cr_vec, bkg_names, h_mt2binsAll_data_cr, doPause=False, xAxisTitle="M_{T2}",
+                           lumi=pd.lumi, lumiUnit=pd.lumiUnit, title=None, subtitles=subtitles, isLog=True,
+                           saveAs=saveAs, scaleMCtoData=False, xAxisUnit="GeV", doSort=False, doMT2Colors=True,
+                           markerSize=1.0, subtitleSize=0.040, doBkgError=True, doOverflow=False,
+#                           cmsTextSize=0.040, doPull=False, convertToPoisson=True, drawSystematicBand=True,
+#                           systematics=systs)
+                           cmsTextSize=0.040, doPull=False, convertToPoisson=True, drawSystematicBand=False)
+
+    for i in range(len(fmc)):
+        fmc[i].Close()
+    fdata.Close()
+
