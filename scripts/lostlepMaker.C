@@ -54,6 +54,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     TString n_mt2bins_name = directory + "/h_n_mt2bins";
     TString crdir = "crsl"+TString(dirs.at(idir));
     TString fullhistnameSL = crdir+"/h_mt2bins";
+    TString fullhistnameSLallbins = crdir+"/h_mt2binsAll";
     TString fullhistnameSLfinebin = crdir+"/h_mt2";
     TString fullhistnameSLHT = crdir+"/h_htbins";
     TString fullhistnameSLNj = crdir+"/h_njbins";
@@ -140,6 +141,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     }
 
     int lastbin_hybrid = 1; // hybrid: will integrate all MT2 bins INCLUDING this one
+    float lastmt2val_hybrid = 0.;
     // check that histograms exist
     TH1D* h_data_cr = (TH1D*) f_data->Get(fullhistnameSL);
     if (!histMapCR["h_lostlepMC_cr"] || !h_data_cr) {
@@ -154,6 +156,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
 	for ( int ibin = h_data_cr->GetNbinsX()+1; ibin >= 1; --ibin ) {
 	  if (h_data_cr->Integral(ibin,-1) < hybrid_nevent_threshold) continue;
 	  lastbin_hybrid = ibin;
+	  lastmt2val_hybrid = h_data_cr->GetBinLowEdge(ibin);
 	  break;
 	}
       }
@@ -225,6 +228,16 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
       cout<<"couldn't find lostlep MC CR finebin hist: "<<fullhistnameSLfinebin<<endl;
       // make empty histogram
       h_lostlepMC_rescaled_cr_finebin = new TH1D("h_mt2", "h_mt2", 150, 0, 1500);
+    }
+
+    TH1D* h_lostlepMC_cr_allbins = (TH1D*) f_lostlep->Get(fullhistnameSLallbins);
+    TH1D* h_lostlepMC_rescaled_cr_allbins = 0;
+    if(h_lostlepMC_cr_allbins) {
+      h_lostlepMC_rescaled_cr_allbins = (TH1D*) h_lostlepMC_cr_allbins->Clone("h_mt2binsAllCRMChybrid");
+    } else {
+      cout<<"couldn't find lostlep MC CR allbins hist: "<<fullhistnameSLallbins<<endl;
+      // make empty histogram - will be incompatible with other copies of this hist..
+      h_lostlepMC_rescaled_cr_allbins = new TH1D("h_mt2binsAll", "h_mt2binsAll", 150, 0, 1500);
     }
 
     TH1D* h_htbins_lostlepMC_cr = (TH1D*) f_lostlep->Get(fullhistnameSLHT);
@@ -325,6 +338,34 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     h_njbins_lostlepMC_rescaled_cr->Scale(norm);
     h_nbjbins_lostlepMC_rescaled_cr->Scale(norm);
 
+    // mt2binsAll: normalize MC to data below lastmt2val_hybrid, then MC to the data integral above
+    TH1D* h_data_cr_allbins = (TH1D*) f_data->Get(fullhistnameSLallbins);
+    if (h_data_cr_allbins) {
+      int lastbin_hybrid_allbins = h_data_cr_allbins->FindBin(lastmt2val_hybrid);
+      for (int ibin = 1; ibin <= h_data_cr_allbins->GetNbinsX(); ++ibin) {
+	// using bin-by-bin: set MC to data yield
+	if (ibin < lastbin_hybrid_allbins) {
+	  double data_val = h_data_cr_allbins->GetBinContent(ibin);
+	  double mc_val = h_lostlepMC_cr_allbins->GetBinContent(ibin);
+	  double mc_err = h_lostlepMC_cr_allbins->GetBinError(ibin);
+	  h_lostlepMC_rescaled_cr_allbins->SetBinContent(ibin, data_val);
+	  if (mc_val > 0.) h_lostlepMC_rescaled_cr_allbins->SetBinError(ibin, mc_err * data_val/mc_val);
+	}
+	else {
+	  double data_int = h_data_cr_allbins->Integral(lastbin_hybrid_allbins,-1);
+	  double mc_int = h_lostlepMC_cr_allbins->Integral(lastbin_hybrid_allbins,-1);
+	  double mc_val = h_lostlepMC_cr_allbins->GetBinContent(ibin);
+	  double mc_err = h_lostlepMC_cr_allbins->GetBinError(ibin);
+	  if (mc_int > 0.) {
+	    h_lostlepMC_rescaled_cr_allbins->SetBinContent(ibin, mc_val * data_int/mc_int);
+	    h_lostlepMC_rescaled_cr_allbins->SetBinError(ibin, mc_err * data_int/mc_int);
+	  }
+	}
+      }
+    } else {
+      cout << "WARNING: didn't find histogram in data: " << fullhistnameSLallbins << endl;
+    }
+
     // Make directory and plot(s) in the output file
     TDirectory* dir = 0;
     dir = (TDirectory*)outfile->Get(directory.Data());
@@ -418,7 +459,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     }
     //    pred_finebin->Print("all");
 
-    pred->Print("all");
+    //    pred->Print("all");
     
     pred->Write();
     pred_finebin->Write();
@@ -436,7 +477,8 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
       iter->second->Write();
     }
     h_lostlepMC_rescaled_cr_finebin->Write();
-    h_data_cr_finebin_save->Write();  
+    h_data_cr_finebin_save->Write();
+    h_lostlepMC_rescaled_cr_allbins->Write();
     h_htbins_lostlepMC_rescaled_cr->Write();
     h_njbins_lostlepMC_rescaled_cr->Write();
     h_nbjbins_lostlepMC_rescaled_cr->Write();

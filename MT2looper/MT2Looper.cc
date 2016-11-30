@@ -62,6 +62,8 @@ const int n_njbins = 4;
 const float njbins[n_njbins+1] = {1, 2, 4, 7, 12};
 const int n_nbjbins = 4;
 const float nbjbins[n_nbjbins+1] = {0, 1, 2, 3, 6};
+const int n_mt2bins_SRBase = 9;
+const float SRBase_mt2bins[n_mt2bins_SRBase+1] = {200, 300, 400, 500, 600, 800, 1000, 1200, 1400, 1800}; 
 const int n_ptVbins = 19;
 float logstep(int i) {
   return TMath::Power(10, 2+4.5e-02*i);
@@ -253,8 +255,7 @@ void MT2Looper::SetSignalRegions(){
   SRBase.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
   SRBase.SetVarCRSL("nlep", 1, 2);
   SRBase.SetVarCRSL("passesHtMet", 1, 2);
-  float SRBase_mt2bins[10] = {200, 300, 400, 500, 600, 800, 1000, 1200, 1400, 1800}; 
-  SRBase.SetMT2Bins(9, SRBase_mt2bins);
+  SRBase.SetMT2Bins(n_mt2bins_SRBase, (float*) SRBase_mt2bins);
 
   std::vector<std::string> vars = SRBase.GetListOfVariables();
   TDirectory * dir = (TDirectory*)outfile_->Get((SRBase.GetName()).c_str());
@@ -2192,6 +2193,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
   plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
   plot1D("h_mt2bins"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  plot1D("h_mt2binsAll"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins_SRBase, SRBase_mt2bins);
   plot1D("h_htbins"+s,       ht_,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins, htbins);
   plot1D("h_htbins2"+s,       ht_,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins2, htbins2);
   plot1D("h_njbins"+s,       nJet30_,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
