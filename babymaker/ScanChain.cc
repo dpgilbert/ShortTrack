@@ -667,14 +667,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               // don't save
             }
             // leptons from taus -- also allow gluon grandparants for ttZ etc
-            else if (motherId == 15 && (grandmotherId == 25 || grandmotherId == 24 || grandmotherId == 23 || grandmotherId == 21 || grandmotherId == 15)) {
+	    //            else if (motherId == 15 && (grandmotherId == 25 || grandmotherId == 24 || grandmotherId == 23 || grandmotherId == 21 || grandmotherId == 15)) {
+            else if (motherId == 15 && (grandmotherId == 25 || grandmotherId == 24 || grandmotherId == 23 || grandmotherId == 15)) {
               goodLepFromTau = true;
             } 
             // leptons from W/Z/H -- also allow gluons for ttZ etc
-            else if (motherId == 25 || motherId == 24 || motherId == 23 || motherId == 21) {
+	    //            else if (motherId == 25 || motherId == 24 || motherId == 23 || motherId == 21) {
+            else if (motherId == 25 || motherId == 24 || motherId == 23) {
               goodLep = true;
 	      // leptons in ttZ can have gluon mothers..
-	      if (motherId == 23 || motherId == 21) goodLepFromZ = true;
+	      //	      if (motherId == 23 || motherId == 21) goodLepFromZ = true;
+	      if (motherId == 23) goodLepFromZ = true;
             } 
           } // status 1 e or mu
 
@@ -685,10 +688,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               // don't save
             }
             // leptons from W/Z/H -- also allow gluon grandparants for ttZ etc
-            else if (motherId == 25 || motherId == 24 || motherId == 23 || motherId == 21) {
+	    //            else if (motherId == 25 || motherId == 24 || motherId == 23 || motherId == 21) {
+            else if (motherId == 25 || motherId == 24 || motherId == 23) {
               goodTau = true;
 	      // leptons in ttZ can have gluon mothers..
-	      if (motherId == 23 || motherId == 21) goodLepFromZ = true;
+	      //	      if (motherId == 23 || motherId == 21) goodLepFromZ = true;
+	      if (motherId == 23) goodLepFromZ = true;
             }
 	    
 	    // find decay mode - only count charged daughters
@@ -733,7 +738,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
 	  // neutrinos -- counting based on decays in NLO ttZ sample
 	  if (pdgId == 12 || pdgId == 14 || pdgId == 16) {
-	    if ((status == 1 && motherId == 23) || (status == 23 && motherId == 21)) ++ngenNuFromZ;
+	    //	    if ((status == 1 && motherId == 23) || (status == 23 && motherId == 21)) ++ngenNuFromZ;
+	    if (status == 1 && motherId == 23) ++ngenNuFromZ;
 	  }
 
           if (goodLep || goodTau || goodLepFromTau) {
