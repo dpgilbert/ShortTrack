@@ -310,7 +310,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
   int lastbin_H46J  = purityRandNorm(h_TemplateH46J, "crdybaseH/h_mt2bins46J", fData, fZinv, fDY);
   TH1D* h_TemplateH7J        = (TH1D*) fData->Get("crdybaseH/h_mt2bins7J");    
   int lastbin_H7J   = purityRandNorm(h_TemplateH7J, "crdybaseH/h_mt2bins7J", fData, fZinv, fDY);
-  TH1D* h_TemplateUH        = (TH1D*) fData->Get("crdybaseL/h_mt2bins");    
+  TH1D* h_TemplateUH        = (TH1D*) fData->Get("crdybaseUH/h_mt2bins");    
   int lastbin_UH    = purityRandNorm(h_TemplateUH, "crdybaseUH/h_mt2bins", fData, fZinv, fDY);
 
 
