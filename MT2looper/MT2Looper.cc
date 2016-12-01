@@ -1148,7 +1148,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
              && (abs(t.lep_pdgId[1]) == 13 ||  t.lep_tightId[1] > 0 )
 	     && (fabs(t.zll_mass - 91.19) < 20 ) 
 	     && (t.zll_pt > 200 ) 
-	     && t.lep_pt[0] > 25 && t.lep_pt[1] > 20
+	     && t.lep_pt[0] > 100 && t.lep_pt[1] > 30
 	     // && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10)// OLDTRIGS
 	     // && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso) //NEWTRIGS
 	     && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso || t.HLT_DoubleEl33) // TRIGS for Moriond 2017
@@ -1169,7 +1169,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
              && (abs(t.lep_pdgId[1]) == 13 ||  t.lep_tightId[1] > 0 )
 	     && (fabs(t.zll_mass - 91.19) < 20 ) 
              && (t.zll_pt > 200 )
-	     && t.lep_pt[0] > 25 && t.lep_pt[1] > 20
+	     && t.lep_pt[0] > 100 && t.lep_pt[1] > 30
 	     && (!t.isData || t.HLT_MuX_Ele12 || t.HLT_Mu8_EleX || t.HLT_Mu30_Ele30_NonIso || t.HLT_Mu33_Ele33_NonIso || t.HLT_Photon165_HE10 || t.HLT_SingleMu_NonIso) //X-Trigs
              ) {
 	  // no additional explicit lepton veto
