@@ -20,6 +20,7 @@ bool doHybridInclusiveTemplate = true; // take kMT2 from inclusive templates
 float hybrid_nevent_threshold = 50.;
 float rSFOF = 1.11;
 float rSFOFerr = 0.15;
+bool verbose = false;
 
 int purityRandNorm(TH1D* h_template, TString name , TFile * fData, TFile * fZinv, TFile * fDY) {
 
@@ -283,7 +284,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
   TH1D* h_TemplateVL23J      = (TH1D*) fData->Get("crdybaseVL/h_mt2bins23J"); 
   int lastbin_VL23J = purityRandNorm(h_TemplateVL23J, "crdybaseVL/h_mt2bins23J", fData, fZinv, fDY);
   TH1D* h_TemplateVL2J       = (TH1D*) fData->Get("crdybaseVL/h_mt2bins"); 
-  int lastbin_VL2J  = purityRandNorm(h_TemplateVL23J, "crdybaseVL/h_mt2bins", fData, fZinv, fDY);
+  int lastbin_VL2J  = purityRandNorm(h_TemplateVL2J, "crdybaseVL/h_mt2bins", fData, fZinv, fDY);
   TH1D* h_TemplateVL4J       = (TH1D*) fData->Get("crdybaseVL/h_mt2bins4J");  
   int lastbin_VL4J  = purityRandNorm(h_TemplateVL4J, "crdybaseVL/h_mt2bins4J", fData, fZinv, fDY);  
   TH1D* h_TemplateL23J       = (TH1D*) fData->Get("crdybaseL/h_mt2bins23J");
@@ -455,27 +456,15 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
     TH1D* purityCard  = (TH1D*) purityData->Clone("purityCard");   
     TH1D* CRyieldCard  = (TH1D*) CRyield->Clone("CRyieldCard");
     
-    double integratedYieldErr = 0;
-    float integratedYield = CRyield->IntegralAndError(0,-1,integratedYieldErr);
-    float integratedDen = integratedYield;
-    float EM = 0;
-    if (hDataEM) EM =  hDataEM->Integral(0, -1*rSFOF);
-    float integratedNum = integratedDen - EM;
-    if (integratedNum < 0) integratedNum = 0;
-    float integratedPurity = integratedNum/integratedDen;
-    float integratedPurityErr = sqrt(integratedPurity*(1-integratedPurity)/integratedDen);// sqrt(e(1-e)/N)
-    cout<<"Found SF="<<integratedYield<<" and OF="<<EM<<", so purity is "<<integratedPurity<<endl;
-    
+  
     if (  doHybridSimple || (doHybridInclusiveTemplate && h_MT2Template==0) ) { 
       // purity needs to describe the integrated purity of the CR
       // ratio needs to be modified so that the last N bins include kMT2
       // CRyield needs to be modified so that the last N bins have the same yield (which is the integral over those N bins)
+      if (verbose) cout<<" Implementing simple hybrid "<<endl;
 
       for ( int ibin=1; ibin <= hZinv->GetNbinsX(); ++ibin ) {
 
-	purityCard->SetBinContent(ibin, integratedPurity);
-	purityCard->SetBinError(ibin, integratedPurityErr);
-	
 	if (ibin < lastbin_hybrid) continue;
 	
 	double integratedYieldErr = 0;
@@ -483,6 +472,16 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 	CRyieldCard->SetBinContent(ibin, integratedYield);
 	CRyieldCard->SetBinError(ibin, integratedYieldErr);
 	
+	float integratedDen = integratedYield;
+	float EM = 0;
+	if (hDataEM) EM =  hDataEM->Integral(lastbin_hybrid, -1*rSFOF);
+	float integratedNum = integratedDen - EM;
+	if (integratedNum < 0) integratedNum = 0;
+	float integratedPurity = integratedNum/integratedDen;
+	float integratedPurityErr = sqrt(integratedPurity*(1-integratedPurity)/integratedDen);// sqrt(e(1-e)/N)   
+	purityCard->SetBinContent(ibin, integratedPurity);
+	purityCard->SetBinError(ibin, integratedPurityErr);
+
 	float integratedZinv = 1;
 	float kMT2 = 0;
 	integratedZinv = hZinv->Integral(lastbin_hybrid, -1);
@@ -498,10 +497,14 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       // purity: also flat
       // ratio: this contains the normalized template scaled by the Zinv/DY ratio for this control region
       
+      if (verbose) cout<<" Implementing hybrid with template "<<endl;
+
       // MT2template needs to be rebinned for this topological region Rebin
       double *TopoRegionBins = hZinv->GetXaxis()->GetXbins()->fArray;
       int nTopoRegionBins    = hZinv->GetXaxis()->GetNbins();
       TH1D* h_MT2TemplateRebin = (TH1D*) h_MT2Template->Rebin(nTopoRegionBins, "h_MT2TemplateRebin", TopoRegionBins);
+      if (verbose) h_MT2TemplateRebin->Print("all");
+      if (verbose) cout<<"Ratio for this control region is "<<ratioValue<<endl;
 
       double integratedYieldErr = 0;
       float integratedYield = CRyield->IntegralAndError(0,-1,integratedYieldErr);
@@ -513,6 +516,8 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       if (integratedNum < 0) integratedNum = 0;
       float integratedPurity = integratedNum/integratedDen;
       float integratedPurityErr = sqrt(integratedPurity*(1-integratedPurity)/integratedDen);// sqrt(e(1-e)/N)
+      if (verbose) cout<<"Found SF="<<integratedYield<<" and OF="<<EM<<", so purity is "<<integratedPurity<<endl;
+
 
       for ( int ibin=1; ibin <= hZinv->GetNbinsX(); ++ibin ) {
 	CRyieldCard->SetBinContent(ibin, integratedYield);
