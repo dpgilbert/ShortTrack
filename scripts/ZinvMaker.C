@@ -17,7 +17,7 @@
 using namespace std;
 bool doHybridSimple = false; // hybrid estimate: uses CR MT2 binning until the (MC) integral is less than the threshold below
 bool doHybridInclusiveTemplate = true; // take kMT2 from inclusive templates
-float hybrid_nevent_threshold = 10.;
+float hybrid_nevent_threshold = 50.;
 float rSFOF = 1.11;
 float rSFOFerr = 0.15;
 
@@ -43,9 +43,9 @@ int purityRandNorm(TH1D* h_template, TString name , TFile * fData, TFile * fZinv
   if (hEMU) h_template->Add(hEMU, -1*rSFOF);
 
   // find the last bin
-  for ( int ibin=1; ibin <= h_template->GetNbinsX(); ++ibin ) {
+  for ( int ibin=1; ibin <= hDY->GetNbinsX(); ++ibin ) {
     float integratedYield = 0;
-    integratedYield = h_template->Integral(ibin,-1);
+    integratedYield = hDY->Integral(ibin,-1);
     if (integratedYield < hybrid_nevent_threshold) {
       if (ibin == 1) lastbin_hybrid = 1;
       else lastbin_hybrid = ibin-1;
@@ -408,10 +408,10 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       //  choose the last bin to try to have at least hybrid_nevent_threshold integrated events
 
       // Calculate last bin on local histogram
-      for ( int ibin=1; ibin <= hData->GetNbinsX(); ++ibin ) {
+      for ( int ibin=1; ibin <= hDY->GetNbinsX(); ++ibin ) {
 	float top = 0, integratedYield = 0;
-	if (hDataEM) top = hDataEM->Integral(ibin,-1*rSFOF);
-	integratedYield = hData->Integral(ibin,-1) - top;
+	//if (hDataEM) top = hDataEM->Integral(ibin,-1*rSFOF);
+	integratedYield = hDY->Integral(ibin,-1) - top;
 	if (integratedYield < hybrid_nevent_threshold) {
 	  if (ibin == 1) lastbin_hybrid = 1;
 	  else lastbin_hybrid = ibin-1;
