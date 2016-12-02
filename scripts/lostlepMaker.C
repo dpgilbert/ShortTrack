@@ -19,8 +19,8 @@ using namespace std;
 
 //options
 bool verbose = false;
-bool doHybrid = true; // hybrid estimate: uses CR MT2 binning until the data CR integral is less than the threshold below
-float hybrid_nevent_threshold = 10.;
+bool doHybrid = true; // hybrid estimate: uses CR MT2 binning until the MC CR integral is less than the threshold below
+float hybrid_nevent_threshold = 50.;
 
 const int n_htbins = 5;
 const float htbins[n_htbins+1] = {200, 450., 575., 1000., 1500., 3000.};
@@ -141,7 +141,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     }
 
     int lastbin_hybrid = 1; // hybrid: will integrate all MT2 bins INCLUDING this one
-    float lastmt2val_hybrid = 0.;
+    float lastmt2val_hybrid = 200.;
     // check that histograms exist
     TH1D* h_data_cr = (TH1D*) f_data->Get(fullhistnameSL);
     if (!histMapCR["h_lostlepMC_cr"] || !h_data_cr) {
@@ -150,11 +150,11 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     } else {
 
       if (doHybrid) {
-	// hybrid method: use data CR yield histogram to determine how many MT2 bins to use
+	// hybrid method: use MC CR yield histogram to determine how many MT2 bins to use
 	//  by default: use all MT2 bins integrated (no bin-by-bin).
 	//  start from the last bin and add bins at lower MT2 until we get above the hybrid_nevent_threshold
-	for ( int ibin = h_data_cr->GetNbinsX()+1; ibin >= 1; --ibin ) {
-	  if (h_data_cr->Integral(ibin,-1) < hybrid_nevent_threshold) continue;
+	for ( int ibin = histMapCR["h_lostlepMC_cr"]->GetNbinsX()+1; ibin >= 1; --ibin ) {
+	  if (histMapCR["h_lostlepMC_cr"]->Integral(ibin,-1) < hybrid_nevent_threshold) continue;
 	  lastbin_hybrid = ibin;
 	  lastmt2val_hybrid = h_data_cr->GetBinLowEdge(ibin);
 	  break;
@@ -192,10 +192,6 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     //can remove once weights added to looper
     alphaMap["alphaHist_mtcut"]->Scale(1.03);
 
-    // store info on which bin is the last used in hybrid method
-    TH1D* h_lastbinHybrid = new TH1D("h_lastbinHybrid",";last bin",1,0,1);
-    h_lastbinHybrid->SetBinContent(1,lastbin_hybrid);
-    
     double data_cr_totalyield = 0;
     TH1D* h_lostlepDD_cr = 0;
     TH1D* h_lostlepDD_cr_datacard = 0;
@@ -461,6 +457,12 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
 
     //    pred->Print("all");
     
+    // store info on which bin / MT2 threshold is the last used in hybrid method
+    TH1D* h_lastbinHybrid = new TH1D("h_lastbinHybrid",";last bin",1,0,1);
+    h_lastbinHybrid->SetBinContent(1,lastbin_hybrid);
+    TH1D* h_lastmt2Hybrid = new TH1D("h_lastmt2Hybrid",";last M_{T2} value",1,0,1);
+    h_lastmt2Hybrid->SetBinContent(1,lastmt2val_hybrid);
+    
     pred->Write();
     pred_finebin->Write();
     Syst->Write();
@@ -492,6 +494,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     h_njets_LOW->Write();
     h_njets_HI->Write();
     h_lastbinHybrid->Write();
+    h_lastmt2Hybrid->Write();
     
   } // loop over signal regions
 
