@@ -325,7 +325,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 
     TH1D* hData = (TH1D*) fData->Get(fullhistnameDY);    
     TH1D* hDY   = (TH1D*) fDY->Get(fullhistnameDY);    
-    TH1D* hDataEM   = (TH1D*) fDY->Get(fullhistnameEM);    
+    TH1D* hDataEM   = (TH1D*) fData->Get(fullhistnameEM);    
     TH1D* hZinv = (TH1D*) fZinv->Get(fullhistname);    
     TH1D* hTop  = (TH1D*) fTop->Get(fullhistnameDY);    
     
@@ -434,7 +434,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
     purityMC->Divide(hDY);
 
     TH1D* purityData = (TH1D*) hData->Clone("h_mt2binsPurityData");
-    if (hDataEM) purityData->Add(hDataEM, -1*rSFOFerr); // Will apply rSFOFerr as additional uncertainty in the cardMaker
+    if (hDataEM) purityData->Add(hDataEM, -1*rSFOF); 
     purityData->Divide(purityData, hData, 1, 1, "B");
     
     TH1D* Stat = (TH1D*) CRyield->Clone("h_mt2binsStat");
@@ -455,12 +455,26 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
     TH1D* purityCard  = (TH1D*) purityData->Clone("purityCard");   
     TH1D* CRyieldCard  = (TH1D*) CRyield->Clone("CRyieldCard");
     
+    double integratedYieldErr = 0;
+    float integratedYield = CRyield->IntegralAndError(0,-1,integratedYieldErr);
+    float integratedDen = integratedYield;
+    float EM = 0;
+    if (hDataEM) EM =  hDataEM->Integral(0, -1*rSFOF);
+    float integratedNum = integratedDen - EM;
+    if (integratedNum < 0) integratedNum = 0;
+    float integratedPurity = integratedNum/integratedDen;
+    float integratedPurityErr = sqrt(integratedPurity*(1-integratedPurity)/integratedDen);// sqrt(e(1-e)/N)
+    cout<<"Found SF="<<integratedYield<<" and OF="<<EM<<", so purity is "<<integratedPurity<<endl;
+    
     if (  doHybridSimple || (doHybridInclusiveTemplate && h_MT2Template==0) ) { 
-      // purity needs to be mofidied so the last N bins all describe the purity of the integrated yield
+      // purity needs to describe the integrated purity of the CR
       // ratio needs to be modified so that the last N bins include kMT2
       // CRyield needs to be modified so that the last N bins have the same yield (which is the integral over those N bins)
 
       for ( int ibin=1; ibin <= hZinv->GetNbinsX(); ++ibin ) {
+
+	purityCard->SetBinContent(ibin, integratedPurity);
+	purityCard->SetBinError(ibin, integratedPurityErr);
 	
 	if (ibin < lastbin_hybrid) continue;
 	
@@ -468,16 +482,6 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 	float integratedYield = CRyield->IntegralAndError(lastbin_hybrid,-1,integratedYieldErr);
 	CRyieldCard->SetBinContent(ibin, integratedYield);
 	CRyieldCard->SetBinError(ibin, integratedYieldErr);
-
-	float integratedDen = integratedYield;
-	float EM = 0;
-	if (hDataEM) EM =  hDataEM->Integral(lastbin_hybrid, -1*rSFOF);
-	float integratedNum = integratedDen - EM;
-	if (integratedNum < 0) integratedNum = 0;
-	float integratedPurity = integratedNum/integratedDen;
-	float integratedPurityErr = sqrt(integratedPurity*(1-integratedPurity)/integratedDen);// sqrt(e(1-e)/N)
-	purityCard->SetBinContent(ibin, integratedPurity);
-	purityCard->SetBinError(ibin, integratedPurityErr);
 	
 	float integratedZinv = 1;
 	float kMT2 = 0;
