@@ -1739,6 +1739,11 @@ namespace mt2 {
     baseSR.SetVarCRSL("met", 250, -1);
     baseSR.SetVarCRSL("deltaPhiMin", 0.3, -1);
     baseSR.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
+    baseSR.SetVarCRDY("nlep", 0, 1);
+    baseSR.SetVarCRDY("njets", 1, 2);
+    baseSR.SetVarCRDY("met", 250, -1);
+    baseSR.SetVarCRDY("deltaPhiMin", 0.3, -1);
+    baseSR.SetVarCRDY("diffMetMhtOverMet", 0, 0.5);
     // QCD region: 2 jets, low deltaPhiMin, pt subleading between 30 and 60 GeV
     baseSR.SetVarCRQCD("j1pt", 250, -1);
     baseSR.SetVarCRQCD("j2pt", 30, 60);
@@ -1765,6 +1770,8 @@ namespace mt2 {
       fullSR0b.SetVar("nbjets", 0, 1);
       fullSR0b.SetVarCRSL("ht", htbins_0b[iSR], htbins_0b[iSR+1]);
       fullSR0b.SetVarCRSL("nbjets", 0, 1);
+      fullSR0b.SetVarCRDY("ht", htbins_0b[iSR], htbins_0b[iSR+1]);
+      fullSR0b.SetVarCRDY("nbjets", 0, 1);
       fullSR0b.SetVarCRQCD("ht", htbins_0b[iSR], htbins_0b[iSR+1]);
       fullSR0b.SetVarCRQCD("nbjets", 0, 1);
       SRVec.push_back(fullSR0b);
@@ -1776,6 +1783,8 @@ namespace mt2 {
       fullSR1b.SetVar("nbjets", 1, -1);
       fullSR1b.SetVarCRSL("ht", htbins_1b[iSR], htbins_1b[iSR+1]);
       fullSR1b.SetVarCRSL("nbjets", 1, -1);
+      fullSR1b.SetVarCRDY("ht", htbins_1b[iSR], htbins_1b[iSR+1]);
+      fullSR1b.SetVarCRDY("nbjets", 1, -1);
       fullSR1b.SetVarCRQCD("ht", htbins_1b[iSR], htbins_1b[iSR+1]);
       fullSR1b.SetVarCRQCD("nbjets", 1, -1);
       SRVec.push_back(fullSR1b);
@@ -1787,9 +1796,11 @@ namespace mt2 {
     fullSR0b.SetName("baseJ0B");
     fullSR0b.SetVar("nbjets", 0, 1);
     fullSR0b.SetVarCRSL("nbjets", 0, 1);
+    fullSR0b.SetVarCRDY("nbjets", 0, 1);
     fullSR0b.SetVarCRQCD("nbjets", 0, 1);
     fullSR0b.SetVar("ht", 250, -1);
     fullSR0b.SetVarCRSL("ht", 250, -1);
+    fullSR0b.SetVarCRDY("ht", 250, -1);
     fullSR0b.SetVarCRQCD("ht", 250, -1);
     fullSR0b.SetMT2Bins(nbins_monojet_0b, htbins_0b_forplot);
     SRVec.push_back(fullSR0b);
@@ -1798,9 +1809,11 @@ namespace mt2 {
     fullSR1b.SetName("baseJ1B");
     fullSR1b.SetVar("nbjets", 1, -1);
     fullSR1b.SetVarCRSL("nbjets", 1, -1);
+    fullSR1b.SetVarCRDY("nbjets", 1, -1);
     fullSR1b.SetVarCRQCD("nbjets", 1, -1);
     fullSR1b.SetVar("ht", 250, -1);
     fullSR1b.SetVarCRSL("ht", 250, -1);
+    fullSR1b.SetVarCRDY("ht", 250, -1);
     fullSR1b.SetVarCRQCD("ht", 250, -1);
     fullSR1b.SetMT2Bins(nbins_monojet_1b, htbins_1b_forplot);
     SRVec.push_back(fullSR1b);
@@ -1822,6 +1835,8 @@ namespace mt2 {
     sr.SetVar("nbjets", 0, 1);
     sr.SetVarCRSL("njets", 2, 4);
     sr.SetVarCRSL("nbjets", 0, 1);
+    sr.SetVarCRDY("njets", 2, 4);
+    sr.SetVarCRDY("nbjets", 0, 1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
@@ -1830,6 +1845,8 @@ namespace mt2 {
     sr.SetVar("nbjets", 1, 2);
     sr.SetVarCRSL("njets", 2, 4);
     sr.SetVarCRSL("nbjets", 1, 2);
+    sr.SetVarCRDY("njets", 2, 4);
+    sr.SetVarCRDY("nbjets", 1, 2);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
@@ -1838,6 +1855,8 @@ namespace mt2 {
     sr.SetVar("nbjets", 2, 3);
     sr.SetVarCRSL("njets", 2, 4);
     sr.SetVarCRSL("nbjets", 2, 3);
+    sr.SetVarCRDY("njets", 2, 4);
+    sr.SetVarCRDY("nbjets", 2, 3);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
@@ -1846,6 +1865,8 @@ namespace mt2 {
     sr.SetVar("nbjets", 0, 1);
     sr.SetVarCRSL("njets", 4, 7);
     sr.SetVarCRSL("nbjets", 0, 1);
+    sr.SetVarCRDY("njets", 4, 7);
+    sr.SetVarCRDY("nbjets", 0, 1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
@@ -1854,6 +1875,8 @@ namespace mt2 {
     sr.SetVar("nbjets", 1, 2);
     sr.SetVarCRSL("njets", 4, 7);
     sr.SetVarCRSL("nbjets", 1, 2);
+    sr.SetVarCRDY("njets", 4, 7);
+    sr.SetVarCRDY("nbjets", 1, 2);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
@@ -1862,6 +1885,8 @@ namespace mt2 {
     sr.SetVar("nbjets", 2, 3);
     sr.SetVarCRSL("njets", 4, 7);
     sr.SetVarCRSL("nbjets", 2, 3);
+    sr.SetVarCRDY("njets", 4, 7);
+    sr.SetVarCRDY("nbjets", 2, 3);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
@@ -1870,6 +1895,8 @@ namespace mt2 {
     sr.SetVar("nbjets", 0, 1);
     sr.SetVarCRSL("njets", 7, -1);
     sr.SetVarCRSL("nbjets", 0, 1);
+    sr.SetVarCRDY("njets", 7, -1);
+    sr.SetVarCRDY("nbjets", 0, 1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
@@ -1879,6 +1906,8 @@ namespace mt2 {
     sr.SetVar("nbjets", 1, 2);
     sr.SetVarCRSL("njets", 7, -1);
     sr.SetVarCRSL("nbjets", 1, 3);
+    sr.SetVarCRDY("njets", 7, -1);
+    sr.SetVarCRDY("nbjets", 1, -1); // DY: NB>0
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
@@ -1888,6 +1917,8 @@ namespace mt2 {
     sr.SetVar("nbjets", 2, 3);
     sr.SetVarCRSL("njets", 7, -1);
     sr.SetVarCRSL("nbjets", 1, 3);
+    sr.SetVarCRDY("njets", 7, -1);
+    sr.SetVarCRDY("nbjets", 1, -1); // DY: NB>0
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
@@ -1896,6 +1927,8 @@ namespace mt2 {
     sr.SetVar("nbjets", 3, -1);
     sr.SetVarCRSL("njets", 2, 7);
     sr.SetVarCRSL("nbjets", 3, -1);
+    sr.SetVarCRDY("njets", 2, 7);
+    sr.SetVarCRDY("nbjets", 3, -1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
@@ -1905,6 +1938,8 @@ namespace mt2 {
     sr.SetVar("nbjets", 3, -1);
     sr.SetVarCRSL("njets", 7, -1);
     sr.SetVarCRSL("nbjets", 1, 3);
+    sr.SetVarCRDY("njets", 7, -1);
+    sr.SetVarCRDY("nbjets", 1, -1); // DY: NB>0
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
@@ -1913,6 +1948,8 @@ namespace mt2 {
     sr.SetVar("nbjets", 0, 1);
     sr.SetVarCRSL("njets", 4, -1);
     sr.SetVarCRSL("nbjets", 0, 1);
+    sr.SetVarCRDY("njets", 4, -1);
+    sr.SetVarCRDY("nbjets", 0, 1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
@@ -1921,6 +1958,8 @@ namespace mt2 {
     sr.SetVar("nbjets", 1, 2);
     sr.SetVarCRSL("njets", 4, -1);
     sr.SetVarCRSL("nbjets", 1, 2);
+    sr.SetVarCRDY("njets", 4, -1);
+    sr.SetVarCRDY("nbjets", 1, 2);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
@@ -1929,6 +1968,8 @@ namespace mt2 {
     sr.SetVar("nbjets", 2, 3);
     sr.SetVarCRSL("njets", 4, -1);
     sr.SetVarCRSL("nbjets", 2, 3);
+    sr.SetVarCRDY("njets", 4, -1);
+    sr.SetVarCRDY("nbjets", 2, 3);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
@@ -1937,6 +1978,8 @@ namespace mt2 {
     sr.SetVar("nbjets", 3, -1);
     sr.SetVarCRSL("njets", 2, -1);
     sr.SetVarCRSL("nbjets", 3, -1);
+    sr.SetVarCRDY("njets", 2, -1);
+    sr.SetVarCRDY("nbjets", 3, -1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
     
@@ -1949,6 +1992,8 @@ namespace mt2 {
       fullSR.SetVar("met", 250, -1);
       fullSR.SetVarCRSL("ht", 250, 450);
       fullSR.SetVarCRSL("met", 250, -1);
+      fullSR.SetVarCRDY("ht", 250, 450);
+      fullSR.SetVarCRDY("met", 250, -1);
       fullSR.SetVarCRQCD("ht", 250, 450);
       fullSR.SetVarCRQCD("met", 250, -1);
       int njets_lo = fullSR.GetLowerBound("njets");
@@ -1969,6 +2014,8 @@ namespace mt2 {
       fullSR.SetVar("met", 250, -1);
       fullSR.SetVarCRSL("ht", 450, 575);
       fullSR.SetVarCRSL("met", 250, -1);
+      fullSR.SetVarCRDY("ht", 450, 575);
+      fullSR.SetVarCRDY("met", 250, -1);
       fullSR.SetVarCRQCD("ht", 450, 575);
       fullSR.SetVarCRQCD("met", 250, -1);
       int njets_lo = fullSR.GetLowerBound("njets");
@@ -1993,6 +2040,8 @@ namespace mt2 {
       fullSR.SetVar("met", 250, -1);
       fullSR.SetVarCRSL("ht", 575, 1000);
       fullSR.SetVarCRSL("met", 250, -1);
+      fullSR.SetVarCRDY("ht", 575, 1000);
+      fullSR.SetVarCRDY("met", 250, -1);
       fullSR.SetVarCRQCD("ht", 575, 1000);
       fullSR.SetVarCRQCD("met", 250, -1);
       int njets_lo = fullSR.GetLowerBound("njets");
@@ -2017,6 +2066,8 @@ namespace mt2 {
       fullSR.SetVar("met", 30, -1);
       fullSR.SetVarCRSL("ht", 1000, 1500);
       fullSR.SetVarCRSL("met", 30, -1);
+      fullSR.SetVarCRDY("ht", 1000, 1500);
+      fullSR.SetVarCRDY("met", 30, -1);
       fullSR.SetVarCRQCD("ht", 1000, 1500);
       fullSR.SetVarCRQCD("met", 30, -1);
       int njets_lo = fullSR.GetLowerBound("njets");
@@ -2041,6 +2092,8 @@ namespace mt2 {
       fullSR.SetVar("met", 30, -1);
       fullSR.SetVarCRSL("ht", 1500, -1);
       fullSR.SetVarCRSL("met", 30, -1);
+      fullSR.SetVarCRDY("ht", 1500, -1);
+      fullSR.SetVarCRDY("met", 30, -1);
       fullSR.SetVarCRQCD("ht", 1500, -1);
       fullSR.SetVarCRQCD("met", 30, -1);
       int njets_lo = fullSR.GetLowerBound("njets");
@@ -2076,6 +2129,14 @@ namespace mt2 {
     baseSR.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
     baseSR.SetVarCRSL("nlep", 1, 2);
 
+    // common selections for CRDY
+    baseSR.SetVarCRDY("mt2", 200, -1);
+    baseSR.SetVarCRDY("j1pt", 30, -1);
+    baseSR.SetVarCRDY("j2pt", 30, -1);
+    baseSR.SetVarCRDY("deltaPhiMin", 0.3, -1);
+    baseSR.SetVarCRDY("diffMetMhtOverMet", 0, 0.5);
+    baseSR.SetVarCRDY("nlep", 0, 1);
+
     // common selections for QCD
     baseSR.SetVarCRQCD("mt2", 200, -1);
     baseSR.SetVarCRQCD("j1pt", 30, -1);
@@ -2097,6 +2158,14 @@ namespace mt2 {
     for(unsigned int i = 0; i < SRVec.size(); i++){
       for(unsigned int j = 0; j < varsCRSL.size(); j++){
         SRVec.at(i).SetVarCRSL(varsCRSL.at(j), baseSR.GetLowerBoundCRSL(varsCRSL.at(j)), baseSR.GetUpperBoundCRSL(varsCRSL.at(j)));
+      }
+    }
+
+    //add baseline selections to all CRDY regions 
+    std::vector<std::string> varsCRDY = baseSR.GetListOfVariablesCRDY();
+    for(unsigned int i = 0; i < SRVec.size(); i++){
+      for(unsigned int j = 0; j < varsCRDY.size(); j++){
+        SRVec.at(i).SetVarCRDY(varsCRDY.at(j), baseSR.GetLowerBoundCRDY(varsCRDY.at(j)), baseSR.GetUpperBoundCRDY(varsCRDY.at(j)));
       }
     }
 
