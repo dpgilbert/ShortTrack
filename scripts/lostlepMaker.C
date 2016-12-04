@@ -476,6 +476,15 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
       }
     }
   
+    // mt2binsAll with extrapolation error
+    TH1D* h_lostlepMC_rescaled_cr_allbins_MCExtrapErr = (TH1D*) h_lostlepMC_cr_allbins->Clone("h_mt2binsAllCRMChybridExtrapErr");
+    for (int ibin = 1; ibin <= h_lostlepMC_cr_allbins->GetNbinsX(); ++ibin) {
+      // scale by relative error from the standard MT2 binning plot
+      int sig_mt2bin = pred->FindBin(h_lostlepMC_cr_allbins->GetBinLowEdge(ibin));
+      float relvar = MCExtrap->GetBinContent(sig_mt2bin) / pred->GetBinContent(sig_mt2bin);
+      h_lostlepMC_rescaled_cr_allbins_MCExtrapErr->SetBinContent( ibin, h_lostlepMC_rescaled_cr_allbins->GetBinContent(ibin) * relvar );
+    }
+    
     // store info on which bin / MT2 threshold is the last used in hybrid method
     TH1D* h_lastbinHybrid = new TH1D("h_lastbinHybrid",";last bin",1,0,1);
     h_lastbinHybrid->SetBinContent(1,lastbin_hybrid);
@@ -501,6 +510,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     h_lostlepMC_rescaled_cr_finebin->Write();
     h_data_cr_finebin_save->Write();
     h_lostlepMC_rescaled_cr_allbins->Write();
+    h_lostlepMC_rescaled_cr_allbins_MCExtrapErr->Write();
     h_htbins_lostlepMC_rescaled_cr->Write();
     h_njbins_lostlepMC_rescaled_cr->Write();
     h_nbjbins_lostlepMC_rescaled_cr->Write();
