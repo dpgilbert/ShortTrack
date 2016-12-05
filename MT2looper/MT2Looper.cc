@@ -95,7 +95,7 @@ bool applyLeptonSFtoSR = false;
 // turn on to apply reweighting to ttbar based on top pt
 bool applyTopPtReweight = false;
 // add weights to correct for photon trigger efficiencies
-bool applyPhotonTriggerWeights = true; //default true
+bool applyPhotonTriggerWeights = false; //not needed since we apply trigger safe H/E cut
 // use 2016 ICHEP ISR weights based on nisrMatch, signal and ttbar only
 bool applyISRWeights = true;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
