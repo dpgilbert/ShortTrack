@@ -2702,7 +2702,7 @@ void MT2Looper::fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, 
   }
   
   // perform r_effective calculation
-  if(t.isData && doReffCalculation && t.nJet30>=2 && t.ht>=250 && t.mt2>=200){
+  if(doReffCalculation && t.nJet30>=2 && t.ht>=250 && t.mt2>=200){
 
       int ht_ind = 0;
       if(t.ht>=450) ht_ind = 1;
