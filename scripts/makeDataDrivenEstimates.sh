@@ -55,8 +55,8 @@ root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/wjets_ht.root\",7)" >> dataDriven
 echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/top.root,6)"
 root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/top.root\",6)" >> dataDrivenEstimates.log
 
-echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/lostlep.root,14)"
-root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/lostlep.root\",14)" >> dataDrivenEstimates.log
+echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/lostlep.root,13)"
+root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/lostlep.root\",13)" >> dataDrivenEstimates.log
 
 # make the data driven background files
 echo "root -b -q lostlepMaker.C+(${INDIR},${LOSTLEPFILE})"

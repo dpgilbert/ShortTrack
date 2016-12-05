@@ -232,7 +232,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   int mt2_LOW = h_sig ? h_sig->GetBinLowEdge(mt2bin) : 0;
   int mt2_HI = h_sig ? mt2_LOW + h_sig->GetBinWidth(mt2bin) : 1500;
   // hardcode the current edge of our highest bin..
-  if (mt2_HI == 1500) mt2_HI = -1;
+  if ((mt2_HI == 1500) || (mt2_HI == 1800)) mt2_HI = -1;
 
   int nbjets_HI_mod = nbjets_HI;
   int njets_HI_mod = njets_HI;

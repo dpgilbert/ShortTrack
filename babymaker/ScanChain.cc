@@ -3466,7 +3466,7 @@ void babyMaker::minuitFunction(int& nDim, double* gout, double& result, double p
     float min_prob = 1E-20;
     for(int i=0; i < t->nRebalJets; i++){
         bool isBjet = (t->rebal_jetbtagcsv[i] > 0.800);
-        float prob = t->rebal_reader.GetValue(t->rebal_jetpt[i]/par[i], fabs(t->rebal_jeteta[i]), isBjet, par[i]);
+        float prob = t->rebal_reader.GetValue(t->rebal_jetpt[i]/par[i], fabs(t->rebal_jeteta[i]), isBjet, par[i], t->isData);
         prob = max(prob, min_prob);
         likelihood += log(prob);
         pt_constrained_x -= (t->rebal_jetpt[i])*cos(t->rebal_jetphi[i])/par[i];

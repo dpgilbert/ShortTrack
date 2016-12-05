@@ -1,4 +1,4 @@
-import ROOT
+import ROOT, math
 
 #snt_file = ROOT.TFile("/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6_12p9fb/data_Run2016_sync.root")
 #snt_file = ROOT.TFile("../MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6/zinv_ht.root")
@@ -6,7 +6,14 @@ import ROOT
 #snt_file = ROOT.TFile("../MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6_noBtagSF/zinv_ht.root")
 #snt_file = ROOT.TFile("../MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6_noBtagSF/gjets_dr0p05_ht.root")
 #snt_file = ROOT.TFile("../MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6/data_Run2016.root")
-snt_file = ROOT.TFile("../MT2looper/output/V00-08-12_json_271036-284044_23Sep2016ReReco_skim_periodsCDEFGH/data_Run2016.root")
+#snt_file = ROOT.TFile("../../MT2looper/output/V00-08-12_json_271036-284044_23Sep2016ReReco_skim_periodsCDEFGH/data_Run2016.root")
+#snt_file = ROOT.TFile("../../MT2looper/output/V00-08-12_json_271036-284044_23Sep2016ReReco_skim_periodsCDEFGH_infcheck/data_Run2016B.root")
+#snt_file = ROOT.TFile("../../MT2looper/output/V00-08-12_json_271036-284044_23Sep2016ReReco_36p46fb_unblind_BCDpartG/data_Run2016.root")
+#snt_file = ROOT.TFile("../../MT2looper/output/V00-08-12_json_271036-284044_23Sep2016ReReco_36p46fb_dypt100_30/data_Run2016.root")
+#snt_file = ROOT.TFile("../../MT2looper/output/V00-08-12_json_271036-284044_23Sep2016ReReco_36p46fb_dypt100_30/lostlepFromCRs.root")
+#snt_file = ROOT.TFile("../../MT2looper/output/V00-08-12_json_271036-284044_23Sep2016ReReco_36p46fb_dypt100_30/zinvFromDY.root")
+#snt_file = ROOT.TFile("../../MT2looper/output/V00-08-12_json_271036-284044_23Sep2016ReReco_36p46fb_dypt100_30_nottbarisrweight/lostlepFromCRs.root")
+snt_file = ROOT.TFile("../../MT2looper/output/V00-08-12_json_271036-284044_23Sep2016ReReco_36p46fb_dy7j1bmerge/zinvFromDY.root")
 
 #eth_file = ROOT.TFile("eth_estimates/gamma_data.root")
 #eth_file = ROOT.TFile("zinvFromGamma_80X.root")
@@ -15,19 +22,36 @@ snt_file = ROOT.TFile("../MT2looper/output/V00-08-12_json_271036-284044_23Sep201
 #eth_file = ROOT.TFile("zinvFromGamma_80X_noSF_SnTMC_fixedIso.root")
 #eth_file = ROOT.TFile("eth_sync_Nov2016/data_llepCR_2016_RunCtoH_eth.root")
 #eth_file = ROOT.TFile("eth_sync_Nov2016/data_zllCR_2016_RunCtoH_eth.root")
-eth_file = ROOT.TFile("eth_sync_Nov2016/data_of_zllCR_2016_RunCtoH_eth.root")
+#eth_file = ROOT.TFile("eth_sync_Nov2016/data_of_zllCR_2016_RunCtoH_eth.root")
+#eth_file = ROOT.TFile("eth_sync_Nov2016/data_gammaCR_2016_RunCtoH_eth.root")
+#eth_file = ROOT.TFile("eth_sync_Nov2016/data_llepCR_2016_RunB_eth.root")
+#eth_file = ROOT.TFile("eth_sync_Nov2016/data_zllCR_2016_RunB_eth.root")
+#eth_file = ROOT.TFile("eth_sync_Nov2016/data_of_zllCR_2016_RunB_eth.root")
 #eth_file = ROOT.TFile("gamma_mc_afterLoopOnSnT.root")
 #eth_file = ROOT.TFile("zinvFromGamma_80X_noSF.root")
 #eth_file = ROOT.TFile("gamma_data_allData.root")
+#eth_file = ROOT.TFile("eth_sync_dec2016/analysisYields_16p9ifb.root")
+#eth_file = ROOT.TFile("eth_sync_dec2016/llepEstimate_36p5ifb.root")
+#eth_file = ROOT.TFile("eth_sync_dec2016/zinvFromZll_36p5ifb.root")
+#eth_file = ROOT.TFile("eth_sync_dec2016_snttrees/zinvFromZll.root")
+eth_file = ROOT.TFile("eth_sync_dec2016_snttrees/zinvFromZll_updatedShape.root")
+#eth_file = ROOT.TFile("eth_sync_dec2016_snttrees/llepEstimate.root")
+#eth_file = ROOT.TFile("eth_sync_dec2016_snttrees/llepEstimate_fixedISR.root")
+#eth_file = ROOT.TFile("eth_sync_dec2016_snttrees/llepEstimate_fixed.root")
 
 #snt_label = "crsl"
-snt_label = "crdy"
-#snt_label = "sr"
+#snt_label = "crdy"
+#snt_label = "crgj"
+snt_label = "sr"
 #eth_label = "gammaCR" 
 #eth_label = "Zinv"
 #eth_label = "llepCR"
+#eth_label = "llepEstimate"
+#eth_label = "llep_est_integral"
+eth_label = "ZinvEstimateFromZll_hybrid"
+#eth_label = "zllData_forHybrid"
 #eth_label = "data"
-eth_label = "data_of"
+#eth_label = "data_of"
 #eth_label = "prompt_integral"   # MC prompt 
 #eth_label = "gamma_est_integral" # data in combined file
 #eth_label = "gammaCR" # data in individual file
@@ -72,7 +96,8 @@ for ht_reg in ["VL","L","M","H","UH"]:
         try:
 #            sntyield = int(snt_file.Get("{0}/h_mt2bins".format(sntname)).Integral(0,-1))   # int
 #            sntyield = (snt_file.Get("{0}/h_mt2bins".format(sntname)).Integral(0,-1))    # float
-            sntyield = (snt_file.Get("{0}/h_mt2binsemu".format(sntname)).Integral(0,-1))    # float
+            sntyield = (snt_file.Get("{0}/hybridEstimate".format(sntname)).Integral(0,-1))    # float
+#            sntyield = (snt_file.Get("{0}/h_mt2binsemu".format(sntname)).Integral(0,-1))    # float
 #            sntyield = int(snt_file.Get("{0}/h_mt2bins".format(sntname)).GetEntries())    # int, entries
         except:
             sntyield = 0
@@ -85,8 +110,8 @@ for ht_reg in ["VL","L","M","H","UH"]:
 
         snt_yields[ethname] = sntyield
         eth_yields[ethname] = ethyield
-        snt_total += sntyield
-        eth_total += ethyield
+        if not math.isnan(sntyield): snt_total += sntyield
+        if not math.isnan(ethyield): eth_total += ethyield
 
 for mj_reg in range(1,8)+range(11,16):
     sntname = "{0}{1}J".format(snt_label, mj_reg)
@@ -108,7 +133,8 @@ for mj_reg in range(1,8)+range(11,16):
     try:
 #    sntyield = int(snt_file.Get("{0}/h_mt2bins".format(sntname)).Integral(0,-1))                           # int
 #        sntyield = (snt_file.Get("{0}/h_mt2bins".format(sntname)).Integral(0,-1))                               # float
-        sntyield = (snt_file.Get("{0}/h_mt2binsemu".format(sntname)).Integral(0,-1))                               # float
+        sntyield = (snt_file.Get("{0}/hybridEstimate".format(sntname)).Integral(0,-1))                               # float
+#        sntyield = (snt_file.Get("{0}/h_mt2binsemu".format(sntname)).Integral(0,-1))                               # float
 #    sntyield = int(snt_file.Get("{0}/h_mt2bins".format(sntname)).GetEntries())                             # int, entries
     except:
         sntyield = 0.
@@ -120,8 +146,8 @@ for mj_reg in range(1,8)+range(11,16):
     
     snt_yields[ethname] = sntyield
     eth_yields[ethname] = ethyield
-    snt_total += sntyield
-    eth_total += ethyield
+    if not math.isnan(sntyield): snt_total += sntyield
+    if not math.isnan(ethyield): eth_total += ethyield
     
 
 ratios = {}

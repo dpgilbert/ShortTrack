@@ -19,6 +19,7 @@ class SR {
     void SetName(std::string sr_name);
     void SetVar(std::string var_name, float lower_bound, float upper_bound);
     void SetVarCRSL(std::string var_name, float lower_bound, float upper_bound);
+    void SetVarCRDY(std::string var_name, float lower_bound, float upper_bound);
     void SetVarCRQCD(std::string var_name, float lower_bound, float upper_bound);
     void SetMT2Bins(int nbins, float* bins);
 
@@ -34,6 +35,11 @@ class SR {
     unsigned int GetNumberOfVariablesCRSL();
     std::vector<std::string> GetListOfVariablesCRSL();
 
+    float GetLowerBoundCRDY(std::string var_name);
+    float GetUpperBoundCRDY(std::string var_name);
+    unsigned int GetNumberOfVariablesCRDY();
+    std::vector<std::string> GetListOfVariablesCRDY();
+
     float GetLowerBoundCRQCD(std::string var_name);
     float GetUpperBoundCRQCD(std::string var_name);
     unsigned int GetNumberOfVariablesCRQCD();
@@ -44,9 +50,11 @@ class SR {
 
     bool PassesSelection(std::map<std::string, float> values);
     bool PassesSelectionCRSL(std::map<std::string, float> values);
+    bool PassesSelectionCRDY(std::map<std::string, float> values);
     bool PassesSelectionCRQCD(std::map<std::string, float> values);
     void RemoveVar(std::string var_name);
     void RemoveVarCRSL(std::string var_name);
+    void RemoveVarCRDY(std::string var_name);
     void RemoveVarCRQCD(std::string var_name);
     void Clear();
 
@@ -93,6 +101,7 @@ class SR {
     std::string srName_;
     std::map<std::string, std::pair<float, float> > bins_;
     std::map<std::string, std::pair<float, float> > binsCRSL_;
+    std::map<std::string, std::pair<float, float> > binsCRDY_;
     std::map<std::string, std::pair<float, float> > binsCRQCD_;
     int n_mt2bins_;
     float *mt2bins_;

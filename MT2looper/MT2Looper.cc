@@ -95,7 +95,7 @@ bool applyLeptonSFtoSR = false;
 // turn on to apply reweighting to ttbar based on top pt
 bool applyTopPtReweight = false;
 // add weights to correct for photon trigger efficiencies
-bool applyPhotonTriggerWeights = true; //default true
+bool applyPhotonTriggerWeights = false; //not needed since we apply trigger safe H/E cut
 // use 2016 ICHEP ISR weights based on nisrMatch, signal and ttbar only
 bool applyISRWeights = true;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
@@ -142,7 +142,6 @@ MT2Looper::~MT2Looper(){
 };
 
 void MT2Looper::SetSignalRegions(){
-
   //SRVec =  getSignalRegionsZurich_jetpt30(); //same as getSignalRegionsZurich(), but with j1pt and j2pt cuts changed to 30 GeV
   //  SRVec =  getSignalRegionsJamboree(); //adds HT 200-450 regions
   SRVec =  getSignalRegions2016(); //adds 2 bins at UH HT, for 3b
@@ -1986,7 +1985,7 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   if(passBaseJ) {
     fillHistosDY(SRBaseMonojet.crdyHistMap, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.GetMT2Bins(), "crdybaseJ", suffix);
     for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
-      if(SRVecMonojet.at(srN).PassesSelection(values_monojet)){
+      if(SRVecMonojet.at(srN).PassesSelectionCRDY(values_monojet)){
         // cout << "FOUNDEVENT:" << prefix+SRVecMonojet.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
 	fillHistosDY(SRVecMonojet.at(srN).crdyHistMap, SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix); 
       }
@@ -2006,10 +2005,10 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   if(passBase && t.zll_ht > 1500.                  ) fillHistosDY(InclusiveRegions.at(4).crdyHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdybaseUH", suffix);
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
-    if(SRVec.at(srN).PassesSelection(values)){
+    if(SRVec.at(srN).PassesSelectionCRDY(values)){
       // cout << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
       fillHistosDY(SRVec.at(srN).crdyHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
-      break;//control regions are orthogonal, event cannot be in more than one
+     //break; //not orthogonal any more 
     }
   }
 

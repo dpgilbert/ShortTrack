@@ -18,9 +18,10 @@
 using namespace std;
 
 //options
-bool verbose = false;
-bool doHybrid = true; // hybrid estimate: uses CR MT2 binning until the MC CR integral is less than the threshold below
-float hybrid_nevent_threshold = 50.;
+const bool verbose = false;
+const bool doHybrid = true; // hybrid estimate: uses CR MT2 binning until the MC CR integral is less than the threshold below
+const float hybrid_nevent_threshold = 50.;
+const float last_bin_relerr = 0.4; // relative extrapolation error in last bin
 
 const int n_htbins = 5;
 const float htbins[n_htbins+1] = {200, 450., 575., 1000., 1500., 3000.};
@@ -456,6 +457,33 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     //    pred_finebin->Print("all");
 
     //    pred->Print("all");
+
+    // MC extrapolation systematic uncertainty: goes up to last_bin_relerr in last bin
+    int n_extrap_bins = n_mt2bins - lastbin_hybrid;
+    TH1D* MCExtrap = (TH1D*) h_lostlepDD_sr->Clone("h_mt2binsMCExtrap");
+    for ( int ibin = 1; ibin <= pred->GetNbinsX(); ++ibin ) {
+      if (ibin < lastbin_hybrid) continue; // no uncertainty if bin-by-bin
+      else if (ibin == lastbin_hybrid) {
+	// first bin needs to compensate normalization from the rest
+	float increment = 0.;
+	for (int jbin=lastbin_hybrid+1; jbin<=pred->GetNbinsX(); ++jbin) 
+	  increment += last_bin_relerr / (n_extrap_bins) * (jbin - lastbin_hybrid) * pred->GetBinContent(jbin);
+	MCExtrap->SetBinContent(ibin, pred->GetBinContent(ibin) - increment);
+      }
+      else {
+	float relvar = last_bin_relerr / (n_extrap_bins) * (ibin - lastbin_hybrid);
+	MCExtrap->SetBinContent(ibin, pred->GetBinContent(ibin) * (1. + relvar));
+      }
+    }
+  
+    // mt2binsAll with extrapolation error
+    TH1D* h_lostlepMC_rescaled_cr_allbins_MCExtrapErr = (TH1D*) h_lostlepMC_cr_allbins->Clone("h_mt2binsAllCRMChybridExtrapErr");
+    for (int ibin = 1; ibin <= h_lostlepMC_cr_allbins->GetNbinsX(); ++ibin) {
+      // scale by relative error from the standard MT2 binning plot
+      int sig_mt2bin = pred->FindBin(h_lostlepMC_cr_allbins->GetBinLowEdge(ibin));
+      float relvar = MCExtrap->GetBinContent(sig_mt2bin) / pred->GetBinContent(sig_mt2bin);
+      h_lostlepMC_rescaled_cr_allbins_MCExtrapErr->SetBinContent( ibin, h_lostlepMC_rescaled_cr_allbins->GetBinContent(ibin) * relvar );
+    }
     
     // store info on which bin / MT2 threshold is the last used in hybrid method
     TH1D* h_lastbinHybrid = new TH1D("h_lastbinHybrid",";last bin",1,0,1);
@@ -469,6 +497,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     h_lostlepDD_cr->Write();
     h_lostlepDD_cr_datacard->Write();
     MCStat->Write();
+    MCExtrap->Write();
     for ( std::map<string, TH1D*>::iterator iter = alphaMap.begin(); iter != alphaMap.end(); ++iter ) {
       iter->second->Write();
     }
@@ -481,6 +510,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     h_lostlepMC_rescaled_cr_finebin->Write();
     h_data_cr_finebin_save->Write();
     h_lostlepMC_rescaled_cr_allbins->Write();
+    h_lostlepMC_rescaled_cr_allbins_MCExtrapErr->Write();
     h_htbins_lostlepMC_rescaled_cr->Write();
     h_njbins_lostlepMC_rescaled_cr->Write();
     h_nbjbins_lostlepMC_rescaled_cr->Write();

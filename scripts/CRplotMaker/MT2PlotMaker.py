@@ -251,6 +251,7 @@ def makeLostLepHybrid(indir, samples=['lostlepFromCRs'], data='data_Run2016', ou
     #loop over sets of regions (0b, >=1b, inclusive)
     for iregs,regs in enumerate(regions):
         h_mt2binsAll_mc_cr_vec = [None for s in samples]
+        h_mt2binsAll_mc_cr_var_vec = [None for s in samples]
         h_mt2binsAll_data_cr = None
         # loop over set of SRs within the given region
         for isr, sr in enumerate(regs):
@@ -267,8 +268,10 @@ def makeLostLepHybrid(indir, samples=['lostlepFromCRs'], data='data_Run2016', ou
                 for i in range(len(fmc)):
                     if h_mt2binsAll_mc_cr_vec[i] == None:
                         h_mt2binsAll_mc_cr_vec[i] = fmc[i].Get("sr{0}{1}/h_mt2binsAllCRMChybrid".format(sr,ht_reg)).Clone("h_mt2binsAll_mc_cr_"+str(i))
+                        h_mt2binsAll_mc_cr_var_vec[i] = fmc[i].Get("sr{0}{1}/h_mt2binsAllCRMChybridExtrapErr".format(sr,ht_reg)).Clone("h_mt2binsAll_mc_cr_var_"+str(i))
                     else:
                         h_mt2binsAll_mc_cr_vec[i].Add(fmc[i].Get("sr{0}{1}/h_mt2binsAllCRMChybrid".format(sr,ht_reg)))
+                        h_mt2binsAll_mc_cr_var_vec[i].Add(fmc[i].Get("sr{0}{1}/h_mt2binsAllCRMChybridExtrapErr".format(sr,ht_reg)))
 
                 # somtimes 0 events in data CR
                 try:
@@ -280,8 +283,16 @@ def makeLostLepHybrid(indir, samples=['lostlepFromCRs'], data='data_Run2016', ou
                     pass
 
         nbins = h_mt2binsAll_data_cr.GetNbinsX()
-        systs = [0 for i in range(nbins)]
-        # ## get systematic in first bin
+        systs = [0. for i in range(nbins)]
+        for i in range(nbins):
+            nom_val = 0.
+            var_val = 0.
+            for h_nom,h_var in zip(h_mt2binsAll_mc_cr_vec,h_mt2binsAll_mc_cr_var_vec):
+                nom_val += h_nom.GetBinContent(i+1)
+                var_val += h_var.GetBinContent(i+1)
+            if (nom_val > 0.01): systs[i] = abs(1. - var_val / nom_val)
+
+        # ## systematic just based on number of bins
         # incr = 0
         # for ibin in range(2,nbins+1):
         #     incr += 0.4 / (nbins-1) * (ibin-1) * h_mt2bins_data.GetBinContent(i)
@@ -326,9 +337,8 @@ def makeLostLepHybrid(indir, samples=['lostlepFromCRs'], data='data_Run2016', ou
                            lumi=pd.lumi, lumiUnit=pd.lumiUnit, title=None, subtitles=subtitles, isLog=True,
                            saveAs=saveAs, scaleMCtoData=False, xAxisUnit="GeV", doSort=False, doMT2Colors=True,
                            markerSize=1.0, subtitleSize=0.040, doBkgError=True, doOverflow=False,
-#                           cmsTextSize=0.040, doPull=False, convertToPoisson=True, drawSystematicBand=True,
-#                           systematics=systs)
-                           cmsTextSize=0.040, doPull=False, convertToPoisson=True, drawSystematicBand=False)
+                           cmsTextSize=0.040, doPull=False, convertToPoisson=True, drawSystematicBand=True,
+                           systematics=systs)
 
     for i in range(len(fmc)):
         fmc[i].Close()
