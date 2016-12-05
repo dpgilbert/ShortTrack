@@ -460,7 +460,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     //multiply in purity histogram to get final alpha
     if (purityCard != 0) {
       h_zinvDY_alpha->Multiply(purityCard);
-      err_zinvDY_purity = purityCard->GetBinError(mt2bin)/purityCard->GetBinContent(mt2bin);
+      err_zinvDY_purity = purityCard->GetBinContent(mt2bin) > 0 ? purityCard->GetBinError(mt2bin)/purityCard->GetBinContent(mt2bin) : 0;
     }
     zinvDY_alpha = h_zinvDY_alpha->GetBinContent(mt2bin);
     zinvDY_alpha_topological = h_zinvDY_alpha->Integral(0,-1);
