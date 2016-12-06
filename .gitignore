@@ -1,0 +1,9 @@
+*.o
+*.so
+*.gdb_history
+*.cxx
+*logs*
+*.pcm
+*.d
+*.log
+
