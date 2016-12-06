@@ -787,8 +787,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	if (verbose) cout<<__LINE__<<endl;
 	if (!t.Flag_badChargedHadronFilter) continue; 
 	if (verbose) cout<<__LINE__<<endl;
-        // met/caloMet filter
-        if (t.met_miniaodPt / t.met_caloPt > 5.0) continue;
       }
 
       // random events with ht or met=="inf" or "nan" that don't get caught by the filters...
@@ -1415,6 +1413,8 @@ void MT2Looper::fillHistosSRBase() {
   // trigger requirement on data
   if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
 
+  // met/caloMet filter for additional cleaning
+  if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = deltaPhiMin_;
@@ -1466,6 +1466,9 @@ void MT2Looper::fillHistosInclusive() {
   // trigger requirement on data
   if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
 
+  // met/caloMet filter for additional cleaning
+  if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
+
   std::map<std::string, float> values;
   values["deltaPhiMin"] = deltaPhiMin_;
   values["diffMetMhtOverMet"]  = diffMetMht_/met_pt_;
@@ -1496,6 +1499,9 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
   // trigger requirement on data
   if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
   
+  // met/caloMet filter for additional cleaning
+  if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
+
   std::map<std::string, float> values;
   values["deltaPhiMin"] = deltaPhiMin_;
   values["diffMetMhtOverMet"]  = diffMetMht_/met_pt_;
@@ -1592,6 +1598,9 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   // trigger requirement on data
   if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
   
+  // met/caloMet filter for additional cleaning
+  if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
+
   // first fill base region
   std::map<std::string, float> valuesBase;
   valuesBase["deltaPhiMin"] = deltaPhiMin_;
