@@ -19,7 +19,7 @@ nj_reg_names = ["j2to3","j4to6","j7toInf","j2to6","j4toInf","j2toInf"]
 top_reg_names = ["j2to3_b0","j2to3_b1","j2to3_b2","j4to6_b0","j4to6_b1","j4to6_b2",
                  "j7toInf_b0","j7toInf_b1","j7toInf_b2","j2to6_b3toInf","j7toInf_b3toInf"]
 vl_top_reg_names = ["j2to3_b0","j2to3_b1","j2to3_b2","j4toInf_b0","j4toInf_b1","j4toInf_b2","j2toInf_b3toInf"]
-vl_top_reg_nums = [1, 2, 3, 12, 13, 14, 15, 16]
+vl_top_reg_nums = [1, 2, 3, 12, 13, 14, 15]
 
 fout = ROOT.TFile(os.path.join(outdir,"qcdEstimate.root"),"RECREATE")
 
@@ -248,11 +248,14 @@ for iht,ht_reg in enumerate(ht_reg_names):
         qcdEstimate_data = h_mt2bins.Clone("yield_qcdEstimate_{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
         qcdEstimate_mc   = h_mt2bins.Clone("yield_qcdEstimate_{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
 
+        # missing correction for purity, add that here
+        qcdEstimate_data.Multiply(h_purity)
+        
         qcdEstimate_data.Multiply(h_rphi_data)
-        qcdEstimate_mc.Multiply(h_rphi_mc)
+        qcdEstimate_mc.Multiply(h_rphi_mc)        
         qcdEstimate_data.Scale(rb_data * fj_data)
         qcdEstimate_mc.Scale(rb_mc * fj_mc)
-
+        
         for ibin in range(1,qcdEstimate_data.GetNbinsX()+1):
             val = qcdEstimate_data.GetBinContent(i)
             err = qcdEstimate_data.GetBinError(i)
