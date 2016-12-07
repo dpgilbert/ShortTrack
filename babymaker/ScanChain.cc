@@ -414,7 +414,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       //VERTICES
       nVert = 0;
       for(unsigned int ivtx=0; ivtx < cms3.evt_nvtxs(); ivtx++){
-
         if(cms3.vtxs_isFake().at(ivtx)) continue;
         if(cms3.vtxs_ndof().at(ivtx) <= 4) continue;
         if(fabs(cms3.vtxs_position().at(ivtx).z()) > 24) continue;
@@ -488,7 +487,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	// temporary workaround: flag not in first 80x MC production, so recompute
 	Flag_HBHENoiseIsoFilter                       = isData ? cms3.filt_hbheNoiseIso() : hbheIsoNoiseFilter();
 	// inputs for badMuonFilters in latest cms3 tag for data, not yet for MC
-	if (isData) Flag_badMuonFilter                            = badMuonFilter();
+	if (isData) {
+          Flag_badMuonFilter                            = badMuonFilter();
+          Flag_badMuonFilterV2                          = badMuonFilterV2();
+          Flag_badChargedHadronFilterV2                 = badChargedCandidateFilterV2();          
+        }
 	Flag_badChargedHadronFilter                   = badChargedCandidateFilter();
 	// necessary?
 	Flag_METFilters                               = cms3.filt_metfilter();
@@ -1735,7 +1738,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           }
         }
         if(doJetLepOverlapRemoval && isOverlapJet) continue;
-
+        
         bool isOverlapJetGamma = false;
 	//check against list of jets that overlap with a photon
 	for(unsigned int j=0; j<removedJetsGamma.size(); j++){
@@ -1744,7 +1747,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	    break;
 	  }
 	} 
-
+        
         if (njet >= max_njet) {
           std::cout << "WARNING: attempted to fill more than " << max_njet << " jets" << std::endl;
           break;
@@ -1770,7 +1773,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
             }
             continue;
           }
-
+          
           jet_pt[njet]   = p4sCorrJets.at(iJet).pt();
           jet_eta[njet]  = p4sCorrJets.at(iJet).eta();
           jet_phi[njet]  = p4sCorrJets.at(iJet).phi();
@@ -1781,7 +1784,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           jet_mass[njet] = cms3.pfjets_mass().at(iJet);
           jet_btagCSV[njet] = cms3.getbtagvalue("pfCombinedInclusiveSecondaryVertexV2BJetTags",iJet);
           jet_btagMVA[njet] = cms3.getbtagvalue("pfCombinedMVAV2BJetTags",iJet);
-          // jet_btagMVA[njet] = cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet); 
+          // jet_btagMVA[njet] = cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet);
+
           if (!isData) {
 	    jet_mcPt[njet] = -1;
             if (cms3.pfjets_mc_p4().size() > 0) jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
@@ -2688,7 +2692,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("Flag_goodVertices", &Flag_goodVertices );
     BabyTree_->Branch("Flag_eeBadScFilter", &Flag_eeBadScFilter );
     BabyTree_->Branch("Flag_badMuonFilter", &Flag_badMuonFilter );
+    BabyTree_->Branch("Flag_badMuonFilterV2", &Flag_badMuonFilterV2 );    
     BabyTree_->Branch("Flag_badChargedHadronFilter", &Flag_badChargedHadronFilter );
+    BabyTree_->Branch("Flag_badChargedHadronFilterV2", &Flag_badChargedHadronFilterV2 );    
     BabyTree_->Branch("Flag_METFilters", &Flag_METFilters );
     BabyTree_->Branch("HLT_PFHT800", &HLT_PFHT800 );
     BabyTree_->Branch("HLT_PFHT900", &HLT_PFHT900 );
@@ -3096,7 +3102,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     Flag_goodVertices = -999;
     Flag_eeBadScFilter = -999;
     Flag_badMuonFilter = -999;
+    Flag_badMuonFilterV2 = -999;    
     Flag_badChargedHadronFilter = -999;
+    Flag_badChargedHadronFilterV2 = -999;    
     Flag_METFilters = -999;
     HLT_PFHT800 = -999;
     HLT_PFHT900 = -999;
