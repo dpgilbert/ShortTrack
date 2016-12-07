@@ -1,8 +1,6 @@
 #!/bin/bash
 
-#INDIR=/home/users/olivito/mt2_80x/MT2Analysis/MT2looper/output/V00-08-10_JECandRenorm_skim_base_mt2gt200_ZinvV6_12p9fb_lostlepshape
-#INDIR=/home/users/olivito/mt2_80x/MT2Analysis/MT2looper/output/V00-08-10_JECandRenorm_skim_base_mt2gt200_ZinvV6_36p26fb_sigcontamtest
-INDIR=/home/users/olivito/mt2_80x/MT2Analysis/MT2looper/output/V00-08-12_json_271036-284044_23Sep2016ReReco_36p26fb_noB_SingleMuElePhot_MuonEG
+INDIR=/home/users/fgolf/mt2/devel/MT2Analysis/MT2looper/output/full2016/
 
 THISDIR=`pwd`
 
@@ -20,8 +18,8 @@ RLFILE=data_Run2016
 QCDFILE=data_Run2016
 #QCDFILE=qcd_ht
 
-QCDESTIMATE=./inputs/qcdEstimateData_2016_ICHEP
-QCDMONOJET=./inputs/qcdEstimateMonojet_2016_ICHEP
+QCDESTIMATE=./inputs/qcdEstimateData
+QCDMONOJET=./inputs/qcdEstimateMonojet
 
 if [ ! -d "$INDIR" ]; then
   echo "Input directory does not exist" 
@@ -38,11 +36,11 @@ hadd -f wjets_ht.root wjets_ht100to200.root wjets_ht200to400.root wjets_ht400to6
 
 ## (temporarily replaced tth with ttg, because of sample availability)
 echo "hadd -f top.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.root"
-hadd -f top.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.root >> dataDrivenEstimates.log
+hadd -f top.root ttsl.root ttdl.root singletop.root ttw_mg_lo.root ttz_mg_lo.root ttg.root >> dataDrivenEstimates.log
 
 ## make "lostlep" from sum of MC lostlep backgrounds (except QCD, to avoid spikes)
-echo "hadd -f lostlep.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.root wjets_ht100to200.root wjets_ht200to400.root wjets_ht400to600.root wjets_ht600to800.root wjets_ht800to1200.root wjets_ht1200to2500.root wjets_ht2500toInf.root" ## (temporarily replaced tth with ttg, because of sample availability)
-hadd -f lostlep.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.root wjets_ht100to200.root wjets_ht200to400.root wjets_ht400to600.root wjets_ht600to800.root wjets_ht800to1200.root wjets_ht1200to2500.root wjets_ht2500toInf.root >> dataDrivenEstimates.log
+echo "hadd -f lostlep.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.root wjets_ht.root" ## (temporarily replaced tth with ttg, because of sample availability)
+hadd -f lostlep.root ttsl.root ttdl.root singletop.root ttw_mg_lo.root ttz_mg_lo.root ttg.root wjets_ht.root >> dataDrivenEstimates.log
 cd $THISDIR
 
 #this script scales the HI and LOW boundary histograms by 1/numSamples since we don't want these hadd'ed

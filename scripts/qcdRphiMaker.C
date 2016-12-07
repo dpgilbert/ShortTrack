@@ -90,14 +90,14 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
 
     if (njets_LOW == 1 && njets_HI_mod == njets_LOW && nbjets_LOW == 0 && nbjets_HI_mod == nbjets_LOW)
     {
-      if (ht_HI > 1000) ht_HI = -1;
-      if (ht_LOW > 1000) ht_LOW = 1000;
+      if (ht_HI > 1200) ht_HI = -1;
+      if (ht_LOW > 1200) ht_LOW = 1000;
     }
 
     if (njets_LOW == 1 && njets_HI_mod == njets_LOW && nbjets_LOW == 1 && nbjets_HI_mod == -1)
     {
-      if (ht_HI > 575) ht_HI = -1;
-      if (ht_LOW > 575) ht_LOW = 575;
+      if (ht_HI > 700) ht_HI = -1;
+      if (ht_LOW > 700) ht_LOW = 700;
     }
     
     std::string ht_str = "HT" + std::to_string(ht_LOW) + "to" + std::to_string(ht_HI);
@@ -113,6 +113,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
     std::string channel_njonly = std::string("HT250toInf_") + jet_str + "_b0toInf";
     // special case for j2to6_b3toInf: use j4to6
     if (nbjets_LOW == 3 && njets_LOW == 2) channel_njonly = "HT250toInf_j4to6_b0toInf";
+    if (njets_LOW == 4 && njets_HI == -1) channel_njonly = "HT250toInf_j4to6_b0toInf";
     std::string channel_htonly = ht_str + "_j2toInf_b0toInf";
 
     if (verbose) std::cout << "channel is: " << channel << std::endl;
