@@ -5,12 +5,18 @@ import os
 ROOT.gROOT.SetBatch(1)
 
 dir = "looper_output/RebalanceAndSmear_V00-08-12_fixedBtag"
+dir_tail50 = "looper_output/RebalanceAndSmear_V00-08-12_tail50"
+dir_tail100 = "looper_output/RebalanceAndSmear_V00-08-12_tail100"
 dir_noRS = "looper_output/RebalanceAndSmear_V00-08-12_noRS"
 
 hrs = ROOT.TH1D("hrs","",44,0,44)
+h50 = ROOT.TH1D("h50","",44,0,44)
+h100 = ROOT.TH1D("h100","",44,0,44)
 hnrs = ROOT.TH1D("hnrs","",44,0,44)
 
 h_evts_rs = ROOT.TH1D("h_evts_rs","",1,0,2)
+h_evts_50 = ROOT.TH1D("h_evts_50","",1,0,2)
+h_evts_100 = ROOT.TH1D("h_evts_100","",1,0,2)
 h_evts_nrs = ROOT.TH1D("h_evts_nrs","",1,0,2)
 
 ibin = 0
@@ -20,6 +26,8 @@ for ht_reg in ["L","M","H","UH"]:
         print ibin
 
         h_evts_rs.Reset()
+        h_evts_50.Reset()
+        h_evts_100.Reset()
         h_evts_nrs.Reset()
         for fn in [os.path.join(dir,"qcd_ht_nonext.root"), os.path.join(dir,"qcd_ht_ext.root")]:
             fact = 0.686
@@ -27,9 +35,19 @@ for ht_reg in ["L","M","H","UH"]:
                 fact = 1-0.686
             bn = fn.split("/")[-1]
             frs = ROOT.TFile(os.path.join(dir,bn))
+            f50 = ROOT.TFile(os.path.join(dir_tail50,bn))
+            f100 = ROOT.TFile(os.path.join(dir_tail100,bn))
             fnrs = ROOT.TFile(os.path.join(dir_noRS,bn))
             try:
                 h_evts_rs.Add(frs.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)),fact)
+            except:
+                pass
+            try:
+                h_evts_50.Add(f50.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)),fact)
+            except:
+                pass
+            try:
+                h_evts_100.Add(f100.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)),fact)
             except:
                 pass
             try:
@@ -40,8 +58,15 @@ for ht_reg in ["L","M","H","UH"]:
         hrs.SetBinContent(ibin, h_evts_rs.GetBinContent(1))
         hrs.SetBinError(ibin, h_evts_rs.GetBinError(1))
 
+        h50.SetBinContent(ibin, h_evts_50.GetBinContent(1))
+        h50.SetBinError(ibin, h_evts_50.GetBinError(1))
+
+        h100.SetBinContent(ibin, h_evts_100.GetBinContent(1))
+        h100.SetBinError(ibin, h_evts_100.GetBinError(1))
+
         hnrs.SetBinContent(ibin, h_evts_nrs.GetBinContent(1))
         hnrs.SetBinError(ibin, h_evts_nrs.GetBinError(1))
+
 
 
 ROOT.gStyle.SetOptStat(0)
@@ -73,6 +98,14 @@ hrs.SetLineColor(ROOT.kBlack)
 hrs.SetMarkerColor(ROOT.kBlack)
 hrs.SetMarkerStyle(20)
 
+h50.SetLineColor(ROOT.kBlue)
+h50.SetMarkerColor(ROOT.kBlue)
+h50.SetMarkerStyle(20)
+
+h100.SetLineColor(ROOT.kRed)
+h100.SetMarkerColor(ROOT.kRed)
+h100.SetMarkerStyle(20)
+
 hnrs.SetLineColor(401)
 hnrs.SetMarkerColor(401)
 hnrs.SetMarkerStyle(20)
@@ -82,6 +115,8 @@ hnrs.GetXaxis().SetLabelSize(0)
 
 hnrs.Draw("PE")
 hrs.Draw("PE SAME")
+h50.Draw("PE SAME")
+h100.Draw("PE SAME")
 
 line = ROOT.TLine()
 line.SetLineStyle(2)
@@ -90,8 +125,10 @@ for ix in [11,22,33]:
     line.DrawLineNDC(x,1-pads[0].GetTopMargin(),x,pads[0].GetBottomMargin())
 
 leg = ROOT.TLegend(0.815,0.78,0.94,0.9)
-leg.AddEntry(hrs, "R&S from MC")
 leg.AddEntry(hnrs, "QCD MC")
+leg.AddEntry(hrs, "R&S from MC")
+leg.AddEntry(h50, "Tail +50%")
+leg.AddEntry(h100, "Tail +100%")
 leg.Draw()
 
 text = ROOT.TLatex()
@@ -127,34 +164,35 @@ for ibin in range(11):
 ## ratio
 pads[1].cd()
 
-h_ratio = hrs.Clone("h_ratio")
-h_ratio.Divide(hnrs)
+h_ratio50 = h50.Clone("h_ratio")
+h_ratio50.Divide(hrs)
 
-h_ratio.GetYaxis().SetRangeUser(0,2)
-h_ratio.GetYaxis().SetNdivisions(505)
-h_ratio.GetYaxis().SetTitle("R&S/MC")
-h_ratio.GetYaxis().SetTitleSize(0.16)
-h_ratio.GetYaxis().SetTitleOffset(0.18)
-h_ratio.GetYaxis().SetLabelSize(0.13)
-h_ratio.GetYaxis().CenterTitle()
-h_ratio.GetYaxis().SetTickLength(0.02)
-h_ratio.GetXaxis().SetLabelSize(0)
-h_ratio.GetXaxis().SetTitle("")
-h_ratio.GetXaxis().SetNdivisions(44,0,0)
-h_ratio.GetXaxis().SetTickSize(0.06)
-h_ratio.SetMarkerStyle(20)
-h_ratio.SetMarkerSize(1.0)
-h_ratio.SetLineWidth(1)
+h_ratio100 = h100.Clone("h_ratio")
+h_ratio100.Divide(hrs)
 
-h_ratio.Draw("PE")
+h_ratio50.GetYaxis().SetRangeUser(0,3)
+h_ratio50.GetYaxis().SetNdivisions(505)
+h_ratio50.GetYaxis().SetTitle("Shift/R&S")
+h_ratio50.GetYaxis().SetTitleSize(0.16)
+h_ratio50.GetYaxis().SetTitleOffset(0.18)
+h_ratio50.GetYaxis().SetLabelSize(0.13)
+h_ratio50.GetYaxis().CenterTitle()
+h_ratio50.GetYaxis().SetTickLength(0.02)
+h_ratio50.GetXaxis().SetLabelSize(0)
+h_ratio50.GetXaxis().SetTitle("")
+h_ratio50.GetXaxis().SetNdivisions(44,0,0)
+h_ratio50.GetXaxis().SetTickSize(0.06)
+h_ratio50.SetMarkerStyle(20)
+h_ratio50.SetMarkerSize(1.0)
+h_ratio50.SetLineWidth(1)
+
+h_ratio50.Draw("PE")
+h_ratio100.Draw("PE SAME")
 
 line = ROOT.TLine()
 line.DrawLine(0,1,44,1)
 
-# c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/MCclosure/RS_MC_closure.pdf")
-# c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/MCclosure/RS_MC_closure.png")
+c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/MCtests/tail_var.pdf")
+c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/MCtests/tail_var.png")
 
-c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/MCtests/closure.pdf")
-c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/MCtests/closure.png")
 
-raw_input()

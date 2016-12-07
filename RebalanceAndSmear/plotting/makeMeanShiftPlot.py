@@ -5,12 +5,15 @@ import os
 ROOT.gROOT.SetBatch(1)
 
 dir = "looper_output/RebalanceAndSmear_V00-08-12_fixedBtag"
+dir_shift = "looper_output/RebalanceAndSmear_V00-08-12_mean04"
 dir_noRS = "looper_output/RebalanceAndSmear_V00-08-12_noRS"
 
 hrs = ROOT.TH1D("hrs","",44,0,44)
+hms = ROOT.TH1D("hms","",44,0,44)
 hnrs = ROOT.TH1D("hnrs","",44,0,44)
 
 h_evts_rs = ROOT.TH1D("h_evts_rs","",1,0,2)
+h_evts_ms = ROOT.TH1D("h_evts_ms","",1,0,2)
 h_evts_nrs = ROOT.TH1D("h_evts_nrs","",1,0,2)
 
 ibin = 0
@@ -20,6 +23,7 @@ for ht_reg in ["L","M","H","UH"]:
         print ibin
 
         h_evts_rs.Reset()
+        h_evts_ms.Reset()
         h_evts_nrs.Reset()
         for fn in [os.path.join(dir,"qcd_ht_nonext.root"), os.path.join(dir,"qcd_ht_ext.root")]:
             fact = 0.686
@@ -27,9 +31,14 @@ for ht_reg in ["L","M","H","UH"]:
                 fact = 1-0.686
             bn = fn.split("/")[-1]
             frs = ROOT.TFile(os.path.join(dir,bn))
+            fms = ROOT.TFile(os.path.join(dir_shift,bn))
             fnrs = ROOT.TFile(os.path.join(dir_noRS,bn))
             try:
                 h_evts_rs.Add(frs.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)),fact)
+            except:
+                pass
+            try:
+                h_evts_ms.Add(fms.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)),fact)
             except:
                 pass
             try:
@@ -40,8 +49,12 @@ for ht_reg in ["L","M","H","UH"]:
         hrs.SetBinContent(ibin, h_evts_rs.GetBinContent(1))
         hrs.SetBinError(ibin, h_evts_rs.GetBinError(1))
 
+        hms.SetBinContent(ibin, h_evts_ms.GetBinContent(1))
+        hms.SetBinError(ibin, h_evts_ms.GetBinError(1))
+
         hnrs.SetBinContent(ibin, h_evts_nrs.GetBinContent(1))
         hnrs.SetBinError(ibin, h_evts_nrs.GetBinError(1))
+
 
 
 ROOT.gStyle.SetOptStat(0)
@@ -73,6 +86,10 @@ hrs.SetLineColor(ROOT.kBlack)
 hrs.SetMarkerColor(ROOT.kBlack)
 hrs.SetMarkerStyle(20)
 
+hms.SetLineColor(ROOT.kBlue)
+hms.SetMarkerColor(ROOT.kBlue)
+hms.SetMarkerStyle(20)
+
 hnrs.SetLineColor(401)
 hnrs.SetMarkerColor(401)
 hnrs.SetMarkerStyle(20)
@@ -81,6 +98,7 @@ hnrs.GetYaxis().SetRangeUser(1e-3,1e3)
 hnrs.GetXaxis().SetLabelSize(0)
 
 hnrs.Draw("PE")
+hms.Draw("PE SAME")
 hrs.Draw("PE SAME")
 
 line = ROOT.TLine()
@@ -90,8 +108,9 @@ for ix in [11,22,33]:
     line.DrawLineNDC(x,1-pads[0].GetTopMargin(),x,pads[0].GetBottomMargin())
 
 leg = ROOT.TLegend(0.815,0.78,0.94,0.9)
-leg.AddEntry(hrs, "R&S from MC")
 leg.AddEntry(hnrs, "QCD MC")
+leg.AddEntry(hrs, "R&S from MC")
+leg.AddEntry(hms, "Template Mean +4%")
 leg.Draw()
 
 text = ROOT.TLatex()
@@ -127,12 +146,12 @@ for ibin in range(11):
 ## ratio
 pads[1].cd()
 
-h_ratio = hrs.Clone("h_ratio")
-h_ratio.Divide(hnrs)
+h_ratio = hms.Clone("h_ratio")
+h_ratio.Divide(hrs)
 
 h_ratio.GetYaxis().SetRangeUser(0,2)
 h_ratio.GetYaxis().SetNdivisions(505)
-h_ratio.GetYaxis().SetTitle("R&S/MC")
+h_ratio.GetYaxis().SetTitle("Shift/R&S")
 h_ratio.GetYaxis().SetTitleSize(0.16)
 h_ratio.GetYaxis().SetTitleOffset(0.18)
 h_ratio.GetYaxis().SetLabelSize(0.13)
@@ -151,10 +170,8 @@ h_ratio.Draw("PE")
 line = ROOT.TLine()
 line.DrawLine(0,1,44,1)
 
-# c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/MCclosure/RS_MC_closure.pdf")
-# c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/MCclosure/RS_MC_closure.png")
+c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/MCtests/mean_shift.pdf")
+c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/MCtests/mean_shift.png")
 
-c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/MCtests/closure.pdf")
-c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/MCtests/closure.png")
 
 raw_input()
