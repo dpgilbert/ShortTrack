@@ -93,6 +93,11 @@ for iht,ht_reg in enumerate(ht_reg_names):
             fnqcd.Close()
         h_purity.Divide(h_denom)
 
+        for i in range(1,h_purity.GetNbinsX()+1):
+            if h_purity.GetBinContent(i) < 0.001 and i > 1:
+                h_purity.SetBinContent(i, h_purity.GetBinContent(i-1))
+                h_purity.SetBinError(i, h_purity.GetBinError(i-1))
+                
         # get nCR
         fin = ROOT.TFile(os.path.join(MT2indir, data_sample+".root"))
         h_mt2bins = fin.Get("crqcd{0}{1}/h_mt2bins".format(topi,htAbbrev))
