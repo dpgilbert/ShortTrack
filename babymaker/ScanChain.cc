@@ -129,7 +129,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     set_goodrun_file(json_file);
   }
 
-  if(!isDataFromFileName && doRebal){
+  if(doRebal){
+      rebal_reader.SetCoreScale(1.0);
+      rebal_reader.SetTailScale(1.0);
+      rebal_reader.SetMeanShift(0.0);
       rebal_reader.Init("rebal/JetResponseTemplates.root");
   }
 
@@ -2400,7 +2403,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       if (verbose) cout << "before fill" << endl;
 
       // do the rebalancing (only MC for now)
-      if(!isData && doRebal){
+      if(doRebal){
           nRebalJets = 0;
           if(njet < 2){
               rebal_status = -1;

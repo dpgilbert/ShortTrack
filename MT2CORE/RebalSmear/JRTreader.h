@@ -23,18 +23,27 @@ class JRTreader {
     ~JRTreader();
     int Init(char *fname);
     float GetRandomResponse(float pt, float eta, bool isBjet);
-    float GetValue(float pt, float eta, bool isBjet, float smearfact);
+    float GetValue(float pt, float eta, bool isBjet, float smearfact, bool correctDataResolution=false);
+    static float GetJERCorrection(float eta);
     static int GetPtBin(float pt);
     static int GetEtaBin(float eta);
     static void GetModifiedBins(int ptbin, int etabin, bool isBjet, int *new_ptbin, int *new_etabin);
+    void SetCoreScale(float);
+    void SetTailScale(float);
+    void SetMeanShift(float);
+    void TransformFit(TH1D *fit, TH1D *core, TH1D *tail);
     void UseRawHistograms(bool use=true);
     void SetBinWidth(float width);
+    void Draw(int,int);
 
  private:
     vector< vector<TH1D*>* > *fits_b;
     vector< vector<TH1D*>* > *fits_nonb;
     bool useFits = true;
     float BINWIDTH = 0.02;
+    float coreScale = 1.0;
+    float tailScale = 1.0;
+    float meanShift = 0.0;
 };
 
 #endif
