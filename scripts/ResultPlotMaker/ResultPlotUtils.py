@@ -85,7 +85,10 @@ def GetUncertaintiesFromDatacard(datacard_fname, bkg_names):
 
 
 def GetJBJregions(ht_reg):
-    if ht_reg != "monojet":
+
+    if ht_reg == "HT250to450":
+        return ["j2to3_b0","j2to3_b1","j2to3_b2","j4toInf_b0","j4toInf_b1","j4toInf_b2","j2toInf_b3toInf"]
+    elif ht_reg != "monojet":
         return ["j2to3_b0","j2to3_b1","j2to3_b2","j4to6_b0","j4to6_b1","j4to6_b2","j7toInf_b0","j7toInf_b1","j7toInf_b2","j2to6_b3toInf","j7toInf_b3toInf"]
     else:
         return ["j1_b0","j1_b1toInf"]
@@ -96,32 +99,40 @@ def GetMT2bins(ht_reg):
 
     for i,jbj_reg in enumerate(jbj_regs):
         bins = []
-        if ht_reg == "HT200to450":
-            if 0 <= i <= 5:            bins = [200,300,400]
-            if 6 <= i <= 8 or i==10:   bins = [200]
-            if i==9:                   bins = [200,300]
+        if ht_reg == "HT250to450":
+            if 0 <= i <= 6:            bins = [200,300,400]
         if ht_reg == "HT450to575":
             if 0 <= i <= 5:            bins = [200,300,400,500]
-            if i==6 or i==8 or i==10:  bins = [200]
-            if i==7 or i==9:           bins = [200,300]
+            if 6 <= i <= 8:            bins = [200,300,400]
+            if i==9:                   bins = [200,300,400,500]
+            if i==10:                  bins = [200,300,400]
         if ht_reg == "HT575to1000":
-            if 0 <= i <= 1 or i==3:    bins = [200,300,400,600,800]
-            if i==2 or 4 <= i <= 5:    bins = [200,300,400,600]
-            if 6 <= i <= 10:           bins = [200,300,400]
+            if 0 <= i <= 5:            bins = [200,300,400,600,800]
+            if i==6:                   bins = [200,300,400,600,800]
+            if 7 <= i <= 8:            bins = [200,300,400,600]
+            if 9 <= i <= 10:           bins = [200,300,400,600]
         if ht_reg == "HT1000to1500":
-            if i==0 or i==3:           bins = [200,400,600,800,1000]
-            if i==1 or i==4:           bins = [200,400,600,800]
-            if i==2 or 8 <= i <= 10:   bins = [200,400]
-            if 5 <= i <= 7:            bins = [200,400,600]
+            if 0 <= i <= 1:            bins = [200,400,600,800,1000,1200]
+            if 2 <= i <= 2:            bins = [200,400,600,800,1000]
+            if 3 <= i <= 4:            bins = [200,400,600,800,1000,1200]
+            if 5 <= i <= 5:            bins = [200,400,600,800,1000]
+            if 6 <= i <= 6:            bins = [200,400,600,800,1000]
+            if 7 <= i <= 8:            bins = [200,400,600,800]
+            if 9 <= i <= 10:           bins = [200,400,600]
         if ht_reg == "HT1500toInf":
-            if i==0 or i==3:           bins = [200,400,600,800,1000]
-            if i==1 or i==4 or i==5:   bins = [200,400,600]
-            if i==2:                   bins = [200]
-            if 6 <= i <= 10:           bins = [200,400]
+            if i==0:                   bins = [200,400,600,800,1000,1400]
+            if i==1:                   bins = [200,400,600,800,1000]
+            if i==2:                   bins = [200,400]
+            if 3 <= i <= 4:            bins = [200,400,600,800,1000,1400]
+            if i==5:                   bins = [200,400,600,800]
+            if i==6:                   bins = [200,400,600,800,1000]
+            if 7 <= i <= 8:            bins = [200,400,600,800]
+            if i==9:                   bins = [200,400,600]
+            if i==10:                  bins = [200,400]
         # for monojet, mt2bins are actually ht bins
         if ht_reg == "monojet":
-            if i==0: bins = [200,250,350,450,575,700,1000]
-            if i==1: bins = [200,250,350,450,575]
+            if i==0: bins = [250,350,450,575,700,1000,1200]
+            if i==1: bins = [250,350,450,575,700]
 
         if bins==[]:
             raise RuntimeError("Couldn't get MT2 binning for region {0} {1}".format(ht_reg,jbj_reg))
@@ -132,7 +143,7 @@ def GetMT2bins(ht_reg):
     return mt2bins
 
 def GetHTtitle(ht_reg):
-    if ht_reg == "HT200to450": return "200 < H_{T} < 450 GeV"
+    if ht_reg == "HT250to450": return "250 < H_{T} < 450 GeV"
     if ht_reg == "HT450to575": return "450 < H_{T} < 575 GeV"
     if ht_reg == "HT575to1000": return "575 < H_{T} < 1000 GeV"
     if ht_reg == "HT1000to1500": return "1000 < H_{T} < 1500 GeV"
