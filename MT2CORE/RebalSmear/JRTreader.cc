@@ -99,9 +99,8 @@ int JRTreader::Init(char *fname){
     return 1;
 }
 
-float JRTreader::GetRandomResponse(float pt, float eta, bool isBjet){
+float JRTreader::GetRandomResponse(float pt, float eta, bool isBjet, bool correctDataResolution){
     
-
     int ptbin_orig = JRTreader::GetPtBin(pt);
     int etabin_orig = JRTreader::GetEtaBin(fabs(eta));
 
@@ -120,7 +119,16 @@ float JRTreader::GetRandomResponse(float pt, float eta, bool isBjet){
     }
 
     float response = fit->GetRandom();
-    return response;
+
+    float correctedSmear;
+    if(correctDataResolution){
+        float corrFac = JRTreader::GetJERCorrection(eta);
+        correctedSmear = (response-1)*corrFac + 1;
+    }else{
+        correctedSmear = response;
+    }
+
+    return correctedSmear;
 }
 
 float JRTreader::GetValue(float pt, float eta, bool isBjet, float smearfact, bool correctDataResolution){
@@ -143,15 +151,16 @@ float JRTreader::GetValue(float pt, float eta, bool isBjet, float smearfact, boo
         return 1.;
     }
 
-    float correctedSmear;
+    float correctedSmear, corrFac;
     if(correctDataResolution){
-        float corrFac = JRTreader::GetJERCorrection(eta);
-        correctedSmear = (smearfact-1)*corrFac + 1;
+        corrFac = JRTreader::GetJERCorrection(eta);
+        correctedSmear = (smearfact-1)/corrFac + 1;
     }else{
+        corrFac = 1.0;
         correctedSmear = smearfact;
     }
 
-    float response = fit->GetBinContent(fit->FindBin(correctedSmear));
+    float response = fit->GetBinContent(fit->FindBin(correctedSmear))/corrFac;
     return response;
 }
 

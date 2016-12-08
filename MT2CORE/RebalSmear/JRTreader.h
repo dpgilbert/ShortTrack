@@ -22,7 +22,7 @@ class JRTreader {
     JRTreader(char *fname=0);
     ~JRTreader();
     int Init(char *fname);
-    float GetRandomResponse(float pt, float eta, bool isBjet);
+    float GetRandomResponse(float pt, float eta, bool isBjet, bool CorrectDataResolution=false);
     float GetValue(float pt, float eta, bool isBjet, float smearfact, bool correctDataResolution=false);
     static float GetJERCorrection(float eta);
     static int GetPtBin(float pt);

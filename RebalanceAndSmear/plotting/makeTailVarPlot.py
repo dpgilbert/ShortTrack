@@ -47,7 +47,12 @@ for ht_reg in ["L","M","H","UH"]:
             except:
                 pass
             try:
-                h_evts_100.Add(f100.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)),fact)
+                htemp = f100.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)).Clone()
+                err = ROOT.Double()
+                htemp.SetBinContent(1,f100.Get("sr{0}{1}/h_met".format(top_reg,ht_reg)).IntegralAndError(0,-1,err))
+                htemp.SetBinError(1,err)
+                                 
+                h_evts_100.Add(htemp, fact)
             except:
                 pass
             try:

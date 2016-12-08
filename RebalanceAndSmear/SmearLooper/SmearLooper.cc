@@ -81,10 +81,14 @@ bool doRebalanceAndSmear = true;
 
 const int numberOfSmears = 100;
 const float smearNormalization = 1.0/float(numberOfSmears);
+const int MAX_SMEARS = 1000;
 // factors to widen the core, magnify the tails, and shift the mean of the response templates
 float coreScale = 1.0;
 float tailScale = 1.0;
 float meanShift = 0.00;
+const float EWK_CUTOFF = 100.0;   // cut on rebalanced MET to remove electroweak contamination in data
+float ewk_correction = 1.0;       // correction factor applied to data events to account for the efficiency of the above cut. Computed based on HT region.
+float prescale_correction = 1.0;  //correct the weight if prescale is too high and we don't smear enough times
 std::vector<float> jet_pt;
 std::vector<float> jet_eta;
 std::vector<float> jet_phi;
@@ -474,7 +478,6 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
         dir_SRJustHT2_temp = outfile_->mkdir((SRJustHT2_temp.GetName()).c_str());
     } 
 
-
     // File Loop
     int nDuplicates = 0;
     int nEvents = chain->GetEntries();
@@ -497,7 +500,6 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
 
         // Event Loop
         unsigned int nEventsTree = tree->GetEntriesFast();
-        // nEventsTree = 10000;
         for( unsigned int event = 0; event < nEventsTree; ++event) {
 
             t.GetEntry(event);
@@ -609,7 +611,40 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
             ////////////////////////////////////
 
             if(doRebalanceAndSmear){
-                if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale) ) continue;
+
+                // ICHEP TRIGGER INFO
+                if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT125_Prescale || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale || t.HLT_PFJet450) ) 
+                    continue;
+
+                if     (t.HLT_PFJet450 != 0)         prescale = 1;      //these are hard-coded effective prescales. Must be recomputed if you change the data-taking period
+                else if(t.HLT_PFHT800 != 0)          prescale = 1;
+                else if(t.HLT_PFHT600_Prescale != 0) prescale = 27;
+                else if(t.HLT_PFHT475_Prescale != 0) prescale = 95;
+                else if(t.HLT_PFHT350_Prescale != 0) prescale = 378;
+                else if(t.HLT_PFHT300_Prescale != 0) prescale = 755;
+                else if(t.HLT_PFHT200_Prescale != 0) prescale = 4442;
+                else if(t.HLT_PFHT125_Prescale != 0) prescale = 4749;
+
+                cout << "DOING EVENT w/ prescale = " << prescale << endl;
+
+                // // END OF YEAR TRIGGER INFO
+                // if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFHT125_Prescale || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale || t.HLT_PFJet450) ) 
+                //     continue;
+
+                // if     (t.HLT_PFJet450 != 0)         prescale = 1;      //these are hard-coded effective prescales. Must be recomputed if you change the data-taking period
+                // else if(t.HLT_PFHT800 != 0)          prescale = 1;
+                // else if(t.HLT_PFHT600_Prescale != 0) prescale = ;
+                // else if(t.HLT_PFHT475_Prescale != 0) prescale = ;
+                // else if(t.HLT_PFHT350_Prescale != 0) prescale = ;
+                // else if(t.HLT_PFHT300_Prescale != 0) prescale = ;
+                // else if(t.HLT_PFHT200_Prescale != 0) prescale = ;
+                // else if(t.HLT_PFHT125_Prescale != 0) prescale = ;
+
+
+                prescale_correction = 1.0;
+                if(numberOfSmears*prescale > MAX_SMEARS)
+                    prescale_correction = (float)numberOfSmears*prescale / MAX_SMEARS;
+
 
                 jet_pt.clear();
                 jet_eta.clear();
@@ -675,15 +710,19 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
 
                 float reb_met_pt = sqrt(new_met_x*new_met_x + new_met_y*new_met_y);
 
-                evtweight_ = 1;
+                // rebalanced met cut to removed EWK contamination in data
+                if(t.isData && reb_met_pt > EWK_CUTOFF)
+                    continue;
+
                 random->SetSeed();
 
-                for(int iSmear=0; iSmear<(numberOfSmears*prescale); iSmear++){
+                for(int iSmear=0; iSmear<min((numberOfSmears*prescale), MAX_SMEARS); iSmear++){
+                    evtweight_ = 1;
 
                     std::vector<float> jet_pt_smeared = jet_pt;
 
                     for(unsigned int i=0; i<jet_pt_smeared.size(); i++){
-                        float smear = reader.GetRandomResponse(jet_pt[i], jet_eta[i], (jet_btagCSV[i]>0.800));
+                        float smear = reader.GetRandomResponse(jet_pt[i], jet_eta[i], (jet_btagCSV[i]>0.800), (bool)t.isData);
                         plot1D("h_smear",      smear,   evtweight_, h_1d_global, ";smear", 10000, 0, 10);
                         jet_pt_smeared.at(i) *= smear;
                     }
@@ -743,8 +782,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
 
                     if(nJet30 < 2) continue;
                     if(ht < 450.0) continue;
-                    // if(ht < 1000.0 && met_pt < 200.0) continue;
-                    if(ht < 1000.0 && met_pt < 30.0) continue;
+                    if(ht < 1000.0 && met_pt < 200.0) continue;
+                    // if(ht < 1000.0 && met_pt < 30.0) continue;
                     if(ht >= 1000.0 && met_pt < 30.0) continue;
 
                     std::vector<LorentzVector> p4sForDphi;
@@ -836,6 +875,14 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
                     RS_vars_["diffMetMht"] = diffMetMht;
                     RS_vars_["jet1_pt"] = jet1_pt;
                     RS_vars_["jet2_pt"] = jet2_pt;
+
+                    // ELECTROWEAK CORRECTIONS. Hard-coded based on comparisons of QCD/EWK MC.
+                    if(t.isData){
+                        if(RS_vars_["ht"] >=450  && RS_vars_["ht"]<575)  evtweight_*=1.02;
+                        if(RS_vars_["ht"] >=575  && RS_vars_["ht"]<1000) evtweight_*=1.17;
+                        if(RS_vars_["ht"] >=1000 && RS_vars_["ht"]<1500) evtweight_*=1.11;
+                        if(RS_vars_["ht"] >=1500)                        evtweight_*=1.07;
+                    }
 
                     //fill temp histograms
                     fillHistos(SRNoCut_temp.srHistMap, SRNoCut_temp.GetNumberOfMT2Bins(), SRNoCut_temp.GetMT2Bins(), SRNoCut_temp.GetName(), "");
@@ -993,7 +1040,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
 void SmearLooper::fillHistosSRBase() {
 
     // trigger requirement on data
-    if (!doRebalanceAndSmear && t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
+    if (!doRebalanceAndSmear && t.isData && !(t.HLT_PFHT800 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
 
     std::map<std::string, float> values;
     if(doRebalanceAndSmear){
@@ -1038,7 +1085,7 @@ void SmearLooper::fillHistosSRBase() {
 void SmearLooper::fillHistosInclusive() {
 
     // trigger requirement on data
-    if (!doRebalanceAndSmear && t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
+    if (!doRebalanceAndSmear && t.isData && !(t.HLT_PFHT800 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
 
     std::map<std::string, float> values;
     if(doRebalanceAndSmear){
@@ -1128,7 +1175,7 @@ void SmearLooper::fillHistosInclusive() {
 void SmearLooper::fillHistosSignalRegion(const std::string& prefix, const std::string& suffix) {
 
     // trigger requirement on data
-    if (!doRebalanceAndSmear && t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
+    if (!doRebalanceAndSmear && t.isData && !(t.HLT_PFHT800 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
 
     std::map<std::string, float> values;
 
@@ -1184,7 +1231,7 @@ void SmearLooper::fillHistosSignalRegion(const std::string& prefix, const std::s
 void SmearLooper::fillHistosCRRSInvertDPhi(const std::string& prefix, const std::string& suffix) {
 
     // trigger requirement on data
-    if (!doRebalanceAndSmear && t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
+    if (!doRebalanceAndSmear && t.isData && !(t.HLT_PFHT800 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
 
     std::map<std::string, float> values;
     if(doRebalanceAndSmear){
@@ -1235,7 +1282,7 @@ void SmearLooper::fillHistosCRRSInvertDPhi(const std::string& prefix, const std:
 void SmearLooper::fillHistosCRRSMT2SideBand(const std::string& prefix, const std::string& suffix) {
 
     // trigger requirement on data
-    if (!doRebalanceAndSmear && t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
+    if (!doRebalanceAndSmear && t.isData && !(t.HLT_PFHT800 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
 
     std::map<std::string, float> values;
     if(doRebalanceAndSmear){
@@ -1286,7 +1333,7 @@ void SmearLooper::fillHistosCRRSMT2SideBand(const std::string& prefix, const std
 void SmearLooper::fillHistosCRRSDPhiMT2(const std::string& prefix, const std::string& suffix) {
 
     // trigger requirement on data
-    if (!doRebalanceAndSmear && t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
+    if (!doRebalanceAndSmear && t.isData && !(t.HLT_PFHT800 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
 
     std::map<std::string, float> values;
     if(doRebalanceAndSmear){
@@ -1532,11 +1579,12 @@ void SmearLooper::plotRS(std::map<string, TH1*> &inmap, std::map<string, TH1*> &
         int numbinsx = in_iter->second->GetNbinsX();
         float xmin = in_iter->second->GetXaxis()->GetXmin();
         float xmax = in_iter->second->GetXaxis()->GetXmax();
-        for(int i=0; i<=numbinsx; i++){
+        for(int i=0; i<=numbinsx+1; i++){
             if(in_iter->second->GetBinContent(i) == 0) continue;
             float xval = in_iter->second->GetBinCenter(i);
             float weight = (in_iter->second->GetBinContent(i)) * smearNormalization;
             if(!t.isData) weight *= evtweight_;
+            if (t.isData) weight *= prescale_correction;
             dir->cd();
             //std::cout << i << std::endl;
             //std::cout << in_iter->second->GetBinContent(i) << std::endl;
