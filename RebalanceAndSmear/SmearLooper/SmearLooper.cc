@@ -543,6 +543,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
 
             if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
 
+            if(isinf(t.met_pt) || isnan(t.met_pt) || isinf(t.ht) || isnan(t.ht) || t.jet_pt[0] > 13000.) continue;
+            
             if (t.nVert == 0) continue;
             if (doRebalanceAndSmear && t.njet < 2) continue;
             if (!doRebalanceAndSmear){
@@ -566,7 +568,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
             if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
             if (!t.Flag_badChargedHadronFilter) continue;
 
-            if (t.met_miniaodPt / t.met_caloPt > 5.0) continue;
+            if (!doRebalanceAndSmear)
+              if (t.met_miniaodPt / t.met_caloPt > 5.0) continue;
 
             // flag signal samples
             if (t.evt_id >= 1000) isSignal_ = true;
@@ -602,7 +605,6 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
 
             // veto on forward jets
             if (doHFJetVeto && nJet30Eta3_ > 0) continue;
-
 
             ////////////////////////////////////
             /// done with overall selection  /// 
@@ -845,7 +847,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
                     diffMetMht = (mhtVector - metVector).Mod();
 
                     //if(diffMetMht/met_pt > 0.5) continue;
-
+                    if (met_pt/met_caloPt > 5) continue;
+                    
                     vector<LorentzVector> hemJets;
                     if(p4sForHems.size() > 1){
                         hemJets = getHemJets(p4sForHems); 
