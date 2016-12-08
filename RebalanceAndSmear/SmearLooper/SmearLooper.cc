@@ -433,9 +433,9 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
 
     outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
 
-    const char* json_file = "../../babymaker/jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
+    const char* json_file = "jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
     // const char* json_file = "";
-    if (t.isData && applyJSON) {
+    if (applyJSON) {
         cout << "Loading json file: " << json_file << endl;
         set_goodrun_file(json_file);
     }
@@ -499,6 +499,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
 
         // Event Loop
         unsigned int nEventsTree = tree->GetEntriesFast();
+        // nEventsTree = 50000;
         for( unsigned int event = 0; event < nEventsTree; ++event) {
 
             t.GetEntry(event);
@@ -712,7 +713,6 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
                 if(t.isData && reb_met_pt > EWK_CUTOFF)
                     continue;
 
-                if (reb_met_pt/t.met_caloPt > 5) continue;
 
                 random->SetSeed();
 
@@ -785,6 +785,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
                     if(ht < 1000.0 && met_pt < 200.0) continue;
                     // if(ht < 1000.0 && met_pt < 30.0) continue;
                     if(ht >= 1000.0 && met_pt < 30.0) continue;
+
+                    if (met_pt/t.met_caloPt > 5.0) continue;
 
                     std::vector<LorentzVector> p4sForDphi;
                     for(unsigned int i=0; i<jet_pt_smeared.size(); i++){
