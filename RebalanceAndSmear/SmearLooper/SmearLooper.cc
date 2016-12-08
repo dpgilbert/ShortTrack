@@ -625,8 +625,6 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
                 else if(t.HLT_PFHT200_Prescale != 0) prescale = 4442;
                 else if(t.HLT_PFHT125_Prescale != 0) prescale = 4749;
 
-                cout << "DOING EVENT w/ prescale = " << prescale << endl;
-
                 // // END OF YEAR TRIGGER INFO
                 // if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFHT125_Prescale || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale || t.HLT_PFJet450) ) 
                 //     continue;
@@ -639,7 +637,6 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
                 // else if(t.HLT_PFHT300_Prescale != 0) prescale = ;
                 // else if(t.HLT_PFHT200_Prescale != 0) prescale = ;
                 // else if(t.HLT_PFHT125_Prescale != 0) prescale = ;
-
 
                 prescale_correction = 1.0;
                 if(numberOfSmears*prescale > MAX_SMEARS)
