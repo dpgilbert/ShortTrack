@@ -73,7 +73,7 @@ bool applyWeights = false;
 // turn on to enable plots of MT2 with systematic variations applied. applyWeights should be true
 bool doSystVariationPlots = false;
 // turn on to apply json file to data
-bool applyJSON = false;
+bool applyJSON = true;
 // veto on jets with pt > 30, |eta| > 3.0
 bool doHFJetVeto = false;
 //bool doRebalanceAndSmear = true;//FIXME
@@ -81,13 +81,12 @@ bool doRebalanceAndSmear = true;
 
 const int numberOfSmears = 100;
 const float smearNormalization = 1.0/float(numberOfSmears);
-const int MAX_SMEARS = 1000;
+const int MAX_SMEARS = 5000;
 // factors to widen the core, magnify the tails, and shift the mean of the response templates
 float coreScale = 1.0;
 float tailScale = 1.0;
 float meanShift = 0.00;
 const float EWK_CUTOFF = 100.0;   // cut on rebalanced MET to remove electroweak contamination in data
-float ewk_correction = 1.0;       // correction factor applied to data events to account for the efficiency of the above cut. Computed based on HT region.
 float prescale_correction = 1.0;  //correct the weight if prescale is too high and we don't smear enough times
 std::vector<float> jet_pt;
 std::vector<float> jet_eta;
@@ -436,7 +435,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
 
     const char* json_file = "../../babymaker/jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
     // const char* json_file = "";
-    if (applyJSON) {
+    if (t.isData && applyJSON) {
         cout << "Loading json file: " << json_file << endl;
         set_goodrun_file(json_file);
     }
@@ -713,6 +712,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
                 if(t.isData && reb_met_pt > EWK_CUTOFF)
                     continue;
 
+                if (reb_met_pt/t.met_caloPt > 5) continue;
+
                 random->SetSeed();
 
                 for(int iSmear=0; iSmear<min((numberOfSmears*prescale), MAX_SMEARS); iSmear++){
@@ -847,7 +848,6 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
                     diffMetMht = (mhtVector - metVector).Mod();
 
                     //if(diffMetMht/met_pt > 0.5) continue;
-                    if (met_pt/met_caloPt > 5) continue;
                     
                     vector<LorentzVector> hemJets;
                     if(p4sForHems.size() > 1){
