@@ -1,10 +1,11 @@
 import ROOT
 import os
 import pyRootPlotMaker as ppm
+import numpy as np
 
 ROOT.gROOT.SetBatch(1)
 
-dir = "looper_output/RebalanceAndSmear_V00-08-12_tail50"
+dir = "looper_output/RebalanceAndSmear_V00-08-12_fixedBtag_v2"
 dir_noRS = "looper_output/RebalanceAndSmear_V00-08-12_noRS"
 
 frse = ROOT.TFile(os.path.join(dir,"qcd_ht_ext.root"))
@@ -28,10 +29,20 @@ for tdir in ["ht450to1000","ht1000toInf"]:
         hnrs.Scale(0.686)
         hnrs.Add(fnrsne.Get("{0}/h_{1}".format(tdir,var)), 1-0.686)
 
-        hrs.Rebin(rebin[ivar])
-        hnrs.Rebin(rebin[ivar])
-
-        for ext in [".pdf",".png"]:
-            saveAs = "/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/MCtests/tmp/{0}/{0}_{1}{2}".format(tdir,var,ext)
-            ppm.plotDataMC([hnrs], ["QCD MC"], h_data=hrs, dataTitle="R&S from MC", saveAs=saveAs, 
-                           xAxisTitle=names[ivar], xAxisUnit=units[ivar])
+        if "nJet30" in var:
+            newbins = np.array([0.,2.,4.,7.,15.])
+            tmp_hrs = hrs.Rebin(4,"tmp_hrs",newbins)
+            tmp_hnrs = hnrs.Rebin(4,"tmp_hnrs",newbins)
+        else:
+            hrs.Rebin(rebin[ivar])
+            hnrs.Rebin(rebin[ivar])
+        
+        for ext in [".pdf",".png",".root"]:
+            if "nJet30" in var:
+                saveAs = "/home/users/fgolf/public_html/mt2/RebalanceAndSmear/MCtests/tmp/{0}/{0}_{1}{2}".format(tdir,var,ext)
+                ppm.plotDataMC([tmp_hnrs], ["QCD MC"], h_data=tmp_hrs, dataTitle="R&S from MC", saveAs=saveAs, 
+                               xAxisTitle=names[ivar], xAxisUnit=units[ivar])
+            else:
+                saveAs = "/home/users/fgolf/public_html/mt2/RebalanceAndSmear/MCtests/tmp/{0}/{0}_{1}{2}".format(tdir,var,ext)
+                ppm.plotDataMC([hnrs], ["QCD MC"], h_data=hrs, dataTitle="R&S from MC", saveAs=saveAs, 
+                               xAxisTitle=names[ivar], xAxisUnit=units[ivar])
