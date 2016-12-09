@@ -71,6 +71,10 @@ class SmearLooper {
   void InitBabyNtuple();
   void FillBabyNtuple();
   void CloseBabyNtuple();
+
+  void ApplyWeights() {applyWeights_ = true;}
+  void DoRebalanceAndSmear() {doRebalanceAndSmear_ = true;}
+  void MakeSmearBaby() {makeSmearBaby_ = true;}
   
  private:
 
@@ -103,6 +107,10 @@ class SmearLooper {
   SRRS SRJustHT1_temp;
   SRRS SRJustHT2_temp;
 
+  bool applyWeights_;
+  bool doRebalanceAndSmear_;
+  bool makeSmearBaby_;
+  
   TFile *SmearBabyFile_;
   TTree *SmearBabyTree_;
 
