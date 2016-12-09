@@ -75,6 +75,9 @@ class SmearLooper {
   void ApplyWeights() {applyWeights_ = true;}
   void DoRebalanceAndSmear() {doRebalanceAndSmear_ = true;}
   void MakeSmearBaby() {makeSmearBaby_ = true;}
+  void SetCoreScale (float coreScale) {coreScale_ = coreScale;}
+  void SetTailScale (float tailScale) {tailScale_ = tailScale;}
+  void SetMeanShift (float meanShift) {meanShift_ = meanShift;}
   
  private:
 
@@ -110,6 +113,10 @@ class SmearLooper {
   bool applyWeights_;
   bool doRebalanceAndSmear_;
   bool makeSmearBaby_;
+
+  float coreScale_;
+  float tailScale_;
+  float meanShift_;
   
   TFile *SmearBabyFile_;
   TTree *SmearBabyTree_;

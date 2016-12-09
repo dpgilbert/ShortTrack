@@ -16,22 +16,40 @@ int main(int argc, char **argv) {
   std::string sample(argv[2]);
   std::string output_dir(argv[3]);
 
-  int max_events = -1;
-  int wflag = 0;
-  int rflag = 0;
   int bflag = 0;
-
+  int cflag = 0;
+  int mflag = 0;
+  int rflag = 0;
+  int tflag = 0;
+  int wflag = 0;
+  int max_events = -1;
+  float core_scale = 1.;
+  float tail_scale = 1.;
+  float mean_shift = 0.;
+  
   int c;
-  while ((c = getopt(argc, argv, "brwn:")) != -1) {
+  while ((c = getopt(argc, argv, "bc:m:n:rt:w")) != -1) {
     switch (c) {
     case 'b':
       bflag = 1;
+      break;
+    case 'c':
+      cflag = 1;
+      core_scale = atof(optarg);
+      break;
+    case 'm':
+      mflag = 1;
+      mean_shift = atof(optarg);
       break;
     case 'n':
       max_events = atoi(optarg);
       break;
     case 'r':
       rflag = 1;
+      break;
+    case 't':
+      tflag = 1;
+      tail_scale = atof(optarg);
       break;
     case 'w':
       wflag = 1;            
@@ -46,8 +64,8 @@ int main(int argc, char **argv) {
     }
   }
 
-  printf ("running on %d events with bflag = %d, rflag = %d, wflag = %d\n",
-          max_events, bflag, rflag, wflag);
+  printf ("running on %d events with bflag = %d, rflag = %d, wflag = %d, and core_scale = %1.2f, tail_scale = %1.2f, mean_shift = %1.2f\n",
+          max_events, bflag, rflag, wflag, core_scale, tail_scale, mean_shift);
   
     
   TChain *ch = new TChain("mt2");
@@ -61,9 +79,12 @@ int main(int argc, char **argv) {
   }
   
   SmearLooper *looper = new SmearLooper();
-  if (wflag) looper->ApplyWeights();
-  if (rflag) looper->DoRebalanceAndSmear();
   if (bflag) looper->MakeSmearBaby();
+  if (cflag) looper->SetCoreScale(core_scale);
+  if (mflag) looper->SetMeanShift(mean_shift);
+  if (rflag) looper->DoRebalanceAndSmear();
+  if (tflag) looper->SetTailScale(tail_scale);
+  if (wflag) looper->ApplyWeights();
   looper->loop(ch, output_dir + "/" + sample + ".root", max_events);
   return 0;
 

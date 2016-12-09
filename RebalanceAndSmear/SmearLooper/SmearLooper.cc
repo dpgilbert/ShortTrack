@@ -85,9 +85,9 @@ const int numberOfSmears = 100;
 const float smearNormalization = 1.0/float(numberOfSmears);
 const int MAX_SMEARS = 5000;
 // factors to widen the core, magnify the tails, and shift the mean of the response templates
-float coreScale = 1.0;
-float tailScale = 1.0;
-float meanShift = 0.00;
+// float coreScale = 1.0;
+// float tailScale = 1.0;
+// float meanShift = 0.00;
 const float EWK_CUTOFF = 100.0;   // cut on rebalanced MET to remove electroweak contamination in data
 float prescale_correction = 1.0;  //correct the weight if prescale is too high and we don't smear enough times
 std::vector<float> jet_pt;
@@ -112,7 +112,10 @@ inline bool sortByPt(const LorentzVector &vec1, const LorentzVector &vec2 ) {
 SmearLooper::SmearLooper() :
   applyWeights_(false),
   doRebalanceAndSmear_(false),
-  makeSmearBaby_(false)
+  makeSmearBaby_(false),
+  coreScale_(1.),
+  tailScale_(1.),
+  meanShift_(0.)
 {
 
   // set up signal binning
@@ -425,9 +428,9 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
   TRandom3 *random = new TRandom3();
 
   // setup template reader
-  reader.SetCoreScale(coreScale);
-  reader.SetTailScale(tailScale);
-  reader.SetMeanShift(meanShift);
+  reader.SetCoreScale(coreScale_);
+  reader.SetTailScale(tailScale_);
+  reader.SetMeanShift(meanShift_);
   reader.Init("JetResponseTemplates.root");
 
   // Benchmark
