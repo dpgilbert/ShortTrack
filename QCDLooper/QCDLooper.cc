@@ -33,7 +33,7 @@ class SR;
 // turn on to apply json file to data
 bool applyJSON = true;
 
-const float lumi = 40.;
+const float lumi = 27.70;
 
 // input effective prescales for PFHT125, PFHT350, PFHT475
 // 4/fb
@@ -41,7 +41,11 @@ const float lumi = 40.;
 // // 7.65/fb
 // double eff_prescales[3] = {3628., 346.3, 86.8};
 // 12.9/fb
-double eff_prescales[3] = {4748., 377.5, 94.6};
+// double eff_prescales[3] = {4748., 377.5, 94.6};
+// 27.66/fb
+double eff_prescales[3] = {7900., 440.6, 110.2};
+// 36.46/fb
+// double eff_prescales[3] = {9200., 460.6, 115.2};
 
 //_______________________________________
 QCDLooper::QCDLooper(){
@@ -106,7 +110,7 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
 
   outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
 
-  const char* json_file = "../babymaker/jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -178,6 +182,11 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
 
       if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
 
+      //
+      // because of trigger issues, decide to only use eras B-G for 2016 data
+      //
+      // if (t.run > 280385) continue;
+      
       // MET filters (first 2 data only)
       if (t.isData) {
         if (!t.Flag_globalTightHalo2016Filter) continue; 
@@ -211,7 +220,7 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
       //----------------------
       // try pfmet/calomet cut
       //----------------------
-      if(t.met_pt/t.met_caloPt >= 5) continue;
+      // if(t.met_pt/t.met_caloPt >= 5) continue;
 
       //---------------------
       // set weights and start making plots
@@ -234,16 +243,16 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
       values["mt2"] = t.mt2;
       values["deltaPhiMin"] = t.deltaPhiMin;
       for(unsigned int i=0; i<SRVec_rphi.size(); i++){
-          if(SRVec_rphi.at(i).PassesSelection(values))
-              fillHistosRphi(SRVec_rphi.at(i).srHistMap,SRVec_rphi.at(i).GetName().c_str());
-          if(SRVec_fj.at(i).PassesSelection(values))
-              fillHistosFj(SRVec_fj.at(i).srHistMap,SRVec_fj.at(i).GetName().c_str());
+        if(SRVec_rphi.at(i).PassesSelection(values))
+          fillHistosRphi(SRVec_rphi.at(i).srHistMap,SRVec_rphi.at(i).GetName().c_str());
+        if(SRVec_fj.at(i).PassesSelection(values))
+          fillHistosFj(SRVec_fj.at(i).srHistMap,SRVec_fj.at(i).GetName().c_str());
       }
       for(unsigned int i=0; i<SRVec_rb.size(); i++){
-          if(SRVec_rb.at(i).PassesSelection(values))
-              fillHistosRb(SRVec_rb.at(i).srHistMap,SRVec_rb.at(i).GetName().c_str());
+        if(SRVec_rb.at(i).PassesSelection(values))
+          fillHistosRb(SRVec_rb.at(i).srHistMap,SRVec_rb.at(i).GetName().c_str());
       }
-
+      
     }//end loop on events in a file
   
     delete tree;
