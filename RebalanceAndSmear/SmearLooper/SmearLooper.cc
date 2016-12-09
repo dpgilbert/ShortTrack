@@ -78,6 +78,8 @@ bool applyJSON = true;
 bool doHFJetVeto = false;
 //bool doRebalanceAndSmear = true;//FIXME
 bool doRebalanceAndSmear = true;
+// make mini baby
+bool makeSmearBaby = true;
 
 const int numberOfSmears = 100;
 const float smearNormalization = 1.0/float(numberOfSmears);
@@ -414,7 +416,7 @@ void SmearLooper::SetSignalRegions(){
 }
 
 
-void SmearLooper::loop(TChain* chain, std::string output_name){
+void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
     TRandom3 *random = new TRandom3();
 
@@ -477,6 +479,13 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
         dir_SRJustHT2_temp = outfile_->mkdir((SRJustHT2_temp.GetName()).c_str());
     } 
 
+    if (makeSmearBaby) {
+      std::string baby_name = output_name;
+      baby_name.replace(baby_name.end()-5,baby_name.end(),"_baby");
+      MakeBabyNtuple(Form("%s.root", baby_name.c_str()));
+      std::cout << "[SmearLooper::loop] Making baby ntuple..." << std::endl;
+    }
+    
     // File Loop
     int nDuplicates = 0;
     int nEvents = chain->GetEntries();
@@ -499,6 +508,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
 
         // Event Loop
         unsigned int nEventsTree = tree->GetEntriesFast();
+        if (maxEvents > 0) nEventsTree = (unsigned int)maxEvents;
         // nEventsTree = 50000;
         for( unsigned int event = 0; event < nEventsTree; ++event) {
 
@@ -524,6 +534,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
                 }
             }
 
+            if (makeSmearBaby) InitBabyNtuple();
+            
             //---------------------
             // skip duplicates -- needed when running on mutiple streams in data
             //---------------------
@@ -612,6 +624,34 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
             ///   time to fill histograms    /// 
             ////////////////////////////////////
 
+            // fill variables to store in baby
+            if (makeSmearBaby) {
+              run                  = t.run;
+              ls                   = t.lumi;
+              evt                  = t.evt;
+              isData               = t.isData;
+              evt_scale1fb         = t.evt_scale1fb;
+              evt_id               = t.evt_id;
+              HLT_PFHT800          = t.HLT_PFHT800;            
+              HLT_PFHT900          = t.HLT_PFHT900;            
+              HLT_PFJet450         = t.HLT_PFJet450;           
+              HLT_PFJet500         = t.HLT_PFJet500;           
+              HLT_PFHT125_Prescale = t.HLT_PFHT125_Prescale;   
+              HLT_PFHT200_Prescale = t.HLT_PFHT200_Prescale;   
+              HLT_PFHT300_Prescale = t.HLT_PFHT300_Prescale;   
+              HLT_PFHT350_Prescale = t.HLT_PFHT350_Prescale;                 
+              HLT_PFHT475_Prescale = t.HLT_PFHT475_Prescale;
+              HLT_PFHT600_Prescale = t.HLT_PFHT600_Prescale;
+              a_nJet30             = t.nJet30;
+              a_nBJet20            = t.nBJet20;
+              a_deltaPhiMin        = t.deltaPhiMin;
+              a_diffMetMhtOverMet  = t.diffMetMht/t.met_pt;
+              a_ht                 = t.ht;
+              a_mt2                = t.mt2;
+              a_met_pt             = t.met_pt;
+              a_met_phi            = t.met_phi;
+            }
+            
             if(doRebalanceAndSmear){
 
                 // ICHEP TRIGGER INFO
@@ -643,8 +683,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
                 prescale_correction = 1.0;
                 if(numberOfSmears*prescale > MAX_SMEARS)
                     prescale_correction = (float)numberOfSmears*prescale / MAX_SMEARS;
-
-
+                
                 jet_pt.clear();
                 jet_eta.clear();
                 jet_phi.clear();
@@ -665,7 +704,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
                 float pt_soft_reco_x = - t.met_pt*cos(t.met_phi);
                 float pt_soft_reco_y = - t.met_pt*sin(t.met_phi);
                 bool dojet = true;
-                int jetCounter = -1;
+                int jetCounter = -1;                
                 float rf = -999;
                 for(int i=0; i<t.njet; i++){
 
@@ -693,13 +732,15 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
                     if(!dojet) continue;
 
                     jetCounter++;
-
+                    
                     rf = t.rebal_factors[jetCounter];
                     jet_pt.push_back(t.jet_pt[i]*rf);
                     jet_eta.push_back(t.jet_eta[i]);
                     jet_phi.push_back(t.jet_phi[i]);
                     jet_btagCSV.push_back(t.jet_btagCSV[i]);
 
+                    if (makeSmearBaby) r_ht += jet_pt.back();
+                    
                     new_met_x -= jet_pt.at(jetCounter)*cos(jet_phi.at(jetCounter));
                     new_met_y -= jet_pt.at(jetCounter)*sin(jet_phi.at(jetCounter));
                     pt_soft_true_x -= jet_pt.at(jetCounter)*cos(jet_phi.at(jetCounter));
@@ -708,15 +749,23 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
                 }
 
                 float reb_met_pt = sqrt(new_met_x*new_met_x + new_met_y*new_met_y);
-
+                int numSmears = min((numberOfSmears*prescale), MAX_SMEARS);
+                                
                 // rebalanced met cut to removed EWK contamination in data
                 if(t.isData && reb_met_pt > EWK_CUTOFF)
                     continue;
 
-
+                if (makeSmearBaby) {
+                  r_met_pt   = t.rebal_met_pt;
+                  r_met_phi  = t.rebal_met_phi;
+                  r_nJet     = jetCounter;
+                  s_prescale = prescale;
+                  s_nsmears  = numSmears;
+                }
+                
                 random->SetSeed();
 
-                for(int iSmear=0; iSmear<min((numberOfSmears*prescale), MAX_SMEARS); iSmear++){
+                for(int iSmear=0; iSmear<numSmears; iSmear++){
                     evtweight_ = 1;
 
                     std::vector<float> jet_pt_smeared = jet_pt;
@@ -878,6 +927,16 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
                     RS_vars_["jet1_pt"] = jet1_pt;
                     RS_vars_["jet2_pt"] = jet2_pt;
 
+                    if (makeSmearBaby) {
+                      s_nJet30[iSmear]            = nJet30;
+                      s_nBJet20[iSmear]           = nBJet20;
+                      s_deltaPhiMin[iSmear]       = deltaPhiMin;
+                      s_diffMetMhtOverMet[iSmear] = diffMetMht/met_pt;
+                      s_ht[iSmear]                = ht;
+                      s_mt2[iSmear]               = mt2;
+                      s_met_pt[iSmear]            = met_pt;
+                    }
+                    
                     // ELECTROWEAK CORRECTIONS. Hard-coded based on comparisons of QCD/EWK MC.
                     if(t.isData){
                         if(RS_vars_["ht"] >=450  && RS_vars_["ht"]<575)  evtweight_*=1.02;
@@ -957,6 +1016,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
                 fillHistosCRRSDPhiMT2();
             }
 
+            FillBabyNtuple();
+
         }//end loop on events in a file
 
         delete tree;
@@ -974,6 +1035,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name){
     // Save Plots
     //---------------------
 
+    CloseBabyNtuple();
+    
     outfile_->cd();
     savePlotsDir(h_1d_global,outfile_,"");
     savePlotsDir(SRNoCut.srHistMap,outfile_,SRNoCut.GetName().c_str());
@@ -1610,4 +1673,110 @@ void SmearLooper::resetHistmap(std::map<string, TH1*> &inmap, std::string outdir
     }
     outfile_->cd();
     return;
+}
+
+void SmearLooper::MakeBabyNtuple(const char *SmearBabyFilename) {
+    SmearBabyFile_ = new TFile(Form("%s", SmearBabyFilename), "RECREATE");
+    SmearBabyFile_->cd();
+    SmearBabyTree_ = new TTree("mt2", "A Smear Baby Ntuple");
+
+    SmearBabyTree_->Branch("run"                  , &run                  );
+    SmearBabyTree_->Branch("ls"                   , &ls                   );
+    SmearBabyTree_->Branch("evt"                  , &evt                  );
+    SmearBabyTree_->Branch("isData"               , &isData               );
+    SmearBabyTree_->Branch("evt_scale1fb"         , &evt_scale1fb         );
+    SmearBabyTree_->Branch("evt_id"               , &evt_id               );  
+    SmearBabyTree_->Branch("HLT_PFHT800"          , &HLT_PFHT800          );   
+    SmearBabyTree_->Branch("HLT_PFHT900"          , &HLT_PFHT900          );   
+    SmearBabyTree_->Branch("HLT_PFJet450"         , &HLT_PFJet450         );   
+    SmearBabyTree_->Branch("HLT_PFJet500"         , &HLT_PFJet500         );   
+    SmearBabyTree_->Branch("HLT_PFHT125_Prescale" , &HLT_PFHT125_Prescale );   
+    SmearBabyTree_->Branch("HLT_PFHT200_Prescale" , &HLT_PFHT200_Prescale );   
+    SmearBabyTree_->Branch("HLT_PFHT300_Prescale" , &HLT_PFHT300_Prescale );   
+    SmearBabyTree_->Branch("HLT_PFHT350_Prescale" , &HLT_PFHT350_Prescale );   
+    SmearBabyTree_->Branch("HLT_PFHT475_Prescale" , &HLT_PFHT475_Prescale );   
+    SmearBabyTree_->Branch("HLT_PFHT600_Prescale" , &HLT_PFHT600_Prescale );   
+    SmearBabyTree_->Branch("a_nJet30"             , &a_nJet30             );
+    SmearBabyTree_->Branch("a_nBJet20"            , &a_nBJet20            );
+    SmearBabyTree_->Branch("a_deltaPhiMin"        , &a_deltaPhiMin        );
+    SmearBabyTree_->Branch("a_diffMetMhtOverMet"  , &a_diffMetMhtOverMet  );
+    SmearBabyTree_->Branch("a_ht"                 , &a_ht                 );
+    SmearBabyTree_->Branch("a_mt2"                , &a_mt2                );
+    SmearBabyTree_->Branch("a_met_pt"             , &a_met_pt             );
+    SmearBabyTree_->Branch("a_met_phi"            , &a_met_phi            );  
+
+    if (doRebalanceAndSmear) {
+      SmearBabyTree_->Branch("r_nJet"              , &r_nJet              );
+      SmearBabyTree_->Branch("r_ht"                , &r_ht                );
+      SmearBabyTree_->Branch("r_met_pt"            , &r_met_pt            );
+      SmearBabyTree_->Branch("r_met_phi"           , &r_met_phi           );      
+      SmearBabyTree_->Branch("s_prescale"          , &s_prescale          );              
+      SmearBabyTree_->Branch("s_nsmears"           , &s_nsmears           , "s_nsmears/I"                      );
+      SmearBabyTree_->Branch("s_nJet30"            , &s_nJet30            , "s_nJet30[s_nsmears]/I"            );
+      SmearBabyTree_->Branch("s_nBJet20"           , &s_nBJet20           , "s_nBJet20[s_nsmears]/I"           );
+      SmearBabyTree_->Branch("s_deltaPhiMin"       , &s_deltaPhiMin       , "s_deltaPhiMin[s_nsmears]/F"       );
+      SmearBabyTree_->Branch("s_diffMetMhtOverMet" , &s_diffMetMhtOverMet , "s_diffMetMhtOverMet[s_nsmears]/F" );
+      SmearBabyTree_->Branch("s_ht"                , &s_ht                , "s_ht[s_nsmears]/F"                );
+      SmearBabyTree_->Branch("s_mt2"               , &s_mt2               , "s_mt2[s_nsmears]/F"               );
+      SmearBabyTree_->Branch("s_met_pt"            , &s_met_pt            , "s_met_pt[s_nsmears]/F"            );
+    }
+    return;
+}
+
+void SmearLooper::InitBabyNtuple () {
+  evt                  = 0;  
+  run                  = -999;
+  ls                   = -999;
+  isData               = 0;
+  evt_id               = -999;  
+  HLT_PFHT800          = 0;   
+  HLT_PFHT900          = 0;   
+  HLT_PFJet450         = 0;   
+  HLT_PFJet500         = 0;   
+  HLT_PFHT125_Prescale = 0;   
+  HLT_PFHT200_Prescale = 0;   
+  HLT_PFHT300_Prescale = 0;   
+  HLT_PFHT350_Prescale = 0;   
+  HLT_PFHT475_Prescale = 0;   
+  HLT_PFHT600_Prescale = 0;   
+  a_nJet30             = -999;
+  a_nBJet20            = -999;  
+  evt_scale1fb         = -999;
+  a_deltaPhiMin        = -999;
+  a_diffMetMhtOverMet  = -999;
+  a_ht                 = -999;
+  a_mt2                = -999;
+  a_met_pt             = -999;
+  a_met_phi            = -999;  
+
+  if (doRebalanceAndSmear) {
+    r_nJet     = -999;
+    r_ht       = -999;
+    r_met_pt   = -999;
+    r_met_phi  = -999;  
+    s_nsmears  = -999;
+    s_prescale = -999;            
+    for (unsigned int i = 0; i < max_nsmear; i++) {
+      s_nJet30[i]            = -999;
+      s_nBJet20[i]           = -999;
+      s_deltaPhiMin[i]       = -999;
+      s_diffMetMhtOverMet[i] = -999;
+      s_ht[i]                = -999;
+      s_mt2[i]               = -999;
+      s_met_pt[i]            = -999;
+    }
+  }
+  return;
+}
+
+void SmearLooper::FillBabyNtuple () {
+  SmearBabyTree_->Fill();
+  return;
+}
+
+void SmearLooper::CloseBabyNtuple () {
+  SmearBabyFile_->cd();
+  SmearBabyTree_->Write();
+  SmearBabyFile_->Close();
+  return;
 }

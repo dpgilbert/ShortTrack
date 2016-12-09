@@ -41,7 +41,7 @@ class SmearLooper {
   ~SmearLooper();
 
   void SetSignalRegions();
-  void loop(TChain* chain, std::string output_name = "test.root");
+  void loop(TChain* chain, std::string output_name = "test.root", int maxEvents = -1);
   void fillHistosSRBase();
   void fillHistosInclusive();
   void fillHistosSignalRegion(const std::string& prefix = "", const std::string& suffix = "");
@@ -66,6 +66,12 @@ class SmearLooper {
   std::vector<float> GetResponseVector(float, float);
   void plotRS(std::map<std::string, TH1*>& inmap, std::map<std::string, TH1*>& outmap, std::string outdir);
   void resetHistmap(std::map<std::string, TH1*>& inmap, std::string outdir);
+
+  void MakeBabyNtuple(const char *);
+  void InitBabyNtuple();
+  void FillBabyNtuple();
+  void CloseBabyNtuple();
+  
  private:
 
   JRTreader reader;
@@ -96,6 +102,57 @@ class SmearLooper {
   SRRS SRNoCut_temp;
   SRRS SRJustHT1_temp;
   SRRS SRJustHT2_temp;
+
+  TFile *SmearBabyFile_;
+  TTree *SmearBabyTree_;
+
+  // baby ntuple variables
+  Int_t           run;
+  Int_t           ls;
+  ULong64_t       evt;
+  Int_t           isData;
+  Float_t         evt_scale1fb;
+  Int_t           evt_id;  
+  
+  //----- TRIGGER 
+  Int_t           HLT_PFHT800;   
+  Int_t           HLT_PFHT900;   
+  Int_t           HLT_PFJet450;   
+  Int_t           HLT_PFJet500;   
+  Int_t           HLT_PFHT125_Prescale;   
+  Int_t           HLT_PFHT200_Prescale;   
+  Int_t           HLT_PFHT300_Prescale;   
+  Int_t           HLT_PFHT350_Prescale;   
+  Int_t           HLT_PFHT475_Prescale;   
+  Int_t           HLT_PFHT600_Prescale;   
+
+  //---- reco quantities
+  Int_t           a_nJet30;
+  Int_t           a_nBJet20;
+  Float_t         a_deltaPhiMin;
+  Float_t         a_diffMetMhtOverMet;
+  Float_t         a_ht;
+  Float_t         a_mt2;
+  Float_t         a_met_pt;
+  Float_t         a_met_phi;  
+
+  //---- rebalanced quantities
+  Int_t           r_nJet; 
+  Float_t         r_ht; 
+  Float_t         r_met_pt;
+  Float_t         r_met_phi;  
+  
+  //----- smeared quantities
+  Int_t           s_nsmears;
+  Float_t         s_prescale;  
+  static const int max_nsmear = 5000;
+  Int_t           s_nJet30[max_nsmear];
+  Int_t           s_nBJet20[max_nsmear];
+  Float_t         s_deltaPhiMin[max_nsmear];
+  Float_t         s_diffMetMhtOverMet[max_nsmear];
+  Float_t         s_ht[max_nsmear];
+  Float_t         s_mt2[max_nsmear];
+  Float_t         s_met_pt[max_nsmear];
 };
 
 #endif
