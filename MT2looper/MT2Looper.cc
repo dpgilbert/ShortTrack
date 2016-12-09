@@ -124,13 +124,17 @@ bool doMinimalPlots = false;
 bool doubleRatioShapeCorrection = false;
 // ignore scale1fb to run over test samples
 bool ignoreScale1fb = false;
+// print qcd CR event list
+bool print_qcd_event_list = false;
 
 // load rphi fits to perform r_effective calculation.
 bool doReffCalculation = true;
-string rphi_file_name = "/home/users/fgolf/mt2/devel/MT2Analysis/scripts/qcdEstimate/output/test/qcdHistos.root";
+string rphi_file_name = "/home/users/fgolf/mt2/devel/MT2Analysis/scripts/qcdEstimate/output/full2016/qcdHistos.root";
 TFile* rphi_file;
 vector<TF1*> rphi_fits_data;
 vector<TF1*> rphi_fits_mc;
+
+std::ofstream fqcdlist;
 
 TString stringsample;
 
@@ -683,6 +687,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   float SRNoCut_mt2bins[10] = {200, 300, 400, 500, 600, 800, 1000, 1200, 1400, 1800};
   SRNoCut.SetMT2Bins(9, SRNoCut_mt2bins);
 
+  // open file to print list of QCD events
+  if (print_qcd_event_list)
+    fqcdlist.open(output_dir+"/qcd_event_list.txt", ios_base::app);  
+  
   // These will be set to true if any SL GJ or DY control region plots are produced
   bool saveGJplots = false;
   bool saveDYplots = false;
@@ -1396,6 +1404,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   delete m1bins;
   delete m2bins;
 
+  // close file for qcd event list
+  if (print_qcd_event_list)
+    fqcdlist.close();
+  
   bmark->Stop("benchmark");
   cout << endl;
   cout << nEventsTotal << " Events Processed" << endl;
@@ -2672,6 +2684,9 @@ void MT2Looper::fillHistosRemovedLepton(std::map<std::string, TH1*>& h_1d, int n
 }
 
 void MT2Looper::fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
+  if (print_qcd_event_list && t.isData)
+    fqcdlist << dirname << "\t" << t.run << "\t" << t.lumi << "\t" << t.evt << std::endl;
+
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
     dir = outfile_->mkdir(dirname.c_str());
