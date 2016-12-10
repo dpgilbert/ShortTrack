@@ -139,11 +139,11 @@ done
 
 if [ ! -d "${COPYDIR}" ]; then
     echo "creating output directory " ${COPYDIR}
-    mkdir ${COPYDIR}
+    mkdir -p ${COPYDIR}
     if [[ ${have_baby} -eq 1 ]]
     then
         echo "creating output directory ${COPYDIR}/smearbaby"
-        mkdir ${COPYDIR}/smearbaby
+        mkdir -p ${COPYDIR}/smearbaby
     fi
 fi
 
