@@ -147,7 +147,7 @@ if [ ! -d "${COPYDIR}" ]; then
     fi
 fi
 
-for outfile in "${OUTPUT[@]}":
+for outfile in "${OUTPUT[@]}";
 do
     if [[ ${outfile} =~ .*baby.* ]]
     then
