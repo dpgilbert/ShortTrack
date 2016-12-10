@@ -442,7 +442,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
   outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
 
-  const char* json_file = "jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  // const char* json_file = "jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  const char* json_file = "jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";  
   // const char* json_file = "";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
