@@ -6,4 +6,4 @@
 *.pcm
 *.d
 *.log
-
+*.pyc
