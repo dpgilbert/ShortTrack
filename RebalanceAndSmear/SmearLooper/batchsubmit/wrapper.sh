@@ -1,16 +1,42 @@
 #!/bin/bash
 
 #
+# parse command line options
+#
+OPTIONS=""
+while getopts "bc:m:n:rt:w" opt; do
+    case "$opt" in
+        b) OPTIONS+="-b "
+           ;;
+        r) OPTIONS+="-r "
+           ;;
+        w) OPTIONS+="-w "
+           ;;
+        c) OPTIONS+="-c ${OPTARG}"
+           ;;
+        m) OPTIONS+="-m ${OPTARG}"
+           ;;
+        n) OPTIONS+="-n ${OPTARG}"
+           ;;
+        t) OPTIONS+="-t ${OPTARG}"
+           ;;
+        esac
+done
+
+shift $((OPTIND-1))
+
+#
 # args
 #
-
-INDIR=$1
-FILEID=$2
-COPYDIR=$3
+INDIR=${@: -3:1}
+FILEID=${@: -2:1}
+COPYDIR=${@: -1:1}
 
 echo "[wrapper] INDIR    = " ${INDIR}
 echo "[wrapper] FILEID     = " ${FILEID}
 echo "[wrapper] COPYDIR   = " ${COPYDIR}
+echo "[wrapper] OPTIONS   = " ${OPTIONS}
+
 
 #
 # set up environment
@@ -83,9 +109,9 @@ ls
 #
 # run it
 #
-echo "[wrapper] running: ./runLooper ${INDIR} ${FILEID} ."
+echo "[wrapper] running: ./runLooper ${INDIR} ${FILEID} . ${OPTIONS}"
 
-./runLooper ${INDIR} ${FILEID} .
+./runLooper ${INDIR} ${FILEID} . ${OPTIONS}
 
 #
 # do something with output
@@ -98,17 +124,39 @@ ls
 # clean up
 #
 
-echo "[wrapper] copying file"
-OUTPUT=`ls | grep ${FILEID}`
+echo "[wrapper] copying files"
+OUTPUT=($(ls | grep ${FILEID}))
 echo "[wrapper] OUTPUT = " ${OUTPUT}
+
+have_baby=0
+for outfile in "${OUTPUT[@]}";
+do
+    if [[ ${outfile} =~ .*baby.* ]]
+    then
+        have_baby=1
+    fi   
+done
 
 if [ ! -d "${COPYDIR}" ]; then
     echo "creating output directory " ${COPYDIR}
     mkdir ${COPYDIR}
+    if [[ ${have_baby} -eq 1 ]]
+    then
+        echo "creating output directory ${COPYDIR}/smearbaby"
+        mkdir ${COPYDIR}/smearbaby
+    fi
 fi
 
-gfal-copy -p -f -t 4200 --verbose file:`pwd`/${OUTPUT} srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${COPYDIR}/${OUTPUT}
-
+for outfile in "${OUTPUT[@]}":
+do
+    if [[ ${outfile} =~ .*baby.* ]]
+    then
+        gfal-copy -p -f -t 4200 --verbose file:`pwd`/${outfile} srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${COPYDIR}/smearbaby/${outfile}
+    else
+        gfal-copy -p -f -t 4200 --verbose file:`pwd`/${outfile} srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${COPYDIR}/${outfile}        
+    fi
+done
+               
 echo "[wrapper] cleaning up"
 for FILE in `find . -not -name "*stderr" -not -name "*stdout"`; do rm -rf $FILE; done
 echo "[wrapper] cleaned up"

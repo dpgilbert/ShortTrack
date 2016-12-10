@@ -1,16 +1,19 @@
 import glob
 import os
 import subprocess
+import fnmatch
 
-suffix = ""
+tag="V00-08-12"
+sample="qcd_ht"
+suffix = "_qcd_noRS"
 username = os.environ["USER"]
-make_baby = False
+make_baby = True
 core_scale = 1.
 mean_shift = 0.
 doRebalanceAndSmear = False
 tail_scale = 1.
 apply_weights = False
-indir = "/hadoop/cms/store/user/bemarsh/mt2babies/merged/RebalanceAndSmear_V00-08-12"
+indir = "/hadoop/cms/store/user/bemarsh/mt2babies/"
 
 x509file = subprocess.check_output(["find","/tmp/", "-maxdepth", "1", "-type", "f", "-user", username, "-regex", "^.*x509.*$"])
 if not x509file:
@@ -43,14 +46,13 @@ if doRebalanceAndSmear: options += "-r "
 if apply_weights: options += "-w "
 options += "-c {0} -m {1} -t {2}".format(core_scale, mean_shift, tail_scale)
 
-for f in glob.glob(os.path.join(indir, "*.root")):
-    bn = f.split("/")[-1].split(".")[0]
-    if bn.find("qcd")==-1:
-        continue
-    fid.write("executable=wrapper.sh\n")
-    fid.write("transfer_executable=True\n")
-    fid.write("arguments=/hadoop/cms/store/user/bemarsh/mt2babies/merged/RebalanceAndSmear_V00-08-12 {0} /hadoop/cms/store/user/{1}/smearoutput/RebalanceAndSmear_V00-08-12{2} {3}\n".format(bn, username, suffix, options))
-    fid.write("queue\n\n")
-             
-
+for dirname in os.listdir(indir):
+    if "RebalanceAndSmear_{0}_{1}".format(tag, sample) in dirname:
+        bn = dirname.split("/")[-1].replace("RebalanceAndSmear_{0}_".format(tag),"")
+        for f in glob.glob(os.path.join("{0}/{1}".format(indir, dirname), "*.root")):
+            fid.write("executable=wrapper.sh\n")
+            fid.write("transfer_executable=True\n")
+            fid.write("arguments={0} /hadoop/cms/store/user/bemarsh/mt2babies/merged/RebalanceAndSmear_V00-08-12 {1} /hadoop/cms/store/user/{2}/smearoutput/RebalanceAndSmear_V00-08-12{3}\n".format(options, bn, username, suffix))
+            fid.write("queue\n\n")
+            
 fid.close()
