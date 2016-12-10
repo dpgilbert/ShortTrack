@@ -99,7 +99,7 @@ tar -zxf input.tar.gz
 #source job_input/setupenv.sh
 #printenv
 
-cd job_input
+#cd job_input
 echo "[wrapper] input contents are"
 ls -a
 
