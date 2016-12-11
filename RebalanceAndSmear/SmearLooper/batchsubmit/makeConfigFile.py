@@ -4,13 +4,14 @@ import subprocess
 import fnmatch
 
 tag="V00-08-12"
-sample="qcd_ht"
-suffix = "_qcd"
+sample="datav2_data_Run2016H_JetHT"
+# sample="qcd_ht"
+suffix = "_data_noRS"
 username = os.environ["USER"]
 make_baby = True
 core_scale = 1.
 mean_shift = 0.
-doRebalanceAndSmear = True
+doRebalanceAndSmear = False
 tail_scale = 1.
 apply_weights = False
 indir = "/hadoop/cms/store/user/bemarsh/mt2babies/"
@@ -52,7 +53,7 @@ for dirname in os.listdir(indir):
             bn = f.split("/")[-1].split(".")[0]            
             fid.write("executable=wrapper.sh\n")
             fid.write("transfer_executable=True\n")
-            fid.write("arguments={0} {1} {2} /hadoop/cms/store/user/{3}/smearoutput/RebalanceAndSmear_V00-08-12{4}\n".format(options, "/".join(f.split("/")[:-1]), bn, username, suffix))
+            fid.write("arguments={0} {1} {2} /hadoop/cms/store/user/{3}/smearoutput/{4}/{5}\n".format(options, "/".join(f.split("/")[:-1]), bn, username, suffix.strip("_"), dirname))
             fid.write("queue\n\n")
             
 fid.close()
