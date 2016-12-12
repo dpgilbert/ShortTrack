@@ -773,9 +773,10 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         }
 
         float reb_met_pt = sqrt(new_met_x*new_met_x + new_met_y*new_met_y);
+
         int numSmears = min((numberOfSmears*prescale), MAX_SMEARS);
         smearNormalization = 1./float(numSmears);
-        
+
         // rebalanced met cut to removed EWK contamination in data
         if(t.isData && reb_met_pt > EWK_CUTOFF)
           continue;
@@ -1043,6 +1044,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
       if (makeSmearBaby_)
         FillBabyNtuple();
+
 
     }//end loop on events in a file
 
