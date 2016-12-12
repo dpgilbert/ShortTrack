@@ -82,7 +82,7 @@ bool doHFJetVeto = false;
 // bool makeSmearBaby_ = true;
 
 const int numberOfSmears = 100;
-const float smearNormalization = 1.0/float(numberOfSmears);
+float smearNormalization = 1.0/float(numberOfSmears);
 const int MAX_SMEARS = 5000;
 // factors to widen the core, magnify the tails, and shift the mean of the response templates
 // float coreScale = 1.0;
@@ -760,7 +760,9 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         }
 
         float reb_met_pt = sqrt(new_met_x*new_met_x + new_met_y*new_met_y);
+
         int numSmears = min((numberOfSmears*prescale), MAX_SMEARS);
+        smearNormalization = 1.0/numSmears;
                                 
         // rebalanced met cut to removed EWK contamination in data
         if(t.isData && reb_met_pt > EWK_CUTOFF)
@@ -1029,6 +1031,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
       if (makeSmearBaby_)
         FillBabyNtuple();
+
 
     }//end loop on events in a file
 

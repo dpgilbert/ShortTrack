@@ -70,8 +70,8 @@ int main(int argc, char **argv) {
     
   TChain *ch = new TChain("mt2");
   
-  TString infile = Form("%s/%s*.root",input_dir.c_str(),sample.c_str());
-  // TString infile = Form("%s/%s.root",input_dir.c_str(),sample.c_str());
+  // TString infile = Form("%s/%s*.root",input_dir.c_str(),sample.c_str());
+  TString infile = Form("%s/%s.root",input_dir.c_str(),sample.c_str());
   ch->Add(infile);
   if (ch->GetEntries() == 0) {
     std::cout << "ERROR: no entries in chain. filename was: " << infile << std::endl;
