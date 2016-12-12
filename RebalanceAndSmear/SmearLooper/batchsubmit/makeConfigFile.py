@@ -3,10 +3,11 @@ import os
 import subprocess
 import fnmatch
 
+version="v1"
 tag="V00-08-12"
-sample="datav2_data_Run2016H_JetHT"
-# sample="qcd_ht"
-suffix = "_data_noRS"
+# sample="datav2_data_Run2016H_JetHT"
+sample="qcd_ht"
+suffix = "_qcd_noRS"
 username = os.environ["USER"]
 make_baby = True
 core_scale = 1.
@@ -53,7 +54,7 @@ for dirname in os.listdir(indir):
             bn = f.split("/")[-1].split(".")[0]            
             fid.write("executable=wrapper.sh\n")
             fid.write("transfer_executable=True\n")
-            fid.write("arguments={0} {1} {2} /hadoop/cms/store/user/{3}/smearoutput/{4}/{5}\n".format(options, "/".join(f.split("/")[:-1]), bn, username, suffix.strip("_"), dirname))
+            fid.write("arguments={0} {1} {2} /hadoop/cms/store/user/{3}/smearoutput/{4}/{5}/{6}\n".format(options, "/".join(f.split("/")[:-1]), bn, username, version, suffix.strip("_"), dirname))
             fid.write("queue\n\n")
             
 fid.close()

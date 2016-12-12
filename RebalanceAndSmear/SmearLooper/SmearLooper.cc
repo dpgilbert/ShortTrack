@@ -82,7 +82,7 @@ bool doHFJetVeto = false;
 // bool makeSmearBaby_ = true;
 
 const int numberOfSmears = 100;
-const float smearNormalization = 1.0/float(numberOfSmears);
+float smearNormalization = 1.0/float(numberOfSmears);
 const int MAX_SMEARS = 5000;
 // factors to widen the core, magnify the tails, and shift the mean of the response templates
 // float coreScale = 1.0;
@@ -527,7 +527,6 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
       int prescale = 1; //FIX THIS
 
-
       //---------------------
       // bookkeeping and progress report
       //---------------------
@@ -563,11 +562,11 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
       //---------------------
 
       if(doRebalanceAndSmear_ && t.rebal_status == -1) continue;
-
+      
       if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
-
+      
       if(isinf(t.met_pt) || isnan(t.met_pt) || isinf(t.ht) || isnan(t.ht) || t.jet_pt[0] > 13000.) continue;
-            
+      
       if (t.nVert == 0) continue;
       if (doRebalanceAndSmear_ && t.njet < 2) continue;
       if (!doRebalanceAndSmear_){
@@ -588,10 +587,11 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
       if (!t.Flag_goodVertices) continue;
       if (!t.Flag_eeBadScFilter) continue;
       if (!t.Flag_HBHENoiseFilter) continue;
+      if (!t.Flag_HBHENoiseIsoFilter) continue;
       if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
       if (!t.Flag_badChargedHadronFilter) continue;
 
-      if (!doRebalanceAndSmear_)
+      if (!doRebalanceAndSmear_) 
         if (t.met_miniaodPt / t.met_caloPt > 5.0) continue;
 
       // flag signal samples
@@ -618,7 +618,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
       // note: this will double count some leptons, since reco leptons can appear as PFcands
       nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
-      if(nlepveto_ > 0) continue;//FIXME
+      if(nlepveto_ > 0) continue;
 
       // count number of forward jets
       nJet30Eta3_ = 0;
@@ -629,6 +629,10 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
       // veto on forward jets
       if (doHFJetVeto && nJet30Eta3_ > 0) continue;
 
+      // veto events with a jet that fails the loose PFJet ID
+      // if (t.nJet30FailId && !doRebalanceAndSmear_) continue;
+      if (t.nJet30FailId) continue;
+      
       ////////////////////////////////////
       /// done with overall selection  /// 
       ////////////////////////////////////
@@ -669,15 +673,24 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT125_Prescale || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale || t.HLT_PFJet450) ) 
           continue;
 
-        if     (t.HLT_PFJet450 != 0)         prescale = 1;      //these are hard-coded effective prescales. Must be recomputed if you change the data-taking period
-        else if(t.HLT_PFHT800 != 0)          prescale = 1;
-        else if(t.HLT_PFHT600_Prescale != 0) prescale = 27;
-        else if(t.HLT_PFHT475_Prescale != 0) prescale = 95;
-        else if(t.HLT_PFHT350_Prescale != 0) prescale = 378;
-        else if(t.HLT_PFHT300_Prescale != 0) prescale = 755;
-        else if(t.HLT_PFHT200_Prescale != 0) prescale = 4442;
-        else if(t.HLT_PFHT125_Prescale != 0) prescale = 4749;
+        // if     (t.HLT_PFJet450 != 0)         prescale = 1;      //these are hard-coded effective prescales. Must be recomputed if you change the data-taking period
+        // else if(t.HLT_PFHT800 != 0)          prescale = 1;
+        // else if(t.HLT_PFHT600_Prescale != 0) prescale = 27;
+        // else if(t.HLT_PFHT475_Prescale != 0) prescale = 95;
+        // else if(t.HLT_PFHT350_Prescale != 0) prescale = 378;
+        // else if(t.HLT_PFHT300_Prescale != 0) prescale = 755;
+        // else if(t.HLT_PFHT200_Prescale != 0) prescale = 4442;
+        // else if(t.HLT_PFHT125_Prescale != 0) prescale = 4749;
 
+        if     (t.HLT_PFHT900 != 0)          prescale = 1;        
+        else if(t.HLT_PFJet450 != 0)         prescale = 1;      //these are hard-coded effective prescales. Must be recomputed if you change the data-taking period
+        else if(t.HLT_PFHT600_Prescale != 0) prescale = 34;
+        else if(t.HLT_PFHT475_Prescale != 0) prescale = 136;
+        else if(t.HLT_PFHT350_Prescale != 0) prescale = 543;
+        else if(t.HLT_PFHT300_Prescale != 0) prescale = 1085;
+        else if(t.HLT_PFHT200_Prescale != 0) prescale = 6242;
+        else if(t.HLT_PFHT125_Prescale != 0) prescale = 21950;
+        
         // // END OF YEAR TRIGGER INFO
         // if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFHT125_Prescale || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale || t.HLT_PFJet450) ) 
         //     continue;
@@ -761,7 +774,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
         float reb_met_pt = sqrt(new_met_x*new_met_x + new_met_y*new_met_y);
         int numSmears = min((numberOfSmears*prescale), MAX_SMEARS);
-                                
+        smearNormalization = 1./float(numSmears);
+        
         // rebalanced met cut to removed EWK contamination in data
         if(t.isData && reb_met_pt > EWK_CUTOFF)
           continue;
@@ -773,7 +787,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
           s_prescale = prescale;
           s_nsmears  = numSmears;
         }
-                
+        
         random->SetSeed();
 
         for(int iSmear=0; iSmear<numSmears; iSmear++){
@@ -1013,7 +1027,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
           resetHistmap(InclusiveRegions_temp.at(srN).crRSDPhiMT2HistMap, "crRSDPhiMT2"+InclusiveRegions_temp.at(srN).GetName());
         }
       }
-      else{
+      else {
         fillHistos(SRNoCut.srHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "");
         if(t.ht>=450 && t.ht<1000 && t.met_pt>30 && t.mt2>50)
           fillHistos(SRJustHT1.srHistMap, SRJustHT1.GetNumberOfMT2Bins(), SRJustHT1.GetMT2Bins(), SRJustHT1.GetName(), "");
@@ -1032,7 +1046,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
     }//end loop on events in a file
 
-    delete tree;
+  delete tree;
     f.Close();
   }//end loop on files
 
@@ -1286,6 +1300,7 @@ void SmearLooper::fillHistosSignalRegion(const std::string& prefix, const std::s
   if(!doRebalanceAndSmear_){
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(SRVec.at(srN).PassesSelection(values)){
+        // cout << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;        
         fillHistos(SRVec.at(srN).srHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
         break;//signal regions are orthogonal, event cannot be in more than one
       }
@@ -1310,7 +1325,7 @@ void SmearLooper::fillHistosCRRSInvertDPhi(const std::string& prefix, const std:
 
   // trigger requirement on data
   if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT800 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
-
+      
   std::map<std::string, float> values;
   if(doRebalanceAndSmear_){
     values["deltaPhiMin"] = RS_vars_["deltaPhiMin"];
@@ -1465,7 +1480,7 @@ void SmearLooper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     dir = outfile_->mkdir(dirname.c_str());
   } 
   dir->cd();
-
+  
   if(doRebalanceAndSmear_){
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
     plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
