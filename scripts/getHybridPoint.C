@@ -36,12 +36,12 @@ void getHybridPoint() {
   setRegions();
   
   cout << "-------------------------------" << endl;
-  cout << "\\begin{tabular}{c|c|c|c}" << endl;
+  cout << "\\begin{tabular}{c|c|c|c|c}" << endl;
   cout << "\\hline \\hline" << endl;
-  cout << "\\multicolumn{4}{c}{Lost Lepton} \\\\" << endl;
-  cout << "\\hline" << endl;
-  cout << "\\multicolumn{3}{c|}{Template Region} & Extrapolation Point\\\\" << endl;
-  cout << "$\\text{H}_{T}$ [GeV] & $\\text{N}_{j}$ & $\\text{N}_{b}$ & $\\text{M}_{T2}$ [GeV]\\\\" << endl;
+  // cout << "\\multicolumn{5}{c}{Lost Lepton} \\\\" << endl;
+  // cout << "\\hline" << endl;
+  cout << "\\multicolumn{3}{c|}{Control Region} & Extrapolation Point & Last $\\text{M}_{T2}$ bin  \\\\" << endl;
+  cout << "$\\text{H}_{T}$ [GeV] & $\\text{N}_{j}$ & $\\text{N}_{b}$ & $\\text{M}_{T2}$ [GeV] & $\\text{M}_{T2}$ [GeV]\\\\" << endl;
   cout << "\\hline" << endl;														
 			       
   // TIter it(lostlepFile->GetListOfKeys());
@@ -57,10 +57,13 @@ void getHybridPoint() {
 
   for (unsigned int i = 0; i<lepSRs.size(); i++) {
     string hist_name = lepSRs[i];
-    hist_name += "/h_lastmt2Hybrid";
-    TH1D* h_lastmt2 = (TH1D*) lostlepFile->Get(TString(hist_name));
+    string hist_name_lastmt2 = hist_name + "/h_lastmt2Hybrid";
+    string hist_name_mt2bins = hist_name + "/h_mt2bins";
+    TH1D* h_lastmt2 = (TH1D*) lostlepFile->Get(TString(hist_name_lastmt2));
+    TH1D* h_mt2bins = (TH1D*) lostlepFile->Get(TString(hist_name_mt2bins));
     int theBin = h_lastmt2->GetBinContent(1);
-    cout << "$" << lepHTs[i] << "$ &" << lepNJs[i] << "&" << lepNBs[i] << "&" << theBin << "\\\\" << endl;
+    int highestMT2bin = h_mt2bins->GetBinLowEdge(h_mt2bins->GetNbinsX());
+    cout << "$" << lepHTs[i] << "$ &" << lepNJs[i] << "&" << lepNBs[i] << "& $>$ " << theBin << "& $>$ " << highestMT2bin << "\\\\" << endl;
   }
   cout << "\\hline \\hline" << endl;
   cout << "\\end{tabular}" << endl;
