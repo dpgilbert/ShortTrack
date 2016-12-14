@@ -137,8 +137,10 @@ int makeHybridTemplate(TH1D* h_template, TString name , TFile * fData, TFile * f
     lastmt2val_hybrid = hDY_Rebin->GetBinLowEdge(ibin);
     break;
   }
-  //cout<<lastbin_hybrid<<" "<<lastmt2val_hybrid<<endl;
-  //hDY_Rebin->Print("all");
+  //if (verbose) cout<<lastbin_hybrid<<" "<<lastmt2val_hybrid<<endl;
+  //if (verbose) hDY_Rebin->Print("all");
+  //if (verbose) hZinv_Rebin->Print("all");
+  //if (verbose) h_RebinnedTemplate->Print("all");
 
   // Get the integrals to normalize the Zinv tails
   // and the uncertainties on the CR yield (dominated by data stats in the last N bins)
@@ -158,17 +160,20 @@ int makeHybridTemplate(TH1D* h_template, TString name , TFile * fData, TFile * f
     if (ibin < lastbin_hybrid) {
       // (SF-OF)*Zinv/DY
       float cont =  h_RebinnedTemplate->GetBinContent(ibin) * hZinv_Rebin->GetBinContent(ibin) / hDY_Rebin->GetBinContent(ibin);
-      float err2 =  pow(h_RebinnedTemplate->GetBinContent(ibin),2) + pow(hZinv_Rebin->GetBinContent(ibin),2)  + pow(hDY_Rebin->GetBinContent(ibin), 2);
+      float err2 =  pow( h_RebinnedTemplate->GetBinError(ibin) / h_RebinnedTemplate->GetBinContent(ibin),2 )  
+	+ pow( hZinv_Rebin->GetBinError(ibin) / hZinv_Rebin->GetBinContent(ibin),2)  
+	+ pow( hDY_Rebin->GetBinError(ibin)   / hDY_Rebin->GetBinContent(ibin), 2 );
+      
       h_RebinnedTemplate->SetBinContent(ibin, cont);
-      h_RebinnedTemplate->SetBinError(ibin, sqrt(err2));
+      h_RebinnedTemplate->SetBinError(ibin, sqrt(err2)*cont);
 
     }
     else {
-      // STILL EDITING THIS
+      float cont = integratedYield * integratedYieldZinv / integratedYieldDY;
+      float err2 = pow( relativeError, 2 ) + pow( relativeErrorZinv, 2 ) + pow( relativeErrorDY, 2 );
       float kMT2 = hZinv_Rebin->GetBinContent(ibin) / integratedYieldZinv;
-      float err = sqrt( relativeError*relativeError + relativeErrorZinv*relativeErrorZinv);
-      h_RebinnedTemplate->SetBinContent(ibin, integratedYield * kMT2);
-      h_RebinnedTemplate->SetBinError(ibin, integratedYield * kMT2 * err );
+      h_RebinnedTemplate->SetBinContent(ibin, cont * kMT2);
+      h_RebinnedTemplate->SetBinError(ibin, cont*sqrt(err2) * kMT2 );
 
     }
 
