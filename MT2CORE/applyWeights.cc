@@ -397,3 +397,23 @@ float getPhotonTriggerWeight(float eta, float pt){
 
   return SF;
 }
+
+float getDileptonTriggerWeight(float pt1, int pdgId1, float pt2, int pdgId2, int unc) {
+
+  float SF;
+  // based on https://indico.cern.ch/event/592150/attachments/1380789/2099040/dileptrigeff_olivito_301116.pdf
+  if      (abs(pdgId1) == 13 && abs(pdgId2) == 13 ) {
+    SF = (unc == 0) ? 0.97 : (unc == -1 ? 0.94 : 1.00);
+  }
+  else if (abs(pdgId1) == 11 && abs(pdgId2) == 11 ) {
+    if ( pt1 < 180 && pt2 < 35) SF = (unc == 0) ? 0.91 : (unc == -1 ? 0.84 : 1.00);
+    else SF = (unc == 0) ? 1.00 : (unc == -1 ? 0.97 : 1.00);
+  }
+  else {
+    if ( pt1 < 180) SF = (unc == 0) ? 0.92 : (unc == -1 ? 0.89 : 0.95);
+    else SF = (unc == 0) ? 0.97 : (unc == -1 ? 0.92 : 1.00);
+  }
+
+  return SF;
+
+}

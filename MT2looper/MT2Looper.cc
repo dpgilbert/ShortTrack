@@ -96,6 +96,8 @@ bool applyLeptonSFtoSR = false;
 bool applyTopPtReweight = false;
 // add weights to correct for photon trigger efficiencies
 bool applyPhotonTriggerWeights = false; //not needed since we apply trigger safe H/E cut
+// add weights to correct for dilepton trigger efficiencies
+bool applyDileptonTriggerWeights = true;
 // use 2016 ICHEP ISR weights based on nisrMatch, signal and ttbar only
 bool applyISRWeights = true;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
@@ -1147,42 +1149,30 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // Variables for Zll (DY) control region
       bool doDYplots = false;
       bool doLowPtSFplots = false;
-      if (t.nlep == 2 && !isSignal_) {
-	if ( (t.lep_charge[0] * t.lep_charge[1] == -1)
-	     && (abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1]) )
-             && (abs(t.lep_pdgId[0]) == 13 ||  t.lep_tightId[0] > 0 )
-             && (abs(t.lep_pdgId[1]) == 13 ||  t.lep_tightId[1] > 0 )
-	     //&& (fabs(t.zll_mass - 91.19) < 20 ) 
-	     && t.lep_pt[0] > 100 && t.lep_pt[1] > 30
-	     // && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10)// OLDTRIGS
-	     // && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso) //NEWTRIGS
-	     && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso || t.HLT_DoubleEl33) // TRIGS for Moriond 2017
-             ) {
-	  // no additional explicit lepton veto
-	  // i.e. implicitly allow 3rd PF lepton or hadron
-	  //nlepveto_ = 0; 
-	  if (t.zll_pt > 200 && fabs(t.zll_mass - 91.19) < 20) doDYplots = true;
-	  else if (t.zll_pt < 200 && fabs(t.zll_mass - 91.19) > 20 && t.zll_mass > 50.) doLowPtSFplots = true;
-	}
-      } // nlep == 2
-
-      // Variables for OppositeFlavor control region
       bool doOFplots = false;
       bool doLowPtOFplots = false;
       if (t.nlep == 2 && !isSignal_) {
+	bool passSFtrig = (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso || t.HLT_DoubleEl33);
+	bool passOFtrig =  (!t.isData || t.HLT_MuX_Ele12 || t.HLT_Mu8_EleX || t.HLT_Mu30_Ele30_NonIso || t.HLT_Mu33_Ele33_NonIso || t.HLT_Photon165_HE10 || t.HLT_SingleMu_NonIso);
 	if ( (t.lep_charge[0] * t.lep_charge[1] == -1)
-	     && (abs(t.lep_pdgId[0]) != abs(t.lep_pdgId[1]) )
              && (abs(t.lep_pdgId[0]) == 13 ||  t.lep_tightId[0] > 0 )
              && (abs(t.lep_pdgId[1]) == 13 ||  t.lep_tightId[1] > 0 )
-	     //&& (fabs(t.zll_mass - 91.19) < 20 ) 
-	     && t.lep_pt[0] > 100 && t.lep_pt[1] > 30
-	     && (!t.isData || t.HLT_MuX_Ele12 || t.HLT_Mu8_EleX || t.HLT_Mu30_Ele30_NonIso || t.HLT_Mu33_Ele33_NonIso || t.HLT_Photon165_HE10 || t.HLT_SingleMu_NonIso) //X-Trigs
-             ) {
+	     && t.lep_pt[0] > 100 && t.lep_pt[1] > 30               ) {
 	  // no additional explicit lepton veto
 	  // i.e. implicitly allow 3rd PF lepton or hadron
 	  //nlepveto_ = 0; 
-	  if (t.zll_pt > 200 && fabs(t.zll_mass - 91.19) < 20) doOFplots = true;
-	  else if (t.zll_pt < 200 && fabs(t.zll_mass - 91.19) > 20 && t.zll_mass > 50.) doLowPtOFplots = true;
+	  if (abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1]) && passSFtrig ) { // SF
+	    if      (t.zll_pt > 200 && fabs(t.zll_mass - 91.19) < 20)                     doDYplots = true;
+	    else if (t.zll_pt < 200 && fabs(t.zll_mass - 91.19) > 20 && t.zll_mass > 50.) doLowPtSFplots = true;
+	  }
+	  else if (abs(t.lep_pdgId[0]) != abs(t.lep_pdgId[1]) && passOFtrig ) { // OF
+	    if      (t.zll_pt > 200 && fabs(t.zll_mass - 91.19) < 20)                     doOFplots = true;
+	    else if (t.zll_pt < 200 && fabs(t.zll_mass - 91.19) > 20 && t.zll_mass > 50.) doLowPtOFplots = true;
+
+	  }
+	  if (!t.isData && applyDileptonTriggerWeights){
+	    evtweight_ *= getDileptonTriggerWeight(t.lep_pt[0], t.lep_pdgId[0], t.lep_pt[1], t.lep_pdgId[1], 0);
+	  }
 	}
       } // nlep == 2
       
