@@ -17,6 +17,18 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
 
     dirnames = [s.strip() for s in dirname.split("+")]
 
+    ## deal with suffixes
+    # crdybaseInclLowPtOF means that we should take the plots in crdybaseIncl that end in LowPt
+    # crdybaseInclLowPtSF means that we should take the plots in crdybaseIncl that end in LowPtemu
+    suffix = None
+    if "LowPtOF" in dirnames[0]:
+        dirnames[0] = dirnames[0].replace("LowPtOF","")
+        suffix = "LowPtemu"
+    if "LowPtSF" in dirnames[0]:
+        dirnames[0] = dirnames[0].replace("LowPtSF","")
+        suffix = "LowPt"
+
+
     ## get background histograms
     for isamp in range(len(samples)):
 
@@ -37,7 +49,10 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
                 else:
                     vn = vn.replace("Loose","FakeLoose")
                     vn = vn.replace("AllIso","FakeAllIso")
-
+                    
+            if suffix != None:
+                vn += suffix
+            print (dirnames[0]+"/h_"+vn)
             h_bkg_vecs[iplot].append( fid.Get(dirnames[0]+"/h_"+vn) )
             # histogram won't exist if there are no events. Replace it with None, handle later
             if type(h_bkg_vecs[iplot][-1])==type(ROOT.TObject()):
@@ -73,6 +88,8 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
         fid = ROOT.TFile(data_file)
         for pl in plots:
             vn = pl[0]
+            if suffix != None:
+                vn += suffix
             h_data.append( fid.Get(dirnames[0]+"/h_"+vn) )
             if type(h_data[-1])==type(ROOT.TObject()):
                 raise Exception("No {0}/h_{1} histogram for {2}!".format(dirname, vn, data))
