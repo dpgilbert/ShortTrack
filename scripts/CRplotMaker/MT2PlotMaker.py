@@ -52,7 +52,7 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
                     
             if suffix != None:
                 vn += suffix
-            print (dirnames[0]+"/h_"+vn)
+            #print (dirnames[0]+"/h_"+vn)
             h_bkg_vecs[iplot].append( fid.Get(dirnames[0]+"/h_"+vn) )
             # histogram won't exist if there are no events. Replace it with None, handle later
             if type(h_bkg_vecs[iplot][-1])==type(ROOT.TObject()):

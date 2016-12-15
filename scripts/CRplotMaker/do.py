@@ -11,7 +11,8 @@ pd.lumi = 36.5
 pd.lumiUnit = "fb"
 
 #input_dir = "/home/users/olivito/mt2_80x/MT2Analysis/MT2looper/output/V00-08-12_json_271036-284044_23Sep2016ReReco_36p46fb_dypt100_30/"
-input_dir = "/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V00-08-09_15Dec16/"
+#input_dir = "/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V00-08-09_15Dec16/"
+input_dir = "/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V00-08-09_16Dec16/"
 ## 31.24/fb
 #input_dir = "/home/users/mderdzinski/summer2016/current_master_mt2/MT2looper/output/31p24_oldMC_nov7"
 ## 20.1/fb
@@ -33,7 +34,7 @@ input_dir = "/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V
 ## 589/pb
 #input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4"
 
-output_dir = "crplots/crplots_36p5fb_1Dec16"
+output_dir = "crplots/crplots_36p5fb_16Dec16"
 
 exts = ["pdf","png"]
 
@@ -75,8 +76,8 @@ MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdybase", pd.d
 MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdybaseJ", pd.ht_njet_plots, output_dir, exts)
 MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdybaseIncl", pd.ht_njet_plots, output_dir, exts)
 
-MT2PlotMaker(input_dir, ["dyjetsll_ht", "ww", "top"], "data_Run2016", "crdybaseInclLowPtOF", pd.ht_njet_extraNB_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["dyjetsll_ht", "ww", "top"], "data_Run2016", "crdybaseInclLowPtSF", pd.ht_njet_extraNB_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["dyjetsll_ht", "ww", "top"], "data_Run2016", "crdybaseInclLowPtOF", pd.ht_njet_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["dyjetsll_ht", "ww", "top"], "data_Run2016", "crdybaseInclLowPtSF", pd.ht_njet_plots, output_dir, exts)
 
 MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdybaseJ", pd.mt2_only, output_dir, exts)
 MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdybaseVL", pd.mt2_only, output_dir, exts)
@@ -86,7 +87,7 @@ MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdybaseH", pd.
 MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdybaseUH", pd.mt2_only, output_dir, exts)
 
 # Lost Lepton MT2 plots, normalized in each HT, nj, nb bin
-makeNormalizedLostLep(input_dir, ["wjets_ht", "top"], "data_Run2016", output_dir, exts, ht_regs=["VL","L","M","H","UH"])
+#makeNormalizedLostLep(input_dir, ["wjets_ht", "top"], "data_Run2016", output_dir, exts, ht_regs=["VL","L","M","H","UH"])
 
 
 
