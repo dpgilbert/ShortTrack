@@ -690,7 +690,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   // open file to print list of QCD events
   if (print_qcd_event_list)
     fqcdlist.open(output_dir+"/qcd_event_list.txt", ios_base::app);  
-  
+
   // These will be set to true if any SL GJ or DY control region plots are produced
   bool saveGJplots = false;
   bool saveDYplots = false;
@@ -1146,13 +1146,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // Variables for Zll (DY) control region
       bool doDYplots = false;
+      bool doLowPtSFplots = false;
       if (t.nlep == 2 && !isSignal_) {
 	if ( (t.lep_charge[0] * t.lep_charge[1] == -1)
 	     && (abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1]) )
              && (abs(t.lep_pdgId[0]) == 13 ||  t.lep_tightId[0] > 0 )
              && (abs(t.lep_pdgId[1]) == 13 ||  t.lep_tightId[1] > 0 )
-	     && (fabs(t.zll_mass - 91.19) < 20 ) 
-	     && (t.zll_pt > 200 ) 
+	     //&& (fabs(t.zll_mass - 91.19) < 20 ) 
 	     && t.lep_pt[0] > 100 && t.lep_pt[1] > 30
 	     // && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10)// OLDTRIGS
 	     // && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso) //NEWTRIGS
@@ -1161,26 +1161,28 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  // no additional explicit lepton veto
 	  // i.e. implicitly allow 3rd PF lepton or hadron
 	  //nlepveto_ = 0; 
-	  doDYplots = true;
+	  if (t.zll_pt > 200 && fabs(t.zll_mass - 91.19) < 20) doDYplots = true;
+	  else if (t.zll_pt < 200 && fabs(t.zll_mass - 91.19) > 20 && t.zll_mass > 50.) doLowPtSFplots = true;
 	}
       } // nlep == 2
 
       // Variables for OppositeFlavor control region
       bool doOFplots = false;
+      bool doLowPtOFplots = false;
       if (t.nlep == 2 && !isSignal_) {
 	if ( (t.lep_charge[0] * t.lep_charge[1] == -1)
 	     && (abs(t.lep_pdgId[0]) != abs(t.lep_pdgId[1]) )
              && (abs(t.lep_pdgId[0]) == 13 ||  t.lep_tightId[0] > 0 )
              && (abs(t.lep_pdgId[1]) == 13 ||  t.lep_tightId[1] > 0 )
-	     && (fabs(t.zll_mass - 91.19) < 20 ) 
-             && (t.zll_pt > 200 )
+	     //&& (fabs(t.zll_mass - 91.19) < 20 ) 
 	     && t.lep_pt[0] > 100 && t.lep_pt[1] > 30
 	     && (!t.isData || t.HLT_MuX_Ele12 || t.HLT_Mu8_EleX || t.HLT_Mu30_Ele30_NonIso || t.HLT_Mu33_Ele33_NonIso || t.HLT_Photon165_HE10 || t.HLT_SingleMu_NonIso) //X-Trigs
              ) {
 	  // no additional explicit lepton veto
 	  // i.e. implicitly allow 3rd PF lepton or hadron
 	  //nlepveto_ = 0; 
-	  doOFplots = true;
+	  if (t.zll_pt > 200 && fabs(t.zll_mass - 91.19) < 20) doOFplots = true;
+	  else if (t.zll_pt < 200 && fabs(t.zll_mass - 91.19) > 20 && t.zll_mass > 50.) doLowPtOFplots = true;
 	}
       } // nlep == 2
       
@@ -1254,11 +1256,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	fillHistosInclusive();
       }
 
-      if (doDYplots || doOFplots) {
+      if (doDYplots || doOFplots || doLowPtSFplots || doLowPtOFplots) {
         saveDYplots = true;
 	if (verbose) cout<<__LINE__<<endl;
         if (doDYplots) fillHistosCRDY("crdy");
         if (doOFplots) fillHistosCRDY("crdy", "emu");
+        if (doLowPtSFplots) fillHistosCRDY("crdy", "LowPt");
+        if (doLowPtOFplots) fillHistosCRDY("crdy", "LowPtemu");
       }
       if (doRLplots) {
         saveRLplots = true;
@@ -1407,7 +1411,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   // close file for qcd event list
   if (print_qcd_event_list)
     fqcdlist.close();
-  
+
   bmark->Stop("benchmark");
   cout << endl;
   cout << nEventsTotal << " Events Processed" << endl;
@@ -2593,6 +2597,19 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
   }
   
   if (dirname=="crdynocut" || TString(dirname).Contains("crdybase") || dirname=="crdyL" || dirname=="crdyM" || dirname=="crdyH") {
+
+//    // Count Loose b-tags (and also Medium, just to make sure we do it right)
+//    int nlooseb = 0;
+//    int nmediumb = 0;
+//    int ntightb = 0;
+//    for (int ijet = 0; ijet < t.njet; ijet++) {
+//      if (t.jet_pt[ijet] > 20. && fabs(t.jet_eta[ijet]) < 2.4) {
+//	if ( t.jet_btagCSV[ijet] > 0.460 ) nlooseb++;
+//	if ( t.jet_btagCSV[ijet] > 0.800 ) nmediumb++;
+//	if ( t.jet_btagCSV[ijet] > 0.935 ) ntightb++;
+//      }
+//    } 
+
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
     plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
     plot1D("h_mt2"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
@@ -2600,6 +2617,9 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     plot1D("h_ht"+s,       t.zll_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
     plot1D("h_nJet30"+s,       nJet30_,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
     plot1D("h_nBJet20"+s,      nBJet20_,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
+//    plot1D("h_nBJet20L"+s,      nlooseb,   evtweight_, h_1d, ";N(bjets, L)", 6, 0, 6);
+//    plot1D("h_nBJet20M"+s,      nmediumb,   evtweight_, h_1d, ";N(bjets, M)", 6, 0, 6);
+//    plot1D("h_nBJet20T"+s,      ntightb,   evtweight_, h_1d, ";N(bjets, T)", 6, 0, 6);
     plot1D("h_deltaPhiMin"+s,  t.zll_deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
     plot1D("h_diffMetMht"+s,   t.zll_diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
     plot1D("h_diffMetMhtOverMet"+s,   t.zll_diffMetMht/t.zll_met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
