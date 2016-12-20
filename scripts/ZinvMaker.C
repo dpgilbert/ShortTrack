@@ -18,7 +18,7 @@ using namespace std;
 bool doHybridSimple = false; // hybrid estimate: uses CR MT2 binning until the (MC) integral is less than the threshold below
 bool doHybridInclusiveTemplate = true; // take kMT2 from inclusive templates
 float hybrid_nevent_threshold = 50.;
-float rSFOF = 1.13;
+float rSFOF = 1.12;
 float rSFOFerr = 0.15;
 bool verbose = true;
 
