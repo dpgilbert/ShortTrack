@@ -533,7 +533,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       // Calculate last bin on local histogram
       for ( int ibin=1; ibin <= hDY->GetNbinsX(); ++ibin ) {
 	float top = 0, integratedYield = 0;
-	//if (hDataEM) top = hDataEM->Integral(ibin,-1*rSFOF);
+	//if (hDataEM) top = hDataEM->Integral(ibin,-1)*rSFOF;
 	integratedYield = hDY->Integral(ibin,-1) - top;
 	if (integratedYield < hybrid_nevent_threshold) {
 	  if (ibin == 1) lastbin_hybrid = 1;
@@ -598,7 +598,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 	
 	float integratedDen = integratedYield;
 	float EM = 0;
-	if (hDataEM) EM =  hDataEM->Integral(lastbin_hybrid, -1*rSFOF);
+	if (hDataEM) EM =  hDataEM->Integral(lastbin_hybrid, -1) * rSFOF;
 	float integratedNum = integratedDen - EM;
 	if (integratedNum < 0) integratedNum = 0;
 	float integratedPurity = integratedNum/integratedDen;
@@ -641,7 +641,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       
       float integratedDen = integratedYield;
       float EM = 0;
-      if (hDataEM) EM =  hDataEM->Integral(0, -1*rSFOF);
+      if (hDataEM) EM =  hDataEM->Integral(0, -1)*rSFOF;
       float integratedNum = integratedDen - EM;
       if (integratedNum < 0) integratedNum = 0;
       float integratedPurity = integratedNum/integratedDen;
