@@ -148,6 +148,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double n_zinvDY_cr(0.);
   double zinvDY_alpha(0.);
   double zinvDY_alpha_topological(0.);
+  double zinvDY_purity(0.);
   double err_zinvDY_mcstat(0.);
   double err_zinvDY_purity(0.);
   bool usingInclusiveTemplates(true);
@@ -468,6 +469,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (h_zinvDY_alpha != 0) {
     //multiply in purity histogram to get final alpha
     if (purityCard != 0) {
+      zinvDY_purity = purityCard->GetBinContent(mt2bin);
       h_zinvDY_alpha->Multiply(purityCard);
       err_zinvDY_purity = purityCard->GetBinContent(mt2bin) > 0 ? purityCard->GetBinError(mt2bin)/purityCard->GetBinContent(mt2bin) : 0;
     }
@@ -635,6 +637,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_zinvDY_mcstat      = Form("zinvDY_MCstat_%s"        , channel.c_str());
   // nuisances decorrelated depending on extrapolation in hybrid method
   TString name_zinvDY_purity      = "zinvDY_purity_"+perTopoRegion;
+  TString name_zinvDY_rsfof       = "zinvDY_rsfof_"+perTopoRegion;
   TString name_zinvDY_shape       = "zinvDY_shape_"+perTopoRegion;
   TString name_zinvDY_crstat      = "zinvDY_CRstat_"    +perTopoRegion;
   if (mt2bin < zinvDY_lastbin_hybrid && !usingInclusiveTemplates) {
@@ -643,7 +646,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   }
   //  double zinvDY_mcsyst = -1.;
   double zinvDY_shape = 1.;
-  double zinvDY_purity = 1. + err_zinvDY_purity; // transfer factor stat uncertainty
+  double zinvDY_puritystat = 1. + err_zinvDY_purity; // transfer factor purity stat uncertainty
+  double zinvDY_rsfof = 1. + (1-zinvDY_purity)*0.15; // transfer factor uncertainty due to R(SF/OF)
   double zinvDY_mcstat = 1. + err_zinvDY_mcstat; // transfer factor stat uncertainty
 
   //  note that if n_zinvDY_cr == 0, we will just use zinvDY_alpha (straight from MC) in the datacard
@@ -656,7 +660,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (zinvDY_alpha > 0.) last_zinvDY_transfer = zinvDY_alpha; // cache last good alpha value
   else if (n_zinvDY == 0) zinvDY_alpha = 0;
   else zinvDY_alpha = last_zinvDY_transfer;   // if alpha is 0: use alpha from previous (MT2) bin
-  n_syst += 2; // zinvDY_crstat, zinvDY_mcstat
+  n_syst += 4; // zinvDY_crstat, zinvDY_mcstat, zinvDY_purity, zinvDY_rsfof
 
   // in hybrid method, or normal extrapolation: shape uncertainty only for bins with MT2 extrapolation
   const float last_bin_relerr_zinvDY = 0.4;
@@ -837,7 +841,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (doZinvFromDY) {
     ofile <<  Form("%s        gmN %.0f    -   %.5f   -   - ",name_zinvDY_crstat.Data(),n_zinvDY_cr,zinvDY_alpha)  << endl;
     ofile <<  Form("%s        lnN    -   %.3f   -   - ",name_zinvDY_mcstat.Data(),zinvDY_mcstat)  << endl;
-    ofile <<  Form("%s        lnN    -   %.3f   -   - ",name_zinvDY_purity.Data(),zinvDY_purity)  << endl;
+    ofile <<  Form("%s        lnN    -   %.3f   -   - ",name_zinvDY_purity.Data(),zinvDY_puritystat)  << endl;
+    ofile <<  Form("%s        lnN    -   %.3f   -   - ",name_zinvDY_rsfof.Data(),zinvDY_rsfof)  << endl;
     if (n_extrap_bins_zinvDY > 0 && mt2bin >= zinvDY_lastbin_hybrid)
       ofile <<  Form("%s    lnN    -   %.3f   -   - ",name_zinvDY_shape.Data(),zinvDY_shape)  << endl;
   }
