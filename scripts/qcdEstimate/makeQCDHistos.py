@@ -84,6 +84,8 @@ for ireg,reg in enumerate(ht_reg_names):
 
     ## GET DATA/MC RATIO
     dataMCsf = h_data_num.Integral(0,-1)/h_mcall_num.Integral(0,-1)
+
+    # print "Data/MC scale factor for region {0} is {1}".format(reg, dataMCsf)
     
     h_datasub_num.Add(h_nonqcd_num,-1*dataMCsf)
     h_datasub_den.Add(h_nonqcd_den,-1*dataMCsf)
