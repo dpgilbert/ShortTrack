@@ -44,4 +44,6 @@ float getLepVetoEffFromFile_fastsim(float pt, float eta, int pdgId);
 
 float getPhotonTriggerWeight(float eta, float pt);
 
+float getDileptonTriggerWeight(float pt1, int pdgId1, float pt2, int pdgId2, int unc = 0);
+
 #endif

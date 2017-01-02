@@ -18,7 +18,7 @@ using namespace std;
 bool doHybridSimple = false; // hybrid estimate: uses CR MT2 binning until the (MC) integral is less than the threshold below
 bool doHybridInclusiveTemplate = true; // take kMT2 from inclusive templates
 float hybrid_nevent_threshold = 50.;
-float rSFOF = 1.13;
+float rSFOF = 1.12;
 float rSFOFerr = 0.15;
 bool verbose = true;
 
@@ -137,8 +137,10 @@ int makeHybridTemplate(TH1D* h_template, TString name , TFile * fData, TFile * f
     lastmt2val_hybrid = hDY_Rebin->GetBinLowEdge(ibin);
     break;
   }
-  //cout<<lastbin_hybrid<<" "<<lastmt2val_hybrid<<endl;
-  //hDY_Rebin->Print("all");
+  //if (verbose) cout<<lastbin_hybrid<<" "<<lastmt2val_hybrid<<endl;
+  //if (verbose) hDY_Rebin->Print("all");
+  //if (verbose) hZinv_Rebin->Print("all");
+  //if (verbose) h_RebinnedTemplate->Print("all");
 
   // Get the integrals to normalize the Zinv tails
   // and the uncertainties on the CR yield (dominated by data stats in the last N bins)
@@ -158,17 +160,20 @@ int makeHybridTemplate(TH1D* h_template, TString name , TFile * fData, TFile * f
     if (ibin < lastbin_hybrid) {
       // (SF-OF)*Zinv/DY
       float cont =  h_RebinnedTemplate->GetBinContent(ibin) * hZinv_Rebin->GetBinContent(ibin) / hDY_Rebin->GetBinContent(ibin);
-      float err2 =  pow(h_RebinnedTemplate->GetBinContent(ibin),2) + pow(hZinv_Rebin->GetBinContent(ibin),2)  + pow(hDY_Rebin->GetBinContent(ibin), 2);
+      float err2 =  pow( h_RebinnedTemplate->GetBinError(ibin) / h_RebinnedTemplate->GetBinContent(ibin),2 )  
+	+ pow( hZinv_Rebin->GetBinError(ibin) / hZinv_Rebin->GetBinContent(ibin),2)  
+	+ pow( hDY_Rebin->GetBinError(ibin)   / hDY_Rebin->GetBinContent(ibin), 2 );
+      
       h_RebinnedTemplate->SetBinContent(ibin, cont);
-      h_RebinnedTemplate->SetBinError(ibin, sqrt(err2));
+      h_RebinnedTemplate->SetBinError(ibin, sqrt(err2)*cont);
 
     }
     else {
-      // STILL EDITING THIS
+      float cont = integratedYield * integratedYieldZinv / integratedYieldDY;
+      float err2 = pow( relativeError, 2 ) + pow( relativeErrorZinv, 2 ) + pow( relativeErrorDY, 2 );
       float kMT2 = hZinv_Rebin->GetBinContent(ibin) / integratedYieldZinv;
-      float err = sqrt( relativeError*relativeError + relativeErrorZinv*relativeErrorZinv);
-      h_RebinnedTemplate->SetBinContent(ibin, integratedYield * kMT2);
-      h_RebinnedTemplate->SetBinError(ibin, integratedYield * kMT2 * err );
+      h_RebinnedTemplate->SetBinContent(ibin, cont * kMT2);
+      h_RebinnedTemplate->SetBinError(ibin, cont*sqrt(err2) * kMT2 );
 
     }
 
@@ -528,7 +533,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       // Calculate last bin on local histogram
       for ( int ibin=1; ibin <= hDY->GetNbinsX(); ++ibin ) {
 	float top = 0, integratedYield = 0;
-	//if (hDataEM) top = hDataEM->Integral(ibin,-1*rSFOF);
+	//if (hDataEM) top = hDataEM->Integral(ibin,-1)*rSFOF;
 	integratedYield = hDY->Integral(ibin,-1) - top;
 	if (integratedYield < hybrid_nevent_threshold) {
 	  if (ibin == 1) lastbin_hybrid = 1;
@@ -593,7 +598,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 	
 	float integratedDen = integratedYield;
 	float EM = 0;
-	if (hDataEM) EM =  hDataEM->Integral(lastbin_hybrid, -1*rSFOF);
+	if (hDataEM) EM =  hDataEM->Integral(lastbin_hybrid, -1) * rSFOF;
 	float integratedNum = integratedDen - EM;
 	if (integratedNum < 0) integratedNum = 0;
 	float integratedPurity = integratedNum/integratedDen;
@@ -636,7 +641,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       
       float integratedDen = integratedYield;
       float EM = 0;
-      if (hDataEM) EM =  hDataEM->Integral(0, -1*rSFOF);
+      if (hDataEM) EM =  hDataEM->Integral(0, -1)*rSFOF;
       float integratedNum = integratedDen - EM;
       if (integratedNum < 0) integratedNum = 0;
       float integratedPurity = integratedNum/integratedDen;

@@ -82,7 +82,7 @@ bool doHFJetVeto = false;
 // bool makeSmearBaby_ = true;
 
 const int numberOfSmears = 100;
-float smearNormalization = 1.0/float(numberOfSmears);
+const float smearNormalization = 1.0/float(numberOfSmears);
 const int MAX_SMEARS = 5000;
 // factors to widen the core, magnify the tails, and shift the mean of the response templates
 // float coreScale = 1.0;
@@ -442,8 +442,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
   outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
 
-  // const char* json_file = "jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
-  const char* json_file = "jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";  
+  const char* json_file = "jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  // const char* json_file = "jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";  
   // const char* json_file = "";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
@@ -669,56 +669,10 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
             
       if(doRebalanceAndSmear_){
 
-        // ICHEP TRIGGER INFO
-        // if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT900 || t.HLT_PFHT125_Prescale || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale || t.HLT_PFJet450) ) 
-        //   continue;
-
         if (not passesTrigger()) continue;
         
-        // if     (t.HLT_PFJet450 != 0)         prescale = 1;      //these are hard-coded effective prescales. Must be recomputed if you change the data-taking period
-        // else if(t.HLT_PFHT800 != 0)          prescale = 1;
-        // else if(t.HLT_PFHT600_Prescale != 0) prescale = 27;
-        // else if(t.HLT_PFHT475_Prescale != 0) prescale = 95;
-        // else if(t.HLT_PFHT350_Prescale != 0) prescale = 378;
-        // else if(t.HLT_PFHT300_Prescale != 0) prescale = 755;
-        // else if(t.HLT_PFHT200_Prescale != 0) prescale = 4442;
-        // else if(t.HLT_PFHT125_Prescale != 0) prescale = 4749;
-
-        // these are hardcoded values for Run H
-        // if     (t.HLT_PFHT900 != 0)          prescale = 1;        
-        // else if(t.HLT_PFJet450 != 0)         prescale = 1;      //these are hard-coded effective prescales. Must be recomputed if you change the data-taking period
-        // else if(t.HLT_PFHT600_Prescale != 0) prescale = 34;
-        // else if(t.HLT_PFHT475_Prescale != 0) prescale = 136;
-        // else if(t.HLT_PFHT350_Prescale != 0) prescale = 543;
-        // else if(t.HLT_PFHT300_Prescale != 0) prescale = 1085;
-        // else if(t.HLT_PFHT200_Prescale != 0) prescale = 6242;
-        // else if(t.HLT_PFHT125_Prescale != 0) prescale = 21950;
-
-        // these are hardcoded values for Run B
-        // if     (t.HLT_PFHT900 != 0)          prescale = 1;
-        // else if(t.HLT_PFHT800 != 0)          prescale = 1;
-        // else if(t.HLT_PFJet450 != 0)         prescale = 1;      //these are hard-coded effective prescales. Must be recomputed if you change the data-taking period
-        // else if(t.HLT_PFHT600_Prescale != 0) prescale = 20;
-        // else if(t.HLT_PFHT475_Prescale != 0) prescale = 78;
-        // else if(t.HLT_PFHT350_Prescale != 0) prescale = 312;
-        // else if(t.HLT_PFHT300_Prescale != 0) prescale = 620;
-        // else if(t.HLT_PFHT200_Prescale != 0) prescale = 3630;
-        // else if(t.HLT_PFHT125_Prescale != 0) prescale = 2734; // this doesn't make sense, need to look into it
-
+        prescale = 1.0; //default value for MC       
         prescale = getTriggerPrescale();
-        
-        // // End OF YEAR TRIGGER INFO
-        // if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFHT125_Prescale || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale || t.HLT_PFJet450) ) 
-        //     continue;
-
-        // if     (t.HLT_PFJet450 != 0)         prescale = 1;      //these are hard-coded effective prescales. Must be recomputed if you change the data-taking period
-        // else if(t.HLT_PFHT800 != 0)          prescale = 1;
-        // else if(t.HLT_PFHT600_Prescale != 0) prescale = ;
-        // else if(t.HLT_PFHT475_Prescale != 0) prescale = ;
-        // else if(t.HLT_PFHT350_Prescale != 0) prescale = ;
-        // else if(t.HLT_PFHT300_Prescale != 0) prescale = ;
-        // else if(t.HLT_PFHT200_Prescale != 0) prescale = ;
-        // else if(t.HLT_PFHT125_Prescale != 0) prescale = ;
 
         prescale_correction = 1.0;
         if(numberOfSmears*prescale > MAX_SMEARS)
@@ -791,7 +745,6 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         float reb_met_pt = sqrt(new_met_x*new_met_x + new_met_y*new_met_y);
 
         int numSmears = min((numberOfSmears*prescale), MAX_SMEARS);
-//        smearNormalization = 1./float(numSmears);
 
         // rebalanced met cut to removed EWK contamination in data
         if(t.isData && reb_met_pt > EWK_CUTOFF)
@@ -873,12 +826,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
           if(nJet30 < 2) continue;
           if(ht < 450.0) continue;
-          // if(ht < 1000.0 && met_pt < 250.0) continue;
-          // if(ht < 1000.0 && met_pt < 30.0) continue;
-          // if(ht >= 1000.0 && met_pt < 30.0) continue;
           if (met_pt < 30.) continue;
-          
-          // if (met_pt/t.met_caloPt > 5.0) continue;
 
           std::vector<LorentzVector> p4sForDphi;
           for(unsigned int i=0; i<jet_pt_smeared.size(); i++){

@@ -88,6 +88,15 @@ ht_njet_plots = [
     ("nBJet20",True,(0,6),None),
 ]
 
+ht_njet_extraNB_plots = [
+    ("ht",True,(250,1500),None,2),
+    ("nJet30",True,(0,14),None),
+    ("nBJet20",True,(0,4),None),
+    ("nBJet20L",True,(0,4),None),
+    ("nBJet20M",True,(0,4),None),
+    ("nBJet20T",True,(0,4),None),
+]
+
 gamma_vars_only = [
     ("gammaPt",True,None,None,4),
     ("gammaEta",False,None,None),

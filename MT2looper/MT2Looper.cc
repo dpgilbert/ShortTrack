@@ -96,6 +96,8 @@ bool applyLeptonSFtoSR = false;
 bool applyTopPtReweight = false;
 // add weights to correct for photon trigger efficiencies
 bool applyPhotonTriggerWeights = false; //not needed since we apply trigger safe H/E cut
+// add weights to correct for dilepton trigger efficiencies
+bool applyDileptonTriggerWeights = true;
 // use 2016 ICHEP ISR weights based on nisrMatch, signal and ttbar only
 bool applyISRWeights = true;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
@@ -690,7 +692,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   // open file to print list of QCD events
   if (print_qcd_event_list)
     fqcdlist.open(output_dir+"/qcd_event_list.txt", ios_base::app);  
-  
+
   // These will be set to true if any SL GJ or DY control region plots are produced
   bool saveGJplots = false;
   bool saveDYplots = false;
@@ -1146,41 +1148,31 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // Variables for Zll (DY) control region
       bool doDYplots = false;
-      if (t.nlep == 2 && !isSignal_) {
-	if ( (t.lep_charge[0] * t.lep_charge[1] == -1)
-	     && (abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1]) )
-             && (abs(t.lep_pdgId[0]) == 13 ||  t.lep_tightId[0] > 0 )
-             && (abs(t.lep_pdgId[1]) == 13 ||  t.lep_tightId[1] > 0 )
-	     && (fabs(t.zll_mass - 91.19) < 20 ) 
-	     && (t.zll_pt > 200 ) 
-	     && t.lep_pt[0] > 100 && t.lep_pt[1] > 30
-	     // && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10)// OLDTRIGS
-	     // && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso) //NEWTRIGS
-	     && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso || t.HLT_DoubleEl33) // TRIGS for Moriond 2017
-             ) {
-	  // no additional explicit lepton veto
-	  // i.e. implicitly allow 3rd PF lepton or hadron
-	  //nlepveto_ = 0; 
-	  doDYplots = true;
-	}
-      } // nlep == 2
-
-      // Variables for OppositeFlavor control region
+      bool doLowPtSFplots = false;
       bool doOFplots = false;
+      bool doLowPtOFplots = false;
       if (t.nlep == 2 && !isSignal_) {
+	bool passSFtrig = (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso || t.HLT_DoubleEl33);
+	bool passOFtrig =  (!t.isData || t.HLT_MuX_Ele12 || t.HLT_Mu8_EleX || t.HLT_Mu30_Ele30_NonIso || t.HLT_Mu33_Ele33_NonIso || t.HLT_Photon165_HE10 || t.HLT_SingleMu_NonIso);
 	if ( (t.lep_charge[0] * t.lep_charge[1] == -1)
-	     && (abs(t.lep_pdgId[0]) != abs(t.lep_pdgId[1]) )
              && (abs(t.lep_pdgId[0]) == 13 ||  t.lep_tightId[0] > 0 )
              && (abs(t.lep_pdgId[1]) == 13 ||  t.lep_tightId[1] > 0 )
-	     && (fabs(t.zll_mass - 91.19) < 20 ) 
-             && (t.zll_pt > 200 )
-	     && t.lep_pt[0] > 100 && t.lep_pt[1] > 30
-	     && (!t.isData || t.HLT_MuX_Ele12 || t.HLT_Mu8_EleX || t.HLT_Mu30_Ele30_NonIso || t.HLT_Mu33_Ele33_NonIso || t.HLT_Photon165_HE10 || t.HLT_SingleMu_NonIso) //X-Trigs
-             ) {
+	     && t.lep_pt[0] > 100 && t.lep_pt[1] > 30               ) {
 	  // no additional explicit lepton veto
 	  // i.e. implicitly allow 3rd PF lepton or hadron
 	  //nlepveto_ = 0; 
-	  doOFplots = true;
+	  if (abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1]) && passSFtrig ) { // SF
+	    if      (t.zll_pt > 200 && fabs(t.zll_mass - 91.19) < 20)                     doDYplots = true;
+	    else if (t.zll_pt < 200 && fabs(t.zll_mass - 91.19) > 20 && t.zll_mass > 50.) doLowPtSFplots = true;
+	  }
+	  else if (abs(t.lep_pdgId[0]) != abs(t.lep_pdgId[1]) && passOFtrig ) { // OF
+	    if      (t.zll_pt > 200 && fabs(t.zll_mass - 91.19) < 20)                     doOFplots = true;
+	    else if (t.zll_pt < 200 && fabs(t.zll_mass - 91.19) > 20 && t.zll_mass > 50.) doLowPtOFplots = true;
+
+	  }
+	  if (!t.isData && applyDileptonTriggerWeights){
+	    evtweight_ *= getDileptonTriggerWeight(t.lep_pt[0], t.lep_pdgId[0], t.lep_pt[1], t.lep_pdgId[1], 0);
+	  }
 	}
       } // nlep == 2
       
@@ -1254,11 +1246,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	fillHistosInclusive();
       }
 
-      if (doDYplots || doOFplots) {
+      if (doDYplots || doOFplots || doLowPtSFplots || doLowPtOFplots) {
         saveDYplots = true;
 	if (verbose) cout<<__LINE__<<endl;
         if (doDYplots) fillHistosCRDY("crdy");
         if (doOFplots) fillHistosCRDY("crdy", "emu");
+        if (doLowPtSFplots) fillHistosCRDY("crdy", "LowPt");
+        if (doLowPtOFplots) fillHistosCRDY("crdy", "LowPtemu");
       }
       if (doRLplots) {
         saveRLplots = true;
@@ -1407,7 +1401,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   // close file for qcd event list
   if (print_qcd_event_list)
     fqcdlist.close();
-  
+
   bmark->Stop("benchmark");
   cout << endl;
   cout << nEventsTotal << " Events Processed" << endl;
@@ -1423,7 +1417,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 void MT2Looper::fillHistosSRBase() {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
+  if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
 
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
@@ -1447,7 +1441,7 @@ void MT2Looper::fillHistosSRBase() {
 
   // do monojet SRs
   bool passMonojet = false;
-  if (passMonojetId_ && (!t.isData || t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) {
+  if (passMonojetId_ && (!t.isData || t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) {
     std::map<std::string, float> values_monojet;
     values_monojet["deltaPhiMin"] = deltaPhiMin_;
     values_monojet["diffMetMhtOverMet"]  = diffMetMht_/met_pt_;
@@ -1476,7 +1470,7 @@ void MT2Looper::fillHistosSRBase() {
 void MT2Looper::fillHistosInclusive() {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
+  if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
 
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
@@ -1509,7 +1503,7 @@ void MT2Looper::fillHistosInclusive() {
 void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
+  if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
   
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
@@ -1537,7 +1531,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
   }
   
   // do monojet SRs
-  if (passMonojetId_ && (!t.isData || t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) {
+  if (passMonojetId_ && (!t.isData || t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) {
     std::map<std::string, float> values_monojet;
     values_monojet["deltaPhiMin"] = deltaPhiMin_;
     values_monojet["diffMetMhtOverMet"]  = diffMetMht_/met_pt_;
@@ -1608,7 +1602,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
+  if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
   
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
@@ -1685,7 +1679,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   }
 
   // do monojet SRs
-  if (passMonojetId_ && (!t.isData || t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) {
+  if (passMonojetId_ && (!t.isData || t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) {
 
     // first fill base region
     std::map<std::string, float> valuesBase_monojet;
@@ -2146,7 +2140,7 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
 void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data (also require to come from JetHT, HTMHT, or MET PD to match ETH)
-  if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
+  if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
 
   
   // topological regions
@@ -2593,6 +2587,19 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
   }
   
   if (dirname=="crdynocut" || TString(dirname).Contains("crdybase") || dirname=="crdyL" || dirname=="crdyM" || dirname=="crdyH") {
+
+//    // Count Loose b-tags (and also Medium, just to make sure we do it right)
+//    int nlooseb = 0;
+//    int nmediumb = 0;
+//    int ntightb = 0;
+//    for (int ijet = 0; ijet < t.njet; ijet++) {
+//      if (t.jet_pt[ijet] > 20. && fabs(t.jet_eta[ijet]) < 2.4) {
+//	if ( t.jet_btagCSV[ijet] > 0.460 ) nlooseb++;
+//	if ( t.jet_btagCSV[ijet] > 0.800 ) nmediumb++;
+//	if ( t.jet_btagCSV[ijet] > 0.935 ) ntightb++;
+//      }
+//    } 
+
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
     plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
     plot1D("h_mt2"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
@@ -2600,6 +2607,9 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     plot1D("h_ht"+s,       t.zll_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
     plot1D("h_nJet30"+s,       nJet30_,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
     plot1D("h_nBJet20"+s,      nBJet20_,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
+//    plot1D("h_nBJet20L"+s,      nlooseb,   evtweight_, h_1d, ";N(bjets, L)", 6, 0, 6);
+//    plot1D("h_nBJet20M"+s,      nmediumb,   evtweight_, h_1d, ";N(bjets, M)", 6, 0, 6);
+//    plot1D("h_nBJet20T"+s,      ntightb,   evtweight_, h_1d, ";N(bjets, T)", 6, 0, 6);
     plot1D("h_deltaPhiMin"+s,  t.zll_deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
     plot1D("h_diffMetMht"+s,   t.zll_diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
     plot1D("h_diffMetMhtOverMet"+s,   t.zll_diffMetMht/t.zll_met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
