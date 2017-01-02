@@ -11,162 +11,219 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
   SRRS baseSR;
 
   //first set binning in njet-nbjet plane
-  sr.SetName("1");
-  sr.SetVar("njets", 2, 4);
-  sr.SetVar("nbjets", 0, 1);
-  sr.SetVarCRSL("njets", 2, 4);
-  sr.SetVarCRSL("nbjets", 0, 1);
-  sr.SetVarCRRSInvertDPhi("njets", 2, 4);
-  sr.SetVarCRRSInvertDPhi("nbjets", 0, 1);
-  sr.SetVarCRRSMT2SideBand("njets", 2, 4);
-  sr.SetVarCRRSMT2SideBand("nbjets", 0, 1);
-  sr.SetVarCRRSDPhiMT2("njets", 2, 4);
-  sr.SetVarCRRSDPhiMT2("nbjets", 0, 1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
+    //first set binning in njet-nbjet plane
+    sr.SetName("1");
+    sr.SetVar("njets", 2, 4);
+    sr.SetVar("nbjets", 0, 1);
+    sr.SetVarCRSL("njets", 2, 4);
+    sr.SetVarCRSL("nbjets", 0, 1);
+    sr.SetVarCRRSInvertDPhi("njets", 2, 4);
+    sr.SetVarCRRSInvertDPhi("nbjets", 0, 1);
+    sr.SetVarCRRSMT2SideBand("njets", 2, 4);
+    sr.SetVarCRRSMT2SideBand("nbjets", 0, 1);
+    sr.SetVarCRRSDPhiMT2("njets", 2, 4);
+    sr.SetVarCRRSDPhiMT2("nbjets", 0, 1);
+    temp_SR_vec.push_back(sr);
+    sr.Clear();
 
-  sr.SetName("2");
-  sr.SetVar("njets", 2, 4);
-  sr.SetVar("nbjets", 1, 2);
-  sr.SetVarCRSL("njets", 2, 4);
-  sr.SetVarCRSL("nbjets", 1, 2);
-  sr.SetVarCRRSInvertDPhi("njets", 2, 4);
-  sr.SetVarCRRSInvertDPhi("nbjets", 1, 2);
-  sr.SetVarCRRSMT2SideBand("njets", 2, 4);
-  sr.SetVarCRRSMT2SideBand("nbjets", 1, 2);
-  sr.SetVarCRRSDPhiMT2("njets", 2, 4);
-  sr.SetVarCRRSDPhiMT2("nbjets", 1, 2);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
+    sr.SetName("2");
+    sr.SetVar("njets", 2, 4);
+    sr.SetVar("nbjets", 1, 2);
+    sr.SetVarCRSL("njets", 2, 4);
+    sr.SetVarCRSL("nbjets", 1, 2);
+    sr.SetVarCRRSInvertDPhi("njets", 2, 4);
+    sr.SetVarCRRSInvertDPhi("nbjets", 1, 2);
+    sr.SetVarCRRSMT2SideBand("njets", 2, 4);
+    sr.SetVarCRRSMT2SideBand("nbjets", 1, 2);
+    sr.SetVarCRRSDPhiMT2("njets", 2, 4);
+    sr.SetVarCRRSDPhiMT2("nbjets", 1, 2);
+    temp_SR_vec.push_back(sr);
+    sr.Clear();
 
-  sr.SetName("3");
-  sr.SetVar("njets", 2, 4);
-  sr.SetVar("nbjets", 2, 3);
-  sr.SetVarCRSL("njets", 2, 4);
-  sr.SetVarCRSL("nbjets", 2, 3);
-  sr.SetVarCRRSInvertDPhi("njets", 2, 4);
-  sr.SetVarCRRSInvertDPhi("nbjets", 2, 3);
-  sr.SetVarCRRSMT2SideBand("njets", 2, 4);
-  sr.SetVarCRRSMT2SideBand("nbjets", 2, 3);
-  sr.SetVarCRRSDPhiMT2("njets", 2, 4);
-  sr.SetVarCRRSDPhiMT2("nbjets", 2, 3);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
+    sr.SetName("3");
+    sr.SetVar("njets", 2, 4);
+    sr.SetVar("nbjets", 2, 3);
+    sr.SetVarCRSL("njets", 2, 4);
+    sr.SetVarCRSL("nbjets", 2, 3);
+    sr.SetVarCRRSInvertDPhi("njets", 2, 4);
+    sr.SetVarCRRSInvertDPhi("nbjets", 2, 3);
+    sr.SetVarCRRSMT2SideBand("njets", 2, 4);
+    sr.SetVarCRRSMT2SideBand("nbjets", 2, 3);
+    sr.SetVarCRRSDPhiMT2("njets", 2, 4);
+    sr.SetVarCRRSDPhiMT2("nbjets", 2, 3);
+    temp_SR_vec.push_back(sr);
+    sr.Clear();
 
-  sr.SetName("4");
-  sr.SetVar("njets", 4, 7);
-  sr.SetVar("nbjets", 0, 1);
-  sr.SetVarCRSL("njets", 4, 7);
-  sr.SetVarCRSL("nbjets", 0, 1);
-  sr.SetVarCRRSInvertDPhi("njets", 4, 7);
-  sr.SetVarCRRSInvertDPhi("nbjets", 0, 1);
-  sr.SetVarCRRSMT2SideBand("njets", 4, 7);
-  sr.SetVarCRRSMT2SideBand("nbjets", 0, 1);
-  sr.SetVarCRRSDPhiMT2("njets", 4, 7);
-  sr.SetVarCRRSDPhiMT2("nbjets", 0, 1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
+    sr.SetName("4");
+    sr.SetVar("njets", 4, 7);
+    sr.SetVar("nbjets", 0, 1);
+    sr.SetVarCRSL("njets", 4, 7);
+    sr.SetVarCRSL("nbjets", 0, 1);
+    sr.SetVarCRRSInvertDPhi("njets", 4, 7);
+    sr.SetVarCRRSInvertDPhi("nbjets", 0, 1);
+    sr.SetVarCRRSMT2SideBand("njets", 4, 7);
+    sr.SetVarCRRSMT2SideBand("nbjets", 0, 1);
+    sr.SetVarCRRSDPhiMT2("njets", 4, 7);
+    sr.SetVarCRRSDPhiMT2("nbjets", 0, 1);
+    temp_SR_vec.push_back(sr);
+    sr.Clear();
 
-  sr.SetName("5");
-  sr.SetVar("njets", 4, 7);
-  sr.SetVar("nbjets", 1, 2);
-  sr.SetVarCRSL("njets", 4, 7);
-  sr.SetVarCRSL("nbjets", 1, 2);
-  sr.SetVarCRRSInvertDPhi("njets", 4, 7);
-  sr.SetVarCRRSInvertDPhi("nbjets", 1, 2);
-  sr.SetVarCRRSMT2SideBand("njets", 4, 7);
-  sr.SetVarCRRSMT2SideBand("nbjets", 1, 2);
-  sr.SetVarCRRSDPhiMT2("njets", 4, 7);
-  sr.SetVarCRRSDPhiMT2("nbjets", 1, 2);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
+    sr.SetName("5");
+    sr.SetVar("njets", 4, 7);
+    sr.SetVar("nbjets", 1, 2);
+    sr.SetVarCRSL("njets", 4, 7);
+    sr.SetVarCRSL("nbjets", 1, 2);
+    sr.SetVarCRRSInvertDPhi("njets", 4, 7);
+    sr.SetVarCRRSInvertDPhi("nbjets", 1, 2);
+    sr.SetVarCRRSMT2SideBand("njets", 4, 7);
+    sr.SetVarCRRSMT2SideBand("nbjets", 1, 2);
+    sr.SetVarCRRSDPhiMT2("njets", 4, 7);
+    sr.SetVarCRRSDPhiMT2("nbjets", 1, 2);
+    temp_SR_vec.push_back(sr);
+    sr.Clear();
 
-  sr.SetName("6");
-  sr.SetVar("njets", 4, 7);
-  sr.SetVar("nbjets", 2, 3);
-  sr.SetVarCRSL("njets", 4, 7);
-  sr.SetVarCRSL("nbjets", 2, 3);
-  sr.SetVarCRRSInvertDPhi("njets", 4, 7);
-  sr.SetVarCRRSInvertDPhi("nbjets", 2, 3);
-  sr.SetVarCRRSMT2SideBand("njets", 4, 7);
-  sr.SetVarCRRSMT2SideBand("nbjets", 2, 3);
-  sr.SetVarCRRSDPhiMT2("njets", 4, 7);
-  sr.SetVarCRRSDPhiMT2("nbjets", 2, 3);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
+    sr.SetName("6");
+    sr.SetVar("njets", 4, 7);
+    sr.SetVar("nbjets", 2, 3);
+    sr.SetVarCRSL("njets", 4, 7);
+    sr.SetVarCRSL("nbjets", 2, 3);
+    sr.SetVarCRRSInvertDPhi("njets", 4, 7);
+    sr.SetVarCRRSInvertDPhi("nbjets", 2, 3);
+    sr.SetVarCRRSMT2SideBand("njets", 4, 7);
+    sr.SetVarCRRSMT2SideBand("nbjets", 2, 3);
+    sr.SetVarCRRSDPhiMT2("njets", 4, 7);
+    sr.SetVarCRRSDPhiMT2("nbjets", 2, 3);
+    temp_SR_vec.push_back(sr);
+    sr.Clear();
 
-  sr.SetName("7");
-  sr.SetVar("njets", 7, -1);
-  sr.SetVar("nbjets", 0, 1);
-  sr.SetVarCRSL("njets", 7, -1);
-  sr.SetVarCRSL("nbjets", 0, 1);
-  sr.SetVarCRRSInvertDPhi("njets", 7, -1);
-  sr.SetVarCRRSInvertDPhi("nbjets", 0, 1);
-  sr.SetVarCRRSMT2SideBand("njets", 7, -1);
-  sr.SetVarCRRSMT2SideBand("nbjets", 0, 1);
-  sr.SetVarCRRSDPhiMT2("njets", 7, -1);
-  sr.SetVarCRRSDPhiMT2("nbjets", 0, 1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
+    sr.SetName("7");
+    sr.SetVar("njets", 7, -1);
+    sr.SetVar("nbjets", 0, 1);
+    sr.SetVarCRSL("njets", 7, -1);
+    sr.SetVarCRSL("nbjets", 0, 1);
+    sr.SetVarCRRSInvertDPhi("njets", 7, -1);
+    sr.SetVarCRRSInvertDPhi("nbjets", 0, 1);
+    sr.SetVarCRRSMT2SideBand("njets", 7, -1);
+    sr.SetVarCRRSMT2SideBand("nbjets", 0, 1);
+    sr.SetVarCRRSDPhiMT2("njets", 7, -1);
+    sr.SetVarCRRSDPhiMT2("nbjets", 0, 1);
+    temp_SR_vec.push_back(sr);
+    sr.Clear();
 
-  // shared CR: 7j1-2b
-  sr.SetName("8");
-  sr.SetVar("njets", 7, -1);
-  sr.SetVar("nbjets", 1, 2);
-  sr.SetVarCRSL("njets", 7, -1);
-  sr.SetVarCRSL("nbjets", 1, 3);
-  sr.SetVarCRRSInvertDPhi("njets", 7, -1);
-  sr.SetVarCRRSInvertDPhi("nbjets", 1, 2);
-  sr.SetVarCRRSMT2SideBand("njets", 7, -1);
-  sr.SetVarCRRSMT2SideBand("nbjets", 1, 2);
-  sr.SetVarCRRSDPhiMT2("njets", 7, -1);
-  sr.SetVarCRRSDPhiMT2("nbjets", 1, 2);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
+    // shared CR: 7j1-2b
+    sr.SetName("8");
+    sr.SetVar("njets", 7, -1);
+    sr.SetVar("nbjets", 1, 2);
+    sr.SetVarCRSL("njets", 7, -1);
+    sr.SetVarCRSL("nbjets", 1, 3);
+    sr.SetVarCRRSInvertDPhi("njets", 7, -1);
+    sr.SetVarCRRSInvertDPhi("nbjets", 1, -1); // DY: NB>0
+    sr.SetVarCRRSMT2SideBand("njets", 7, -1);
+    sr.SetVarCRRSMT2SideBand("nbjets", 1, -1); // DY: NB>0
+    sr.SetVarCRRSDPhiMT2("njets", 7, -1);
+    sr.SetVarCRRSDPhiMT2("nbjets", 1, -1); // DY: NB>0
+    temp_SR_vec.push_back(sr);
+    sr.Clear();
 
-  // shared CR: 7j1-2b
-  sr.SetName("9");
-  sr.SetVar("njets", 7, -1);
-  sr.SetVar("nbjets", 2, 3);
-  sr.SetVarCRSL("njets", 7, -1);
-  sr.SetVarCRSL("nbjets", 1, 3);
-  sr.SetVarCRRSInvertDPhi("njets", 7, -1);
-  sr.SetVarCRRSInvertDPhi("nbjets", 2, 3);
-  sr.SetVarCRRSMT2SideBand("njets", 7, -1);
-  sr.SetVarCRRSMT2SideBand("nbjets", 2, 3);
-  sr.SetVarCRRSDPhiMT2("njets", 7, -1);
-  sr.SetVarCRRSDPhiMT2("nbjets", 2, 3);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
+    // shared CR: 7j1-2b
+    sr.SetName("9");
+    sr.SetVar("njets", 7, -1);
+    sr.SetVar("nbjets", 2, 3);
+    sr.SetVarCRSL("njets", 7, -1);
+    sr.SetVarCRSL("nbjets", 1, 3);
+    sr.SetVarCRRSInvertDPhi("njets", 7, -1);
+    sr.SetVarCRRSInvertDPhi("nbjets", 1, -1); // DY: NB>0
+    sr.SetVarCRRSMT2SideBand("njets", 7, -1);
+    sr.SetVarCRRSMT2SideBand("nbjets", 1, -1); // DY: NB>0
+    sr.SetVarCRRSDPhiMT2("njets", 7, -1);
+    sr.SetVarCRRSDPhiMT2("nbjets", 1, -1); // DY: NB>0
+    temp_SR_vec.push_back(sr);
+    sr.Clear();
 
-  sr.SetName("10");
-  sr.SetVar("njets", 2, 7);
-  sr.SetVar("nbjets", 3, -1);
-  sr.SetVarCRSL("njets", 2, 7);
-  sr.SetVarCRSL("nbjets", 3, -1);
-  sr.SetVarCRRSInvertDPhi("njets", 2, 7);
-  sr.SetVarCRRSInvertDPhi("nbjets", 3, -1);
-  sr.SetVarCRRSMT2SideBand("njets", 2, 7);
-  sr.SetVarCRRSMT2SideBand("nbjets", 3, -1);
-  sr.SetVarCRRSDPhiMT2("njets", 2, 7);
-  sr.SetVarCRRSDPhiMT2("nbjets", 3, -1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
+    sr.SetName("10");
+    sr.SetVar("njets", 2, 7);
+    sr.SetVar("nbjets", 3, -1);
+    sr.SetVarCRSL("njets", 2, 7);
+    sr.SetVarCRSL("nbjets", 3, -1);
+    sr.SetVarCRRSInvertDPhi("njets", 2, 7);
+    sr.SetVarCRRSInvertDPhi("nbjets", 3, -1);
+    sr.SetVarCRRSMT2SideBand("njets", 2, 7);
+    sr.SetVarCRRSMT2SideBand("nbjets", 3, -1);
+    sr.SetVarCRRSDPhiMT2("njets", 2, 7);
+    sr.SetVarCRRSDPhiMT2("nbjets", 3, -1);
+    temp_SR_vec.push_back(sr);
+    sr.Clear();
 
-  // shared CR: 7j1-2b
-  sr.SetName("11");
-  sr.SetVar("njets", 7, -1);
-  sr.SetVar("nbjets", 3, -1);
-  sr.SetVarCRSL("njets", 7, -1);
-  sr.SetVarCRSL("nbjets", 1, 3);
-  sr.SetVarCRRSInvertDPhi("njets", 7, -1);
-  sr.SetVarCRRSInvertDPhi("nbjets", 3, -1);
-  sr.SetVarCRRSMT2SideBand("njets", 7, -1);
-  sr.SetVarCRRSMT2SideBand("nbjets", 3, -1);
-  sr.SetVarCRRSDPhiMT2("njets", 7, -1);
-  sr.SetVarCRRSDPhiMT2("nbjets", 3, -1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
+    // shared CR: 7j1-2b
+    sr.SetName("11");
+    sr.SetVar("njets", 7, -1);
+    sr.SetVar("nbjets", 3, -1);
+    sr.SetVarCRSL("njets", 7, -1);
+    sr.SetVarCRSL("nbjets", 1, 3);
+    sr.SetVarCRRSInvertDPhi("njets", 7, -1);
+    sr.SetVarCRRSInvertDPhi("nbjets", 1, -1); // DY: NB>0
+    sr.SetVarCRRSMT2SideBand("njets", 7, -1);
+    sr.SetVarCRRSMT2SideBand("nbjets", 1, -1); // DY: NB>0
+    sr.SetVarCRRSDPhiMT2("njets", 7, -1);
+    sr.SetVarCRRSDPhiMT2("nbjets", 1, -1); // DY: NB>0
+    temp_SR_vec.push_back(sr);
+    sr.Clear();
+
+    sr.SetName("12");
+    sr.SetVar("njets", 4, -1);
+    sr.SetVar("nbjets", 0, 1);
+    sr.SetVarCRSL("njets", 4, -1);
+    sr.SetVarCRSL("nbjets", 0, 1);
+    sr.SetVarCRRSInvertDPhi("njets", 4, -1);
+    sr.SetVarCRRSInvertDPhi("nbjets", 0, 1);
+    sr.SetVarCRRSMT2SideBand("njets", 4, -1);
+    sr.SetVarCRRSMT2SideBand("nbjets", 0, 1);
+    sr.SetVarCRRSDPhiMT2("njets", 4, -1);
+    sr.SetVarCRRSDPhiMT2("nbjets", 0, 1);
+    temp_SR_vec.push_back(sr);
+    sr.Clear();
+
+    sr.SetName("13");
+    sr.SetVar("njets", 4, -1);
+    sr.SetVar("nbjets", 1, 2);
+    sr.SetVarCRSL("njets", 4, -1);
+    sr.SetVarCRSL("nbjets", 1, 2);
+    sr.SetVarCRRSInvertDPhi("njets", 4, -1);
+    sr.SetVarCRRSInvertDPhi("nbjets", 1, 2);
+    sr.SetVarCRRSMT2SideBand("njets", 4, -1);
+    sr.SetVarCRRSMT2SideBand("nbjets", 1, 2);
+    sr.SetVarCRRSDPhiMT2("njets", 4, -1);
+    sr.SetVarCRRSDPhiMT2("nbjets", 1, 2);
+    temp_SR_vec.push_back(sr);
+    sr.Clear();
+
+    sr.SetName("14");
+    sr.SetVar("njets", 4, -1);
+    sr.SetVar("nbjets", 2, 3);
+    sr.SetVarCRSL("njets", 4, -1);
+    sr.SetVarCRSL("nbjets", 2, 3);
+    sr.SetVarCRRSInvertDPhi("njets", 4, -1);
+    sr.SetVarCRRSInvertDPhi("nbjets", 2, 3);
+    sr.SetVarCRRSMT2SideBand("njets", 4, -1);
+    sr.SetVarCRRSMT2SideBand("nbjets", 2, 3);
+    sr.SetVarCRRSDPhiMT2("njets", 4, -1);
+    sr.SetVarCRRSDPhiMT2("nbjets", 2, 3);
+    temp_SR_vec.push_back(sr);
+    sr.Clear();
+
+    sr.SetName("15");
+    sr.SetVar("njets", 2, -1);
+    sr.SetVar("nbjets", 3, -1);
+    sr.SetVarCRSL("njets", 2, -1);
+    sr.SetVarCRSL("nbjets", 3, -1);
+    sr.SetVarCRRSInvertDPhi("njets", 2, -1);
+    sr.SetVarCRRSInvertDPhi("nbjets", 3, -1);
+    sr.SetVarCRRSMT2SideBand("njets", 2, -1);
+    sr.SetVarCRRSMT2SideBand("nbjets", 3, -1);
+    sr.SetVarCRRSDPhiMT2("njets", 2, -1);
+    sr.SetVarCRRSDPhiMT2("nbjets", 3, -1);
+    temp_SR_vec.push_back(sr);
+    sr.Clear();
 
 
   //add HT and MET requirements
@@ -174,56 +231,56 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     SRRS fullSR = temp_SR_vec.at(iSR);  
     fullSR.SetName(fullSR.GetName() + "L");
     fullSR.SetVar("ht", 450, 575);
-    fullSR.SetVar("met", 200, -1);
+    fullSR.SetVar("met", 250, -1);
     fullSR.SetVarCRSL("ht", 450, 575);
-    fullSR.SetVarCRSL("met", 200, -1);
+    fullSR.SetVarCRSL("met", 250, -1);
     fullSR.SetVarCRRSInvertDPhi("ht", 450, 575);
-    fullSR.SetVarCRRSInvertDPhi("met", 200, -1);
+    fullSR.SetVarCRRSInvertDPhi("met", 250, -1);
     fullSR.SetVarCRRSMT2SideBand("ht", 450, 575);
-    fullSR.SetVarCRRSMT2SideBand("met", 200, -1);
+    fullSR.SetVarCRRSMT2SideBand("met", 250, -1);
     fullSR.SetVarCRRSDPhiMT2("ht", 450, 575);
-    fullSR.SetVarCRRSDPhiMT2("met", 200, -1);
+    fullSR.SetVarCRRSDPhiMT2("met", 250, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
-    if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-    else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-    else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-    else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-    else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-    else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-    else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[2] = {200, 1500};                fullSR.SetMT2Bins(1, mt2bins);}
-    else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[3] = {200, 300, 1500};           fullSR.SetMT2Bins(2, mt2bins);}
-    else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[2] = {200, 1500};                fullSR.SetMT2Bins(1, mt2bins);}
-    else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[3] = {200, 300, 1500};           fullSR.SetMT2Bins(2, mt2bins);}
-    else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[2] = {200, 1500};                fullSR.SetMT2Bins(1, mt2bins);}
+      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, 1500};      fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, 1500};      fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, 1500};      fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[4] = {200, 300, 400, 1500};      fullSR.SetMT2Bins(3, mt2bins);}
     SRVec.push_back(fullSR);
   }
   for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
     SRRS fullSR = temp_SR_vec.at(iSR);  
     fullSR.SetName(fullSR.GetName() + "M");
     fullSR.SetVar("ht", 575, 1000);
-    fullSR.SetVar("met", 200, -1);
+    fullSR.SetVar("met", 250, -1);
     fullSR.SetVarCRSL("ht", 575, 1000);
-    fullSR.SetVarCRSL("met", 200, -1);
+    fullSR.SetVarCRSL("met", 250, -1);
     fullSR.SetVarCRRSInvertDPhi("ht", 575, 1000);
-    fullSR.SetVarCRRSInvertDPhi("met", 200, -1);
+    fullSR.SetVarCRRSInvertDPhi("met", 250, -1);
     fullSR.SetVarCRRSMT2SideBand("ht", 575, 1000);
-    fullSR.SetVarCRRSMT2SideBand("met", 200, -1);
+    fullSR.SetVarCRRSMT2SideBand("met", 250, -1);
     fullSR.SetVarCRRSDPhiMT2("ht", 575, 1000);
-    fullSR.SetVarCRRSDPhiMT2("met", 200, -1);
+    fullSR.SetVarCRRSDPhiMT2("met", 250, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
-    if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-    else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-    else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 600, 1500};      fullSR.SetMT2Bins(4, mt2bins);}
-    else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-    else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 600, 1500};      fullSR.SetMT2Bins(4, mt2bins);}
-    else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 600, 1500};      fullSR.SetMT2Bins(4, mt2bins);}
-    else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, 1500};           fullSR.SetMT2Bins(3, mt2bins);}
-    else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, 1500};           fullSR.SetMT2Bins(3, mt2bins);}
-    else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, 1500};           fullSR.SetMT2Bins(3, mt2bins);}
-    else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[4] = {200, 300, 400, 1500};           fullSR.SetMT2Bins(3, mt2bins);}
-    else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[4] = {200, 300, 400, 1500};           fullSR.SetMT2Bins(3, mt2bins);}
+      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 600, 1500};      fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 600, 1500};      fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[5] = {200, 300, 400, 600, 1500};      fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[5] = {200, 300, 400, 600, 1500};      fullSR.SetMT2Bins(4, mt2bins);}
     SRVec.push_back(fullSR);
   }
   for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
@@ -241,17 +298,17 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     fullSR.SetVarCRRSDPhiMT2("met", 30, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
-    if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-    else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[5] = {200, 400, 600, 800, 1500};       fullSR.SetMT2Bins(4, mt2bins);}
-    else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[3] = {200, 400, 1500};                 fullSR.SetMT2Bins(2, mt2bins);}
-    else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-    else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[5] = {200, 400, 600, 800, 1500};       fullSR.SetMT2Bins(4, mt2bins);}
-    else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[4] = {200, 400, 600, 1500};            fullSR.SetMT2Bins(3, mt2bins);}
-    else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[4] = {200, 400, 600, 1500};            fullSR.SetMT2Bins(3, mt2bins);}
-    else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[4] = {200, 400, 600, 1500};            fullSR.SetMT2Bins(3, mt2bins);}
-    else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[3] = {200, 400, 1500};                 fullSR.SetMT2Bins(2, mt2bins);}
-    else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[3] = {200, 400, 1500};                 fullSR.SetMT2Bins(2, mt2bins);}
-    else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[3] = {200, 400, 1500};                 fullSR.SetMT2Bins(2, mt2bins);}
+      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500};       fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500};       fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500};       fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[5] = {200, 400, 600, 800, 1500};             fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[5] = {200, 400, 600, 800, 1500};             fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[4] = {200, 400, 600, 1500};                  fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[4] = {200, 400, 600, 1500};                  fullSR.SetMT2Bins(3, mt2bins);}
     SRVec.push_back(fullSR);
   }
   for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
@@ -269,17 +326,17 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     fullSR.SetVarCRRSDPhiMT2("met", 30, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
-    if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-    else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[4] = {200, 400, 600, 1500};            fullSR.SetMT2Bins(3, mt2bins);}
-    else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[2] = {200, 1500};                      fullSR.SetMT2Bins(1, mt2bins);}
-    else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-    else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[4] = {200, 400, 600, 1500};            fullSR.SetMT2Bins(3, mt2bins);}
-    else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[4] = {200, 400, 600, 1500};            fullSR.SetMT2Bins(3, mt2bins);}
-    else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[3] = {200, 400, 1500};                 fullSR.SetMT2Bins(2, mt2bins);}
-    else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[3] = {200, 400, 1500};                 fullSR.SetMT2Bins(2, mt2bins);}
-    else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[3] = {200, 400, 1500};                 fullSR.SetMT2Bins(2, mt2bins);}
-    else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[3] = {200, 400, 1500};                 fullSR.SetMT2Bins(1, mt2bins);}
-    else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[3] = {200, 400, 1500};                 fullSR.SetMT2Bins(1, mt2bins);}
+      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 1800}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[6] = {200, 400, 600, 800, 1000, 1800};       fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[3] = {200, 400, 1800};                       fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 1800}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 1800}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[5] = {200, 400, 600, 800, 1800};             fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1800};       fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[5] = {200, 400, 600, 800, 1800};             fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[5] = {200, 400, 600, 800, 1800};             fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[4] = {200, 400, 600, 1800};                  fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[3] = {200, 400, 1800};                       fullSR.SetMT2Bins(2, mt2bins);}
     SRVec.push_back(fullSR);
   }
 
