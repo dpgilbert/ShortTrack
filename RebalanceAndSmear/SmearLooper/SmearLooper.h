@@ -78,6 +78,8 @@ class SmearLooper {
   void SetCoreScale (float coreScale) {coreScale_ = coreScale;}
   void SetTailScale (float tailScale) {tailScale_ = tailScale;}
   void SetMeanShift (float meanShift) {meanShift_ = meanShift;}
+  bool passesTrigger ();
+  float getTriggerPrescale ();
   
  private:
 

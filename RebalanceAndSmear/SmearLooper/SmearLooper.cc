@@ -670,9 +670,11 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
       if(doRebalanceAndSmear_){
 
         // ICHEP TRIGGER INFO
-        if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT125_Prescale || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale || t.HLT_PFJet450) ) 
-          continue;
+        // if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT900 || t.HLT_PFHT125_Prescale || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale || t.HLT_PFJet450) ) 
+        //   continue;
 
+        if (not passesTrigger()) continue;
+        
         // if     (t.HLT_PFJet450 != 0)         prescale = 1;      //these are hard-coded effective prescales. Must be recomputed if you change the data-taking period
         // else if(t.HLT_PFHT800 != 0)          prescale = 1;
         // else if(t.HLT_PFHT600_Prescale != 0) prescale = 27;
@@ -682,16 +684,30 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         // else if(t.HLT_PFHT200_Prescale != 0) prescale = 4442;
         // else if(t.HLT_PFHT125_Prescale != 0) prescale = 4749;
 
-        if     (t.HLT_PFHT900 != 0)          prescale = 1;        
-        else if(t.HLT_PFJet450 != 0)         prescale = 1;      //these are hard-coded effective prescales. Must be recomputed if you change the data-taking period
-        else if(t.HLT_PFHT600_Prescale != 0) prescale = 34;
-        else if(t.HLT_PFHT475_Prescale != 0) prescale = 136;
-        else if(t.HLT_PFHT350_Prescale != 0) prescale = 543;
-        else if(t.HLT_PFHT300_Prescale != 0) prescale = 1085;
-        else if(t.HLT_PFHT200_Prescale != 0) prescale = 6242;
-        else if(t.HLT_PFHT125_Prescale != 0) prescale = 21950;
+        // these are hardcoded values for Run H
+        // if     (t.HLT_PFHT900 != 0)          prescale = 1;        
+        // else if(t.HLT_PFJet450 != 0)         prescale = 1;      //these are hard-coded effective prescales. Must be recomputed if you change the data-taking period
+        // else if(t.HLT_PFHT600_Prescale != 0) prescale = 34;
+        // else if(t.HLT_PFHT475_Prescale != 0) prescale = 136;
+        // else if(t.HLT_PFHT350_Prescale != 0) prescale = 543;
+        // else if(t.HLT_PFHT300_Prescale != 0) prescale = 1085;
+        // else if(t.HLT_PFHT200_Prescale != 0) prescale = 6242;
+        // else if(t.HLT_PFHT125_Prescale != 0) prescale = 21950;
+
+        // these are hardcoded values for Run B
+        // if     (t.HLT_PFHT900 != 0)          prescale = 1;
+        // else if(t.HLT_PFHT800 != 0)          prescale = 1;
+        // else if(t.HLT_PFJet450 != 0)         prescale = 1;      //these are hard-coded effective prescales. Must be recomputed if you change the data-taking period
+        // else if(t.HLT_PFHT600_Prescale != 0) prescale = 20;
+        // else if(t.HLT_PFHT475_Prescale != 0) prescale = 78;
+        // else if(t.HLT_PFHT350_Prescale != 0) prescale = 312;
+        // else if(t.HLT_PFHT300_Prescale != 0) prescale = 620;
+        // else if(t.HLT_PFHT200_Prescale != 0) prescale = 3630;
+        // else if(t.HLT_PFHT125_Prescale != 0) prescale = 2734; // this doesn't make sense, need to look into it
+
+        prescale = getTriggerPrescale();
         
-        // // END OF YEAR TRIGGER INFO
+        // // End OF YEAR TRIGGER INFO
         // if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFHT125_Prescale || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale || t.HLT_PFJet450) ) 
         //     continue;
 
@@ -775,7 +791,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         float reb_met_pt = sqrt(new_met_x*new_met_x + new_met_y*new_met_y);
 
         int numSmears = min((numberOfSmears*prescale), MAX_SMEARS);
-        smearNormalization = 1./float(numSmears);
+//        smearNormalization = 1./float(numSmears);
 
         // rebalanced met cut to removed EWK contamination in data
         if(t.isData && reb_met_pt > EWK_CUTOFF)
@@ -857,11 +873,12 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
           if(nJet30 < 2) continue;
           if(ht < 450.0) continue;
-          if(ht < 1000.0 && met_pt < 200.0) continue;
+          // if(ht < 1000.0 && met_pt < 250.0) continue;
           // if(ht < 1000.0 && met_pt < 30.0) continue;
-          if(ht >= 1000.0 && met_pt < 30.0) continue;
-
-          if (met_pt/t.met_caloPt > 5.0) continue;
+          // if(ht >= 1000.0 && met_pt < 30.0) continue;
+          if (met_pt < 30.) continue;
+          
+          // if (met_pt/t.met_caloPt > 5.0) continue;
 
           std::vector<LorentzVector> p4sForDphi;
           for(unsigned int i=0; i<jet_pt_smeared.size(); i++){
@@ -1134,7 +1151,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 void SmearLooper::fillHistosSRBase() {
 
   // trigger requirement on data
-  if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT800 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
+  if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
 
   std::map<std::string, float> values;
   if(doRebalanceAndSmear_){
@@ -1144,7 +1161,7 @@ void SmearLooper::fillHistosSRBase() {
     values["j1pt"]        = RS_vars_["jet1_pt"];
     values["j2pt"]        = RS_vars_["jet2_pt"];
     values["mt2"]         = RS_vars_["mt2"];
-    values["passesHtMet"] = ( (RS_vars_["ht"] > 450. && RS_vars_["met_pt"] > 200.) || (RS_vars_["ht"] > 1000. && RS_vars_["met_pt"] > 30.) );//FIXME
+    values["passesHtMet"] = ( (RS_vars_["ht"] > 450. && RS_vars_["met_pt"] > 250.) || (RS_vars_["ht"] > 1000. && RS_vars_["met_pt"] > 30.) );//FIXME
     //values["passesHtMet"] = ( (RS_vars_["ht"] > 450. && RS_vars_["met_pt"] > 30.) || (RS_vars_["ht"] > 1000. && RS_vars_["met_pt"] > 30.) );
   }
   else{
@@ -1154,7 +1171,7 @@ void SmearLooper::fillHistosSRBase() {
     values["j1pt"]        = t.jet1_pt;
     values["j2pt"]        = t.jet2_pt;
     values["mt2"]         = t.mt2;
-    values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+    values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 250.) || (t.ht > 1000. && t.met_pt > 30.) );
   }
 
   if(!doRebalanceAndSmear_){
@@ -1179,7 +1196,7 @@ void SmearLooper::fillHistosSRBase() {
 void SmearLooper::fillHistosInclusive() {
 
   // trigger requirement on data
-  if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT800 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
+  if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
 
   std::map<std::string, float> values;
   if(doRebalanceAndSmear_){
@@ -1189,7 +1206,7 @@ void SmearLooper::fillHistosInclusive() {
     values["j1pt"]        = RS_vars_["jet1_pt"];
     values["j2pt"]        = RS_vars_["jet2_pt"];
     values["mt2"]         = RS_vars_["mt2"];
-    values["passesHtMet"] = ( (RS_vars_["ht"] > 450. && RS_vars_["met_pt"] > 200.) || (RS_vars_["ht"] > 1000. && RS_vars_["met_pt"] > 30.) );//FIXME
+    values["passesHtMet"] = ( (RS_vars_["ht"] > 450. && RS_vars_["met_pt"] > 250.) || (RS_vars_["ht"] > 1000. && RS_vars_["met_pt"] > 30.) );//FIXME
     //values["passesHtMet"] = ( (RS_vars_["ht"] > 450. && RS_vars_["met_pt"] > 30.) || (RS_vars_["ht"] > 1000. && RS_vars_["met_pt"] > 30.) );
   }
   else{
@@ -1199,7 +1216,7 @@ void SmearLooper::fillHistosInclusive() {
     values["j1pt"]        = t.jet1_pt;
     values["j2pt"]        = t.jet2_pt;
     values["mt2"]         = t.mt2;
-    values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+    values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 250.) || (t.ht > 1000. && t.met_pt > 30.) );
   }
 
   if(!doRebalanceAndSmear_){
@@ -1269,7 +1286,7 @@ void SmearLooper::fillHistosInclusive() {
 void SmearLooper::fillHistosSignalRegion(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT800 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
+  if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
 
   std::map<std::string, float> values;
 
@@ -1326,7 +1343,7 @@ void SmearLooper::fillHistosSignalRegion(const std::string& prefix, const std::s
 void SmearLooper::fillHistosCRRSInvertDPhi(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT800 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
+  if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
       
   std::map<std::string, float> values;
   if(doRebalanceAndSmear_){
@@ -1377,7 +1394,7 @@ void SmearLooper::fillHistosCRRSInvertDPhi(const std::string& prefix, const std:
 void SmearLooper::fillHistosCRRSMT2SideBand(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT800 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
+  if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
 
   std::map<std::string, float> values;
   if(doRebalanceAndSmear_){
@@ -1428,7 +1445,7 @@ void SmearLooper::fillHistosCRRSMT2SideBand(const std::string& prefix, const std
 void SmearLooper::fillHistosCRRSDPhiMT2(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT800 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
+  if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
 
   std::map<std::string, float> values;
   if(doRebalanceAndSmear_){
@@ -1810,3 +1827,81 @@ void SmearLooper::CloseBabyNtuple () {
   SmearBabyFile_->Close();
   return;
 }
+
+bool SmearLooper::passesTrigger() {
+  //
+  // We should only use each trigger in a certain HT range.
+  // Otherwise, we will double count the data contributions to the r&s estimate.
+  //
+  // HLT_PFHT900 for ht >= 1000
+  // HLT_PFHT600 for 700 <= ht < 1000
+  // HLT_PFHT475 for 575 <= ht < 700
+  // HLT_PFHT350 for 450 <= ht < 575
+  // HLT_PFHT300 for 400 <= ht < 450
+  // HLT_PFHT200 for 300 <= ht < 400
+  // HLT_PFHT125 for 250 <= ht < 300
+
+  if (not t.isData) return true;
+  if (t.ht < 300)
+    return t.HLT_PFHT125_Prescale;
+  else if (t.ht < 400)
+    return t.HLT_PFHT200_Prescale;
+  else if (t.ht < 450)
+    return t.HLT_PFHT300_Prescale;
+  else if (t.ht < 575)
+    return t.HLT_PFHT350_Prescale;
+  else if (t.ht < 700)
+    return (t.HLT_PFHT475_Prescale or t.HLT_PFJet450);
+  else if (t.ht < 1000)
+    return (t.HLT_PFHT600_Prescale or t.HLT_PFJet450);
+  else
+    return (t.HLT_PFHT900 or t.HLT_PFJet450);
+
+  return false;
+}
+
+// for full year
+float SmearLooper::getTriggerPrescale () {
+  if (not t.isData) return 1;
+  if (t.ht < 300)
+    return 9421;
+  else if (t.ht < 400)
+    return 5410;
+  else if (t.ht < 450)
+    return 917;
+  else if (t.ht < 575)
+    return 458;
+  else if (t.ht < 700) {
+    if (t.HLT_PFJet450) return 1;
+    return 115;
+  }
+  else if (t.ht < 1000) {
+    if (t.HLT_PFJet450) return 1;
+    return 29;
+  }
+  else
+    return 1;
+}
+
+// for Run B
+// float SmearLooper::getTriggerPrescale () {
+//   if (not t.isData) return 1;
+//   if (t.ht < 300)
+//     return 2734;
+//   else if (t.ht < 400)
+//     return 3630;
+//   else if (t.ht < 450)
+//     return 620;
+//   else if (t.ht < 575)
+//     return 312;
+//   else if (t.ht < 700) {
+//     if (t.HLT_PFJet450) return 1;
+//     return 78;
+//   }
+//   else if (t.ht < 1000) {
+//     if (t.HLT_PFJet450) return 1;
+//     return 20;
+//   }
+//   else
+//     return 1;
+// }
