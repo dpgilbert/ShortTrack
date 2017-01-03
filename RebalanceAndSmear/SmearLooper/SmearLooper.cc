@@ -57,8 +57,8 @@ float m1bins[n_m1bins+1];
 const int n_m2bins = 33;
 float m2bins[n_m2bins+1];
 
-const int n_htbins = 4;
-const float htbins[n_htbins+1] = {450., 575., 1000., 1500., 3000.};
+const int n_htbins = 5;
+const float htbins[n_htbins+1] = {250., 450., 575., 1000., 1500., 3000.};
 const int n_njbins = 3;
 const float njbins[n_njbins+1] = {2, 4, 7, 12};
 const int n_nbjbins = 4;
@@ -296,6 +296,14 @@ void SmearLooper::SetSignalRegions(){
   outfile_->cd();
 
   //setup inclusive regions
+  SRRS InclusiveHT250to1000 = SRBase;
+  InclusiveHT250to1000.SetName("InclusiveHT250to1000");
+  InclusiveHT250to1000.SetVar("ht", 250, 1000);
+  InclusiveHT250to1000.SetVarCRRSInvertDPhi("ht", 250, 1000);
+  InclusiveHT250to1000.SetVarCRRSMT2SideBand("ht", 250, 1000);
+  InclusiveHT250to1000.SetVarCRRSDPhiMT2("ht", 250, 1000);
+  InclusiveRegions.push_back(InclusiveHT250to1000);
+
   SRRS InclusiveHT450to1000 = SRBase;
   InclusiveHT450to1000.SetName("InclusiveHT450to1000");
   InclusiveHT450to1000.SetVar("ht", 450, 1000);
@@ -487,6 +495,17 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
     dir_SRJustHT2_temp = outfile_->mkdir((SRJustHT2_temp.GetName()).c_str());
   } 
 
+  SRJustHT3.SetName("ht250to1000");
+  float SRJustHT3_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500}; 
+  SRJustHT3.SetMT2Bins(7, SRJustHT3_mt2bins);
+
+  SRJustHT3_temp = SRJustHT3;
+  SRJustHT3_temp.SetName("temp_"+SRJustHT3_temp.GetName());
+  TDirectory * dir_SRJustHT3_temp = (TDirectory*)outfile_->Get((SRJustHT3_temp.GetName()).c_str());
+  if (dir_SRJustHT3_temp == 0) {
+    dir_SRJustHT3_temp = outfile_->mkdir((SRJustHT3_temp.GetName()).c_str());
+  } 
+  
   if (makeSmearBaby_) {
     std::string baby_name = output_name;
     baby_name.replace(baby_name.end()-5,baby_name.end(),"_baby");
@@ -571,7 +590,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
       if (doRebalanceAndSmear_ && t.njet < 2) continue;
       if (!doRebalanceAndSmear_){
         if(t.nJet30 < 2) continue;
-        if(t.ht < 450.0) continue;
+        if(t.ht < 250.0) continue;
         if(t.ht < 1000.0 && t.met_pt < 30.0) continue;
         if(t.ht >= 1000.0 && t.met_pt < 30.0) continue;
         if(t.mt2 < 50) continue;
@@ -825,7 +844,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
           met_phi = met_vec.Phi();
 
           if(nJet30 < 2) continue;
-          if(ht < 450.0) continue;
+          if(ht < 250.0) continue;
           if (met_pt < 30.) continue;
 
           std::vector<LorentzVector> p4sForDphi;
@@ -930,6 +949,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     
           // ELECTROWEAK CORRECTIONS. Hard-coded based on comparisons of QCD/EWK MC.
           if(t.isData){
+            if(RS_vars_["ht"] >=250  && RS_vars_["ht"]<450)  evtweight_*=1.02;
             if(RS_vars_["ht"] >=450  && RS_vars_["ht"]<575)  evtweight_*=1.02;
             if(RS_vars_["ht"] >=575  && RS_vars_["ht"]<1000) evtweight_*=1.17;
             if(RS_vars_["ht"] >=1000 && RS_vars_["ht"]<1500) evtweight_*=1.11;
@@ -942,6 +962,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
             fillHistos(SRJustHT1_temp.srHistMap, SRJustHT1_temp.GetNumberOfMT2Bins(), SRJustHT1_temp.GetMT2Bins(), SRJustHT1_temp.GetName(), "");
           if(RS_vars_["ht"]>=1000 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
             fillHistos(SRJustHT2_temp.srHistMap, SRJustHT2_temp.GetNumberOfMT2Bins(), SRJustHT2_temp.GetMT2Bins(), SRJustHT2_temp.GetName(), "");
+          if(RS_vars_["ht"]>=250 && RS_vars_["ht"]<1000 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+            fillHistos(SRJustHT3_temp.srHistMap, SRJustHT3_temp.GetNumberOfMT2Bins(), SRJustHT3_temp.GetMT2Bins(), SRJustHT3_temp.GetName(), "");
           fillHistosSignalRegion("sr");
           fillHistosSRBase();
           fillHistosInclusive();
@@ -955,6 +977,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         plotRS(SRNoCut_temp.srHistMap, SRNoCut.srHistMap, SRNoCut.GetName());
         plotRS(SRJustHT1_temp.srHistMap, SRJustHT1.srHistMap, SRJustHT1.GetName());
         plotRS(SRJustHT2_temp.srHistMap, SRJustHT2.srHistMap, SRJustHT2.GetName());
+        plotRS(SRJustHT3_temp.srHistMap, SRJustHT3.srHistMap, SRJustHT3.GetName());        
         plotRS(SRBase_temp.srHistMap, SRBase.srHistMap, SRBase.GetName());
         plotRS(SRBase_temp.crRSInvertDPhiHistMap, SRBase.crRSInvertDPhiHistMap, "crRSInvertDPhi"+SRBase.GetName());
         plotRS(SRBase_temp.crRSMT2SideBandHistMap, SRBase.crRSMT2SideBandHistMap, "crRSMT2SideBand"+SRBase.GetName());
@@ -976,6 +999,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         resetHistmap(SRNoCut_temp.srHistMap, SRNoCut_temp.GetName());
         resetHistmap(SRJustHT1_temp.srHistMap, SRJustHT1_temp.GetName());
         resetHistmap(SRJustHT2_temp.srHistMap, SRJustHT2_temp.GetName());
+        resetHistmap(SRJustHT3_temp.srHistMap, SRJustHT3_temp.GetName());        
         resetHistmap(SRBase_temp.srHistMap, SRBase_temp.GetName());
         resetHistmap(SRBase_temp.crRSInvertDPhiHistMap, "crRSInvertDPhi"+SRBase_temp.GetName());
         resetHistmap(SRBase_temp.crRSMT2SideBandHistMap, "crRSMT2SideBand"+SRBase_temp.GetName());
@@ -999,6 +1023,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
           fillHistos(SRJustHT1.srHistMap, SRJustHT1.GetNumberOfMT2Bins(), SRJustHT1.GetMT2Bins(), SRJustHT1.GetName(), "");
         if(t.ht>=1000 && t.met_pt>30 && t.mt2>50)
           fillHistos(SRJustHT2.srHistMap, SRJustHT2.GetNumberOfMT2Bins(), SRJustHT2.GetMT2Bins(), SRJustHT2.GetName(), "");
+        if(t.ht>=250 && t.ht<1000 && t.met_pt>30 && t.mt2>50)
+          fillHistos(SRJustHT3.srHistMap, SRJustHT3.GetNumberOfMT2Bins(), SRJustHT3.GetMT2Bins(), SRJustHT3.GetName(), "");
         fillHistosSignalRegion("sr");
         fillHistosSRBase();
         fillHistosInclusive();
@@ -1036,6 +1062,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
   savePlotsDir(SRNoCut.srHistMap,outfile_,SRNoCut.GetName().c_str());
   savePlotsDir(SRJustHT1.srHistMap,outfile_,SRJustHT1.GetName().c_str());
   savePlotsDir(SRJustHT2.srHistMap,outfile_,SRJustHT2.GetName().c_str());
+  savePlotsDir(SRJustHT3.srHistMap,outfile_,SRJustHT3.GetName().c_str());  
   savePlotsDir(SRBase.srHistMap,outfile_,SRBase.GetName().c_str());
   savePlotsDir(SRBase.crRSInvertDPhiHistMap,outfile_,"crRSInvertDPhibase");
   savePlotsDir(SRBase.crRSMT2SideBandHistMap,outfile_,"crRSMT2SideBandbase");
@@ -1109,7 +1136,7 @@ void SmearLooper::fillHistosSRBase() {
     values["j1pt"]        = RS_vars_["jet1_pt"];
     values["j2pt"]        = RS_vars_["jet2_pt"];
     values["mt2"]         = RS_vars_["mt2"];
-    values["passesHtMet"] = ( (RS_vars_["ht"] > 450. && RS_vars_["met_pt"] > 250.) || (RS_vars_["ht"] > 1000. && RS_vars_["met_pt"] > 30.) );//FIXME
+    values["passesHtMet"] = ( (RS_vars_["ht"] > 250. && RS_vars_["met_pt"] > 250.) || (RS_vars_["ht"] > 1000. && RS_vars_["met_pt"] > 30.) );//FIXME
     //values["passesHtMet"] = ( (RS_vars_["ht"] > 450. && RS_vars_["met_pt"] > 30.) || (RS_vars_["ht"] > 1000. && RS_vars_["met_pt"] > 30.) );
   }
   else{
@@ -1119,7 +1146,7 @@ void SmearLooper::fillHistosSRBase() {
     values["j1pt"]        = t.jet1_pt;
     values["j2pt"]        = t.jet2_pt;
     values["mt2"]         = t.mt2;
-    values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 250.) || (t.ht > 1000. && t.met_pt > 30.) );
+    values["passesHtMet"] = ( (t.ht > 250. && t.met_pt > 250.) || (t.ht > 1000. && t.met_pt > 30.) );
   }
 
   if(!doRebalanceAndSmear_){
@@ -1154,7 +1181,7 @@ void SmearLooper::fillHistosInclusive() {
     values["j1pt"]        = RS_vars_["jet1_pt"];
     values["j2pt"]        = RS_vars_["jet2_pt"];
     values["mt2"]         = RS_vars_["mt2"];
-    values["passesHtMet"] = ( (RS_vars_["ht"] > 450. && RS_vars_["met_pt"] > 250.) || (RS_vars_["ht"] > 1000. && RS_vars_["met_pt"] > 30.) );//FIXME
+    values["passesHtMet"] = ( (RS_vars_["ht"] > 250. && RS_vars_["met_pt"] > 250.) || (RS_vars_["ht"] > 1000. && RS_vars_["met_pt"] > 30.) );//FIXME
     //values["passesHtMet"] = ( (RS_vars_["ht"] > 450. && RS_vars_["met_pt"] > 30.) || (RS_vars_["ht"] > 1000. && RS_vars_["met_pt"] > 30.) );
   }
   else{
@@ -1164,7 +1191,7 @@ void SmearLooper::fillHistosInclusive() {
     values["j1pt"]        = t.jet1_pt;
     values["j2pt"]        = t.jet2_pt;
     values["mt2"]         = t.mt2;
-    values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 250.) || (t.ht > 1000. && t.met_pt > 30.) );
+    values["passesHtMet"] = ( (t.ht > 250. && t.met_pt > 250.) || (t.ht > 1000. && t.met_pt > 30.) );
   }
 
   if(!doRebalanceAndSmear_){

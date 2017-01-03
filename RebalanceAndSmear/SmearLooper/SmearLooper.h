@@ -97,9 +97,10 @@ class SmearLooper {
   std::vector<SRRS> SRVec;
   std::vector<SRRS> InclusiveRegions;
   SRRS SRBase;
-  SRRS SRNoCut;
+  SRRS SRNoCut;  
   SRRS SRJustHT1;
   SRRS SRJustHT2;
+  SRRS SRJustHT3;  
   SRRS CRSL_WJets;
   SRRS CRSL_TTbar;
   TH1D* h_nvtx_weights_;
@@ -111,6 +112,7 @@ class SmearLooper {
   SRRS SRNoCut_temp;
   SRRS SRJustHT1_temp;
   SRRS SRJustHT2_temp;
+  SRRS SRJustHT3_temp;  
 
   bool applyWeights_;
   bool doRebalanceAndSmear_;
