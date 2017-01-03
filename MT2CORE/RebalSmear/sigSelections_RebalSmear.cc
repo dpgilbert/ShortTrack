@@ -228,6 +228,31 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
 
   //add HT and MET requirements
   for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
+    if (iSR >= 3 && iSR <= 10) continue;
+    SRRS fullSR = temp_SR_vec.at(iSR); 
+    fullSR.SetName(fullSR.GetName() + "VL");
+    fullSR.SetVar("ht", 250, 450);
+    fullSR.SetVar("met", 250, -1);
+    fullSR.SetVarCRSL("ht", 250, 450);
+    fullSR.SetVarCRSL("met", 250, -1);
+    fullSR.SetVarCRRSInvertDPhi("ht", 250, 450);
+    fullSR.SetVarCRRSInvertDPhi("met", 250, -1);
+    fullSR.SetVarCRRSMT2SideBand("ht", 250, 450);
+    fullSR.SetVarCRRSMT2SideBand("met", 250, -1);
+    fullSR.SetVarCRRSDPhiMT2("ht", 250, 450);
+    fullSR.SetVarCRRSDPhiMT2("met", 250, -1);
+    int njets_lo = fullSR.GetLowerBound("njets");
+    int nbjets_lo = fullSR.GetLowerBound("nbjets");
+    if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
+    else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
+    else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
+    else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
+    else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
+    else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
+    else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
+    SRVec.push_back(fullSR);
+  }
+  for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
     SRRS fullSR = temp_SR_vec.at(iSR);  
     fullSR.SetName(fullSR.GetName() + "L");
     fullSR.SetVar("ht", 450, 575);
@@ -342,8 +367,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
 
   //define baseline selections commmon to all signal regions 
   baseSR.SetVar("mt2", 200, -1);
-  baseSR.SetVar("j1pt", 100, -1);
-  baseSR.SetVar("j2pt", 100, -1);
+  baseSR.SetVar("j1pt", 30, -1);
+  baseSR.SetVar("j2pt", 30, -1);
   baseSR.SetVar("deltaPhiMin", 0.3, -1);
   baseSR.SetVar("diffMetMhtOverMet", 0, 0.5);
   baseSR.SetVar("nlep", 0, 1);
@@ -351,29 +376,29 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
 
   // common selections for CRSL
   baseSR.SetVarCRSL("mt2", 200, -1);
-  baseSR.SetVarCRSL("j1pt", 100, -1);
-  baseSR.SetVarCRSL("j2pt", 100, -1);
+  baseSR.SetVarCRSL("j1pt", 30, -1);
+  baseSR.SetVarCRSL("j2pt", 30, -1);
   baseSR.SetVarCRSL("deltaPhiMin", 0.3, -1);
   baseSR.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
   baseSR.SetVarCRSL("nlep", 1, 2);
 
   baseSR.SetVarCRRSInvertDPhi("mt2", 200, -1);
-  baseSR.SetVarCRRSInvertDPhi("j1pt", 100, -1);
-  baseSR.SetVarCRRSInvertDPhi("j2pt", 100, -1);
+  baseSR.SetVarCRRSInvertDPhi("j1pt", 30, -1);
+  baseSR.SetVarCRRSInvertDPhi("j2pt", 30, -1);
   baseSR.SetVarCRRSInvertDPhi("deltaPhiMin", 0.0, 0.3);
   baseSR.SetVarCRRSInvertDPhi("diffMetMhtOverMet", 0, 0.5);
   baseSR.SetVarCRRSInvertDPhi("nlep", 0, 1);
 
   baseSR.SetVarCRRSMT2SideBand("mt2", 100, 200);
-  baseSR.SetVarCRRSMT2SideBand("j1pt", 100, -1);
-  baseSR.SetVarCRRSMT2SideBand("j2pt", 100, -1);
+  baseSR.SetVarCRRSMT2SideBand("j1pt", 30, -1);
+  baseSR.SetVarCRRSMT2SideBand("j2pt", 30, -1);
   baseSR.SetVarCRRSMT2SideBand("deltaPhiMin", 0.3, -1);
   baseSR.SetVarCRRSMT2SideBand("diffMetMhtOverMet", 0, 0.5);
   baseSR.SetVarCRRSMT2SideBand("nlep", 0, 1);
 
   baseSR.SetVarCRRSDPhiMT2("mt2", 100, 200);
-  baseSR.SetVarCRRSDPhiMT2("j1pt", 100, -1);
-  baseSR.SetVarCRRSDPhiMT2("j2pt", 100, -1);
+  baseSR.SetVarCRRSDPhiMT2("j1pt", 30, -1);
+  baseSR.SetVarCRRSDPhiMT2("j2pt", 30, -1);
   baseSR.SetVarCRRSDPhiMT2("deltaPhiMin", 0.0, 0.3);
   baseSR.SetVarCRRSDPhiMT2("diffMetMhtOverMet", 0, 0.5);
   baseSR.SetVarCRRSDPhiMT2("nlep", 0, 1);
