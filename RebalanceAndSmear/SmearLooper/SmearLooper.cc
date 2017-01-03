@@ -1275,6 +1275,8 @@ void SmearLooper::fillHistosCRSL() {
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
   values["nlep"]        = t.nLepLowMT;
+  values["nbjets"]      = t.nBJet20;
+  values["njets"]       = t.nJet30;
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["mt2"]         = t.mt2;
@@ -1302,6 +1304,8 @@ void SmearLooper::fillHistosCRDY() {
   values["deltaPhiMin"] = t.zll_deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
   values["nlep"]        = 0; //dummy value, taken care of by doDYplots flag
+  values["nbjets"]      = t.nBJet20;
+  values["njets"]       = t.nJet30;
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["mt2"]         = t.zll_mt2;
