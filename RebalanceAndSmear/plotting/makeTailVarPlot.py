@@ -4,7 +4,7 @@ import os
 
 ROOT.gROOT.SetBatch(1)
 
-dir = "looper_output/RebalanceAndSmear_V00-08-12_fixedBtag"
+dir = "looper_output/RebalanceAndSmear_V00-08-12_fixedBtag_v2"
 dir_tail50 = "looper_output/RebalanceAndSmear_V00-08-12_tail50"
 dir_tail100 = "looper_output/RebalanceAndSmear_V00-08-12_tail100"
 dir_noRS = "looper_output/RebalanceAndSmear_V00-08-12_noRS"
@@ -21,9 +21,12 @@ h_evts_nrs = ROOT.TH1D("h_evts_nrs","",1,0,2)
 
 ibin = 0
 for ht_reg in ["L","M","H","UH"]:
+    sum_rs = 0
+    sum_rs50 = 0
+    sum_rs100 = 0    
     for top_reg in range(1,12):
         ibin+=1
-        print ibin
+        # print ibin
 
         h_evts_rs.Reset()
         h_evts_50.Reset()
@@ -72,7 +75,13 @@ for ht_reg in ["L","M","H","UH"]:
         hnrs.SetBinContent(ibin, h_evts_nrs.GetBinContent(1))
         hnrs.SetBinError(ibin, h_evts_nrs.GetBinError(1))
 
+        if "UH" in ht_reg and top_reg == 5: continue
+        sum_rs += h_evts_rs.GetBinContent(1)
+        sum_rs50 += h_evts_50.GetBinContent(1)
+        sum_rs100 += h_evts_100.GetBinContent(1)
 
+    print "{0} HT: rs = {1}, rs50 = {2}, ratio = {3}".format(ht_reg, sum_rs, sum_rs50, sum_rs50/sum_rs)
+    print "{0} HT: rs = {1}, rs100 = {2}, ratio = {3}".format(ht_reg, sum_rs, sum_rs100, sum_rs100/sum_rs)        
 
 ROOT.gStyle.SetOptStat(0)
 
@@ -197,7 +206,7 @@ h_ratio100.Draw("PE SAME")
 line = ROOT.TLine()
 line.DrawLine(0,1,44,1)
 
-c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/MCtests/tail_var.pdf")
-c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/MCtests/tail_var.png")
+c.SaveAs("/home/users/fgolf/public_html/mt2/RebalanceAndSmear/MCtests/tail_var.pdf")
+c.SaveAs("/home/users/fgolf/public_html/mt2/RebalanceAndSmear/MCtests/tail_var.png")
 
 

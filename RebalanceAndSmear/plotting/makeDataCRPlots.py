@@ -4,6 +4,8 @@ import pyRootPlotMaker as ppm
 import numpy as np
 import random
 
+doByTopoReg = False
+
 def GetTotalHistogram(h, fid, h_name, cr, ht_regs, isDataRS=False):
   # h is an already made TH1D with the correct binning
   h.Reset()
@@ -50,17 +52,29 @@ vars = ["ht", "met", "mt2", "nJet30", "nBJet20"]
 rebin = [2, 2, 2, 1, 1]
 
 xRangeUser = [(1000,3000), (0,1000), (200,500), None, None]
+htRangeUser = [(400, 600), (550, 1100), (900,1600), (1400,3000)]
 units = ["GeV","GeV","GeV",None,None]
 titles = ["H_{T}","MET","M_{T2}","N-jet","N-bjet"]
 
-# dirs = ["crRSInvertDPhiInclusiveHT1000toInf", "crRSMT2SideBandInclusiveHT1000toInf", "crRSInvertDPhiInclusiveHT450to1000", "crRSMT2SideBandInclusiveHT450to1000"]
 dirs = [("crRSInvertDPhi", ["L","M"]), ("crRSInvertDPhi", ["H","UH"]), ("crRSMT2SideBand", ["L","M"]), ("crRSMT2SideBand", ["H","UH"])]
-# dirs = [("crRSInvertDPhi", ["H","UH"])]
+if doByTopoReg:
+  dirs = [("crRSInvertDPhi", ["L"]), ("crRSInvertDPhi", ["M"]), ("crRSInvertDPhi", ["H"]), ("crRSInvertDPhi", ["UH"]),
+          ("crRSMT2SideBand", ["L"]), ("crRSMT2SideBand", ["M"]), ("crRSMT2SideBand", ["H"]), ("crRSMT2SideBand", ["UH"])]
+
 for cr, ht_regs in dirs:
   if ht_regs==["L","M"]:
     ht_name="InclusiveHT450to1000"
   if ht_regs==["H","UH"]:
     ht_name="InclusiveHT1000toInf"
+  if ht_regs==["L"]:
+    ht_name="InclusiveHT450to575"
+  if ht_regs==["M"]:
+    ht_name="InclusiveHT575to1000"
+  if ht_regs==["H"]:
+    ht_name="InclusiveHT1000to1500"
+  if ht_regs==["UH"]:
+    ht_name="InclusiveHT1500toInf"
+
   try:
     os.makedirs(os.path.join(outdir,cr+ht_name))
     os.system("cp ~/scripts/index.php "+os.path.join(outdir,cr+ht_name))
@@ -74,7 +88,15 @@ for cr, ht_regs in dirs:
     xRangeUser[0] = (450,1000)
   if "HT1000toInf" in ht_name:
     xRangeUser[0] = (1000,3000)
-  
+  if "HT450to575" in ht_name:
+    xRangeUser[0] = (400,600)
+  if "HT575to1000" in ht_name:
+    xRangeUser[0] = (550,1100)
+  if "HT1000to1500" in ht_name:
+    xRangeUser[0] = (900,1600)
+  if "HT1500toInf" in ht_name:
+    xRangeUser[0] = (1500,3000)
+    
   for ivar,var in enumerate(vars):
     h_data = data_file.Get("srbase/h_{0}".format(var)).Clone()
     h_data.Reset()
