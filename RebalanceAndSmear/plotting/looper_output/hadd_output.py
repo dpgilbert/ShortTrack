@@ -29,7 +29,6 @@ while idir < len(list_of_subdirs):
   list_of_files = []    
   for fname in os.listdir(list_of_subdirs[idir]):      
     path = os.path.join(list_of_subdirs[idir],fname)
-    if "data" in path: continue
     if os.path.isdir(path):
       print "Appending directory {0}".format(path)
     list_of_subdirs.append(path) if os.path.isdir(path) else list_of_files.append(path)            
