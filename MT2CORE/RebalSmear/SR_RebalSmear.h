@@ -19,6 +19,7 @@ class SRRS {
     void SetName(std::string sr_name);
     void SetVar(std::string var_name, float lower_bound, float upper_bound);
     void SetVarCRSL(std::string var_name, float lower_bound, float upper_bound);
+    void SetVarCRDY(std::string var_name, float lower_bound, float upper_bound);
     void SetVarCRRSInvertDPhi(std::string var_name, float lower_bound, float upper_bound);
     void SetVarCRRSMT2SideBand(std::string var_name, float lower_bound, float upper_bound);
     void SetVarCRRSDPhiMT2(std::string var_name, float lower_bound, float upper_bound);
@@ -35,6 +36,11 @@ class SRRS {
     float GetUpperBoundCRSL(std::string var_name);
     unsigned int GetNumberOfVariablesCRSL();
     std::vector<std::string> GetListOfVariablesCRSL();
+
+    float GetLowerBoundCRDY(std::string var_name);
+    float GetUpperBoundCRDY(std::string var_name);
+    unsigned int GetNumberOfVariablesCRDY();
+    std::vector<std::string> GetListOfVariablesCRDY();
 
     float GetLowerBoundCRRSInvertDPhi(std::string var_name);
     float GetUpperBoundCRRSInvertDPhi(std::string var_name);
@@ -56,11 +62,13 @@ class SRRS {
 
     bool PassesSelection(std::map<std::string, float> values);
     bool PassesSelectionCRSL(std::map<std::string, float> values);
+    bool PassesSelectionCRDY(std::map<std::string, float> values);
     bool PassesSelectionCRRSInvertDPhi(std::map<std::string, float> values);
     bool PassesSelectionCRRSMT2SideBand(std::map<std::string, float> values);
     bool PassesSelectionCRRSDPhiMT2(std::map<std::string, float> values);
     void RemoveVar(std::string var_name);
     void RemoveVarCRSL(std::string var_name);
+    void RemoveVarCRDY(std::string var_name);
     void RemoveVarCRRSInvertDPhi(std::string var_name);
     void RemoveVarCRRSMT2SideBand(std::string var_name);
     void RemoveVarCRRSDPhiMT2(std::string var_name);
@@ -72,21 +80,21 @@ class SRRS {
     std::map<std::string, TH1*> crslmuHistMap;
     std::map<std::string, TH1*> crslelHistMap;
     std::map<std::string, TH1*> crslhadHistMap;
-    std::map<std::string, TH1*> crgjHistMap;
-    std::map<std::string, RooDataSet*> crgjRooDataSetMap;
     std::map<std::string, TH1*> crdyHistMap;
-    std::map<std::string, TH1*> crrlHistMap;
-    std::map<std::string, TH1*> crrlmuHistMap;
-    std::map<std::string, TH1*> crrlelHistMap;
     std::map<std::string, TH1*> crRSInvertDPhiHistMap;
+    std::map<std::string, TH1*> crRSInvertDPhiSLHistMap;
+    std::map<std::string, TH1*> crRSInvertDPhiDYHistMap;
     std::map<std::string, TH1*> crRSMT2SideBandHistMap;
+    std::map<std::string, TH1*> crRSMT2SideBandSLHistMap;
+    std::map<std::string, TH1*> crRSMT2SideBandDYHistMap;
     std::map<std::string, TH1*> crRSDPhiMT2HistMap;
 
   private:
 
     std::string srName_;
     std::map<std::string, std::pair<float, float> > bins_;
-    std::map<std::string, std::pair<float, float> > binsCRSL_;
+    std::map<std::string, std::pair<float, float> > binsCRSL_; 
+    std::map<std::string, std::pair<float, float> > binsCRDY_; 
     std::map<std::string, std::pair<float, float> > binsCRRSInvertDPhi_;
     std::map<std::string, std::pair<float, float> > binsCRRSMT2SideBand_;
     std::map<std::string, std::pair<float, float> > binsCRRSDPhiMT2_;

@@ -17,6 +17,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     sr.SetVar("nbjets", 0, 1);
     sr.SetVarCRSL("njets", 2, 4);
     sr.SetVarCRSL("nbjets", 0, 1);
+    sr.SetVarCRDY("njets", 2, 4);
+    sr.SetVarCRDY("nbjets", 0, 1);
     sr.SetVarCRRSInvertDPhi("njets", 2, 4);
     sr.SetVarCRRSInvertDPhi("nbjets", 0, 1);
     sr.SetVarCRRSMT2SideBand("njets", 2, 4);
@@ -31,6 +33,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     sr.SetVar("nbjets", 1, 2);
     sr.SetVarCRSL("njets", 2, 4);
     sr.SetVarCRSL("nbjets", 1, 2);
+    sr.SetVarCRDY("njets", 2, 4);
+    sr.SetVarCRDY("nbjets", 1, 2);
     sr.SetVarCRRSInvertDPhi("njets", 2, 4);
     sr.SetVarCRRSInvertDPhi("nbjets", 1, 2);
     sr.SetVarCRRSMT2SideBand("njets", 2, 4);
@@ -45,6 +49,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     sr.SetVar("nbjets", 2, 3);
     sr.SetVarCRSL("njets", 2, 4);
     sr.SetVarCRSL("nbjets", 2, 3);
+    sr.SetVarCRDY("njets", 2, 4);
+    sr.SetVarCRDY("nbjets", 2, 3);
     sr.SetVarCRRSInvertDPhi("njets", 2, 4);
     sr.SetVarCRRSInvertDPhi("nbjets", 2, 3);
     sr.SetVarCRRSMT2SideBand("njets", 2, 4);
@@ -59,6 +65,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     sr.SetVar("nbjets", 0, 1);
     sr.SetVarCRSL("njets", 4, 7);
     sr.SetVarCRSL("nbjets", 0, 1);
+    sr.SetVarCRDY("njets", 4, 7);
+    sr.SetVarCRDY("nbjets", 0, 1);
     sr.SetVarCRRSInvertDPhi("njets", 4, 7);
     sr.SetVarCRRSInvertDPhi("nbjets", 0, 1);
     sr.SetVarCRRSMT2SideBand("njets", 4, 7);
@@ -73,6 +81,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     sr.SetVar("nbjets", 1, 2);
     sr.SetVarCRSL("njets", 4, 7);
     sr.SetVarCRSL("nbjets", 1, 2);
+    sr.SetVarCRDY("njets", 4, 7);
+    sr.SetVarCRDY("nbjets", 1, 2);
     sr.SetVarCRRSInvertDPhi("njets", 4, 7);
     sr.SetVarCRRSInvertDPhi("nbjets", 1, 2);
     sr.SetVarCRRSMT2SideBand("njets", 4, 7);
@@ -87,6 +97,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     sr.SetVar("nbjets", 2, 3);
     sr.SetVarCRSL("njets", 4, 7);
     sr.SetVarCRSL("nbjets", 2, 3);
+    sr.SetVarCRDY("njets", 4, 7);
+    sr.SetVarCRDY("nbjets", 2, 3);
     sr.SetVarCRRSInvertDPhi("njets", 4, 7);
     sr.SetVarCRRSInvertDPhi("nbjets", 2, 3);
     sr.SetVarCRRSMT2SideBand("njets", 4, 7);
@@ -101,6 +113,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     sr.SetVar("nbjets", 0, 1);
     sr.SetVarCRSL("njets", 7, -1);
     sr.SetVarCRSL("nbjets", 0, 1);
+    sr.SetVarCRDY("njets", 7, -1);
+    sr.SetVarCRDY("nbjets", 0, 1);
     sr.SetVarCRRSInvertDPhi("njets", 7, -1);
     sr.SetVarCRRSInvertDPhi("nbjets", 0, 1);
     sr.SetVarCRRSMT2SideBand("njets", 7, -1);
@@ -116,6 +130,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     sr.SetVar("nbjets", 1, 2);
     sr.SetVarCRSL("njets", 7, -1);
     sr.SetVarCRSL("nbjets", 1, 3);
+    sr.SetVarCRDY("njets", 7, -1);
+    sr.SetVarCRDY("nbjets", 1, 3);
     sr.SetVarCRRSInvertDPhi("njets", 7, -1);
     sr.SetVarCRRSInvertDPhi("nbjets", 1, -1); // DY: NB>0
     sr.SetVarCRRSMT2SideBand("njets", 7, -1);
@@ -131,6 +147,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     sr.SetVar("nbjets", 2, 3);
     sr.SetVarCRSL("njets", 7, -1);
     sr.SetVarCRSL("nbjets", 1, 3);
+    sr.SetVarCRDY("njets", 7, -1);
+    sr.SetVarCRDY("nbjets", 1, 3);
     sr.SetVarCRRSInvertDPhi("njets", 7, -1);
     sr.SetVarCRRSInvertDPhi("nbjets", 1, -1); // DY: NB>0
     sr.SetVarCRRSMT2SideBand("njets", 7, -1);
@@ -145,6 +163,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     sr.SetVar("nbjets", 3, -1);
     sr.SetVarCRSL("njets", 2, 7);
     sr.SetVarCRSL("nbjets", 3, -1);
+    sr.SetVarCRDY("njets", 2, 7);
+    sr.SetVarCRDY("nbjets", 3, -1);
     sr.SetVarCRRSInvertDPhi("njets", 2, 7);
     sr.SetVarCRRSInvertDPhi("nbjets", 3, -1);
     sr.SetVarCRRSMT2SideBand("njets", 2, 7);
@@ -160,6 +180,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     sr.SetVar("nbjets", 3, -1);
     sr.SetVarCRSL("njets", 7, -1);
     sr.SetVarCRSL("nbjets", 1, 3);
+    sr.SetVarCRDY("njets", 7, -1);
+    sr.SetVarCRDY("nbjets", 1, 3);
     sr.SetVarCRRSInvertDPhi("njets", 7, -1);
     sr.SetVarCRRSInvertDPhi("nbjets", 1, -1); // DY: NB>0
     sr.SetVarCRRSMT2SideBand("njets", 7, -1);
@@ -174,6 +196,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     sr.SetVar("nbjets", 0, 1);
     sr.SetVarCRSL("njets", 4, -1);
     sr.SetVarCRSL("nbjets", 0, 1);
+    sr.SetVarCRDY("njets", 4, -1);
+    sr.SetVarCRDY("nbjets", 0, 1);
     sr.SetVarCRRSInvertDPhi("njets", 4, -1);
     sr.SetVarCRRSInvertDPhi("nbjets", 0, 1);
     sr.SetVarCRRSMT2SideBand("njets", 4, -1);
@@ -188,6 +212,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     sr.SetVar("nbjets", 1, 2);
     sr.SetVarCRSL("njets", 4, -1);
     sr.SetVarCRSL("nbjets", 1, 2);
+    sr.SetVarCRDY("njets", 4, -1);
+    sr.SetVarCRDY("nbjets", 1, 2);
     sr.SetVarCRRSInvertDPhi("njets", 4, -1);
     sr.SetVarCRRSInvertDPhi("nbjets", 1, 2);
     sr.SetVarCRRSMT2SideBand("njets", 4, -1);
@@ -202,6 +228,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     sr.SetVar("nbjets", 2, 3);
     sr.SetVarCRSL("njets", 4, -1);
     sr.SetVarCRSL("nbjets", 2, 3);
+    sr.SetVarCRDY("njets", 4, -1);
+    sr.SetVarCRDY("nbjets", 2, 3);
     sr.SetVarCRRSInvertDPhi("njets", 4, -1);
     sr.SetVarCRRSInvertDPhi("nbjets", 2, 3);
     sr.SetVarCRRSMT2SideBand("njets", 4, -1);
@@ -216,6 +244,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     sr.SetVar("nbjets", 3, -1);
     sr.SetVarCRSL("njets", 2, -1);
     sr.SetVarCRSL("nbjets", 3, -1);
+    sr.SetVarCRDY("njets", 2, -1);
+    sr.SetVarCRDY("nbjets", 3, -1);
     sr.SetVarCRRSInvertDPhi("njets", 2, -1);
     sr.SetVarCRRSInvertDPhi("nbjets", 3, -1);
     sr.SetVarCRRSMT2SideBand("njets", 2, -1);
@@ -235,6 +265,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     fullSR.SetVar("met", 250, -1);
     fullSR.SetVarCRSL("ht", 250, 450);
     fullSR.SetVarCRSL("met", 250, -1);
+    fullSR.SetVarCRDY("ht", 250, 450);
+    fullSR.SetVarCRDY("met", 250, -1);
     fullSR.SetVarCRRSInvertDPhi("ht", 250, 450);
     fullSR.SetVarCRRSInvertDPhi("met", 250, -1);
     fullSR.SetVarCRRSMT2SideBand("ht", 250, 450);
@@ -259,6 +291,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     fullSR.SetVar("met", 250, -1);
     fullSR.SetVarCRSL("ht", 450, 575);
     fullSR.SetVarCRSL("met", 250, -1);
+    fullSR.SetVarCRDY("ht", 450, 575);
+    fullSR.SetVarCRDY("met", 250, -1);
     fullSR.SetVarCRRSInvertDPhi("ht", 450, 575);
     fullSR.SetVarCRRSInvertDPhi("met", 250, -1);
     fullSR.SetVarCRRSMT2SideBand("ht", 450, 575);
@@ -287,6 +321,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     fullSR.SetVar("met", 250, -1);
     fullSR.SetVarCRSL("ht", 575, 1000);
     fullSR.SetVarCRSL("met", 250, -1);
+    fullSR.SetVarCRDY("ht", 575, 1000);
+    fullSR.SetVarCRDY("met", 250, -1);
     fullSR.SetVarCRRSInvertDPhi("ht", 575, 1000);
     fullSR.SetVarCRRSInvertDPhi("met", 250, -1);
     fullSR.SetVarCRRSMT2SideBand("ht", 575, 1000);
@@ -315,6 +351,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     fullSR.SetVar("met", 30, -1);
     fullSR.SetVarCRSL("ht", 1000, 1500);
     fullSR.SetVarCRSL("met", 30, -1);
+    fullSR.SetVarCRDY("ht", 1000, 1500);
+    fullSR.SetVarCRDY("met", 30, -1);
     fullSR.SetVarCRRSInvertDPhi("ht", 1000, 1500);
     fullSR.SetVarCRRSInvertDPhi("met", 30, -1);
     fullSR.SetVarCRRSMT2SideBand("ht", 1000, 1500);
@@ -343,6 +381,8 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
     fullSR.SetVar("met", 30, -1);
     fullSR.SetVarCRSL("ht", 1500, -1);
     fullSR.SetVarCRSL("met", 30, -1);
+    fullSR.SetVarCRDY("ht", 1500, -1);
+    fullSR.SetVarCRDY("met", 30, -1);
     fullSR.SetVarCRRSInvertDPhi("ht", 1500, -1);
     fullSR.SetVarCRRSInvertDPhi("met", 30, -1);
     fullSR.SetVarCRRSMT2SideBand("ht", 1500, -1);
@@ -382,6 +422,14 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
   baseSR.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
   baseSR.SetVarCRSL("nlep", 1, 2);
 
+  // common selections for CRDY
+  baseSR.SetVarCRDY("mt2", 200, -1);
+  baseSR.SetVarCRDY("j1pt", 30, -1);
+  baseSR.SetVarCRDY("j2pt", 30, -1);
+  baseSR.SetVarCRDY("deltaPhiMin", 0.3, -1);
+  baseSR.SetVarCRDY("diffMetMhtOverMet", 0, 0.5);
+  baseSR.SetVarCRDY("nlep", 2, 2);
+
   baseSR.SetVarCRRSInvertDPhi("mt2", 200, -1);
   baseSR.SetVarCRRSInvertDPhi("j1pt", 30, -1);
   baseSR.SetVarCRRSInvertDPhi("j2pt", 30, -1);
@@ -416,6 +464,14 @@ std::vector<SRRS> getSignalRegionsICHEP_RS(){
   for(unsigned int i = 0; i < SRVec.size(); i++){
     for(unsigned int j = 0; j < varsCRSL.size(); j++){
       SRVec.at(i).SetVarCRSL(varsCRSL.at(j), baseSR.GetLowerBoundCRSL(varsCRSL.at(j)), baseSR.GetUpperBoundCRSL(varsCRSL.at(j)));
+    }
+  }
+
+  //add baseline selections to all CRDY regions 
+  std::vector<std::string> varsCRDY = baseSR.GetListOfVariablesCRDY();
+  for(unsigned int i = 0; i < SRVec.size(); i++){
+    for(unsigned int j = 0; j < varsCRDY.size(); j++){
+      SRVec.at(i).SetVarCRDY(varsCRDY.at(j), baseSR.GetLowerBoundCRDY(varsCRDY.at(j)), baseSR.GetUpperBoundCRDY(varsCRDY.at(j)));
     }
   }
 

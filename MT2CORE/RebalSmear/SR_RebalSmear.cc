@@ -24,6 +24,10 @@ void SRRS::SetVarCRSL(std::string var_name, float lower_bound, float upper_bound
   binsCRSL_[var_name] = std::pair<float, float>(lower_bound, upper_bound);
 }
 
+void SRRS::SetVarCRDY(std::string var_name, float lower_bound, float upper_bound){
+  binsCRDY_[var_name] = std::pair<float, float>(lower_bound, upper_bound);
+}
+
 void SRRS::SetVarCRRSInvertDPhi(std::string var_name, float lower_bound, float upper_bound){
   binsCRRSInvertDPhi_[var_name] = std::pair<float, float>(lower_bound, upper_bound);
 }
@@ -83,6 +87,26 @@ unsigned int SRRS::GetNumberOfVariablesCRSL(){
 std::vector<std::string> SRRS::GetListOfVariablesCRSL(){
   std::vector<std::string> vars;
   for(std::map<std::string, std::pair<float, float> >::const_iterator it = binsCRSL_.begin(); it != binsCRSL_.end(); ++it) {
+    vars.push_back(it->first);
+  }
+  return (vars);
+}
+
+float SRRS::GetLowerBoundCRDY(std::string var_name){
+  return (binsCRDY_.at(var_name)).first;
+}
+
+float SRRS::GetUpperBoundCRDY(std::string var_name){
+  return (binsCRDY_.at(var_name)).second;
+}
+
+unsigned int SRRS::GetNumberOfVariablesCRDY(){
+  return (binsCRDY_.size());
+}
+
+std::vector<std::string> SRRS::GetListOfVariablesCRDY(){
+  std::vector<std::string> vars;
+  for(std::map<std::string, std::pair<float, float> >::const_iterator it = binsCRDY_.begin(); it != binsCRDY_.end(); ++it) {
     vars.push_back(it->first);
   }
   return (vars);
@@ -197,6 +221,27 @@ bool SRRS::PassesSelectionCRSL(std::map<std::string, float> values){
   return true;
 }
 
+bool SRRS::PassesSelectionCRDY(std::map<std::string, float> values){
+  float ep = 0.000001;
+  if(GetNumberOfVariablesCRDY() != values.size()){
+    std::cout << "Number of variables to cut on != number of variables in CRDY region. Passed " << values.size() << ", expected " << GetNumberOfVariablesCRDY() << std::endl;
+    throw std::invalid_argument("Number of variables to cut on != number of variables in CRDY region");
+  }
+  for(std::map<std::string, float>::const_iterator it = values.begin(); it != values.end(); it++){
+    if(binsCRDY_.find(it->first) != binsCRDY_.end()){ //check that we actually have bounds set for this variable
+      float value = it->second;
+      float cut_lower = GetLowerBoundCRDY(it->first);
+      float cut_upper = GetUpperBoundCRDY(it->first);
+      if(value < cut_lower) return false;
+      if(( std::abs(cut_upper + 1.0) > ep ) && (value >= cut_upper)) return false;
+    }
+    else{
+      throw std::invalid_argument("Cut values not set for this variable");
+    }
+  }
+  return true;
+}
+
 bool SRRS::PassesSelectionCRRSInvertDPhi(std::map<std::string, float> values){
   float ep = 0.000001;
   if(GetNumberOfVariablesCRRSInvertDPhi() != values.size()){
@@ -270,6 +315,11 @@ void SRRS::RemoveVarCRSL(std::string var_name){
   else throw std::invalid_argument("Variable not added. Cannot remove!");
 }
 
+void SRRS::RemoveVarCRDY(std::string var_name){
+  if(binsCRDY_.find(var_name) != binsCRDY_.end()) binsCRDY_.erase(var_name);
+  else throw std::invalid_argument("Variable not added. Cannot remove!");
+}
+
 void SRRS::RemoveVarCRRSInvertDPhi(std::string var_name){
   if(binsCRRSInvertDPhi_.find(var_name) != binsCRRSInvertDPhi_.end()) binsCRRSInvertDPhi_.erase(var_name);
   else throw std::invalid_argument("Variable not added. Cannot remove!");
@@ -289,6 +339,7 @@ void SRRS::Clear(){
   srName_ = "";
   bins_.clear();
   binsCRSL_.clear();
+  binsCRDY_.clear();
   binsCRRSInvertDPhi_.clear();
   binsCRRSMT2SideBand_.clear();
   binsCRRSDPhiMT2_.clear();

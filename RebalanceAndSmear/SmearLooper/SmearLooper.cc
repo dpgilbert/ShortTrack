@@ -162,6 +162,18 @@ void SmearLooper::SetSignalRegions(){
     }
     plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).crslHistMap, "", 1, 0, 2);
 
+    dir = (TDirectory*)outfile_->Get(("crdy"+SRVec.at(i).GetName()).c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir(("crdy"+SRVec.at(i).GetName()).c_str());
+    } 
+    dir->cd();
+    std::vector<std::string> varsCRDY = SRVec.at(i).GetListOfVariablesCRDY();
+    for(unsigned int j = 0; j < varsCRDY.size(); j++){
+      plot1D("h_"+varsCRDY.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBoundCRDY(varsCRDY.at(j)), SRVec.at(i).crdyHistMap, "", 1, 0, 2);
+      plot1D("h_"+varsCRDY.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBoundCRDY(varsCRDY.at(j)), SRVec.at(i).crdyHistMap, "", 1, 0, 2);
+    }
+    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).crdyHistMap, "", 1, 0, 2);
+
     dir = (TDirectory*)outfile_->Get(("crRSInvertDPhi"+SRVec.at(i).GetName()).c_str());
     if (dir == 0) {
       dir = outfile_->mkdir(("crRSInvertDPhi"+SRVec.at(i).GetName()).c_str());
@@ -173,6 +185,30 @@ void SmearLooper::SetSignalRegions(){
       plot1D("h_"+varsCRRSInvertDPhi.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBoundCRRSInvertDPhi(varsCRRSInvertDPhi.at(j)), SRVec.at(i).crRSInvertDPhiHistMap, "", 1, 0, 2);
     }
     plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).crRSInvertDPhiHistMap, "", 1, 0, 2);
+
+    dir = (TDirectory*)outfile_->Get(("crRSInvertDPhiSL"+SRVec.at(i).GetName()).c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir(("crRSInvertDPhiSL"+SRVec.at(i).GetName()).c_str());
+    } 
+    dir->cd();
+    std::vector<std::string> varsCRRSInvertDPhiSL = SRVec.at(i).GetListOfVariablesCRRSInvertDPhi();
+    for(unsigned int j = 0; j < varsCRRSInvertDPhiSL.size(); j++){
+      plot1D("h_"+varsCRRSInvertDPhi.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBoundCRRSInvertDPhi(varsCRRSInvertDPhi.at(j)), SRVec.at(i).crRSInvertDPhiHistMap, "", 1, 0, 2);
+      plot1D("h_"+varsCRRSInvertDPhi.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBoundCRRSInvertDPhi(varsCRRSInvertDPhi.at(j)), SRVec.at(i).crRSInvertDPhiHistMap, "", 1, 0, 2);
+    }
+    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).crRSInvertDPhiSLHistMap, "", 1, 0, 2);
+
+    dir = (TDirectory*)outfile_->Get(("crRSInvertDPhiDY"+SRVec.at(i).GetName()).c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir(("crRSInvertDPhiDY"+SRVec.at(i).GetName()).c_str());
+    } 
+    dir->cd();
+    std::vector<std::string> varsCRRSInvertDPhiDY = SRVec.at(i).GetListOfVariablesCRRSInvertDPhi();
+    for(unsigned int j = 0; j < varsCRRSInvertDPhiDY.size(); j++){
+      plot1D("h_"+varsCRRSInvertDPhi.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBoundCRRSInvertDPhi(varsCRRSInvertDPhi.at(j)), SRVec.at(i).crRSInvertDPhiHistMap, "", 1, 0, 2);
+      plot1D("h_"+varsCRRSInvertDPhi.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBoundCRRSInvertDPhi(varsCRRSInvertDPhi.at(j)), SRVec.at(i).crRSInvertDPhiHistMap, "", 1, 0, 2);
+    }
+    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).crRSInvertDPhiDYHistMap, "", 1, 0, 2);
 
     dir = (TDirectory*)outfile_->Get(("crRSMT2SideBand"+SRVec.at(i).GetName()).c_str());
     if (dir == 0) {
@@ -186,6 +222,30 @@ void SmearLooper::SetSignalRegions(){
     }
     plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).crRSMT2SideBandHistMap, "", 1, 0, 2);
 
+    dir = (TDirectory*)outfile_->Get(("crRSMT2SideBandSL"+SRVec.at(i).GetName()).c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir(("crRSMT2SideBandSL"+SRVec.at(i).GetName()).c_str());
+    } 
+    dir->cd();
+    std::vector<std::string> varsCRRSMT2SideBandSL = SRVec.at(i).GetListOfVariablesCRRSMT2SideBand();
+    for(unsigned int j = 0; j < varsCRRSMT2SideBandSL.size(); j++){
+      plot1D("h_"+varsCRRSMT2SideBand.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBoundCRRSMT2SideBand(varsCRRSMT2SideBand.at(j)), SRVec.at(i).crRSMT2SideBandHistMap, "", 1, 0, 2);
+      plot1D("h_"+varsCRRSMT2SideBand.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBoundCRRSMT2SideBand(varsCRRSMT2SideBand.at(j)), SRVec.at(i).crRSMT2SideBandHistMap, "", 1, 0, 2);
+    }
+    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).crRSMT2SideBandSLHistMap, "", 1, 0, 2);
+
+    dir = (TDirectory*)outfile_->Get(("crRSMT2SideBandDY"+SRVec.at(i).GetName()).c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir(("crRSMT2SideBandDY"+SRVec.at(i).GetName()).c_str());
+    } 
+    dir->cd();
+    std::vector<std::string> varsCRRSMT2SideBandDY = SRVec.at(i).GetListOfVariablesCRRSMT2SideBand();
+    for(unsigned int j = 0; j < varsCRRSMT2SideBandDY.size(); j++){
+      plot1D("h_"+varsCRRSMT2SideBand.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBoundCRRSMT2SideBand(varsCRRSMT2SideBand.at(j)), SRVec.at(i).crRSMT2SideBandHistMap, "", 1, 0, 2);
+      plot1D("h_"+varsCRRSMT2SideBand.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBoundCRRSMT2SideBand(varsCRRSMT2SideBand.at(j)), SRVec.at(i).crRSMT2SideBandHistMap, "", 1, 0, 2);
+    }
+    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).crRSMT2SideBandDYHistMap, "", 1, 0, 2);
+
     dir = (TDirectory*)outfile_->Get(("crRSDPhiMT2"+SRVec.at(i).GetName()).c_str());
     if (dir == 0) {
       dir = outfile_->mkdir(("crRSDPhiMT2"+SRVec.at(i).GetName()).c_str());
@@ -197,18 +257,6 @@ void SmearLooper::SetSignalRegions(){
       plot1D("h_"+varsCRRSDPhiMT2.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBoundCRRSDPhiMT2(varsCRRSDPhiMT2.at(j)), SRVec.at(i).crRSDPhiMT2HistMap, "", 1, 0, 2);
     }
     plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).crRSDPhiMT2HistMap, "", 1, 0, 2);
-
-    dir = (TDirectory*)outfile_->Get(("crgj"+SRVec.at(i).GetName()).c_str());
-    if (dir == 0) {
-      dir = outfile_->mkdir(("crgj"+SRVec.at(i).GetName()).c_str());
-    } 
-    dir->cd();
-    for(unsigned int j = 0; j < vars.size(); j++){
-      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).crgjHistMap, "", 1, 0, 2);
-      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).crgjHistMap, "", 1, 0, 2);
-    }
-    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).crgjHistMap, "", 1, 0, 2);
-    outfile_->cd();
   }
 
   SRBase.SetName("srbase");
@@ -546,6 +594,25 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
       int prescale = 1; //FIX THIS
 
+      bool doDYplots = false;
+      bool doSLplots = false;
+
+      if(t.nLepLowMT == 1){
+          doSLplots = true;
+      }
+
+      if(t.nlep == 2){
+          bool passTrig = (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso || t.HLT_DoubleEl33);
+          if(passTrig && (t.lep_charge[0] * t.lep_charge[1] == -1)
+             && (abs(t.lep_pdgId[0]) == 13 ||  t.lep_tightId[0] > 0 )
+             && (abs(t.lep_pdgId[1]) == 13 ||  t.lep_tightId[1] > 0 )
+             && t.lep_pt[0] > 100 && t.lep_pt[1] > 30 ) {
+
+              if(abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1]) && t.zll_pt > 200 && fabs(t.zll_mass - 91.19) < 20)
+                  doDYplots = true;
+          }
+      }
+
       //---------------------
       // bookkeeping and progress report
       //---------------------
@@ -637,7 +704,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
       // note: this will double count some leptons, since reco leptons can appear as PFcands
       nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
-      if(nlepveto_ > 0) continue;
+      if(doRebalanceAndSmear_ && nlepveto_ > 0) continue;
 
       // count number of forward jets
       nJet30Eta3_ = 0;
@@ -1031,6 +1098,12 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         fillHistosCRRSInvertDPhi();
         fillHistosCRRSMT2SideBand();
         fillHistosCRRSDPhiMT2();
+        if(doSLplots){
+            fillHistosCRSL();
+        }
+        if(doDYplots){
+            fillHistosCRDY();
+        }
       }
 
       if (makeSmearBaby_)
@@ -1088,13 +1161,38 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
     }
   }
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+    if(!SRVec.at(srN).crslHistMap.empty()){
+      savePlotsDir(SRVec.at(srN).crslHistMap, outfile_, ("crsl"+SRVec.at(srN).GetName()).c_str());
+    }
+  }
+  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+    if(!SRVec.at(srN).crdyHistMap.empty()){
+      savePlotsDir(SRVec.at(srN).crdyHistMap, outfile_, ("crdy"+SRVec.at(srN).GetName()).c_str());
+    }
+  }
+  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(!SRVec.at(srN).crRSInvertDPhiHistMap.empty()){
       savePlotsDir(SRVec.at(srN).crRSInvertDPhiHistMap, outfile_, ("crRSInvertDPhi"+SRVec.at(srN).GetName()).c_str());
     }
   }
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
-    if(!SRVec.at(srN).crRSMT2SideBandHistMap.empty()){
-      savePlotsDir(SRVec.at(srN).crRSMT2SideBandHistMap, outfile_, ("crRSMT2SideBand"+SRVec.at(srN).GetName()).c_str());
+    if(!SRVec.at(srN).crRSInvertDPhiSLHistMap.empty()){
+      savePlotsDir(SRVec.at(srN).crRSInvertDPhiSLHistMap, outfile_, ("crRSInvertDPhiSL"+SRVec.at(srN).GetName()).c_str());
+    }
+  }
+  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+    if(!SRVec.at(srN).crRSInvertDPhiDYHistMap.empty()){
+      savePlotsDir(SRVec.at(srN).crRSInvertDPhiDYHistMap, outfile_, ("crRSInvertDPhiDY"+SRVec.at(srN).GetName()).c_str());
+    }
+  }
+  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+    if(!SRVec.at(srN).crRSMT2SideBandSLHistMap.empty()){
+      savePlotsDir(SRVec.at(srN).crRSMT2SideBandSLHistMap, outfile_, ("crRSMT2SideBandSL"+SRVec.at(srN).GetName()).c_str());
+    }
+  }
+  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+    if(!SRVec.at(srN).crRSMT2SideBandDYHistMap.empty()){
+      savePlotsDir(SRVec.at(srN).crRSMT2SideBandDYHistMap, outfile_, ("crRSMT2SideBandDY"+SRVec.at(srN).GetName()).c_str());
     }
   }
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
@@ -1127,7 +1225,7 @@ void SmearLooper::fillHistosSRBase() {
 
   // trigger requirement on data
   if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
-
+ 
   std::map<std::string, float> values;
   if(doRebalanceAndSmear_){
     values["deltaPhiMin"] = RS_vars_["deltaPhiMin"];
@@ -1167,6 +1265,61 @@ void SmearLooper::fillHistosSRBase() {
 
   return;
 }
+
+void SmearLooper::fillHistosCRSL() {
+
+  // trigger requirement on data
+  if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120)) return;
+
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = t.deltaPhiMin;
+  values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  values["nlep"]        = t.nLepLowMT;
+  values["j1pt"]        = t.jet1_pt;
+  values["j2pt"]        = t.jet2_pt;
+  values["mt2"]         = t.mt2;
+  values["ht"]          = t.ht;
+  values["met"]         = t.met_pt;
+  
+  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+      if(SRVec.at(srN).PassesSelectionCRSL(values)){
+          fillHistos(SRVec.at(srN).crslHistMap,    SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crsl"+SRVec.at(srN).GetName(), "");
+      }
+  }  
+  values["nlep"] = 0; // the doSLplots flag in the main loop takes care of this.
+  for(unsigned int srN = 0; srN < SRVec.size(); srN++){   
+      if(SRVec.at(srN).PassesSelectionCRRSInvertDPhi(values)) fillHistos(SRVec.at(srN).crRSInvertDPhiSLHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crRSInvertDPhiSL"+SRVec.at(srN).GetName(), "");
+      if(SRVec.at(srN).PassesSelectionCRRSMT2SideBand(values)) fillHistos(SRVec.at(srN).crRSMT2SideBandSLHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crRSMT2SideBandSL"+SRVec.at(srN).GetName(), "");
+  }
+
+  return;
+
+}
+
+void SmearLooper::fillHistosCRDY() {
+
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = t.zll_deltaPhiMin;
+  values["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
+  values["nlep"]        = 0; //dummy value, taken care of by doDYplots flag
+  values["j1pt"]        = t.jet1_pt;
+  values["j2pt"]        = t.jet2_pt;
+  values["mt2"]         = t.zll_mt2;
+  values["ht"]          = t.zll_ht;
+  values["met"]         = t.zll_met_pt;
+  
+  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+      if(SRVec.at(srN).PassesSelection(values)){
+          fillHistos(SRVec.at(srN).crdyHistMap,    SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crdy"+SRVec.at(srN).GetName(), "");
+      }
+      if(SRVec.at(srN).PassesSelectionCRRSInvertDPhi(values)) fillHistos(SRVec.at(srN).crRSInvertDPhiDYHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crRSInvertDPhiDY"+SRVec.at(srN).GetName(), "");
+      if(SRVec.at(srN).PassesSelectionCRRSMT2SideBand(values)) fillHistos(SRVec.at(srN).crRSMT2SideBandDYHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crRSMT2SideBandDY"+SRVec.at(srN).GetName(), "");
+  }
+
+  return;
+
+}
+
 
 void SmearLooper::fillHistosInclusive() {
 
