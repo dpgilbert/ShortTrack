@@ -117,7 +117,7 @@ SmearLooper::SmearLooper() :
   tailScale_(1.),
   meanShift_(0.)
 {
-
+  
   // set up signal binning
   for (int i = 0; i <= n_m1bins; ++i) {
     m1bins[i] = 375. + i*50.;
@@ -134,7 +134,7 @@ SmearLooper::~SmearLooper(){
 void SmearLooper::SetSignalRegions(){
 
   SRVec =  getSignalRegionsICHEP_RS();
-  cout << SRVec.size() << endl;
+  // cout << SRVec.size() << endl;
 
   //store histograms with cut values for all variables
   for(unsigned int i = 0; i < SRVec.size(); i++){
@@ -498,8 +498,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
   outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
 
-  const char* json_file = "jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
-  // const char* json_file = "jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";  
+  // const char* json_file = "jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  const char* json_file = "jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";  
   // const char* json_file = "";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
@@ -555,10 +555,10 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
   } 
   
   if (makeSmearBaby_) {
+    std::cout << "[SmearLooper::loop] Making baby ntuple..." << std::endl;    
     std::string baby_name = output_name;
     baby_name.replace(baby_name.end()-5,baby_name.end(),"_baby");
     MakeBabyNtuple(Form("%s.root", baby_name.c_str()));
-    std::cout << "[SmearLooper::loop] Making baby ntuple..." << std::endl;
   }
     
   // File Loop
