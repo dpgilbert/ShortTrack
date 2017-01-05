@@ -6,6 +6,7 @@ import re
 
 
 #samples = ["datav2_data_Run2016[B-H]_(HTMHT|JetHT|MET)"]
+#samples = ["datav2_data_Run2016[B-H]_(HTMHT|MET)"]
 #samples = ["datav2_data_Run2016[B-H]_JetHT"]
 #samples = ["datav2_data_Run2016[B-H]_MET"]
 samples = ["qcd_ht", "zinv_ht", "wjets_ht", "ttdl", "ttsl", "singletop", "ttw", "ttz"]
@@ -88,7 +89,13 @@ for sample in samples:
           fid.write("arguments={0} {1} {2} /hadoop/cms/store/user/{3}/smearoutput/{4}/{5}/{6}\n".format(options, "/".join(f.split("/")[:-1]), ",".join(list_of_files), username, version, suffix.strip("_"), dirname))
           fid.write("queue\n\n")
           list_of_files = []
-        
+      ## now, if there are still files left in the list, write them to config
+      if len(list_of_files):
+        fid.write("executable=wrapper.sh\n")
+        fid.write("transfer_executable=True\n")
+        fid.write("arguments={0} {1} {2} /hadoop/cms/store/user/{3}/smearoutput/{4}/{5}/{6}\n".format(options, "/".join(f.split("/")[:-1]), ",".join(list_of_files), username, version, suffix.strip("_"), dirname))
+        fid.write("queue\n\n")
+        list_of_files = []          
   is_first = False
 if not test:
     fid.close()
