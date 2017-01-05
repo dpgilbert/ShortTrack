@@ -73,21 +73,28 @@ echo "[wrapper] hostname  = " `hostname`
 echo "[wrapper] date      = " `date`
 echo "[wrapper] linux timestamp = " `date +%s`
 echo "[wrapper] checking input file with ls"
-ls -alrth ${INDIR}/${FILEID}.root
 
-# catch exit code
-if [ $? -ne 0 ]; then
-    echo "[wrapper] could not find input file, trying xrootd instead"
-    FILESHORT=${INDIR#/hadoop/cms}/${FILEID}.root
-    xrdfs xrootd.t2.ucsd.edu ls ${FILESHORT}
+IFS=','
+read -ra FILES <<< "${FILEID}"
+for file in "${FILES[@]}";
+do
+    ls -alrth ${INDIR}/${file}.root    
+
+    # catch exit code
     if [ $? -ne 0 ]; then
-	echo "[wrapper] could not find input file with xrootd either, exiting"
-	exit 1
-    else
-	echo "[wrapper] found file with xrootd, will proceed"
-	FILE="root://xrootd.t2.ucsd.edu/"${FILESHORT}
+        echo "[wrapper] could not find input file, trying xrootd instead"
+        FILESHORT=${INDIR#/hadoop/cms}/${file}.root
+        xrdfs xrootd.t2.ucsd.edu ls ${FILESHORT}
+        if [ $? -ne 0 ]; then
+	    echo "[wrapper] could not find input file with xrootd either, exiting"
+	    exit 1
+        else
+	    echo "[wrapper] found file with xrootd, will proceed"
+	    FILE="root://xrootd.t2.ucsd.edu/"${FILESHORT}
+        fi
     fi
-fi
+done
+unset IFS
 
 #
 # untar input sandbox
@@ -124,8 +131,9 @@ ls
 # clean up
 #
 
+
 echo "[wrapper] copying files"
-OUTPUT=($(ls | grep ${FILEID}))
+OUTPUT=($(ls | grep ${FILES[0]}))
 echo "[wrapper] OUTPUT = " ${OUTPUT}
 
 have_baby=0
