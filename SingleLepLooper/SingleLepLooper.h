@@ -33,6 +33,7 @@ class SingleLepLooper {
   void loop(TChain* chain, std::string output_name = "test.root");
   void fillHistos(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
   void fillLepSFWeightsFromFile();
+  float getAverageISRWeight(const int evt_id, const int var = 0);
 
  private:
 
