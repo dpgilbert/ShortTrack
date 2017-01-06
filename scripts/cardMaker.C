@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <set>
+#include <regex>
 
 #include "TROOT.h"
 #include "TLatex.h"
@@ -33,6 +34,8 @@ const bool verbose = false;
 const bool suppressZeroBins = false;
 
 const bool suppressZeroTRs = true;
+
+const bool doSuperSignalRegions = false;
 
 const float dummy_alpha = 1.; // dummy value for gmN when there are no SR events
 
@@ -104,6 +107,19 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString fullhistnameCRSL = TString(dir).ReplaceAll("sr","crsl") + "/h_mt2bins";
   TString fullhistnameCRSLScan  = fullhistnameCRSL+"_sigscan";
 
+  // check to see if this is a super signal region (20 and up)
+  int sr_number = -1;
+  std::regex sr_number_regex("[^0-9]*([0-9]+).*"); // finds an integer of any length
+  std::smatch sr_number_match;
+  if (std::regex_match(dir_str,sr_number_match, sr_number_regex)) {
+    sr_number = stoi(sr_number_match[1].str());
+    if (doSuperSignalRegions && sr_number < 20) return 0;
+    else if (!doSuperSignalRegions && sr_number >= 20) return 0;
+  }
+  else {
+    cout << "WARNING: couldn't get signal region number for region: " << dir_str << endl;
+  }
+  
   TString signame(signal);
   if (scanM1 >= 0 && scanM2 >= 0) {
     signame = Form("%s_%d_%d",signal.c_str(),scanM1,scanM2);
