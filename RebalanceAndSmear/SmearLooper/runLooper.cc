@@ -1,8 +1,21 @@
 #include <string>
 #include "TChain.h"
 #include "TString.h"
-
+#include <vector>
+#include <sstream>
 #include "SmearLooper.h"
+
+
+std::vector<std::string> split(const std::string &s, char delim)
+{
+  std::stringstream ss(s);
+  std::string item;
+  std::vector<std::string> tokens;
+  while (std::getline(ss, item, delim)) {
+    tokens.push_back(item);
+  }
+  return tokens;
+}
 
 int main(int argc, char **argv) {
 
@@ -11,11 +24,13 @@ int main(int argc, char **argv) {
     std::cout << "USAGE: runLooper <input_dir> <sample> <output_dir> <options>" << std::endl;
     return 1;
   }
-
+  
   std::string input_dir(argv[1]);
   std::string sample(argv[2]);
   std::string output_dir(argv[3]);
 
+  std::vector<std::string> samples = split(sample, ',');
+  
   int bflag = 0;
   int cflag = 0;
   int mflag = 0;
@@ -71,11 +86,13 @@ int main(int argc, char **argv) {
   TChain *ch = new TChain("mt2");
   
   // TString infile = Form("%s/%s*.root",input_dir.c_str(),sample.c_str());
-  TString infile = Form("%s/%s.root",input_dir.c_str(),sample.c_str());
-  ch->Add(infile);
-  if (ch->GetEntries() == 0) {
-    std::cout << "ERROR: no entries in chain. filename was: " << infile << std::endl;
-    return 2;
+  for (unsigned int idx = 0; idx < samples.size(); idx++) {
+    TString infile = Form("%s/%s.root",input_dir.c_str(),samples.at(idx).c_str());
+    ch->Add(infile);
+    if (ch->GetEntries() == 0) {
+      std::cout << "ERROR: no entries in chain. filename was: " << infile << std::endl;
+      return 2;
+    }
   }
   
   SmearLooper *looper = new SmearLooper();
@@ -85,19 +102,6 @@ int main(int argc, char **argv) {
   if (rflag) looper->DoRebalanceAndSmear();
   if (tflag) looper->SetTailScale(tail_scale);
   if (wflag) looper->ApplyWeights();
-  looper->loop(ch, output_dir + "/" + sample + ".root", max_events);
+  looper->loop(ch, output_dir + "/" + samples.at(0) + ".root", max_events);
   return 0;
-
-  // //RS batch submit
-  // TChain *ch = new TChain("mt2"); 
- 
-  // ch->Add("input_mt2_baby.root");
-  // if (ch->GetEntries() == 0) {
-  //   return 2;
-  // }
-
-  // SmearLooper *looper = new SmearLooper();
-  // looper->loop(ch, "output.root");
-  // return 0;
-
 }

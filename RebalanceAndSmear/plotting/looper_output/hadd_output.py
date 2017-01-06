@@ -8,7 +8,7 @@ import os
 import sys
 import glob
 
-test=False
+test=True
 
 indir = sys.argv[1]
 basedir = indir.strip("/").split("/")[-1]
@@ -33,7 +33,7 @@ while idir < len(list_of_subdirs):
       print "Appending directory {0}".format(path)
     list_of_subdirs.append(path) if os.path.isdir(path) else list_of_files.append(path)            
   if len(list_of_files):
-    outpath = os.path.join(basedir,list_of_subdirs[idir].split(basedir)[-1].strip("/"))                                       
+    outpath = os.path.join(basedir,list_of_subdirs[idir].split("/"+basedir)[-1].strip("/"))                                       
     try:
       print "Making directory: {0}".format(outpath)
       if not test:

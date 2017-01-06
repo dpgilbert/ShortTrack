@@ -41,7 +41,7 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
 
   TH1::SetDefaultSumw2();
   
-  TString suffix = "_36p5fb";
+  TString suffix = "_36p5fb_nologx";
   
   TChain* t_ht = new TChain("mt2");
   TChain* t_met = new TChain("mt2");
@@ -67,9 +67,17 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   //  TCut trigs_em = "HLT_MuX_Ele12 || HLT_Mu8_EleX || HLT_Mu30_Ele30_NonIso || HLT_Mu33_Ele33_NonIso";
   TCut trigs_em = "HLT_MuX_Ele12 || HLT_Mu8_EleX || HLT_Mu30_Ele30_NonIso || HLT_Mu33_Ele33_NonIso || HLT_SingleMu_NonIso || HLT_Photon165_HE10";
   
-  const int nbins = 12;
-  const Double_t bins[nbins+1] = {20, 25, 30, 35, 40, 
-				  50, 60, 80, 100, 120, 150, 200, 300};
+  // const int nbins_lead = 12;
+  // const Double_t bins_lead[nbins+1] = {20, 25, 30, 35, 40, 
+  // 				       50, 60, 80, 100, 120, 150, 200, 300};
+  // const int nbins_subl = 12;
+  // const Double_t bins_subl[nbins+1] = {20, 25, 30, 35, 40, 
+  // 				       50, 60, 80, 100, 120, 150, 200, 300};
+  const int nbins_lead = 2;
+  const Double_t bins_lead[nbins_lead+1] = {100, 180, 300};
+  
+  const int nbins_subl = 4;
+  const Double_t bins_subl[nbins_subl+1] = {30, 35, 100, 180, 300};
   
   // TH1D* h_ee_leadpt_denom_ht = new TH1D("h_ee_leadpt_denom_ht",";lead p_{T} [GeV]",nbins, bins);
   // TH1D* h_ee_leadpt_num_ht = (TH1D*) h_ee_leadpt_denom_ht->Clone("h_ee_leadpt_num_ht");
@@ -80,7 +88,7 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   // TH1D* h_ee_sublpt_denom_met = (TH1D*) h_ee_leadpt_denom_ht->Clone("h_ee_sublpt_denom_met");
   // TH1D* h_ee_sublpt_num_met = (TH1D*) h_ee_leadpt_denom_ht->Clone("h_ee_sublpt_num_met");
 
-  TH2D* h_ee_pt_2d_denom_ht = new TH2D("h_ee_pt_2d_denom_ht",";lead p_{T} [GeV]; subl p_{T} [GeV]",nbins, bins,nbins, bins);
+  TH2D* h_ee_pt_2d_denom_ht = new TH2D("h_ee_pt_2d_denom_ht",";lead p_{T} [GeV]; subl p_{T} [GeV]",nbins_lead, bins_lead,nbins_subl, bins_subl);
   TH2D* h_ee_pt_2d_num_ht = (TH2D*) h_ee_pt_2d_denom_ht->Clone("h_ee_pt_2d_num_ht");
   TH2D* h_ee_pt_2d_denom_met = (TH2D*) h_ee_pt_2d_denom_ht->Clone("h_ee_pt_2d_denom_met");
   TH2D* h_ee_pt_2d_num_met = (TH2D*) h_ee_pt_2d_denom_ht->Clone("h_ee_pt_2d_num_met");
@@ -158,7 +166,7 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   t_met->Draw("lep_pt[1]:lep_pt[0]>>h_ee_pt_2d_num_met",ee+trigs_met+"met_pt > 250."+trigs_ee);
 
   TCanvas* c_ee_2d_ht = new TCanvas("c_ee_2d_ht","c_ee_2d_ht");
-  c_ee_2d_ht->SetLogx();
+  //  c_ee_2d_ht->SetLogx();
   c_ee_2d_ht->SetLogy();
   c_ee_2d_ht->cd();
 
@@ -167,7 +175,7 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   h_ee_pt_2d_eff_ht->GetXaxis()->SetMoreLogLabels();
   h_ee_pt_2d_eff_ht->GetYaxis()->SetMoreLogLabels();
   h_ee_pt_2d_eff_ht->GetYaxis()->SetTitleOffset(1.0);
-  h_ee_pt_2d_eff_ht->Draw("col text");
+  h_ee_pt_2d_eff_ht->Draw("col texte");
   
   CMS_lumi( c_ee_2d_ht, iPeriod, iPos );
   c_ee_2d_ht->SaveAs(Form("trigeff_dilep_ee_2d_ht%s.pdf",suffix.Data()));
@@ -202,7 +210,7 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   t_met->Draw("lep_pt[1]:lep_pt[0]>>h_mm_pt_2d_num_met",mm+trigs_met+"met_pt > 250."+trigs_mm);
 
   TCanvas* c_mm_2d_ht = new TCanvas("c_mm_2d_ht","c_mm_2d_ht");
-  c_mm_2d_ht->SetLogx();
+  //  c_mm_2d_ht->SetLogx();
   c_mm_2d_ht->SetLogy();
   c_mm_2d_ht->cd();
 
@@ -211,7 +219,7 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   h_mm_pt_2d_eff_ht->GetXaxis()->SetMoreLogLabels();
   h_mm_pt_2d_eff_ht->GetYaxis()->SetMoreLogLabels();
   h_mm_pt_2d_eff_ht->GetYaxis()->SetTitleOffset(1.0);
-  h_mm_pt_2d_eff_ht->Draw("col text");
+  h_mm_pt_2d_eff_ht->Draw("col texte");
   
   CMS_lumi( c_mm_2d_ht, iPeriod, iPos );
   c_mm_2d_ht->SaveAs(Form("trigeff_dilep_mm_2d_ht%s.pdf",suffix.Data()));
@@ -245,7 +253,7 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   t_met->Draw("lep_pt[1]:lep_pt[0]>>h_em_pt_2d_num_met",em+trigs_met+"met_pt > 250."+trigs_em);
 
   TCanvas* c_em_2d_ht = new TCanvas("c_em_2d_ht","c_em_2d_ht");
-  c_em_2d_ht->SetLogx();
+  //  c_em_2d_ht->SetLogx();
   c_em_2d_ht->SetLogy();
   c_em_2d_ht->cd();
 
@@ -254,7 +262,7 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   h_em_pt_2d_eff_ht->GetXaxis()->SetMoreLogLabels();
   h_em_pt_2d_eff_ht->GetYaxis()->SetMoreLogLabels();
   h_em_pt_2d_eff_ht->GetYaxis()->SetTitleOffset(1.0);
-  h_em_pt_2d_eff_ht->Draw("col text");
+  h_em_pt_2d_eff_ht->Draw("col texte");
   
   CMS_lumi( c_em_2d_ht, iPeriod, iPos );
   c_em_2d_ht->SaveAs(Form("trigeff_dilep_em_2d_ht%s.pdf",suffix.Data()));

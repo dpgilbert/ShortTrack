@@ -37,11 +37,13 @@ bool applyJSON = true;
 // veto on jets with pt > 30, |eta| > 3.0
 bool doHFJetVeto = false;
 // turn on to apply btag sf to central value
-bool applyBtagSF = true;
+bool applyBtagSF = false;
 // turn on to apply lepton sf to central value - take from babies
-bool applyLeptonSFfromBabies = false;
+bool applyLeptonSFfromBabies = true;
 // turn on to apply lepton sf to central value - reread from files
-bool applyLeptonSFfromFiles = true;
+bool applyLeptonSFfromFiles = false;
+// use 2016 ICHEP ISR weights based on nisrMatch, signal and ttbar only
+bool applyISRWeights = true;
 // turn on to enable plots with systematic variations applied. will only do variations for applied weights
 bool doSystVariationPlots = true;
 
@@ -149,7 +151,8 @@ void SingleLepLooper::loop(TChain* chain, std::string output_name){
 
   outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
 
-  const char* json_file = "../babymaker/jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  // full 2016 dataset json, 36.26/fb:
+  const char* json_file = "../babymaker/jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -251,8 +254,8 @@ void SingleLepLooper::loop(TChain* chain, std::string output_name){
       // basic single lepton selection: vertex, 1 lepton, single lep trigger
       if (t.nVert == 0) continue;
       if (t.nlep < 1) continue;
-      if (t.isData && (!t.HLT_PFMETNoMu100_PFMHTNoMu100 && !t.HLT_PFMET100_PFMHT100)) continue;
-      //if (t.isData && (!t.HLT_SingleEl && !t.HLT_SingleEl_NonIso && !t.HLT_SingleMu && !t.HLT_SingleMu_NonIso)) continue;
+      //      if (t.isData && (!t.HLT_PFMETNoMu100_PFMHTNoMu100 && !t.HLT_PFMET100_PFMHT100)) continue;
+      if (t.isData && (!t.HLT_SingleEl && !t.HLT_SingleEl_NonIso && !t.HLT_SingleMu && !t.HLT_SingleMu_NonIso)) continue;
       //if (!t.HLT_SingleEl && !t.HLT_SingleMu) continue;
 
       // remove low pt QCD samples 
@@ -262,7 +265,7 @@ void SingleLepLooper::loop(TChain* chain, std::string output_name){
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      const float lumi = 12.9;
+      const float lumi = 36.46;
       evtweight_ = 1.;
 
       // apply relevant weights to MC
@@ -290,6 +293,10 @@ void SingleLepLooper::loop(TChain* chain, std::string output_name){
 	else if (applyLeptonSFfromBabies) {
 	  evtweight_ *= t.weight_lepsf;
 	}
+	if (applyISRWeights && t.evt_id >= 301 && t.evt_id <= 303) {
+	  float avgweight_isr = getAverageISRWeight(t.evt_id, 0);
+	  evtweight_ *= t.weight_isr / avgweight_isr;
+	}
       } // !isData
 
       // count number of forward jets
@@ -308,16 +315,16 @@ void SingleLepLooper::loop(TChain* chain, std::string output_name){
       if (t.lep_pt[0] < 25.) continue; // pt 25
 
       // flavor specific cuts
-      //      bool pass_electrons = bool( abs(t.lep_pdgId[0]) == 11 && t.lep_tightId[0] > 2 && t.lep_relIso03[0] < 0.1 && t.lep_relIso03[0] * t.lep_pt[0] < 5. && (fabs(t.lep_eta[0]) < 1.4 || fabs(t.lep_eta[0]) > 1.6) && fabs(t.lep_eta[0]) < 2.1 );
-      bool pass_electrons = bool( abs(t.lep_pdgId[0]) == 11 && t.lep_tightId[0] > 2 && t.lep_miniRelIso[0] < 0.1 );
+      bool pass_electrons = bool( abs(t.lep_pdgId[0]) == 11 && t.lep_tightId[0] > 2 && t.lep_relIso03[0] < 0.1 && t.lep_relIso03[0] * t.lep_pt[0] < 5. && (fabs(t.lep_eta[0]) < 1.4 || fabs(t.lep_eta[0]) > 1.6) && fabs(t.lep_eta[0]) < 2.1 );
+      //bool pass_electrons = bool( abs(t.lep_pdgId[0]) == 11 && t.lep_tightId[0] > 2 && t.lep_miniRelIso[0] < 0.1 );
       bool is_eb = bool(fabs(t.lep_eta[0]) < 1.479);
     
-      bool pass_muons = bool(abs(t.lep_pdgId[0]) == 13 && t.lep_tightId[0] > 0 && t.lep_miniRelIso[0] < 0.2);
-      //      bool pass_muons = bool(abs(t.lep_pdgId[0]) == 13 && t.lep_tightId[0] > 0 && t.lep_miniRelIso[0] < 0.2 && t.lep_relIso03[0] * t.lep_pt[0] < 4.);
+      //bool pass_muons = bool(abs(t.lep_pdgId[0]) == 13 && t.lep_tightId[0] > 0 && t.lep_miniRelIso[0] < 0.2);
+      bool pass_muons = bool(abs(t.lep_pdgId[0]) == 13 && t.lep_tightId[0] > 0 && t.lep_miniRelIso[0] < 0.2 && t.lep_relIso03[0] * t.lep_pt[0] < 4.);
 
       if (!pass_electrons && !pass_muons) continue;
       float mt = MT(t.lep_pt[0],t.lep_phi[0],t.met_pt,t.met_phi);
-      //      if (mt > 100.) continue;
+      if (mt > 100.) continue;
 
       fillHistos(CRSLNoCut.crslHistMap,"crslnocut");
       if (pass_electrons) {
@@ -645,3 +652,25 @@ void SingleLepLooper::fillLepSFWeightsFromFile() {
   
   return;
 }
+
+//_______________________________________
+float SingleLepLooper::getAverageISRWeight(const int evt_id, const int var) {
+
+  // madgraph ttsl, from RunIISpring16MiniAODv2
+  if (evt_id == 301 || evt_id == 302) {
+    if (var == 0) return 0.910; // nominal
+    else if (var == 1) return 0.955; // UP
+    else if (var == -1) return 0.865; // DN
+  }
+  // madgraph ttdl, from RunIISpring16MiniAODv2
+  else if (evt_id == 303) {
+    if (var == 0) return 0.897; // nominal
+    else if (var == 1) return 0.948; // UP
+    else if (var == -1) return 0.845; // DN
+  }
+
+  std::cout << "WARNING: MT2Looper::getAverageISRWeight: didn't recognize either evt_id: " << evt_id
+	    << " or variation: " << var << std::endl;
+  return 1.;
+}
+
