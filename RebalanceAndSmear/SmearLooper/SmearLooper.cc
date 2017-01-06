@@ -657,10 +657,10 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
       if (doRebalanceAndSmear_ && t.njet < 2) continue;
       if (!doRebalanceAndSmear_){
         if(t.nJet30 < 2) continue;
-        if(t.ht < 250.0) continue;
-        if(t.ht < 1000.0 && t.met_pt < 30.0) continue;
-        if(t.ht >= 1000.0 && t.met_pt < 30.0) continue;
-        if(t.mt2 < 50) continue;
+        if(t.ht < 250.0 && (t.nlep!=2 || t.zll_ht < 250)) continue;
+        if(t.ht < 1000.0 && t.met_pt < 30.0 && (t.nlep!=2 || (t.zll_ht<1000 && t.zll_met_pt<30))) continue;
+        if(t.ht >= 1000.0 && t.met_pt < 30.0 && (t.nlep!=2 || (t.zll_ht>=1000 && t.zll_met_pt<30))) continue;
+        if(t.mt2 < 50 && (t.nlep!=2 || t.zll_mt2<50)) continue;
         //if((t.diffMetMht/t.met_pt) > 0.5) continue;
         //if(t.deltaPhiMin < 0.3) continue;
       }
@@ -1314,6 +1314,8 @@ void SmearLooper::fillHistosCRDY() {
   
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(SRVec.at(srN).PassesSelection(values)){
+          // if(SRVec.at(srN).GetName()=="1H")
+          //     cout << t.run << ":" << t.lumi << ":" << t.evt << endl;
           fillHistos(SRVec.at(srN).crdyHistMap,    SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crdy"+SRVec.at(srN).GetName(), "");
       }
       if(SRVec.at(srN).PassesSelectionCRRSInvertDPhi(values)) fillHistos(SRVec.at(srN).crRSInvertDPhiDYHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crRSInvertDPhiDY"+SRVec.at(srN).GetName(), "");
