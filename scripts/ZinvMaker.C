@@ -79,20 +79,20 @@ int findLastMT2Hardcoded(TString srname){
   else if (srname == "9UH") return 400;
   else if (srname =="10UH") return 400;
   else if (srname =="11UH") return 400;
-//
-//  else if (srname == "20") return 500;
-//  else if (srname == "21") return 500;
-//  else if (srname == "22") return 500;
-//  else if (srname == "23") return 500;
-//  else if (srname == "24") return 500;
-//  else if (srname == "25") return 500;
-//  else if (srname == "26") return 500;
-//  else if (srname == "27") return 500;
-//  else if (srname == "28") return 500;
-//  else if (srname == "29") return 500;
-//  else if (srname == "30") return 500;
-//  else if (srname == "31") return 500;
-//
+
+  else if (srname == "20") return 500;
+  else if (srname == "21") return 600;
+  else if (srname == "22") return 500;
+  else if (srname == "23") return 400;
+  else if (srname == "24") return 500;
+  else if (srname == "25") return 400;
+  else if (srname == "26") return 600;
+  else if (srname == "27") return 400;
+  else if (srname == "28") return 500;
+  else if (srname == "29") return 400;
+  else if (srname == "30") return 500;
+  else if (srname == "31") return 400;
+
   else return -1;
 
 }
