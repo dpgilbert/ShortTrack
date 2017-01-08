@@ -22,6 +22,82 @@ float rSFOF = 1.12;
 float rSFOFerr = 0.15;
 bool verbose = true;
 
+int findLastMT2Hardcoded(TString srname){ 
+
+  if (srname == "1VL")      return 400;
+  else if (srname == "2VL") return 400; 
+  else if (srname == "3VL") return 400;
+  else if (srname =="12VL") return 300;
+  else if (srname =="13VL") return 300;
+  else if (srname =="14VL") return 300;
+  else if (srname =="15VL") return 400;
+
+  else if (srname == "1L") return 400;
+  else if (srname == "2L") return 400;
+  else if (srname == "3L") return 400;
+  else if (srname == "4L") return 400;
+  else if (srname == "5L") return 400;
+  else if (srname == "6L") return 400;
+  else if (srname == "7L") return 200;
+  else if (srname == "8L") return 200;
+  else if (srname == "9L") return 200;
+  else if (srname =="10L") return 500;
+  else if (srname =="11L") return 200;
+
+  else if (srname == "1M") return 600;
+  else if (srname == "2M") return 600;
+  else if (srname == "3M") return 600;
+  else if (srname == "4M") return 400;
+  else if (srname == "5M") return 400;
+  else if (srname == "6M") return 400;
+  else if (srname == "7M") return 200;
+  else if (srname == "8M") return 200;
+  else if (srname == "9M") return 200;
+  else if (srname =="10M") return 600;
+  else if (srname =="11M") return 200;
+
+  else if (srname == "1H") return 400;
+  else if (srname == "2H") return 400;
+  else if (srname == "3H") return 400;
+  else if (srname == "4H") return 400;
+  else if (srname == "5H") return 400;
+  else if (srname == "6H") return 400;
+  else if (srname == "7H") return 200;
+  else if (srname == "8H") return 200;
+  else if (srname == "9H") return 200;
+  else if (srname =="10H") return 400;
+  else if (srname =="11H") return 200;
+
+  else if (srname == "1UH") return 400;
+  else if (srname == "2UH") return 400;
+  else if (srname == "3UH") return 400;
+  else if (srname == "4UH") return 400;
+  else if (srname == "5UH") return 400;
+  else if (srname == "6UH") return 400;
+  else if (srname == "7UH") return 400;
+  else if (srname == "8UH") return 400;
+  else if (srname == "9UH") return 400;
+  else if (srname =="10UH") return 400;
+  else if (srname =="11UH") return 400;
+//
+//  else if (srname == "20") return 500;
+//  else if (srname == "21") return 500;
+//  else if (srname == "22") return 500;
+//  else if (srname == "23") return 500;
+//  else if (srname == "24") return 500;
+//  else if (srname == "25") return 500;
+//  else if (srname == "26") return 500;
+//  else if (srname == "27") return 500;
+//  else if (srname == "28") return 500;
+//  else if (srname == "29") return 500;
+//  else if (srname == "30") return 500;
+//  else if (srname == "31") return 500;
+//
+  else return -1;
+
+}
+
+
 int purityRandNorm(TH1D* h_template, TString name , TFile * fData, TFile * fZinv, TFile * fDY, int & lastmt2val_hybrid) {
 
   //cout<<"purityRandNorm for template "<<name<<endl;
@@ -97,7 +173,7 @@ int purityRandNorm(TH1D* h_template, TString name , TFile * fData, TFile * fZinv
 // New function: takes as input a blank histogram with the right binning, then turns it to a template.
 // We used to first make a global hybrid template, then rebin it to match the toporegion
 // Instead here we first rebin the golbal template to match the toporegion, and only afterwards we hybridize it
-int makeHybridTemplate(TH1D* h_template, TString name , TFile * fData, TFile * fZinv, TFile * fDY, int & lastmt2val_hybrid) {
+int makeHybridTemplate(TString srname, TH1D* h_template, TString name , TFile * fData, TFile * fZinv, TFile * fDY, int & lastmt2val_hybrid) {
 
   //cout<<"purityRandNorm for template "<<name<<endl;
   //h_template->Print("all");
@@ -130,14 +206,27 @@ int makeHybridTemplate(TH1D* h_template, TString name , TFile * fData, TFile * f
   TH1D* hZinv_Rebin = (TH1D*) hZinv->Rebin(nTopoRegionBins, "hZinv_Rebin", TopoRegionBins);
   if (hOF) h_RebinnedTemplate->Add(hOF_Rebin, -1*rSFOF);
 
-  // find the last bin
-  for ( int ibin = hDY_Rebin->GetNbinsX()+1; ibin >= 1; --ibin ) {
-    if (hDY_Rebin->Integral(ibin,-1) < hybrid_nevent_threshold) continue;
-    lastbin_hybrid = ibin;
-    lastmt2val_hybrid = hDY_Rebin->GetBinLowEdge(ibin);
+
+
+  // find the last bin (hardcoded)
+  // for every topological region, just hardcode lastbin_hybrid and lastmt2val_hybrid
+  lastmt2val_hybrid = findLastMT2Hardcoded(srname);
+  if (lastmt2val_hybrid>0) lastbin_hybrid = hDY_Rebin->GetXaxis()->FindBin(lastmt2val_hybrid+1);
+
+  // find the last bin (flexible)
+  if (lastmt2val_hybrid == -1) {
+    cout<<"Could not find hardcoded last bin for this region. Counting "<<hybrid_nevent_threshold<<" MC events"<<endl;
+    for ( int ibin = hDY_Rebin->GetNbinsX()+1; ibin >= 1; --ibin ) {
+      //cout<<hDY_Rebin->Integral(ibin,-1)<<endl;
+      if (hDY_Rebin->Integral(ibin,-1) < hybrid_nevent_threshold) continue;
+      lastbin_hybrid = ibin;
+      lastmt2val_hybrid = hDY_Rebin->GetBinLowEdge(ibin);
     break;
+    }
   }
-  //if (verbose) cout<<lastbin_hybrid<<" "<<lastmt2val_hybrid<<endl;
+
+  if (verbose) cout<<lastbin_hybrid<<" "<<lastmt2val_hybrid<<endl;
+  //if (verbose) hDY->Print("all");
   //if (verbose) hDY_Rebin->Print("all");
   //if (verbose) hZinv_Rebin->Print("all");
   //if (verbose) h_RebinnedTemplate->Print("all");
@@ -422,8 +511,9 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 //  int lastbin_UH    = purityRandNorm(h_TemplateUH, "crdybaseUH/h_mt2bins", fData, fZinv, fDY, lastmt2_UH);
 
 
-  
   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+    
+    TString srname = dirs.at(idir);
     TString directory = "sr"+dirs.at(idir);
     TString directoryDY = "crdy"+dirs.at(idir);
 
@@ -460,7 +550,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 
     int lastbin_hybrid = 1;
     int lastmt2val_hybrid = 200;
-    int ht_LOW = 0, ht_HI = 0, njets_LOW = 0, njets_HI = 0;
+    int ht_LOW = 0, ht_HI = 0, njets_LOW = 0, njets_HI = 0, nbjets_LOW = 0, nbjets_HI = 0;
     TH1D* h_MT2Template = (TH1D*) hZinv->Clone("h_MT2Template");  
     TString inclusiveTemplateName = "";
   
@@ -476,27 +566,50 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       TH1D* h_njets_HI  = (TH1D*) fZinv->Get(directory+"/h_njets_HI");
       if (h_njets_LOW) njets_LOW = h_njets_LOW->GetBinContent(1);
       if (h_njets_HI)  njets_HI = h_njets_HI->GetBinContent(1);
+      TH1D* h_nbjets_LOW = (TH1D*) fZinv->Get(directory+"/h_nbjets_LOW");
+      TH1D* h_nbjets_HI  = (TH1D*) fZinv->Get(directory+"/h_nbjets_HI");
+      if (h_nbjets_LOW) nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
+      if (h_nbjets_HI)  nbjets_HI = h_nbjets_HI->GetBinContent(1);
       
       //Determine which inclusive template to use. If none works, this reverts to HybridSimple, taking template from its own TopoRegion 
-      if (ht_LOW == 250) {
-	if (njets_LOW == 2 && njets_HI==4) inclusiveTemplateName = "crdybaseVL/h_mt2bins23J"; 
+      // Start from the Aggregate Regions (hardcoded, since they can partially overlap with the standard regions)
+      if (srname == "20") inclusiveTemplateName = "crdy20/h_mt2bins";  // self (2j, HT1000)
+      else if (srname == "21") inclusiveTemplateName = "crdy21/h_mt2bins"; // self (2j, HT1500)
+      else if (srname == "22") inclusiveTemplateName = "crdy22/h_mt2bins"; // self (4j, HT1000)
+      else if (srname == "23") inclusiveTemplateName = "crdy21/h_mt2bins"; // from 21 
+      else if (srname == "24") inclusiveTemplateName = "crdy24/h_mt2bins"; // self (7J, HT1000)
+      else if (srname == "25") inclusiveTemplateName = "crdy21/h_mt2bins"; // from 21
+      else if (srname == "26") inclusiveTemplateName = "crdy20/h_mt2bins"; // from 20
+      else if (srname == "27") inclusiveTemplateName = "crdy21/h_mt2bins"; // from 21
+      //      else if (srname == "28") inclusiveTemplateName = "crdy20/h_mt2bins3J"; // need a 3J histogram within SR20
+      else if (srname == "28") inclusiveTemplateName = "crdy20/h_mt2bins"; // test
+      else if (srname == "29") inclusiveTemplateName = "crdy21/h_mt2bins"; // from 21
+      else if (srname == "30") inclusiveTemplateName = "crdy24/h_mt2bins"; // from 24
+      else if (srname == "31") inclusiveTemplateName = "crdy21/h_mt2bins"; // from 21
+      // Now the standard regions
+      else if (ht_LOW == 250) {
+	if (njets_LOW == 2 && nbjets_LOW==3) inclusiveTemplateName = "crdybaseVL/h_mt2bins3J"; 
+	else if (njets_LOW == 2 && njets_HI==4) inclusiveTemplateName = "crdybaseVL/h_mt2bins23J"; 
 	else if (njets_LOW == 2)  inclusiveTemplateName = "crdybaseVL/h_mt2bins"; 
 	else if (njets_LOW == 4)  inclusiveTemplateName = "crdybaseVL/h_mt2bins4J"; 
       }
       else if (ht_LOW == 450) {
-	if (njets_LOW == 2 && njets_HI==7)  inclusiveTemplateName = "crdybaseL/h_mt2bins26J"; 
+	if (njets_LOW == 2 && nbjets_LOW==3) inclusiveTemplateName = "crdybaseL/h_mt2bins36J"; 
+	else if (njets_LOW == 2 && njets_HI==7)  inclusiveTemplateName = "crdybaseL/h_mt2bins26J"; 
 	else if (njets_LOW == 2)  inclusiveTemplateName = "crdybaseL/h_mt2bins23J"; 
 	else if (njets_LOW == 4)  inclusiveTemplateName = "crdybaseL/h_mt2bins46J"; 
 	else if (njets_LOW == 7)  inclusiveTemplateName = "crdybaseL/h_mt2bins7J"; 
       }
       else if (ht_LOW == 575) {
-	if (njets_LOW == 2 && njets_HI==7) inclusiveTemplateName = "crdybaseM/h_mt2bins26J"; 
+	if (njets_LOW == 2 && nbjets_LOW==3) inclusiveTemplateName = "crdybaseM/h_mt2bins36J"; 
+	else if (njets_LOW == 2 && njets_HI==7) inclusiveTemplateName = "crdybaseM/h_mt2bins26J"; 
 	else if (njets_LOW == 2)  inclusiveTemplateName = "crdybaseM/h_mt2bins23J"; 
 	else if (njets_LOW == 4)  inclusiveTemplateName = "crdybaseM/h_mt2bins46J"; 
 	else if (njets_LOW == 7)  inclusiveTemplateName = "crdybaseM/h_mt2bins7J"; 
       }
       else if (ht_LOW == 1000) {
-	if (njets_LOW == 2 && njets_HI==7)  inclusiveTemplateName = "crdybaseH/h_mt2bins26J"; 
+	if (njets_LOW == 2 && nbjets_LOW==3) inclusiveTemplateName = "crdybaseH/h_mt2bins36J"; 
+	else if (njets_LOW == 2 && njets_HI==7)  inclusiveTemplateName = "crdybaseH/h_mt2bins26J"; 
 	else if (njets_LOW == 2)  inclusiveTemplateName = "crdybaseH/h_mt2bins23J";
 	else if (njets_LOW == 4)  inclusiveTemplateName = "crdybaseH/h_mt2bins46J";
 	else if (njets_LOW == 7)  inclusiveTemplateName = "crdybaseH/h_mt2bins7J";
@@ -511,7 +624,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       else {
 	cout<< "Using inclusive template "<<inclusiveTemplateName<<" for region: HT "<<ht_LOW<<"-"<<ht_HI<<" and NJ "<<njets_LOW<<"-"<<njets_HI<<endl; 
 	// Get the template
-	lastbin_hybrid = makeHybridTemplate(h_MT2Template, inclusiveTemplateName , fData, fZinv, fDY, lastmt2val_hybrid);
+	lastbin_hybrid = makeHybridTemplate(srname, h_MT2Template, inclusiveTemplateName , fData, fZinv, fDY, lastmt2val_hybrid);
 	cout<<"lastbin_hybrid "<<lastbin_hybrid<<" and lastmt2val_hybrid "<<lastmt2val_hybrid<<endl;
 	h_MT2Template->Print("all");
       }
