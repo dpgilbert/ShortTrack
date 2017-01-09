@@ -20,10 +20,10 @@ for SAMPLE in ${Samples[@]};
   nohup ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR} >& ${LOGDIR}/log_${SAMPLE}.txt &
 done
 
-#most recent run2016H
+#except most recent run2016H
 INDIR=/nfs-6/userdata/mt2/rphi_skim_V00-08-12_json_271036-284044_23Sep2016ReReco_36p26fb 
 
-declare -a Samples=(data_Run2016B.root data_Run2016C.root data_Run2016D.root data_Run2016E.root data_Run2016F.root data_Run2016G.root)
+declare -a Samples=(data_Run2016B data_Run2016C data_Run2016D data_Run2016E data_Run2016F data_Run2016G)
 
 for SAMPLE in ${Samples[@]};
   do echo ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR}

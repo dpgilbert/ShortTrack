@@ -58,7 +58,7 @@ QCDLooper::~QCDLooper(){
 //_______________________________________
 void QCDLooper::SetSignalRegions(){
 
-    string HTnames[5] = {"ht250to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf"};
+  string HTnames[6] = {"ht250to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf","ht1000toInf"};
     double HTcuts[6] = {250,450,575,1000,1500,-1};
     for(unsigned int i=0; i<5; i++){
         SR sr;
@@ -78,7 +78,27 @@ void QCDLooper::SetSignalRegions(){
         SRVec_fj.push_back(sr);
         outfile_->mkdir(sr.GetName().c_str());
     }
+    //
+    // now we have to add an extra ht region for the SSRs
+    //
+    SR sr;
+    sr.SetName("rphi_"+HTnames[5]);
+    sr.SetVar("ht",1000,-1);
+    sr.SetVar("njets",2,-1);
+    sr.SetVar("mt2",50,-1);
+    sr.SetVar("deltaPhiMin",0,-1);
+    SRVec_rphi.push_back(sr);
+    outfile_->mkdir(sr.GetName().c_str());
 
+    sr.SetName("fj_"+HTnames[5]);
+    sr.SetVar("ht",1000,-1);
+    sr.SetVar("njets",2,-1);
+    sr.SetVar("mt2",100,200);
+    sr.SetVar("deltaPhiMin",0,0.3);
+    SRVec_fj.push_back(sr);
+    outfile_->mkdir(sr.GetName().c_str());
+    
+    
     string NJnames[6] = {"j2to3","j4to6","j7toInf", "j2to6", "j4toInf", "j2toInf"};
     int NJcuts[4] = {2,4,7,-1};
     for(unsigned int i=0; i<6; i++){
@@ -238,9 +258,9 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
       // fill histograms
       //---------------------------
       std::map<std::string, float> values;
-      values["njets"]        = t.nJet30;
-      values["ht"]         = t.ht;
-      values["mt2"] = t.mt2;
+      values["njets"]       = t.nJet30;
+      values["ht"]          = t.ht;
+      values["mt2"]         = t.mt2;
       values["deltaPhiMin"] = t.deltaPhiMin;
       for(unsigned int i=0; i<SRVec_rphi.size(); i++){
         if(SRVec_rphi.at(i).PassesSelection(values))
@@ -372,6 +392,9 @@ double QCDLooper::getTriggerPrescale(std::string dirname) {
       return (t.HLT_PFHT900 || t.HLT_PFJet450)==0 ? -1 : 1;
     }
     if(strstr(dirname.c_str(),"ht1500toInf") != NULL){
+      return (t.HLT_PFHT900 || t.HLT_PFJet450)==0 ? -1 : 1;
+    }
+    if(strstr(dirname.c_str(),"ht1000toInf") != NULL){
       return (t.HLT_PFHT900 || t.HLT_PFJet450)==0 ? -1 : 1;
     }
 
