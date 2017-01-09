@@ -4,9 +4,13 @@
 # parse command line options
 #
 OPTIONS=""
-while getopts "bc:m:n:rt:w" opt; do
+while getopts "bc:hm:n:rt:w" opt; do
     case "$opt" in
         b) OPTIONS+="-b "
+           ;;
+        h) OPTIONS+="-h "
+           ;;
+        j) OPTIONS+="-j "
            ;;
         r) OPTIONS+="-r "
            ;;
