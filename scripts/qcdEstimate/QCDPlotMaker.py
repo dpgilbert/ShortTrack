@@ -57,9 +57,9 @@ def makeRbPlot(h_mc, h_data, nj_reg, outfile):
 
 def makeFjPlot(h_mc, h_data, ht_reg, outfile):
     ht_reg = ["ht250to450","ht450to575","ht575to1000",
-              "ht1000to1500","ht1500toInf"].index(ht_reg)
+              "ht1000to1500","ht1500toInf","ht1000toInf"].index(ht_reg)
 
-    ht_bounds = [(250,450),(450,575),(575,1000),(1000,1500),(1500,"Inf")]
+    ht_bounds = [(250,450),(450,575),(575,1000),(1000,1500),(1500,"Inf"),(1000,"Inf")]
 
     h_mcerr = h_mc.Clone("h_mcerr")
 
@@ -108,9 +108,9 @@ def makeFjPlot(h_mc, h_data, ht_reg, outfile):
 
 def makeRphiPlot(h_all, h_qcd, fit, ht_reg, isData, outfile, fit_systUp=None, fit_systDown=None):
     ht_reg = ["ht250to450","ht450to575","ht575to1000",
-              "ht1000to1500","ht1500toInf"].index(ht_reg)
+              "ht1000to1500","ht1500toInf","ht1000toInf"].index(ht_reg)
 
-    ht_bounds = [(250,450),(450,575),(575,1000),(1000,1500),(1500,"Inf")]
+    ht_bounds = [(250,450),(450,575),(575,1000),(1000,1500),(1500,"Inf"),(1000,"Inf")]
 
     # h_errBand = ROOT.TH1D("h_errBand","",294,30,1500)
     # h_errBand.SetFillColor(ROOT.kGray)
