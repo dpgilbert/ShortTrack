@@ -307,6 +307,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         return;
       }
 
+      // get CMS3 version number to use later
+      TString cms3_version = cms3.evt_CMS3tag().at(0);
+      // convert last two digits of version number to int
+      int small_cms3_version = TString(cms3_version(cms3_version.Length()-2,cms3_version.Length())).Atoi();
+      
       if (verbose) cout << "before trigger" << endl;
 
       //TRIGGER - check first to enable cuts
@@ -487,8 +492,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
 	// temporary workaround: flag not in first 80x MC production, so recompute
 	Flag_HBHENoiseIsoFilter                       = isData ? cms3.filt_hbheNoiseIso() : hbheIsoNoiseFilter();
-	// inputs for badMuonFilters in latest cms3 tag for data, not yet for MC
-	if (isData) {
+	// inputs for badMuonFilters in latest cms3 tags
+	if (cms3_version.Contains("V08-00") && small_cms3_version > 12) {
           Flag_badMuonFilter                            = badMuonFilter();
           Flag_badMuonFilterV2                          = badMuonFilterV2();
           Flag_badChargedHadronFilterV2                 = badChargedCandidateFilterV2();          
@@ -1006,10 +1011,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
       // check CMS3 version to see if all muon branches are present
       bool do_highpt_muon_id = false;
-      TString cms3_version = cms3.evt_CMS3tag().at(0);
-      // convert last two digits of version number to int
-      int small_version = TString(cms3_version(cms3_version.Length()-2,cms3_version.Length())).Atoi();
-      if (cms3_version.Contains("V08-00") && small_version <= 12) do_highpt_muon_id = false;
+      if (cms3_version.Contains("V08-00") && small_cms3_version <= 12) do_highpt_muon_id = false;
       else do_highpt_muon_id = true;
       
       //MUONS
