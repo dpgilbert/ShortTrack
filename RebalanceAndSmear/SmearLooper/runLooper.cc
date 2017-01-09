@@ -33,6 +33,8 @@ int main(int argc, char **argv) {
   
   int bflag = 0;
   int cflag = 0;
+  int hflag = 0;
+  int jflag = 1;
   int mflag = 0;
   int rflag = 0;
   int tflag = 0;
@@ -43,7 +45,7 @@ int main(int argc, char **argv) {
   float mean_shift = 0.;
   
   int c;
-  while ((c = getopt(argc, argv, "bc:m:n:rt:w")) != -1) {
+  while ((c = getopt(argc, argv, "bc:hjm:n:rt:w")) != -1) {
     switch (c) {
     case 'b':
       bflag = 1;
@@ -51,6 +53,12 @@ int main(int argc, char **argv) {
     case 'c':
       cflag = 1;
       core_scale = atof(optarg);
+      break;
+    case 'h':
+      hflag = 1;
+      break;
+    case 'j':
+      jflag = 0;
       break;
     case 'm':
       mflag = 1;
@@ -79,8 +87,8 @@ int main(int argc, char **argv) {
     }
   }
 
-  printf ("running on %d events with bflag = %d, rflag = %d, wflag = %d, and core_scale = %1.2f, tail_scale = %1.2f, mean_shift = %1.2f\n",
-          max_events, bflag, rflag, wflag, core_scale, tail_scale, mean_shift);
+  printf ("running on %d events with bflag = %d, rflag = %d, wflag = %d, hflag = %d, jflag = %d and core_scale = %1.2f, tail_scale = %1.2f, mean_shift = %1.2f\n",
+          max_events, bflag, rflag, wflag, hflag, jflag, core_scale, tail_scale, mean_shift);
   
     
   TChain *ch = new TChain("mt2");
@@ -98,6 +106,8 @@ int main(int argc, char **argv) {
   SmearLooper *looper = new SmearLooper();
   if (bflag) looper->MakeSmearBaby();
   if (cflag) looper->SetCoreScale(core_scale);
+  if (hflag) looper->UseRawHists();
+  if (!jflag) looper->UseBjetResponse(jflag);
   if (mflag) looper->SetMeanShift(mean_shift);
   if (rflag) looper->DoRebalanceAndSmear();
   if (tflag) looper->SetTailScale(tail_scale);
