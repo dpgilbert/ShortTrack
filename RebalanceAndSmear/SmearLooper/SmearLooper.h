@@ -68,6 +68,8 @@ class SmearLooper {
   void SetCoreScale (float coreScale) {coreScale_ = coreScale;}
   void SetTailScale (float tailScale) {tailScale_ = tailScale;}
   void SetMeanShift (float meanShift) {meanShift_ = meanShift;}
+  void UseRawHists () {useRawHists_ = true;}
+  void UseBjetResponse (bool use) {useBjetResponse_ = use;}
   bool passesTrigger ();
   float getTriggerPrescale ();
   
@@ -90,7 +92,12 @@ class SmearLooper {
   SRRS SRNoCut;  
   SRRS SRJustHT1;
   SRRS SRJustHT2;
-  SRRS SRJustHT3;  
+  SRRS SRJustHT3;
+  SRRS SRJustHT4;
+  SRRS SRJustHT5;
+  SRRS SRJustHT6;
+  SRRS SRJustHT7;
+  SRRS SRJustHT8;
   SRRS CRSL_WJets;
   SRRS CRSL_TTbar;
   TH1D* h_nvtx_weights_;
@@ -103,11 +110,18 @@ class SmearLooper {
   SRRS SRJustHT1_temp;
   SRRS SRJustHT2_temp;
   SRRS SRJustHT3_temp;  
+  SRRS SRJustHT4_temp;
+  SRRS SRJustHT5_temp;
+  SRRS SRJustHT6_temp;
+  SRRS SRJustHT7_temp;
+  SRRS SRJustHT8_temp;
 
   bool applyWeights_;
   bool doRebalanceAndSmear_;
   bool makeSmearBaby_;
-
+  bool useRawHists_;
+  bool useBjetResponse_;
+  
   float coreScale_;
   float tailScale_;
   float meanShift_;

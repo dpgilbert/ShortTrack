@@ -113,6 +113,8 @@ SmearLooper::SmearLooper() :
   applyWeights_(false),
   doRebalanceAndSmear_(false),
   makeSmearBaby_(false),
+  useRawHists_(false),
+  useBjetResponse_(true),
   coreScale_(1.),
   tailScale_(1.),
   meanShift_(0.)
@@ -487,8 +489,9 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
   reader.SetCoreScale(coreScale_);
   reader.SetTailScale(tailScale_);
   reader.SetMeanShift(meanShift_);
+  reader.UseRawHistograms(useRawHists_);
   reader.Init("JetResponseTemplates.root");
-
+  
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
   bmark->Start("benchmark");
@@ -552,6 +555,61 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
   TDirectory * dir_SRJustHT3_temp = (TDirectory*)outfile_->Get((SRJustHT3_temp.GetName()).c_str());
   if (dir_SRJustHT3_temp == 0) {
     dir_SRJustHT3_temp = outfile_->mkdir((SRJustHT3_temp.GetName()).c_str());
+  } 
+
+  SRJustHT4.SetName("ht250to450");
+  float SRJustHT4_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500}; 
+  SRJustHT4.SetMT2Bins(7, SRJustHT4_mt2bins);
+
+  SRJustHT4_temp = SRJustHT4;
+  SRJustHT4_temp.SetName("temp_"+SRJustHT4_temp.GetName());
+  TDirectory * dir_SRJustHT4_temp = (TDirectory*)outfile_->Get((SRJustHT4_temp.GetName()).c_str());
+  if (dir_SRJustHT4_temp == 0) {
+    dir_SRJustHT4_temp = outfile_->mkdir((SRJustHT4_temp.GetName()).c_str());
+  } 
+
+  SRJustHT5.SetName("ht450to575");
+  float SRJustHT5_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500}; 
+  SRJustHT5.SetMT2Bins(7, SRJustHT5_mt2bins);
+
+  SRJustHT5_temp = SRJustHT5;
+  SRJustHT5_temp.SetName("temp_"+SRJustHT5_temp.GetName());
+  TDirectory * dir_SRJustHT5_temp = (TDirectory*)outfile_->Get((SRJustHT5_temp.GetName()).c_str());
+  if (dir_SRJustHT5_temp == 0) {
+    dir_SRJustHT5_temp = outfile_->mkdir((SRJustHT5_temp.GetName()).c_str());
+  } 
+
+  SRJustHT6.SetName("ht575to1000");
+  float SRJustHT6_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500}; 
+  SRJustHT6.SetMT2Bins(7, SRJustHT6_mt2bins);
+
+  SRJustHT6_temp = SRJustHT6;
+  SRJustHT6_temp.SetName("temp_"+SRJustHT6_temp.GetName());
+  TDirectory * dir_SRJustHT6_temp = (TDirectory*)outfile_->Get((SRJustHT6_temp.GetName()).c_str());
+  if (dir_SRJustHT6_temp == 0) {
+    dir_SRJustHT6_temp = outfile_->mkdir((SRJustHT6_temp.GetName()).c_str());
+  } 
+
+  SRJustHT7.SetName("ht1000to1500");
+  float SRJustHT7_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500}; 
+  SRJustHT7.SetMT2Bins(7, SRJustHT7_mt2bins);
+
+  SRJustHT7_temp = SRJustHT7;
+  SRJustHT7_temp.SetName("temp_"+SRJustHT7_temp.GetName());
+  TDirectory * dir_SRJustHT7_temp = (TDirectory*)outfile_->Get((SRJustHT7_temp.GetName()).c_str());
+  if (dir_SRJustHT7_temp == 0) {
+    dir_SRJustHT7_temp = outfile_->mkdir((SRJustHT7_temp.GetName()).c_str());
+  } 
+
+  SRJustHT8.SetName("ht1500to2000");
+  float SRJustHT8_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500}; 
+  SRJustHT8.SetMT2Bins(7, SRJustHT8_mt2bins);
+
+  SRJustHT8_temp = SRJustHT8;
+  SRJustHT8_temp.SetName("temp_"+SRJustHT8_temp.GetName());
+  TDirectory * dir_SRJustHT8_temp = (TDirectory*)outfile_->Get((SRJustHT8_temp.GetName()).c_str());
+  if (dir_SRJustHT8_temp == 0) {
+    dir_SRJustHT8_temp = outfile_->mkdir((SRJustHT8_temp.GetName()).c_str());
   } 
   
   if (makeSmearBaby_) {
@@ -852,7 +910,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
           std::vector<float> jet_pt_smeared = jet_pt;
 
           for(unsigned int i=0; i<jet_pt_smeared.size(); i++){
-            float smear = reader.GetRandomResponse(jet_pt[i], jet_eta[i], (jet_btagCSV[i]>0.800), (bool)t.isData);
+            float smear = reader.GetRandomResponse(jet_pt[i], jet_eta[i], useBjetResponse_ ? (jet_btagCSV[i]>0.800) : false, (bool)t.isData);
             plot1D("h_smear",      smear,   evtweight_, h_1d_global, ";smear", 10000, 0, 10);
             jet_pt_smeared.at(i) *= smear;
           }
@@ -1031,6 +1089,16 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
             fillHistos(SRJustHT2_temp.srHistMap, SRJustHT2_temp.GetNumberOfMT2Bins(), SRJustHT2_temp.GetMT2Bins(), SRJustHT2_temp.GetName(), "");
           if(RS_vars_["ht"]>=250 && RS_vars_["ht"]<1000 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
             fillHistos(SRJustHT3_temp.srHistMap, SRJustHT3_temp.GetNumberOfMT2Bins(), SRJustHT3_temp.GetMT2Bins(), SRJustHT3_temp.GetName(), "");
+          if(RS_vars_["ht"]>=250 && RS_vars_["ht"]<450 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+            fillHistos(SRJustHT4_temp.srHistMap, SRJustHT4_temp.GetNumberOfMT2Bins(), SRJustHT4_temp.GetMT2Bins(), SRJustHT4_temp.GetName(), "");
+          if(RS_vars_["ht"]>=450 && RS_vars_["ht"]<575 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+            fillHistos(SRJustHT5_temp.srHistMap, SRJustHT5_temp.GetNumberOfMT2Bins(), SRJustHT5_temp.GetMT2Bins(), SRJustHT5_temp.GetName(), "");
+          if(RS_vars_["ht"]>=575 && RS_vars_["ht"]<1000 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+            fillHistos(SRJustHT6_temp.srHistMap, SRJustHT6_temp.GetNumberOfMT2Bins(), SRJustHT6_temp.GetMT2Bins(), SRJustHT6_temp.GetName(), "");
+          if(RS_vars_["ht"]>=1000 && RS_vars_["ht"]<1500 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+            fillHistos(SRJustHT7_temp.srHistMap, SRJustHT7_temp.GetNumberOfMT2Bins(), SRJustHT7_temp.GetMT2Bins(), SRJustHT7_temp.GetName(), "");
+          if(RS_vars_["ht"]>=1500 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+            fillHistos(SRJustHT8_temp.srHistMap, SRJustHT8_temp.GetNumberOfMT2Bins(), SRJustHT8_temp.GetMT2Bins(), SRJustHT8_temp.GetName(), "");          
           fillHistosSignalRegion("sr");
           fillHistosSRBase();
           fillHistosInclusive();
@@ -1044,7 +1112,12 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         plotRS(SRNoCut_temp.srHistMap, SRNoCut.srHistMap, SRNoCut.GetName());
         plotRS(SRJustHT1_temp.srHistMap, SRJustHT1.srHistMap, SRJustHT1.GetName());
         plotRS(SRJustHT2_temp.srHistMap, SRJustHT2.srHistMap, SRJustHT2.GetName());
-        plotRS(SRJustHT3_temp.srHistMap, SRJustHT3.srHistMap, SRJustHT3.GetName());        
+        plotRS(SRJustHT3_temp.srHistMap, SRJustHT3.srHistMap, SRJustHT3.GetName());
+        plotRS(SRJustHT4_temp.srHistMap, SRJustHT4.srHistMap, SRJustHT4.GetName());
+        plotRS(SRJustHT5_temp.srHistMap, SRJustHT5.srHistMap, SRJustHT5.GetName());
+        plotRS(SRJustHT6_temp.srHistMap, SRJustHT6.srHistMap, SRJustHT6.GetName());
+        plotRS(SRJustHT7_temp.srHistMap, SRJustHT7.srHistMap, SRJustHT7.GetName());
+        plotRS(SRJustHT8_temp.srHistMap, SRJustHT8.srHistMap, SRJustHT8.GetName());        
         plotRS(SRBase_temp.srHistMap, SRBase.srHistMap, SRBase.GetName());
         plotRS(SRBase_temp.crRSInvertDPhiHistMap, SRBase.crRSInvertDPhiHistMap, "crRSInvertDPhi"+SRBase.GetName());
         plotRS(SRBase_temp.crRSMT2SideBandHistMap, SRBase.crRSMT2SideBandHistMap, "crRSMT2SideBand"+SRBase.GetName());
@@ -1067,6 +1140,11 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         resetHistmap(SRJustHT1_temp.srHistMap, SRJustHT1_temp.GetName());
         resetHistmap(SRJustHT2_temp.srHistMap, SRJustHT2_temp.GetName());
         resetHistmap(SRJustHT3_temp.srHistMap, SRJustHT3_temp.GetName());        
+        resetHistmap(SRJustHT4_temp.srHistMap, SRJustHT4_temp.GetName());
+        resetHistmap(SRJustHT5_temp.srHistMap, SRJustHT5_temp.GetName());
+        resetHistmap(SRJustHT6_temp.srHistMap, SRJustHT6_temp.GetName());        
+        resetHistmap(SRJustHT7_temp.srHistMap, SRJustHT7_temp.GetName());
+        resetHistmap(SRJustHT8_temp.srHistMap, SRJustHT8_temp.GetName());
         resetHistmap(SRBase_temp.srHistMap, SRBase_temp.GetName());
         resetHistmap(SRBase_temp.crRSInvertDPhiHistMap, "crRSInvertDPhi"+SRBase_temp.GetName());
         resetHistmap(SRBase_temp.crRSMT2SideBandHistMap, "crRSMT2SideBand"+SRBase_temp.GetName());
@@ -1092,6 +1170,16 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
           fillHistos(SRJustHT2.srHistMap, SRJustHT2.GetNumberOfMT2Bins(), SRJustHT2.GetMT2Bins(), SRJustHT2.GetName(), "");
         if(t.ht>=250 && t.ht<1000 && t.met_pt>30 && t.mt2>50)
           fillHistos(SRJustHT3.srHistMap, SRJustHT3.GetNumberOfMT2Bins(), SRJustHT3.GetMT2Bins(), SRJustHT3.GetName(), "");
+        if(t.ht>=250 && t.ht<450 && t.met_pt>30 && t.mt2>50) 
+          fillHistos(SRJustHT4.srHistMap, SRJustHT4.GetNumberOfMT2Bins(), SRJustHT4.GetMT2Bins(), SRJustHT4.GetName(), "");
+        if(t.ht>=450 && t.ht<575 && t.met_pt>30 && t.mt2>50) 
+          fillHistos(SRJustHT5.srHistMap, SRJustHT5.GetNumberOfMT2Bins(), SRJustHT5.GetMT2Bins(), SRJustHT5.GetName(), "");
+        if(t.ht>=575 && t.ht<1000 && t.met_pt>30 && t.mt2>50) 
+          fillHistos(SRJustHT6.srHistMap, SRJustHT6.GetNumberOfMT2Bins(), SRJustHT6.GetMT2Bins(), SRJustHT6.GetName(), "");
+        if(t.ht>=1000 && t.ht<1500 && t.met_pt>30 && t.mt2>50) 
+          fillHistos(SRJustHT7.srHistMap, SRJustHT7.GetNumberOfMT2Bins(), SRJustHT7.GetMT2Bins(), SRJustHT7.GetName(), "");
+        if(t.ht>=1500 && t.met_pt>30 && t.mt2>50) 
+          fillHistos(SRJustHT8.srHistMap, SRJustHT8.GetNumberOfMT2Bins(), SRJustHT8.GetMT2Bins(), SRJustHT8.GetName(), "");                  
         fillHistosSignalRegion("sr");
         fillHistosSRBase();
         fillHistosInclusive();
@@ -1136,6 +1224,11 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
   savePlotsDir(SRJustHT1.srHistMap,outfile_,SRJustHT1.GetName().c_str());
   savePlotsDir(SRJustHT2.srHistMap,outfile_,SRJustHT2.GetName().c_str());
   savePlotsDir(SRJustHT3.srHistMap,outfile_,SRJustHT3.GetName().c_str());  
+  savePlotsDir(SRJustHT4.srHistMap,outfile_,SRJustHT4.GetName().c_str());
+  savePlotsDir(SRJustHT5.srHistMap,outfile_,SRJustHT5.GetName().c_str());
+  savePlotsDir(SRJustHT6.srHistMap,outfile_,SRJustHT6.GetName().c_str());  
+  savePlotsDir(SRJustHT7.srHistMap,outfile_,SRJustHT7.GetName().c_str());
+  savePlotsDir(SRJustHT8.srHistMap,outfile_,SRJustHT8.GetName().c_str());
   savePlotsDir(SRBase.srHistMap,outfile_,SRBase.GetName().c_str());
   savePlotsDir(SRBase.crRSInvertDPhiHistMap,outfile_,"crRSInvertDPhibase");
   savePlotsDir(SRBase.crRSMT2SideBandHistMap,outfile_,"crRSMT2SideBandbase");
