@@ -4,22 +4,30 @@ import os
 
 ROOT.gROOT.SetBatch(1)
 
-dir = "looper_output/v6/qcd/"
-dir_noRS = "looper_output/v6/qcd_noRS/"
+dir = "looper_output/v10/qcd/"
+dir_noRS = "looper_output/v10/qcd_noRS/"
 
-hrs = ROOT.TH1D("hrs","",44,0,44)
-hnrs = ROOT.TH1D("hnrs","",44,0,44)
+hrs = ROOT.TH1D("hrs","",51,0,51)
+hnrs = ROOT.TH1D("hnrs","",51,0,51)
 
 h_evts_rs = ROOT.TH1D("h_evts_rs","",1,0,2)
 h_evts_nrs = ROOT.TH1D("h_evts_nrs","",1,0,2)
 
 frs = ROOT.TFile(os.path.join(dir,"merged_hists.root"))
 fnrs = ROOT.TFile(os.path.join(dir_noRS,"merged_hists.root"))
+
+top_regs_vl=[1,2,3,12,13,14,15]
+
 ibin = 0
-for ht_reg in ["L","M","H","UH"]:
+for ht_reg in ["VL","L","M","H","UH"]:
   sum_rs = 0
   sum_nrs = 0
-  for top_reg in range(1,12):
+  top_regs = []
+  if ht_reg == "VL":
+    top_regs = top_regs_vl
+  else:
+    top_regs.extend(range(1,12))  
+  for top_reg in top_regs:
     ibin+=1
     print ibin, top_reg, ht_reg
 
@@ -97,8 +105,8 @@ hrs.Draw("PE SAME")
 
 line = ROOT.TLine()
 line.SetLineStyle(2)
-for ix in [11,22,33]:
-  x = pads[0].GetLeftMargin() + ix/44.0 * (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin())
+for ix in [7,18,29,40]:
+  x = pads[0].GetLeftMargin() + ix/51.0 * (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin())
   line.DrawLineNDC(x,1-pads[0].GetTopMargin(),x,pads[0].GetBottomMargin())
 
 leg = ROOT.TLegend(0.815,0.78,0.94,0.9)
@@ -109,16 +117,18 @@ leg.Draw()
 text = ROOT.TLatex()
 text.SetNDC(1)
 text.SetTextSize(0.03)
-text.DrawLatex(0.18,0.79,"Low H_{T}")
-text.DrawLatex(0.39,0.79,"Medium H_{T}")
-text.DrawLatex(0.60,0.79,"High H_{T}")
-text.DrawLatex(0.81,0.73,"Extreme H_{T}")
+text.DrawLatex(0.12,0.79,"Very Low H_{T}")
+text.DrawLatex(0.3,0.79,"Low H_{T}")
+text.DrawLatex(0.45,0.79,"Medium H_{T}")
+text.DrawLatex(0.65,0.79,"High H_{T}")
+text.DrawLatex(0.8,0.73,"Extreme H_{T}")
 text.SetTextFont(42)
 text.SetTextSize(0.04)
 text.DrawLatex(0.8,0.93,"1 fb^{-1} (13 TeV)")
 
 
-binWidth = (1-pads[0].GetLeftMargin()-pads[1].GetRightMargin())/44.0
+binWidth = (1-pads[0].GetLeftMargin()-pads[1].GetRightMargin())/51.0
+binLabels_vl = ["2-3j, 0b", "2-3j, 1b", "2-3j, 2b", "#geq4j, 0b", "#geq4j, 1b", "#geq4j, 2b", "#geq2j, #geq3b"] 
 binLabels = ["2-3j, 0b", "2-3j, 1b", "2-3j, 2b", "4-6j, 0b", "4-6j, 1b", "4-6j, 2b", "#geq7j, 0b", "#geq7j, 1b", "#geq7j, 2b", "2-6j, #geq3b", "#geq7j, #geq3b"]
 text = ROOT.TLatex()
 text.SetNDC(1)
@@ -129,11 +139,12 @@ text.SetTextFont(42)
 for ibin in range(11):
   x = pads[0].GetLeftMargin() + (ibin+0.5)*binWidth
   y = pads[0].GetBottomMargin()-0.009
-  text.DrawLatex(x,y,binLabels[ibin])
-  text.DrawLatex(x+11*binWidth,y,binLabels[ibin])
-  text.DrawLatex(x+22*binWidth,y,binLabels[ibin])
-  text.DrawLatex(x+33*binWidth,y,binLabels[ibin])
-
+  if ibin < 7:
+    text.DrawLatex(x,y,binLabels_vl[ibin])
+  text.DrawLatex(x+7*binWidth,y,binLabels[ibin])    
+  text.DrawLatex(x+18*binWidth,y,binLabels[ibin])
+  text.DrawLatex(x+29*binWidth,y,binLabels[ibin])
+  text.DrawLatex(x+40*binWidth,y,binLabels[ibin])
 
 
 ## ratio
@@ -152,7 +163,7 @@ h_ratio.GetYaxis().CenterTitle()
 h_ratio.GetYaxis().SetTickLength(0.02)
 h_ratio.GetXaxis().SetLabelSize(0)
 h_ratio.GetXaxis().SetTitle("")
-h_ratio.GetXaxis().SetNdivisions(44,0,0)
+h_ratio.GetXaxis().SetNdivisions(51,0,0)
 h_ratio.GetXaxis().SetTickSize(0.06)
 h_ratio.SetMarkerStyle(20)
 h_ratio.SetMarkerSize(1.0)
@@ -161,10 +172,11 @@ h_ratio.SetLineWidth(1)
 h_ratio.Draw("PE")
 
 line = ROOT.TLine()
-line.DrawLine(0,1,44,1)
+line.DrawLine(0,1,51,1)
 
 username = os.environ["USER"]
-c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/MCtests/closure.pdf".format(username))
-c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/MCtests/closure.png".format(username))
+c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/MCtests2/closure.pdf".format(username))
+c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/MCtests2/closure.png".format(username))
+c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/MCtests2/closure.root".format(username))
 
 raw_input()
