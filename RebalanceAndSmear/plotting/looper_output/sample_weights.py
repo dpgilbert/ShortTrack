@@ -6,3 +6,9 @@ def get_weight(sample_id, is_ext):
         return list_of_ext_weights[sample_id]
     else:
         return list_of_non_ext_weights[sample_id]
+
+def get_total_weight(sample_id):
+  w_ext = float(list_of_ext_weights[sample_id])
+  w_next = float(list_of_non_ext_weights[sample_id])
+  w = 1. / ((1./w_ext) + (1./w_next))
+  return w
