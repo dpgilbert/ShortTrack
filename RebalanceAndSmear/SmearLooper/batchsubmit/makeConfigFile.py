@@ -9,23 +9,33 @@ import re
 #samples = ["datav2_data_Run2016[B-H]_(HTMHT|MET)"]
 #samples = ["datav2_data_Run2016[B-H]_JetHT"]
 #samples = ["datav2_data_Run2016[B-H]_MET"]
-samples = ["qcd_ht", "zinv_ht", "wjets_ht", "ttdl", "ttsl", "singletop", "ttw", "ttz"]
-#samples = ["qcd_ht"]
+#samples = ["qcd_ht", "zinv_ht", "wjets_ht", "ttdl", "ttsl", "singletop", "ttw", "ttz"]
+#samples = ["zinv_ht", "wjets_ht", "ttdl", "ttsl", "singletop", "ttw", "ttz"]
 #samples = ["data_rereco_data_Run2016[B-G]_(HTMHT|JetHT|MET)", "datav2_data_Run2016H_(HTMHT|JetHT|MET)"]
+#samples = ["data_rereco_data_Run2016[B-G]_JetHT", "datav2_data_Run2016H_JetHT"]
+#samples = ["data_rereco_data_Run2016[E-G]_(HTMHT|MET)", "datav2_data_Run2016H_(HTMHT|MET)"]
+#samples = ["data_rereco_data_Run2016[E-G]_JetHT", "datav2_data_Run2016H_JetHT"]
+#samples = ["data_rereco_data_Run2016[B-D]_JetHT"]
+#samples = ["data_rereco_data_Run2016C_MET"]
+#samples = ["data_rereco_data_Run2016C_HTMHT"]
+#samples = ["data_rereco_data_Run2016[B-D]_(JetHT|HTMHT|MET)"]
+samples = ["qcd_ht"]
 #samples = ["data_rereco_data_Run2016[B-G]_JetHT", "datav2_data_Run2016H_JetHT"]
 
 test = False
-version="v10"
-doRebalanceAndSmear = False
+version="v11_rawhists"
+doRebalanceAndSmear = True
 tag="V00-08-12"
 username = os.environ["USER"]
+use_b_resp = True
 make_baby = True
+use_raw_hists = True
 core_scale = 1.
 mean_shift = 0.
 tail_scale = 1.
 apply_weights = False
 indir = "/hadoop/cms/store/user/bemarsh/mt2babies/"
-numFilesPerJob = 30
+numFilesPerJob = 15
 append=False
 
 x509file = subprocess.check_output(["find","/tmp/", "-maxdepth", "1", "-type", "f", "-user", username, "-regex", "^.*x509.*$"])
@@ -35,6 +45,8 @@ if not x509file:
 
 options = ""
 if make_baby: options += "-b "
+if use_raw_hists: options += "-h "
+if not use_b_resp: options += "-j "
 if doRebalanceAndSmear: options += "-r "
 if apply_weights: options += "-w "
 options += "-c {0} -m {1} -t {2}".format(core_scale, mean_shift, tail_scale)
