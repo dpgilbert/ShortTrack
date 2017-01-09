@@ -3,7 +3,7 @@ import glob
 import os
 import math
 
-doRatioToTotal = True
+doRatioToTotal = False
 
 def getRatioAndError (h1, h2):
   err1 = r.Double(0)
@@ -17,25 +17,32 @@ def getRatioAndError (h1, h2):
 r.gROOT.SetBatch(1)
 
 rphi_file = "/home/users/fgolf/mt2/devel/MT2Analysis/MT2looper/output/full2016/qcdFromCRs.root"
-rs_file = "looper_output/v6/data/merged_hists.root"
-data_file = "looper_output/v6/data_noRS/merged_hists.root"
+rs_file = "looper_output/v10/data/merged_hists.root"
+data_file = "looper_output/v10/data_noRS/merged_hists_skims.root"
 
-hrphi = r.TH1D("hrphi","",44,0,44)
-hrs = r.TH1D("hrs","",44,0,44)
-hdata = r.TH1D("hdata","",44,0,44)
+hrphi = r.TH1D("hrphi","",51,0,51)
+hrs = r.TH1D("hrs","",51,0,51)
+hdata = r.TH1D("hdata","",51,0,51)
 
 h_evts_rphi = r.TH1D("h_evts_rphi","",1,0,2)
 h_evts_rs = r.TH1D("h_evts_rs","",1,0,2)
 h_evts_data = r.TH1D("h_evts_data","",1,0,2)
 
+top_regs_vl=[1,2,3,12,13,14,15]
+
 frphi = r.TFile(rphi_file)
 frs = r.TFile(rs_file)
 fdata = r.TFile(data_file)
 ibin = 0
-for ht_reg in ["L","M","H","UH"]:
+for ht_reg in ["VL","L","M","H","UH"]:
   sum_rphi = 0
   sum_rs = 0
-  for top_reg in range(1,12):
+  top_regs = []
+  if ht_reg == "VL":
+    top_regs = top_regs_vl
+  else:
+    top_regs.extend(range(1,12))
+  for top_reg in top_regs:
     ibin+=1
 
     rphi_err = r.Double(0)
@@ -43,6 +50,8 @@ for ht_reg in ["L","M","H","UH"]:
       h_evts_rs.Reset()
     if h_evts_rphi:
       h_evts_rphi.Reset()
+    if h_evts_data:
+      h_evts_data.Reset()
     try:
       h_evts_rphi = frphi.Get("sr{0}{1}/h_mt2bins".format(top_reg,ht_reg))
     except:
@@ -125,7 +134,9 @@ hrphi.SetLineColor(401)
 hrphi.SetMarkerColor(401)
 hrphi.SetMarkerStyle(20)
 
-hrphi.GetYaxis().SetRangeUser(1e-3,1e3)
+hrphi.GetYaxis().SetRangeUser(1e-3,1e4)
+if doRatioToTotal:
+  hrphi.GetYaxis().SetRangeUser(1e-3,5)
 hrphi.GetXaxis().SetLabelSize(0)
 
 hrphi.Draw("PE")
@@ -133,8 +144,8 @@ hrs.Draw("PE SAME")
 
 line = r.TLine()
 line.SetLineStyle(2)
-for ix in [11,22,33]:
-  x = pads[0].GetLeftMargin() + ix/44.0 * (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin())
+for ix in [7,18,29,40]:
+  x = pads[0].GetLeftMargin() + ix/51.0 * (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin())
   line.DrawLineNDC(x,1-pads[0].GetTopMargin(),x,pads[0].GetBottomMargin())
 
 leg = r.TLegend(0.815,0.78,0.94,0.9)
@@ -145,16 +156,18 @@ leg.Draw()
 text = r.TLatex()
 text.SetNDC(1)
 text.SetTextSize(0.03)
-text.DrawLatex(0.18,0.79,"Low H_{T}")
-text.DrawLatex(0.39,0.79,"Medium H_{T}")
-text.DrawLatex(0.60,0.79,"High H_{T}")
-text.DrawLatex(0.81,0.73,"Extreme H_{T}")
+text.DrawLatex(0.12,0.79,"Very Low H_{T}")
+text.DrawLatex(0.3,0.79,"Low H_{T}")
+text.DrawLatex(0.45,0.79,"Medium H_{T}")
+text.DrawLatex(0.65,0.79,"High H_{T}")
+text.DrawLatex(0.8,0.73,"Extreme H_{T}")
 text.SetTextFont(42)
 text.SetTextSize(0.04)
 text.DrawLatex(0.8,0.93,"36.5 fb^{-1} (13 TeV)")
 
 
-binWidth = (1-pads[0].GetLeftMargin()-pads[1].GetRightMargin())/44.0
+binWidth = (1-pads[0].GetLeftMargin()-pads[1].GetRightMargin())/51.0
+binLabels_vl = ["2-3j, 0b", "2-3j, 1b", "2-3j, 2b", "#geq4j, 0b", "#geq4j, 1b", "#geq4j, 2b", "#geq2j, #geq3b"] 
 binLabels = ["2-3j, 0b", "2-3j, 1b", "2-3j, 2b", "4-6j, 0b", "4-6j, 1b", "4-6j, 2b", "#geq7j, 0b", "#geq7j, 1b", "#geq7j, 2b", "2-6j, #geq3b", "#geq7j, #geq3b"]
 text = r.TLatex()
 text.SetNDC(1)
@@ -165,10 +178,12 @@ text.SetTextFont(42)
 for ibin in range(11):
   x = pads[0].GetLeftMargin() + (ibin+0.5)*binWidth
   y = pads[0].GetBottomMargin()-0.009
-  text.DrawLatex(x,y,binLabels[ibin])
-  text.DrawLatex(x+11*binWidth,y,binLabels[ibin])
-  text.DrawLatex(x+22*binWidth,y,binLabels[ibin])
-  text.DrawLatex(x+33*binWidth,y,binLabels[ibin])
+  if ibin < 7:
+    text.DrawLatex(x,y,binLabels_vl[ibin])
+  text.DrawLatex(x+7*binWidth,y,binLabels[ibin])    
+  text.DrawLatex(x+18*binWidth,y,binLabels[ibin])
+  text.DrawLatex(x+29*binWidth,y,binLabels[ibin])
+  text.DrawLatex(x+40*binWidth,y,binLabels[ibin])
 
 
 
@@ -188,7 +203,7 @@ h_ratio.GetYaxis().CenterTitle()
 h_ratio.GetYaxis().SetTickLength(0.02)
 h_ratio.GetXaxis().SetLabelSize(0)
 h_ratio.GetXaxis().SetTitle("")
-h_ratio.GetXaxis().SetNdivisions(44,0,0)
+h_ratio.GetXaxis().SetNdivisions(51,0,0)
 h_ratio.GetXaxis().SetTickSize(0.06)
 h_ratio.SetMarkerStyle(20)
 h_ratio.SetMarkerSize(1.0)
@@ -197,13 +212,13 @@ h_ratio.SetLineWidth(1)
 h_ratio.Draw("PE")
 
 line = r.TLine()
-line.DrawLine(0,1,44,1)
+line.DrawLine(0,1,51,1)
 
 username = os.environ["USER"]
 suffix = "_rat" if doRatioToTotal else ""
-c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/data_tests/comparison{1}.pdf".format(username,suffix))
-c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/data_tests/comparison{1}.png".format(username,suffix))
-c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/data_tests/comparison{1}.root".format(username,suffix))
+c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/data_tests2/comparison{1}.pdf".format(username,suffix))
+c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/data_tests2/comparison{1}.png".format(username,suffix))
+c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/data_tests2/comparison{1}.root".format(username,suffix))
 
 raw_input()
 
