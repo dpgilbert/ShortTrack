@@ -1526,7 +1526,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
     if(SRVec.at(srN).PassesSelection(values)){
       // cout << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.evt_id << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
       fillHistos(SRVec.at(srN).srHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
-      break;//signal regions are orthogonal, event cannot be in more than one
+      //break;//signal regions are orthogonal, event cannot be in more than one --> not true now with super signal regions
     }
   }
   
@@ -1569,7 +1569,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(SRVec.at(srN).PassesSelection(values_genmet)){
 	fillHistosGenMET(SRVec.at(srN).srHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
-	break;//signal regions are orthogonal, event cannot be in more than one
+	//break;//signal regions are orthogonal, event cannot be in more than one --> not true now with super signal regions
       }
     }
   
