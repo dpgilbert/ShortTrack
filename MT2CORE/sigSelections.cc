@@ -2102,7 +2102,7 @@ namespace mt2 {
       else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[5] = {200, 300, 400, 600, 1500};      fullSR.SetMT2Bins(4, mt2bins);}
       SRVec.push_back(fullSR);
     }
-    for(unsigned int iSR = 0; iSR < temp_SR_vec.size()-4; iSR++){
+    for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
       if (iSR >= 15) continue;      
       SR fullSR = temp_SR_vec.at(iSR);  
       fullSR.SetName(fullSR.GetName() + "H");
@@ -2150,7 +2150,7 @@ namespace mt2 {
         float mt2bins[3] = {200, 400, 1800};
         float mt2bins_ssr[4] = {200, 400, 600, 1800};
         if (njets_hi == -1)
-          fullSR.SetMT2Bins(2, mt2bins_ssr);
+          fullSR.SetMT2Bins(3, mt2bins_ssr);
         else
           fullSR.SetMT2Bins(2, mt2bins);          
       }      
