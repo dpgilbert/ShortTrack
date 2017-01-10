@@ -19,7 +19,7 @@ nj_reg_names = ["j2to3","j4to6","j7toInf","j2to6","j4toInf","j2toInf"]
 top_reg_names = ["j2to3_b0","j2to3_b1","j2to3_b2","j4to6_b0","j4to6_b1","j4to6_b2",
                  "j7toInf_b0","j7toInf_b1","j7toInf_b2","j2to6_b3toInf","j7toInf_b3toInf"]
 vl_top_reg_names = ["j2to3_b0","j2to3_b1","j2to3_b2","j4toInf_b0","j4toInf_b1","j4toInf_b2","j2toInf_b3toInf"]
-hi_top_reg_names = ["j2toInf_b0toInf","j4toInf_b0toInf","j7toInf_b0toInf","j2toInf_b2toInf","j2toInf_b3toInf","j7toInf_b3toInf"]
+hi_top_reg_names = ["j2toInf_b3toInf","j2toInf_b0toInf","j4toInf_b0toInf","j7toInf_b0toInf","j2toInf_b2toInf","j7toInf_b3toInf"]
 vl_top_reg_nums = [1, 2, 3, 12, 13, 14, 15]
 hi_top_reg_nums = [i for i in range(15,20)]+[11]
 uh_top_reg_nums = [i for i in range(1,len(top_reg_names)+1)]
