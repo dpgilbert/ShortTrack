@@ -42,8 +42,8 @@ def merge (indir, test=False):
       for sub in fname.split("_"):
         if "ht" not in sub: continue
         sample_id = name_to_sample_id[sub.strip("ht").split("to")[0]]
-        w_ext = float(get_weight(sample_id, True))
-        w_non_ext = float(get_weight(sample_id, False))
+        w_ext = get_weight(sample_id, True)
+        w_non_ext = get_weight(sample_id, False)
         w_ext_sf = w_non_ext/(w_ext + w_non_ext)
         w_non_ext_sf = w_ext/(w_ext + w_non_ext)        
         outname = "merged_hists_qcd_{0}.root".format(sub.split("/")[0])
