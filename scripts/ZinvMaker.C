@@ -173,7 +173,7 @@ int purityRandNorm(TH1D* h_template, TString name , TFile * fData, TFile * fZinv
 // New function: takes as input a blank histogram with the right binning, then turns it to a template.
 // We used to first make a global hybrid template, then rebin it to match the toporegion
 // Instead here we first rebin the golbal template to match the toporegion, and only afterwards we hybridize it
-int makeHybridTemplate(TString srname, TH1D* h_template, TString name , TFile * fData, TFile * fZinv, TFile * fDY, int & lastmt2val_hybrid) {
+int makeHybridTemplate(TString srname, TH1D* & h_template, TString name , TFile * fData, TFile * fZinv, TFile * fDY, int & lastmt2val_hybrid) {
 
   //cout<<"purityRandNorm for template "<<name<<endl;
   //h_template->Print("all");
@@ -189,10 +189,12 @@ int makeHybridTemplate(TString srname, TH1D* h_template, TString name , TFile * 
 
   if (h_template == 0) {
     cout<<"ZinvMaker::makeHybridTemplate  :  could not finde input template"<<endl;
+    h_template = 0; // Make sure template isn't used
     return lastbin_hybrid;
   }
   if (hDY == 0 || hZinv == 0) {
     cout<<"ZinvMaker::makeHybridTemplate  :  could not find DY or Zinv MC histogram "<<name<<endl;
+    h_template = 0;  // Make sure template isn't used
     return lastbin_hybrid;
   }
 
@@ -620,13 +622,15 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 	cout<< "Can't find template for region: HT "<<ht_LOW<<"-"<<ht_HI<<" and NJ "<<njets_LOW<<"-"<<njets_HI<<endl;
 	lastbin_hybrid = 1;
 	h_MT2Template = 0;
+	cout<<"h_MT2Template is 0, using hybrid within this region (no external templates)"<<endl;
       }
       else {
 	cout<< "Using inclusive template "<<inclusiveTemplateName<<" for region: HT "<<ht_LOW<<"-"<<ht_HI<<" and NJ "<<njets_LOW<<"-"<<njets_HI<<endl; 
 	// Get the template
 	lastbin_hybrid = makeHybridTemplate(srname, h_MT2Template, inclusiveTemplateName , fData, fZinv, fDY, lastmt2val_hybrid);
 	cout<<"lastbin_hybrid "<<lastbin_hybrid<<" and lastmt2val_hybrid "<<lastmt2val_hybrid<<endl;
-	h_MT2Template->Print("all");
+	if (h_MT2Template!=0) h_MT2Template->Print("all");
+	else cout<<"h_MT2Template is 0, using hybrid within this region (no external templates)"<<endl;
       }
 
    
