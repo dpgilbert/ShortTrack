@@ -482,6 +482,7 @@ class babyMaker {
   Float_t         jet_area[max_njet];   //[njet]
   Int_t           jet_id[max_njet];   //[njet]
   Int_t           jet_puId[max_njet];   //[njet]
+  Float_t         jet_muf[max_njet];   //[njet]
 
 //----- SUSY SIGNALS
   Int_t           GenSusyMScan1;

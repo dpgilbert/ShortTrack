@@ -1805,6 +1805,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           //jet_qgl
           jet_area[njet] = cms3.pfjets_area().at(iJet);
           jet_rawPt[njet] = cms3.pfjets_p4().at(iJet).pt() * cms3.pfjets_undoJEC().at(iJet);
+          jet_muf[njet] = cms3.pfjets_muonE()[iJet] / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
 
           if (isMonoPFJet_Monojet(iJet)) jet_id[njet] = 5;
           else if (isMonoPFJet_MT2(iJet)) jet_id[njet] = 4;
@@ -1816,8 +1817,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
 	  // ad-hoc filter:
 	  //  check for jets with pt > 200, mufrac > 0.5, dphi(jet,MET) > pi - 0.4
-	  float jet_muf = cms3.pfjets_muonE()[iJet] / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
-	  if ( (jet_pt[njet] > 200.0) && (jet_muf > 0.5) && (DeltaPhi(jet_phi[njet],met_phi) > TMath::Pi() - 0.4) ) {
+	  if ( (jet_pt[njet] > 200.0) && (jet_muf[njet] > 0.5) && (DeltaPhi(jet_phi[njet],met_phi) > TMath::Pi() - 0.4) ) {
 	    ++nJet200MuFrac50DphiMet;
 	  }
 
@@ -2947,6 +2947,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("jet_area", jet_area, "jet_area[njet]/F" );
     BabyTree_->Branch("jet_id", jet_id, "jet_id[njet]/I" );
     BabyTree_->Branch("jet_puId", jet_puId, "jet_puId[njet]/I" );
+    BabyTree_->Branch("jet_muf", jet_muf, "jet_muf[njet]/F" );
     BabyTree_->Branch("weight_lepsf", &weight_lepsf );
     BabyTree_->Branch("weight_lepsf_UP", &weight_lepsf_UP );
     BabyTree_->Branch("weight_lepsf_DN", &weight_lepsf_DN );
@@ -3415,6 +3416,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       jet_area[i] = -999;
       jet_id[i] = -999;
       jet_puId[i] = -999;
+      jet_muf[i] = -999;
     }
 
     rebal_status = -999;
