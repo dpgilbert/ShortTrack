@@ -119,6 +119,7 @@ class babyMaker {
   Int_t           nJet30FailId;
   Int_t           nJet100FailId;
   Int_t           nJet20BadFastsim;
+  Int_t           nJet200MuFrac50DphiMet;
   Int_t           nMuons10;
   Int_t           nElectrons10;
   Int_t           nLepLowMT;

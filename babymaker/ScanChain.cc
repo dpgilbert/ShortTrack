@@ -1683,6 +1683,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       nJet30FailId = 0;
       nJet100FailId = 0;
       nJet20BadFastsim = 0;
+      nJet200MuFrac50DphiMet = 0;
       minMTBMet = 999999.;
       jet1_pt = 0.;
       jet2_pt = 0.;
@@ -1812,6 +1813,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           else jet_id[njet] = 0;
 
           jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
+
+	  // ad-hoc filter:
+	  //  check for jets with pt > 200, mufrac > 0.5, dphi(jet,MET) > pi - 0.4
+	  float jet_muf = cms3.pfjets_muonE()[iJet] / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
+	  if ( (jet_pt[njet] > 200.0) && (jet_muf > 0.5) && (DeltaPhi(jet_phi[njet],met_phi) > TMath::Pi() - 0.4) ) {
+	    ++nJet200MuFrac50DphiMet;
+	  }
 
           // use pt20 for bjet counting, pt30 for everything else
           if( (jet_pt[njet] > 20.0) && (fabs(jet_eta[njet]) < 2.4) ){ 
@@ -2614,6 +2622,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("nJet30FailId", &nJet30FailId );
     BabyTree_->Branch("nJet100FailId", &nJet100FailId );
     BabyTree_->Branch("nJet20BadFastsim", &nJet20BadFastsim );
+    BabyTree_->Branch("nJet200MuFrac50DphiMet", &nJet200MuFrac50DphiMet );
     BabyTree_->Branch("nMuons10", &nMuons10 );
     BabyTree_->Branch("nElectrons10", &nElectrons10 );
     BabyTree_->Branch("nLepLowMT", &nLepLowMT );
@@ -3023,6 +3032,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     nJet30FailId = -999;
     nJet100FailId = -999;
     nJet20BadFastsim = -999;
+    nJet200MuFrac50DphiMet = -999;
     nMuons10 = -999;
     nElectrons10 = -999;
     nLepLowMT = -999;
