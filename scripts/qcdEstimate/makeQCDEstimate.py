@@ -14,16 +14,15 @@ data_sample = "data_Run2016"
 qcd_sample = "qcd_ht"
 nonqcd_samples = ["top","wjets_ht","zinv_ht","dyjetsll_ht"]
 
-ht_reg_names = ["ht250to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf","ht1000toInf"]
+ht_reg_names = ["ht250to450","ht450to575","ht575to1000","ht1000to1500" ,"ht1500toInf","ht1000toInf","ht1500toInf"]
 nj_reg_names = ["j2to3","j4to6","j7toInf","j2to6","j4toInf","j2toInf"]
 top_reg_names = ["j2to3_b0","j2to3_b1","j2to3_b2","j4to6_b0","j4to6_b1","j4to6_b2",
                  "j7toInf_b0","j7toInf_b1","j7toInf_b2","j2to6_b3toInf","j7toInf_b3toInf"]
 vl_top_reg_names = ["j2to3_b0","j2to3_b1","j2to3_b2","j4toInf_b0","j4toInf_b1","j4toInf_b2","j2toInf_b3toInf"]
-hi_top_reg_names = ["j2toInf_b3toInf","j2toInf_b0toInf","j4toInf_b0toInf","j7toInf_b0toInf","j2toInf_b2toInf","j7toInf_b3toInf"]
+ssr_top_reg_names = ["j2toInf_b3toInf","j2toInf_b0toInf","j4toInf_b0toInf","j7toInf_b0toInf","j2toInf_b2toInf","j7toInf_b3toInf"]
 vl_top_reg_nums = [1, 2, 3, 12, 13, 14, 15]
-hi_top_reg_nums = [i for i in range(15,20)]+[11]
-uh_top_reg_nums = [i for i in range(1,len(top_reg_names)+1)]
-uh_top_reg_nums.extend(hi_top_reg_nums)
+ssr_low_top_reg_nums = [i for i in range(20,32,2)]
+ssr_hi_top_reg_nums = [i for i in range(21,32,2)]
 
 fout = ROOT.TFile(os.path.join(outdir,"qcdEstimate.root"),"RECREATE")
 
@@ -38,7 +37,8 @@ for iht,ht_reg in enumerate(ht_reg_names):
   fj_mc.SetDirectory(0)
   fj_data.SetDirectory(0)
   fin.Close()
-  
+
+  if iht == 6: ht_reg += "_ssr"
   d = fj_data_dir.mkdir("{0}_j2toInf_b0toInf".format(ht_reg.replace("ht","HT")))
   d.cd()
   fj_data.Write()
@@ -80,24 +80,25 @@ for iht,ht_reg in enumerate(ht_reg_names):
   if ht_reg == "ht250to450":
     topo_reg_names = vl_top_reg_names
   elif ht_reg == "ht1000toInf":
-    topo_reg_names = hi_top_reg_names
-  elif ht_reg == "ht1500toInf":
-    topo_reg_names.extend(hi_top_reg_names)
-    del topo_reg_names[-1]
+    topo_reg_names = ssr_top_reg_names
+  elif ht_reg == "ht1500toInf" and iht == 6:
+    topo_reg_names = ssr_top_reg_names
+  ht_reg_tmp = ht_reg
   for itop,top_reg in enumerate(topo_reg_names):
+    ht_reg = ht_reg_tmp
     nj_reg = top_reg.split('_')[0]
     nb_reg = top_reg.split('_')[1]
-    htAbbrev = ["VL","L","M","H","UH","HI"][iht]
+    htAbbrev = ["VL","L","M","H","UH","",""][iht]
      
     topi = itop+1
     if ht_reg == "ht250to450":
       topi = vl_top_reg_nums[itop]
     elif ht_reg == "ht1000toInf":
-      topi = hi_top_reg_nums[itop]
-    elif ht_reg == "ht1500toInf":
-      topi = uh_top_reg_nums[itop]
+      topi = ssr_low_top_reg_nums[itop]
+    elif ht_reg == "ht1500toInf" and iht == 6:
+        topi = ssr_hi_top_reg_nums[itop]
 
-    print "Getting CR yields and forming QCD estimate in region",str(topi)+htAbbrev
+    print "Getting CR yields and forming QCD estimate in region",str(topi)+htAbbrev    
     
     #purity calc
     fqcd = ROOT.TFile(os.path.join(MT2indir, qcd_sample+".root"))
@@ -171,7 +172,9 @@ for iht,ht_reg in enumerate(ht_reg_names):
       h_rphi_mc.SetBinError(i,err)
 
 #    fin.Close()
-     
+    tmp_ht_reg = ht_reg
+    if iht >= 5:        
+        ht_reg = ht_reg+"_ssr"
     d = purity_dir.mkdir("{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
     d.cd()
     h_purity.Write()
@@ -197,6 +200,7 @@ for iht,ht_reg in enumerate(ht_reg_names):
     h_r_systFit.Write()
     
     ## FORM ESTIMATE
+    ht_reg = tmp_ht_reg
     h_rb_data = rb_data_dir.Get("HT250toInf_{0}_b0toInf/yield_r_hat_data_HT250toInf_{0}_b0toInf".format(nj_reg))
     h_rb_mc = rb_mc_dir.Get("HT250toInf_{0}_b0toInf/yield_r_hat_mc_HT250toInf_{0}_b0toInf".format(nj_reg))
     h_fj_data = fj_data_dir.Get("{0}_j2toInf_b0toInf/yield_f_jets_data_{0}_j2toInf_b0toInf".format(ht_reg.replace("ht","HT")))
@@ -298,7 +302,9 @@ for iht,ht_reg in enumerate(ht_reg_names):
       val = qcdEstimate_mc.GetBinContent(i)
       err = qcdEstimate_mc.GetBinError(i)
       qcdEstimate_mc.SetBinError(i, np.sqrt((err/val)**2+fj_mc_relerr**2+rb_mc_err**2)*val if val!=0 else 0)
-    
+
+    if iht >= 5:
+        ht_reg += "_ssr"
     d = qcd_estimate_dir.mkdir("{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
     d.cd()
     qcdEstimate_data.Write()
