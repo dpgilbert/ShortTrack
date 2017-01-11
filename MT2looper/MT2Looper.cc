@@ -567,7 +567,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     }else{
       string ht_strs[6] = {"ht250to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf","ht1000toInf"};
       string syst_strs[3] = {"","_systUp","_systDown"};
-      for(int i=0; i<5; i++){
+      for(int i=0; i<6; i++){
         for(int j=0; j<3; j++){
           rphi_fits_data.push_back((TF1*)rphi_file->Get(Form("rphi_%s/fit_data%s",ht_strs[i].c_str(),syst_strs[j].c_str())));
           rphi_fits_mc.push_back((TF1*)rphi_file->Get(Form("rphi_%s/fit_mc%s",ht_strs[i].c_str(),syst_strs[j].c_str())));
