@@ -1,6 +1,8 @@
 #include <iostream>
 #include <utility>
 #include <vector>
+#include <string>
+#include <cctype>
 
 #include "TROOT.h"
 #include "TLatex.h"
@@ -38,6 +40,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
   const unsigned int ndirs = dirs.size();
   
   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+    bool is_ssr_dir = false;
     TString directory = "sr"+dirs.at(idir);
     TString fullhistname = directory + "/h_mt2bins";
     TString n_mt2bins_name = directory + "/h_n_mt2bins";
@@ -72,7 +75,10 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
     TH1D* h_ht_HI = (TH1D*) f_data->Get(directory+"/h_ht_HI");
     int ht_LOW = h_ht_LOW->GetBinContent(1);
     int ht_HI = h_ht_HI->GetBinContent(1);
-  
+
+    std::cout << dirs.at(idir) << std::endl;
+    if (not isalpha(dirs.at(idir)[dirs.at(idir).length()-1]) and ht_LOW == 1500) is_ssr_dir = true;
+    
     TH1D* h_nbjets_LOW = (TH1D*) f_data->Get(directory+"/h_nbjets_LOW");
     TH1D* h_nbjets_HI = (TH1D*) f_data->Get(directory+"/h_nbjets_HI");
     int nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
@@ -101,6 +107,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
     }
     
     std::string ht_str = "HT" + std::to_string(ht_LOW) + "to" + std::to_string(ht_HI);
+    if (is_ssr_dir) ht_str += "_ssr";
     std::string jet_str = (njets_HI_mod == njets_LOW) ? "j" + std::to_string(njets_LOW) : "j" + std::to_string(njets_LOW) + "to" + std::to_string(njets_HI_mod);
     std::string bjet_str = (nbjets_HI_mod == nbjets_LOW) ? "b" + std::to_string(nbjets_LOW) : "b" + std::to_string(nbjets_LOW) + "to" + std::to_string(nbjets_HI_mod);
   
@@ -338,6 +345,7 @@ void qcdRphiMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/
       std::string sr_string = k->GetTitle();
       sr_string.erase(0, 2);//remove "sr" from front of string
       dirs.push_back(sr_string);
+      std::cout << "Adding reg " << sr_string << std::endl;
     }
   }
 

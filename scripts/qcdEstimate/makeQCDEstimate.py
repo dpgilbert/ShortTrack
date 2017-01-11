@@ -32,13 +32,13 @@ for iht,ht_reg in enumerate(ht_reg_names):
   print "Getting fj in HT region",ht_reg
 
   fin = ROOT.TFile(os.path.join(outdir, "qcdHistos.root"))
-  fj_mc = fin.Get("fj_{0}/h_qcd_fj".format(ht_reg)).Clone("yield_f_jets_mc_{0}_j2toInf_b0toInf".format(ht_reg.replace("ht","HT")))
-  fj_data = fin.Get("fj_{0}/h_datasub_fj".format(ht_reg)).Clone("yield_f_jets_data_{0}_j2toInf_b0toInf".format(ht_reg.replace("ht","HT")))
+  fj_mc = fin.Get("fj_{0}/h_qcd_fj".format(ht_reg)).Clone("yield_f_jets_mc_{0}{1}j2toInf_b0toInf".format(ht_reg.replace("ht","HT"),"_ssr_" if iht == 6 else "_"))
+  fj_data = fin.Get("fj_{0}/h_datasub_fj".format(ht_reg)).Clone("yield_f_jets_data_{0}{1}j2toInf_b0toInf".format(ht_reg.replace("ht","HT"),"_ssr_" if iht == 6 else "_"))
   fj_mc.SetDirectory(0)
   fj_data.SetDirectory(0)
   fin.Close()
 
-  if iht == 6: ht_reg += "_ssr"
+  if iht == 6: ht_reg += "_ssr"  
   d = fj_data_dir.mkdir("{0}_j2toInf_b0toInf".format(ht_reg.replace("ht","HT")))
   d.cd()
   fj_data.Write()
@@ -102,7 +102,7 @@ for iht,ht_reg in enumerate(ht_reg_names):
     
     #purity calc
     fqcd = ROOT.TFile(os.path.join(MT2indir, qcd_sample+".root"))
-    h_purity = fqcd.Get("crqcd{0}{1}/h_mt2bins".format(topi,htAbbrev)).Clone("yield_qcdPurity_{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
+    h_purity = fqcd.Get("crqcd{0}{1}/h_mt2bins".format(topi,htAbbrev)).Clone("yield_qcdPurity_{0}{1}{2}".format(ht_reg.replace("ht","HT"), "_ssr_" if iht == 6 else "_", top_reg))
     h_denom = h_purity.Clone("h_denom")
     for nqcd in nonqcd_samples:
       fnqcd = ROOT.TFile(os.path.join(MT2indir, nqcd+".root"))
@@ -122,13 +122,13 @@ for iht,ht_reg in enumerate(ht_reg_names):
     h_mt2bins.SetDirectory(0)
     
     # do r_effective calculation
-    h_rphi_mc = h_mt2bins.Clone("yield_r_effectiveMC_{0}_{1}".format(ht_reg.replace("ht","HT"), top_reg))        
-    h_rphi_data = h_mt2bins.Clone("yield_r_effective_{0}_{1}".format(ht_reg.replace("ht","HT"), top_reg))
-    h_rphi_mc_systUp = h_mt2bins.Clone("yield_systUp_r_effectiveMC_{0}_{1}".format(ht_reg.replace("ht","HT"), top_reg))        
-    h_rphi_data_systUp = h_mt2bins.Clone("yield_systUp_r_effective_{0}_{1}".format(ht_reg.replace("ht","HT"), top_reg))
-    h_rphi_mc_systDown = h_mt2bins.Clone("yield_systDown_r_effectiveMC_{0}_{1}".format(ht_reg.replace("ht","HT"), top_reg))        
-    h_rphi_data_systDown = h_mt2bins.Clone("yield_systDown_r_effective_{0}_{1}".format(ht_reg.replace("ht","HT"), top_reg))
-    h_r_systFit = h_mt2bins.Clone("yield_r_systFit_{0}_{1}".format(ht_reg.replace("ht","HT"), top_reg))
+    h_rphi_mc = h_mt2bins.Clone("yield_r_effectiveMC_{0}{1}{2}".format(ht_reg.replace("ht","HT"), "_ssr_" if iht == 6 else "_", top_reg))        
+    h_rphi_data = h_mt2bins.Clone("yield_r_effective_{0}{1}{2}".format(ht_reg.replace("ht","HT"), "_ssr_" if iht == 6 else "_", top_reg))
+    h_rphi_mc_systUp = h_mt2bins.Clone("yield_systUp_r_effectiveMC_{0}{1}{2}".format(ht_reg.replace("ht","HT"), "_ssr_" if iht == 6 else "_", top_reg))        
+    h_rphi_data_systUp = h_mt2bins.Clone("yield_systUp_r_effective_{0}{1}{2}".format(ht_reg.replace("ht","HT"), "_ssr_" if iht == 6 else "_", top_reg))
+    h_rphi_mc_systDown = h_mt2bins.Clone("yield_systDown_r_effectiveMC_{0}{1}{2}".format(ht_reg.replace("ht","HT"), "_ssr_" if iht == 6 else "_", top_reg))        
+    h_rphi_data_systDown = h_mt2bins.Clone("yield_systDown_r_effective_{0}{1}{2}".format(ht_reg.replace("ht","HT"), "_ssr_" if iht == 6 else "_", top_reg))
+    h_r_systFit = h_mt2bins.Clone("yield_r_systFit_{0}{1}{2}".format(ht_reg.replace("ht","HT"), "_ssr_" if iht == 6 else "_", top_reg))
 
     for i in range(1,h_mt2bins.GetNbinsX()+1):
       dname = "crqcd{0}{1}".format(topi,htAbbrev)
@@ -146,7 +146,7 @@ for iht,ht_reg in enumerate(ht_reg_names):
       nCR = fin.Get(dname+"/h_mt2bins").GetBinContent(i)
       # all of the sumRphis are 0 anyway, so prevent divide by 0 errors
       if nCR==0:
-          nCR = 1
+        nCR = 1
       
       h_rphi_mc.SetBinContent(i, sumRphi_mc/nCR)
       h_rphi_data.SetBinContent(i, sumRphi/nCR)
@@ -173,7 +173,7 @@ for iht,ht_reg in enumerate(ht_reg_names):
 
 #    fin.Close()
     tmp_ht_reg = ht_reg
-    if iht >= 5:        
+    if iht == 6:        
         ht_reg = ht_reg+"_ssr"
     d = purity_dir.mkdir("{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
     d.cd()
@@ -303,7 +303,7 @@ for iht,ht_reg in enumerate(ht_reg_names):
       err = qcdEstimate_mc.GetBinError(i)
       qcdEstimate_mc.SetBinError(i, np.sqrt((err/val)**2+fj_mc_relerr**2+rb_mc_err**2)*val if val!=0 else 0)
 
-    if iht >= 5:
+    if iht == 6:
         ht_reg += "_ssr"
     d = qcd_estimate_dir.mkdir("{0}_{1}".format(ht_reg.replace("ht","HT"),top_reg))
     d.cd()
