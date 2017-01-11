@@ -2252,7 +2252,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
       //plot1D("h_mt2bins36J"+NB+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     }
   }
-  if (dirname=="20") { // Special plot to get MT2 template for 3B aggregate region
+  if (dirname=="sr20") { // Special plot to get MT2 template for 3B aggregate region
     if (nJet30_ > 2) {
       plot1D("h_mt2bins3J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     }
@@ -2644,6 +2644,11 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     if (nJet30_ > 3 && nJet30_ < 7) {
       plot1D("h_mt2bins36J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
       //plot1D("h_mt2bins36J"+NB+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    }
+  }
+  if (dirname=="crdy20") { // Special plot to get MT2 template for 3B aggregate region
+    if (nJet30_ > 2) {
+      plot1D("h_mt2bins3J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     }
   }
   
