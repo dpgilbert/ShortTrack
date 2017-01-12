@@ -90,6 +90,7 @@ const int MAX_SMEARS = 5000;
 // float meanShift = 0.00;
 const float EWK_CUTOFF = 100.0;   // cut on rebalanced MET to remove electroweak contamination in data
 float prescale_correction = 1.0;  //correct the weight if prescale is too high and we don't smear enough times
+
 std::vector<float> jet_pt;
 std::vector<float> jet_eta;
 std::vector<float> jet_phi;
@@ -117,7 +118,8 @@ SmearLooper::SmearLooper() :
   useBjetResponse_(true),
   coreScale_(1.),
   tailScale_(1.),
-  meanShift_(0.)
+  meanShift_(0.),
+  CUT_LEVEL_(1)
 {
   
   // set up signal binning
@@ -904,6 +906,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         
         random->SetSeed();
 
+
         for(int iSmear=0; iSmear<numSmears; iSmear++){
           evtweight_ = 1;
 
@@ -968,9 +971,11 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
           met_vec.SetPxPyPzE(new_met_x, new_met_y, 0, met_pt);
           met_phi = met_vec.Phi();
 
-          if(nJet30 < 2) continue;
-          if(ht < 250.0) continue;
-          if (met_pt < 30.) continue;
+
+          if(nJet30 < 2 && CUT_LEVEL_<3) continue;
+          if(ht < 250.0 && CUT_LEVEL_<3) continue;
+          if (met_pt < 30. && CUT_LEVEL_<3) continue;
+          if (met_pt<250. && ht>1000 && CUT_LEVEL_<2) continue;
 
           std::vector<LorentzVector> p4sForDphi;
           for(unsigned int i=0; i<jet_pt_smeared.size(); i++){
@@ -998,7 +1003,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
             if(ip4 < 4) deltaPhiMin = min(deltaPhiMin, DeltaPhi( met_phi, p4sForDphi.at(ip4).phi() ));
           }
 
-          //if(deltaPhiMin < 0.3) continue;
+          // if(deltaPhiMin < 0.3) continue;
 
           std::vector<LorentzVector> p4sForHems;
           for(unsigned int i=0; i<jet_pt_smeared.size(); i++){
@@ -1033,7 +1038,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
           TVector2 metVector = TVector2(met_pt*cos(met_phi), met_pt*sin(met_phi));
           diffMetMht = (mhtVector - metVector).Mod();
 
-          //if(diffMetMht/met_pt > 0.5) continue;
+          if(diffMetMht/met_pt > 0.5 && CUT_LEVEL_<2) continue;
                     
           vector<LorentzVector> hemJets;
           if(p4sForHems.size() > 1){
@@ -1045,7 +1050,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
           mt2 = HemMT2(met_pt, met_phi, hemJets.at(0), hemJets.at(1));
 
-          if(mt2 < 50.0) continue;
+          if(mt2 < 50.0 && CUT_LEVEL_<3) continue;
+          if(mt2 < 100.0 && CUT_LEVEL_<2) continue;
 
           jet1_pt = p4sForHems.at(0).pt();
           jet2_pt = p4sForHems.at(1).pt();
