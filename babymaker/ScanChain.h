@@ -119,6 +119,7 @@ class babyMaker {
   Int_t           nJet30FailId;
   Int_t           nJet100FailId;
   Int_t           nJet20BadFastsim;
+  Int_t           nJet200MuFrac50DphiMet;
   Int_t           nMuons10;
   Int_t           nElectrons10;
   Int_t           nLepLowMT;
@@ -499,6 +500,7 @@ class babyMaker {
   Float_t         jet_area[max_njet];   //[njet]
   Int_t           jet_id[max_njet];   //[njet]
   Int_t           jet_puId[max_njet];   //[njet]
+  Float_t         jet_muf[max_njet];   //[njet]
 
 //----- SUSY SIGNALS
   Int_t           GenSusyMScan1;

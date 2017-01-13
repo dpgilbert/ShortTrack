@@ -35,6 +35,7 @@ int main(int argc, char **argv) {
   int cflag = 0;
   int hflag = 0;
   int jflag = 1;
+  int lflag = 0;
   int mflag = 0;
   int rflag = 0;
   int tflag = 0;
@@ -43,7 +44,8 @@ int main(int argc, char **argv) {
   float core_scale = 1.;
   float tail_scale = 1.;
   float mean_shift = 0.;
-  
+  int cut_level = 1;
+
   int c;
   while ((c = getopt(argc, argv, "bc:hjm:n:rt:w")) != -1) {
     switch (c) {
@@ -63,6 +65,10 @@ int main(int argc, char **argv) {
     case 'm':
       mflag = 1;
       mean_shift = atof(optarg);
+      break;
+    case 'l':
+      lflag = 1;
+      cut_level = atoi(optarg);
       break;
     case 'n':
       max_events = atoi(optarg);
@@ -112,6 +118,8 @@ int main(int argc, char **argv) {
   if (rflag) looper->DoRebalanceAndSmear();
   if (tflag) looper->SetTailScale(tail_scale);
   if (wflag) looper->ApplyWeights();
+  if (lflag) looper->SetCutLevel(cut_level);
+  
   looper->loop(ch, output_dir + "/" + samples.at(0) + ".root", max_events);
   return 0;
 }
