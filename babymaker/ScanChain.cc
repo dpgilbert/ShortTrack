@@ -922,6 +922,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       vector<LorentzVector> p4sForHemsDN;
       vector<LorentzVector> p4sForHemsGamma;
       vector<LorentzVector> p4sForHemsZll;
+      vector<LorentzVector> p4sForHemsZllUP;
+      vector<LorentzVector> p4sForHemsZllDN;
       vector<LorentzVector> p4sForHemsZllMT;
       vector<LorentzVector> p4sForHemsRl;
 
@@ -930,6 +932,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       vector<LorentzVector> p4sForDphiDN;
       vector<LorentzVector> p4sForDphiGamma;
       vector<LorentzVector> p4sForDphiZll;
+      vector<LorentzVector> p4sForDphiZllUP;
+      vector<LorentzVector> p4sForDphiZllDN;
       vector<LorentzVector> p4sForDphiZllMT;
       vector<LorentzVector> p4sForDphiRl;
 
@@ -1131,6 +1135,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       if (nlep == 2) {
         float zll_met_px  = met_pt * cos(met_phi);
         float zll_met_py  = met_pt * sin(met_phi);	
+        float zll_met_pxUP  = met_ptJECup * cos(met_phiJECup);
+        float zll_met_pyUP  = met_ptJECup * sin(met_phiJECup);	
+        float zll_met_pxDN  = met_ptJECdn * cos(met_phiJECdn);
+        float zll_met_pyDN  = met_ptJECdn * sin(met_phiJECdn);	
         zll_met_px += lep_pt[0] * cos(lep_phi[0]);
         zll_met_px += lep_pt[1] * cos(lep_phi[1]);
         zll_met_py += lep_pt[0] * sin(lep_phi[0]);
@@ -1138,7 +1146,26 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         // recalculated MET with photons added
         TVector2 zll_met_vec(zll_met_px, zll_met_py);
         zll_met_pt = zll_met_vec.Mod();
-        zll_met_phi = TVector2::Phi_mpi_pi(zll_met_vec.Phi());      
+        zll_met_phi = TVector2::Phi_mpi_pi(zll_met_vec.Phi()); 
+
+        zll_met_pxUP += lep_pt[0] * cos(lep_phi[0]);
+        zll_met_pxUP += lep_pt[1] * cos(lep_phi[1]);
+        zll_met_pyUP += lep_pt[0] * sin(lep_phi[0]);
+        zll_met_pyUP += lep_pt[1] * sin(lep_phi[1]);
+        // recalculated MET with photons added
+        TVector2 zll_met_vecUP(zll_met_pxUP, zll_met_pyUP);
+        zll_met_ptJECup = zll_met_vecUP.Mod();
+        zll_met_phiJECup = TVector2::Phi_mpi_pi(zll_met_vecUP.Phi()); 
+
+        zll_met_pxDN += lep_pt[0] * cos(lep_phi[0]);
+        zll_met_pxDN += lep_pt[1] * cos(lep_phi[1]);
+        zll_met_pyDN += lep_pt[0] * sin(lep_phi[0]);
+        zll_met_pyDN += lep_pt[1] * sin(lep_phi[1]);
+        // recalculated MET with photons added
+        TVector2 zll_met_vecDN(zll_met_pxDN, zll_met_pyDN);
+        zll_met_ptJECdn = zll_met_vecDN.Mod();
+        zll_met_phiJECdn = TVector2::Phi_mpi_pi(zll_met_vecDN.Phi()); 
+     
         TLorentzVector l0(0,0,0,0);
         TLorentzVector l1(0,0,0,0);
         l0.SetPtEtaPhiM(lep_pt[0], lep_eta[0], lep_phi[0], lep_mass[0]);
@@ -1951,6 +1978,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               else if (jet2_ptJECup < 0.1) jet2_ptJECup = p4sCorrJetsUP.at(iJet).pt();
               p4sForHemsUP.push_back(p4sCorrJetsUP.at(iJet));
               p4sForDphiUP.push_back(p4sCorrJetsUP.at(iJet));
+              p4sForHemsZllUP.push_back(p4sCorrJetsUP.at(iJet));
+              p4sForDphiZllUP.push_back(p4sCorrJetsUP.at(iJet));
               nJet30JECup++;
             } // pt40
             //CSVv2IVFM
@@ -1961,6 +1990,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  // accept jets out to eta 4.7 for dphi
           else if ( (jet_ptUP > 30.0) && (fabs(jet_etaUP) < 4.7) ) {
             p4sForDphiUP.push_back(p4sCorrJetsUP.at(iJet));
+            p4sForDphiZllUP.push_back(p4sCorrJetsUP.at(iJet));
           }
 	  
 	  //repeat for JEC dn
@@ -1973,6 +2003,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               else if (jet2_ptJECdn < 0.1) jet2_ptJECdn = p4sCorrJetsDN.at(iJet).pt();
               p4sForHemsDN.push_back(p4sCorrJetsDN.at(iJet));
               p4sForDphiDN.push_back(p4sCorrJetsDN.at(iJet));
+              p4sForHemsZllDN.push_back(p4sCorrJetsDN.at(iJet));
+              p4sForDphiZllDN.push_back(p4sCorrJetsDN.at(iJet));
               nJet30JECdn++;
             } // pt40
             //CSVv2IVFM
@@ -1983,6 +2015,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  // accept jets out to eta 4.7 for dphi
           else if ( (jet_ptDN > 30.0) && (fabs(jet_etaDN) < 4.7) ) {
             p4sForDphiDN.push_back(p4sCorrJetsDN.at(iJet));
+            p4sForDphiZllDN.push_back(p4sCorrJetsDN.at(iJet));
           }
 
           // fill gamma_XXX variables before checking for lepton overlap. Why? Let's keep them consistent with the lepton-overlapped jets
@@ -2065,7 +2098,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       sort(p4sForHemsGamma.begin(), p4sForHemsGamma.end(), sortByPt);
       sort(p4sForDphiGamma.begin(), p4sForDphiGamma.end(), sortByPt);
       sort(p4sForHemsZll.begin(), p4sForHemsZll.end(), sortByPt);
+      sort(p4sForHemsZllUP.begin(), p4sForHemsZllUP.end(), sortByPt);
+      sort(p4sForHemsZllDN.begin(), p4sForHemsZllDN.end(), sortByPt);
       sort(p4sForDphiZll.begin(), p4sForDphiZll.end(), sortByPt);
+      sort(p4sForDphiZllUP.begin(), p4sForDphiZllUP.end(), sortByPt);
+      sort(p4sForDphiZllDN.begin(), p4sForDphiZllDN.end(), sortByPt);      
       sort(p4sForHemsZllMT.begin(), p4sForHemsZllMT.end(), sortByPt);
       sort(p4sForDphiZllMT.begin(), p4sForDphiZllMT.end(), sortByPt);
       sort(p4sForHemsRl.begin(), p4sForHemsRl.end(), sortByPt);
@@ -2245,36 +2282,78 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
       // MT2, MHT for Z-->ll control region
       zll_ht = 0;
+      zll_htJECup = 0;
+      zll_htJECdn = 0;
       zllmt_ht = 0;
       if (nlep == 2) {
         zll_deltaPhiMin = 999;
         LorentzVector sumMhtp4Zll = LorentzVector(0,0,0,0);
+        LorentzVector sumMhtp4ZllUP = LorentzVector(0,0,0,0);
+        LorentzVector sumMhtp4ZllDN = LorentzVector(0,0,0,0);
 
         // compute MHT using same objects as MT2 inputs
         for (unsigned int ip4 = 0; ip4 < p4sForHemsZll.size(); ++ip4) {
           zll_ht += p4sForHemsZll.at(ip4).pt();
           sumMhtp4Zll -= p4sForHemsZll.at(ip4);
         }
+        for (unsigned int ip4 = 0; ip4 < p4sForHemsZllUP.size(); ++ip4) {
+          zll_htJECup += p4sForHemsZllUP.at(ip4).pt();
+          sumMhtp4ZllUP -= p4sForHemsZllUP.at(ip4);
+        }
+        for (unsigned int ip4 = 0; ip4 < p4sForHemsZllDN.size(); ++ip4) {
+          zll_htJECdn += p4sForHemsZllDN.at(ip4).pt();
+          sumMhtp4ZllDN -= p4sForHemsZllDN.at(ip4);
+        }
 
         // min(dphi) of 4 leading objects
         for (unsigned int ip4 = 0; ip4 < p4sForDphiZll.size(); ++ip4) {
           if(ip4 < 4) zll_deltaPhiMin = min(zll_deltaPhiMin, DeltaPhi( zll_met_phi, p4sForDphiZll.at(ip4).phi() ));
         }
+        // min(dphi) of 4 leading objects
+        for (unsigned int ip4 = 0; ip4 < p4sForDphiZllUP.size(); ++ip4) {
+          if(ip4 < 4) zll_deltaPhiMinJECup = min(zll_deltaPhiMinJECup, DeltaPhi( zll_met_phiJECup, p4sForDphiZllUP.at(ip4).phi() ));
+        }
+        // min(dphi) of 4 leading objects
+        for (unsigned int ip4 = 0; ip4 < p4sForDphiZllDN.size(); ++ip4) {
+          if(ip4 < 4) zll_deltaPhiMinJECdn = min(zll_deltaPhiMinJECdn, DeltaPhi( zll_met_phiJECdn, p4sForDphiZllDN.at(ip4).phi() ));
+        }
 
         vector<LorentzVector> hemJetsZll;
+        vector<LorentzVector> hemJetsZllUP;
+        vector<LorentzVector> hemJetsZllDN;
         if(p4sForHemsZll.size() > 1){
           //Hemispheres used in MT2 calculation
           hemJetsZll = getHemJets(p4sForHemsZll);  
 
           zll_mt2 = HemMT2(zll_met_pt, zll_met_phi, hemJetsZll.at(0), hemJetsZll.at(1));
-        }	  
+        }
+        if(p4sForHemsZllUP.size() > 1){
+          hemJetsZllUP = getHemJets(p4sForHemsZllUP);  
+          zll_mt2JECup = HemMT2(zll_met_ptJECup, zll_met_phiJECup, hemJetsZllUP.at(0), hemJetsZllUP.at(1));
+        }
+        if(p4sForHemsZllDN.size() > 1){
+          hemJetsZllDN = getHemJets(p4sForHemsZllDN);  
+          zll_mt2JECdn = HemMT2(zll_met_ptJECdn, zll_met_phiJECdn, hemJetsZllDN.at(0), hemJetsZllDN.at(1));
+        }		  
 
         zll_mht_pt  = sumMhtp4Zll.pt();
         zll_mht_phi = sumMhtp4Zll.phi();
+        zll_mht_ptJECup  = sumMhtp4ZllUP.pt();
+        zll_mht_phiJECup = sumMhtp4ZllUP.phi();
+        zll_mht_ptJECdn  = sumMhtp4ZllDN.pt();
+        zll_mht_phiJECdn = sumMhtp4ZllDN.phi();
 
         TVector2 mhtVectorZll = TVector2(zll_mht_pt*cos(zll_mht_phi), zll_mht_pt*sin(zll_mht_phi));
         TVector2 metVectorZll = TVector2(zll_met_pt*cos(zll_met_phi), zll_met_pt*sin(zll_met_phi));
         zll_diffMetMht = (mhtVectorZll - metVectorZll).Mod();
+
+        TVector2 mhtVectorZllUP = TVector2(zll_mht_ptJECup*cos(zll_mht_phiJECup), zll_mht_ptJECup*sin(zll_mht_phiJECup));
+        TVector2 metVectorZllUP = TVector2(zll_met_ptJECup*cos(zll_met_phiJECup), zll_met_ptJECup*sin(zll_met_phiJECup));
+        zll_diffMetMhtJECup = (mhtVectorZllUP - metVectorZllUP).Mod();
+
+        TVector2 mhtVectorZllDN = TVector2(zll_mht_ptJECdn*cos(zll_mht_phiJECdn), zll_mht_ptJECdn*sin(zll_mht_phiJECdn));
+        TVector2 metVectorZllDN = TVector2(zll_met_ptJECdn*cos(zll_met_phiJECdn), zll_met_ptJECdn*sin(zll_met_phiJECdn));
+        zll_diffMetMhtJECdn = (mhtVectorZllDN - metVectorZllDN).Mod();
 
 
         // same for Zll MT region test
@@ -2832,6 +2911,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("zll_eta", &zll_eta );
     BabyTree_->Branch("zll_phi", &zll_phi );
     BabyTree_->Branch("zll_ht", &zll_ht );
+    BabyTree_->Branch("zll_mt2JECup", &zll_mt2JECup );
+    BabyTree_->Branch("zll_deltaPhiMinJECup", &zll_deltaPhiMinJECup );
+    BabyTree_->Branch("zll_diffMetMhtJECup", &zll_diffMetMhtJECup );
+    BabyTree_->Branch("zll_met_ptJECup", &zll_met_ptJECup );
+    BabyTree_->Branch("zll_met_phiJECup", &zll_met_phiJECup );
+    BabyTree_->Branch("zll_mht_ptJECup", &zll_mht_ptJECup );
+    BabyTree_->Branch("zll_mht_phiJECup", &zll_mht_phiJECup );
+    BabyTree_->Branch("zll_htJECup", &zll_htJECup );
+    BabyTree_->Branch("zll_mt2JECdn", &zll_mt2JECdn );
+    BabyTree_->Branch("zll_deltaPhiMinJECdn", &zll_deltaPhiMinJECdn );
+    BabyTree_->Branch("zll_diffMetMhtJECdn", &zll_diffMetMhtJECdn );
+    BabyTree_->Branch("zll_met_ptJECdn", &zll_met_ptJECdn );
+    BabyTree_->Branch("zll_met_phiJECdn", &zll_met_phiJECdn );
+    BabyTree_->Branch("zll_mht_ptJECdn", &zll_mht_ptJECdn );
+    BabyTree_->Branch("zll_mht_phiJECdn", &zll_mht_phiJECdn );
+    BabyTree_->Branch("zll_htJECdn", &zll_htJECdn );
     BabyTree_->Branch("zllmt_mt2", &zllmt_mt2 );
     BabyTree_->Branch("zllmt_deltaPhiMin", &zllmt_deltaPhiMin );
     BabyTree_->Branch("zllmt_diffMetMht", &zllmt_diffMetMht );
@@ -3198,6 +3293,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     zll_eta = -999.0;
     zll_phi = -999.0;
     zll_ht = -999.0;
+    zll_mt2JECup = -999.0;
+    zll_deltaPhiMinJECup = -999.0;
+    zll_diffMetMhtJECup = -999.0;
+    zll_met_ptJECup = -999.0;
+    zll_met_phiJECup = -999.0;
+    zll_mht_ptJECup = -999.0;
+    zll_mht_phiJECup = -999.0;
+    zll_htJECup = -999.0;
+    zll_mt2JECdn = -999.0;
+    zll_deltaPhiMinJECdn = -999.0;
+    zll_diffMetMhtJECdn = -999.0;
+    zll_met_ptJECdn = -999.0;
+    zll_met_phiJECdn = -999.0;
+    zll_mht_ptJECdn = -999.0;
+    zll_mht_phiJECdn = -999.0;
+    zll_htJECdn = -999.0;
     zllmt_mt2 = -999.0;
     zllmt_deltaPhiMin = -999.0;
     zllmt_diffMetMht = -999.0;

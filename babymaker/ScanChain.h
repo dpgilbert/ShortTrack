@@ -365,6 +365,24 @@ class babyMaker {
   Float_t         zll_phi;
   Float_t         zll_ht;
 
+  Float_t         zll_mt2JECup;
+  Float_t         zll_deltaPhiMinJECup;
+  Float_t         zll_diffMetMhtJECup;
+  Float_t         zll_met_ptJECup;
+  Float_t         zll_met_phiJECup;
+  Float_t         zll_mht_ptJECup;
+  Float_t         zll_mht_phiJECup;
+  Float_t         zll_htJECup;
+
+  Float_t         zll_mt2JECdn;
+  Float_t         zll_deltaPhiMinJECdn;
+  Float_t         zll_diffMetMhtJECdn;
+  Float_t         zll_met_ptJECdn;
+  Float_t         zll_met_phiJECdn;
+  Float_t         zll_mht_ptJECdn;
+  Float_t         zll_mht_phiJECdn;
+  Float_t         zll_htJECdn;
+
   // event level vars recalculated for Z-->ll MT control region
   Float_t         zllmt_mt2;
   Float_t         zllmt_deltaPhiMin;
