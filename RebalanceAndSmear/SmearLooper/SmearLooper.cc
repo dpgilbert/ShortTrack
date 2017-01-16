@@ -116,6 +116,7 @@ SmearLooper::SmearLooper() :
   makeSmearBaby_(false),
   useRawHists_(false),
   useBjetResponse_(true),
+  applyCuts_(true),
   coreScale_(1.),
   tailScale_(1.),
   meanShift_(0.),
@@ -971,12 +972,12 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
           met_vec.SetPxPyPzE(new_met_x, new_met_y, 0, met_pt);
           met_phi = met_vec.Phi();
 
-
-          if(nJet30 < 2 && CUT_LEVEL_<3) continue;
-          if(ht < 250.0 && CUT_LEVEL_<3) continue;
-          if (met_pt < 30. && CUT_LEVEL_<3) continue;
-          if (met_pt<250. && ht>1000 && CUT_LEVEL_<2) continue;
-
+          if(nJet30 < 2) continue;
+          if (applyCuts_) {
+            if(ht < 250.0) continue;
+            if (met_pt < 30.) continue;
+          }
+          
           std::vector<LorentzVector> p4sForDphi;
           for(unsigned int i=0; i<jet_pt_smeared.size(); i++){
             if(jet_pt_smeared.at(i) < 30.0 || fabs(jet_eta.at(i)) > 4.7) continue;
@@ -1052,6 +1053,10 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
           if(mt2 < 50.0 && CUT_LEVEL_<3) continue;
           if(mt2 < 100.0 && CUT_LEVEL_<2) continue;
+
+          if (applyCuts_) {
+            if(mt2 < 50.0) continue;
+          }
 
           jet1_pt = p4sForHems.at(0).pt();
           jet2_pt = p4sForHems.at(1).pt();
