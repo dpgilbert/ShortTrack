@@ -82,6 +82,8 @@ const bool saveLHEweights = false;
 const bool saveLHEweightsScaleOnly = true;
 // do rebalancing and save rebalanced jet info in babies
 const bool doRebal = false;
+// save high-pT PF cands
+const bool saveHighPtPFcands = true;
 
 babyMaker *t; //little sketchy, but need a global pointer to babyMaker for use in minuitFunction (for doing rebalancing)
 
@@ -1340,6 +1342,122 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         i++;
       }
 
+      //--
+      if (verbose) cout << "before highPtPFcands" << endl;
+
+      if (saveHighPtPFcands) {
+	//HIGH-PT PF CANDS
+	std::vector<std::pair<int, float> > pf_pt_ordering;
+	vector<float>vec_highPtPFcands_pt;
+	vector<float>vec_highPtPFcands_eta;
+	vector<float>vec_highPtPFcands_phi;
+	vector<float>vec_highPtPFcands_mass;
+	vector<float>vec_highPtPFcands_absIso;
+	vector<float>vec_highPtPFcands_relIsoAn04;
+	vector<float>vec_highPtPFcands_dz;
+	vector<int>  vec_highPtPFcands_pdgId;
+	vector<int>  vec_highPtPFcands_mcMatchId;
+	
+	nhighPtPFcands = 0;
+	for (unsigned int ipf = 0; ipf < pfcands_p4().size(); ipf++) {
+	  
+	  // if(cms3.pfcands_charge().at(ipf) == 0) continue;
+	  // if(fabs(cms3.pfcands_dz().at(ipf)) > 0.1) continue;
+	  // if(cms3.pfcands_fromPV().at(ipf) <= 1) continue;
+	  
+	  float cand_pt = cms3.pfcands_p4().at(ipf).pt();
+	  if(cand_pt < 50) continue;
+	  if(cand_pt < 300 && !(abs(cms3.pfcands_particleId().at(ipf)) == 13) ) continue;
+	  
+	  float absiso  = TrackIso(ipf, 0.3, 0.0, true, false);
+	  // if(applyLeptonIso && absiso >= min(0.2*cand_pt, 8.0)) continue;
+	  
+	  float mt = MT(cand_pt,cms3.pfcands_p4().at(ipf).phi(),met_pt,met_phi);
+	  int pdgId = abs(cms3.pfcands_particleId().at(ipf));
+	  float an04 = PFCandRelIsoAn04(ipf);
+	  
+	  if ((cand_pt > 5.) && (pdgId == 11 || pdgId == 13) && (absiso/cand_pt < 0.2) && (mt < 100.)) {
+	    // use PF leptons for hemispheres etc same as reco leptons
+	    //  BUT first do overlap removal with reco leptons to avoid double counting
+	    bool overlap = false;
+	    for(unsigned int iLep = 0; iLep < p4sUniqueLeptons.size(); iLep++){
+	      float thisDR = DeltaR(pfcands_p4().at(ipf).eta(), p4sUniqueLeptons.at(iLep).eta(), pfcands_p4().at(ipf).phi(), p4sUniqueLeptons.at(iLep).phi());
+	      // use small DR threshold to ONLY remove objects that are exactly the same (reco/pf leptons)
+	      if (thisDR < 0.01) {
+		overlap = true;
+		break;
+	      }
+	    } // loop over reco leps
+	    // if (!overlap) {
+	    
+	    //   p4sUniqueLeptons.push_back(cms3.pfcands_p4().at(ipf));
+	    //   if (doJetLepOverlapRemoval) {
+	    //     p4sForHems.push_back(cms3.pfcands_p4().at(ipf));
+	    //     p4sForHemsUP.push_back(cms3.pfcands_p4().at(ipf));
+	    //     p4sForHemsDN.push_back(cms3.pfcands_p4().at(ipf));
+	    //     p4sForDphi.push_back(cms3.pfcands_p4().at(ipf));
+	    //     p4sForDphiUP.push_back(cms3.pfcands_p4().at(ipf));
+	    //     p4sForDphiDN.push_back(cms3.pfcands_p4().at(ipf));
+	    //   }
+	    
+	    //   // // -------------- WORK IN PROGRESS -----------------
+	    //   // // update scale factor and uncertainty.  Assume SFs are 1 for fullsim, based on isolation T&P results.  use only uncertainty.
+	    //   // //  for fastsim, assume that ID + iso results apply, use SF and uncertainty
+	    //   // if (!isData && applyLeptonSFs) {
+	    //   //   weightStruct weights = getLepSFFromFile(cms3.pfcands_p4().at(ipf).pt(), cms3.pfcands_p4().at(ipf).eta(), pdgId);
+	    //   //   //weight_lepsf *= weights.cent;
+	    //   //   weight_lepsf_UP *= weights.up;
+	    //   //   weight_lepsf_DN *= weights.dn;
+	    //   //   if (isFastsim) {
+	    //   // 	weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.pfcands_p4().at(ipf).pt(), cms3.pfcands_p4().at(ipf).eta(), pdgId);
+	    //   // 	weight_lepsf *= weights_fastsim.cent;
+	    //   // 	weight_lepsf_UP *= weights_fastsim.up;
+	    //   // 	weight_lepsf_DN *= weights_fastsim.dn;
+	    //   //   }
+	    //   // }
+	    
+	    // }
+	  } // passing pflepton 
+	  
+	  pf_pt_ordering.push_back(std::pair<int,float>(nhighPtPFcands,cand_pt));
+	  
+	  vec_highPtPFcands_pt.push_back    ( cand_pt                          );
+	  vec_highPtPFcands_eta.push_back   ( cms3.pfcands_p4().at(ipf).eta()  );
+	  vec_highPtPFcands_phi.push_back   ( cms3.pfcands_p4().at(ipf).phi()  );
+	  vec_highPtPFcands_mass.push_back  ( cms3.pfcands_mass().at(ipf)      );
+	  vec_highPtPFcands_absIso.push_back( absiso                           );
+	  vec_highPtPFcands_relIsoAn04.push_back( an04                         );
+	  vec_highPtPFcands_dz.push_back    ( cms3.pfcands_dz().at(ipf)        );
+	  vec_highPtPFcands_pdgId.push_back ( cms3.pfcands_particleId().at(ipf));
+	  vec_highPtPFcands_mcMatchId.push_back ( 0 );
+	  
+	  nhighPtPFcands++;
+	}  
+	
+	//now fill arrays from vectors, pf cands with largest pt first
+	i = 0;
+	std::sort(pf_pt_ordering.begin(), pf_pt_ordering.end(), sortByValue);
+	for(std::vector<std::pair<int, float> >::iterator it = pf_pt_ordering.begin(); it!= pf_pt_ordering.end(); ++it){
+	  
+	  if (i >= max_nhighPtPFcands) {
+	    std::cout << "WARNING: attempted to fill more than " << max_nhighPtPFcands << " iso tracks" << std::endl;
+	    break;
+	  }
+
+	  highPtPFcands_pt[i]     = vec_highPtPFcands_pt.at(it->first);
+	  highPtPFcands_eta[i]    = vec_highPtPFcands_eta.at(it->first);
+	  highPtPFcands_phi[i]    = vec_highPtPFcands_phi.at(it->first);
+	  highPtPFcands_mass[i]   = vec_highPtPFcands_mass.at(it->first);
+	  highPtPFcands_absIso[i] = vec_highPtPFcands_absIso.at(it->first);
+	  highPtPFcands_relIsoAn04[i] = vec_highPtPFcands_relIsoAn04.at(it->first);
+	  highPtPFcands_dz[i]     = vec_highPtPFcands_dz.at(it->first);
+	  highPtPFcands_pdgId[i]  = vec_highPtPFcands_pdgId.at(it->first);
+	  highPtPFcands_mcMatchId[i]  = vec_highPtPFcands_mcMatchId.at(it->first);
+	  i++;
+	}
+
+      }//saveHighPtPFcands
+      
       // count number of unique lowMT leptons (e/mu)
       //  same collection as those used for jet/lepton overlap, but require MT < 100 explicitly
       nLepLowMT = 0;
@@ -2861,6 +2979,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("isoTrack_dz", isoTrack_dz, "isoTrack_dz[nisoTrack]/F" );
     BabyTree_->Branch("isoTrack_pdgId", isoTrack_pdgId, "isoTrack_pdgId[nisoTrack]/I" );
     BabyTree_->Branch("isoTrack_mcMatchId", isoTrack_mcMatchId, "isoTrack_mcMatchId[nisoTrack]/I" );
+    BabyTree_->Branch("nhighPtPFcands", &nhighPtPFcands, "nhighPtPFcands/I" );
+    BabyTree_->Branch("highPtPFcands_pt", highPtPFcands_pt, "highPtPFcands_pt[nhighPtPFcands]/F" );
+    BabyTree_->Branch("highPtPFcands_eta", highPtPFcands_eta, "highPtPFcands_eta[nhighPtPFcands]/F" );
+    BabyTree_->Branch("highPtPFcands_phi", highPtPFcands_phi, "highPtPFcands_phi[nhighPtPFcands]/F" );
+    BabyTree_->Branch("highPtPFcands_mass", highPtPFcands_mass, "highPtPFcands_mass[nhighPtPFcands]/F" );
+    BabyTree_->Branch("highPtPFcands_absIso", highPtPFcands_absIso, "highPtPFcands_absIso[nhighPtPFcands]/F" );
+    BabyTree_->Branch("highPtPFcands_relIsoAn04", highPtPFcands_relIsoAn04, "highPtPFcands_relIsoAn04[nhighPtPFcands]/F" );
+    BabyTree_->Branch("highPtPFcands_dz", highPtPFcands_dz, "highPtPFcands_dz[nhighPtPFcands]/F" );
+    BabyTree_->Branch("highPtPFcands_pdgId", highPtPFcands_pdgId, "highPtPFcands_pdgId[nhighPtPFcands]/I" );
+    BabyTree_->Branch("highPtPFcands_mcMatchId", highPtPFcands_mcMatchId, "highPtPFcands_mcMatchId[nhighPtPFcands]/I" );
     BabyTree_->Branch("nPFLep5LowMT", &nPFLep5LowMT, "nPFLep5LowMT/I" );
     BabyTree_->Branch("nPFHad10LowMT", &nPFHad10LowMT, "nPFHad10LowMT/I" );
     BabyTree_->Branch("ntau", &ntau, "ntau/I" );
@@ -3259,6 +3387,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     HLT_DiCentralPFJet55_PFMET110 = -999;
     nlep = -999;
     nisoTrack = -999;
+    nhighPtPFcands = -999;
     nPFLep5LowMT = -999;
     nPFHad10LowMT = -999;
     ntau = -999;
@@ -3411,6 +3540,18 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       isoTrack_dz[i] = -999;
       isoTrack_pdgId[i] = -999;
       isoTrack_mcMatchId[i] = -999;
+    }
+
+    for(int i=0; i < max_nhighPtPFcands; i++){
+      highPtPFcands_pt[i] = -999;
+      highPtPFcands_eta[i] = -999;
+      highPtPFcands_phi[i] = -999;
+      highPtPFcands_mass[i] = -999;
+      highPtPFcands_absIso[i] = -999;
+      highPtPFcands_relIsoAn04[i] = -999;
+      highPtPFcands_dz[i] = -999;
+      highPtPFcands_pdgId[i] = -999;
+      highPtPFcands_mcMatchId[i] = -999;
     }
 
     for(int i=0; i < max_ntau; i++){

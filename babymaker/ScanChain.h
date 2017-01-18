@@ -299,6 +299,19 @@ class babyMaker {
   Int_t             nPFLep5LowMT;
   Int_t             nPFHad10LowMT;
 
+//----- HIGH PT PF CANDS
+  static const int max_nhighPtPFcands = 50;
+  Int_t             nhighPtPFcands;
+  Float_t           highPtPFcands_pt[max_nhighPtPFcands];
+  Float_t           highPtPFcands_eta[max_nhighPtPFcands];
+  Float_t           highPtPFcands_phi[max_nhighPtPFcands];
+  Float_t           highPtPFcands_mass[max_nhighPtPFcands];
+  Float_t           highPtPFcands_absIso[max_nhighPtPFcands];
+  Float_t           highPtPFcands_relIsoAn04[max_nhighPtPFcands];
+  Float_t           highPtPFcands_dz[max_nhighPtPFcands];
+  Int_t             highPtPFcands_pdgId[max_nhighPtPFcands];
+  Int_t             highPtPFcands_mcMatchId[max_nhighPtPFcands];
+
 //----- TAUS
   static const int max_ntau = 50;
   Int_t           ntau;
