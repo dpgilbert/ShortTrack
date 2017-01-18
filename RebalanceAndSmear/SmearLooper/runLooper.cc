@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
   int cut_level = 1;
 
   int c;
-  while ((c = getopt(argc, argv, "bc:hjm:n:rt:w")) != -1) {
+  while ((c = getopt(argc, argv, "bc:hjl:m:n:rt:w")) != -1) {
     switch (c) {
     case 'b':
       bflag = 1;

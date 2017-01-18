@@ -116,7 +116,6 @@ SmearLooper::SmearLooper() :
   makeSmearBaby_(false),
   useRawHists_(false),
   useBjetResponse_(true),
-  applyCuts_(true),
   coreScale_(1.),
   tailScale_(1.),
   meanShift_(0.),
@@ -972,12 +971,12 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
           met_vec.SetPxPyPzE(new_met_x, new_met_y, 0, met_pt);
           met_phi = met_vec.Phi();
 
-          if(nJet30 < 2) continue;
-          if (applyCuts_) {
-            if(ht < 250.0) continue;
-            if (met_pt < 30.) continue;
-          }
-          
+
+          if(nJet30 < 2 && CUT_LEVEL_<3) continue;
+          if(ht < 250.0 && CUT_LEVEL_<3) continue;
+          if (met_pt < 30. && CUT_LEVEL_<3) continue;
+          if (met_pt<250. && ht>1000 && CUT_LEVEL_<2) continue;
+
           std::vector<LorentzVector> p4sForDphi;
           for(unsigned int i=0; i<jet_pt_smeared.size(); i++){
             if(jet_pt_smeared.at(i) < 30.0 || fabs(jet_eta.at(i)) > 4.7) continue;
@@ -1044,22 +1043,19 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
           vector<LorentzVector> hemJets;
           if(p4sForHems.size() > 1){
             hemJets = getHemJets(p4sForHems); 
+            mt2 = HemMT2(met_pt, met_phi, hemJets.at(0), hemJets.at(1));
+            jet1_pt = p4sForHems.at(0).pt();
+            jet2_pt = p4sForHems.at(1).pt();
           }else{
-            std::cout << "Problem with jets for hemispheres!" << std::endl;
-            return;
+            // std::cout << "Problem with jets for hemispheres!" << std::endl;
+            // return;
+              mt2 = -1;
+              jet1_pt = -1;
+              jet2_pt = -1;
           }
-
-          mt2 = HemMT2(met_pt, met_phi, hemJets.at(0), hemJets.at(1));
 
           if(mt2 < 50.0 && CUT_LEVEL_<3) continue;
           if(mt2 < 100.0 && CUT_LEVEL_<2) continue;
-
-          if (applyCuts_) {
-            if(mt2 < 50.0) continue;
-          }
-
-          jet1_pt = p4sForHems.at(0).pt();
-          jet2_pt = p4sForHems.at(1).pt();
 
           RS_vars_["mt2"] = mt2;
           RS_vars_["reb_met_pt"] = reb_met_pt;
