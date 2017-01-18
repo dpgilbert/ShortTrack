@@ -1361,63 +1361,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	nhighPtPFcands = 0;
 	for (unsigned int ipf = 0; ipf < pfcands_p4().size(); ipf++) {
 	  
-	  // if(cms3.pfcands_charge().at(ipf) == 0) continue;
-	  // if(fabs(cms3.pfcands_dz().at(ipf)) > 0.1) continue;
-	  // if(cms3.pfcands_fromPV().at(ipf) <= 1) continue;
-	  
 	  float cand_pt = cms3.pfcands_p4().at(ipf).pt();
 	  if(cand_pt < 50) continue;
 	  if(cand_pt < 300 && !(abs(cms3.pfcands_particleId().at(ipf)) == 13) ) continue;
 	  
 	  float absiso  = TrackIso(ipf, 0.3, 0.0, true, false);
-	  // if(applyLeptonIso && absiso >= min(0.2*cand_pt, 8.0)) continue;
-	  
-	  float mt = MT(cand_pt,cms3.pfcands_p4().at(ipf).phi(),met_pt,met_phi);
-	  int pdgId = abs(cms3.pfcands_particleId().at(ipf));
 	  float an04 = PFCandRelIsoAn04(ipf);
-	  
-	  if ((cand_pt > 5.) && (pdgId == 11 || pdgId == 13) && (absiso/cand_pt < 0.2) && (mt < 100.)) {
-	    // use PF leptons for hemispheres etc same as reco leptons
-	    //  BUT first do overlap removal with reco leptons to avoid double counting
-	    bool overlap = false;
-	    for(unsigned int iLep = 0; iLep < p4sUniqueLeptons.size(); iLep++){
-	      float thisDR = DeltaR(pfcands_p4().at(ipf).eta(), p4sUniqueLeptons.at(iLep).eta(), pfcands_p4().at(ipf).phi(), p4sUniqueLeptons.at(iLep).phi());
-	      // use small DR threshold to ONLY remove objects that are exactly the same (reco/pf leptons)
-	      if (thisDR < 0.01) {
-		overlap = true;
-		break;
-	      }
-	    } // loop over reco leps
-	    // if (!overlap) {
-	    
-	    //   p4sUniqueLeptons.push_back(cms3.pfcands_p4().at(ipf));
-	    //   if (doJetLepOverlapRemoval) {
-	    //     p4sForHems.push_back(cms3.pfcands_p4().at(ipf));
-	    //     p4sForHemsUP.push_back(cms3.pfcands_p4().at(ipf));
-	    //     p4sForHemsDN.push_back(cms3.pfcands_p4().at(ipf));
-	    //     p4sForDphi.push_back(cms3.pfcands_p4().at(ipf));
-	    //     p4sForDphiUP.push_back(cms3.pfcands_p4().at(ipf));
-	    //     p4sForDphiDN.push_back(cms3.pfcands_p4().at(ipf));
-	    //   }
-	    
-	    //   // // -------------- WORK IN PROGRESS -----------------
-	    //   // // update scale factor and uncertainty.  Assume SFs are 1 for fullsim, based on isolation T&P results.  use only uncertainty.
-	    //   // //  for fastsim, assume that ID + iso results apply, use SF and uncertainty
-	    //   // if (!isData && applyLeptonSFs) {
-	    //   //   weightStruct weights = getLepSFFromFile(cms3.pfcands_p4().at(ipf).pt(), cms3.pfcands_p4().at(ipf).eta(), pdgId);
-	    //   //   //weight_lepsf *= weights.cent;
-	    //   //   weight_lepsf_UP *= weights.up;
-	    //   //   weight_lepsf_DN *= weights.dn;
-	    //   //   if (isFastsim) {
-	    //   // 	weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.pfcands_p4().at(ipf).pt(), cms3.pfcands_p4().at(ipf).eta(), pdgId);
-	    //   // 	weight_lepsf *= weights_fastsim.cent;
-	    //   // 	weight_lepsf_UP *= weights_fastsim.up;
-	    //   // 	weight_lepsf_DN *= weights_fastsim.dn;
-	    //   //   }
-	    //   // }
-	    
-	    // }
-	  } // passing pflepton 
 	  
 	  pf_pt_ordering.push_back(std::pair<int,float>(nhighPtPFcands,cand_pt));
 	  
