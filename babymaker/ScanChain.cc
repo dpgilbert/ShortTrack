@@ -1939,7 +1939,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	      if (jet_pt[njet] > 30.0) nBJet30mva++;
             }
             //CSVv2IVFM
-            if(jet_btagCSV[njet] >= 0.800){
+            if(jet_btagCSV[njet] >= 0.8484){
               nBJet20++; 
               nBJet20csv++;
 	      if (jet_pt[njet] > 30.0) nBJet30csv++;
@@ -2058,7 +2058,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               nJet30JECup++;
             } // pt40
             //CSVv2IVFM
-            if(jet_btagCSV[njet] >= 0.800) {
+            if(jet_btagCSV[njet] >= 0.8484) {
               nBJet20JECup++;
             } // pass med btag
           } // pt 20 eta 2.5
@@ -2083,7 +2083,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               nJet30JECdn++;
             } // pt40
             //CSVv2IVFM
-            if(jet_btagCSV[njet] >= 0.800) {
+            if(jet_btagCSV[njet] >= 0.8484) {
               nBJet20JECdn++;
             } // pass med btag
           } // pt 20 eta 2.5
@@ -2109,7 +2109,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               if(jet_btagMVA[njet] >= 0.185){ // CombinedMVAv2
                   gamma_nBJet20mva++;
               }
-              if(jet_btagCSV[njet] >= 0.800) { 
+              if(jet_btagCSV[njet] >= 0.8484) { 
                 gamma_nBJet20++; 
                 gamma_nBJet20csv++;
                 if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++; 
@@ -3692,7 +3692,7 @@ void babyMaker::minuitFunction(int& nDim, double* gout, double& result, double p
     float pt_constrained_y = 0.0;
     float min_prob = 1E-20;
     for(int i=0; i < t->nRebalJets; i++){
-        bool isBjet = (t->rebal_jetbtagcsv[i] > 0.800);
+        bool isBjet = (t->rebal_jetbtagcsv[i] > 0.8484);
         float prob = t->rebal_reader.GetValue(t->rebal_jetpt[i]/par[i], fabs(t->rebal_jeteta[i]), isBjet, par[i], t->isData);
         prob = max(prob, min_prob);
         likelihood += log(prob);
