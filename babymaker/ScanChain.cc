@@ -202,50 +202,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     }
   }
 
-  // ----------------------------------
-  // retrieve JEC from files, if using
-  // ----------------------------------
-
-  std::vector<std::string> jetcorr_filenames_pfL1FastJetL2L3;
-  FactorizedJetCorrector *jet_corrector_pfL1FastJetL2L3(0);
-  JetCorrectionUncertainty* jetcorr_uncertainty(0);
-
-  if (applyJECfromFile) {
-    jetcorr_filenames_pfL1FastJetL2L3.clear();
-    std::string jetcorr_uncertainty_filename;
-
-    if (isDataFromFileName) {
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_DATA_L1FastJet_AK4PFchs.txt");
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_DATA_L2Relative_AK4PFchs.txt");
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_DATA_L3Absolute_AK4PFchs.txt");
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_DATA_L2L3Residual_AK4PFchs.txt");
-    } else if (isFastsim) {
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_FastSimV1_MC_L1FastJet_AK4PFchs.txt");
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_FastSimV1_MC_L2Relative_AK4PFchs.txt");
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_FastSimV1_MC_L3Absolute_AK4PFchs.txt");
-      jetcorr_uncertainty_filename = "jetCorrections/Spring16_FastSimV1_MC_Uncertainty_AK4PFchs.txt"; 
-    } else {
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_25nsV5_MC_L1FastJet_AK4PFchs.txt");
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_25nsV5_MC_L2Relative_AK4PFchs.txt");
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_25nsV5_MC_L3Absolute_AK4PFchs.txt");
-      jetcorr_uncertainty_filename = "jetCorrections/Summer16_25nsV5_MC_Uncertainty_AK4PFchs.txt";
-    }
-
-    cout << "applying JEC from the following files:" << endl;
-    for (unsigned int ifile = 0; ifile < jetcorr_filenames_pfL1FastJetL2L3.size(); ++ifile) {
-      cout << "   " << jetcorr_filenames_pfL1FastJetL2L3.at(ifile) << endl;
-    }
-
-    jet_corrector_pfL1FastJetL2L3  = makeJetCorrector(jetcorr_filenames_pfL1FastJetL2L3);
-
-    if (!isDataFromFileName) {
-      cout << "applying JEC uncertainties from file: " << endl
-	   << "   " << jetcorr_uncertainty_filename << endl;
-      jetcorr_uncertainty = new JetCorrectionUncertainty(jetcorr_uncertainty_filename);
-    }
-      
-  } // if applyJECfromFile
-
   // get susy xsec file
   TH1F* h_sig_xsec(0);
   if ((baby_name.find("T1") != std::string::npos) || (baby_name.find("T2") != std::string::npos)) {
@@ -278,7 +234,113 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     cout << "running on file: " << currentFile->GetTitle() << endl;
 
     evt_id = sampleID(currentFile->GetTitle());
+    TString currentFileName(currentFile->GetTitle());
 
+    // ----------------------------------
+    // retrieve JEC from files, if using
+    //   need to do within file loop to access sample names
+    // ----------------------------------
+
+    // stores current corrections for a given event
+    FactorizedJetCorrector *jet_corrector_pfL1FastJetL2L3_current(0);
+    
+    // default corrections
+    std::vector<std::string> jetcorr_filenames_pfL1FastJetL2L3;
+    FactorizedJetCorrector *jet_corrector_pfL1FastJetL2L3(0);
+    JetCorrectionUncertainty* jetcorr_uncertainty(0);
+
+    // corrections for later runs in 2016F
+    std::vector<std::string> jetcorr_filenames_pfL1FastJetL2L3_postrun278802;
+    FactorizedJetCorrector *jet_corrector_pfL1FastJetL2L3_postrun278802(0);
+    
+    if (applyJECfromFile) {
+      jetcorr_filenames_pfL1FastJetL2L3.clear();
+      std::string jetcorr_uncertainty_filename;
+
+      if (isDataFromFileName) {
+	// // old corrections, independent of run
+	// jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_DATA_L1FastJet_AK4PFchs.txt");
+	// jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_DATA_L2Relative_AK4PFchs.txt");
+	// jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_DATA_L3Absolute_AK4PFchs.txt");
+	// jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_DATA_L2L3Residual_AK4PFchs.txt");
+
+	// run dependent corrections for 80X data
+	if (currentFileName.Contains("2016B") || currentFileName.Contains("2016C") || currentFileName.Contains("2016D")) {
+	  jetcorr_filenames_pfL1FastJetL2L3.clear();
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016BCDV2_DATA_L1FastJet_AK4PFchs.txt"   );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016BCDV2_DATA_L2Relative_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016BCDV2_DATA_L3Absolute_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016BCDV2_DATA_L2L3Residual_AK4PFchs.txt");
+	}
+	else if (currentFileName.Contains("2016E") || currentFileName.Contains("2016F")) {
+	  jetcorr_filenames_pfL1FastJetL2L3.clear();
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016EFV2_DATA_L1FastJet_AK4PFchs.txt"   );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016EFV2_DATA_L2Relative_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016EFV2_DATA_L3Absolute_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016EFV2_DATA_L2L3Residual_AK4PFchs.txt");
+
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.clear();
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Spring16_23Sep2016GV2_DATA_L1FastJet_AK4PFchs.txt"   );
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Spring16_23Sep2016GV2_DATA_L2Relative_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Spring16_23Sep2016GV2_DATA_L3Absolute_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Spring16_23Sep2016GV2_DATA_L2L3Residual_AK4PFchs.txt");
+	}
+	else if (currentFileName.Contains("2016G")) {
+	  jetcorr_filenames_pfL1FastJetL2L3.clear();
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016GV2_DATA_L1FastJet_AK4PFchs.txt"   );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016GV2_DATA_L2Relative_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016GV2_DATA_L3Absolute_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016GV2_DATA_L2L3Residual_AK4PFchs.txt");
+	}
+	else if (currentFileName.Contains("2016H")) {
+	  jetcorr_filenames_pfL1FastJetL2L3.clear();
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016HV2_DATA_L1FastJet_AK4PFchs.txt"   );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016HV2_DATA_L2Relative_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016HV2_DATA_L3Absolute_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016HV2_DATA_L2L3Residual_AK4PFchs.txt");
+	}
+      } else if (isFastsim) {
+	jetcorr_filenames_pfL1FastJetL2L3.clear();
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_FastSimV1_MC_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_FastSimV1_MC_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_FastSimV1_MC_L3Absolute_AK4PFchs.txt");
+	jetcorr_uncertainty_filename = "jetCorrections/Spring16_FastSimV1_MC_Uncertainty_AK4PFchs.txt"; 
+      } else if (currentFileName.Contains("Spring16")) { // Spring16 MC (ICHEP)
+	jetcorr_filenames_pfL1FastJetL2L3.clear();
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_MC_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_MC_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_MC_L3Absolute_AK4PFchs.txt");
+	jetcorr_uncertainty_filename = "jetCorrections/Spring16_25nsV6_MC_Uncertainty_AK4PFchs.txt";
+      } else { // default: Summer16 corrections (Moriond 2017)
+	jetcorr_filenames_pfL1FastJetL2L3.clear();
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_25nsV5_MC_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_25nsV5_MC_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_25nsV5_MC_L3Absolute_AK4PFchs.txt");
+	jetcorr_uncertainty_filename = "jetCorrections/Summer16_25nsV5_MC_Uncertainty_AK4PFchs.txt";
+      }
+
+      cout << "applying JEC from the following files:" << endl;
+      for (unsigned int ifile = 0; ifile < jetcorr_filenames_pfL1FastJetL2L3.size(); ++ifile) {
+	cout << "   " << jetcorr_filenames_pfL1FastJetL2L3.at(ifile) << endl;
+      }
+      jet_corrector_pfL1FastJetL2L3  = makeJetCorrector(jetcorr_filenames_pfL1FastJetL2L3);
+      
+      if (isDataFromFileName && currentFileName.Contains("2016F")) {
+	cout << "additional run-dependent JEC from the following files:" << endl;
+	for (unsigned int ifile = 0; ifile < jetcorr_filenames_pfL1FastJetL2L3_postrun278802.size(); ++ifile) {
+	  cout << "   " << jetcorr_filenames_pfL1FastJetL2L3_postrun278802.at(ifile) << endl;
+	}
+	jet_corrector_pfL1FastJetL2L3_postrun278802  = makeJetCorrector(jetcorr_filenames_pfL1FastJetL2L3);
+      }
+
+      if (!isDataFromFileName) {
+	cout << "applying JEC uncertainties from file: " << endl
+	     << "   " << jetcorr_uncertainty_filename << endl;
+	jetcorr_uncertainty = new JetCorrectionUncertainty(jetcorr_uncertainty_filename);
+      }
+      
+    } // if applyJECfromFile
+    
     // Get File Content
     TFile* f = TFile::Open( currentFile->GetTitle() );
     TTree *tree = (TTree*)f->Get("Events");
@@ -401,6 +463,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         continue;
       }
 
+      // set jet corrector based on run number for data
+      if (isData && run >= 278802 && run <= 278808) {
+	jet_corrector_pfL1FastJetL2L3_current = jet_corrector_pfL1FastJetL2L3_postrun278802;
+      } else {
+	jet_corrector_pfL1FastJetL2L3_current = jet_corrector_pfL1FastJetL2L3;
+      }
+
       if (!removePostProcVars) {
         evt_nEvts = cms3.evt_nEvts();
         evt_scale1fb = cms3.evt_scale1fb();
@@ -436,14 +505,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	std::pair <float, float> t1metDN;
 	std::pair <float, float> t1met;
 	if (!isData) {
-	  t1metUP = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3, jetcorr_uncertainty, 1,doRecomputeRawPFMET_);
-	  t1metDN = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3, jetcorr_uncertainty, 0,doRecomputeRawPFMET_);
-	  t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3, 0, 0,doRecomputeRawPFMET_);
+	  t1metUP = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, jetcorr_uncertainty, 1,doRecomputeRawPFMET_);
+	  t1metDN = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, jetcorr_uncertainty, 0,doRecomputeRawPFMET_);
+	  t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, 0, 0,doRecomputeRawPFMET_);
 	}
 	else {
-	  t1metUP = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3); // never apply variations to data
-	  t1metDN = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3); // never apply variations to data
-	  t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3); // never apply variations to data
+	  t1metUP = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current); // never apply variations to data
+	  t1metDN = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current); // never apply variations to data
+	  t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current); // never apply variations to data
 	}
 	met_pt  = t1met.first;
 	met_phi = t1met.second;
@@ -1655,11 +1724,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           LorentzVector pfjet_p4_uncor = cms3.pfjets_p4().at(iJet) * cms3.pfjets_undoJEC().at(iJet);
 
           // get L1FastL2L3Residual total correction
-          jet_corrector_pfL1FastJetL2L3->setRho   ( cms3.evt_fixgridfastjet_all_rho() );
-          jet_corrector_pfL1FastJetL2L3->setJetA  ( cms3.pfjets_area().at(iJet)       );
-          jet_corrector_pfL1FastJetL2L3->setJetPt ( pfjet_p4_uncor.pt()               );
-          jet_corrector_pfL1FastJetL2L3->setJetEta( pfjet_p4_uncor.eta()              );
-          double corr = jet_corrector_pfL1FastJetL2L3->getCorrection();
+          jet_corrector_pfL1FastJetL2L3_current->setRho   ( cms3.evt_fixgridfastjet_all_rho() );
+          jet_corrector_pfL1FastJetL2L3_current->setJetA  ( cms3.pfjets_area().at(iJet)       );
+          jet_corrector_pfL1FastJetL2L3_current->setJetPt ( pfjet_p4_uncor.pt()               );
+          jet_corrector_pfL1FastJetL2L3_current->setJetEta( pfjet_p4_uncor.eta()              );
+          double corr = jet_corrector_pfL1FastJetL2L3_current->getCorrection();
 
           // check for negative correction
           if (corr < 0. && fabs(pfjet_p4_uncor.eta()) < 4.7) {
@@ -2685,6 +2754,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
     delete tree;
     f->Close();
+
+    if (applyJECfromFile) {
+      delete jet_corrector_pfL1FastJetL2L3;
+      if (jet_corrector_pfL1FastJetL2L3_postrun278802) delete jet_corrector_pfL1FastJetL2L3_postrun278802;
+      if (!isDataFromFileName) delete jetcorr_uncertainty;  
+    }
+
     }//end loop on files
 
     cout << "Processed " << nEventsTotal << " events" << endl;
@@ -2713,9 +2789,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	delete reader_fastsim_DN;
       }
     }
-
-    if (applyJECfromFile) delete jet_corrector_pfL1FastJetL2L3;
-    if (!isDataFromFileName && applyJECfromFile) delete jetcorr_uncertainty;
 
     bmark->Stop("benchmark");
     cout << endl;
