@@ -155,25 +155,28 @@ The directory also contains other skimming scripts for specific purposes.
 
 
 
-#####################################################################################
-###                                                                               ###
-###   Instructions for running MT2 baby making within the AutoTwopler framework   ###
-###                                                                               ###
-#####################################################################################
+#################################################################################
+#                                                                               #
+#   Instructions for running MT2 baby making within the AutoTwopler framework   #
+#                                                                               #
+#################################################################################
 
 1. Need to checkout NtupleTools inside of MT2Analysis
-
+``` bash
 git clone git@github.com:cmstas/NtupleTools.git
-
+```
 
 2. Run setup script (in NtupleTools/AutoTwopler)
+``` bash
+. setup.sh
+```
 
-. setup.py
+3. Preparing input files for job submission (in MT2Analysis/babymaker/batchsubmit)
+``` bash
+. make_job_inputs.sh
+```
 
-
-3. Preparing input files for job submission
-
-Need to create package.tar.gz containing:
+This creates a package.tar.gz in batchsubmit/job_input containing:
 
 - btagsf
 - data
@@ -184,14 +187,13 @@ Need to create package.tar.gz containing:
 - LinkDef*.pcm
 - executable (processBaby)
 
-Copy it to batchsubmit/job_input.
-Also need to copy the following files to batchsubmit/job_input:
+It also copies the following files to batchsubmit/job_input:
 
-wrapper_auto.sh
-sweeproot.sh
-sweeproot_macro.C
-merge_script.sh
-merge_macro.C
+- wrapper_auto.sh
+- sweeproot.sh
+- sweeproot_macro.C
+- merge_script.sh
+- merge_macro.C
 
 4. Job submission
 
@@ -200,6 +202,6 @@ The file mt2.py should only need to be touched rarely.  It contains dataset --> 
 Most interaction is through ducks.py, which is also where parameters from mt2.py can (and should) be overridden.
 
 5. Launching jobs
-
+``` bash
 python ducks.py
-
+```
