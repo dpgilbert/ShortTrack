@@ -196,7 +196,7 @@ tag = "test"
 package = inputs_path+"package.tar.gz"
 executable = inputs_path+"wrapper_auto.sh"
 dashboard_name = "AutoTwopler_MT2babies"
-baby_merged_dir = "/hadoop/cms/store/user/${USER}/AutoTwopler_babies/merged/"
+baby_merged_dir = "/hadoop/cms/store/user/%s/AutoTwopler_babies/merged/"%(os.getenv("USER"))
 merge_babies_on_condor = True
 
 if not os.path.isfile(package):
