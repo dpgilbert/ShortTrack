@@ -4,22 +4,26 @@ import run
 import params as p
 import mt2 as mt2
 
+# set tag
+mt2.tag = "test"
+
 # make instructions
 instructions = []
 
 ##
 ## make instructions by class of sample
 ##
+#samples_types = ["backgrounds", "data", "scans"]
 samples_types = ["backgrounds", "data"]
 for stype in samples_types:
     for ds in mt2.d_ds2name[stype].keys():
         instructions.append({"executable": mt2.executable, "package": mt2.package, "analysis": "MT2", "dataset": ds, "baby_tag": mt2.tag, "type": "BABY", "extra": ""})
 
 ##
-## make instructios by sample shortname
+## make instructions by sample shortname
 ##
-todo = "WJetsIncl WJets100to200 WJets100to200ext WJets200to400 WJets200to400ext WJets200to400ext2 WJets400To600 WJets400To600ext WJets600To800 WJets600To800ext WJets800To1200ext WJets1200To2500 WJets2500ToInf WJets2500ToInfext ".strip().split()
-#instructions = [inst for inst in instructions if mt2.dataset_to_shortname(inst["dataset"]) in todo]
+todo = "wjets_incl wjets_ht100to200 wjets_ht2500toInf ".strip().split()
+instructions = [inst for inst in instructions if mt2.dataset_to_shortname(inst["dataset"]) in todo]
 
 p.dataset_to_shortname = mt2.dataset_to_shortname
 p.dashboard_name = mt2.dashboard_name
