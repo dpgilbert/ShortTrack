@@ -166,40 +166,21 @@ The directory also contains other skimming scripts for specific purposes.
 git clone git@github.com:cmstas/NtupleTools.git
 ```
 
-2. Run setup script (in NtupleTools/AutoTwopler)
+2. Run setup script (in NtupleTools/AutoTwopler) - this needs to be done in every session
 ``` bash
 . setup.sh
 ```
 
-3. Preparing input files for job submission (in MT2Analysis/babymaker/batchsubmit)
+3. Prepare input files for job submission (in MT2Analysis/babymaker/batchsubmit)
 ``` bash
 . make_job_inputs.sh
 ```
-
-This creates a package.tar.gz in batchsubmit/job_input containing:
-
-- btagsf
-- data
-- jetCorrections
-- jsons
-- lepsf
-- *.so for babymaking
-- LinkDef*.pcm
-- executable (processBaby)
-
-It also copies the following files to batchsubmit/job_input:
-
-- wrapper_auto.sh
-- sweeproot.sh
-- sweeproot_macro.C
-- merge_script.sh
-- merge_macro.C
 
 4. Job submission
 
 User interaction primarily happens with mt2.py and ducks.py, both inside of MT2Analysis/babymaker/batchsubmit.
 The file mt2.py should only need to be touched rarely.  It contains dataset --> shortname mapping for samples and default mt2 configuration parameters.
-Most interaction is through ducks.py, which is also where parameters from mt2.py can (and should) be overridden.
+Most interaction is through ducks.py, which is also where parameters from mt2.py can (and should) be overridden, like the ntuple tag.
 
 5. Launching jobs
 ``` bash
