@@ -2003,7 +2003,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               nJet30++;
               if (jet_pt[njet] > 40.) nJet40++;
             } // pt40
-            if(jet_btagMVA[njet] >= 0.185) {
+            if(jet_btagMVA[njet] >= 0.4432) {
               nBJet20mva++;
 	      if (jet_pt[njet] > 30.0) nBJet30mva++;
             }
@@ -2175,7 +2175,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
                 gamma_nJet30++;
                 if (p4sCorrJets.at(iJet).pt() > 40.0) gamma_nJet40++;
               } // pt30
-              if(jet_btagMVA[njet] >= 0.185){ // CombinedMVAv2
+              if(jet_btagMVA[njet] >= 0.4432){ // CombinedMVAv2
                   gamma_nBJet20mva++;
               }
               if(jet_btagCSV[njet] >= 0.8484) { 
