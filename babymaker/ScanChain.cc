@@ -554,17 +554,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	// note: in CMS3, filt_cscBeamHalo and evt_cscTightHaloId are the same
 	Flag_CSCTightHaloFilter                       = cms3.filt_cscBeamHalo();
 	Flag_CSCTightHalo2015Filter                   = cms3.filt_cscBeamHalo2015();
-	// in latest cms3 tag for data, not yet for MC
-	if (isData) {
-	  Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
-	  Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
-	}
 	// note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
 	Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
 	// temporary workaround: flag not in first 80x MC production, so recompute
 	Flag_HBHENoiseIsoFilter                       = isData ? cms3.filt_hbheNoiseIso() : hbheIsoNoiseFilter();
 	// inputs for badMuonFilters in latest cms3 tags
 	if (cms3_version.Contains("V08-00") && small_cms3_version > 12) {
+	  Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
+	  Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
           Flag_badMuonFilter                            = badMuonFilter();
           Flag_badMuonFilterV2                          = badMuonFilterV2();
           Flag_badChargedHadronFilterV2                 = badChargedCandidateFilterV2();          
