@@ -121,6 +121,7 @@ class babyMaker {
   Int_t           nJet20BadFastsim;
   Int_t           nJet200MuFrac50DphiMet;
   Int_t           nMuons10;
+  Int_t           nBadMuons20;
   Int_t           nElectrons10;
   Int_t           nLepLowMT;
   Int_t           nTaus20;

@@ -568,7 +568,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           Flag_badMuonFilter                            = badMuonFilter();
           Flag_badMuonFilterV2                          = badMuonFilterV2();
           Flag_badChargedHadronFilterV2                 = badChargedCandidateFilterV2();          
-        }
+	}
 	Flag_badChargedHadronFilter                   = badChargedCandidateFilter();
 	// necessary?
 	Flag_METFilters                               = cms3.filt_metfilter();
@@ -1091,8 +1091,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       
       //MUONS
       nMuons10 = 0;
+      nBadMuons20 = 0;
       for(unsigned int iMu = 0; iMu < cms3.mus_p4().size(); iMu++){
         if(cms3.mus_p4().at(iMu).pt() < 10.0) continue;
+	// check for bad muons to count
+	if (cms3.mus_p4().at(iMu).pt() > 20.0 && isBadGlobalMuon(iMu)) ++nBadMuons20;
         if(fabs(cms3.mus_p4().at(iMu).eta()) > 2.4) continue;
         // first check ID then iso
         if(!muonID(iMu,id_level_t::HAD_loose_noiso_v4)) continue;
@@ -2843,6 +2846,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("nJet20BadFastsim", &nJet20BadFastsim );
     BabyTree_->Branch("nJet200MuFrac50DphiMet", &nJet200MuFrac50DphiMet );
     BabyTree_->Branch("nMuons10", &nMuons10 );
+    BabyTree_->Branch("nBadMuons20", &nBadMuons20 );
     BabyTree_->Branch("nElectrons10", &nElectrons10 );
     BabyTree_->Branch("nLepLowMT", &nLepLowMT );
     BabyTree_->Branch("nTaus20", &nTaus20 );
@@ -3280,6 +3284,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     nJet20BadFastsim = -999;
     nJet200MuFrac50DphiMet = -999;
     nMuons10 = -999;
+    nBadMuons20 = -999;
     nElectrons10 = -999;
     nLepLowMT = -999;
     nTaus20 = -999;
