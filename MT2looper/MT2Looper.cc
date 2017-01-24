@@ -1524,7 +1524,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelection(values)){
-      // cout << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.evt_id << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
+      //cout << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
       fillHistos(SRVec.at(srN).srHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
       //break;//signal regions are orthogonal, event cannot be in more than one --> not true now with super signal regions
     }
@@ -1544,7 +1544,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 
     for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
       if(SRVecMonojet.at(srN).PassesSelection(values_monojet)){
-        // cout << "FOUNDEVENT:" << prefix+SRVecMonojet.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
+        //cout << "FOUNDEVENT:" << prefix+SRVecMonojet.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
 	fillHistos(SRVecMonojet.at(srN).srHistMap, SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix);
 	//break;//signal regions are orthogonal, event cannot be in more than one --> not true for Monojet, since we have inclusive regions
       }
@@ -1686,7 +1686,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
     valuesBase_monojet["deltaPhiMin"] = deltaPhiMin_;
     valuesBase_monojet["diffMetMhtOverMet"]  = diffMetMht_/met_pt_;
     valuesBase_monojet["nlep"]        = t.nLepLowMT;
-    valuesBase_monojet["ht"]          = ht_; // ETH uses ht instead of jet1_pt here..
+    valuesBase_monojet["ht"]          = jet1_pt_; // don't include the lepton
     valuesBase_monojet["njets"]       = nJet30_;
     valuesBase_monojet["met"]         = met_pt_;
 
@@ -1704,7 +1704,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
     //values_monojet["j1pt"]        = jet1_pt_; // ETH doesn't cut on jet1_pt..
     values_monojet["njets"]       = nJet30_;
     values_monojet["nbjets"]      = nBJet20_;
-    values_monojet["ht"]          = ht_;
+    values_monojet["ht"]          = jet1_pt_; // don't include the lepton 
     values_monojet["met"]         = met_pt_;
 
     for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
@@ -1754,7 +1754,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
       //values_monojet_genmet["j1pt"]        = jet1_pt_; // ETH doesn't cut on jet1_pt..
       values_monojet_genmet["njets"]       = nJet30_;
       values_monojet_genmet["nbjets"]      = nBJet20_;
-      values_monojet_genmet["ht"]          = ht_;
+      values_monojet_genmet["ht"]          = jet1_pt_;
       values_monojet_genmet["met"]         = t.met_genPt;
 
       for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
