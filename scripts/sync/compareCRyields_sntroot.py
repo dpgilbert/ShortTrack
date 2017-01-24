@@ -73,10 +73,11 @@ import ROOT, math
 snt_folder = "../../MT2looper/output/full2016unblind/"
 eth_folder = "20Jan16eth"
 #type = "data"
-#type = "ZinvEst"
+type = "ZinvEst"
 #type = "LLepEst"
 #type = "LLepCR"
-type = "ZinvCR"
+#type = "ZinvCR"
+#type = "ZinvCROF"
 
 print "Looking at: " + type
 
@@ -109,6 +110,12 @@ if (type == "ZinvCR") :
     eth_file = ROOT.TFile(eth_folder+"/zllCR_Jan20.root")
     snt_label = "crdy"
     eth_label = "data"
+
+if (type == "ZinvCROF") :
+    snt_file = ROOT.TFile(snt_folder+"/data_Run2016.root")
+    eth_file = ROOT.TFile(eth_folder+"/zllCR_OF_Jan20.root")
+    snt_label = "crdy"
+    eth_label = "data_of"
 
 
 eth_yields = {}
@@ -157,8 +164,12 @@ for ht_reg in ["VL","L","M","H","UH"]:
 #            sntyield = int(snt_file.Get("{0}/h_mt2bins".format(sntname)).GetEntries())    # int, entries
             if (type == "data" or type == "LLepCR" or type == "ZinvCR"):
                 sntyield = int(snt_file.Get("{0}/h_mt2bins".format(sntname)).Integral(0,-1))   # int
-            elif (type == "ZinvEst" or type == "LLepEst"):
+            elif (type == "LLepEst"):
                 sntyield = (snt_file.Get("{0}/h_mt2bins".format(sntname)).Integral(0,-1))    # float
+            elif (type == "ZinvEst"):
+                sntyield = (snt_file.Get("{0}/hybridEstimate".format(sntname)).Integral(0,-1))    # float
+            elif (type == "ZinvCROF"):
+                sntyield = int(snt_file.Get("{0}/h_mt2binsemu".format(sntname)).Integral(0,-1))   # int
         except:
             sntyield = 0
 #        ethyield = int(eth_file.Get("{0}/{1}/yield_{0}_{1}".format(eth_label, ethname)).Integral(1,-1))   # int
@@ -168,7 +179,7 @@ for ht_reg in ["VL","L","M","H","UH"]:
 #        ethyield = (eth_file.Get("{0}/{1}/yield_{0}_{1}".format(eth_label, ethname)).Integral(1,1))   # float, first bin only
 #        ethyield = int(eth_file.Get("{0}/{1}/yield_{0}_{1}".format(eth_label, ethname)).GetEntries())   # int, entries
         
-        if (type == "data" or type == "LLepCR" or type == "ZinvCR"):
+        if (type == "data" or type == "LLepCR" or type == "ZinvCR" or type == "ZinvCROF"):
             ethyield = int(eth_file.Get("{0}/{1}/yield_{0}_{1}".format(eth_label, ethname)).Integral(1,-1))   # int
         elif (type == "ZinvEst" or type == "LLepEst"):
             ethyield = (eth_file.Get("{0}/{1}/yield_{0}_{1}".format(eth_label, ethname)).Integral(1,-1))   # float
@@ -208,8 +219,12 @@ for mj_reg in range(1,8)+range(11,16):
 #    sntyield = int(snt_file.Get("{0}/h_mt2bins".format(sntname)).GetEntries())                             # int, entries
         if (type == "data" or type == "LLepCR" or type == "ZinvCR"):
             sntyield = int(snt_file.Get("{0}/h_mt2bins".format(sntname)).Integral(0,-1))   # int
-        elif (type == "ZinvEst" or type == "LLepEst"):
+        elif (type == "ZinvEst"):
             sntyield = (snt_file.Get("{0}/h_mt2bins".format(sntname)).Integral(0,-1))    # float
+        elif (type == "ZinvEst"):
+            sntyield = (snt_file.Get("{0}/hybridEstimate".format(sntname)).Integral(0,-1))    # float
+        elif (type == "ZinvCROF"):
+            sntyield = int(snt_file.Get("{0}/h_mt2binsemu".format(sntname)).Integral(0,-1))   # int
     except:
         sntyield = 0.
 #    ethyield = int(eth_file.Get("{0}/{1}/yield_{0}_{1}".format(eth_label,ethname)).Integral(1,-1))         # int    
@@ -219,7 +234,7 @@ for mj_reg in range(1,8)+range(11,16):
 #    ethyield = int(eth_file.Get("{0}/{1}/yield_{0}_{1}".format(eth_label,ethname)).GetEntries())             # int, entries, first bin only
     
 
-    if (type == "data" or type == "LLepCR" or type == "ZinvCR"):
+    if (type == "data" or type == "LLepCR" or type == "ZinvCR" or type == "ZinvCROF"):
         ethyield = int(eth_file.Get("{0}/{1}/yield_{0}_{1}".format(eth_label, ethname)).Integral())   # int
         #ethyield = int(eth_file.Get("{0}/{1}/yield_{0}_{1}".format(eth_label,ethname)).GetEntries())             # int, entries, first bin only
 
