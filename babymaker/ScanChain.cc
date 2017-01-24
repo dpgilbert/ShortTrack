@@ -1082,17 +1082,19 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       if (verbose) cout << "before muons" << endl;
 
       // check CMS3 version to see if all muon branches are present
-      bool do_highpt_muon_id = false;
-      if (cms3_version.Contains("V08-00") && small_cms3_version <= 12) do_highpt_muon_id = false;
-      else do_highpt_muon_id = true;
+      bool recent_cms3_version = false;
+      if (cms3_version.Contains("V08-00") && small_cms3_version <= 12) recent_cms3_version = false;
+      else recent_cms3_version = true;
       
       //MUONS
       nMuons10 = 0;
       nBadMuons20 = 0;
       for(unsigned int iMu = 0; iMu < cms3.mus_p4().size(); iMu++){
         if(cms3.mus_p4().at(iMu).pt() < 10.0) continue;
-	// check for bad muons to count
-	if (cms3.mus_p4().at(iMu).pt() > 20.0 && isBadGlobalMuon(iMu)) ++nBadMuons20;
+	// check for bad muons to count, only in recent CMS3 versions
+	if (recent_cms3_version) {
+	  if (cms3.mus_p4().at(iMu).pt() > 20.0 && isBadGlobalMuon(iMu)) ++nBadMuons20;
+	}
         if(fabs(cms3.mus_p4().at(iMu).eta()) > 2.4) continue;
         // first check ID then iso
         if(!muonID(iMu,id_level_t::HAD_loose_noiso_v4)) continue;
@@ -1108,7 +1110,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         vec_lep_dxy.push_back ( cms3.mus_dxyPV().at(iMu)); // this uses the silicon track. should we use best track instead?
         vec_lep_dz.push_back ( cms3.mus_dzPV().at(iMu)); // this uses the silicon track. should we use best track instead?
         vec_lep_tightId.push_back ( muTightID(iMu,analysis_t::HAD,4) );
-	if (do_highpt_muon_id) {
+	if (recent_cms3_version) {
 	  vec_lep_heepId.push_back ( isHighPtMuonPOG(iMu) );
 	  vec_lep_highPtFit_pt.push_back ( cms3.mus_bfit_p4().at(iMu).pt());
 	  vec_lep_highPtFit_eta.push_back ( cms3.mus_bfit_p4().at(iMu).eta());
