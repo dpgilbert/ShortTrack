@@ -4,6 +4,7 @@
 #include <string>
 #include <cmath>
 #include <algorithm>
+#include <regex>
 
 #include "TROOT.h"
 #include "TLatex.h"
@@ -85,6 +86,20 @@ void convertSNTtoETH(TString dir, TString sample) {
     if(dir_name == "") continue;
     if(!dir_name.Contains("sr")) continue;
     if(dir_name.Contains("base")) continue;
+    
+    // check to see if this is a super signal region (20 and up)
+    int sr_number = -1;
+    std::string dir_str = dir_k->GetTitle();
+    std::regex sr_number_regex("[^0-9]*([0-9]+).*"); // finds an integer of any length
+    std::smatch sr_number_match;
+    if (std::regex_match(dir_str,sr_number_match, sr_number_regex)) {
+      sr_number = stoi(sr_number_match[1].str());
+      if (sr_number >= 20) continue;
+    }
+    else {
+      cout << "WARNING: couldn't get signal region number for region: " << dir_str << endl;
+    }
+  
     TDirectory* din = (TDirectory*) dir_k->ReadObj();
     if(din == 0) continue;
     //std::cout << "dir_name: " << dir_name << std::endl;
