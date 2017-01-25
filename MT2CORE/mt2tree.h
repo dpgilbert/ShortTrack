@@ -46,6 +46,7 @@ public :
    Int_t           nJet30FailId;
    Int_t           nJet100FailId;
    Int_t           nJet20BadFastsim;
+   Int_t           nJet200MuFrac50DphiMet;
    Int_t           nBJet20;
    Int_t           nBJet20JECup;
    Int_t           nBJet20JECdn;
@@ -435,6 +436,7 @@ public :
    TBranch        *b_nJet30FailId;   //!
    TBranch        *b_nJet100FailId;   //!
    TBranch        *b_nJet20BadFastsim;   //!
+   TBranch        *b_nJet200MuFrac50DphiMet;   //!
    TBranch        *b_nBJet20;   //!
    TBranch        *b_nBJet20JECup;   //!
    TBranch        *b_nBJet20JECdn;   //!
@@ -882,6 +884,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("nJet30FailId", &nJet30FailId, &b_nJet30FailId);
    fChain->SetBranchAddress("nJet100FailId", &nJet100FailId, &b_nJet100FailId);
    fChain->SetBranchAddress("nJet20BadFastsim", &nJet20BadFastsim, &b_nJet20BadFastsim);
+   fChain->SetBranchAddress("nJet200MuFrac50DphiMet", &nJet200MuFrac50DphiMet, &b_nJet200MuFrac50DphiMet);
    fChain->SetBranchAddress("nBJet20", &nBJet20, &b_nBJet20);
    fChain->SetBranchAddress("nBJet20JECup", &nBJet20JECup, &b_nBJet20JECup);
    fChain->SetBranchAddress("nBJet20JECdn", &nBJet20JECdn, &b_nBJet20JECdn);
