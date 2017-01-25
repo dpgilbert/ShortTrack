@@ -135,6 +135,13 @@ echo "[wrapper] doing skim"
 root -b -q skim_macro.C
 
 #
+# do rphi skim
+#
+
+echo "[wrapper] doing rphi skim"
+root -b -q skim_rphi_macro.C
+
+#
 # clean up
 #
 

@@ -17,7 +17,7 @@ samples_types = ["backgrounds", "data", "scans"]
 #samples_types = ["scans"]
 for stype in samples_types:
     for ds in mt2.d_ds2name[stype].keys():
-        instructions.append({"executable": mt2.executable, "package": mt2.package, "analysis": "MT2", "dataset": ds, "baby_tag": mt2.tag, "type": "BABY", "extra": [-1, "output.root,skim.root"]})
+        instructions.append({"executable": mt2.executable, "package": mt2.package, "analysis": "MT2", "dataset": ds, "baby_tag": mt2.tag, "type": "BABY", "extra": [-1, "output.root,skim.root,skim_rphi.root"]})
 
 ##
 ## make instructions by sample shortname
