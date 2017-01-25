@@ -375,6 +375,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       TString cms3_version = cms3.evt_CMS3tag().at(0);
       // convert last two digits of version number to int
       int small_cms3_version = TString(cms3_version(cms3_version.Length()-2,cms3_version.Length())).Atoi();
+      bool recent_cms3_version = true;
+      if (cms3_version.Contains("V08-00") && small_cms3_version <= 12) recent_cms3_version = false;
       
       if (verbose) cout << "before trigger" << endl;
 
@@ -559,7 +561,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	// temporary workaround: flag not in first 80x MC production, so recompute
 	Flag_HBHENoiseIsoFilter                       = isData ? cms3.filt_hbheNoiseIso() : hbheIsoNoiseFilter();
 	// inputs for badMuonFilters in latest cms3 tags
-	if (cms3_version.Contains("V08-00") && small_cms3_version > 12) {
+	if (recent_cms3_version) {
 	  Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
 	  Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
           Flag_badMuonFilter                            = badMuonFilter();
@@ -1081,11 +1083,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
       if (verbose) cout << "before muons" << endl;
 
-      // check CMS3 version to see if all muon branches are present
-      bool recent_cms3_version = false;
-      if (cms3_version.Contains("V08-00") && small_cms3_version <= 12) recent_cms3_version = false;
-      else recent_cms3_version = true;
-      
       //MUONS
       nMuons10 = 0;
       nBadMuons20 = 0;
