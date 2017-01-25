@@ -2350,7 +2350,7 @@ namespace mt2 {
     sr.SetVarCRSL("ht", 1000, -1);
     sr.SetVarCRSL("met", 30, -1);
     sr.SetVarCRDY("njets", 2, -1);
-    sr.SetVarCRDY("nbjets", 3, -1);
+    sr.SetVarCRDY("nbjets", 1, -1); // DY: NB>0
     sr.SetVarCRDY("ht", 1000, -1);
     sr.SetVarCRDY("met", 30, -1);
     sr.SetVarCRQCD("ht", 1000, -1);
@@ -2371,7 +2371,7 @@ namespace mt2 {
     sr.SetVarCRSL("ht", 1500, -1);
     sr.SetVarCRSL("met", 30, -1);
     sr.SetVarCRDY("njets", 2, -1);
-    sr.SetVarCRDY("nbjets", 3, -1);
+    sr.SetVarCRDY("nbjets", 1, -1); // DY: NB>0
     sr.SetVarCRDY("ht", 1500, -1);
     sr.SetVarCRDY("met", 30, -1);
     sr.SetVarCRQCD("ht", 1500, -1);
@@ -2392,7 +2392,7 @@ namespace mt2 {
     sr.SetVarCRSL("ht", 1000, -1);
     sr.SetVarCRSL("met", 30, -1);
     sr.SetVarCRDY("njets", 7, -1);
-    sr.SetVarCRDY("nbjets", 3, -1);
+    sr.SetVarCRDY("nbjets", 1, -1); // DY: NB>0
     sr.SetVarCRDY("ht", 1000, -1);
     sr.SetVarCRDY("met", 30, -1);
     sr.SetVarCRQCD("ht", 1000, -1);
@@ -2413,7 +2413,7 @@ namespace mt2 {
     sr.SetVarCRSL("ht", 1500, -1);
     sr.SetVarCRSL("met", 30, -1);
     sr.SetVarCRDY("njets", 7, -1);
-    sr.SetVarCRDY("nbjets", 3, -1);
+    sr.SetVarCRDY("nbjets", 1, -1); // DY: NB>0
     sr.SetVarCRDY("ht", 1500, -1);
     sr.SetVarCRDY("met", 30, -1);
     sr.SetVarCRQCD("ht", 1500, -1);
