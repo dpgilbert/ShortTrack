@@ -6,11 +6,11 @@ import ROOT
 import math
 import collections
 
-datacard_dir = 'allcards_hybrid_36p5fb_nodata_ssrs_try4'
-output_dir = 'cards_for_macroregions_36p5fb_ssrs_try4'
+datacard_dir = 'allcards_ssr_36p5fb_V15'
+output_dir = 'cards_for_macroregions_36p5fb_ssrs_V15'
 
 # signal point may appear in name
-signal_point = '_T1tttt_1900_1'
+signal_point = '_T1tttt_1800_1'
 #signal_point = ''
 
 doSignal = False
@@ -241,15 +241,29 @@ def printMacroRegionYields( region, datacard_list ):
     # print ' qcd: %.3f + %.3f - %.3f' % (n_qcd, abserr_sum_qcd_up, abserr_sum_qcd_dn)
     # print ' sig: %.3f' % (n_sig)
 
-    # if n_bkg > 100:
-    #     print '%s & $%.0f^{+%.0f}_{-%.0f}$ & %d &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_obs)
-    # else:
-    #     print '%s & $%.1f^{+%.1f}_{-%.1f}$ & %d &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_obs)
-        
+    ### with observed yields
     if n_bkg > 100:
-        print '%s & $%.0f^{+%.0f}_{-%.0f}$ &  &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn)
+        if '%.0f'%(abserr_sum_bkg_up) == '%.0f'%(abserr_sum_bkg_dn):
+            print '%s & $%.0f \pm %.0f$ & %d &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, n_obs)
+        else:
+            print '%s & $%.0f^{+%.0f}_{-%.0f}$ & %d &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_obs)
     else:
-        print '%s & $%.1f^{+%.1f}_{-%.1f}$ &  &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn)
+        if '%.1f'%(abserr_sum_bkg_up) == '%.1f'%(abserr_sum_bkg_dn):
+            print '%s & $%.1f \pm %.1f$ & %d &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, n_obs)
+        else:
+            print '%s & $%.1f^{+%.1f}_{-%.1f}$ & %d &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_obs)
+        
+    # ### without observed yields
+    # if n_bkg > 100:
+    #     if '%.0f'%(abserr_sum_bkg_up) == '%.0f'%(abserr_sum_bkg_dn):
+    #         print '%s & $%.0f \pm %.0f$ &  &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up)
+    #     else:
+    #         print '%s & $%.0f^{+%.0f}_{-%.0f}$ &  &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn)
+    # else:
+    #     if '%.1f'%(abserr_sum_bkg_up) == '%.1f'%(abserr_sum_bkg_dn):
+    #         print '%s & $%.1f \pm %.1f$ &  &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up)
+    #     else:
+    #         print '%s & $%.1f^{+%.1f}_{-%.1f}$ &  &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn)
         
     makeMacroRegionDatacard( region, n_obs, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_sig )
 
@@ -329,18 +343,18 @@ def main():
         ]
     
     all_regions = collections.OrderedDict()
-    all_regions['2j_loose']  = datacards_2j_loose
-    all_regions['2j_tight']  = datacards_2j_tight
+    all_regions['2j_loose'] = datacards_2j_loose
+    all_regions['2j_tight'] = datacards_2j_tight
     all_regions['4j_loose'] = datacards_4j_loose
-    all_regions['4j_tight']  = datacards_4j_tight
+    all_regions['4j_tight'] = datacards_4j_tight
     all_regions['7j_loose'] = datacards_7j_loose
-    all_regions['7j_tight']  = datacards_7j_tight
+    all_regions['7j_tight'] = datacards_7j_tight
     all_regions['2b_loose'] = datacards_2b_loose
-    all_regions['2b_tight']  = datacards_2b_tight
+    all_regions['2b_tight'] = datacards_2b_tight
     all_regions['3b_loose'] = datacards_3b_loose
-    all_regions['3b_tight']  = datacards_3b_tight
+    all_regions['3b_tight'] = datacards_3b_tight
     all_regions['7j3b_loose'] = datacards_7j3b_loose
-    all_regions['7j3b_tight']  = datacards_7j3b_tight
+    all_regions['7j3b_tight'] = datacards_7j3b_tight
 
     # make output directory
     if not os.path.exists(output_dir):
