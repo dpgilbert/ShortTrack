@@ -127,12 +127,18 @@ echo "[wrapper] running rigorousSweepRoot.py"
 python rigorousSweepRoot.py
 date +%s
 
+#
+# do skim
+#
+
+echo "[wrapper] doing skim"
+root -b -q skim_macro.C
 
 #
 # clean up
 #
 
-echo "[wrapper] copying file"
+echo "[wrapper] copying files"
 
 # if [ ! -d "${COPYDIR}" ]; then
 #     echo "creating output directory " ${COPYDIR}
