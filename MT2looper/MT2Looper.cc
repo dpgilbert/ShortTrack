@@ -1421,6 +1421,8 @@ void MT2Looper::fillHistosSRBase() {
 
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
+  // ad-hoc RA2/b filter
+  if (t.nJet200MuFrac50DphiMet > 0) return;
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = deltaPhiMin_;
@@ -1474,6 +1476,8 @@ void MT2Looper::fillHistosInclusive() {
 
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
+  // ad-hoc RA2/b filter
+  if (t.nJet200MuFrac50DphiMet > 0) return;
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = deltaPhiMin_;
@@ -1507,6 +1511,8 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
   
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
+  // ad-hoc RA2/b filter
+  if (t.nJet200MuFrac50DphiMet > 0) return;
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = deltaPhiMin_;
@@ -1606,6 +1612,8 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
+  // ad-hoc RA2/b filter
+  if (t.nJet200MuFrac50DphiMet > 0) return;
 
   // first fill base region
   std::map<std::string, float> valuesBase;
@@ -1952,6 +1960,11 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
 
   // trigger requirement on data and MC already implemented when defining doDYplots
   
+  // met/caloMet filter for additional cleaning, only for pfmet > 200
+  if ((t.met_miniaodPt > 200.) && (t.met_miniaodPt / t.met_caloPt > 5.0)) return;
+  // ad-hoc RA2/b filter
+  if (t.nJet200MuFrac50DphiMet > 0) return;
+  
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.zll_deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
@@ -1979,7 +1992,7 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   valuesBase_monojet["deltaPhiMin"] = t.zll_deltaPhiMin;
   valuesBase_monojet["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
   valuesBase_monojet["nlep"]        = 0;
-  valuesBase_monojet["ht"]          = ht_; // ETH doesn't cut on jet1_pt here, only ht
+  valuesBase_monojet["ht"]          = t.zll_ht; 
   valuesBase_monojet["njets"]       = nJet30_;
   valuesBase_monojet["met"]         = t.zll_met_pt;
 
@@ -2142,6 +2155,10 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
   // trigger requirement on data (also require to come from JetHT, HTMHT, or MET PD to match ETH)
   if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
 
+  // met/caloMet filter for additional cleaning
+  if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
+  // ad-hoc RA2/b filter
+  if (t.nJet200MuFrac50DphiMet > 0) return;
   
   // topological regions
   std::map<std::string, float> values;
