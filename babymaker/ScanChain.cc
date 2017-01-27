@@ -267,37 +267,37 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	// run dependent corrections for 80X data
 	if (currentFileName.Contains("2016B") || currentFileName.Contains("2016C") || currentFileName.Contains("2016D")) {
 	  jetcorr_filenames_pfL1FastJetL2L3.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016BCDV2_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016BCDV2_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016BCDV2_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016BCDV2_DATA_L2L3Residual_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016BCDV3_DATA_L1FastJet_AK4PFchs.txt"   );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016BCDV3_DATA_L2Relative_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016BCDV3_DATA_L3Absolute_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016BCDV3_DATA_L2L3Residual_AK4PFchs.txt");
 	}
 	else if (currentFileName.Contains("2016E") || currentFileName.Contains("2016F")) {
 	  jetcorr_filenames_pfL1FastJetL2L3.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016EFV2_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016EFV2_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016EFV2_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016EFV2_DATA_L2L3Residual_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016EFV3_DATA_L1FastJet_AK4PFchs.txt"   );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016EFV3_DATA_L2Relative_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016EFV3_DATA_L3Absolute_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016EFV3_DATA_L2L3Residual_AK4PFchs.txt");
 
 	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Spring16_23Sep2016GV2_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Spring16_23Sep2016GV2_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Spring16_23Sep2016GV2_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Spring16_23Sep2016GV2_DATA_L2L3Residual_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV3_DATA_L1FastJet_AK4PFchs.txt"   );
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV3_DATA_L2Relative_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV3_DATA_L3Absolute_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV3_DATA_L2L3Residual_AK4PFchs.txt");
 	}
 	else if (currentFileName.Contains("2016G")) {
 	  jetcorr_filenames_pfL1FastJetL2L3.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016GV2_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016GV2_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016GV2_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016GV2_DATA_L2L3Residual_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV3_DATA_L1FastJet_AK4PFchs.txt"   );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV3_DATA_L2Relative_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV3_DATA_L3Absolute_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV3_DATA_L2L3Residual_AK4PFchs.txt");
 	}
 	else if (currentFileName.Contains("2016H")) {
 	  jetcorr_filenames_pfL1FastJetL2L3.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016HV2_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016HV2_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016HV2_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_23Sep2016HV2_DATA_L2L3Residual_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV3_DATA_L1FastJet_AK4PFchs.txt"   );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV3_DATA_L2Relative_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV3_DATA_L3Absolute_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV3_DATA_L2L3Residual_AK4PFchs.txt");
 	}
       } else if (isFastsim) {
 	jetcorr_filenames_pfL1FastJetL2L3.clear();
@@ -313,10 +313,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	jetcorr_uncertainty_filename = "jetCorrections/Spring16_25nsV6_MC_Uncertainty_AK4PFchs.txt";
       } else { // default: Summer16 corrections (Moriond 2017)
 	jetcorr_filenames_pfL1FastJetL2L3.clear();
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_25nsV5_MC_L1FastJet_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_25nsV5_MC_L2Relative_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_25nsV5_MC_L3Absolute_AK4PFchs.txt");
-	jetcorr_uncertainty_filename = "jetCorrections/Summer16_25nsV5_MC_Uncertainty_AK4PFchs.txt";
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016V3_MC_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016V3_MC_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016V3_MC_L3Absolute_AK4PFchs.txt");
+	jetcorr_uncertainty_filename = "jetCorrections/Summer16_23Sep2016V3_MC_Uncertainty_AK4PFchs.txt";
       }
 
       cout << "applying JEC from the following files:" << endl;
