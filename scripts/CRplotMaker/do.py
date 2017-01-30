@@ -7,7 +7,7 @@ ROOT.gROOT.SetBatch(1)
 from MT2PlotMaker import *
 import MT2PlotDefs as pd
 
-pd.lumi = 36.5
+pd.lumi = 36.8
 pd.lumiUnit = "fb"
 
 #input_dir = "/home/users/olivito/mt2_80x/MT2Analysis/MT2looper/output/V00-08-12_json_271036-284044_23Sep2016ReReco_36p46fb_dypt100_30/"
