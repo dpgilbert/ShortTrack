@@ -14,7 +14,7 @@ using namespace std;
 // merges a sample and corrects scale1fb for the number of events in the merged sample
 // - can be used to merge ext stats versions of samples
 // - does NOT take into account negative weights for NLO samples!!
-int mergeFixScale1fb(const TString& indir, const TString& sample, const TString& outdir, double xsec_force = -1.){
+int mergeFixScale1fb(const TString& indir, const TString& sample, const TString& outdir){
   
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
@@ -26,9 +26,6 @@ int mergeFixScale1fb(const TString& indir, const TString& sample, const TString&
 
   TString infiles = Form("%s/%s*.root",indir.Data(),sample.Data());
   TString outfile = Form("%s/%s.root",outdir.Data(),sample.Data());
-  
-  // long long max_tree_size = 5000000000LL; // 5GB
-  // TTree::SetMaxTreeSize(max_tree_size);
   
   TChain *chain = new TChain("mt2");
   chain->Add(infiles);
@@ -42,22 +39,28 @@ int mergeFixScale1fb(const TString& indir, const TString& sample, const TString&
 
   float xsec_input_max = chain->GetMaximum("evt_xsec");
   float xsec_input_min = chain->GetMinimum("evt_xsec");
-  if (xsec_force < 0 && fabs(xsec_input_max - xsec_input_min) > 1e-4 * xsec_input_max) {
+  if (fabs(xsec_input_max - xsec_input_min) > 1e-3 * xsec_input_max) {
     cout << "ERROR: xsec varies across input trees: max value: " << xsec_input_max
 	 << ", min value: " << xsec_input_min << ", aborting.." << endl;
     return 2;
   }
-  else if (xsec_force > 0) {
-    xsec_input_max = xsec_force;
-  }
   float kfactor_input = chain->GetMaximum("evt_kfactor");
   float filter_input = chain->GetMaximum("evt_filter");
 
-  Float_t scale1fb_input = xsec_input_max * kfactor_input * filter_input * 1000. / float(nevents_input);
-
+  // NOTE: this calculation assumes that scale1fb is correct for each individual sample
+  //  i.e. that we processed the full CMS3 dataset for each sample when making babies
+  // Float_t scale1fb_input = xsec_input_max * kfactor_input * filter_input * 1000. / float(nevents_input);
+  float evt_scale1fb_max = chain->GetMaximum("evt_scale1fb");
+  float evt_scale1fb_min = chain->GetMinimum("evt_scale1fb");
+  Float_t scale1fb_input_inv = 1./evt_scale1fb_max + 1./evt_scale1fb_min;
+  Float_t scale1fb_input = 1./scale1fb_input_inv;
+  if (sample.Contains("wjets_ht200to400")) // hack for now to deal with this sample since 3 samples need to be combined
+      scale1fb_input = 0.0120695;
+  
   cout << "input events: " << nevents_input << endl
        << "xsec*kfactor*filter: " << xsec_input_max * kfactor_input * filter_input << endl
-       << "new scale1fb: " << scale1fb_input << endl;
+       << "new scale1fb: " << scale1fb_input << endl
+       << "old scale1fb(s): " << evt_scale1fb_max << ", " << evt_scale1fb_min << endl;
 
   //-------------------------------------------------------------
   // Removes branches to be replaced
@@ -66,12 +69,11 @@ int mergeFixScale1fb(const TString& indir, const TString& sample, const TString&
   chain->SetBranchStatus("evt_scale1fb", 0);
   chain->SetBranchStatus("evt_nEvts", 0);
 
-  cout << "Merging to file: " << outfile << endl;
-
   TFile *out = TFile::Open(outfile.Data(), "RECREATE");
   TTree *clone;
   clone = chain->CloneTree(-1, "fast");
-  //  clone->SetMaxTreeSize(5000000000LL); // ~5 GB
+
+  cout << "Merging to file: " << outfile << endl;
 
   //-------------------------------------------------------------
 
@@ -88,6 +90,7 @@ int mergeFixScale1fb(const TString& indir, const TString& sample, const TString&
   }
   //-------------------------------------------------------------
 
+  clone->SetMaxTreeSize(5000000000LL); // ~5 GB
   clone->Write(); 
   out->Close();
 
