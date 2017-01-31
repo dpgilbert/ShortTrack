@@ -647,11 +647,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   if (verbose) cout<<__LINE__<<endl;
 
   if (applyLeptonSFfromFiles) {
-    setElSFfile("../babymaker/lepsf/scaleFactors_el_ichep_2016.root", "../babymaker/lepsf/egammaEffi_track_SF2D_ichep_2016.root" );
-    setMuSFfile("../babymaker/lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
-		"../babymaker/lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
-		"../babymaker/lepsf/TnP_MuonID_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
-		"../babymaker/lepsf/general_tracks_and_early_general_tracks_corr_ratio.root");
+    setElSFfile("../babymaker/lepsf/moriond17/scaleFactors_el_moriond_2017.root", "../babymaker/lepsf/moriond17/egammaEffi.txt_EGM2D.root" );
+    setMuSFfileNoTrk("../babymaker/lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
+		     "../babymaker/lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
+		     "../babymaker/lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root");
     setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  
   }
   
