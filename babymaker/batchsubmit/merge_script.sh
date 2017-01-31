@@ -36,9 +36,14 @@ root -l -n -b -q "merge_macro.C+(\"${UNMERGED_DIR}\",\"list_input.txt\",\"${OUTF
 # If GetEntry() returns -1, then there was an I/O problem, so we will delete it
 cat > rigorousSweepRoot.py << EOL
 import ROOT as r
-import os
+import os, sys
 
 f1 = r.TFile("${OUTFILE}")
+if f1.IsZombie():
+    print "[RSR] removing zombie ${OUTFILE} because it does not deserve to live"
+    os.system("rm ${OUTFILE}")
+    sys.exit()
+
 t = f1.Get("mt2")
 print "[RSR] ntuple has %i events" % t.GetEntries()
 
@@ -74,4 +79,4 @@ gfal-copy -p -f -t 4200 --verbose file://`pwd`/${OUTFILE} srm://bsrm-3.t2.ucsd.e
 echo "[merge_script] cleaning up"
 for FILE in `find . -not -name "*stderr" -not -name "*stdout"`; do rm -rf $FILE; done
 echo "[merge_script] cleaned up"
-ls
+ls -l

@@ -102,9 +102,14 @@ mv ${OUTPUT} output.root
 # If GetEntry() returns -1, then there was an I/O problem, so we will delete it
 cat > rigorousSweepRoot.py << EOL
 import ROOT as r
-import os
+import os, sys
 
 f1 = r.TFile("output.root")
+if f1.IsZombie():
+    print "[RSR] removing zombie output.root because it does not deserve to live"
+    os.system("rm output.root")
+    sys.exit()
+
 t = f1.Get("mt2")
 print "[RSR] ntuple has %i events" % t.GetEntries()
 
