@@ -481,7 +481,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     for (int ibin = 1; ibin <= h_lostlepMC_cr_allbins->GetNbinsX(); ++ibin) {
       // scale by relative error from the standard MT2 binning plot
       int sig_mt2bin = pred->FindBin(h_lostlepMC_cr_allbins->GetBinLowEdge(ibin));
-      float relvar = MCExtrap->GetBinContent(sig_mt2bin) / pred->GetBinContent(sig_mt2bin);
+      float relvar = (pred->GetBinContent(sig_mt2bin) > 0.) ? (MCExtrap->GetBinContent(sig_mt2bin) / pred->GetBinContent(sig_mt2bin)) : 0.;
       h_lostlepMC_rescaled_cr_allbins_MCExtrapErr->SetBinContent( ibin, h_lostlepMC_rescaled_cr_allbins->GetBinContent(ibin) * relvar );
     }
     
