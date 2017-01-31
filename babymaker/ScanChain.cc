@@ -187,11 +187,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
   // Lepton Scale Factors
   if (applyLeptonSFs) {
-    setElSFfile("lepsf/scaleFactors_el_ichep_2016.root", "lepsf/egammaEffi_track_SF2D_ichep_2016.root" );
-    setMuSFfile("lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
-		"lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
-		"lepsf/TnP_MuonID_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
-		"lepsf/general_tracks_and_early_general_tracks_corr_ratio.root");
+    setElSFfile("lepsf/moriond17/scaleFactors_el_moriond_2017.root", "lepsf/moriond17/egammaEffi.txt_EGM2D.root" );
+    setMuSFfileNoTrk("lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
+		     "lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
+		     "lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root");
     setVetoEffFile_fullsim("lepsf/vetoeff_emu_etapt_lostlep.root");  
     if (isFastsim) {
       setElSFfile_fastsim("lepsf/sf_el_vetoCB_mini01.root");

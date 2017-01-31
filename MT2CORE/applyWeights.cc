@@ -44,8 +44,8 @@ bool setElSFfile(TString filenameIDISO, TString filenameTRK, bool useTight){
   if (!f1->IsOpen()) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find scale factor file "<<filenameIDISO<<std::endl;
   if (!f2->IsOpen()) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find track scale factor file "<<filenameTRK<<std::endl;
   TH2D* h_id = 0;
-  if (useTight) h_id = (TH2D*) f1->Get("GsfElectronToTight");
-  else h_id = (TH2D*) f1->Get("GsfElectronToVeto");
+  if (useTight) h_id = (TH2D*) f1->Get("GsfElectronToCutBasedSpring15T");
+  else h_id = (TH2D*) f1->Get("GsfElectronToCutBasedSpring15V");
   TH2D* h_iso = (TH2D*) f1->Get("MVAVLooseElectronToMini");
   TH2D* h_trk = (TH2D*) f2->Get("EGamma_SF2D");
   if (!h_id || !h_iso || !h_trk) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find scale factor histogram"<<std::endl;
@@ -87,12 +87,34 @@ bool setMuSFfile(TString filenameID, TString filenameISO, TString filenameIP, TS
 }
 
 //_________________________________________________________
+bool setMuSFfileNoTrk(TString filenameID, TString filenameISO, TString filenameIP){
+  TFile * f1 = new TFile(filenameID);
+  TFile * f2 = new TFile(filenameISO);
+  TFile * f3 = new TFile(filenameIP);
+  if (!f1->IsOpen()) { std::cout<<"applyWeights::setMuSFfileNoTrk: ERROR: Could not find ID scale factor file "<<filenameID<<std::endl; return 0;}
+  if (!f2->IsOpen()) { std::cout<<"applyWeights::setMuSFfileNoTrk: ERROR: Could not find ISO scale factor file "<<filenameISO<<std::endl; return 0;}
+  if (!f3->IsOpen()) { std::cout<<"applyWeights::setMuSFfileNoTrk: ERROR: Could not find IP scale factor file "<<filenameIP<<std::endl; return 0;}
+  TH2D* h_id = (TH2D*) f1->Get("SF");
+  TH2D* h_iso = (TH2D*) f2->Get("SF");
+  TH2D* h_ip = (TH2D*) f3->Get("SF");
+  if (!h_id || !h_iso || !h_ip) { std::cout<<"applyWeights::setMuSFfileNoTrk: ERROR: Could not find scale factor histogram"<<std::endl; return 0;}
+  h_muSF = (TH2D*) h_id->Clone("h_muSF");
+  h_muSF->SetDirectory(0);
+  h_muSF->Multiply(h_iso);
+  h_muSF->Multiply(h_ip);
+  //h_muSF->Print("all");
+  return true;
+}
+
+//_________________________________________________________
 weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
 
   weightStruct weights;
 
-  if(!h_elSF || !h_muSF || !h_elSF_trk || !h_muSF_trk_ptgt10 || !h_muSF_trk_ptlt10) {
-    std::cout << "applyWeights::getLepSFFromFile: ERROR: missing input hists" << std::endl;
+  //  if(!h_elSF || !h_muSF || !h_elSF_trk || !h_muSF_trk_ptgt10 || !h_muSF_trk_ptlt10) {
+  if(!h_elSF || !h_muSF || !h_elSF_trk) {
+    std::cout << "applyWeights::getLepSFFromFile: ERROR: missing input hists" << std::endl
+	      << "h_elSF: " << h_elSF << ", h_elSF_trk: " << h_elSF_trk << ", h_muSF: " << h_muSF << std::endl;
     return weights;
   }
 
@@ -108,7 +130,7 @@ weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
     int biny_trk = 1; // hardcoding for now - only one bin in pt (hist starts at 20)
     central *= h_elSF_trk->GetBinContent(binx_trk,biny_trk);
     float trk_err = h_elSF_trk->GetBinError(binx_trk,biny_trk);
-    if (pt_cutoff < 20.) err = sqrt(err*err + trk_err*trk_err + 0.03*0.03); // extra 3% error for pt < 20
+    if (pt_cutoff < 20. || pt_cutoff > 80.) err = sqrt(err*err + trk_err*trk_err + 0.01*0.01); // extra 1% error for pt < 20 OR pt > 80
     else err = sqrt(err*err + trk_err*trk_err); // otherwise just use histogram error
     weights.cent = central;
     weights.up = central+err;
@@ -120,9 +142,11 @@ weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
     int binx = h_muSF->GetXaxis()->FindBin(pt_cutoff);
     int biny = h_muSF->GetYaxis()->FindBin(fabs(eta));
     float central = h_muSF->GetBinContent(binx,biny);
-    // get also trk sf
-    if (pt > 10) central *= h_muSF_trk_ptgt10->GetBinContent(h_muSF_trk_ptgt10->FindBin(eta));
-    else central *= h_muSF_trk_ptlt10->GetBinContent(h_muSF_trk_ptlt10->FindBin(eta));
+    // get also trk sf, if present
+    if (h_muSF_trk_ptgt10 && h_muSF_trk_ptlt10) {
+      if (pt > 10) central *= h_muSF_trk_ptgt10->GetBinContent(h_muSF_trk_ptgt10->FindBin(eta));
+      else central *= h_muSF_trk_ptlt10->GetBinContent(h_muSF_trk_ptlt10->FindBin(eta));
+    }
     float err  = 0.03; // suggested 3% uncert
     weights.cent = central;
     weights.up = central+err;
