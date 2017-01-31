@@ -2958,15 +2958,15 @@ float MT2Looper::getAverageISRWeight(const int evt_id, const int var) {
 
   // madgraph ttsl, from RunIISpring16MiniAODv2
   if (evt_id == 301 || evt_id == 302) {
-    if (var == 0) return 0.910; // nominal
-    else if (var == 1) return 0.955; // UP
-    else if (var == -1) return 0.865; // DN
+    if (var == 0) return 0.909; // nominal
+    else if (var == 1) return 0.954; // UP
+    else if (var == -1) return 0.863; // DN
   }
   // madgraph ttdl, from RunIISpring16MiniAODv2
   else if (evt_id == 303) {
-    if (var == 0) return 0.897; // nominal
+    if (var == 0) return 0.895; // nominal
     else if (var == 1) return 0.948; // UP
-    else if (var == -1) return 0.845; // DN
+    else if (var == -1) return 0.843; // DN
   }
 
   std::cout << "WARNING: MT2Looper::getAverageISRWeight: didn't recognize either evt_id: " << evt_id
