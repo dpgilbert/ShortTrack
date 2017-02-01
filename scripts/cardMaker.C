@@ -221,7 +221,12 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (!h_sig) {
     if (verbose) cout<<"No signal found in this region"<<endl;
     if (suppressZeroBins || suppressZeroTRs) return 0;
-  } else {
+  }
+  else if (h_sig->Integral(0,-1) == 0) {
+    if (verbose) cout<<"No signal found in this region"<<endl;
+    if (suppressZeroBins || suppressZeroTRs) return 0;
+  }
+  else {
     n_sig = h_sig->GetBinContent(mt2bin);
     n_sig_TR = h_sig->Integral(0,-1);
     err_sig_mcstat = h_sig->GetBinError(mt2bin);
@@ -305,8 +310,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   TString cardname = Form("%s/datacard_%s_%s.txt",output_dir.c_str(),channel.c_str(),signame.Data());
 
-  //  if (suppressZeroBins && ((n_sig < 0.1) || (n_sig/n_bkg < 0.02))) {
-  if ( (suppressZeroBins && (n_sig < 0.001)) || (suppressZeroTRs && (n_sig < 0.001)) ) {
+    if (suppressZeroBins && ((n_sig < 0.1) || (n_sig/n_bkg < 0.02))) {
+      //if ( (suppressZeroBins && (n_sig < 0.001)) || (suppressZeroTRs && (n_sig < 0.001)) ) {
     if (verbose) std::cout << "Zero signal, card not printed: " << cardname << std::endl;
     return 0;
   }
