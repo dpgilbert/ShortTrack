@@ -11,7 +11,8 @@ def MakePlot(ht_reg, datacard_dir, datacard_name, outdir, userMax=None):
     #list of lists, one per jbj region, of low edges of MT2 bins
     mt2bins = utils.GetMT2bins(ht_reg)
 
-    nBinsTotal = sum([len(bins)-1 for bins in mt2bins]) + 1
+    # nBinsTotal = sum([len(bins)-1 for bins in mt2bins]) + 1
+    nBinsTotal = sum([len(bins)-1 for bins in mt2bins])
     bkg_processes = ["zinv","llep","qcd"]
     nBkgs = len(bkg_processes)
 
