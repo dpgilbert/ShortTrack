@@ -988,7 +988,7 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
 	    y_binwidth = 5;
 	    y_max = 800;
 	  }
-	  for (int im1 = 0; im1 <= 2000; im1 += 25) {
+	  for (int im1 = 0; im1 <= 2200; im1 += 25) {
 	    for (int im2 = 0; im2 <= y_max; im2 += y_binwidth) {
 	      int result = printCard(k->GetTitle(), imt2, signal, output_dir, im1, im2);   //MT2 and scan bins with no entries are handled by printCard function.
 	      if (result > 0) signal_points.insert( make_pair(im1,im2) ); 
