@@ -676,6 +676,12 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (zinvDY_alpha > 0.) last_zinvDY_transfer = zinvDY_alpha; // cache last good alpha value
   else if (n_zinvDY == 0) zinvDY_alpha = 0;
   else zinvDY_alpha = last_zinvDY_transfer;   // if alpha is 0: use alpha from previous (MT2) bin
+
+  if (zinvDY_alpha != n_zinvDY/n_zinvDY_cr && n_zinvDY_cr != 0) {
+    if (verbose) cout << "zinvDY_alpha does not add up! alpha: " << zinvDY_alpha << " n_cr: " << n_zinvDY_cr << " n: " << n_zinvDY << endl;
+    zinvDY_alpha = n_zinvDY/n_zinvDY_cr;
+    if (verbose) cout << "Setting zinvDY_alpha to " << zinvDY_alpha << endl;
+  }
   n_syst += 4; // zinvDY_crstat, zinvDY_mcstat, zinvDY_purity, zinvDY_rsfof
 
   // in hybrid method, or normal extrapolation: shape uncertainty only for bins with MT2 extrapolation
