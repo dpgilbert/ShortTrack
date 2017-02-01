@@ -85,7 +85,7 @@ bool useDRforGammaQCDMixing = true; // requires GenParticles
 // turn on to apply weights to central value
 bool applyWeights = false;
 // turn on to apply btag sf to central value
-bool applyBtagSF = false; // default true
+bool applyBtagSF = true; // default true
 // turn on to apply lepton sf to central value - take from babies
 bool applyLeptonSFfromBabies = false;
 // turn on to apply lepton sf to central value - reread from files
