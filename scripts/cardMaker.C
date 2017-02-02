@@ -6,6 +6,7 @@
 #include <string>
 #include <set>
 #include <regex>
+#include <sys/stat.h>
 
 #include "TROOT.h"
 #include "TLatex.h"
@@ -17,6 +18,7 @@
 #include "TCollection.h"
 #include "TKey.h"
 #include "TBenchmark.h"
+#include "RooHistError.h"
 
 using namespace std;
 
@@ -55,9 +57,16 @@ const bool correlateLostlepNuisances = true; //if false, new lostlep nuisances w
 
 const bool doSimpleLostlepNuisances = false; //if true, reverts to ICHEP lostlep nuisances (only alpha & lepeff)
 
+const bool printTable = false; //if true, prints additional .txt files with the data & bkg yields and uncertainties for plotmaking
+
 double last_zinv_ratio = 0.5;
 double last_lostlep_transfer = 2.;
 double last_zinvDY_transfer = 2.;
+
+inline bool FileExists(const TString name) {
+  struct stat buffer;   
+  return (stat (name.Data(), &buffer) == 0); 
+}
 
 //_______________________________________________________________________________
 void ReplaceString(std::string& subject, const std::string& search, const std::string& replace) {
@@ -932,6 +941,68 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   if (verbose) std::cout << "Wrote card: " << cardname << std::endl;
 
+  //prints a table of background and CR yields, with systematic and statistical errors
+  TString tablename = Form("%s/table_%s.txt",output_dir.c_str(),channel.c_str());
+  if (printTable && !FileExists(tablename)) {
+    //calculate the stat error for each background based on poisson interval
+    double zinvDY_statUp, zinvDY_statDown;
+    RooHistError::instance().getPoissonInterval(n_zinvDY_cr,zinvDY_statDown,zinvDY_statUp,1.);
+    zinvDY_statUp   *= (n_zinvDY_cr>0) ? n_zinvDY/n_zinvDY_cr : (zinvDY_alpha>0) ?  zinvDY_alpha : last_zinvDY_transfer;
+    zinvDY_statDown *= (n_zinvDY_cr>0) ? n_zinvDY/n_zinvDY_cr : (zinvDY_alpha>0) ?  zinvDY_alpha : last_zinvDY_transfer;  
+    zinvDY_statUp    = abs(zinvDY_statUp - n_zinvDY);
+    zinvDY_statDown  = abs(zinvDY_statDown - n_zinvDY);
+    
+    double lostlep_statUp, lostlep_statDown;
+    RooHistError::instance().getPoissonInterval(n_lostlep_cr,lostlep_statDown,lostlep_statUp,1.);
+    lostlep_statUp   *= (n_lostlep_cr>0) ? n_lostlep/n_lostlep_cr : (lostlep_alpha>0) ?  lostlep_alpha : last_lostlep_transfer;
+    lostlep_statDown *= (n_lostlep_cr>0) ? n_lostlep/n_lostlep_cr : (lostlep_alpha>0) ?  lostlep_alpha : last_lostlep_transfer;  
+    lostlep_statUp    = abs(lostlep_statUp - n_lostlep);
+    lostlep_statDown  = abs(lostlep_statDown - n_lostlep);
+
+    double qcd_statUp, qcd_statDown;
+    RooHistError::instance().getPoissonInterval(n_qcd_cr,qcd_statDown,qcd_statUp,1.);
+    qcd_statUp   *= (n_qcd_cr>0) ? n_qcd/n_qcd_cr : (qcd_alpha>0) ?  qcd_alpha : 0;
+    qcd_statDown *= (n_qcd_cr>0) ? n_qcd/n_qcd_cr : (qcd_alpha>0) ?  qcd_alpha : 0;  
+    qcd_statUp    = abs(qcd_statUp - n_qcd);
+    qcd_statDown  = abs(qcd_statDown - n_qcd);
+
+    //calculate the total syst error for each background by summing in quadrature
+    double zinvDY_syst;
+    if (n_extrap_bins_zinvDY > 0 && mt2bin >= zinvDY_lastbin_hybrid) {
+      zinvDY_syst = n_zinvDY*pow(pow(1-zinvDY_mcstat,2)+pow(1-zinvDY_puritystat,2)+pow(1-zinvDY_rsfof,2)+pow(1-zinvDY_shape,2),0.5);
+    }
+    else zinvDY_syst = n_zinvDY*pow(pow(1-zinvDY_mcstat,2)+pow(1-zinvDY_puritystat,2)+pow(1-zinvDY_rsfof,2),0.5);
+
+    
+    double lostlep_syst;
+    if (n_mt2bins > 1 && mt2bin >= lostlep_lastbin_hybrid) {
+      lostlep_syst = n_lostlep*pow(pow(1-lostlep_lepeff,2)+pow(1-lostlep_mtcut,2)+pow(1-lostlep_taueff,2)+pow(1-lostlep_btageff,2)+pow(1-lostlep_jec,2)+pow(1-lostlep_renorm,2)+pow(1-lostlep_mcstat,2)+pow(1-lostlep_shape,2),0.5);
+    }
+    else lostlep_syst = n_lostlep*pow(pow(1-lostlep_lepeff,2)+pow(1-lostlep_mtcut,2)+pow(1-lostlep_taueff,2)+pow(1-lostlep_btageff,2)+pow(1-lostlep_jec,2)+pow(1-lostlep_renorm,2)+pow(1-lostlep_mcstat,2),0.5);
+
+    double qcd_syst;
+    if (njets_LOW == 1) {
+      qcd_syst = n_qcd*pow(pow(1-qcd_alphaerr,2),0.5);
+    }
+    else qcd_syst = n_qcd*pow(pow(1-qcd_fjrbsyst,2)+pow(1-qcd_fitstat,2)+pow(1-qcd_fitsyst,2),0.5);
+    
+    //write the table
+    ofstream tablefile;
+    tablefile.open(tablename);
+    tablefile <<  "### bg_name yield statUp statDown systUp systDown" << endl;
+    tablefile << Form("zinv  %.1f  %.1f  %.1f  %.1f  %.1f ",n_zinvDY, zinvDY_statUp, zinvDY_statDown, zinvDY_syst, zinvDY_syst) << endl;
+    tablefile << Form("llep  %.1f  %.1f  %.1f  %.1f  %.1f ",n_lostlep, lostlep_statUp, lostlep_statDown, lostlep_syst, lostlep_syst) << endl;
+    tablefile << Form("qcd  %.1f  %.1f  %.1f  %.1f  %.1f ",n_qcd, qcd_statUp, qcd_statDown, qcd_syst, qcd_syst) << endl;
+    tablefile << Form("data %.0f ", n_data) << endl;
+    tablefile << Form("zinv_nCR %.0f ", n_zinvDY_cr) << endl;
+    tablefile << Form("llep_nCR %.0f ", n_lostlep_cr) << endl;
+    tablefile << Form("qcd_nCR %.0f ", n_qcd_cr) << endl;
+    
+    tablefile.close();
+    
+    if (verbose) std::cout << "Wrote table: " << tablename << std::endl;
+  }//if printTable
+  
   return 1;
 }
 
