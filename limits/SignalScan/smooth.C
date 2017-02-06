@@ -8,6 +8,8 @@
 #include <iostream>
 #include <vector>
 
+const int ybinsfirstxbin=30;
+
 float GetValue(float xvalue, TH1F &hist){
   float xmax = hist.GetXaxis()->GetXmax()-0.01;
   int xbin = hist.GetXaxis()->FindBin(min(xvalue, xmax));
@@ -26,11 +28,45 @@ float GetValueMinus(float xvalue, TH1F &hist){
   return hist.GetBinContent(xbin) - hist.GetBinError(xbin);
 }
 
+void fillHorizontalBelowZero(TH2 *hist){
+  for (int i = 1; i < hist->GetNbinsX()+1; i++) {
+    hist->SetBinContent( i,1,hist->GetBinContent(i,2) );
+  }
+}
+
+void smoothDiagonal(TH2* hist){
+  for (int ix = 1; ix < hist->GetNbinsX()+1; ix++) {
+    for (int iy = hist->GetNbinsY()-2; iy > 0; iy--) {
+      //    if (iy>ix+ybinsfirstxbin) hist->SetBinContent(ix,iy,hist->GetBinContent(ix,iy-1));
+      if (hist->GetBinContent(ix,iy)==0) {
+	for (int iyy = iy; iyy < hist->GetNbinsY()-2; iyy++) {
+	  hist->SetBinContent(ix,iyy,hist->GetBinContent(ix,iy-1));
+	}
+      }
+      else break;
+    }
+  }
+}
+
+void cleanDiagonal(TH2* hist, TH2* histUnsmooth, bool isR){
+  for (int ix = 1; ix < hist->GetNbinsX()+1; ix++) {
+    for (int iy = hist->GetNbinsY()-2; iy > 0; iy--) {
+      //if (iy>ix+ybinsfirstxbin) hist->SetBinContent(ix,iy,0);
+      if (histUnsmooth->GetBinContent(ix,iy)==0) {
+  	if (isR) hist->SetBinContent(ix,iy,1.1);
+  	else hist->SetBinContent(ix,iy,0);
+      }
+      else break;
+    }
+  }
+}
+
 void smooth(std::string model){
 
   TFile *f_xsec = new TFile("xsec_susy_13tev.root", "READ");
   TH1F *h_xsec = (TH1F*)f_xsec->Get("h_xsec_gluino");//FIXME for Gluino models
-  //TH1F *h_xsec = (TH1F*)f_xsec->Get("h_xsec_stop");// for stop/sbottom models
+  if ( model.find("T2-4bd") != string::npos || model.find("T2tt") != string::npos)
+    h_xsec = (TH1F*)f_xsec->Get("h_xsec_stop");// for stop/sbottom models
 
   TFile *f = new TFile(Form("r-values_%s.root", model.c_str()), "UPDATE");
   f->cd();
@@ -68,7 +104,7 @@ void smooth(std::string model){
       if(xsec_limit == 0){
         continue;
       }
-      xsec_limit *= (GetValueMinus(proj_x_1m->GetBinCenter(i), *h_xsec)/GetValue(proj_x_1m->GetBinCenter(i), *h_xsec));
+      xsec_limit *= (GetValue(proj_x_1m->GetBinCenter(i), *h_xsec)/GetValueMinus(proj_x_1m->GetBinCenter(i), *h_xsec));
       hObs1m->SetBinContent(i,j,xsec_limit);
     }
   } 
@@ -82,12 +118,22 @@ void smooth(std::string model){
       if(xsec_limit == 0){
         continue;
       }
-      xsec_limit *= (GetValuePlus(proj_x_1p->GetBinCenter(i), *h_xsec)/GetValue(proj_x_1p->GetBinCenter(i), *h_xsec));
+      xsec_limit *= (GetValue(proj_x_1p->GetBinCenter(i), *h_xsec)/GetValuePlus(proj_x_1p->GetBinCenter(i), *h_xsec));
       hObs1p->SetBinContent(i,j,xsec_limit);
     }
   } 
 
-
+  
+  fillHorizontalBelowZero(hExp);
+  fillHorizontalBelowZero(hObs);
+  fillHorizontalBelowZero(hObs1m);
+  fillHorizontalBelowZero(hObs1p);
+  fillHorizontalBelowZero(hExp1m);
+  fillHorizontalBelowZero(hExp2m);
+  fillHorizontalBelowZero(hExp1p);
+  fillHorizontalBelowZero(hExp2p);
+  fillHorizontalBelowZero(hXsec_obs);
+  
   TGraph2D *hExp_graph   = new TGraph2D(hExp);
   TGraph2D *hObs_graph   = new TGraph2D(hObs);
   TGraph2D *hObs1m_graph   = new TGraph2D(hObs1m);
@@ -98,25 +144,26 @@ void smooth(std::string model){
   TGraph2D *hExp2p_graph = new TGraph2D(hExp2p);
   TGraph2D *hXsec_obs_graph = new TGraph2D(hXsec_obs);
 
-  //hExp_graph->SetNpx(2*hExp_graph->GetNpx());
-  //hObs_graph->SetNpx(2*hObs_graph->GetNpx());
-  //hObs1m_graph->SetNpx(2*hObs1m_graph->GetNpx());
-  //hObs1p_graph->SetNpx(2*hObs1p_graph->GetNpx());
-  //hExp1m_graph->SetNpx(2*hExp1m_graph->GetNpx());
-  //hExp2m_graph->SetNpx(2*hExp2m_graph->GetNpx());
-  //hExp1p_graph->SetNpx(2*hExp1p_graph->GetNpx());
-  //hExp2p_graph->SetNpx(2*hExp2p_graph->GetNpx());
-  //hXsec_obs_graph->SetNpx(2*hXsec_obs_graph->GetNpx());
+  const float width = 12.5;
+  hExp_graph->SetNpx((hExp_graph->GetXmax()-hExp_graph->GetXmin())/width);
+  hObs_graph->SetNpx((hObs_graph->GetXmax()-hObs_graph->GetXmin())/width);
+  hObs1m_graph->SetNpx((hObs1m_graph->GetXmax()-hObs1m_graph->GetXmin())/width);
+  hObs1p_graph->SetNpx((hObs1p_graph->GetXmax()-hObs1p_graph->GetXmin())/width);
+  hExp1m_graph->SetNpx((hExp1m_graph->GetXmax()-hExp1m_graph->GetXmin())/width);
+  hExp2m_graph->SetNpx((hExp2m_graph->GetXmax()-hExp2m_graph->GetXmin())/width);
+  hExp1p_graph->SetNpx((hExp1p_graph->GetXmax()-hExp1p_graph->GetXmin())/width);
+  hExp2p_graph->SetNpx((hExp2p_graph->GetXmax()-hExp2p_graph->GetXmin())/width);
+  hXsec_obs_graph->SetNpx((hXsec_obs_graph->GetXmax()-hXsec_obs_graph->GetXmin())/width);
 
-  //hExp_graph->SetNpy(2*hExp_graph->GetNpy());
-  //hObs_graph->SetNpy(2*hObs_graph->GetNpy());
-  //hObs1m_graph->SetNpy(2*hObs1m_graph->GetNpy());
-  //hObs1p_graph->SetNpy(2*hObs1p_graph->GetNpy());
-  //hExp1m_graph->SetNpy(2*hExp1m_graph->GetNpy());
-  //hExp2m_graph->SetNpy(2*hExp2m_graph->GetNpy());
-  //hExp1p_graph->SetNpy(2*hExp1p_graph->GetNpy());
-  //hExp2p_graph->SetNpy(2*hExp2p_graph->GetNpy());
-  //hXsec_obs_graph->SetNpy(2*hXsec_obs_graph->GetNpy());
+  hExp_graph->SetNpy((hExp_graph->GetYmax()-hExp_graph->GetYmin())/width);
+  hObs_graph->SetNpy((hObs_graph->GetYmax()-hObs_graph->GetYmin())/width);
+  hObs1m_graph->SetNpy((hObs1m_graph->GetYmax()-hObs1m_graph->GetYmin())/width);
+  hObs1p_graph->SetNpy((hObs1p_graph->GetYmax()-hObs1p_graph->GetYmin())/width);
+  hExp1m_graph->SetNpy((hExp1m_graph->GetYmax()-hExp1m_graph->GetYmin())/width);
+  hExp2m_graph->SetNpy((hExp2m_graph->GetYmax()-hExp2m_graph->GetYmin())/width);
+  hExp1p_graph->SetNpy((hExp1p_graph->GetYmax()-hExp1p_graph->GetYmin())/width);
+  hExp2p_graph->SetNpy((hExp2p_graph->GetYmax()-hExp2p_graph->GetYmin())/width);
+  hXsec_obs_graph->SetNpy((hXsec_obs_graph->GetYmax()-hXsec_obs_graph->GetYmin())/width);
 
   TH2D *hExp_smooth   = hExp_graph->GetHistogram();
   TH2D *hObs_smooth   = hObs_graph->GetHistogram();
@@ -128,6 +175,42 @@ void smooth(std::string model){
   TH2D *hExp2p_smooth = hExp2p_graph->GetHistogram();
   TH2D *hXsec_obs_smooth = hXsec_obs_graph->GetHistogram();
 
+  TH2D * unsmoothedHist = (TH2D*) hExp_smooth->Clone();
+  
+  smoothDiagonal(hExp_smooth);
+  smoothDiagonal(hObs_smooth);
+  smoothDiagonal(hObs1m_smooth);
+  smoothDiagonal(hObs1p_smooth);
+  smoothDiagonal(hExp1m_smooth);
+  smoothDiagonal(hExp2m_smooth);
+  smoothDiagonal(hExp1p_smooth);
+  smoothDiagonal(hExp2p_smooth);
+  smoothDiagonal(hXsec_obs_smooth);
+  
+  const int nSmooth = 3;
+  cout << "Smoothing..." << endl;
+  for (int i = 0; i < nSmooth; i++) {
+    hExp_smooth->Smooth(1,"k3a");
+    hObs_smooth->Smooth(1,"k3a");
+    hObs1m_smooth->Smooth(1,"k3a");
+    hObs1p_smooth->Smooth(1,"k3a");
+    hExp1m_smooth->Smooth(1,"k3a");
+    hExp2m_smooth->Smooth(1,"k3a");
+    hExp1p_smooth->Smooth(1,"k3a");
+    hExp2p_smooth->Smooth(1,"k3a");
+    hXsec_obs_smooth->Smooth(1,"k3a");
+  }
+
+  cleanDiagonal(hExp_smooth,unsmoothedHist,1);
+  cleanDiagonal(hObs_smooth,unsmoothedHist,1);
+  cleanDiagonal(hObs1m_smooth,unsmoothedHist,1);
+  cleanDiagonal(hObs1p_smooth,unsmoothedHist,1);
+  cleanDiagonal(hExp1m_smooth,unsmoothedHist,1);
+  cleanDiagonal(hExp2m_smooth,unsmoothedHist,1);
+  cleanDiagonal(hExp1p_smooth,unsmoothedHist,1);
+  cleanDiagonal(hExp2p_smooth,unsmoothedHist,1);
+  cleanDiagonal(hXsec_obs_smooth,unsmoothedHist,0);
+  
   hExp_smooth->Write("hExp_smooth",TObject::kOverwrite);
   hObs_smooth->Write("hObs_smooth",TObject::kOverwrite);
   hObs1m_smooth->Write("hObs1m_smooth",TObject::kOverwrite);

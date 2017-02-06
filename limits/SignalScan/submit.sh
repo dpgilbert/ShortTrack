@@ -1,25 +1,30 @@
 #!/bin/bash
 
 SAMPLE=$1
+DATE=$2
+MODELFOLDER=$3
 
 while  ! voms-proxy-info -exist
 do echo "No Proxy found issuing \"voms-proxy-init -voms cms\""
    voms-proxy-init -hours 168 -voms cms 
 done
 
-MODEL=$(echo "$SAMPLE"|awk -F- 'split($1,a,"_")&&$0=a[1]')
+#MODEL=$(echo "$SAMPLE"|awk -F- 'split($1,a,"_")&&$0=a[1]')
+MODEL=$(echo "$SAMPLE"|awk -F_ 'split($1,a,"_")&&$0=a[1]')
 
-INPUT="job_input.tar.gz, cards_$MODEL/cards_$SAMPLE.tar.gz"
+echo $MODEL $SAMPLE $DATE $MODELFOLDER
+
+INPUT="job_input.tar.gz, cards_${MODELFOLDER}_${DATE}/cards_$SAMPLE.tar.gz"
 SITE="T2_US_UCSD"
 PROXY=$(voms-proxy-info -path)
-SUBMITLOGDIR="${PWD}/submit_logs_$MODEL"
-JOBLOGDIR="/data/tmp/jgran/job_logs/limits_for_paper_$MODEL"
-JOBCFGDIR="${PWD}/job_cfg_$MODEL"
+SUBMITLOGDIR="${PWD}/submit_logs_$MODELFOLDER"
+JOBLOGDIR="/data/tmp/$USER/job_logs/mt2Limits_$MODELFOLDER"
+JOBCFGDIR="${PWD}/job_cfg_$MODELFOLDER"
 LOG="${SUBMITLOGDIR}/condor_submit.log"
 OUT="${JOBLOGDIR}/1e.\$(Cluster).\$(Process).out"
 ERR="${JOBLOGDIR}/1e.\$(Cluster).\$(Process).err"
 
-OUTPUTDIR=/hadoop/cms/store/user/$USER/combine/limits_for_paper/$MODEL
+OUTPUTDIR=/hadoop/cms/store/user/$USER/combine/limits/${MODELFOLDER}_${DATE}
 
 if [ ! -d "${SUBMITLOGDIR}" ]; then
     mkdir -p ${SUBMITLOGDIR}
@@ -52,4 +57,6 @@ arguments=$SAMPLE $OUTPUTDIR
 queue
 " > ${JOBCFGDIR}/condor_$SAMPLE.cmd
 
+echo "condor_submit ${JOBCFGDIR}/condor_$SAMPLE.cmd"
 condor_submit ${JOBCFGDIR}/condor_$SAMPLE.cmd
+

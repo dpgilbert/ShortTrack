@@ -10,7 +10,7 @@
 
 TGraph DrawContours(TGraph2D &g2, int color, int style){
   TGraph out;
-  TList *l = g2.GetContourList(1.);
+  TList *l = g2.GetContourList(1.0);
   //l->Print();
   //TList *l = g2.GetContourList(20000.);
   if(!l){
@@ -33,7 +33,7 @@ TGraph DrawContours(TGraph2D &g2, int color, int style){
     }
     g->SetLineColor(color);
     g->SetLineStyle(style);
-    g->SetLineWidth(5);
+    g->SetLineWidth(4);
     g->Draw("L same");
   }
   return out;
@@ -65,21 +65,21 @@ void make_contour(std::string model){
   TGraph2D *hExp2p_graph = new TGraph2D(hExp2p_smooth);
 
   TCanvas* c1 = new TCanvas();
-  hExp_graph->Draw("COLZ");
+  hExp_graph->Draw("CONTZ LIST");
   c1->Update();
-  hObs_graph->Draw("COLZ");
+  hObs_graph->Draw("CONTZ LIST");
   c1->Update();
-  hObs1m_graph->Draw("COLZ");
+  hObs1m_graph->Draw("CONTZ LIST");
   c1->Update();
-  hObs1p_graph->Draw("COLZ");
+  hObs1p_graph->Draw("CONTZ LIST");
   c1->Update();
-  hExp1m_graph->Draw("COLZ");
+  hExp1m_graph->Draw("CONTZ LIST");
   c1->Update();
-  hExp2m_graph->Draw("COLZ");
+  hExp2m_graph->Draw("CONTZ LIST");
   c1->Update();
-  hExp1p_graph->Draw("COLZ");
+  hExp1p_graph->Draw("CONTZ LIST");
   c1->Update();
-  hExp2p_graph->Draw("COLZ");
+  hExp2p_graph->Draw("CONTZ LIST");
   c1->Update();
 
   TLegend* l = 0;
