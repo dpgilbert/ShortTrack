@@ -28,13 +28,13 @@ float GetValueMinus(float xvalue, TH1F &hist){
   return hist.GetBinContent(xbin) - hist.GetBinError(xbin);
 }
 
-void fillHorizontalBelowZero(TH2 *hist){
+void FillHorizontalBelowZero(TH2 *hist){
   for (int i = 1; i < hist->GetNbinsX()+1; i++) {
     hist->SetBinContent( i,1,hist->GetBinContent(i,2) );
   }
 }
 
-void smoothDiagonal(TH2* hist){
+void SmoothDiagonal(TH2* hist){
   for (int ix = 1; ix < hist->GetNbinsX()+1; ix++) {
     for (int iy = hist->GetNbinsY()-2; iy > 0; iy--) {
       //    if (iy>ix+ybinsfirstxbin) hist->SetBinContent(ix,iy,hist->GetBinContent(ix,iy-1));
@@ -48,17 +48,52 @@ void smoothDiagonal(TH2* hist){
   }
 }
 
-void cleanDiagonal(TH2* hist, TH2* histUnsmooth, bool isR){
+void CleanDiagonal(TH2* hist, TH2* histUnsmooth, bool isXsec){
   for (int ix = 1; ix < hist->GetNbinsX()+1; ix++) {
     for (int iy = hist->GetNbinsY()-2; iy > 0; iy--) {
       //if (iy>ix+ybinsfirstxbin) hist->SetBinContent(ix,iy,0);
       if (histUnsmooth->GetBinContent(ix,iy)==0) {
-  	if (isR) hist->SetBinContent(ix,iy,1.1);
+  	if (!isXsec) hist->SetBinContent(ix,iy,1.1);
   	else hist->SetBinContent(ix,iy,0);
       }
       else break;
     }
   }
+}
+
+TH2D* InterpolateAndSmooth(TH2* hist, string model){
+
+  //cosmetic fix to extend temperate past axes
+  FillHorizontalBelowZero(hist);
+
+  //interpolate by converting hist->graph->hist
+  TGraph2D *hist_graph   = new TGraph2D(hist);
+  
+  const float width = 12.5;
+  hist_graph->SetNpx((hist_graph->GetXmax()-hist_graph->GetXmin())/width);
+  hist_graph->SetNpy((hist_graph->GetYmax()-hist_graph->GetYmin())/width);
+  TH2D *hist_smooth   = hist_graph->GetHistogram();
+  TH2D * unsmoothedHist = (TH2D*) hist_smooth->Clone();
+
+  //temporarily fill zeroes above diagonal so smoothing doesn't smooth to zero
+  SmoothDiagonal(hist_smooth);
+
+  //perform smoothing
+  int nSmooth = 0;  
+  if (model.find("T2tt") !=std::string::npos) nSmooth = 1;
+  else if (model.find("T2qq") !=std::string::npos) nSmooth = 2;
+  else nSmooth = 3;
+  
+  for (int i = 0; i < nSmooth; i++) {
+    hist_smooth->Smooth(1,"k3a");
+  }
+
+  const string histname = hist->GetName();
+  const bool isXsec = histname.find("Xsec") !=std::string::npos;
+  //reset zeroes above diagonal
+  CleanDiagonal(hist_smooth,unsmoothedHist,isXsec);
+
+  return hist_smooth;
 }
 
 void smooth(std::string model){
@@ -123,103 +158,26 @@ void smooth(std::string model){
     }
   } 
 
-  
-  fillHorizontalBelowZero(hExp);
-  fillHorizontalBelowZero(hObs);
-  fillHorizontalBelowZero(hObs1m);
-  fillHorizontalBelowZero(hObs1p);
-  fillHorizontalBelowZero(hExp1m);
-  fillHorizontalBelowZero(hExp2m);
-  fillHorizontalBelowZero(hExp1p);
-  fillHorizontalBelowZero(hExp2p);
-  fillHorizontalBelowZero(hXsec_obs);
-  
-  TGraph2D *hExp_graph   = new TGraph2D(hExp);
-  TGraph2D *hObs_graph   = new TGraph2D(hObs);
-  TGraph2D *hObs1m_graph   = new TGraph2D(hObs1m);
-  TGraph2D *hObs1p_graph   = new TGraph2D(hObs1p);
-  TGraph2D *hExp1m_graph = new TGraph2D(hExp1m);
-  TGraph2D *hExp2m_graph = new TGraph2D(hExp2m);
-  TGraph2D *hExp1p_graph = new TGraph2D(hExp1p);
-  TGraph2D *hExp2p_graph = new TGraph2D(hExp2p);
-  TGraph2D *hXsec_obs_graph = new TGraph2D(hXsec_obs);
+  TH2D *hExp_smooth       = InterpolateAndSmooth(hExp,model);
+  TH2D *hObs_smooth       = InterpolateAndSmooth(hObs,model);
+  TH2D *hObs1m_smooth     = InterpolateAndSmooth(hObs1m,model);
+  TH2D *hObs1p_smooth     = InterpolateAndSmooth(hObs1p,model);
+  TH2D *hExp1m_smooth     = InterpolateAndSmooth(hExp1m,model);
+  TH2D *hExp2m_smooth     = InterpolateAndSmooth(hExp2m,model);
+  TH2D *hExp1p_smooth     = InterpolateAndSmooth(hExp1p,model);
+  TH2D *hExp2p_smooth     = InterpolateAndSmooth(hExp2p,model);
+  TH2D *hXsec_obs_smooth  = InterpolateAndSmooth(hXsec_obs,model);
+ 
+  hExp_smooth             ->Write("hExp_smooth",TObject::kOverwrite);
+  hObs_smooth             ->Write("hObs_smooth",TObject::kOverwrite);
+  hObs1m_smooth           ->Write("hObs1m_smooth",TObject::kOverwrite);
+  hObs1p_smooth           ->Write("hObs1p_smooth",TObject::kOverwrite);
+  hExp1m_smooth           ->Write("hExp1m_smooth",TObject::kOverwrite);
+  hExp2m_smooth           ->Write("hExp2m_smooth",TObject::kOverwrite);
+  hExp1p_smooth           ->Write("hExp1p_smooth",TObject::kOverwrite);
+  hExp2p_smooth           ->Write("hExp2p_smooth",TObject::kOverwrite);
+  hXsec_obs_smooth        ->Write("hXsec_obs_smooth",TObject::kOverwrite);
 
-  const float width = 12.5;
-  hExp_graph->SetNpx((hExp_graph->GetXmax()-hExp_graph->GetXmin())/width);
-  hObs_graph->SetNpx((hObs_graph->GetXmax()-hObs_graph->GetXmin())/width);
-  hObs1m_graph->SetNpx((hObs1m_graph->GetXmax()-hObs1m_graph->GetXmin())/width);
-  hObs1p_graph->SetNpx((hObs1p_graph->GetXmax()-hObs1p_graph->GetXmin())/width);
-  hExp1m_graph->SetNpx((hExp1m_graph->GetXmax()-hExp1m_graph->GetXmin())/width);
-  hExp2m_graph->SetNpx((hExp2m_graph->GetXmax()-hExp2m_graph->GetXmin())/width);
-  hExp1p_graph->SetNpx((hExp1p_graph->GetXmax()-hExp1p_graph->GetXmin())/width);
-  hExp2p_graph->SetNpx((hExp2p_graph->GetXmax()-hExp2p_graph->GetXmin())/width);
-  hXsec_obs_graph->SetNpx((hXsec_obs_graph->GetXmax()-hXsec_obs_graph->GetXmin())/width);
-
-  hExp_graph->SetNpy((hExp_graph->GetYmax()-hExp_graph->GetYmin())/width);
-  hObs_graph->SetNpy((hObs_graph->GetYmax()-hObs_graph->GetYmin())/width);
-  hObs1m_graph->SetNpy((hObs1m_graph->GetYmax()-hObs1m_graph->GetYmin())/width);
-  hObs1p_graph->SetNpy((hObs1p_graph->GetYmax()-hObs1p_graph->GetYmin())/width);
-  hExp1m_graph->SetNpy((hExp1m_graph->GetYmax()-hExp1m_graph->GetYmin())/width);
-  hExp2m_graph->SetNpy((hExp2m_graph->GetYmax()-hExp2m_graph->GetYmin())/width);
-  hExp1p_graph->SetNpy((hExp1p_graph->GetYmax()-hExp1p_graph->GetYmin())/width);
-  hExp2p_graph->SetNpy((hExp2p_graph->GetYmax()-hExp2p_graph->GetYmin())/width);
-  hXsec_obs_graph->SetNpy((hXsec_obs_graph->GetYmax()-hXsec_obs_graph->GetYmin())/width);
-
-  TH2D *hExp_smooth   = hExp_graph->GetHistogram();
-  TH2D *hObs_smooth   = hObs_graph->GetHistogram();
-  TH2D *hObs1m_smooth   = hObs1m_graph->GetHistogram();
-  TH2D *hObs1p_smooth   = hObs1p_graph->GetHistogram();
-  TH2D *hExp1m_smooth = hExp1m_graph->GetHistogram();
-  TH2D *hExp2m_smooth = hExp2m_graph->GetHistogram();
-  TH2D *hExp1p_smooth = hExp1p_graph->GetHistogram();
-  TH2D *hExp2p_smooth = hExp2p_graph->GetHistogram();
-  TH2D *hXsec_obs_smooth = hXsec_obs_graph->GetHistogram();
-
-  TH2D * unsmoothedHist = (TH2D*) hExp_smooth->Clone();
-  
-  smoothDiagonal(hExp_smooth);
-  smoothDiagonal(hObs_smooth);
-  smoothDiagonal(hObs1m_smooth);
-  smoothDiagonal(hObs1p_smooth);
-  smoothDiagonal(hExp1m_smooth);
-  smoothDiagonal(hExp2m_smooth);
-  smoothDiagonal(hExp1p_smooth);
-  smoothDiagonal(hExp2p_smooth);
-  smoothDiagonal(hXsec_obs_smooth);
-  
-  const int nSmooth = 3;
-  cout << "Smoothing..." << endl;
-  for (int i = 0; i < nSmooth; i++) {
-    hExp_smooth->Smooth(1,"k3a");
-    hObs_smooth->Smooth(1,"k3a");
-    hObs1m_smooth->Smooth(1,"k3a");
-    hObs1p_smooth->Smooth(1,"k3a");
-    hExp1m_smooth->Smooth(1,"k3a");
-    hExp2m_smooth->Smooth(1,"k3a");
-    hExp1p_smooth->Smooth(1,"k3a");
-    hExp2p_smooth->Smooth(1,"k3a");
-    hXsec_obs_smooth->Smooth(1,"k3a");
-  }
-
-  cleanDiagonal(hExp_smooth,unsmoothedHist,1);
-  cleanDiagonal(hObs_smooth,unsmoothedHist,1);
-  cleanDiagonal(hObs1m_smooth,unsmoothedHist,1);
-  cleanDiagonal(hObs1p_smooth,unsmoothedHist,1);
-  cleanDiagonal(hExp1m_smooth,unsmoothedHist,1);
-  cleanDiagonal(hExp2m_smooth,unsmoothedHist,1);
-  cleanDiagonal(hExp1p_smooth,unsmoothedHist,1);
-  cleanDiagonal(hExp2p_smooth,unsmoothedHist,1);
-  cleanDiagonal(hXsec_obs_smooth,unsmoothedHist,0);
-  
-  hExp_smooth->Write("hExp_smooth",TObject::kOverwrite);
-  hObs_smooth->Write("hObs_smooth",TObject::kOverwrite);
-  hObs1m_smooth->Write("hObs1m_smooth",TObject::kOverwrite);
-  hObs1p_smooth->Write("hObs1p_smooth",TObject::kOverwrite);
-  hExp1m_smooth->Write("hExp1m_smooth",TObject::kOverwrite);
-  hExp2m_smooth->Write("hExp2m_smooth",TObject::kOverwrite);
-  hExp1p_smooth->Write("hExp1p_smooth",TObject::kOverwrite);
-  hExp2p_smooth->Write("hExp2p_smooth",TObject::kOverwrite);
-  hXsec_obs_smooth->Write("hXsec_obs_smooth",TObject::kOverwrite);
   f->Close();
   delete f;
 
