@@ -140,7 +140,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
   if (applyBtagSFs) {
     // setup btag calibration readers
-    calib = new BTagCalibration("csvv2", "btagsf/CSVv2Moriond17_2017_1_26_BtoH.csv"); // 80X ichep version
+    calib = new BTagCalibration("csvv2", "btagsf/CSVv2_Moriond17_B_H.csv"); // 80X moriond17 version
     // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80X
     reader_heavy = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "central"); // central
     reader_heavy_UP = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "up");  // sys up
