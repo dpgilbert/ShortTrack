@@ -52,6 +52,12 @@ int mergeFixScale1fb(const TString& indir, const TString& sample, const TString&
   // Float_t scale1fb_input = xsec_input_max * kfactor_input * filter_input * 1000. / float(nevents_input);
   float evt_scale1fb_max = chain->GetMaximum("evt_scale1fb");
   float evt_scale1fb_min = chain->GetMinimum("evt_scale1fb");
+  if (fabs(evt_scale1fb_max - evt_scale1fb_min) < 1e-3 * evt_scale1fb_max) {
+    cout << "ERROR: all events have the same scale1fb: " << evt_scale1fb_max
+	 << ", no need to merge, aborting.." << endl;
+    return 2;
+  }
+  
   Float_t scale1fb_input_inv = 1./evt_scale1fb_max + 1./evt_scale1fb_min;
   Float_t scale1fb_input = 1./scale1fb_input_inv;
   if (sample.Contains("wjets_ht200to400")) // hack for now to deal with this sample since 3 samples need to be combined
