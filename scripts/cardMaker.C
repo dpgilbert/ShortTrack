@@ -53,7 +53,7 @@ const bool subtractSignalContam = false;
 
 const bool doZinvFromDY = true; //if false, will take estimate from GJets
 
-const bool correlateLostlepNuisances = true; //if false, new lostlep nuisances will be decorrelated in all regions
+const bool decorrelateLostlepNuisances = false; //if true, new lostlep nuisances will be decorrelated in all regions
 
 const bool doSimpleLostlepNuisances = false; //if true, reverts to ICHEP lostlep nuisances (only alpha & lepeff)
 
@@ -577,7 +577,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double lostlep_mtcut = 1.03; // transfer factor uncertainty from mt cut
   double lostlep_taueff = 1.0 + lostlep_alpha_tau_ERR; // transfer factor uncertainty from tau efficiency
   double lostlep_btageff = 1.0 + lostlep_alpha_btagsf_ERR; // transfer factor uncertainty from btag efficiency
-  double lostlep_jec = 1.0 + 0.05; // transfer factor uncertainty from JEC unc
+  double lostlep_jec = 1.0 + 0.02; // transfer factor uncertainty from JEC unc
   double lostlep_renorm = 1.0 + lostlep_alpha_renorm_ERR; // transfer factor uncertainty from renorm & factorization scales
   double lostlep_alphaerr = 1. + 0.10; // only used if doSimpleLostlepNuisances
  
@@ -600,14 +600,14 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_lostlep_lepeff     = Form("llep_lepeff");
   TString name_lostlep_taueff     = Form("llep_taueff");
   TString name_lostlep_btageff    = Form("llep_btageff");
-  TString name_lostlep_jec        = Form("llep_jec");
+  TString name_lostlep_jec        = Form("jec");
   TString name_lostlep_renorm     = Form("llep_renorm");
   TString name_lostlep_mtcut      = Form("llep_mtcut");
-  if (correlateLostlepNuisances) {
+  if (decorrelateLostlepNuisances) {
     name_lostlep_lepeff     = Form("llep_lepeff_%s"      , channel.c_str());
     name_lostlep_taueff     = Form("llep_taueff_%s"      , channel.c_str());
     name_lostlep_btageff    = Form("llep_btageff_%s"     , channel.c_str());
-    name_lostlep_jec        = Form("llep_jec_%s"         , channel.c_str());
+    //name_lostlep_jec        = Form("llep_jec_%s"         , channel.c_str()); //this nuisance is always totally correlated with Zinv
     name_lostlep_renorm     = Form("llep_renorm_%s"      , channel.c_str());
     name_lostlep_mtcut      = Form("llep_mtcut_%s"       , channel.c_str());
   }
@@ -630,7 +630,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   else if (n_lostlep == 0) lostlep_alpha = 0;
   else lostlep_alpha = last_lostlep_transfer;   // if alpha is 0: use alpha from previous (MT2) bin
   if (doSimpleLostlepNuisances) n_syst += 4; // lostlep_crstat, lostlep_mcstat, lostlep_alphaerr, lostlep_lepeff
-  else n_syst += 8; // lostlep_crstat, lostlep_mcstat, lostlep_lepeff, lostlep_mtcut, lostlep_taueff, lostlep_btageff, lostlep_jec, lostlep_renorm
+  else n_syst += 8; // lostlep_crstat, lostlep_mcstat, lostlep_lepeff, lostlep_mtcut, lostlep_taueff, lostlep_btageff, jec, lostlep_renorm
 
   // ----- zinv bkg uncertainties - depend on signal region, b selection
   TString perChannel(channel.c_str());
@@ -669,6 +669,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_zinvDY_purity      = "zinvDY_purity_"+perTopoRegion;
   TString name_zinvDY_rsfof       = "zinvDY_rsfof_"+perTopoRegion;
   TString name_zinvDY_shape       = "zinvDY_shape_"+perTopoRegion;
+  //TString name_zinvDY_jec         = "jec"; // name defined in lostlep estimate
   TString name_zinvDY_crstat      = "zinvDY_CRstat_"    +perTopoRegion;
   if (mt2bin < zinvDY_lastbin_hybrid && !usingInclusiveTemplates) {
     // bin-by-bin is used: no shape uncertainty, decorrelated CR uncertainty
@@ -679,6 +680,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double zinvDY_puritystat = 1. + err_zinvDY_purity; // transfer factor purity stat uncertainty
   double zinvDY_rsfof = 1. + (1-zinvDY_purity)*0.15; // transfer factor uncertainty due to R(SF/OF)
   double zinvDY_mcstat = 1. + err_zinvDY_mcstat; // transfer factor stat uncertainty
+  double zinvDY_jec = (ht_HI == 450) ?  1. + 0.05 : 1. + 0.02; // transfer factor jec uncertainty
 
   //  note that if n_zinvDY_cr == 0, we will just use zinvDY_alpha (straight from MC) in the datacard
   if (n_zinvDY_cr > 0.) {
@@ -696,7 +698,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     zinvDY_alpha = n_zinvDY/n_zinvDY_cr;
     if (verbose) cout << "Setting zinvDY_alpha to " << zinvDY_alpha << endl;
   }
-  n_syst += 4; // zinvDY_crstat, zinvDY_mcstat, zinvDY_purity, zinvDY_rsfof
+  n_syst += 5; // zinvDY_crstat, zinvDY_mcstat, zinvDY_purity, zinvDY_rsfof, jec
 
   // in hybrid method, or normal extrapolation: shape uncertainty only for bins with MT2 extrapolation
   const float last_bin_relerr_zinvDY = 0.4;
@@ -917,7 +919,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mtcut.Data(),lostlep_mtcut)  << endl;
     ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_taueff.Data(),lostlep_taueff)  << endl;
     ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_btageff.Data(),lostlep_btageff)  << endl;
-    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_jec.Data(),lostlep_jec)  << endl;
+    if (!doZinvFromDY) ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_jec.Data(),lostlep_jec)  << endl;
     ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_renorm.Data(),lostlep_renorm)  << endl;
   }
   ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_lostlep_crstat.Data(),n_lostlep_cr,lostlep_alpha)  << endl;
@@ -926,6 +928,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_shape.Data(),lostlep_shape)  << endl;
   //ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_alphaerr.Data(),lostlep_alphaerr)  << endl;
 
+  //jec systematics for Zinv and lostlep
+  if (doZinvFromDY) ofile <<  Form("%s        lnN    -    %.3f    %.3f    - ",name_lostlep_jec.Data(),zinvDY_jec,lostlep_jec)  << endl;
 
   // ---- QCD systs
   ofile <<  Form("%s        gmN %.0f    -    -    -   %.5f",name_qcd_crstat.Data(),n_qcd_cr,qcd_crstat)  << endl;
