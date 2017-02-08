@@ -23,8 +23,8 @@ class sms():
         self.label= "pp #rightarrow #tilde{g} #tilde{g}, #tilde{g} #rightarrow t #bar{t} #tilde{#chi}^{0}_{1}";
         self.label2= "";
         # scan range to plot
-        self.Xmin = 700.
-        self.Xmax = 1950.
+        self.Xmin = 600.
+        self.Xmax = 2200.
         self.Ymin = 0.
         self.Ymax = 1800.
         self.Zmin = 0.001
@@ -41,11 +41,12 @@ class sms():
         self.modelname = "T1bbbb"
         # decay chain
         self.label= "pp #rightarrow #tilde{g} #tilde{g}, #tilde{g} #rightarrow b #bar{b} #tilde{#chi}^{0}_{1}";
+        self.label2= "";
         # plot boundary. The top 1/4 of the y axis is taken by the legend
         self.Xmin = 600.
-        self.Xmax = 1950.
+        self.Xmax = 2300.
         self.Ymin = 0.
-        self.Ymax = 1800.
+        self.Ymax = 2000.
         self.Zmin = 0.001
         self.Zmax = 2.
         # produce sparticle
@@ -60,6 +61,7 @@ class sms():
         self.modelname = "T1qqqq"
         # decay chain
         self.label= "pp #rightarrow #tilde{g} #tilde{g}, #tilde{g} #rightarrow q #bar{q} #tilde{#chi}^{0}_{1}";
+        self.label2= "";
         # plot boundary. The top 1/4 of the y axis is taken by the legend
         self.Xmin = 600.
         self.Xmax = 1950.
@@ -101,13 +103,14 @@ class sms():
         self.modelname = "T2tt"
         # decay chain
         self.label= "pp #rightarrow #tilde{t} #tilde{t}, #tilde{t} #rightarrow t #tilde{#chi}^{0}_{1}";
+        self.label2= "";
         # plot boundary. The top 1/4 of the y axis is taken by the legend
-        self.Xmin = 100.
-        self.Xmax = 1000.
+        self.Xmin = 150.
+        self.Xmax = 1200.
         self.Ymin = 0.
-        self.Ymax = 800.
+        self.Ymax = 700.
         self.Zmin = 0.001
-        self.Zmax = 2.
+        self.Zmax = 100.
         # produce sparticle
         self.sParticle = "m_{#tilde{t}} [GeV]"
         # LSP
@@ -120,6 +123,7 @@ class sms():
         self.modelname = "T2bb"
         # decay chain
         self.label= "pp #rightarrow #tilde{b} #tilde{b}, #tilde{b} #rightarrow b #tilde{#chi}^{0}_{1}";
+        self.label2= "";
         # plot boundary. The top 1/4 of the y axis is taken by the legend
         self.Xmin = 100.
         self.Xmax = 1000.
