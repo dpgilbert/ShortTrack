@@ -149,12 +149,12 @@ void make_contour(std::string model){
   TGraph cobsm = ExtractContour(hObs1m_smooth,1,1,splitRL);
   TGraph cobsp = ExtractContour(hObs1p_smooth,1,1,splitRL);
 
-  cup.Write("graph_smoothed_ExpP",TObject::kOverwrite);
-  cdown.Write("graph_smoothed_ExpM",TObject::kOverwrite);
-  cexp.Write("graph_smoothed_Exp",TObject::kOverwrite);
-  cobs.Write("graph_smoothed_Obs",TObject::kOverwrite);
-  cobsm.Write("graph_smoothed_ObsM",TObject::kOverwrite);
-  cobsp.Write("graph_smoothed_ObsP",TObject::kOverwrite);
+  cup.Write("gr_ep1s_smoothed",TObject::kOverwrite);
+  cdown.Write("gr_em1s_smoothed",TObject::kOverwrite);
+  cexp.Write("gr_exp_smoothed",TObject::kOverwrite);
+  cobs.Write("gr_obs_smoothed",TObject::kOverwrite);
+  cobsm.Write("gr_om1s_smoothed",TObject::kOverwrite);
+  cobsp.Write("gr_op1s_smoothed",TObject::kOverwrite);
 
   f->Close();
   delete f;

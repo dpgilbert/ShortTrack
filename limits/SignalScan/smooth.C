@@ -115,7 +115,7 @@ void smooth(std::string model){
 
   if(!hExp) std::cout << "hist not found" << std::endl;
 
-  TH2* hXsec_obs = (TH2*)hObs->Clone("hXsec_obs"); 
+  TH2* hXsec_obs = (TH2*)hObs->Clone("obs_xs"); 
   TH1D* proj_x = hXsec_obs->ProjectionX();
 
   for(int i=1; i<=hXsec_obs->GetNbinsX(); i++){
