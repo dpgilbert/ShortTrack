@@ -11,7 +11,7 @@ git clone git@github.com:CMS-SUS-XPAG/PlotsSMS.git
 #put modified sms.py and model config files into PlotsSMS area
 cp sms.py PlotsSMS/python
 mkdir -p PlotsSMS/config/mt2
-cp *_mt2.cfg PlotsSMS/config/mt2
+cp cfg/*_mt2.cfg PlotsSMS/config/mt2
 
 #set environment
 source /cvmfs/cms.cern.ch/cmssw/cmsset_default.sh > /dev/null 2>&1
