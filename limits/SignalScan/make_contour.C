@@ -4,20 +4,51 @@
 #include "TTree.h"
 #include "TGraph2D.h"
 #include "TGraph.h"
+#include "TMultiGraph.h"
+#include "TStyle.h"
 
 #include <iostream>
 #include <vector>
 
-TGraph DrawContours(TGraph2D &g2, int color, int style){
-  TGraph out;
-  TList *l = g2.GetContourList(1.0);
-  //l->Print();
-  //TList *l = g2.GetContourList(20000.);
+bool  pairCompare(const std::pair<int, TGraph>& no1, const std::pair<int, TGraph>& no2){
+  return no1.first < no2.first;
+}
+
+TGraph MergeGraphs(vector<TGraph> vecGraph){
+  TMultiGraph mg;
+  mg.Add(&vecGraph[0]);
+  mg.Add(&vecGraph[1]);
+  TGraph g;
+  g.Merge(mg.GetListOfGraphs());
+  g.SetName(vecGraph[0].GetName());
+  return g;
+}
+
+vector<TGraph> DrawContours(TH2* hist, int color, int style){
+
+  TGraph2D *h_graph   = new TGraph2D(hist);
+  
+  TCanvas* c1 = new TCanvas();
+  
+  h_graph->Draw("CONT0 LIST");
+  c1->Update();
+
+  // TObjArray* obj = (TObjArray*) gROOT->GetListOfSpecials()->FindObject("contours");
+  // TList* l2 = (TList*) obj->At(1);
+  
+  vector<TGraph> vecGraph;
+  vector<pair<int,TGraph>> vecGraphPairs;
+  TGraph out1 = 0;
+  TGraph out2 = 0;
+  TList *l = h_graph->GetContourList(1.0);
   if(!l){
     std::cout << "no contour" << std::endl;
-    return out;
+    vecGraph.push_back(out1);
+    vecGraph.push_back(out2);
+    return vecGraph;
   }
-  bool added = false;
+  
+  //bool added = false;
   int max_points = -1;
   for(int i = 0; i < l->GetSize(); ++i){
     TGraph *g = static_cast<TGraph*>(l->At(i));
@@ -27,8 +58,10 @@ TGraph DrawContours(TGraph2D &g2, int color, int style){
     }
     int n_points = g->GetN();
     std::cout << "n_points = " << n_points << std::endl;
+    vecGraphPairs.push_back(std::make_pair(n_points,*g));
     if(n_points > max_points){
-      out = *g;
+      // out2 = out1;
+      // out1 = *g;
       max_points = n_points;
     }
     g->SetLineColor(color);
@@ -36,7 +69,58 @@ TGraph DrawContours(TGraph2D &g2, int color, int style){
     g->SetLineWidth(4);
     g->Draw("L same");
   }
-  return out;
+
+  std::sort(vecGraphPairs.rbegin(),vecGraphPairs.rend(),pairCompare);
+  
+  if (vecGraphPairs.size() == 1) vecGraphPairs.push_back(vecGraphPairs[0]);
+  
+  // if (l->GetSize() < 2) out2 = out1;
+  
+  vecGraph.push_back(vecGraphPairs[0].second);
+  vecGraph.push_back(vecGraphPairs[1].second);
+
+  //DELETE STUFF
+  
+  return vecGraph;
+}
+
+TGraph ExtractContour(TH2* hist, int color, int style, bool splitRL=false){
+
+  vector<TGraph> v_contour;
+
+  hist->SetMinimum(0);
+  hist->SetMaximum(2);
+  hist->SetContour(4);
+  
+  if(splitRL) {
+    TH2* hL = (TH2*) hist->Clone();
+    TH2* hR = (TH2*) hist->Clone();
+
+    for (int ix = 1; ix < hist->GetNbinsX()+1; ix++) {
+      for (int iy = 1; iy < hist->GetNbinsY()+1; iy++) {
+	float m1 = hist->GetXaxis()->GetBinLowEdge(ix);
+	float m2 = hist->GetYaxis()->GetBinLowEdge(iy);
+	if (m1-m2 >= 150) hL->SetBinContent(ix,iy, 0);
+	if (m1-m2 <= 200) hR->SetBinContent(ix,iy, 0);
+      }
+    }
+
+    vector<TGraph> v_L = DrawContours(hL, color, style);
+    vector<TGraph> v_R = DrawContours(hR, color, style);
+
+    v_contour.push_back(v_L[0]);
+    v_contour.push_back(v_R[0]);
+  }
+  else{
+    v_contour = DrawContours(hist, color, style);  
+  }
+  
+  TGraph g = MergeGraphs(v_contour);
+
+  //DELETE STUFF
+
+  //FIXME:for now just return the first graph
+  return v_contour[0];
 }
 
 void make_contour(std::string model){
@@ -55,41 +139,15 @@ void make_contour(std::string model){
 
   if(!hExp_smooth) std::cout << "hist not found" << std::endl;
 
-  TGraph2D *hExp_graph   = new TGraph2D(hExp_smooth);
-  TGraph2D *hObs_graph   = new TGraph2D(hObs_smooth);
-  TGraph2D *hObs1m_graph   = new TGraph2D(hObs1m_smooth);
-  TGraph2D *hObs1p_graph   = new TGraph2D(hObs1p_smooth);
-  TGraph2D *hExp1m_graph = new TGraph2D(hExp1m_smooth);
-  TGraph2D *hExp2m_graph = new TGraph2D(hExp2m_smooth);
-  TGraph2D *hExp1p_graph = new TGraph2D(hExp1p_smooth);
-  TGraph2D *hExp2p_graph = new TGraph2D(hExp2p_smooth);
-
-  TCanvas* c1 = new TCanvas();
-  hExp_graph->Draw("CONTZ LIST");
-  c1->Update();
-  hObs_graph->Draw("CONTZ LIST");
-  c1->Update();
-  hObs1m_graph->Draw("CONTZ LIST");
-  c1->Update();
-  hObs1p_graph->Draw("CONTZ LIST");
-  c1->Update();
-  hExp1m_graph->Draw("CONTZ LIST");
-  c1->Update();
-  hExp2m_graph->Draw("CONTZ LIST");
-  c1->Update();
-  hExp1p_graph->Draw("CONTZ LIST");
-  c1->Update();
-  hExp2p_graph->Draw("CONTZ LIST");
-  c1->Update();
-
-  TLegend* l = 0;
-
-  TGraph cup = DrawContours(*hExp1p_graph, 2, 2);
-  TGraph cdown = DrawContours(*hExp1m_graph, 2, 2);
-  TGraph cexp = DrawContours(*hExp_graph, 2, 1);
-  TGraph cobs = DrawContours(*hObs_graph, 1, 1);
-  TGraph cobsm = DrawContours(*hObs1m_graph, 1, 1);
-  TGraph cobsp = DrawContours(*hObs1p_graph, 1, 1);
+  gStyle->SetNumberContours(100);
+  
+  bool splitRL = false;
+  TGraph cup = ExtractContour(hExp1p_smooth,2,2,splitRL);
+  TGraph cdown = ExtractContour(hExp1m_smooth,2,2,splitRL);
+  TGraph cexp = ExtractContour(hExp_smooth,2,1,splitRL);
+  TGraph cobs = ExtractContour(hObs_smooth,1,1,splitRL);
+  TGraph cobsm = ExtractContour(hObs1m_smooth,1,1,splitRL);
+  TGraph cobsp = ExtractContour(hObs1p_smooth,1,1,splitRL);
 
   cup.Write("graph_smoothed_ExpP",TObject::kOverwrite);
   cdown.Write("graph_smoothed_ExpM",TObject::kOverwrite);
