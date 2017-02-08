@@ -115,7 +115,7 @@ void smooth(std::string model){
 
   if(!hExp) std::cout << "hist not found" << std::endl;
 
-  TH2* hXsec_obs = (TH2*)hObs->Clone("obs_xs"); 
+  TH2* hXsec_obs = (TH2*)hObs->Clone("hXsec_obs"); 
   TH1D* proj_x = hXsec_obs->ProjectionX();
 
   for(int i=1; i<=hXsec_obs->GetNbinsX(); i++){
@@ -176,7 +176,7 @@ void smooth(std::string model){
   hExp2m_smooth           ->Write("hExp2m_smooth",TObject::kOverwrite);
   hExp1p_smooth           ->Write("hExp1p_smooth",TObject::kOverwrite);
   hExp2p_smooth           ->Write("hExp2p_smooth",TObject::kOverwrite);
-  hXsec_obs_smooth        ->Write("hXsec_obs_smooth",TObject::kOverwrite);
+  hXsec_obs_smooth        ->Write("obs_xs",TObject::kOverwrite);
 
   f->Close();
   delete f;

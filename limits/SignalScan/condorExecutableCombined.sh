@@ -48,11 +48,11 @@ which root
 echo "ls -lrth"
 ls -lrth
 
-echo "running combineCards.py"
-python combineCards.py -S "datacard_"*"_$SAMPLE.txt" > "card_all_$SAMPLE.txt"  
-#mv "datacard_${SAMPLE}_combined.txt" "card_all_$SAMPLE.txt"  #use this line instead of combineCards.py if cards are already combined
-echo "ls -lrth after combineCards.py"
-ls -lrth
+#echo "running combineCards.py"
+#python combineCards.py -S "datacard_"*"_$SAMPLE.txt" > "card_all_$SAMPLE.txt"  
+mv "datacard_${SAMPLE}_combined.txt" "card_all_$SAMPLE.txt"  #use this line instead of combineCards.py if cards are already combined
+#echo "ls -lrth after combineCards.py"
+#ls -lrth
 echo "running text2workspace.py"
 ./text2workspace.py card_all_$SAMPLE.txt -b -o $SAMPLE.root
 echo "ls -lrth after text2workspace.py"

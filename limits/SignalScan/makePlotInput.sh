@@ -1,16 +1,10 @@
 #!/bin/bash
 
-MODEL=T1tttt
-#MODEL=T1bbbb
-#MODEL=T1qqqq
-#MODEL=T2tt
-#MODEL=T2bb
-#MODEL=T2-4bd_scan
+MODEL=$1
+DATE=$2
+INDIR=$3
 
-DATE=ETH_Feb2
-
-INDIR=/hadoop/cms/store/user/${USER}/combine/limits/${MODEL}_${DATE}
-CARDDIR="/home/users/mderdzinski/winter2017/clean_master/scripts/cards_${MODEL}_${DATE}"
+LIMITDIR=/hadoop/cms/store/user/${USER}/combine/limits/${MODEL}_${DATE}
 
 rm r-values_${MODEL}.root
 
@@ -31,10 +25,10 @@ do
   fi
 #  echo $MASS1
 #  echo $MASS2
-#  root -b -q "make_rValues.C(\"$INDIR\",\"$MODEL\",$MASS1,$MASS2)"
-  echo "make_rValues(\"$INDIR\",\"$MODEL\",$MASS1,$MASS2)" >> temp
+#  root -b -q "make_rValues.C(\"$LIMITDIR\",\"$MODEL\",$MASS1,$MASS2)"
+  echo "make_rValues(\"$LIMITDIR\",\"$MODEL\",$MASS1,$MASS2)" >> temp
 
-done < $CARDDIR/points_$MODEL.txt
+done < $INDIR/points_$MODEL.txt
 echo ".q" >> temp
 
 cat temp | root -b  &> logMakePlotInput.txt 

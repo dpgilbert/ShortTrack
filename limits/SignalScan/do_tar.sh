@@ -1,15 +1,10 @@
 #!/bin/bash
 
-MODEL="T1tttt"
-#MODEL="T1bbbb"
-#MODEL="T1qqqq"
-#MODEL="T2tt"
-#MODEL="T2bb"
-#MODEL="T2-4bd_scan" #Need to remove points beyond 400 by hand from points_$MODEL
+MODEL=$1
+DATE=$2
+INDIR=$3
+COMBINED=$4
 
-DATE="ETH_Feb2"
-
-INDIR="/home/users/mderdzinski/winter2017/clean_master/scripts/cards_${MODEL}_${DATE}"
 CARD_DIR="cards_${MODEL}_${DATE}"
 
 if [ -d $CARD_DIR ]
@@ -31,8 +26,12 @@ fi
 while read i
 do
   echo $i
-  tar -czvf cards_$i.tar.gz "datacard_"*"${i}.txt" >> log_tar.log 2>&1
-  #tar -czvf cards_$i.tar.gz "datacard_"*"${i}_combined.txt" >> log_tar.log 2>&1  #for cards already combined
+  if [ $COMBINED == 1 ]
+  then
+      tar -czvf cards_$i.tar.gz "datacard_"*"${i}_combined.txt" >> log_tar.log 2>&1  #for cards already combined
+  else
+      tar -czvf cards_$i.tar.gz "datacard_"*"${i}.txt" >> log_tar.log 2>&1
+  fi
 done < $INDIR/points_$MODEL.txt
 popd
 

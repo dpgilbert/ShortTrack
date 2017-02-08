@@ -3,6 +3,7 @@
 SAMPLE=$1
 DATE=$2
 MODELFOLDER=$3
+COMBINED=$4
 
 while  ! voms-proxy-info -exist
 do echo "No Proxy found issuing \"voms-proxy-init -voms cms\""
@@ -38,6 +39,13 @@ if [ ! -d "${JOBCFGDIR}" ]; then
     mkdir -p ${JOBCFGDIR}
 fi
 
+if [ $COMBINED == 1 ]
+then
+    EXE=condorExecutableCombined.sh
+else
+    EXE=condorExecutable.sh
+fi
+
 echo "
 universe=grid
 Grid_Resource=condor cmssubmit-r1.t2.ucsd.edu glidein-collector.t2.ucsd.edu
@@ -51,7 +59,7 @@ output=${OUT}
 error =${ERR}
 notification=Never
 x509userproxy=${PROXY}
-executable=condorExecutable.sh
+executable=${EXE}
 transfer_executable=True
 arguments=$SAMPLE $OUTPUTDIR 
 queue

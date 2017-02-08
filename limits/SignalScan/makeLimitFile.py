@@ -5,6 +5,8 @@ from sys import argv,exit
 #from optparse import OptionParser
 import ROOT
 
+print "running:", argv
+
 if len(argv)<4:
     print "Usage: "+argv[0]+" [model] [date] [pointsFile]"
     exit(1)

@@ -5,7 +5,7 @@ from sys import argv,exit
 from optparse import OptionParser
 import ROOT
 
-print "runing:", argv
+print "running:", argv
 
 if len(argv)<2:
     print "Usage: "+argv[0]+" fileWithLimits.txt [doOneFold (default=False)]"
