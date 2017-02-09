@@ -244,7 +244,7 @@ h_lims_yn   = {} # limits in excluded/non-exluded, interpolated
 h_lims_xs   = {} # limits in cross-section, interpolated
 g2_lims_mu  = {} # TGraph2D limits in signal-strength, automatic interpolation
 
-m1min, m1max = 0, 2200
+m1min, m1max = 0, 2300
 m2min, m2max = 0, 2000
 xbinSize = 25
 #xbinSize = 25 if model!='T2cc' else 5
