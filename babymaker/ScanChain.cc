@@ -655,14 +655,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
             }
             if (nHardScatter > 2) std::cout << "WARNING: found too many gluinos in T1 MC!" << std::endl;
           }
-          else if (evt_id >= 1100 && evt_id < 1110) {
-            // SMS T2tt - stops
+          else if ((evt_id >= 1100 && evt_id < 1110) || (evt_id >= 1140 && evt_id < 1160)) {
+            // SMS T2tt, T2bW, T2bt - stops
             if (isLastCopy == 1 && pdgId == 1000006) {
 	      genProd_pdgId = pdgId;
               recoil += cms3.genps_p4().at(iGen);
               ++nHardScatter;
             }
-            if (nHardScatter > 2) std::cout << "WARNING: found too many stops in T2tt MC!" << std::endl;
+            if (nHardScatter > 2) std::cout << "WARNING: found too many stops in T2tt/T2bW/T2bt MC!" << std::endl;
           }
           else if (evt_id >= 1110 && evt_id < 1120) {
             // SMS T2qq - squarks
