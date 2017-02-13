@@ -1,14 +1,16 @@
 #!/bin/bash
 
-#MODEL="T1tttt"
-#MODEL="T1bbbb"
-#MODEL="T1qqqq"
-#MODEL="T2tt"
-MODEL="T2bb"
-INDIR="/home/users/jgran/limits_for_paper/MT2Analysis/scripts/cards_$MODEL"
+MODEL=$1
+DATE=$2
+INDIR=$3
+COMBINED=$4
+
+OUTPUTDIR="/hadoop/cms/store/user/$USER/combine/limits/${MODEL}_${DATE}"
+
+rm -r $OUTPUTDIR/*
 
 while read i
 do
   echo $i
-  ./submit.sh $i 
+  ./submit.sh $i ${DATE} ${MODEL} ${COMBINED}
 done < $INDIR/points_$MODEL.txt

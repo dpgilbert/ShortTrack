@@ -134,7 +134,7 @@ do_extmerge wjets_ht100to200
 do_extmerge wjets_ht200to400
 do_extmerge wjets_ht400to600
 do_extmerge wjets_ht600to800
-do_extmerge wjets_ht800to1200
+do_cp wjets_ht800to1200
 do_cp wjets_ht1200to2500
 do_extmerge wjets_ht2500toInf
 
