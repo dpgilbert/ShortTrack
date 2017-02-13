@@ -32,7 +32,7 @@ vector<string> zinvHTs;
 vector<string> zinvNJs;
 vector<string> zinvNBs;
 
-TString dir = "/home/users/mderdzinski/summer2016/current_master_mt2/MT2looper/output/36p46_v10MC_dec20/";
+TString dir = "/home/users/mderdzinski/winter2017/clean_master/MT2looper/output/full2016_v16fixed_Feb6/";
 
 void setRegionsLepAll() {
 
@@ -248,8 +248,12 @@ void getZinvTable() {
   cout << "\\hline" << endl;														
   cout << std::fixed;
   
-  for (unsigned int i = 0; i<zinvSRs.size(); i++) {
+  for (unsigned int i = 0; i<zinvSRs.size(); i++) {    
     string srName = zinvSRs[i];
+    bool isHighNjNb = (srName.find("8") !=std::string::npos) || (srName.find("9") !=std::string::npos) || (srName.find("11") !=std::string::npos);
+    string asterisk = "";
+    if (isHighNjNb) asterisk = "$^{(*)}$";
+      
     string cr_hist_name = srName+"/CRyieldCard";
     string sf_hist_name = srName+"/h_mt2binsCRyield";
     string of_hist_name = srName+"/h_mt2binsCRyieldEM";
@@ -280,7 +284,7 @@ void getZinvTable() {
     cout << ofBin << "&";
     // cout << std::setprecision(3) << purityBin << "&";
     cout << std::setprecision(3) << purityBin << "$\\pm$" << purityBinErr << "&";
-    cout << std::setprecision(2) << ratioBin << "\\\\" << endl;
+    cout << std::setprecision(2) << ratioBin << asterisk << "\\\\" << endl;
     // cout << std::setprecision(2) << ratioBin << "$\\pm$" << ratioBinErr << "\\\\" << endl;
   }
   cout << "\\hline \\hline" << endl;
@@ -291,7 +295,7 @@ void getZinvTable() {
 
 void getHybridPoint() {
 
-  //getZinvTable();
-  getHybridTables();
+  getZinvTable();
+  //getHybridTables();
   
 }
