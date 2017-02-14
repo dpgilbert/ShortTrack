@@ -17,6 +17,9 @@ using namespace std;
 TCanvas *canv;
 TString outname = "prova.root";
 
+
+TH1D* h_Pull = new TH1D("pull", "pull", 20, -4, 4);
+
 /////////////////////////
 
 // USE: root -b -L compareOrig.C
@@ -55,9 +58,9 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
   }
   cmsText = "CMS Preliminary";
 //  cmsText = "CMS";
-  lumi_13TeV = "4.0 fb^{-1}";
+  lumi_13TeV = "36.8 fb^{-1}";
   if (mconly) {
-    cmsText = "CMS Supplementary Simulation";
+    cmsText = "CMS Preliminary";
     lumi_13TeV = "";
   }
 
@@ -431,7 +434,7 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
     ratiopad->SetRightMargin(0.05);
     ratiopad->SetTopMargin(0.04);
     ratiopad->SetBottomMargin(0.44);
-    ratiopad->SetGridy();
+    ratiopad->SetGridy(1);
     ratiopad->Draw();
     ratiopad->cd();
     
@@ -442,9 +445,11 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
     h_axis_ratio->GetYaxis()->SetTitleSize(0.18);
     h_axis_ratio->GetYaxis()->SetNdivisions(5);
     h_axis_ratio->GetYaxis()->SetLabelSize(0.15);
-    h_axis_ratio->GetYaxis()->SetRangeUser(0.01,1.99);
+    //h_axis_ratio->GetYaxis()->SetRangeUser(0.01,1.99);
+    h_axis_ratio->GetYaxis()->SetRangeUser(0.5,1.5);
     //h_axis_ratio->GetYaxis()->SetRangeUser(0.001,1.);
-    h_axis_ratio->GetYaxis()->SetTitle("Ratio to Z");
+//    h_axis_ratio->GetYaxis()->SetTitle("Ratio to Z");
+    h_axis_ratio->GetYaxis()->SetTitle("Ratio");
     h_axis_ratio->GetXaxis()->SetTitle(sig_hists[1]->GetXaxis()->GetTitle());
     h_axis_ratio->GetXaxis()->SetTitleSize(0.17);
     h_axis_ratio->GetXaxis()->SetLabelSize(0.17);
@@ -474,8 +479,23 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
         for (int ibin=1; ibin <= h_ratio->GetNbinsX(); ++ibin)  h_tmp->SetBinError(ibin, 0.);
         h_ratio->Divide(h_tmp);
       }
-      else h_ratio->Divide(sig_hists[0]);
+      else {
+        if ( h_ratio->GetNbinsX() == sig_hists[0]->GetNbinsX() ) h_ratio->Divide(sig_hists[0]); 
+        else {
+          cout<<h_ratio->GetNbinsX()<<endl;
+          double *TopoRegionBins = h_ratio->GetXaxis()->GetXbins()->fArray;  
+          int nTopoRegionBins    = h_ratio->GetXaxis()->GetNbins();        
+          TH1D* h_Rebinned = (TH1D*) sig_hists[0]->Rebin(nTopoRegionBins, "h_RebinnedTemplate", TopoRegionBins);
+          h_ratio->Divide(h_Rebinned); 
+        }
+      }
     
+      for (int ibin=1; ibin <= h_ratio->GetNbinsX(); ++ibin) {
+//        cout<<"Difference "<< h_ratio->GetBinContent(ibin) - 1 <<", uncertainty "<<h_ratio->GetBinError(ibin)<<endl;
+//        cout<<"Pull "<<(h_ratio->GetBinContent(ibin) - 1)/h_ratio->GetBinError(ibin)<<endl;
+        h_Pull->Fill((h_ratio->GetBinContent(ibin) - 1)/h_ratio->GetBinError(ibin));
+      }
+      
       TGraphErrors* g_ratio = new TGraphErrors(h_ratio);
       g_ratio->SetName(Form("%s_graph",h_ratio->GetName()));
       for (int ibin=0; ibin < h_ratio->GetNbinsX(); ++ibin) {
@@ -510,9 +530,9 @@ void makeCMSPlotRatios(  vector<TString> files,  vector<TString> labels, vector<
     if (labels[i].Contains("data") || labels[i].Contains("Data")) mconly = false;
   }
   cmsText = "CMS Preliminary";
-  lumi_13TeV = "4.0 fb^{-1}";
+  lumi_13TeV = "36.8 fb^{-1}";
   if (mconly) {
-    cmsText = "CMS Simulation";
+    cmsText = "CMS Preliminary";
     lumi_13TeV = "";
   }
   
@@ -578,6 +598,7 @@ void makeCMSPlotRatios(  vector<TString> files,  vector<TString> labels, vector<
     plotpad = new TPad("plotpad","plotpad",0,0.2,1,0.99);
     plotpad->SetTopMargin(0.05);
     plotpad->SetRightMargin(0.05);
+    plotpad->SetLeftMargin(0.15);
     plotpad->SetBottomMargin(0.05);
     plotpad->Draw();
     plotpad->cd();
@@ -699,7 +720,7 @@ void makeCMSPlotRatios(  vector<TString> files,  vector<TString> labels, vector<
 //    }
     // Patch to subtract data-driven fakes from MC plots of htbins, njbins, nbjbins
     if (files[i+1].Contains("data_Run2016")  && labels[i+1].Contains("bkg subtr") && nplots[i+1].Contains("crgjbase")
-          && ( nplots[i+1].Contains("htbins") || nplots[i+1].Contains("njbins") || nplots[i+1].Contains("nbjbins"))) {
+          && ( nplots[i+1].Contains("htbins") || nplots[i+1].Contains("njbins") || nplots[i+1].Contains("nbjbins") || nplots[i+1].Contains("bosonptbins"))) {
       TString purityfile = files[i+1].ReplaceAll("data_Run2016", "purity");
       cout<<"Taking fakes from file "<<purityfile<<endl;
       TFile f3(purityfile,"READ");
@@ -708,11 +729,14 @@ void makeCMSPlotRatios(  vector<TString> files,  vector<TString> labels, vector<
       if (fakesplot.Contains("htbins")) fakesplot.ReplaceAll("h_htbins","h_predhtbinsFailSieieData");
       if (fakesplot.Contains("njbins")) fakesplot.ReplaceAll("h_njbins","h_prednjbinsFailSieieData");
       if (fakesplot.Contains("nbjbins")) fakesplot.ReplaceAll("h_nbjbins","h_prednbjbinsFailSieieData");
+      if (fakesplot.Contains("bosonptbins")) fakesplot.ReplaceAll("h_bosonptbins","h_predbosonptbinsFailSieieData");
       TH1D* h_temp3 = (TH1D*) f3.Get(fakesplot);
       if (h_temp3 == 0) {cout<<"No histogram "<<fakesplot<<" in "<<purityfile<<endl; return;}
       h_temp2->Add(h_temp3, -1);
       for (int ibin=1; ibin <= h_temp2->GetNbinsX(); ++ibin) {if (h_temp2->GetBinContent(ibin)<0) {h_temp2->SetBinContent(ibin,0);h_temp2->SetBinError(ibin,0);}}
       h_temp2->Scale(0.92);
+      //cout<<"____________________________________Adjusting purity by 2% to match ETH_______________________________________"<<endl;
+      //h_temp2->Scale(1.02);
       // Add 10% uncertainty for p and f
       for (int ibin=1; ibin <= h_temp2->GetNbinsX(); ++ibin) {
         float tenpercent = 0.1*h_temp2->GetBinContent(ibin);
@@ -724,7 +748,7 @@ void makeCMSPlotRatios(  vector<TString> files,  vector<TString> labels, vector<
     }
     //subtrac ttbar from DY
     if (files[i].Contains("data_Run2016")  && labels[i].Contains("bkg subtr") && nplots[i].Contains("crdybase")
-        && ( nplots[i].Contains("htbins") || nplots[i].Contains("njbins") || nplots[i].Contains("nbjbins") || nplots[i].Contains("mt2bins"))) {
+        && ( nplots[i].Contains("htbins") || nplots[i].Contains("njbins") || nplots[i].Contains("nbjbins") || nplots[i+1].Contains("bosonptbins") || nplots[i].Contains("mt2bins"))) {
       TString topfile = files[i].ReplaceAll("data_Run2016", "top");
       cout<<"Taking ttbar from file "<<topfile<<endl;
       TFile f3(topfile,"READ");
@@ -758,6 +782,7 @@ void makeCMSPlotRatios(  vector<TString> files,  vector<TString> labels, vector<
       h_temp2->Scale(1.23);
       cout<<"Scaled GJet by 1.23 to invert Z kFactor"<<endl;
     }
+
     TH1D* h = (TH1D*) h_temp->Clone("h1");
 
     h->Divide(h_temp2);
@@ -935,14 +960,16 @@ void makeCMSPlotRatios(  vector<TString> files,  vector<TString> labels, vector<
       //g_ratio->SetLineColor(kBlack);
       //g_ratio->SetMarkerColor(kBlack);
       //g_ratio->SetMarkerStyle(20);
-      gStyle->SetOptFit(11);
+      gStyle->SetOptFit(111);
       gStyle->SetFitFormat("3.2g");
       gStyle->SetStatX(0.8);
       gStyle->SetStatY(0.95);
       gStyle->SetStatH(0.3);
       TF1* f=new TF1("f", "[0]", xmin, xmax);
+//      TF1* f=new TF1("f", "[0]+[1]*x", xmin, xmax);
       f->SetLineColor(kRed);
       f->SetParameter(0, 1.0);
+      f->SetParameter(1, 0.0);
       g_ratio->Print("all");
       g_ratio->Fit(f, "0");
       g_ratio->Draw("p0same");
@@ -1501,15 +1528,382 @@ void SuperimpVecRatio(vector<TString> files, vector<TString> labels, vector<TStr
 void compareMultiPlot()
 {
 
-  TString dir = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/V00-08-02_nojson_skim_base_mt2gt200_ZinvV4/";
+
+//  TString dir = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6/";
+//  TString dir = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/FromMark_zinvHW_oct30/";
+//  TString dir = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/FromMark_zinvHW_nhIso_nov2/";
+//  TString dir = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/FromMark_zinvHW_HOverE015_nov2/";
+//  TString dir = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6_DRcorr/";
 //  TString dir = "/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-10_25ns_data_json_246908-260627_v2_skim_base_V4_mt2gt200_2p26fb_newtxtfilters_jet1ptqcd/";
+//  TString dir = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/FromMark_sep29_V00-08-09_json_271036-280385_NoL1T_24p6fb_skim_base_mt2gt200_ZinvV6/";
+//  TString dir = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/FromMark_31p24_oldMC_nov7/";
+//  TString dir = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/FromMark_36p26_v10MC_nov29/";
+  TString dir = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/V00-08-15/";
+  TString dir2 = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/V00-08-09_16Dec16/";
 
   
-  TString dir3 = "/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-07_signalSyst/";
   
   vector<TString> files; vector<TString> labels; vector<TString> nplots;
-
   
+  
+  TString dir4 = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/CheckEGMissue2/";
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir4+"data_Run2016.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_bosonptbinsMuMu");
+  files.push_back( dir4+"data_Run2016.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_bosonptbinsEE");
+  makeCMSPlot(  files, labels, nplots, "ZpT_eeVSmm_Data", /*xtitle*/ "Z pt [GeV]" , /*ytitle*/ "" , /*xmin*/ 207, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 1, /*doRatio*/ 1 );
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_bosonptbinsMuMu");
+  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_bosonptbinsEE");
+  makeCMSPlot(  files, labels, nplots, "ZpT_eeVSmm_MC", /*xtitle*/ "Z pt [GeV]" , /*ytitle*/ "" , /*xmin*/ 207, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 1, /*doRatio*/ 1 );
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir4+"data_Run2016.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_mt2binsMuMu");
+  files.push_back( dir4+"data_Run2016.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_mt2binsEE");
+  makeCMSPlot(  files, labels, nplots, "Zmt2_eeVSmm_Data", /*xtitle*/ "MT2 [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/1199 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_mt2binsMuMu");
+  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_mt2binsEE");
+  makeCMSPlot(  files, labels, nplots, "Zmt2_eeVSmm_MC", /*xtitle*/ "MT2 [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/1199 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir4+"data_Run2016.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_metMuMu");
+  files.push_back( dir4+"data_Run2016.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_metEE");
+  makeCMSPlot(  files, labels, nplots, "Zmet_eeVSmm_Data", /*xtitle*/ "MT2 [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_metMuMu");
+  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_metEE");
+  makeCMSPlot(  files, labels, nplots, "Zmet_eeVSmm_MC", /*xtitle*/ "MT2 [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+
+
+  // STUDY HIGH PT PF CANDIDATES
+//  TString dir3 = "/Users/giovannizevidellaporta/UCSD/MT2_2016/METfilter/data_Run2016H_noQCD.root";
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir3);            labels.push_back("All");            nplots.push_back("srbase/h_pfCand_pt");
+//  files.push_back( dir3);            labels.push_back("NeutralEM");            nplots.push_back("srbase/h_pfCand_22_pt");
+//  files.push_back( dir3);            labels.push_back("Muon");            nplots.push_back("srbase/h_pfCand_13_pt");
+//  makeCMSPlot(  files, labels, nplots, "PFCandPt", /*xtitle*/ "pt [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 0 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir3);            labels.push_back("All");            nplots.push_back("srbaseIncl/h_pfCand_pt");
+//  files.push_back( dir3);            labels.push_back("NeutralEM");            nplots.push_back("srbaseIncl/h_pfCand_22_pt");
+//  files.push_back( dir3);            labels.push_back("Muon");            nplots.push_back("srbaseIncl/h_pfCand_13_pt");
+//  makeCMSPlot(  files, labels, nplots, "PFCandPtIncl", /*xtitle*/ "pt [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 0 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir3);            labels.push_back("All");            nplots.push_back("srbase/h_pfCand_deltaPFMET");
+//  files.push_back( dir3);            labels.push_back("NeutralEM");            nplots.push_back("srbase/h_pfCand_22_deltaPFMET");
+//  files.push_back( dir3);            labels.push_back("Muon");            nplots.push_back("srbase/h_pfCand_13_deltaPFMET");
+//  makeCMSPlot(  files, labels, nplots, "PFCandDPt", /*xtitle*/ "pt [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 0 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir3);            labels.push_back("All");            nplots.push_back("srbaseIncl/h_pfCand_deltaPFMET");
+//  files.push_back( dir3);            labels.push_back("NeutralEM");            nplots.push_back("srbaseIncl/h_pfCand_22_deltaPFMET");
+//  files.push_back( dir3);            labels.push_back("Muon");            nplots.push_back("srbaseIncl/h_pfCand_13_deltaPFMET");
+//  makeCMSPlot(  files, labels, nplots, "PFCandDPtIncl", /*xtitle*/ "pt [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 0 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir3);            labels.push_back("All");            nplots.push_back("srbase/h_pfCand_deltaPhiPFMET");
+//  files.push_back( dir3);            labels.push_back("NeutralEM");            nplots.push_back("srbase/h_pfCand_22_deltaPhiPFMET");
+//  files.push_back( dir3);            labels.push_back("Muon");            nplots.push_back("srbase/h_pfCand_13_deltaPhiPFMET");
+//  makeCMSPlot(  files, labels, nplots, "PFCandDPhi", /*xtitle*/ "pt [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 0 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir3);            labels.push_back("All");            nplots.push_back("srbaseIncl/h_pfCand_deltaPhiPFMET");
+//  files.push_back( dir3);            labels.push_back("NeutralEM");            nplots.push_back("srbaseIncl/h_pfCand_22_deltaPhiPFMET");
+//  files.push_back( dir3);            labels.push_back("Muon");            nplots.push_back("srbaseIncl/h_pfCand_13_deltaPhiPFMET");
+//  makeCMSPlot(  files, labels, nplots, "PFCandDPhiIncl", /*xtitle*/ "pt [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 0 );
+//  
+  
+  
+  
+  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir+"dyjetsll_ht.root");           labels.push_back("Z");                 nplots.push_back("crdy6M/h_mt2bins");
+//  files.push_back( dir+"ttz.root");            labels.push_back("TTZ");            nplots.push_back("crdy6M/h_mt2bins");
+//  //  makeCMSPlot(  files, labels, nplots, "Monojet_W_GJ", /*xtitle*/ "HT [GeV]" , /*ytitle*/ "Events / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1 );
+//  //  makeCMSPlot(  files, labels, nplots, "Monojet_W_GJ_norm", /*xtitle*/ "HT [GeV]" , /*ytitle*/ "AU " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 1, /*doRatio*/ 1 );
+//  makeCMSPlot(  files, labels, nplots, "TTZshape46j2bMHT", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  //makeCMSPlot(  files, labels, nplots, "truthPtVratio", /*xtitle*/ "p_{T}^{V} [GeV]" , /*ytitle*/ "Events / 40 GeV" , /*xmin*/ 0, /*xmax*/1200 , /*rebin*/ 4 , /*logplot*/ 1, /*scalesig*/ -1., /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir+"dyjetsll_ht.root");           labels.push_back("Z");                 nplots.push_back("crdy6M/h_mt2bins");
+//  files.push_back( dir+"ttz.root");            labels.push_back("TTZ");            nplots.push_back("crdy6M/h_mt2bins");
+//  //  makeCMSPlot(  files, labels, nplots, "Monojet_W_GJ", /*xtitle*/ "HT [GeV]" , /*ytitle*/ "Events / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1 );
+//  //  makeCMSPlot(  files, labels, nplots, "Monojet_W_GJ_norm", /*xtitle*/ "HT [GeV]" , /*ytitle*/ "AU " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 1, /*doRatio*/ 1 );
+//  makeCMSPlot(  files, labels, nplots, "TTZ46j2bMHT", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Events / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 1 );
+//  //makeCMSPlot(  files, labels, nplots, "truthPtVratio", /*xtitle*/ "p_{T}^{V} [GeV]" , /*ytitle*/ "Events / 40 GeV" , /*xmin*/ 0, /*xmax*/1200 , /*rebin*/ 4 , /*logplot*/ 1, /*scalesig*/ -1., /*doRatio*/ 1 );
+//  
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir+"data_Run2016.root");            labels.push_back("MC");            nplots.push_back("crdybaseIncl/h_nBJet20LowPt");
+//  files.push_back( dir+"data_Run2016.root");                labels.push_back("MC");            nplots.push_back("crdybaseIncl/h_nBJet20LowPtemu");
+//  makeCMSPlotRatios(  files, labels, nplots, "RSFOF_NB", /*xtitle*/ "N(bjets)" , /*ytitle*/ "R(SF/OF)" , /*xmin*/ 0, /*xmax*/4 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1);
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir+"data_Run2016.root");            labels.push_back("MC");            nplots.push_back("crdybaseIncl/h_nBJet20LLowPt");
+//  files.push_back( dir+"data_Run2016.root");                labels.push_back("MC");            nplots.push_back("crdybaseIncl/h_nBJet20LLowPtemu");
+//  makeCMSPlotRatios(  files, labels, nplots, "RSFOF_NBL", /*xtitle*/ "N(bjets)" , /*ytitle*/ "R(SF/OF)" , /*xmin*/ 0, /*xmax*/4 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1);
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir+"data_Run2016.root");            labels.push_back("MC");            nplots.push_back("crdybaseIncl/h_nBJet20TLowPt");
+//  files.push_back( dir+"data_Run2016.root");                labels.push_back("MC");            nplots.push_back("crdybaseIncl/h_nBJet20TLowPtemu");
+//  makeCMSPlotRatios(  files, labels, nplots, "RSFOF_NBT", /*xtitle*/ "N(bjets)" , /*ytitle*/ "R(SF/OF)" , /*xmin*/ 0, /*xmax*/4 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1);
+//  
+//  
+  
+//  // VL
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("23j 0b");            nplots.push_back("sr1VL/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("23j 1b");            nplots.push_back("sr2VL/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("23j 2b");            nplots.push_back("sr3VL/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_1VL", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("23j 0b");            nplots.push_back("crdy1VL/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("23j 1b");            nplots.push_back("crdy2VL/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("23j 2b");            nplots.push_back("crdy3VL/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_1VLDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("4+j 0b");            nplots.push_back("sr12VL/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("4+j 1b");            nplots.push_back("sr13VL/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("4+j 2b");            nplots.push_back("sr14VL/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_4VL", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("4+j 0b");            nplots.push_back("crdy12VL/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("4+j 1b");            nplots.push_back("crdy13VL/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("4+j 2b");            nplots.push_back("crdy14VL/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_4VLDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  // L
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("23j 0b");            nplots.push_back("sr1L/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("23j 1b");            nplots.push_back("sr2L/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("23j 2b");            nplots.push_back("sr3L/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_1L", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("23j 0b");            nplots.push_back("crdy1L/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("23j 1b");            nplots.push_back("crdy2L/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("23j 2b");            nplots.push_back("crdy3L/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_1LDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("46j 0b");            nplots.push_back("sr4L/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("46j 1b");            nplots.push_back("sr5L/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("46j 2b");            nplots.push_back("sr6L/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_4L", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("46j 0b");            nplots.push_back("crdy4L/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("46j 1b");            nplots.push_back("crdy5L/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("46j 2b");            nplots.push_back("crdy6L/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_4LDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("7j 0b");            nplots.push_back("sr7L/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("7j 1b");            nplots.push_back("sr8L/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("7j 2b");            nplots.push_back("sr9L/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("7j 3b");            nplots.push_back("sr11L/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_7L", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("7j 0b");            nplots.push_back("crdy7L/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("7j 1b");            nplots.push_back("crdy8L/h_mt2bins_1B");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("7j 2b");            nplots.push_back("crdy9L/h_mt2bins_2B");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("7j 3b");            nplots.push_back("crdy11L/h_mt2bins_3B");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_7LDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  // M
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("23j 0b");            nplots.push_back("sr1M/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("23j 1b");            nplots.push_back("sr2M/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("23j 2b");            nplots.push_back("sr3M/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_1M", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("23j 0b");            nplots.push_back("crdy1M/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("23j 1b");            nplots.push_back("crdy2M/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("23j 2b");            nplots.push_back("crdy3M/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_1MDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("46j 0b");            nplots.push_back("sr4M/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("46j 1b");            nplots.push_back("sr5M/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("46j 2b");            nplots.push_back("sr6M/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_4M", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("46j 0b");            nplots.push_back("crdy4M/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("46j 1b");            nplots.push_back("crdy5M/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("46j 2b");            nplots.push_back("crdy6M/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_4MDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("7j 0b");            nplots.push_back("sr7M/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("7j 1b");            nplots.push_back("sr8M/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("7j 2b");            nplots.push_back("sr9M/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("7j 3b");            nplots.push_back("sr11M/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_7M", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("7j 0b");            nplots.push_back("crdy7M/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("7j 1b");            nplots.push_back("crdy8M/h_mt2bins_1B");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("7j 2b");            nplots.push_back("crdy9M/h_mt2bins_2B");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("7j 3b");            nplots.push_back("crdy11M/h_mt2bins_3B");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_7MDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  
+//  // H
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("23j 0b");            nplots.push_back("sr1H/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("23j 1b");            nplots.push_back("sr2H/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("23j 2b");            nplots.push_back("sr3H/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_1H", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("23j 0b");            nplots.push_back("crdy1H/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("23j 1b");            nplots.push_back("crdy2H/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("23j 2b");            nplots.push_back("crdy3H/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_1HDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("46j 0b");            nplots.push_back("sr4H/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("46j 1b");            nplots.push_back("sr5H/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("46j 2b");            nplots.push_back("sr6H/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_4H", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("46j 0b");            nplots.push_back("crdy4H/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("46j 1b");            nplots.push_back("crdy5H/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("46j 2b");            nplots.push_back("crdy6H/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_4HDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("7j 0b");            nplots.push_back("sr7H/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("7j 1b");            nplots.push_back("sr8H/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("7j 2b");            nplots.push_back("sr9H/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("7j 3b");            nplots.push_back("sr11H/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_7H", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("7j 0b");            nplots.push_back("crdy7H/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("7j 1b");            nplots.push_back("crdy8H/h_mt2bins_1B");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("7j 2b");            nplots.push_back("crdy9H/h_mt2bins_2B");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("7j 3b");            nplots.push_back("crdy11H/h_mt2bins_3B");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_7HDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  // UH
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("23j 0b");            nplots.push_back("sr1UH/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("23j 1b");            nplots.push_back("sr2UH/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("23j 2b");            nplots.push_back("sr3UH/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_1UH", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("23j 0b");            nplots.push_back("crdy1UH/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("23j 1b");            nplots.push_back("crdy2UH/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("23j 2b");            nplots.push_back("crdy3UH/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_1UHDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("46j 0b");            nplots.push_back("sr4UH/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("46j 1b");            nplots.push_back("sr5UH/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("46j 2b");            nplots.push_back("sr6UH/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_4UH", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("46j 0b");            nplots.push_back("crdy4UH/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("46j 1b");            nplots.push_back("crdy5UH/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("46j 2b");            nplots.push_back("crdy6UH/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_4UHDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("7j 0b");            nplots.push_back("sr7UH/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("7j 1b");            nplots.push_back("sr8UH/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("7j 2b");            nplots.push_back("sr9UH/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("7j 3b");            nplots.push_back("sr11UH/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_7UH", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("7j 0b");            nplots.push_back("crdy7UH/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("7j 1b");            nplots.push_back("crdy8UH/h_mt2bins_1B");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("7j 2b");            nplots.push_back("crdy9UH/h_mt2bins_2B");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("7j 3b");            nplots.push_back("crdy11UH/h_mt2bins_3B");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_7UHDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  h_Pull->SaveAs("pull.root");
+//
+//  
+//  // UH vs NJ
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("23j 0b");            nplots.push_back("sr1UH/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("46j 0b");            nplots.push_back("sr4UH/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("7j 0b");            nplots.push_back("sr7UH/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNJ_UH", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("23j 0b");            nplots.push_back("crdy1UH/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("46j 0b");            nplots.push_back("crdy4UH/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("7j 0b");            nplots.push_back("crdy7UH/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNJ_UHDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  // 26j 3b
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("3j");            nplots.push_back("srbaseVL/h_mt2bins3J");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("2j 3b");            nplots.push_back("sr15VL/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_26VL", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("3j");            nplots.push_back("crdybaseVL/h_mt2bins3J");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("2j 3b");            nplots.push_back("crdy15VL/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_26VLDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("36j");            nplots.push_back("srbaseL/h_mt2bins36J");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("26j 3b");            nplots.push_back("sr10L/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_26L", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("36j");            nplots.push_back("crdybaseL/h_mt2bins36J");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("26j 3b");            nplots.push_back("crdy10L/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_26LDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("36j");            nplots.push_back("srbaseM/h_mt2bins36J");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("26j 3b");            nplots.push_back("sr10M/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_26M", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("36j");            nplots.push_back("crdybaseM/h_mt2bins36J");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("26j 3b");            nplots.push_back("crdy10M/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_26MDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("36j");            nplots.push_back("srbaseH/h_mt2bins36J");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("26j 3b");            nplots.push_back("sr10H/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_26H", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("36j");            nplots.push_back("crdybaseH/h_mt2bins36J");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("26j 3b");            nplots.push_back("crdy10H/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_26HDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("Inclusive");            nplots.push_back("srbaseUH/h_mt2bins");
+//  files.push_back( dir2+"zinv_ht.root");            labels.push_back("26j 3b");            nplots.push_back("sr10UH/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_26UH", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("Inclusive");            nplots.push_back("crdybaseUH/h_mt2bins");
+//  files.push_back( dir2+"dyjetsll_ht.root");            labels.push_back("26j 3b");            nplots.push_back("crdy10UH/h_mt2bins");
+//  makeCMSPlot(  files, labels, nplots, "MT2vsNB_26UHDY", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  
+//  
+//  
+//  
+//  return;
   
 //
 //
@@ -1523,52 +1917,61 @@ void compareMultiPlot()
 
   files.clear(); labels.clear(); nplots.clear();
   files.push_back( "");       labels.push_back("200 < H_{T} < 450 GeV");          nplots.push_back("");
-  files.push_back( dir+"2015zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseVL/h_mt2bins");
+
+  files.push_back( dir+"zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseVL/h_mt2bins");
   files.push_back( dir+"purity.root");            labels.push_back("#gamma estimate (Data)");            nplots.push_back("srbaseVL/h_mt2binspredZFailSieieData");
   files.push_back( dir+"purityRL.root");          labels.push_back("W estimate (Data)");            nplots.push_back("srbaseVL/h_predZ");
+  files.push_back( dir+"zinvFromDY.root");          labels.push_back("DY estimate (Data)");            nplots.push_back("srbaseVL/h_mt2bins");
   makeCMSPlot(  files, labels, nplots, "MT2VL_W_GJ_log", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 200, /*xmax*/1000 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
   //makeCMSPlot(  files, labels, nplots, "truthPtVratio", /*xtitle*/ "p_{T}^{V} [GeV]" , /*ytitle*/ "Events / 40 GeV" , /*xmin*/ 0, /*xmax*/1200 , /*rebin*/ 4 , /*logplot*/ 1, /*scalesig*/ -1., /*doRatio*/ 1 );
   
   
   files.clear(); labels.clear(); nplots.clear();
   files.push_back( "");       labels.push_back("450 < H_{T} < 575 GeV");          nplots.push_back("");
-  files.push_back( dir+"2015zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseL/h_mt2bins");
+
+  files.push_back( dir+"zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseL/h_mt2bins");
   files.push_back( dir+"purity.root");            labels.push_back("#gamma estimate (Data)");            nplots.push_back("srbaseL/h_mt2binspredZFailSieieData");
   files.push_back( dir+"purityRL.root");          labels.push_back("W estimate (Data)");            nplots.push_back("srbaseL/h_predZ");
+  files.push_back( dir+"zinvFromDY.root");          labels.push_back("DY estimate (Data)");            nplots.push_back("srbaseL/h_mt2bins");
   makeCMSPlot(  files, labels, nplots, "MT2L_W_GJ_log", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
   //makeCMSPlot(  files, labels, nplots, "truthPtVratio", /*xtitle*/ "p_{T}^{V} [GeV]" , /*ytitle*/ "Events / 40 GeV" , /*xmin*/ 0, /*xmax*/1200 , /*rebin*/ 4 , /*logplot*/ 1, /*scalesig*/ -1., /*doRatio*/ 1 );
   files.clear(); labels.clear(); nplots.clear();
   files.push_back( "");       labels.push_back("575 < H_{T} < 1000 GeV");          nplots.push_back("");
-  files.push_back( dir+"2015zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseM/h_mt2bins");
+  files.push_back( dir+"zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseM/h_mt2bins");
   files.push_back( dir+"purity.root");            labels.push_back("#gamma estimate (Data)");            nplots.push_back("srbaseM/h_mt2binspredZFailSieieData");
   files.push_back( dir+"purityRL.root");          labels.push_back("W estimate (Data)");            nplots.push_back("srbaseM/h_predZ");
+  files.push_back( dir+"zinvFromDY.root");          labels.push_back("DY estimate (Data)");            nplots.push_back("srbaseM/h_mt2bins");
   makeCMSPlot(  files, labels, nplots, "MT2M_W_GJ_log", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
   //makeCMSPlot(  files, labels, nplots, "truthPtVratio", /*xtitle*/ "p_{T}^{V} [GeV]" , /*ytitle*/ "Events / 40 GeV" , /*xmin*/ 0, /*xmax*/1200 , /*rebin*/ 4 , /*logplot*/ 1, /*scalesig*/ -1., /*doRatio*/ 1 );
   files.clear(); labels.clear(); nplots.clear();
   files.push_back( "");       labels.push_back("1000 < H_{T} < 1500 GeV");          nplots.push_back("");
-  files.push_back( dir+"2015zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseH/h_mt2bins");
+  files.push_back( dir+"zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseH/h_mt2bins");
   files.push_back( dir+"purity.root");            labels.push_back("#gamma estimate (Data)");            nplots.push_back("srbaseH/h_mt2binspredZFailSieieData");
   files.push_back( dir+"purityRL.root");          labels.push_back("W estimate (Data)");            nplots.push_back("srbaseH/h_predZ");
+//  files.push_back( dir+"zinvFromDY.root");          labels.push_back("DY (Data)");            nplots.push_back("srbaseH/h_mt2bins");
+  files.push_back( dir+"zinvFromDY.root");          labels.push_back("DY estimate (Data)");            nplots.push_back("srbaseH/h_mt2bins");
   makeCMSPlot(  files, labels, nplots, "MT2H_W_GJ_log", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
   //makeCMSPlot(  files, labels, nplots, "truthPtVratio", /*xtitle*/ "p_{T}^{V} [GeV]" , /*ytitle*/ "Events / 40 GeV" , /*xmin*/ 0, /*xmax*/1200 , /*rebin*/ 4 , /*logplot*/ 1, /*scalesig*/ -1., /*doRatio*/ 1 );
   files.clear(); labels.clear(); nplots.clear();
   files.push_back( "");       labels.push_back("H_{T} > 1500 GeV");          nplots.push_back("");
-  files.push_back( dir+"2015zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseUH/h_mt2bins");
+  files.push_back( dir+"zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseUH/h_mt2bins");
   files.push_back( dir+"purity.root");            labels.push_back("#gamma estimate (Data)");            nplots.push_back("srbaseUH/h_mt2binspredZFailSieieData");
   files.push_back( dir+"purityRL.root");          labels.push_back("W estimate (Data)");            nplots.push_back("srbaseUH/h_predZ");
+  files.push_back( dir+"zinvFromDY.root");          labels.push_back("DY estimate (Data)");            nplots.push_back("srbaseUH/h_mt2bins");
   makeCMSPlot(  files, labels, nplots, "MT2UH_W_GJ_log", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
   //makeCMSPlot(  files, labels, nplots, "truthPtVratio", /*xtitle*/ "p_{T}^{V} [GeV]" , /*ytitle*/ "Events / 40 GeV" , /*xmin*/ 0, /*xmax*/1200 , /*rebin*/ 4 , /*logplot*/ 1, /*scalesig*/ -1., /*doRatio*/ 1 );
   files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir+"2015zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbase/h_mt2bins");
+  files.push_back( dir+"zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbase/h_mt2bins");
   files.push_back( dir+"purity.root");            labels.push_back("#gamma estimate (Data)");            nplots.push_back("srbase/h_mt2binspredZFailSieieData");
   files.push_back( dir+"purityRL.root");          labels.push_back("W estimate (Data)");            nplots.push_back("srbase/h_predZ");
+  files.push_back( dir+"zinvFromDY.root");          labels.push_back("DY estimate (Data)");            nplots.push_back("srbase/h_mt2bins");
   makeCMSPlot(  files, labels, nplots, "MT2_W_GJ", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Events / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1 );
   makeCMSPlot(  files, labels, nplots, "MT2_W_GJ_norm", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "AU " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 1, /*doRatio*/ 1 );
   makeCMSPlot(  files, labels, nplots, "MT2_W_GJ_log", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
   //makeCMSPlot(  files, labels, nplots, "truthPtVratio", /*xtitle*/ "p_{T}^{V} [GeV]" , /*ytitle*/ "Events / 40 GeV" , /*xmin*/ 0, /*xmax*/1200 , /*rebin*/ 4 , /*logplot*/ 1, /*scalesig*/ -1., /*doRatio*/ 1 );
   
   files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir+"2015zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseJ/h_mt2bins");
+  files.push_back( dir+"zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseJ/h_mt2bins");
   files.push_back( dir+"purity.root");            labels.push_back("#gamma estimate (Data)");            nplots.push_back("srbaseJ/h_mt2binspredZFailSieieData");
   files.push_back( dir+"purityRL.root");          labels.push_back("W estimate (Data)");            nplots.push_back("srbaseJ/h_predZ");
 //  makeCMSPlot(  files, labels, nplots, "Monojet_W_GJ", /*xtitle*/ "HT [GeV]" , /*ytitle*/ "Events / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1 );
@@ -1603,6 +2006,13 @@ void compareMultiPlot()
   makeCMSPlot(  files, labels, nplots, "PurityNBJ", /*xtitle*/ "N(b-jets)" , /*ytitle*/ "Photon Purity" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 0 );
   
   files.clear(); labels.clear(); nplots.clear();
+
+  files.push_back( dir+"purity.root");            labels.push_back("Data (FR)");            nplots.push_back("srbaseIncl/h_bosonptbinspurityFailSieieData");
+  files.push_back( dir+"purity.root");            labels.push_back("MC (FR)");            nplots.push_back("srbaseIncl/h_bosonptbinspurityFailSieie");
+  files.push_back( dir+"purity.root");            labels.push_back("MC (truth)");            nplots.push_back("srbaseIncl/h_bosonptbinspurityTrue");
+  makeCMSPlot(  files, labels, nplots, "PurityPTV", /*xtitle*/ "Boson p_T [GeV]" , /*ytitle*/ "Photon Purity" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 0 );
+  
+  files.clear(); labels.clear(); nplots.clear();
   files.push_back( dir+"purity.root");            labels.push_back("Data (FR)");            nplots.push_back("srbaseIncl/h_htbinspurityFailSieieData");
   files.push_back( dir+"purity.root");            labels.push_back("MC (FR)");            nplots.push_back("srbaseIncl/h_htbinspurityFailSieie");
   files.push_back( dir+"purity.root");            labels.push_back("MC (truth)");            nplots.push_back("srbaseIncl/h_htbinspurityTrue");
@@ -1610,8 +2020,8 @@ void compareMultiPlot()
   
   
   files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir+"2015dyjetsll_ht.root");            labels.push_back("MC");            nplots.push_back("crdybase/h_mt2bins");
-  files.push_back( dir+"2015gjets_ht.root");          labels.push_back("MC");            nplots.push_back("crgjbase/h_mt2bins");
+  files.push_back( dir+"dyjetsll_ht.root");            labels.push_back("MC");            nplots.push_back("crdybase/h_mt2bins");
+  files.push_back( dir+"gjets_dr0p05_ht.root");          labels.push_back("MC");            nplots.push_back("crgjbase/h_mt2bins");
   files.push_back( dir+"data_Run2016.root");            labels.push_back("Data (bkg subtr)");            nplots.push_back("crdybase/h_mt2bins");
   files.push_back( dir+"purity.root");          labels.push_back("Data (bkg subtr)");            nplots.push_back("srbase/h_mt2binsphotonestimateFailSieieData");
 //    files.push_back( dir+"data_Run2016.root");            labels.push_back("Data (full)");            nplots.push_back("crdybase/h_mt2bins");
@@ -1619,8 +2029,18 @@ void compareMultiPlot()
   makeCMSPlotRatios(  files, labels, nplots, "DoubleRatioMT2", /*xtitle*/ "MT2 [GeV]" , /*ytitle*/ "R(Z_{ll} / #gamma)" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1);
   
   files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir+"2015dyjetsll_ht.root");            labels.push_back("MC");            nplots.push_back("crdybaseJ/h_mt2bins");
-  files.push_back( dir+"2015gjets_ht.root");          labels.push_back("MC");            nplots.push_back("crgjbaseJ/h_mt2bins");
+  files.push_back( dir+"wjets_ht.root");            labels.push_back("MC");            nplots.push_back("crrlbase/h_mt2bins");
+  files.push_back( dir+"gjets_dr0p05_ht.root");          labels.push_back("MC");            nplots.push_back("crgjbase/h_mt2bins");
+  files.push_back( dir+"purityRL.root");            labels.push_back("Data (bkg subtr)");            nplots.push_back("srbase/h_predW");
+  files.push_back( dir+"purity.root");          labels.push_back("Data (bkg subtr)");            nplots.push_back("srbase/h_mt2binsphotonestimateFailSieieData");
+  //    files.push_back( dir+"data_Run2016.root");            labels.push_back("Data (full)");            nplots.push_back("crdybase/h_mt2bins");
+  //    files.push_back( dir+"data_Run2016.root");          labels.push_back("Data (full)");            nplots.push_back("crgjbase/h_mt2bins");
+  makeCMSPlotRatios(  files, labels, nplots, "DoubleRatioMT2_WG", /*xtitle*/ "MT2 [GeV]" , /*ytitle*/ "R(W_{l#nu} / #gamma)" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1);
+  
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+"dyjetsll_ht.root");            labels.push_back("MC");            nplots.push_back("crdybaseJ/h_mt2bins");
+  files.push_back( dir+"gjets_dr0p05_ht.root");          labels.push_back("MC");            nplots.push_back("crgjbaseJ/h_mt2bins");
   files.push_back( dir+"data_Run2016.root");            labels.push_back("Data (bkg subtr)");            nplots.push_back("crdybaseJ/h_mt2bins");
   files.push_back( dir+"purity.root");          labels.push_back("Data (bkg subtr)");            nplots.push_back("srbaseJ/h_mt2binsphotonestimateFailSieieData");
   makeCMSPlotRatios(  files, labels, nplots, "DoubleRatioMonojet", /*xtitle*/ "p_{T}(jet1)  [GeV]" , /*ytitle*/ "R(Z_{ll} / #gamma)" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1);
@@ -1656,8 +2076,8 @@ void compareMultiPlot()
 //  makeCMSPlotRatios(  files, labels, nplots, "DoubleRatioHTOutOfBox", /*xtitle*/ "HT [GeV]" , /*ytitle*/ "DY/#gamma Ratio" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1);
   
   files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir+"2015dyjetsll_ht.root");            labels.push_back("MC");            nplots.push_back("crdybase/h_htbins");
-  files.push_back( dir+"2015gjets_ht.root");          labels.push_back("MC");            nplots.push_back("crgjbase/h_htbins");
+  files.push_back( dir+"dyjetsll_ht.root");            labels.push_back("MC");            nplots.push_back("crdybase/h_htbins");
+  files.push_back( dir+"gjets_dr0p05_ht.root");          labels.push_back("MC");            nplots.push_back("crgjbase/h_htbins");
   files.push_back( dir+"data_Run2016.root");            labels.push_back("Data (bkg subtr)");            nplots.push_back("crdybase/h_htbins");
   files.push_back( dir+"purity.root");          labels.push_back("Data (bkg subtr)");            nplots.push_back("srbase/h_htbinsphotonestimateFailSieieData");
 //    files.push_back( dir+"data_Run2016.root");            labels.push_back("Data (full)");            nplots.push_back("crdybase/h_htbins");
@@ -1665,16 +2085,16 @@ void compareMultiPlot()
   makeCMSPlotRatios(  files, labels, nplots, "DoubleRatioHT", /*xtitle*/ "HT [GeV]" , /*ytitle*/ "R(Z_{ll} / #gamma)" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1);
   
   files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir+"2015dyjetsll_ht.root");            labels.push_back("MC");            nplots.push_back("crdybase/h_njbins");
-  files.push_back( dir+"2015gjets_ht.root");          labels.push_back("MC");            nplots.push_back("crgjbase/h_njbins");
+  files.push_back( dir+"dyjetsll_ht.root");            labels.push_back("MC");            nplots.push_back("crdybase/h_njbins");
+  files.push_back( dir+"gjets_dr0p05_ht.root");          labels.push_back("MC");            nplots.push_back("crgjbase/h_njbins");
   files.push_back( dir+"data_Run2016.root");            labels.push_back("Data (bkg subtr)");            nplots.push_back("crdybase/h_njbins");
   files.push_back( dir+"purity.root");          labels.push_back("Data (bkg subtr)");            nplots.push_back("srbase/h_njbinsphotonestimateFailSieieData");
   makeCMSPlotRatios(  files, labels, nplots, "DoubleRatioNJ", /*xtitle*/ "N(jets)" , /*ytitle*/ "R(Z_{ll} / #gamma)" , /*xmin*/ 2, /*xmax*/12 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1);
   
   
   files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir+"2015dyjetsll_ht.root");            labels.push_back("MC");            nplots.push_back("crdybase/h_nbjbins");
-  files.push_back( dir+"2015gjets_ht.root");                labels.push_back("MC");            nplots.push_back("crgjbase/h_nbjbins");
+  files.push_back( dir+"dyjetsll_ht.root");            labels.push_back("MC");            nplots.push_back("crdybase/h_nbjbins");
+  files.push_back( dir+"gjets_dr0p05_ht.root");                labels.push_back("MC");            nplots.push_back("crgjbase/h_nbjbins");
   files.push_back( dir+"data_Run2016.root");            labels.push_back("Data (bkg subtr)");            nplots.push_back("crdybase/h_nbjbins");
   files.push_back( dir+"purity.root");                   labels.push_back("Data (bkg subtr)");            nplots.push_back("srbase/h_nbjbinsphotonestimateFailSieieData");
 //  files.push_back( dir+"data_Run2016.root");            labels.push_back("Data (full)");            nplots.push_back("crdybase/h_nbjbins");
@@ -1682,30 +2102,38 @@ void compareMultiPlot()
   makeCMSPlotRatios(  files, labels, nplots, "DoubleRatioNB", /*xtitle*/ "N(bjets)" , /*ytitle*/ "R(Z_{ll} / #gamma)" , /*xmin*/ 0, /*xmax*/3 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1);
   
   files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir+"2015dyjetsll_ht.root");            labels.push_back("MC");            nplots.push_back("crdybaseIncl/h_htbins");
-  files.push_back( dir+"2015gjets_ht.root");          labels.push_back("MC");            nplots.push_back("crgjbaseIncl/h_htbins");
+  files.push_back( dir+"dyjetsll_ht.root");            labels.push_back("MC");            nplots.push_back("crdybaseIncl/h_htbins");
+  files.push_back( dir+"gjets_dr0p05_ht.root");          labels.push_back("MC");            nplots.push_back("crgjbaseIncl/h_htbins");
   files.push_back( dir+"data_Run2016.root");            labels.push_back("Data (bkg subtr)");            nplots.push_back("crdybaseIncl/h_htbins");
   files.push_back( dir+"purity.root");          labels.push_back("Data (bkg subtr)");            nplots.push_back("srbaseIncl/h_htbinsphotonestimateFailSieieData");
   makeCMSPlotRatios(  files, labels, nplots, "DoubleRatioHTincl", /*xtitle*/ "HT [GeV]" , /*ytitle*/ "R(Z_{ll} / #gamma)" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1);
   
   files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir+"2015dyjetsll_ht.root");            labels.push_back("MC");            nplots.push_back("crdybaseIncl/h_njbins");
-  files.push_back( dir+"2015gjets_ht.root");          labels.push_back("MC");            nplots.push_back("crgjbaseIncl/h_njbins");
+  files.push_back( dir+"dyjetsll_ht.root");            labels.push_back("MC");            nplots.push_back("crdybaseIncl/h_njbins");
+  files.push_back( dir+"gjets_dr0p05_ht.root");          labels.push_back("MC");            nplots.push_back("crgjbaseIncl/h_njbins");
   files.push_back( dir+"data_Run2016.root");            labels.push_back("Data (bkg subtr)");            nplots.push_back("crdybaseIncl/h_njbins");
   files.push_back( dir+"purity.root");          labels.push_back("Data (bkg subtr)");            nplots.push_back("srbaseIncl/h_njbinsphotonestimateFailSieieData");
   makeCMSPlotRatios(  files, labels, nplots, "DoubleRatioNJincl", /*xtitle*/ "N(jets)" , /*ytitle*/ "R(Z_{ll} / #gamma)" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1);
   
   
   files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir+"2015dyjetsll_ht.root");            labels.push_back("MC");            nplots.push_back("crdybaseIncl/h_nbjbins");
-  files.push_back( dir+"2015gjets_ht.root");                labels.push_back("MC");            nplots.push_back("crgjbaseIncl/h_nbjbins");
+  files.push_back( dir+"dyjetsll_ht.root");            labels.push_back("MC");            nplots.push_back("crdybaseIncl/h_nbjbins");
+  files.push_back( dir+"gjets_dr0p05_ht.root");                labels.push_back("MC");            nplots.push_back("crgjbaseIncl/h_nbjbins");
   files.push_back( dir+"data_Run2016.root");            labels.push_back("Data (bkg subtr)");            nplots.push_back("crdybaseIncl/h_nbjbins");
   files.push_back( dir+"purity.root");                   labels.push_back("Data (bkg subtr)");            nplots.push_back("srbaseIncl/h_nbjbinsphotonestimateFailSieieData");
   makeCMSPlotRatios(  files, labels, nplots, "DoubleRatioNBincl", /*xtitle*/ "N(bjets)" , /*ytitle*/ "R(Z_{ll} / #gamma)" , /*xmin*/ 0, /*xmax*/3 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1);
   
+
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+"dyjetsll_ht.root");            labels.push_back("MC");            nplots.push_back("crdybaseIncl/h_bosonptbins");
+  files.push_back( dir+"gjets_dr0p05_ht.root");        labels.push_back("MC");            nplots.push_back("crgjbaseIncl/h_bosonptbins");
+  files.push_back( dir+"data_Run2016.root");            labels.push_back("Data (bkg subtr)");            nplots.push_back("crdybaseIncl/h_bosonptbins");
+  files.push_back( dir+"purity.root");                   labels.push_back("Data (bkg subtr)");            nplots.push_back("srbaseIncl/h_bosonptbinsphotonestimateFailSieieData");
+  makeCMSPlotRatios(  files, labels, nplots, "DoubleRatioVPTincl", /*xtitle*/ "Boson p_T [GeV]" , /*ytitle*/ "R(Z_{ll} / #gamma)" , /*xmin*/ 200, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1);
+  
   
 
-  TString dir2 = "/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-07_signalSyst/";
+   dir2 = "/Users/giovannizevidellaporta/UCSD/MT2/Zinvisible/MT2babies/V00-01-07_signalSyst/";
 
 //
 //  files.clear(); labels.clear(); nplots.clear();
@@ -1840,30 +2268,91 @@ void compareMultiPlot()
 //
   
   files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir+"gjets_ht.root");            labels.push_back("80X ");            nplots.push_back("crgjbaseIncl/h_htbins");
-  files.push_back( dir+"2015gjets_ht.root");            labels.push_back("74X");            nplots.push_back("crgjbaseIncl/h_htbins");
-  makeCMSPlot(  files, labels, nplots, "GJets74X80X_HT", /*xtitle*/ "HT [GeV]" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 1 );
+  files.push_back( dir+"gjets_dr0p05_ht.root");            labels.push_back("0.05 ");            nplots.push_back("crgjbaseIncl/h_htbins");
+  files.push_back( dir+"gjets_dr0p4_ht.root");            labels.push_back("0.4");            nplots.push_back("crgjbaseIncl/h_htbins");
+  makeCMSPlot(  files, labels, nplots, "GJets04vs005_HT", /*xtitle*/ "HT [GeV]" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1 );
+  makeCMSPlot(  files, labels, nplots, "GJets04vs005_HTnorm", /*x*/  "HT [GeV]" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 1, /*doRatio*/ 1 );
   
   files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir+"gjets_ht.root");            labels.push_back("80X ");            nplots.push_back("crgjbase/h_mt2bins");
-  files.push_back( dir+"2015gjets_ht.root");            labels.push_back("74X");            nplots.push_back("crgjbase/h_mt2bins");
-  makeCMSPlot(  files, labels, nplots, "GJets74X80X_MT2", /*xtitle*/ "MT2 [GeV]" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/995 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 1 );
+  files.push_back( dir+"gjets_dr0p05_ht.root");            labels.push_back("0.05 ");            nplots.push_back("crgjbase/h_mt2bins");
+  files.push_back( dir+"gjets_dr0p4_ht.root");            labels.push_back("0.4");            nplots.push_back("crgjbase/h_mt2bins");
+  makeCMSPlot(  files, labels, nplots, "GJets04vs005_MT2", /*xtitle*/ "MT2 [GeV]" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/995 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1 );
+  makeCMSPlot(  files, labels, nplots, "GJets04vs005_MT2norm", /*xt*/ "MT2 [GeV]" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/995 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 1, /*doRatio*/ 1 );
   
   
   files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir+"gjets_ht.root");            labels.push_back("80X ");            nplots.push_back("crgjbaseIncl/h_njbins");
-  files.push_back( dir+"2015gjets_ht.root");            labels.push_back("74X");            nplots.push_back("crgjbaseIncl/h_njbins");
-  makeCMSPlot(  files, labels, nplots, "GJets74X80X_NJ", /*xtitle*/ "N(jets)" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 1 );
+  files.push_back( dir+"gjets_dr0p05_ht.root");            labels.push_back("0.05 ");            nplots.push_back("crgjbaseIncl/h_njbins");
+  files.push_back( dir+"gjets_dr0p4_ht.root");            labels.push_back("0.4");            nplots.push_back("crgjbaseIncl/h_njbins");
+  makeCMSPlot(  files, labels, nplots, "GJets04vs005_NJ", /*xtitle*/ "N(jets)" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1 );
+  makeCMSPlot(  files, labels, nplots, "GJets04vs005_NJnorm", /*xe*/ "N(jets)" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 1, /*doRatio*/ 1 );
 
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+"gjets_dr0p05_ht.root");            labels.push_back("0.05 ");            nplots.push_back("crgjbaseIncl/h_nbjbins");
+  files.push_back( dir+"gjets_dr0p4_ht.root");            labels.push_back("0.4");            nplots.push_back("crgjbaseIncl/h_nbjbins");
+  makeCMSPlot(  files, labels, nplots, "GJets04vs005_NBJ", /*xtitle*/ "N(b-jets)" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1 );
+  makeCMSPlot(  files, labels, nplots, "GJets04vs005_NBJnorm", /*xe*/ "N(b-jets)" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+"gjets_dr0p05_ht.root");            labels.push_back("0.05 ");            nplots.push_back("crgjbaseIncl/h_drMinParton");
+  files.push_back( dir+"gjets_dr0p4_ht.root");            labels.push_back("0.4");            nplots.push_back("crgjbaseIncl/h_drMinParton");
+  makeCMSPlot(  files, labels, nplots, "GJets04vs005_DR", /*xtitle*/ "minDR(photon, parton)" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1 );
+  makeCMSPlot(  files, labels, nplots, "GJets04vs005_DRnorm", /*xe*/ "minDR(photon, parton)" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 1, /*doRatio*/ 1 );
+  
   
   
   files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir+"gjets_ht.root");            labels.push_back("80X ");            nplots.push_back("crgjbaseIncl/h_nbjbins");
-  files.push_back( dir+"2015gjets_ht.root");            labels.push_back("74X");            nplots.push_back("crgjbaseIncl/h_nbjbins");
-  makeCMSPlot(  files, labels, nplots, "GJets74X80X_NBJ", /*xtitle*/ "N(b-jets)" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 1 );
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT VL, NJ 2-3, NB 0");            nplots.push_back("sr1VL/h_mt2");
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT VL, NJ 2-3, NB 1");            nplots.push_back("sr2VL/h_mt2");
+  makeCMSPlot(  files, labels, nplots, "ZinvMT2vsNB_sr1VL", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT L, NJ 2-3, NB 0");            nplots.push_back("sr1L/h_mt2");
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT L, NJ 2-3, NB 1");            nplots.push_back("sr2L/h_mt2");
+  makeCMSPlot(  files, labels, nplots, "ZinvMT2vsNB_sr1L", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT M, NJ 2-3, NB 0");            nplots.push_back("sr1M/h_mt2");
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT M, NJ 2-3, NB 1");            nplots.push_back("sr2M/h_mt2");
+  makeCMSPlot(  files, labels, nplots, "ZinvMT2vsNB_sr1M", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 10 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT H, NJ 2-3, NB 0");            nplots.push_back("sr1H/h_mt2");
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT H, NJ 2-3, NB 1");            nplots.push_back("sr2H/h_mt2");
+  makeCMSPlot(  files, labels, nplots, "ZinvMT2vsNB_sr1H", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 10 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT UH, NJ 2-3, NB 0");            nplots.push_back("sr1UH/h_mt2");
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT UH, NJ 2-3, NB 1");            nplots.push_back("sr2UH/h_mt2");
+  makeCMSPlot(  files, labels, nplots, "ZinvMT2vsNB_sr1UH", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 20 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
 
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT VL, NJ 4-6, NB 0");            nplots.push_back("sr4VL/h_mt2");
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT VL, NJ 4-6, NB 1");            nplots.push_back("sr5VL/h_mt2");
+  makeCMSPlot(  files, labels, nplots, "ZinvMT2vsNB_sr4VL", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT L, NJ 4-6, NB 0");            nplots.push_back("sr4L/h_mt2");
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT L, NJ 4-6, NB 1");            nplots.push_back("sr5L/h_mt2");
+  makeCMSPlot(  files, labels, nplots, "ZinvMT2vsNB_sr4L", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT M, NJ 4-6, NB 0");            nplots.push_back("sr4M/h_mt2");
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT M, NJ 4-6, NB 1");            nplots.push_back("sr5M/h_mt2");
+  makeCMSPlot(  files, labels, nplots, "ZinvMT2vsNB_sr4M", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT H, NJ 4-6, NB 0");            nplots.push_back("sr4H/h_mt2");
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT H, NJ 4-6, NB 1");            nplots.push_back("sr5H/h_mt2");
+  makeCMSPlot(  files, labels, nplots, "ZinvMT2vsNB_sr4H", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 10 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT UH, NJ 4-6, NB 0");            nplots.push_back("sr4UH/h_mt2");
+  files.push_back( dir+"zinv_ht.root");            labels.push_back("HT UH, NJ 4-6, NB 1");            nplots.push_back("sr5UH/h_mt2");
+  makeCMSPlot(  files, labels, nplots, "ZinvMT2vsNB_sr4UH", /*xtitle*/ "HT [GeV]" , /*ytitle*/ "Events" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 20 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
   
   
+
+   
   return;
 }
 

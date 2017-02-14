@@ -277,6 +277,7 @@ void getZinvTable() {
 
     //no histogram with DY yield, calculate using purity
     crBin = sfBin*purityBin;
+    if (purityBin == 0) crBin = 1; //exception for edge case with 1 SF, 1 OF event in cr10H
     
     cout << "$" << zinvHTs[i] << "$ &" << zinvNJs[i] << "&" << zinvNBs[i] << "&";
     cout << std::setprecision(1) << crBin << "&";

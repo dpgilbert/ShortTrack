@@ -90,11 +90,13 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (verbose) cout<<"Looking at region "<<dir_str<<", mt2 bin "<<mt2bin<<endl;
   TString dir = TString(dir_str);
   TString fullhistname = dir + "/h_mt2bins";
+  TString fullhistnameGenMet  = fullhistname+"_genmet";
   TString fullhistnameBtagsfHeavy  = fullhistname+"_btagsf_heavy_UP";
   TString fullhistnameBtagsfLight  = fullhistname+"_btagsf_light_UP";
   TString fullhistnameLepeff  = fullhistname+"_lepeff_UP";
   TString fullhistnameIsr  = fullhistname+"_isr_UP";
   TString fullhistnameScan  = fullhistname+"_sigscan";
+  TString fullhistnameScanGenMet  = fullhistname+"_sigscan_genmet";
   TString fullhistnameScanBtagsfHeavy  = fullhistname+"_sigscan_btagsf_heavy_UP";
   TString fullhistnameScanBtagsfLight  = fullhistname+"_sigscan_btagsf_light_UP";
   TString fullhistnameScanLepeff  = fullhistname+"_sigscan_lepeff_UP";
@@ -183,6 +185,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double n_sig_TR(0.);
   double n_sig_crsl(0.);
   double err_sig_mcstat(0.);
+  double n_sig_genmet(0.);
+  double n_sig_recogenaverage(0.);
   double n_sig_btagsf_heavy_UP(0.);
   double n_sig_btagsf_light_UP(0.);
   double n_sig_lepeff_UP(0.);
@@ -190,6 +194,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   TH1D* h_sig(0);
   TH1D* h_sig_crsl(0);
+  TH1D* h_sig_genmet(0);
   TH1D* h_sig_btagsf_heavy_UP(0);
   TH1D* h_sig_btagsf_light_UP(0);
   TH1D* h_sig_lepeff_UP(0);
@@ -201,6 +206,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     int bin1 = h_sigscan->GetYaxis()->FindBin(scanM1);
     int bin2 = h_sigscan->GetZaxis()->FindBin(scanM2);
     h_sig = h_sigscan->ProjectionX(Form("h_mt2bins_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),bin1,bin1,bin2,bin2);
+    TH3D* h_sigscan_genmet = (TH3D*) f_sig->Get(fullhistnameScanGenMet);
+    if (h_sigscan_genmet) h_sig_genmet = h_sigscan_genmet->ProjectionX(Form("h_mt2bins_genmet_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),bin1,bin1,bin2,bin2);
     TH3D* h_sigscan_btagsf_heavy_UP = (TH3D*) f_sig->Get(fullhistnameScanBtagsfHeavy);
     if (h_sigscan_btagsf_heavy_UP) h_sig_btagsf_heavy_UP = h_sigscan_btagsf_heavy_UP->ProjectionX(Form("h_mt2bins_btagsf_heavy_UP_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),bin1,bin1,bin2,bin2);
     TH3D* h_sigscan_btagsf_light_UP = (TH3D*) f_sig->Get(fullhistnameScanBtagsfLight);
@@ -217,6 +224,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // single point sample
   else {
     h_sig = (TH1D*) f_sig->Get(fullhistname);
+    h_sig_genmet = (TH1D*) f_sig->Get(fullhistnameGenMet);
     h_sig_btagsf_heavy_UP = (TH1D*) f_sig->Get(fullhistnameBtagsfHeavy);
     h_sig_btagsf_light_UP = (TH1D*) f_sig->Get(fullhistnameBtagsfLight);
     h_sig_lepeff_UP = (TH1D*) f_sig->Get(fullhistnameLepeff);
@@ -240,10 +248,14 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     n_sig_TR = h_sig->Integral(0,-1);
     err_sig_mcstat = h_sig->GetBinError(mt2bin);
   }
+  if (h_sig_genmet) n_sig_genmet = h_sig_genmet->GetBinContent(mt2bin);
   if (h_sig_btagsf_heavy_UP) n_sig_btagsf_heavy_UP = h_sig_btagsf_heavy_UP->GetBinContent(mt2bin);
   if (h_sig_btagsf_light_UP) n_sig_btagsf_light_UP = h_sig_btagsf_light_UP->GetBinContent(mt2bin);
   if (h_sig_lepeff_UP) n_sig_lepeff_UP = h_sig_lepeff_UP->GetBinContent(mt2bin);
   if (h_sig_isr_UP) n_sig_isr_UP = h_sig_isr_UP->GetBinContent(mt2bin);
+
+  //gen-reco averaging
+  n_sig_recogenaverage = (n_sig_genmet + n_sig)/2;
   
   //Get variable boundaries for signal region.
   //Used to create datacard name.
@@ -597,14 +609,14 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_lostlep_mcstat     = Form("llep_MCstat_%s"        , channel.c_str());
 
   // nuisances correlated across all bins
-  TString name_lostlep_lepeff     = Form("llep_lepeff");
+  TString name_lostlep_lepeff     = Form("lep_eff");
   TString name_lostlep_taueff     = Form("llep_taueff");
   TString name_lostlep_btageff    = Form("llep_btageff");
   TString name_lostlep_jec        = Form("jec");
   TString name_lostlep_renorm     = Form("llep_renorm");
   TString name_lostlep_mtcut      = Form("llep_mtcut");
   if (decorrelateLostlepNuisances) {
-    name_lostlep_lepeff     = Form("llep_lepeff_%s"      , channel.c_str());
+    //name_lostlep_lepeff     = Form("llep_lepeff_%s"      , channel.c_str()); //this nuisance is always totally correlated with Zinv
     name_lostlep_taueff     = Form("llep_taueff_%s"      , channel.c_str());
     name_lostlep_btageff    = Form("llep_btageff_%s"     , channel.c_str());
     //name_lostlep_jec        = Form("llep_jec_%s"         , channel.c_str()); //this nuisance is always totally correlated with Zinv
@@ -664,10 +676,10 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   //zinv Estimate from DY nuisances
   // nuisances decorrelated across all bins
-  TString name_zinvDY_mcstat      = Form("zinvDY_MCstat_%s"        , channel.c_str());
+  TString name_zinvDY_alphaErr      = Form("zinvDY_alphaErr_%s"        , channel.c_str());
   // nuisances decorrelated depending on extrapolation in hybrid method
   TString name_zinvDY_purity      = "zinvDY_purity_"+perTopoRegion;
-  TString name_zinvDY_rsfof       = "zinvDY_rsfof_"+perTopoRegion;
+  TString name_zinvDY_rsfof       = "zinvDY_Rsfof";
   TString name_zinvDY_shape       = "zinvDY_shape_"+perTopoRegion;
   //TString name_zinvDY_jec         = "jec"; // name defined in lostlep estimate
   TString name_zinvDY_crstat      = "zinvDY_CRstat_"    +perTopoRegion;
@@ -679,7 +691,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double zinvDY_shape = 1.;
   double zinvDY_puritystat = 1. + err_zinvDY_purity; // transfer factor purity stat uncertainty
   double zinvDY_rsfof = 1. + (1-zinvDY_purity)*0.15; // transfer factor uncertainty due to R(SF/OF)
-  double zinvDY_mcstat = 1. + err_zinvDY_mcstat; // transfer factor stat uncertainty
+  double zinvDY_alphaErr = 1. + err_zinvDY_mcstat; // transfer factor stat uncertainty
+  double zinvDY_lepeff = 1. + 0.05; // lepeff uncertainty
   double zinvDY_jec = (ht_HI == 450) ?  1. + 0.05 : 1. + 0.02; // transfer factor jec uncertainty
 
   //  note that if n_zinvDY_cr == 0, we will just use zinvDY_alpha (straight from MC) in the datacard
@@ -698,7 +711,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     zinvDY_alpha = n_zinvDY/n_zinvDY_cr;
     if (verbose) cout << "Setting zinvDY_alpha to " << zinvDY_alpha << endl;
   }
-  n_syst += 5; // zinvDY_crstat, zinvDY_mcstat, zinvDY_purity, zinvDY_rsfof, jec
+  n_syst += 6; // zinvDY_crstat, zinvDY_alphaErr, zinvDY_purity, zinvDY_rsfof, lep_eff, jec
 
   // in hybrid method, or normal extrapolation: shape uncertainty only for bins with MT2 extrapolation
   const float last_bin_relerr_zinvDY = 0.4;
@@ -778,8 +791,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   // ----- sig uncertainties
   double sig_syst         = 1.10; // dummy 10% from early MC studies
-  double sig_lumi         = 1.046; // 4.6% lumi uncertainty, end of 2015
+  double sig_lumi         = 1.062; // 6.2% lumi uncertainty, Moriond 2016
   double sig_mcstat       = (n_sig > 0.) ? 1. + sqrt(pow(err_sig_mcstat/n_sig,2) + 0.005) : 1.071; // MC stat err +  quadrature sum of 5% for JES, 5% for renorm/fact scales
+  double sig_genmet       = (n_sig > 0.) ? 1. + (n_sig-n_sig_genmet)/2/n_sig : 1.00; // reco-gen MET averaging
   double sig_btagsf_heavy = (n_sig > 0.) ? n_sig_btagsf_heavy_UP/n_sig : 1.00; // btagsf heavy, eff UP
   double sig_btagsf_light = (n_sig > 0.) ? n_sig_btagsf_light_UP/n_sig : 1.00; // btagsf light, eff UP
   double sig_lepeff       = (n_sig > 0.) ? n_sig_lepeff_UP/n_sig : 1.00; // lepton eff UP
@@ -789,6 +803,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_sig_syst         = "sig_syst";
   TString name_sig_lumi         = "lumi_syst";
   TString name_sig_mcstat       = "sig_MCstat_"+perChannel;
+  TString name_sig_genmet       = "sig_gensyst";
   TString name_sig_isr          = "sig_isrSyst";
   TString name_sig_btagsf_heavy = "sig_bTagHeavySyst";
   TString name_sig_btagsf_light = "sig_bTagLightSyst";
@@ -800,7 +815,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   }
   // otherwise do "real" signal systematics
   else {
-    n_syst += 5; // mcstat (including gen scales and JEC), lumi, btagsf_heavy, btagsf_light, isr
+    n_syst += 6; // mcstat (including gen scales and JEC), lumi, btagsf_heavy, btagsf_light, isr, reco-gen averaging
     if (isSignalWithLeptons) ++n_syst; // lepeff
   }
 
@@ -852,13 +867,13 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   ofile <<  "kmax *"                                                                        << endl;
   ofile <<  "------------"                                                                  << endl;
   ofile <<  Form("bin         %s",channel.c_str())                                          << endl;
-  ofile <<  Form("observation %.0f",n_data)                                                 << endl;
+  ofile <<  Form("observation %.3f",n_data)                                                 << endl;
   ofile <<  "------------"                                                                  << endl;
   ofile <<  Form("bin             %s   %s   %s   %s",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str()) << endl;
   ofile <<  "process          sig       zinv        llep      qcd"                                      << endl; 
   ofile <<  "process           0         1           2         3"                                      << endl;
-  if (doZinvFromDY) ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig,n_zinvDY,n_lostlep,n_qcd) << endl;
-  else ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig,n_zinv,n_lostlep,n_qcd) << endl;
+  if (doZinvFromDY) ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig_recogenaverage,n_zinvDY,n_lostlep,n_qcd) << endl;
+  else ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig_recogenaverage,n_zinv,n_lostlep,n_qcd) << endl;
   ofile <<  "------------"                                                                  << endl;
  
   // ---- sig systs
@@ -869,6 +884,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   else {
     ofile <<  Form("%s                    lnN    %.3f   -    -    - ",name_sig_lumi.Data(),sig_lumi)  << endl;
     ofile <<  Form("%s     lnN    %.3f   -    -    - ",name_sig_mcstat.Data(),sig_mcstat)  << endl;
+    ofile <<  Form("%s                  lnU    %.3f   -    -    - ",name_sig_genmet.Data(),sig_genmet)  << endl;
     ofile <<  Form("%s                  lnN    %.3f   -    -    - ",name_sig_isr.Data(),sig_isr)  << endl;
     ofile <<  Form("%s            lnN    %.3f   -    -    - ",name_sig_btagsf_heavy.Data(),sig_btagsf_heavy)  << endl;
     ofile <<  Form("%s            lnN    %.3f   -    -    - ",name_sig_btagsf_light.Data(),sig_btagsf_light)  << endl;
@@ -878,7 +894,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // ---- Zinv systs
   if (doZinvFromDY) {
     ofile <<  Form("%s        gmN %.0f    -   %.5f   -   - ",name_zinvDY_crstat.Data(),n_zinvDY_cr,zinvDY_alpha)  << endl;
-    ofile <<  Form("%s        lnN    -   %.3f   -   - ",name_zinvDY_mcstat.Data(),zinvDY_mcstat)  << endl;
+    ofile <<  Form("%s        lnN    -   %.3f   -   - ",name_zinvDY_alphaErr.Data(),zinvDY_alphaErr)  << endl;
     ofile <<  Form("%s        lnN    -   %.3f   -   - ",name_zinvDY_purity.Data(),zinvDY_puritystat)  << endl;
     ofile <<  Form("%s        lnN    -   %.3f   -   - ",name_zinvDY_rsfof.Data(),zinvDY_rsfof)  << endl;
     if (n_extrap_bins_zinvDY > 0 && mt2bin >= zinvDY_lastbin_hybrid)
@@ -915,7 +931,6 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_alphaerr.Data(),lostlep_alphaerr)  << endl;
   }
   else {
-    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_lepeff.Data(),lostlep_lepeff)  << endl;
     ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mtcut.Data(),lostlep_mtcut)  << endl;
     ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_taueff.Data(),lostlep_taueff)  << endl;
     ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_btageff.Data(),lostlep_btageff)  << endl;
@@ -928,9 +943,16 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_shape.Data(),lostlep_shape)  << endl;
   //ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_alphaerr.Data(),lostlep_alphaerr)  << endl;
 
-  //jec systematics for Zinv and lostlep
-  if (doZinvFromDY) ofile <<  Form("%s        lnN    -    %.3f    %.3f    - ",name_lostlep_jec.Data(),zinvDY_jec,lostlep_jec)  << endl;
-
+  //lepeff & jec systematics for Zinv and lostlep
+  if (doZinvFromDY) {
+    ofile <<  Form("%s        lnN    -    %.3f    %.3f    - ",name_lostlep_jec.Data(),zinvDY_jec,lostlep_jec)  << endl;
+    ofile <<  Form("%s        lnN    -    %.3f    %.3f    - ",name_lostlep_lepeff.Data(),zinvDY_lepeff,lostlep_lepeff)  << endl;
+  }
+  else {
+    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_jec.Data(),lostlep_jec)  << endl;
+    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_lepeff.Data(),lostlep_lepeff)  << endl;
+  }
+  
   // ---- QCD systs
   ofile <<  Form("%s        gmN %.0f    -    -    -   %.5f",name_qcd_crstat.Data(),n_qcd_cr,qcd_crstat)  << endl;
   if (njets_LOW == 1) {
@@ -973,9 +995,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     //calculate the total syst error for each background by summing in quadrature
     double zinvDY_syst;
     if (n_extrap_bins_zinvDY > 0 && mt2bin >= zinvDY_lastbin_hybrid) {
-      zinvDY_syst = n_zinvDY*pow(pow(1-zinvDY_mcstat,2)+pow(1-zinvDY_puritystat,2)+pow(1-zinvDY_rsfof,2)+pow(1-zinvDY_shape,2),0.5);
+      zinvDY_syst = n_zinvDY*pow(pow(1-zinvDY_alphaErr,2)+pow(1-zinvDY_puritystat,2)+pow(1-zinvDY_rsfof,2)+pow(1-zinvDY_shape,2),0.5);
     }
-    else zinvDY_syst = n_zinvDY*pow(pow(1-zinvDY_mcstat,2)+pow(1-zinvDY_puritystat,2)+pow(1-zinvDY_rsfof,2),0.5);
+    else zinvDY_syst = n_zinvDY*pow(pow(1-zinvDY_alphaErr,2)+pow(1-zinvDY_puritystat,2)+pow(1-zinvDY_rsfof,2),0.5);
 
     
     double lostlep_syst;
