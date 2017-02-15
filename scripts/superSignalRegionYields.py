@@ -6,14 +6,17 @@ import ROOT
 import math
 import collections
 
-datacard_dir = 'allcards_ssr_36p5fb_V15'
-output_dir = 'cards_for_macroregions_36p5fb_ssrs_V15'
+datacard_dir = 'allcards_ssr_36p8fb_V16'
+output_dir = 'cards_for_macroregions_36p8fb_ssrs_V16_sigsyst0'
 
 # signal point may appear in name
 signal_point = '_T1tttt_1800_1'
 #signal_point = ''
 
 doSignal = False
+#signalError = 1.15 # arbitrary choice
+signalError = 1.00
+
 
 #__________________________________________________
 # writes a datacard for a macroregion
@@ -26,8 +29,6 @@ def makeMacroRegionDatacard( region, n_obs, n_bkg, abserr_bkg_up, abserr_bkg_dn,
     sig_val = 1.
     if doSignal:
         sig_val = n_sig
-    sig_nuis = 1.15 # arbitrary choice
-#    sig_nuis = 1.30 # arbitrary choice
 
     filename = '%s/datacard_macroregion_%s.txt' % (output_dir, region)
     outf = open(filename, 'w')
@@ -47,7 +48,7 @@ rate 	 %.3f 	 %.3f
 -------------
 sig_syst    lnN    %.2f -
 bkg_syst    lnN    - %.2f/%.2f
-''' % (region, n_obs, region, region, sig_val, n_bkg, sig_nuis, rel_nuis_up, rel_nuis_dn) )
+''' % (region, n_obs, region, region, sig_val, n_bkg, signalError, rel_nuis_up, rel_nuis_dn) )
     outf.close()
 
 #__________________________________________________
@@ -244,26 +245,26 @@ def printMacroRegionYields( region, datacard_list ):
     ### with observed yields
     if n_bkg > 100:
         if '%.0f'%(abserr_sum_bkg_up) == '%.0f'%(abserr_sum_bkg_dn):
-            print '%s & $%.0f \pm %.0f$ & %d &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, n_obs)
+            print '%s & $%.0f \pm %.0f$ & %d &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, n_obs)
         else:
-            print '%s & $%.0f^{+%.0f}_{-%.0f}$ & %d &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_obs)
+            print '%s & $%.0f^{+%.0f}_{-%.0f}$ & %d &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_obs)
     else:
         if '%.1f'%(abserr_sum_bkg_up) == '%.1f'%(abserr_sum_bkg_dn):
-            print '%s & $%.1f \pm %.1f$ & %d &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, n_obs)
+            print '%s & $%.1f \pm %.1f$ & %d &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, n_obs)
         else:
-            print '%s & $%.1f^{+%.1f}_{-%.1f}$ & %d &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_obs)
+            print '%s & $%.1f^{+%.1f}_{-%.1f}$ & %d &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_obs)
         
     # ### without observed yields
     # if n_bkg > 100:
     #     if '%.0f'%(abserr_sum_bkg_up) == '%.0f'%(abserr_sum_bkg_dn):
-    #         print '%s & $%.0f \pm %.0f$ &  &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up)
+    #         print '%s & $%.0f \pm %.0f$ &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up)
     #     else:
-    #         print '%s & $%.0f^{+%.0f}_{-%.0f}$ &  &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn)
+    #         print '%s & $%.0f^{+%.0f}_{-%.0f}$ &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn)
     # else:
     #     if '%.1f'%(abserr_sum_bkg_up) == '%.1f'%(abserr_sum_bkg_dn):
-    #         print '%s & $%.1f \pm %.1f$ &  &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up)
+    #         print '%s & $%.1f \pm %.1f$ &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up)
     #     else:
-    #         print '%s & $%.1f^{+%.1f}_{-%.1f}$ &  &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn)
+    #         print '%s & $%.1f^{+%.1f}_{-%.1f}$ &  &  \\\\' % (region_print, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn)
         
     makeMacroRegionDatacard( region, n_obs, n_bkg, abserr_sum_bkg_up, abserr_sum_bkg_dn, n_sig )
 
