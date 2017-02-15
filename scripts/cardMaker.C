@@ -49,7 +49,7 @@ const bool integratedZinvEstimate = true;
 
 const bool doDummySignalSyst = false;
 
-const bool subtractSignalContam = false;
+const bool subtractSignalContam = true;
 
 const bool doZinvFromDY = true; //if false, will take estimate from GJets
 
@@ -116,7 +116,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString fullhistnameFitStat  = fullhistname+"FitStat";
   TString fullhistnameFitSyst  = fullhistname+"FitSyst";
   TString fullhistnameCRSL = TString(dir).ReplaceAll("sr","crsl") + "/h_mt2bins";
+  TString fullhistnameCRSLGenMet = TString(dir).ReplaceAll("sr","crsl") + "/h_mt2bins_genmet";
   TString fullhistnameCRSLScan  = fullhistnameCRSL+"_sigscan";
+  TString fullhistnameCRSLScanGenMet  = fullhistnameCRSL+"_sigscan_genmet";
 
   // check to see if this is a super signal region (20 and up)
   int sr_number = -1;
@@ -184,16 +186,20 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double n_sig(0.);
   double n_sig_TR(0.);
   double n_sig_crsl(0.);
+  double n_sig_crsl_genmet(0.);
   double err_sig_mcstat(0.);
+  double err_sig_mcstat_rel(0.);
   double n_sig_genmet(0.);
   double n_sig_recogenaverage(0.);
   double n_sig_btagsf_heavy_UP(0.);
   double n_sig_btagsf_light_UP(0.);
   double n_sig_lepeff_UP(0.);
   double n_sig_isr_UP(0.);
+  double err_sig_recogenaverage(0.);
 
   TH1D* h_sig(0);
   TH1D* h_sig_crsl(0);
+  TH1D* h_sig_crsl_genmet(0);
   TH1D* h_sig_genmet(0);
   TH1D* h_sig_btagsf_heavy_UP(0);
   TH1D* h_sig_btagsf_light_UP(0);
@@ -218,7 +224,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     if (h_sigscan_isr_UP) h_sig_isr_UP = h_sigscan_isr_UP->ProjectionX(Form("h_mt2bins_isr_UP_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),bin1,bin1,bin2,bin2);
     if (subtractSignalContam) {
       TH3D* h_sigscan_crsl = (TH3D*) f_sig->Get(fullhistnameCRSLScan);
+      TH3D* h_sigscan_crsl_genmet = (TH3D*) f_sig->Get(fullhistnameCRSLScanGenMet);
       if (h_sigscan_crsl) h_sig_crsl = h_sigscan_crsl->ProjectionX(Form("h_mt2bins_crsl_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),bin1,bin1,bin2,bin2);
+      if (h_sigscan_crsl_genmet) h_sig_crsl_genmet = h_sigscan_crsl_genmet->ProjectionX(Form("h_mt2bins_genmet_crsl_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),bin1,bin1,bin2,bin2);
     }
   }
   // single point sample
@@ -229,7 +237,10 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     h_sig_btagsf_light_UP = (TH1D*) f_sig->Get(fullhistnameBtagsfLight);
     h_sig_lepeff_UP = (TH1D*) f_sig->Get(fullhistnameLepeff);
     h_sig_isr_UP = (TH1D*) f_sig->Get(fullhistnameIsr);
-    if (subtractSignalContam) h_sig_crsl = (TH1D*) f_sig->Get(fullhistnameCRSL);
+    if (subtractSignalContam) {
+      h_sig_crsl = (TH1D*) f_sig->Get(fullhistnameCRSL);
+      h_sig_crsl_genmet = (TH1D*) f_sig->Get(fullhistnameCRSLGenMet);
+    }
     // Trick to print out monojet regions even when running on signal without monojet events
     //    if (fullhistname.Contains("J")) 
     //      h_sig = (TH1D*) f_sig->Get("sr6M/h_mt2bins");
@@ -247,15 +258,13 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     n_sig = h_sig->GetBinContent(mt2bin);
     n_sig_TR = h_sig->Integral(0,-1);
     err_sig_mcstat = h_sig->GetBinError(mt2bin);
+    err_sig_mcstat_rel = err_sig_mcstat/n_sig;
   }
   if (h_sig_genmet) n_sig_genmet = h_sig_genmet->GetBinContent(mt2bin);
   if (h_sig_btagsf_heavy_UP) n_sig_btagsf_heavy_UP = h_sig_btagsf_heavy_UP->GetBinContent(mt2bin);
   if (h_sig_btagsf_light_UP) n_sig_btagsf_light_UP = h_sig_btagsf_light_UP->GetBinContent(mt2bin);
   if (h_sig_lepeff_UP) n_sig_lepeff_UP = h_sig_lepeff_UP->GetBinContent(mt2bin);
   if (h_sig_isr_UP) n_sig_isr_UP = h_sig_isr_UP->GetBinContent(mt2bin);
-
-  //gen-reco averaging
-  n_sig_recogenaverage = (n_sig_genmet + n_sig)/2;
   
   //Get variable boundaries for signal region.
   //Used to create datacard name.
@@ -297,7 +306,6 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   std::string channel = ht_str + "_" + jet_str + "_" + bjet_str + "_" + mt2_str;
   std::string topologicalR = ht_str + "_" + jet_str + "_" + bjet_str;
-
   
   // bin boundaries for CRSL, for lostlep systematic correlations
   TH1D* h_ht_LOW_crsl = (TH1D*) f_lostlep->Get(dir+"/h_ht_LOW");
@@ -789,11 +797,63 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (njets_LOW == 1) n_syst += 2; // crstat, alphaerr
   else n_syst += 4; // crstat, fjrbsyst, fitstat, fitsyst
 
+  
+  //gen-reco averaging
+  n_sig_recogenaverage = (n_sig_genmet + n_sig)/2;
+  err_sig_recogenaverage = (n_sig-n_sig_genmet)/2/n_sig_recogenaverage;
+  
+  // correction for signal contamination:
+  //   find how much bkg prediction is increased for this MT2 bin by signal in CR (n_lostlep_extra)
+  //   subtract n_lostlep_extra from n_sig and use for reduced signal efficiency
+  if (subtractSignalContam) {
+    if (h_sig_crsl) {
+      // integrated shape
+      if (mt2bin >= lostlep_lastbin_hybrid) {
+	n_sig_crsl = h_sig_crsl->Integral(lostlep_lastbin_hybrid,-1);
+	if (h_sig_crsl_genmet) n_sig_crsl_genmet = h_sig_crsl_genmet->Integral(lostlep_lastbin_hybrid,-1);
+      }
+      // bin-by-bin
+      else {
+	n_sig_crsl = h_sig_crsl->GetBinContent(mt2bin);
+	if (h_sig_crsl_genmet) n_sig_crsl_genmet = h_sig_crsl_genmet->GetBinContent(mt2bin);
+      }
+      double n_lostlep_extra = n_sig_crsl * lostlep_alpha;
+      double n_lostlep_extra_genmet = n_sig_crsl_genmet * lostlep_alpha;
+      double n_lostlep_extra_recogenaverage = (n_lostlep_extra + n_lostlep_extra_genmet)/2;
+      double n_sig_cor = std::max(0.,n_sig - n_lostlep_extra);
+      double n_sig_cor_genmet = std::max(0.,n_sig_genmet - n_lostlep_extra_genmet);
+      double n_sig_cor_recogenaverage = std::max(0., n_sig_recogenaverage - n_lostlep_extra_recogenaverage);
+      if (verbose) {
+	cout << "correcting down signal yield from " << n_sig << " to " << n_sig_cor
+	     << ", n_sig_crsl: " << n_sig_crsl
+	     << ", alpha: " << lostlep_alpha << ", extra bkg pred: " << n_lostlep_extra
+	     << ", lostlep_lastbin_hybrid: " << lostlep_lastbin_hybrid << endl;
+	cout << "correcting down genmet yield from " << n_sig_genmet << " to " << n_sig_cor_genmet
+	     << ", n_sig_crsl: " << n_sig_crsl
+	     << ", alpha: " << lostlep_alpha << ", extra bkg pred: " << n_lostlep_extra_genmet
+	     << ", lostlep_lastbin_hybrid: " << lostlep_lastbin_hybrid << endl;
+	cout << "correcting down recogenaverage yield from " << n_sig_recogenaverage << " to " << n_sig_cor_recogenaverage
+	     << ", n_sig_crsl: " << n_sig_crsl
+	     << ", alpha: " << lostlep_alpha << ", extra bkg pred: " << n_lostlep_extra_recogenaverage
+	     << ", lostlep_lastbin_hybrid: " << lostlep_lastbin_hybrid << endl;
+      }
+      n_sig = n_sig_cor;
+      n_sig_genmet = n_sig_cor_genmet;
+      // n_sig_recogenaverage = n_sig_cor_recogenaverage;
+      n_sig_recogenaverage = (n_sig_cor + n_sig_cor_genmet)/2;
+      err_sig_recogenaverage = (n_sig-n_sig_genmet)/2/n_sig_recogenaverage;
+    }
+    else {
+      cout << "tried to subtract signal contamination but couldn't find sig_crsl hist" << endl;
+    }
+  } // if (subtractSignalContam)
+  
+  
   // ----- sig uncertainties
   double sig_syst         = 1.10; // dummy 10% from early MC studies
-  double sig_lumi         = 1.062; // 6.2% lumi uncertainty, Moriond 2016
-  double sig_mcstat       = (n_sig > 0.) ? 1. + sqrt(pow(err_sig_mcstat/n_sig,2) + 0.005) : 1.071; // MC stat err +  quadrature sum of 5% for JES, 5% for renorm/fact scales
-  double sig_genmet       = (n_sig > 0.) ? 1. + (n_sig-n_sig_genmet)/2/n_sig : 1.00; // reco-gen MET averaging
+  double sig_lumi         = 1.026; // 2.6% lumi uncertainty, Moriond 2016
+  double sig_mcstat       = (n_sig > 0.) ? 1. + sqrt(pow(err_sig_mcstat_rel,2) + 0.005) : 1.071; // MC stat err +  quadrature sum of 5% for JES, 5% for renorm/fact scales
+  double sig_genmet       = (n_sig > 0.) ? 1. + err_sig_recogenaverage: 1.00; // reco-gen MET averaging
   double sig_btagsf_heavy = (n_sig > 0.) ? n_sig_btagsf_heavy_UP/n_sig : 1.00; // btagsf heavy, eff UP
   double sig_btagsf_light = (n_sig > 0.) ? n_sig_btagsf_light_UP/n_sig : 1.00; // btagsf light, eff UP
   double sig_lepeff       = (n_sig > 0.) ? n_sig_lepeff_UP/n_sig : 1.00; // lepton eff UP
@@ -818,30 +878,6 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     n_syst += 6; // mcstat (including gen scales and JEC), lumi, btagsf_heavy, btagsf_light, isr, reco-gen averaging
     if (isSignalWithLeptons) ++n_syst; // lepeff
   }
-
-  // correction for signal contamination:
-  //   find how much bkg prediction is increased for this MT2 bin by signal in CR (n_lostlep_extra)
-  //   subtract n_lostlep_extra from n_sig and use for reduced signal efficiency
-  if (subtractSignalContam) {
-    if (h_sig_crsl) {
-      // integrated shape
-      if (mt2bin >= lostlep_lastbin_hybrid) n_sig_crsl = h_sig_crsl->Integral(lostlep_lastbin_hybrid,-1);
-      // bin-by-bin
-      else n_sig_crsl = h_sig_crsl->GetBinContent(mt2bin);
-      double n_lostlep_extra = n_sig_crsl * lostlep_alpha;
-      double n_sig_cor = std::max(0.,n_sig - n_lostlep_extra);
-      if (verbose) {
-	cout << "correcting down signal yield from " << n_sig << " to " << n_sig_cor
-	     << ", n_sig_crsl: " << n_sig_crsl
-	     << ", alpha: " << lostlep_alpha << ", extra bkg pred: " << n_lostlep_extra
-	     << ", lostlep_lastbin_hybrid: " << lostlep_lastbin_hybrid << endl;
-      }
-      n_sig = n_sig_cor;
-    }
-    else {
-      cout << "tried to subtract signal contamination but couldn't find sig_crsl hist" << endl;
-    }
-  } // if (subtractSignalContam)
 
   if (doZinvFromDY)  n_bkg = n_lostlep+n_zinvDY+n_qcd;
   else               n_bkg = n_lostlep+n_zinv+n_qcd;
