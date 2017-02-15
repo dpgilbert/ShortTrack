@@ -783,10 +783,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         if (verbose) cout<<__LINE__<<endl;
         if (!t.Flag_badMuonFilter) continue;
 	if (verbose) cout<<__LINE__<<endl;
+	if (!t.Flag_eeBadScFilter) continue; 
+	if (verbose) cout<<__LINE__<<endl;
       }
       if (!stringsample.Contains("2015")) { // several filters are not in 2015 MC
 	if (!t.Flag_goodVertices) continue;
-	if (!t.Flag_eeBadScFilter) continue; 
 	if (verbose) cout<<__LINE__<<endl;
 	if (!t.Flag_HBHENoiseFilter) continue;
 	if (verbose) cout<<__LINE__<<endl;
