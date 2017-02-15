@@ -168,11 +168,10 @@ void SingleLepLooper::loop(TChain* chain, std::string output_name){
   }
   
   if (applyLeptonSFfromFiles) {
-    setElSFfile("../babymaker/lepsf/scaleFactors_el_ichep_2016.root", "../babymaker/lepsf/egammaEffi_track_SF2D_ichep_2016.root", true );
-    setMuSFfile("../babymaker/lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
-		"../babymaker/lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
-		"../babymaker/lepsf/TnP_MuonID_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
-		"../babymaker/lepsf/general_tracks_and_early_general_tracks_corr_ratio.root");
+    setElSFfile("../babymaker/lepsf/moriond17/scaleFactors_el_moriond_2017.root", "../babymaker/lepsf/moriond17/egammaEffi.txt_EGM2D.root" );
+    setMuSFfileNoTrk("../babymaker/lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
+		     "../babymaker/lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
+		     "../babymaker/lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root");
   }
   
   cout << "[SingleLepLooper::loop] setting up histos" << endl;
@@ -265,7 +264,7 @@ void SingleLepLooper::loop(TChain* chain, std::string output_name){
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      const float lumi = 36.46;
+      const float lumi = 36.81431;
       evtweight_ = 1.;
 
       // apply relevant weights to MC
@@ -656,21 +655,20 @@ void SingleLepLooper::fillLepSFWeightsFromFile() {
 //_______________________________________
 float SingleLepLooper::getAverageISRWeight(const int evt_id, const int var) {
 
-  // madgraph ttsl, from RunIISpring16MiniAODv2
+  // madgraph ttsl, from RunIISummer16MiniAODv2
   if (evt_id == 301 || evt_id == 302) {
-    if (var == 0) return 0.910; // nominal
-    else if (var == 1) return 0.955; // UP
-    else if (var == -1) return 0.865; // DN
+    if (var == 0) return 0.909; // nominal
+    else if (var == 1) return 0.954; // UP
+    else if (var == -1) return 0.863; // DN
   }
-  // madgraph ttdl, from RunIISpring16MiniAODv2
+  // madgraph ttdl, from RunIISummer16MiniAODv2
   else if (evt_id == 303) {
-    if (var == 0) return 0.897; // nominal
+    if (var == 0) return 0.895; // nominal
     else if (var == 1) return 0.948; // UP
-    else if (var == -1) return 0.845; // DN
+    else if (var == -1) return 0.843; // DN
   }
 
   std::cout << "WARNING: MT2Looper::getAverageISRWeight: didn't recognize either evt_id: " << evt_id
 	    << " or variation: " << var << std::endl;
   return 1.;
 }
-
