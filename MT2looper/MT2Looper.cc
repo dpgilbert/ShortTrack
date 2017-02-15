@@ -864,7 +864,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //---------------------
       outfile_->cd();
       // const float lumi = 12.9; //ICHEP 2016
-      const float lumi = 36.81431; // full 2016
+      const float lumi = 35.867; // full 2016
     
       evtweight_ = 1.;
       if (verbose) cout<<__LINE__<<endl;
