@@ -184,13 +184,16 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   int zinvDY_lastbin_hybrid(1);
 
   double n_sig(0.);
+  double n_sig_cor(0.);
   double n_sig_TR(0.);
   double n_sig_crsl(0.);
   double n_sig_crsl_genmet(0.);
   double err_sig_mcstat(0.);
   double err_sig_mcstat_rel(0.);
   double n_sig_genmet(0.);
+  double n_sig_cor_genmet(0.);
   double n_sig_recogenaverage(0.);
+  double n_sig_cor_recogenaverage(0.);
   double n_sig_btagsf_heavy_UP(0.);
   double n_sig_btagsf_light_UP(0.);
   double n_sig_lepeff_UP(0.);
@@ -805,6 +808,11 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // correction for signal contamination:
   //   find how much bkg prediction is increased for this MT2 bin by signal in CR (n_lostlep_extra)
   //   subtract n_lostlep_extra from n_sig and use for reduced signal efficiency
+  //first initialize corrected yields to initial values
+  n_sig_cor = n_sig;
+  n_sig_cor_genmet = n_sig_genmet;
+  n_sig_cor_recogenaverage = n_sig_recogenaverage;
+     
   if (subtractSignalContam) {
     if (h_sig_crsl) {
       // integrated shape
@@ -820,9 +828,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
       double n_lostlep_extra = n_sig_crsl * lostlep_alpha;
       double n_lostlep_extra_genmet = n_sig_crsl_genmet * lostlep_alpha;
       double n_lostlep_extra_recogenaverage = (n_lostlep_extra + n_lostlep_extra_genmet)/2;
-      double n_sig_cor = std::max(0.,n_sig - n_lostlep_extra);
-      double n_sig_cor_genmet = std::max(0.,n_sig_genmet - n_lostlep_extra_genmet);
-      double n_sig_cor_recogenaverage = std::max(0., n_sig_recogenaverage - n_lostlep_extra_recogenaverage);
+      n_sig_cor = std::max(0.,n_sig - n_lostlep_extra);
+      n_sig_cor_genmet = std::max(0.,n_sig_genmet - n_lostlep_extra_genmet);
+      n_sig_cor_recogenaverage = std::max(0., n_sig_recogenaverage - n_lostlep_extra_recogenaverage);
       if (verbose) {
 	cout << "correcting down signal yield from " << n_sig << " to " << n_sig_cor
 	     << ", n_sig_crsl: " << n_sig_crsl
@@ -837,17 +845,12 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 	     << ", alpha: " << lostlep_alpha << ", extra bkg pred: " << n_lostlep_extra_recogenaverage
 	     << ", lostlep_lastbin_hybrid: " << lostlep_lastbin_hybrid << endl;
       }
-      n_sig = n_sig_cor;
-      n_sig_genmet = n_sig_cor_genmet;
-      // n_sig_recogenaverage = n_sig_cor_recogenaverage;
-      n_sig_recogenaverage = (n_sig_cor + n_sig_cor_genmet)/2;
-      err_sig_recogenaverage = (n_sig-n_sig_genmet)/2/n_sig_recogenaverage;
+      err_sig_recogenaverage = (n_sig_cor-n_sig_cor_genmet)/2/n_sig_cor_recogenaverage;
     }
     else {
       cout << "tried to subtract signal contamination but couldn't find sig_crsl hist" << endl;
     }
-  } // if (subtractSignalContam)
-  
+  } // if (subtractSignalContam)  
   
   // ----- sig uncertainties
   double sig_syst         = 1.10; // dummy 10% from early MC studies
@@ -908,8 +911,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   ofile <<  Form("bin             %s   %s   %s   %s",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str()) << endl;
   ofile <<  "process          sig       zinv        llep      qcd"                                      << endl; 
   ofile <<  "process           0         1           2         3"                                      << endl;
-  if (doZinvFromDY) ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig_recogenaverage,n_zinvDY,n_lostlep,n_qcd) << endl;
-  else ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig_recogenaverage,n_zinv,n_lostlep,n_qcd) << endl;
+  if (doZinvFromDY) ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig_cor_recogenaverage,n_zinvDY,n_lostlep,n_qcd) << endl;
+  else ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig_cor_recogenaverage,n_zinv,n_lostlep,n_qcd) << endl;
   ofile <<  "------------"                                                                  << endl;
  
   // ---- sig systs
