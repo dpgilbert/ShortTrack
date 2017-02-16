@@ -1,10 +1,16 @@
 #!/bin/bash
 
-# for samples where we don't merge with extensions
+# for samples where we don't merge with extensions. remove skim,rphi from the names
 function do_cp ()
-{   
-    echo "cp $INDIR/$1*.root $OUTPUTDIR"
-    cp $INDIR/$1*.root $OUTPUTDIR
+{
+    for oldname in `/bin/ls $INDIR/$1*.root`;
+    do
+	oldname1=$(basename ${oldname})
+	newname1=${oldname1/skim_/}
+	newname=${newname1/rphi_/}
+	echo "cp ${oldname} ${OUTPUTDIR}/${newname}"
+	cp ${oldname} ${OUTPUTDIR}/${newname}
+    done
 }
 
 # for samples where we do merge with extensions
@@ -16,11 +22,11 @@ function do_extmerge ()
 
 TAG=V00-08-16
 
-#INDIR=/hadoop/cms/store/user/${USER}/AutoTwopler_babies/merged/MT2/${TAG}/skim/
-#OUTPUTDIR=/nfs-6/userdata/mt2/${TAG}_skim_base_mt2gt200_ZinvV6_JECs/
+INDIR=/hadoop/cms/store/user/${USER}/AutoTwopler_babies/merged/MT2/${TAG}/skim/
+OUTPUTDIR=/nfs-6/userdata/mt2/${TAG}_skim_base_mt2gt200_ZinvV6_JECs/
 
-INDIR=/hadoop/cms/store/user/${USER}/AutoTwopler_babies/merged/MT2/${TAG}/skim_rphi/
-OUTPUTDIR=/nfs-6/userdata/mt2/${TAG}_skim_rphi/
+#INDIR=/hadoop/cms/store/user/${USER}/AutoTwopler_babies/merged/MT2/${TAG}/skim_rphi/
+#OUTPUTDIR=/nfs-6/userdata/mt2/${TAG}_skim_rphi/
 
 LOGDIR=mergeLogs
 
@@ -200,10 +206,23 @@ do_cp zinv_ht2500toInf
 # #
 
 do_cp ww_2l2nu_powheg
+# do_cp ww_lnuqq_powheg
+# do_cp wz_lnqq_amcnlo
+# do_cp wz_1l3n_amcnlo
+# do_cp wz_3lnu_powheg
+# do_cp zz_2l2n_powheg
+# do_cp zz_2l2q_powheg
+# do_cp zz_2q2n_amcnlo
+# do_cp zz_4l_powheg
 
 # #
 # # TRIBOSON
 # #
+
+# do_cp www_incl_amcnlo
+# do_cp wwz_incl_amcnlo
+# do_cp wzz_incl_amcnlo
+# do_cp zzz_incl_amcnlo
 
 # #
 # # TTV, TT+X
@@ -260,13 +279,14 @@ do_extmerge qcd_ht2000toInf
 # SIGNAL SCANS
 #
 
-# do_cp T1tttt
-# do_cp T1bbbb
-# do_cp T1qqqq
-# # do_cp T5qqqqVV
-# do_cp T2bb
-# do_cp T2tt_mStop-400to1200
-# do_cp T2tt_mStop-150to250
-# do_cp T2tt_mStop-250to350
-# do_cp T2tt_mStop-350to400
-# do_cp T2qq
+do_cp T1tttt
+do_cp T1bbbb
+do_cp T1qqqq
+# do_cp T5qqqqVV
+do_cp T2bb
+do_cp T2tt_mStop-400to1200
+do_cp T2tt_mStop-150to250
+do_cp T2tt_mStop-250to350
+do_cp T2tt_mStop-350to400
+do_cp T2qq
+do_cp T2cc
