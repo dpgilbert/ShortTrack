@@ -157,6 +157,7 @@ int main(int argc, char **argv) {
   else if (infile.Contains("SMS-T2bW"))                                                  sample = Form("T2bW_%s"                     , outfileid.Data());
   else if (infile.Contains("SMS-T2bt"))                                                  sample = Form("T2bt_%s"                     , outfileid.Data());
   else if (infile.Contains("SMS-T2cc"))                                                  sample = Form("T2cc_%s"                     , outfileid.Data());
+  else if (infile.Contains("SMS-T6qqWW"))                                                sample = Form("T6qqWW_%s"                   , outfileid.Data());
   //Data
   else if (infile.Contains("Run2015B") && infile.Contains("PromptReco"))                 sample = Form("data_Run2015B_PromptReco_%s" , outfileid.Data());
   else if (infile.Contains("Run2015B") && infile.Contains("17Jul2015"))                  sample = Form("data_Run2015B_17Jul2015_%s"  , outfileid.Data());

@@ -209,12 +209,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
   // get susy xsec file
   TH1F* h_sig_xsec(0);
-  if ((baby_name.find("T1") != std::string::npos) || (baby_name.find("T2") != std::string::npos)) {
+  if ((baby_name.find("T1") != std::string::npos) || (baby_name.find("T2") != std::string::npos) || (baby_name.find("T5") != std::string::npos) || (baby_name.find("T6") != std::string::npos)) {
     // determine which susy particle is being produced
     TString sparticle = "";
     if ((baby_name.find("T1") != std::string::npos) || (baby_name.find("T5") != std::string::npos)) sparticle = "gluino";
     else if ((baby_name.find("T2tt") != std::string::npos) || (baby_name.find("T2bb") != std::string::npos) || (baby_name.find("T2cc") != std::string::npos) || (baby_name.find("T2bW") != std::string::npos) || (baby_name.find("T2bt") != std::string::npos)) sparticle = "stop";
-    else if (baby_name.find("T2qq") != std::string::npos) sparticle = "squark";
+    else if ((baby_name.find("T2qq") != std::string::npos) || (baby_name.find("T6qq") != std::string::npos)) sparticle = "squark";
     if (sparticle == "") std::cout << "WARNING: didn't recognize signal sample from name: " << baby_name << std::endl;
     
     TFile* f_xsec = new TFile("data/xsec_susy_13tev.root");
