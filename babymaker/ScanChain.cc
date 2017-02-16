@@ -138,6 +138,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       rebal_reader.Init("rebal/JetResponseTemplates.root");
   }
 
+  TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
+
   if (applyBtagSFs) {
     // setup btag calibration readers
     calib = new BTagCalibration("csvv2", "btagsf/CSVv2_Moriond17_B_H.csv"); // 80X moriond17 version
@@ -154,10 +156,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     TH2D* h_btag_eff_b_temp = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_b");
     TH2D* h_btag_eff_c_temp = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_c");
     TH2D* h_btag_eff_udsg_temp = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_udsg");
-    BabyFile_->cd();
     h_btag_eff_b = (TH2D*) h_btag_eff_b_temp->Clone("h_btag_eff_b");
+    h_btag_eff_b->SetDirectory(rootdir);
     h_btag_eff_c = (TH2D*) h_btag_eff_c_temp->Clone("h_btag_eff_c");
+    h_btag_eff_c->SetDirectory(rootdir);
     h_btag_eff_udsg = (TH2D*) h_btag_eff_udsg_temp->Clone("h_btag_eff_udsg");
+    h_btag_eff_udsg->SetDirectory(rootdir);
     f_btag_eff->Close();
 
     std::cout << "loaded fullsim btag SFs" << std::endl;
@@ -175,10 +179,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       TH2D* h_btag_eff_b_fastsim_temp = (TH2D*) f_btag_eff_fastsim->Get("h2_BTaggingEff_csv_med_Eff_b");
       TH2D* h_btag_eff_c_fastsim_temp = (TH2D*) f_btag_eff_fastsim->Get("h2_BTaggingEff_csv_med_Eff_c");
       TH2D* h_btag_eff_udsg_fastsim_temp = (TH2D*) f_btag_eff_fastsim->Get("h2_BTaggingEff_csv_med_Eff_udsg");
-      BabyFile_->cd();
       h_btag_eff_b_fastsim = (TH2D*) h_btag_eff_b_fastsim_temp->Clone("h_btag_eff_b_fastsim");
+      h_btag_eff_b_fastsim->SetDirectory(rootdir);
       h_btag_eff_c_fastsim = (TH2D*) h_btag_eff_c_fastsim_temp->Clone("h_btag_eff_c_fastsim");
+      h_btag_eff_c_fastsim->SetDirectory(rootdir);
       h_btag_eff_udsg_fastsim = (TH2D*) h_btag_eff_udsg_fastsim_temp->Clone("h_btag_eff_udsg_fastsim");
+      h_btag_eff_udsg_fastsim->SetDirectory(rootdir);
       f_btag_eff_fastsim->Close();
       
       std::cout << "loaded fastsim btag SFs" << std::endl;
@@ -213,8 +219,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     
     TFile* f_xsec = new TFile("data/xsec_susy_13tev.root");
     TH1F* h_sig_xsec_temp = (TH1F*) f_xsec->Get(Form("h_xsec_%s",sparticle.Data()));
-    BabyFile_->cd();
     h_sig_xsec = (TH1F*) h_sig_xsec_temp->Clone("h_sig_xsec");
+    h_sig_xsec->SetDirectory(rootdir);
     f_xsec->Close();
   }
   
