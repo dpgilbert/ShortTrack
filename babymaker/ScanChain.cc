@@ -1357,21 +1357,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               p4sForDphiDN.push_back(cms3.pfcands_p4().at(ipf));
             }
 
-	    // // -------------- WORK IN PROGRESS -----------------
-	    // // update scale factor and uncertainty.  Assume SFs are 1 for fullsim, based on isolation T&P results.  use only uncertainty.
-	    // //  for fastsim, assume that ID + iso results apply, use SF and uncertainty
-	    // if (!isData && applyLeptonSFs) {
-	    //   weightStruct weights = getLepSFFromFile(cms3.pfcands_p4().at(ipf).pt(), cms3.pfcands_p4().at(ipf).eta(), pdgId);
-	    //   //weight_lepsf *= weights.cent;
-	    //   weight_lepsf_UP *= weights.up;
-	    //   weight_lepsf_DN *= weights.dn;
-	    //   if (isFastsim) {
-	    // 	weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.pfcands_p4().at(ipf).pt(), cms3.pfcands_p4().at(ipf).eta(), pdgId);
-	    // 	weight_lepsf *= weights_fastsim.cent;
-	    // 	weight_lepsf_UP *= weights_fastsim.up;
-	    // 	weight_lepsf_DN *= weights_fastsim.dn;
-	    //   }
-	    // }
+	    // update scale factor and uncertainty.  Assume SFs are 1, based on isolation T&P results.  use only uncertainty.
+	    if (!isData && applyLeptonSFs) {
+	      weightStruct weights = getLepSFFromFile(cms3.pfcands_p4().at(ipf).pt(), cms3.pfcands_p4().at(ipf).eta(), pdgId);
+	      weight_lepsf_UP *= (1.0 + (weights.up - weights.cent));
+	      weight_lepsf_DN *= (1.0 - (weights.cent - weights.dn));
+	      if (isFastsim) {
+	    	weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.pfcands_p4().at(ipf).pt(), cms3.pfcands_p4().at(ipf).eta(), pdgId);
+	    	weight_lepsf_UP *= (1.0 + (weights_fastsim.up - weights_fastsim.cent));
+	    	weight_lepsf_DN *= (1.0 - (weights_fastsim.cent - weights_fastsim.dn));
+	      }
+	    }
 	    
           }
         } // passing pflepton 
