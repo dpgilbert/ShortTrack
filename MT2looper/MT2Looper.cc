@@ -860,6 +860,56 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
 
       //---------------------
+      // set event level variables
+      //---------------------
+      
+      //initialize the event variables
+      mt2_           = t.mt2;
+      ht_            = t.ht;
+      met_pt_        = t.met_pt;
+      met_phi_       = t.met_phi;
+      mht_pt_        = t.mht_pt;
+      mht_phi_       = t.mht_phi;
+      jet1_pt_       = t.jet1_pt;
+      jet2_pt_       = t.jet2_pt;
+      deltaPhiMin_   = t.deltaPhiMin;
+      diffMetMht_    = t.diffMetMht;
+      nJet30_        = t.nJet30;
+      nBJet20_       = t.nBJet20;
+      
+      //apply JEC variations
+      if (doJECVars == 1) {
+	mt2_           = t.mt2JECup;
+	ht_            = t.htJECup;
+	met_pt_        = t.met_ptJECup;
+	met_phi_       = t.met_phiJECup;
+	mht_pt_        = t.mht_ptJECup;
+	mht_phi_       = t.mht_phiJECup;
+	jet1_pt_       = t.jet1_ptJECup;
+	jet2_pt_       = t.jet2_ptJECup;
+	deltaPhiMin_   = t.deltaPhiMinJECup;
+	diffMetMht_    = t.diffMetMhtJECup;
+	nJet30_        = t.nJet30JECup;
+	nBJet20_       = t.nBJet20JECup;
+      }
+      else if (doJECVars == -1) {
+	mt2_           = t.mt2JECdn;
+	ht_            = t.htJECdn;
+	met_pt_        = t.met_ptJECdn;
+	met_phi_       = t.met_phiJECdn;
+	mht_pt_        = t.mht_ptJECdn;
+	mht_phi_       = t.mht_phiJECdn;
+	jet1_pt_       = t.jet1_ptJECdn;
+	jet2_pt_       = t.jet2_ptJECdn;
+	deltaPhiMin_   = t.deltaPhiMinJECdn;
+	diffMetMht_    = t.diffMetMhtJECdn;
+	nJet30_        = t.nJet30JECdn;
+	nBJet20_       = t.nBJet20JECdn;
+      }
+      else if (doJECVars == 0) {}
+      else { cerr << "WARNING: options doJECVars has illegal value!" << endl; }
+      
+      //---------------------
       // set weights and start making plots
       //---------------------
       outfile_->cd();
@@ -999,52 +1049,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doHFJetVeto && nJet30Eta3_ > 0) continue;
       if (verbose) cout<<__LINE__<<endl;
 
-      //initialize the event variables
-      mt2_           = t.mt2;
-      ht_            = t.ht;
-      met_pt_        = t.met_pt;
-      met_phi_       = t.met_phi;
-      mht_pt_        = t.mht_pt;
-      mht_phi_       = t.mht_phi;
-      jet1_pt_       = t.jet1_pt;
-      jet2_pt_       = t.jet2_pt;
-      deltaPhiMin_   = t.deltaPhiMin;
-      diffMetMht_    = t.diffMetMht;
-      nJet30_        = t.nJet30;
-      nBJet20_       = t.nBJet20;
-      
-      //apply JEC variations
-      if (doJECVars == 1) {
-	mt2_           = t.mt2JECup;
-	ht_            = t.htJECup;
-	met_pt_        = t.met_ptJECup;
-	met_phi_       = t.met_phiJECup;
-	mht_pt_        = t.mht_ptJECup;
-	mht_phi_       = t.mht_phiJECup;
-	jet1_pt_       = t.jet1_ptJECup;
-	jet2_pt_       = t.jet2_ptJECup;
-	deltaPhiMin_   = t.deltaPhiMinJECup;
-	diffMetMht_    = t.diffMetMhtJECup;
-	nJet30_        = t.nJet30JECup;
-	nBJet20_       = t.nBJet20JECup;
-      }
-      else if (doJECVars == -1) {
-	mt2_           = t.mt2JECdn;
-	ht_            = t.htJECdn;
-	met_pt_        = t.met_ptJECdn;
-	met_phi_       = t.met_phiJECdn;
-	mht_pt_        = t.mht_ptJECdn;
-	mht_phi_       = t.mht_phiJECdn;
-	jet1_pt_       = t.jet1_ptJECdn;
-	jet2_pt_       = t.jet2_ptJECdn;
-	deltaPhiMin_   = t.deltaPhiMinJECdn;
-	diffMetMht_    = t.diffMetMhtJECdn;
-	nJet30_        = t.nJet30JECdn;
-	nBJet20_       = t.nBJet20JECdn;
-      }
-      else if (doJECVars == 0) {}
-      else { cerr << "WARNING: options doJECVars has illegal value!" << endl; }
-      
       // check jet id for monojet - don't apply to signal
       //  following ETH, just check leading jet (don't check if jet is central..)
       passMonojetId_ = false;
@@ -2931,6 +2935,38 @@ void MT2Looper::fillLepSFWeightsFromFile() {
       weight_lepsf_cr_DN_ *= weights_fastsim.dn;
     }
   } // loop over leps
+
+  // have to also check for leptons only reco'd as PF leptons.. only add on to uncertainty
+  for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
+    float pt = t.isoTrack_pt[itrk];
+    if (pt < 5.) continue;
+    int pdgId = t.isoTrack_pdgId[itrk];
+    if ((abs(pdgId) != 11) && (abs(pdgId) != 13)) continue;
+    if (t.isoTrack_absIso[itrk]/pt > 0.2) continue;
+    float mt = sqrt( 2 * met_pt_ * pt * ( 1 - cos( met_phi_ - t.isoTrack_phi[itrk]) ) );
+    if (mt > 100.) continue;
+
+    // check overlap with reco leptons
+    bool overlap = false;
+    for(int ilep = 0; ilep < t.nlep; ilep++){
+      float thisDR = DeltaR(t.isoTrack_eta[itrk], t.lep_eta[ilep], t.isoTrack_phi[itrk], t.lep_phi[ilep]);
+      if (thisDR < 0.01) {
+	overlap = true;
+	break;
+      }
+    } // loop over reco leps
+    if (overlap) continue;
+
+    weightStruct weights = getLepSFFromFile(t.isoTrack_pt[itrk], t.isoTrack_eta[itrk], t.isoTrack_pdgId[itrk]);
+    weight_lepsf_cr_UP_ *= (1.0 + (weights.up - weights.cent));
+    weight_lepsf_cr_DN_ *= (1.0 - (weights.cent - weights.dn));
+    if (isSignal_) {
+      weightStruct weights_fastsim = getLepSFFromFile_fastsim(t.isoTrack_pt[itrk], t.isoTrack_eta[itrk], t.lep_pdgId[itrk]);
+      weight_lepsf_cr_UP_ *= (1.0 + (weights_fastsim.up - weights_fastsim.cent));
+      weight_lepsf_cr_DN_ *= (1.0 - (weights_fastsim.cent - weights_fastsim.dn));
+    }
+
+  } // loop over isoTracks
   
   return;
 }
