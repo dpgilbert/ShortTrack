@@ -211,6 +211,9 @@ class babyMaker {
   Int_t           Flag_eeBadScFilter;
   Int_t           Flag_badMuonFilter;
   Int_t           Flag_badMuonFilterV2;  
+  Int_t           Flag_badMuons;  
+  Int_t           Flag_duplicateMuons;  
+  Int_t           Flag_noBadMuons;  
   Int_t           Flag_badChargedHadronFilter;
   Int_t           Flag_badChargedHadronFilterV2;  
   Int_t           Flag_METFilters;  

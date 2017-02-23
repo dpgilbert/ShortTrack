@@ -272,37 +272,37 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	// run dependent corrections for 80X data
 	if (currentFileName.Contains("2016B") || currentFileName.Contains("2016C") || currentFileName.Contains("2016D")) {
 	  jetcorr_filenames_pfL1FastJetL2L3.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016BCDV3_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016BCDV3_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016BCDV3_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016BCDV3_DATA_L2L3Residual_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016BCDV4_DATA_L1FastJet_AK4PFchs.txt"   );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016BCDV4_DATA_L2Relative_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016BCDV4_DATA_L3Absolute_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016BCDV4_DATA_L2L3Residual_AK4PFchs.txt");
 	}
 	else if (currentFileName.Contains("2016E") || currentFileName.Contains("2016F")) {
 	  jetcorr_filenames_pfL1FastJetL2L3.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016EFV3_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016EFV3_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016EFV3_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016EFV3_DATA_L2L3Residual_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016EFV4_DATA_L1FastJet_AK4PFchs.txt"   );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016EFV4_DATA_L2Relative_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016EFV4_DATA_L3Absolute_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016EFV4_DATA_L2L3Residual_AK4PFchs.txt");
 
 	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV3_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV3_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV3_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV3_DATA_L2L3Residual_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L1FastJet_AK4PFchs.txt"   );
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L2Relative_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L3Absolute_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L2L3Residual_AK4PFchs.txt");
 	}
 	else if (currentFileName.Contains("2016G")) {
 	  jetcorr_filenames_pfL1FastJetL2L3.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV3_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV3_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV3_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV3_DATA_L2L3Residual_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L1FastJet_AK4PFchs.txt"   );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L2Relative_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L3Absolute_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L2L3Residual_AK4PFchs.txt");
 	}
 	else if (currentFileName.Contains("2016H")) {
 	  jetcorr_filenames_pfL1FastJetL2L3.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV3_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV3_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV3_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV3_DATA_L2L3Residual_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV4_DATA_L1FastJet_AK4PFchs.txt"   );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV4_DATA_L2Relative_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV4_DATA_L3Absolute_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV4_DATA_L2L3Residual_AK4PFchs.txt");
 	}
       } else if (isFastsim) {
 	jetcorr_filenames_pfL1FastJetL2L3.clear();
@@ -318,10 +318,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	jetcorr_uncertainty_filename = "jetCorrections/Spring16_25nsV6_MC_Uncertainty_AK4PFchs.txt";
       } else { // default: Summer16 corrections (Moriond 2017)
 	jetcorr_filenames_pfL1FastJetL2L3.clear();
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016V3_MC_L1FastJet_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016V3_MC_L2Relative_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016V3_MC_L3Absolute_AK4PFchs.txt");
-	jetcorr_uncertainty_filename = "jetCorrections/Summer16_23Sep2016V3_MC_Uncertainty_AK4PFchs.txt";
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016V4_MC_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016V4_MC_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016V4_MC_L3Absolute_AK4PFchs.txt");
+	jetcorr_uncertainty_filename = "jetCorrections/Summer16_23Sep2016V4_MC_Uncertainty_AK4PFchs.txt";
       }
 
       cout << "applying JEC from the following files:" << endl;
@@ -507,7 +507,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
       }
 
-      if (applyJECfromFile && recomputeT1MET) {
+      //check CMS version to see if we want to use MuEGCleaned MET and turn off JEC corrections for reminiAOD data
+      bool useMuEGCleanedMet = false;
+      bool skipJECOnMet = false; //we are out of sync with ETH on MET unless we pull directly from reminiAOD
+      if (small_cms3_version >= 18) {
+	useMuEGCleanedMet = true;
+	skipJECOnMet = true;
+      }
+      
+      if (applyJECfromFile && recomputeT1MET && !skipJECOnMet) {
+      // if (applyJECfromFile && recomputeT1MET) {
 	std::pair <float, float> t1metUP;
 	std::pair <float, float> t1metDN;
 	std::pair <float, float> t1met;
@@ -515,6 +524,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  t1metUP = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, jetcorr_uncertainty, 1,doRecomputeRawPFMET_);
 	  t1metDN = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, jetcorr_uncertainty, 0,doRecomputeRawPFMET_);
 	  t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, 0, 0,doRecomputeRawPFMET_);
+	}
+	else if (useMuEGCleanedMet) {
+	  t1metUP = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, NULL, 0, 0, 1); // never apply variations to data
+	  t1metDN = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, NULL, 0, 0, 1); // never apply variations to data
+	  t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, NULL, 0, 0, 1); // never apply variations to data
 	}
 	else {
 	  t1metUP = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current); // never apply variations to data
@@ -527,13 +541,18 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	met_phiJECup = t1metUP.second;
 	met_ptJECdn  = t1metDN.first;
 	met_phiJECdn = t1metDN.second;
-      } else {
+      }
+      else if (useMuEGCleanedMet){
+	met_pt  = cms3.evt_muegclean_pfmet();
+	met_phi = cms3.evt_muegclean_pfmetPhi();
+      }
+      else {
 	met_pt  = cms3.evt_pfmet();
 	met_phi = cms3.evt_pfmetPhi();
       }
       met_rawPt  = cms3.evt_pfmet_raw();
       met_rawPhi = cms3.evt_pfmetPhi_raw();
-
+      
       if (!isData) {
         met_genPt  = cms3.gen_met();
         met_genPhi = cms3.gen_metPhi();
@@ -543,9 +562,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       metStruct trkmet = trackerMET(0.1);
       met_trkPt = trkmet.met;
       met_trkPhi = trkmet.metphi;
-      met_miniaodPt  = cms3.evt_pfmet();
-      met_miniaodPhi = cms3.evt_pfmetPhi();
-
+      if (useMuEGCleanedMet){
+	met_miniaodPt  = cms3.evt_muegclean_pfmet();
+	met_miniaodPhi = cms3.evt_muegclean_pfmetPhi();
+      }
+      else {	
+	met_miniaodPt  = cms3.evt_pfmet();
+	met_miniaodPhi = cms3.evt_pfmetPhi();
+      }
+      
       // MET FILTERS -- not present in fastsim
       if (!isFastsim) {
 	Flag_EcalDeadCellTriggerPrimitiveFilter       = cms3.filt_ecalTP();
@@ -571,6 +596,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
           Flag_badMuonFilter                            = badMuonFilter();
           Flag_badMuonFilterV2                          = badMuonFilterV2();
+	  if (small_cms3_version >= 18) {
+	    Flag_badMuons                                 = cms3.filt_badMuons();
+	    Flag_duplicateMuons                           = cms3.filt_duplicateMuons();
+	    Flag_noBadMuons                               = cms3.filt_noBadMuons();
+	  }
           Flag_badChargedHadronFilterV2                 = badChargedCandidateFilterV2();          
 	}
 	Flag_badChargedHadronFilter                   = badChargedCandidateFilter();
@@ -2928,7 +2958,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("Flag_goodVertices", &Flag_goodVertices );
     BabyTree_->Branch("Flag_eeBadScFilter", &Flag_eeBadScFilter );
     BabyTree_->Branch("Flag_badMuonFilter", &Flag_badMuonFilter );
-    BabyTree_->Branch("Flag_badMuonFilterV2", &Flag_badMuonFilterV2 );    
+    BabyTree_->Branch("Flag_badMuonFilterV2", &Flag_badMuonFilterV2 ); 
+    BabyTree_->Branch("Flag_badMuons", &Flag_badMuons ); 
+    BabyTree_->Branch("Flag_duplicateMuons", &Flag_duplicateMuons );   
+    BabyTree_->Branch("Flag_noBadMuons", &Flag_noBadMuons );  
     BabyTree_->Branch("Flag_badChargedHadronFilter", &Flag_badChargedHadronFilter );
     BabyTree_->Branch("Flag_badChargedHadronFilterV2", &Flag_badChargedHadronFilterV2 );    
     BabyTree_->Branch("Flag_METFilters", &Flag_METFilters );
@@ -3368,6 +3401,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     Flag_eeBadScFilter = -999;
     Flag_badMuonFilter = -999;
     Flag_badMuonFilterV2 = -999;    
+    Flag_badMuons = -999;    
+    Flag_duplicateMuons = -999;    
+    Flag_noBadMuons = -999;    
     Flag_badChargedHadronFilter = -999;
     Flag_badChargedHadronFilterV2 = -999;    
     Flag_METFilters = -999;
