@@ -609,10 +609,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   h_sig_avgweight_isr_ = 0;
   h_sig_avgweight_isr_UP_ = 0;
   h_sig_avgweight_isr_DN_ = 0;
-  if ((doScanWeights || applyBtagSF) && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
+  if ((doScanWeights || applyBtagSF) && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T6") != std::string::npos))) {
     std::string scan_name = sample;
     if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
+    else if (sample.find("T6") != std::string::npos) scan_name = sample.substr(0,6);
     TFile* f_nsig_weights = new TFile(Form("../babymaker/data/nsig_weights_%s.root",scan_name.c_str()));
     TH2D* h_sig_nevents_temp = (TH2D*) f_nsig_weights->Get("h_nsig");
     TH2D* h_sig_avgweight_btagsf_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf");
@@ -2979,7 +2980,7 @@ void MT2Looper::fillHistosGenMET(std::map<std::string, TH1*>& h_1d, int n_mt2bin
   dir->cd();
 
   // workaround for monojet bins
-  float mt2_temp = mt2_;
+  float mt2_temp = t.mt2_genmet;
   if (nJet30_ == 1) mt2_temp = ht_;
 
   plot1D("h_mt2bins_genmet"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
