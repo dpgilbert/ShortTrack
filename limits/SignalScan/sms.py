@@ -138,6 +138,26 @@ class sms():
         # turn off diagonal lines
         self.diagOn = False
 
+    def T2cc(self):
+        # model name
+        self.modelname = "T2cc"
+        # decay chain
+        self.label= "pp #rightarrow #tilde{t} #tilde{t}, #tilde{t} #rightarrow c #tilde{#chi}^{0}_{1}";
+        self.label2= "";
+        # plot boundary. The top 1/4 of the y axis is taken by the legend
+        self.Xmin = 300.
+        self.Xmax = 800.
+        self.Ymin = 0.
+        self.Ymax = 1000.
+        self.Zmin = 0.001
+        self.Zmax = 100.
+        # produce sparticle
+        self.sParticle = "m_{#tilde{t}} [GeV]"
+        # LSP
+        self.LSP = "m_{#tilde{#chi}_{1}^{0}} [GeV]"
+        # turn off diagonal lines
+        self.diagOn = True
+
     def T24bd(self):
         # model name
         self.modelname = "T2-4bd"

@@ -25,13 +25,20 @@ void make_rValues(std::string indir, std::string model, int m1, int m2){
     int xhigh = 2200;
     int ylow = 0;
     int yhigh = 1600;
-    const int stepsize = 25;
-    int nbinsx = (xhigh-xlow+stepsize)/stepsize;
-    int nbinsy = (yhigh-ylow+2*stepsize)/stepsize;
-    if ( model.find("T2-4bd") != std::string::npos ) {
+    int stepsizeX = 25;
+    int stepsizeY = 25;
+    int nbinsx = (xhigh-xlow+stepsizeX)/stepsizeX;
+    int nbinsy = (yhigh-ylow+2*stepsizeY)/stepsizeY;
+    if ( model.find("T2-4bd") != std::string::npos) {
       nbinsy = 160;
       ylow = 0;
       yhigh = 800;
+    }
+    if ( model.find("T2cc") != std::string::npos ) {
+      stepsizeY = 5;
+      ylow = 0;
+      yhigh = 800;
+      nbinsy = (yhigh-ylow+2*stepsizeY)/stepsizeY;
     }
     
     // TH2F *hExp   = new TH2F("hExp",   "hExp"  , nbinsx, xlow, xhigh, nbinsy, ylow, yhigh);
@@ -41,12 +48,12 @@ void make_rValues(std::string indir, std::string model, int m1, int m2){
     // TH2F *hExp1p = new TH2F("hExp1p", "hExp1p", nbinsx, xlow, xhigh, nbinsy, ylow, yhigh);
     // TH2F *hExp2p = new TH2F("hExp2p", "hExp2p", nbinsx, xlow, xhigh, nbinsy, ylow, yhigh);
     
-    TH2F *hExp   = new TH2F("hExp",   "hExp"  , nbinsx, xlow-stepsize/2, xhigh+stepsize/2, nbinsy, ylow-3*stepsize/2, yhigh+stepsize/2);
-    TH2F *hObs   = new TH2F("hObs",   "hObs"  , nbinsx, xlow-stepsize/2, xhigh+stepsize/2, nbinsy, ylow-3*stepsize/2, yhigh+stepsize/2);
-    TH2F *hExp1m = new TH2F("hExp1m", "hExp1m", nbinsx, xlow-stepsize/2, xhigh+stepsize/2, nbinsy, ylow-3*stepsize/2, yhigh+stepsize/2);
-    TH2F *hExp2m = new TH2F("hExp2m", "hExp2m", nbinsx, xlow-stepsize/2, xhigh+stepsize/2, nbinsy, ylow-3*stepsize/2, yhigh+stepsize/2);
-    TH2F *hExp1p = new TH2F("hExp1p", "hExp1p", nbinsx, xlow-stepsize/2, xhigh+stepsize/2, nbinsy, ylow-3*stepsize/2, yhigh+stepsize/2);
-    TH2F *hExp2p = new TH2F("hExp2p", "hExp2p", nbinsx, xlow-stepsize/2, xhigh+stepsize/2, nbinsy, ylow-3*stepsize/2, yhigh+stepsize/2);
+    TH2F *hExp   = new TH2F("hExp",   "hExp"  , nbinsx, xlow-stepsizeX/2, xhigh+stepsizeX/2, nbinsy, ylow-3*stepsizeY/2, yhigh+stepsizeY/2);
+    TH2F *hObs   = new TH2F("hObs",   "hObs"  , nbinsx, xlow-stepsizeX/2, xhigh+stepsizeX/2, nbinsy, ylow-3*stepsizeY/2, yhigh+stepsizeY/2);
+    TH2F *hExp1m = new TH2F("hExp1m", "hExp1m", nbinsx, xlow-stepsizeX/2, xhigh+stepsizeX/2, nbinsy, ylow-3*stepsizeY/2, yhigh+stepsizeY/2);
+    TH2F *hExp2m = new TH2F("hExp2m", "hExp2m", nbinsx, xlow-stepsizeX/2, xhigh+stepsizeX/2, nbinsy, ylow-3*stepsizeY/2, yhigh+stepsizeY/2);
+    TH2F *hExp1p = new TH2F("hExp1p", "hExp1p", nbinsx, xlow-stepsizeX/2, xhigh+stepsizeX/2, nbinsy, ylow-3*stepsizeY/2, yhigh+stepsizeY/2);
+    TH2F *hExp2p = new TH2F("hExp2p", "hExp2p", nbinsx, xlow-stepsizeX/2, xhigh+stepsizeX/2, nbinsy, ylow-3*stepsizeY/2, yhigh+stepsizeY/2);
 
     f_temp->Write();
     f_temp->Close();
