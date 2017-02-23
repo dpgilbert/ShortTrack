@@ -119,14 +119,15 @@ weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
   }
 
   float pt_cutoff = std::max(10.1,std::min(100.,double(pt)));
+  float eta_cutoff = std::max(-2.39,std::min(2.39,double(eta)));
 
   if (abs(pdgId) == 11) {
     int binx = h_elSF->GetXaxis()->FindBin(pt_cutoff);
-    int biny = h_elSF->GetYaxis()->FindBin(fabs(eta));
+    int biny = h_elSF->GetYaxis()->FindBin(fabs(eta_cutoff));
     float central = h_elSF->GetBinContent(binx,biny);
     float err  = h_elSF->GetBinError(binx,biny);
     // get also trk sf
-    int binx_trk = h_elSF_trk->GetXaxis()->FindBin(eta);
+    int binx_trk = h_elSF_trk->GetXaxis()->FindBin(eta_cutoff);
     int biny_trk = 1; // hardcoding for now - only one bin in pt (hist starts at 20)
     central *= h_elSF_trk->GetBinContent(binx_trk,biny_trk);
     float trk_err = h_elSF_trk->GetBinError(binx_trk,biny_trk);
@@ -136,23 +137,23 @@ weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
     weights.up = central+err;
     weights.dn = central-err;
     if (central > 1.3 || central < 0.3) 
-      std::cout<<"STRANGE: Electron with pT/eta of "<<pt_cutoff<<"/"<<eta<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
+      std::cout<<"STRANGE: Electron with pT/eta of "<<pt_cutoff<<"/"<<eta_cutoff<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
   }
   else if (abs(pdgId) == 13) {
     int binx = h_muSF->GetXaxis()->FindBin(pt_cutoff);
-    int biny = h_muSF->GetYaxis()->FindBin(fabs(eta));
+    int biny = h_muSF->GetYaxis()->FindBin(fabs(eta_cutoff));
     float central = h_muSF->GetBinContent(binx,biny);
     // get also trk sf, if present
     if (h_muSF_trk_ptgt10 && h_muSF_trk_ptlt10) {
-      if (pt > 10) central *= h_muSF_trk_ptgt10->GetBinContent(h_muSF_trk_ptgt10->FindBin(eta));
-      else central *= h_muSF_trk_ptlt10->GetBinContent(h_muSF_trk_ptlt10->FindBin(eta));
+      if (pt > 10) central *= h_muSF_trk_ptgt10->GetBinContent(h_muSF_trk_ptgt10->FindBin(eta_cutoff));
+      else central *= h_muSF_trk_ptlt10->GetBinContent(h_muSF_trk_ptlt10->FindBin(eta_cutoff));
     }
     float err  = 0.03; // suggested 3% uncert
     weights.cent = central;
     weights.up = central+err;
     weights.dn = central-err;
     if (central > 1.2 || central < 0.8) 
-      std::cout<<"STRANGE: Muon with pT/eta of "<<pt_cutoff<<"/"<<eta<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
+      std::cout<<"STRANGE: Muon with pT/eta of "<<pt_cutoff<<"/"<<eta_cutoff<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
   }
 
   return weights;
@@ -202,28 +203,29 @@ weightStruct getLepSFFromFile_fastsim(float pt, float eta, int pdgId) {
   }
 
   float pt_cutoff = std::max(10.1,std::min(100.,double(pt)));
+  float eta_cutoff = std::max(-2.39,std::min(2.39,double(eta)));
 
   if (abs(pdgId) == 11) {
     int binx = h_elSF_fastsim->GetXaxis()->FindBin(pt_cutoff);
-    int biny = h_elSF_fastsim->GetYaxis()->FindBin(fabs(eta));
+    int biny = h_elSF_fastsim->GetYaxis()->FindBin(fabs(eta_cutoff));
     float central = h_elSF_fastsim->GetBinContent(binx,biny);
     float err  = 0.02; // 2% for all pt
     weights.cent = central;
     weights.up = central+err;
     weights.dn = central-err;
     if (central > 1.3 || central < 0.7) 
-      std::cout<<"STRANGE: Electron with pT/eta of "<<pt_cutoff<<"/"<<eta<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
+      std::cout<<"STRANGE: Electron with pT/eta of "<<pt_cutoff<<"/"<<eta_cutoff<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
   }
   else if (abs(pdgId) == 13) {
     int binx = h_muSF_fastsim->GetXaxis()->FindBin(pt_cutoff);
-    int biny = h_muSF_fastsim->GetYaxis()->FindBin(fabs(eta));
+    int biny = h_muSF_fastsim->GetYaxis()->FindBin(fabs(eta_cutoff));
     float central = h_muSF_fastsim->GetBinContent(binx,biny);
     float err  = 0.02; // 2% for all pt
     weights.cent = central;
     weights.up = central+err;
     weights.dn = central-err;
     if (central > 1.3 || central < 0.7) 
-      std::cout<<"STRANGE: Muon with pT/eta of "<<pt_cutoff<<"/"<<eta<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
+      std::cout<<"STRANGE: Muon with pT/eta of "<<pt_cutoff<<"/"<<eta_cutoff<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
   }
 
   return weights;
