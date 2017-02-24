@@ -68,11 +68,11 @@ bool setMuSFfile(TString filenameID, TString filenameISO, TString filenameIP, TS
   if (!f2->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find ISO scale factor file "<<filenameISO<<std::endl; return 0;}
   if (!f3->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find IP scale factor file "<<filenameIP<<std::endl; return 0;}
   if (!f4->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find TRK scale factor file "<<filenameTRK<<std::endl; return 0;}
-  TH2D* h_id = (TH2D*) f1->Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0");
-  TH2D* h_iso = (TH2D*) f2->Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_PF_pass");
-  TH2D* h_ip = (TH2D*) f3->Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_PF_pass");
-  TH1D* h_trk_ptlt10 = (TH1D*) f4->Get("mutrksfptl10");
-  TH1D* h_trk_ptgt10 = (TH1D*) f4->Get("mutrksfptg10");
+  TH2D* h_id = (TH2D*) f1->Get("SF");
+  TH2D* h_iso = (TH2D*) f2->Get("SF");
+  TH2D* h_ip = (TH2D*) f3->Get("SF");
+  TH1D* h_trk_ptlt10 = (TH1D*) f4->Get("ratio_eff_eta3_tk0_dr030e030_corr");
+  TH1D* h_trk_ptgt10 = (TH1D*) f4->Get("ratio_eff_eta3_dr030e030_corr");
   if (!h_id || !h_iso || !h_ip || !h_trk_ptlt10 || !h_trk_ptgt10) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find scale factor histogram"<<std::endl; return 0;}
   h_muSF = (TH2D*) h_id->Clone("h_muSF");
   h_muSF->SetDirectory(0);
