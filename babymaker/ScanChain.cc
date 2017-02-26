@@ -637,6 +637,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  }
 	}
 
+	// get filter efficiency value for T2cc sample
+	if (evt_id == 1130) {
+	  evt_filter = cms3.sparm_filterEfficiency();
+	}
+
         if (verbose) cout << "before gen particles" << endl;
 
         //GEN PARTICLES
