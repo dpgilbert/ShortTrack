@@ -926,7 +926,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  int binx = h_sig_nevents_->GetXaxis()->FindBin(t.GenSusyMScan1);
 	  int biny = h_sig_nevents_->GetYaxis()->FindBin(t.GenSusyMScan2);
 	  double nevents = h_sig_nevents_->GetBinContent(binx,biny);
-	  evtweight_ = lumi * t.evt_xsec*1000./nevents; // assumes xsec is already filled correctly
+	  evtweight_ = lumi * t.evt_xsec*t.evt_filter*1000./nevents; // assumes xsec, filter are already filled correctly
 	} else {
 	  if (!ignoreScale1fb) evtweight_ = t.evt_scale1fb * lumi;
 	}
