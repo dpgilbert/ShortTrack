@@ -1569,31 +1569,31 @@ void compareMultiPlot()
   vector<TString> files; vector<TString> labels; vector<TString> nplots;
   
   
-  TString dir4 = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/CheckEGMissue2/";
-  files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir4+"data_Run2016.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_bosonptbinsMuMu");
-  files.push_back( dir4+"data_Run2016.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_bosonptbinsEE");
-  makeCMSPlot(  files, labels, nplots, "ZpT_eeVSmm_Data", /*xtitle*/ "Z pt [GeV]" , /*ytitle*/ "" , /*xmin*/ 207, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 1, /*doRatio*/ 1 );
-  files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_bosonptbinsMuMu");
-  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_bosonptbinsEE");
-  makeCMSPlot(  files, labels, nplots, "ZpT_eeVSmm_MC", /*xtitle*/ "Z pt [GeV]" , /*ytitle*/ "" , /*xmin*/ 207, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 1, /*doRatio*/ 1 );
-  files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir4+"data_Run2016.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_mt2binsMuMu");
-  files.push_back( dir4+"data_Run2016.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_mt2binsEE");
-  makeCMSPlot(  files, labels, nplots, "Zmt2_eeVSmm_Data", /*xtitle*/ "MT2 [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/1199 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
-  files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_mt2binsMuMu");
-  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_mt2binsEE");
-  makeCMSPlot(  files, labels, nplots, "Zmt2_eeVSmm_MC", /*xtitle*/ "MT2 [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/1199 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
-  files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir4+"data_Run2016.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_metMuMu");
-  files.push_back( dir4+"data_Run2016.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_metEE");
-  makeCMSPlot(  files, labels, nplots, "Zmet_eeVSmm_Data", /*xtitle*/ "MT2 [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
-  files.clear(); labels.clear(); nplots.clear();
-  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_metMuMu");
-  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_metEE");
-  makeCMSPlot(  files, labels, nplots, "Zmet_eeVSmm_MC", /*xtitle*/ "MT2 [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  TString dir4 = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/CheckEGMissue2/";
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir4+"data_Run2016.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_bosonptbinsMuMu");
+//  files.push_back( dir4+"data_Run2016.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_bosonptbinsEE");
+//  makeCMSPlot(  files, labels, nplots, "ZpT_eeVSmm_Data", /*xtitle*/ "Z pt [GeV]" , /*ytitle*/ "" , /*xmin*/ 207, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 1, /*doRatio*/ 1 );
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_bosonptbinsMuMu");
+//  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_bosonptbinsEE");
+//  makeCMSPlot(  files, labels, nplots, "ZpT_eeVSmm_MC", /*xtitle*/ "Z pt [GeV]" , /*ytitle*/ "" , /*xmin*/ 207, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 1, /*doRatio*/ 1 );
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir4+"data_Run2016.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_mt2binsMuMu");
+//  files.push_back( dir4+"data_Run2016.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_mt2binsEE");
+//  makeCMSPlot(  files, labels, nplots, "Zmt2_eeVSmm_Data", /*xtitle*/ "MT2 [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/1199 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_mt2binsMuMu");
+//  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_mt2binsEE");
+//  makeCMSPlot(  files, labels, nplots, "Zmt2_eeVSmm_MC", /*xtitle*/ "MT2 [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/1199 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir4+"data_Run2016.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_metMuMu");
+//  files.push_back( dir4+"data_Run2016.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_metEE");
+//  makeCMSPlot(  files, labels, nplots, "Zmet_eeVSmm_Data", /*xtitle*/ "MT2 [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+//  files.clear(); labels.clear(); nplots.clear();
+//  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("MM");            nplots.push_back("crdybaseIncl/h_metMuMu");
+//  files.push_back( dir4+"dyjetsll_ht.root");       labels.push_back("EE");            nplots.push_back("crdybaseIncl/h_metEE");
+//  makeCMSPlot(  files, labels, nplots, "Zmet_eeVSmm_MC", /*xtitle*/ "MT2 [GeV]" , /*ytitle*/ "" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
 
 
   // STUDY HIGH PT PF CANDIDATES
@@ -1991,6 +1991,8 @@ void compareMultiPlot()
   makeCMSPlot(  files, labels, nplots, "MT2_W_GJ_norm", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "AU " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 1, /*doRatio*/ 1 );
   makeCMSPlot(  files, labels, nplots, "MT2_W_GJ_log", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / 100 GeV " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
   //makeCMSPlot(  files, labels, nplots, "truthPtVratio", /*xtitle*/ "p_{T}^{V} [GeV]" , /*ytitle*/ "Events / 40 GeV" , /*xmin*/ 0, /*xmax*/1200 , /*rebin*/ 4 , /*logplot*/ 1, /*scalesig*/ -1., /*doRatio*/ 1 );
+  
+  return;
   
   files.clear(); labels.clear(); nplots.clear();
   files.push_back( dir+"zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseJ/h_mt2bins");
