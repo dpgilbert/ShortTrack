@@ -154,7 +154,7 @@ d_ds2name = {
         "/MuonEG/Run2016F-03Feb2017-v1/MINIAOD"          : "data_Run2016F_MuonEG_03Feb2017",
 
         "/JetHT/Run2016G-03Feb2017-v1/MINIAOD"           : "data_Run2016G_JetHT_03Feb2017",
-        "/HTMHT/Run2016G-03Feb2017-v2/MINIAOD"           : "data_Run2016G_HTMHT_03Feb2017",
+        "/HTMHT/Run2016G-03Feb2017-v1/MINIAOD"           : "data_Run2016G_HTMHT_03Feb2017",
         "/MET/Run2016G-03Feb2017-v1/MINIAOD"             : "data_Run2016G_MET_03Feb2017",
         "/SingleElectron/Run2016G-03Feb2017-v1/MINIAOD"  : "data_Run2016G_SingleElectron_03Feb2017",
         "/SingleMuon/Run2016G-03Feb2017-v1/MINIAOD"      : "data_Run2016G_SingleMuon_03Feb2017",
