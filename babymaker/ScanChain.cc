@@ -200,10 +200,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 		"lepsf/moriond17/Tracking_EfficienciesAndSF_BCDEFGH_hists.root");
     setVetoEffFile_fullsim("lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
     if (isFastsim) {
-      setElSFfile_fastsim("lepsf/sf_el_vetoCB_mini01.root");
-      setMuSFfile_fastsim("lepsf/sf_mu_loose.root",
-			  "lepsf/sf_mu_looseID_mini02.root",
-			  "lepsf/sf_mu_looseIP2D.root");
+      setElSFfile_fastsim("lepsf/moriond17/sf_el_vetoCB_mini01.root");
+      setMuSFfile_fastsim("lepsf/moriond17/sf_mu_looseID.root",
+			  "lepsf/moriond17/sf_mu_looseID_mini02.root",
+			  "lepsf/moriond17/sf_mu_mediumID_looseIP2D.root");
       setVetoEffFile_fastsim("lepsf/vetoeff_emu_etapt_T1tttt.root");  
     }
   }
