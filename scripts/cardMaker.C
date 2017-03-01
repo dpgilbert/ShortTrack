@@ -845,7 +845,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 	     << ", alpha: " << lostlep_alpha << ", extra bkg pred: " << n_lostlep_extra_recogenaverage
 	     << ", lostlep_lastbin_hybrid: " << lostlep_lastbin_hybrid << endl;
       }
-      err_sig_recogenaverage = (n_sig_cor-n_sig_cor_genmet)/2/n_sig_cor_recogenaverage;
+      err_sig_recogenaverage = (n_sig_cor_recogenaverage > 0.) ? abs(n_sig_cor-n_sig_cor_genmet)/2/n_sig_cor_recogenaverage : 0;
     }
     else {
       cout << "tried to subtract signal contamination but couldn't find sig_crsl hist" << endl;
