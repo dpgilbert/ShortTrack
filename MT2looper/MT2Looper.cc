@@ -795,7 +795,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (t.isData) {
         if (!t.Flag_globalTightHalo2016Filter) continue; 
         if (verbose) cout<<__LINE__<<endl;
-        if (!t.Flag_badMuonFilter) continue;
+        if (!t.Flag_badMuonFilterV2) continue;
 	if (verbose) cout<<__LINE__<<endl;
 	if (!t.Flag_eeBadScFilter) continue; 
 	if (verbose) cout<<__LINE__<<endl;
@@ -809,7 +809,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	if (verbose) cout<<__LINE__<<endl;
 	if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
 	if (verbose) cout<<__LINE__<<endl;
-	if (!t.Flag_badChargedHadronFilter) continue; 
+	if (!t.Flag_badChargedHadronFilterV2) continue; 
 	if (verbose) cout<<__LINE__<<endl;
       }
 
