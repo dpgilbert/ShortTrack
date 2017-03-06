@@ -104,6 +104,7 @@ class MT2Looper {
   SR CRSL_WJets;
   SR CRSL_TTbar;
   TH1D* h_nvtx_weights_;
+  TH1D* h_nTrueInt_weights_;
   TH2D* h_sig_nevents_;
   TH2D* h_sig_avgweight_btagsf_;
   TH2D* h_sig_avgweight_btagsf_heavy_UP_;

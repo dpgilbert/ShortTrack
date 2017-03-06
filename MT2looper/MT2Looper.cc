@@ -104,6 +104,8 @@ bool applyISRWeights = true;
 bool doSystVariationPlots = true;
 // turn on to apply Nvtx reweighting to MC
 bool doNvtxReweight = false;
+// turn on to apply nTrueInt reweighting to MC
+bool doNTrueIntReweight = true;
 // turn on to apply json file to data
 bool applyJSON = true;
 // veto on jets with pt > 30, |eta| > 3.0
@@ -599,6 +601,16 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     f_weights->Close();
     delete f_weights;
   }
+  h_nTrueInt_weights_ = 0;
+  if (doNTrueIntReweight) {
+    TFile* f_weights = new TFile("../babymaker/data/puWeight2016.root");
+    TH1D* h_nTrueInt_weights_temp = (TH1D*) f_weights->Get("pileupWeight");
+    outfile_->cd();
+    h_nTrueInt_weights_ = (TH1D*) h_nTrueInt_weights_temp->Clone("h_pileupWeight");
+    h_nTrueInt_weights_->SetDirectory(0);
+    f_weights->Close();
+    delete f_weights;
+  }
   if (verbose) cout<<__LINE__<<endl;
   h_sig_nevents_ = 0;
   h_sig_avgweight_btagsf_ = 0;
@@ -948,6 +960,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  if (t.nVert > 31) nvtx_input = 31;
 	  if (t.nVert < 4) nvtx_input = 4;
 	  float puWeight = h_nvtx_weights_->GetBinContent(h_nvtx_weights_->FindBin(nvtx_input));
+	  evtweight_ *= puWeight;
+	}
+	if (doNTrueIntReweight) {
+	  int nTrueInt_input = t.nTrueInt;
+	  float puWeight = h_nTrueInt_weights_->GetBinContent(h_nTrueInt_weights_->FindBin(nTrueInt_input));
 	  evtweight_ *= puWeight;
 	}
 	// prioritize files for lepton SF, if we accidentally gave both options
