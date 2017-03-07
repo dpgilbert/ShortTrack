@@ -246,8 +246,8 @@ void SingleLepLooper::loop(TChain* chain, std::string output_name){
 	if (!t.Flag_HBHENoiseFilter) continue;
 	if (!t.Flag_HBHENoiseIsoFilter) continue;
 	if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
-	if (!t.Flag_badMuonFilter) continue;
-	if (!t.Flag_badChargedHadronFilter) continue;
+	if (!t.Flag_badMuonFilterV2) continue;
+	if (!t.Flag_badChargedHadronFilterV2) continue;
       }
 
       // basic single lepton selection: vertex, 1 lepton, single lep trigger
@@ -264,7 +264,7 @@ void SingleLepLooper::loop(TChain* chain, std::string output_name){
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      const float lumi = 36.81431;
+      const float lumi = 35.867; // full 2016
       evtweight_ = 1.;
 
       // apply relevant weights to MC
