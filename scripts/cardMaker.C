@@ -855,6 +855,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // ----- sig uncertainties
   double sig_syst         = 1.10; // dummy 10% from early MC studies
   double sig_lumi         = 1.026; // 2.6% lumi uncertainty, Moriond 2016
+  double sig_pu           = 1.046; // 4.6% pile-up uncertainty
   double sig_mcstat       = (n_sig > 0.) ? 1. + sqrt(pow(err_sig_mcstat_rel,2) + 0.005) : 1.071; // MC stat err +  quadrature sum of 5% for JES, 5% for renorm/fact scales
   double sig_genmet       = (n_sig > 0.) ? 1. + err_sig_recogenaverage: 1.00; // reco-gen MET averaging
   double sig_btagsf_heavy = (n_sig > 0.) ? n_sig_btagsf_heavy_UP/n_sig : 1.00; // btagsf heavy, eff UP
@@ -865,6 +866,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // fully correlated for lumi, btagsf, lepeff, isr.  Fully uncorrelated for stats and other systs
   TString name_sig_syst         = "sig_syst";
   TString name_sig_lumi         = "lumi_syst";
+  TString name_sig_pu           = "sig_PUsyst";
   TString name_sig_mcstat       = "sig_MCstat_"+perChannel;
   TString name_sig_genmet       = "sig_gensyst";
   TString name_sig_isr          = "sig_isrSyst";
@@ -878,7 +880,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   }
   // otherwise do "real" signal systematics
   else {
-    n_syst += 6; // mcstat (including gen scales and JEC), lumi, btagsf_heavy, btagsf_light, isr, reco-gen averaging
+    n_syst += 7; // mcstat (including gen scales and JEC), lumi, pileup, btagsf_heavy, btagsf_light, isr, reco-gen averaging
     if (isSignalWithLeptons) ++n_syst; // lepeff
   }
 
@@ -922,6 +924,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // full signal systematics
   else {
     ofile <<  Form("%s                    lnN    %.3f   -    -    - ",name_sig_lumi.Data(),sig_lumi)  << endl;
+    ofile <<  Form("%s                    lnN    %.3f   -    -    - ",name_sig_pu.Data(),sig_pu)  << endl;
     ofile <<  Form("%s     lnN    %.3f   -    -    - ",name_sig_mcstat.Data(),sig_mcstat)  << endl;
     ofile <<  Form("%s                  lnU    %.3f   -    -    - ",name_sig_genmet.Data(),sig_genmet)  << endl;
     ofile <<  Form("%s                  lnN    %.3f   -    -    - ",name_sig_isr.Data(),sig_isr)  << endl;
