@@ -193,8 +193,8 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
 	if (!t.Flag_HBHENoiseFilter) continue;
 	if (!t.Flag_HBHENoiseIsoFilter) continue;
 	if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
-	if (!t.Flag_badMuonFilter) continue;
-	if (!t.Flag_badChargedHadronFilter) continue;
+	if (!t.Flag_badMuonFilterV2) continue;
+	if (!t.Flag_badChargedHadronFilterV2) continue;
       }
       
       // // txt MET filters (data only)
@@ -222,7 +222,7 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
       //---------------------
       outfile_->cd();
       //      const float lumi = 12.9;
-      const float lumi = 36.26;
+      const float lumi = 35.867; // full 2016
       evtweight_ = 1.;
 
       // apply relevant weights to MC
