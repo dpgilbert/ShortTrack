@@ -59,6 +59,8 @@ const bool doSimpleLostlepNuisances = false; //if true, reverts to ICHEP lostlep
 
 const bool printTable = false; //if true, prints additional .txt files with the data & bkg yields and uncertainties for plotmaking
 
+const bool suppressUHmt2bin = true; //if true, skips the lowest mt2bin in the UH HT region
+
 double last_zinv_ratio = 0.5;
 double last_lostlep_transfer = 2.;
 double last_zinvDY_transfer = 2.;
@@ -1132,8 +1134,9 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
 	    y_binwidth = 5;
 	    y_max = 800;
 	  }
-	  for (int im1 = 0; im1 <= 2200; im1 += 25) {
+	  for (int im1 = 0; im1 <= 2300; im1 += 25) {
 	    for (int im2 = 0; im2 <= y_max; im2 += y_binwidth) {
+	      if (suppressUHmt2bin && TString(k->GetTitle()).Contains("UH") && imt2 == 1) continue;
 	      int result = printCard(k->GetTitle(), imt2, signal, output_dir, im1, im2);   //MT2 and scan bins with no entries are handled by printCard function.
 	      if (result > 0) signal_points.insert( make_pair(im1,im2) ); 
 	    } // scanM2 loop
