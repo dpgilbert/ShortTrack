@@ -54,13 +54,13 @@ def main (args):
     transfer_input_files=wrapper.sh, job_input{0}/input.tar.gz
     +DESIRED_Sites="T2_US_UCSD"
     +Owner = undefined
-    log=/data/tmp/fgolf/condor_submit_logs/smearing/condor_12_01_16.log
-    output=/data/tmp/fgolf/condor_job_logs/smearing/1e.$(Cluster).$(Process).out
-    error =/data/tmp/fgolf/condor_job_logs/smearing/1e.$(Cluster).$(Process).err
+    log=/data/tmp/{1}/condor_submit_logs/smearing/condor_12_01_16.log
+    output=/data/tmp/{1}/condor_job_logs/smearing/1e.$(Cluster).$(Process).out
+    error =/data/tmp/{1}/condor_job_logs/smearing/1e.$(Cluster).$(Process).err
     notification=Never
-    x509userproxy={1}
+    x509userproxy={2}
     
-    """.format(GetJobInputDir(args[1]), x509file))
+    """.format(GetJobInputDir(args[1]), username, x509file))
 
     for f in list_of_failed_jobs:
       fid.write("executable=wrapper.sh\n")
