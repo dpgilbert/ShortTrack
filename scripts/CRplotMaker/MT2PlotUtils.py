@@ -31,9 +31,11 @@ def GetCRName(cr):
 
 def GetSampleName(sample):
     names = {"wjets_ht": "W+Jets",
+             "wjets": "W+Jets",
              "2015wjets_ht": "W+Jets",
              "wjets_incl": "W+Jets",
              "dyjetsll_ht": "Z(#font[12]{ll})+Jets",
+             "dyjetsll": "Z(#font[12]{ll})+Jets",
              "2015dyjetsll_ht": "Z(#font[12]{ll})+Jets",
              "dyjetsll_incl": "Z(#font[12]{ll})+Jets",
              "zinv_ht": "Z(#nu#nu)+Jets",
@@ -48,6 +50,7 @@ def GetSampleName(sample):
              "qcd_ht": "QCD",
              "2015qcd_ht": "QCD",
              "lostlepFromCRs": "Lost Lepton",
+             "ww_2l2nu": "WW(2l2#nu)"
              }
 
     # use the above name if defined, otherwise use sample itself
@@ -105,8 +108,10 @@ def GetSubtitles(dirname):
 
     return ["H_{T} > 250 GeV","M_{T2} > 200 GeV", "#geq 2j"]
 
-def Rebin(h_bkg_vec, h_data, r):
+def Rebin(h_bkg_vec, h_data, r, h_sig_vec=[]):
     for h in h_bkg_vec:
+        h.Rebin(r)
+    for h in h_sig_vec:
         h.Rebin(r)
     if h_data!=None:
         h_data.Rebin(r)

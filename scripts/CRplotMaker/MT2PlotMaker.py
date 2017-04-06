@@ -5,7 +5,7 @@ import pyRootPlotMaker as ppm
 import MT2PlotUtils as utils
 import MT2PlotDefs as pd
 
-def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["pdf"], tag=""):
+def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["pdf"], tag="", signals=[], opts=""):
     # rootdir contains output of MT2Looper, samples are names of the .root files,
     # data is the name of the data file, dirname is the directory within the root file
     # to extract plots from, plots are a list of plot definitions from MT2PlotDefs
@@ -14,6 +14,7 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
 
     h_bkg_vecs = [[] for x in plots]
     h_data = []
+    h_sig_vecs = [[] for x in plots]
 
     dirnames = [s.strip() for s in dirname.split("+")]
 
@@ -65,6 +66,30 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
 
         fid.Close()
 
+    ## get background histograms
+    for isig in range(len(signals)):
+
+        # get the root file for the given sample. This assumes that frag/fake photons come from qcd_ht.root
+        fn = os.path.join(rootdir,signals[isig]+".root")        
+        fid = ROOT.TFile(fn)
+
+        for iplot in range(len(plots)):
+            vn = plots[iplot][0]
+
+            if suffix != None:
+                vn += suffix
+            h_sig_vecs[iplot].append( fid.Get(dirnames[0]+"/h_"+vn) )
+            # histogram won't exist if there are no events. Replace it with None, handle later
+            if type(h_sig_vecs[iplot][-1])==type(ROOT.TObject()):
+                h_sig_vecs[iplot][-1] = None
+            else:
+                h_sig_vecs[iplot][-1].SetDirectory(0)
+                # handle the case with more than one directory
+                for idir in range(1, len(dirnames)):
+                    h_sig_vecs[iplot][-1].Add(fid.Get(dirnames[idir]+"/h_"+vn))
+
+        fid.Close()
+
     # deal with nonexistent histograms
     for i in range(len(plots)):
         firstGood = -1
@@ -78,6 +103,10 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
             if h_bkg_vecs[i][isamp] == None:
                 h_bkg_vecs[i][isamp] = h_bkg_vecs[i][firstGood].Clone()
                 h_bkg_vecs[i][isamp].Reset()
+        for isig in range(len(signals)):
+            if h_sig_vecs[i][isig] == None:
+                h_sig_vecs[i][isig] = h_bkg_vecs[i][firstGood].Clone()
+                h_sig_vecs[i][isig].Reset()
 
     
     ## get data histograms
@@ -111,7 +140,7 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
             userMin = plots[i][3][0]
             userMax = plots[i][3][1]
         if len(plots[i]) >= 5:
-            utils.Rebin(h_bkg_vecs[i],h_data[i], plots[i][4])
+            utils.Rebin(h_bkg_vecs[i], h_data[i], plots[i][4], h_sig_vec=h_sig_vecs[i])
         doOverflow = True
         if len(plots[i]) >= 6:
             doOverflow = plots[i][5]
@@ -121,6 +150,8 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
         xAxisTitle = utils.GetVarName(vn)
         unit = utils.GetUnit(vn)
         subtitles = utils.GetSubtitles(dirname)
+        if "noSubtitles" in opts:
+            subtitles=None
         if h_data[i]!=None:
             subLegText = ["MC scaled by {datamcsf}","# Data events: {ndata}"]
         else:
@@ -134,7 +165,7 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
                            scaleMCtoData=True, xAxisUnit=unit, userMin=userMin, userMax=userMax, doSort=False, doMT2Colors=True, 
                            markerSize=markerSize, titleSize=0.035, subtitleSize=0.033, legCoords=(0.60,0.70,0.87,0.895),
                            subLegText=subLegText, subLegTextSize=0.036, doBkgError=True, doOverflow=doOverflow, cmsTextSize=0.04,
-                           convertToPoisson=True, drawZeros=False)
+                           convertToPoisson=True, drawZeros=False, h_sig_vec=h_sig_vecs[i], sig_names=signals)
             
 
 
