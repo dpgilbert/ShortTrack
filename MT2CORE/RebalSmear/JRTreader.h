@@ -19,9 +19,9 @@ using namespace std;
 class JRTreader {
  public:
     
-    JRTreader(char *fname=0);
+    JRTreader(const char *fname=0);
     ~JRTreader();
-    int Init(char *fname);
+    int Init(const char *fname);
     float GetRandomResponse(float pt, float eta, bool isBjet, bool CorrectDataResolution=false);
     float GetValue(float pt, float eta, bool isBjet, float smearfact, bool correctDataResolution=false);
     static float GetJERCorrection(float eta);

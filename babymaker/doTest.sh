@@ -1,6 +1,6 @@
 #!/bin/bash
 
-make -j 8
+make -j 8 || return $?
 
 #./processBaby data_json_test /home/users/jgran/temp/74x_sync/CMSSW_7_4_3/src/CMS3/NtupleMaker/ntuple_data.root
 #./processBaby data_test  /nfs-7/userdata/jgran/74x_sync/ntuple_data.root

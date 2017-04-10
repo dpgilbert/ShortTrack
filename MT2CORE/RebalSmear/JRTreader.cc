@@ -8,7 +8,7 @@
 #include "TH1D.h"
 #include "TCanvas.h"
 
-JRTreader::JRTreader(char *fname){
+JRTreader::JRTreader(const char *fname){
     fits_b = NULL;
     fits_nonb = NULL;
     if(fname != NULL){
@@ -43,7 +43,7 @@ JRTreader::~JRTreader(){
     }
 }
 
-int JRTreader::Init(char *fname){
+int JRTreader::Init(const char *fname){
     TFile *f = TFile::Open(fname);
     if(f->IsZombie())
         return 0;

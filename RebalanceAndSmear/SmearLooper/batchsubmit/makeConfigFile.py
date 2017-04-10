@@ -7,10 +7,10 @@ import re
 
 #samples = ["datav2_data_Run2016[B-H]_(HTMHT|JetHT|MET)"]
 #samples = ["datav2_data_Run2016[B-H]_(HTMHT|MET)"]
-#samples = ["datav2_data_Run2016[B-H]_JetHT"]
+# samples = ["datav2_data_Run2016[B-H]_JetHT"]
 #samples = ["datav2_data_Run2016[B-H]_MET"]
 #samples = ["qcd_ht", "zinv_ht", "wjets_ht", "ttdl", "ttsl", "singletop", "ttw", "ttz"]
-#samples = ["zinv_ht", "wjets_ht", "ttdl", "ttsl", "singletop", "ttw", "ttz"]
+# samples = ["zinv_ht", "wjets_ht", "ttdl", "ttsl", "singletop", "ttw", "ttz"]
 #samples = ["data_rereco_data_Run2016[B-G]_(HTMHT|JetHT|MET)", "datav2_data_Run2016H_(HTMHT|JetHT|MET)"]
 #samples = ["data_rereco_data_Run2016[B-G]_JetHT", "datav2_data_Run2016H_JetHT"]
 #samples = ["data_rereco_data_Run2016[E-G]_(HTMHT|MET)", "datav2_data_Run2016H_(HTMHT|MET)"]
@@ -23,13 +23,13 @@ samples = ["qcd_ht"]
 #samples = ["data_rereco_data_Run2016[B-G]_JetHT", "datav2_data_Run2016H_JetHT"]
 
 test = False
-version="v11_rawhists"
-doRebalanceAndSmear = True
+version="test"
+doRebalanceAndSmear = False
 tag="V00-08-12"
 username = os.environ["USER"]
 use_b_resp = True
 make_baby = True
-use_raw_hists = True
+use_raw_hists = False
 core_scale = 1.
 mean_shift = 0.
 tail_scale = 1.
@@ -74,16 +74,16 @@ for sample in samples:
       when_to_transfer_output = ON_EXIT
       #the actual executable to run is not transfered by its name.
       #In fact, some sites may do weird things like renaming it and such.
-      transfer_input_files=wrapper.sh, job_input{0}/input.tar.gz
+      transfer_input_files=wrapper.sh, job_input_{0}/input.tar.gz
       +DESIRED_Sites="T2_US_UCSD"
       +Owner = undefined
-      log=/data/tmp/fgolf/condor_submit_logs/smearing/condor_12_01_16.log
-      output=/data/tmp/fgolf/condor_job_logs/smearing/1e.$(Cluster).$(Process).out
-      error =/data/tmp/fgolf/condor_job_logs/smearing/1e.$(Cluster).$(Process).err
+      log=/data/tmp/{1}/condor_submit_logs/smearing/condor_12_01_16.log
+      output=/data/tmp/{1}/condor_job_logs/smearing/1e.$(Cluster).$(Process).out
+      error =/data/tmp/{1}/condor_job_logs/smearing/1e.$(Cluster).$(Process).err
       notification=Never
-      x509userproxy={1}
+      x509userproxy={2}
     
-      """.format(suffix, x509file))    
+      """.format(version, username, x509file))    
     
   for dirname in os.listdir(indir):
     m = re_sample.match(dirname)

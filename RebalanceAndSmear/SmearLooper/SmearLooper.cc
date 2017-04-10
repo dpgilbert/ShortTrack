@@ -19,9 +19,6 @@
 #include "TKey.h"
 #include "TLorentzVector.h"
 
-#include "RooRealVar.h"
-#include "RooDataSet.h"
-
 // Tools
 #include "../../CORE/Tools/utils.h"
 #include "../../CORE/Tools/goodrun.h"
@@ -39,7 +36,6 @@
 using namespace std;
 using namespace mt2;
 using namespace duplicate_removal;
-using namespace RooFit;
 
 class mt2tree;
 class SRRS;
@@ -63,10 +59,6 @@ const int n_njbins = 3;
 const float njbins[n_njbins+1] = {2, 4, 7, 12};
 const int n_nbjbins = 4;
 const float nbjbins[n_nbjbins+1] = {0, 1, 2, 3, 6};
-
-//RooRealVars for unbinned data hist
-RooRealVar* x_ = new RooRealVar( "x", "", 0., 50.);
-RooRealVar* w_ = new RooRealVar( "w", "", 0., 1000.);
 
 // turn on to apply weights to central value
 // bool applyWeights_ = false;
@@ -975,7 +967,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
           if(nJet30 < 2 && CUT_LEVEL_<3) continue;
           if(ht < 250.0 && CUT_LEVEL_<3) continue;
           if (met_pt < 30. && CUT_LEVEL_<3) continue;
-          if (met_pt<250. && ht>1000 && CUT_LEVEL_<2) continue;
+          if (met_pt<250. && ht<1000 && CUT_LEVEL_<2) continue;
 
           std::vector<LorentzVector> p4sForDphi;
           for(unsigned int i=0; i<jet_pt_smeared.size(); i++){
