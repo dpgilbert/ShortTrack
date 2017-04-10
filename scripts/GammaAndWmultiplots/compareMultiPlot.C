@@ -56,11 +56,11 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
   for( unsigned int i = 0 ; i < labels.size() ; ++i ){
     if (labels[i].Contains("data") || labels[i].Contains("Data")) mconly = false;
   }
-  cmsText = "CMS Preliminary";
+  cmsText = "CMS";
 //  cmsText = "CMS";
-  lumi_13TeV = "36.8 fb^{-1}";
+  lumi_13TeV = "35.9 fb^{-1}";
   if (mconly) {
-    cmsText = "CMS Preliminary";
+    cmsText = "CMS";
     lumi_13TeV = "";
   }
 
@@ -126,14 +126,16 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
     plotpad = new TPad("plotpad","plotpad",0,0.2,1,0.99);
     plotpad->SetTopMargin(0.05);
     plotpad->SetRightMargin(0.05);
-    plotpad->SetBottomMargin(0.05);
+    plotpad->SetBottomMargin(0.12);
     plotpad->Draw();
     plotpad->cd();
     if( logplot ) plotpad->SetLogy();
   }
   
   //TLegend* leg = new TLegend(0.55,0.6,0.85,0.92);
-  TLegend* leg = new TLegend(0.55,0.70,0.85,0.90);
+  
+  TLegend* leg = new TLegend(0.46,0.60,0.80,0.89); //puts legend in top right corner
+  // TLegend* leg = new TLegend(0.12,0.20,0.46,0.49); //puts legend in bottem left corner
   if (saveas.Contains("urity")) leg = new TLegend(0.55,0.25,0.85,0.40);
 
   leg->SetFillColor(0);
@@ -336,12 +338,25 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
   h_axes->GetYaxis()->SetTitle(ytitle.c_str());
   h_axes->GetYaxis()->SetLabelSize(0.04);
 //  h_axes->GetYaxis()->SetTitleOffset(1.5);
+  // h_axes->GetYaxis()->SetTitleOffset(1);
   h_axes->GetYaxis()->SetTitleOffset(1);
   h_axes->GetYaxis()->SetTitleSize(0.05);
-  if (doRatio) {
-    h_axes->GetXaxis()->SetLabelSize(0.);
-    h_axes->GetXaxis()->SetTitleSize(0.);
-  }
+  // h_axes->GetXaxis()->SetTitle(sig_hists[1]->GetXaxis()->GetTitle());
+
+  // h_axes->GetYaxis()->SetTitleOffset(0.25);
+  // h_axes->GetYaxis()->SetTitleSize(0.18);
+  // h_axes->GetYaxis()->SetNdivisions(5);
+  // h_axes->GetYaxis()->SetLabelSize(0.15);
+  // h_axes->GetXaxis()->SetTitle(sig_hists[1]->GetXaxis()->GetTitle());
+  h_axes->GetXaxis()->SetTitleSize(0.05);
+  h_axes->GetXaxis()->SetLabelSize(0.05);
+  h_axes->GetXaxis()->SetTitleOffset(1);
+  h_axes->GetXaxis()->SetTickLength(0.07);
+  
+  // if (doRatio) {
+  //   h_axes->GetXaxis()->SetLabelSize(0.);
+  //   h_axes->GetXaxis()->SetTitleSize(0.);
+  // }
   
   
   if (nplots[0].Contains("dijetflav")) {
@@ -358,7 +373,7 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
     
   }
   
-  h_axes->Draw();
+  h_axes->Draw("axis");
   
   //t->Draw("hist same");
   
@@ -412,7 +427,7 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
   //  if (region_label_line2.Length() > 0) label.DrawLatex(0.187,label_y_start - 2 * label_y_spacing,region_label_line2);
   
   leg->Draw();
-  //h_axes->Draw("axissame");
+  h_axes->Draw("axissame");
   
   
   // -- for CMS_lumi label
@@ -448,11 +463,11 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
     //plotpad->SetTopMargin(0.05);
     //plotpad->SetRightMargin(0.05);
     //plotpad->SetBottomMargin(0.05);
-    TPad* ratiopad = new TPad("ratiopad","ratiopad",0.,0.,1,0.23);
+    TPad* ratiopad = new TPad("ratiopad","ratiopad",0.,0.,1,0.2);
     ratiopad->SetLeftMargin(0.1);//(0.16);
     ratiopad->SetRightMargin(0.05);
-    ratiopad->SetTopMargin(0.04);
-    ratiopad->SetBottomMargin(0.44);
+    ratiopad->SetTopMargin(0.1);
+    ratiopad->SetBottomMargin(0.1);
     ratiopad->SetGridy(1);
     ratiopad->Draw();
     ratiopad->cd();
@@ -469,12 +484,15 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
     //h_axis_ratio->GetYaxis()->SetRangeUser(0.001,1.);
 //    h_axis_ratio->GetYaxis()->SetTitle("Ratio to Z");
     h_axis_ratio->GetYaxis()->SetTitle("Ratio");
-    h_axis_ratio->GetXaxis()->SetTitle(sig_hists[1]->GetXaxis()->GetTitle());
+    // h_axis_ratio->GetXaxis()->SetTitle(sig_hists[1]->GetXaxis()->GetTitle());
     h_axis_ratio->GetXaxis()->SetTitleSize(0.17);
     h_axis_ratio->GetXaxis()->SetLabelSize(0.17);
     h_axis_ratio->GetXaxis()->SetTitleOffset(1);
     h_axis_ratio->GetXaxis()->SetTickLength(0.07);
-    h_axis_ratio->Draw("axis");
+    // h_axis_ratio->Draw("axis");
+    h_axis_ratio->GetXaxis()->SetLabelSize(0.);
+    h_axis_ratio->GetXaxis()->SetTitleSize(0.);
+    h_axis_ratio->Draw();
     
     if (drawBand) {
       TH1D* h_band = (TH1D*) sig_hists[0]->Clone("band");
@@ -532,12 +550,20 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
       //g_ratio->SetMarkerStyle(20);
       g_ratio->Draw("p0same");
     }
+
+    
+    h_axis_ratio->Draw("axissame");
+    TLine* zeroLine = new TLine(xmin,1,xmax,1);
+    zeroLine->SetLineColor(kBlack);
+    zeroLine->SetLineStyle(3);
+    zeroLine->Draw();
     
   } // if (doRatio)
   
   gPad->Modified();
   
   can->Print(Form("compareMultiPlot/%s.pdf",canvas_name.Data()));
+  can->Print(Form("compareMultiPlot/%s.png",canvas_name.Data()));
   
   
   return;
@@ -552,10 +578,10 @@ void makeCMSPlotRatios(  vector<TString> files,  vector<TString> labels, vector<
   for( unsigned int i = 0 ; i < labels.size() ; ++i ){
     if (labels[i].Contains("data") || labels[i].Contains("Data")) mconly = false;
   }
-  cmsText = "CMS Preliminary";
-  lumi_13TeV = "36.8 fb^{-1}";
+  cmsText = "CMS";
+  lumi_13TeV = "35.9 fb^{-1}";
   if (mconly) {
-    cmsText = "CMS Preliminary";
+    cmsText = "CMS";
     lumi_13TeV = "";
   }
   
@@ -1006,6 +1032,7 @@ void makeCMSPlotRatios(  vector<TString> files,  vector<TString> labels, vector<
   gPad->Modified();
   
   can->Print(Form("compareMultiPlot/%s.pdf",canvas_name.Data()));
+  can->Print(Form("compareMultiPlot/%s.png",canvas_name.Data()));
   
   
   return;
@@ -1055,7 +1082,8 @@ void Superimp(TString file1, TString file2, TString la1, TString la2, TString np
   //h2->Draw("same");
   l->Draw("same");
 
-  canv->Print("compare/" + nplot + fix + ".pdf"); 
+  canv->Print("compare/" + nplot + fix + ".pdf");
+  canv->Print("compare/" + nplot + fix + ".png"); 
   delete canv;
   delete l   ;
   return;
@@ -1147,6 +1175,7 @@ void SuperimpVec(vector<TString> files, vector<TString> labels, vector<TString> 
   }
   l->Draw("same");
   canv->Print("compareMultiPlot/" + saveas+ ".pdf"); 
+  canv->Print("compareMultiPlot/" + saveas+ ".png"); 
   //delete canv;
   //delete l   ;
   return;
@@ -1244,7 +1273,8 @@ void SuperimpRatios(vector<TString> files, vector<TString> labels, vector<TStrin
     i++;
   }
   l->Draw("same");
-  canv->Print("compareMultiPlot/" + saveas+ ".pdf"); 
+  canv->Print("compareMultiPlot/" + saveas+ ".pdf");
+  canv->Print("compareMultiPlot/" + saveas+ ".png");  
   //delete canv;
   //delete l   ;
   return;
@@ -1353,6 +1383,7 @@ void SuperimpRatiosFlat(vector<TString> files, vector<TString> labels, vector<TS
     i++;
   }
   l->Draw("same");
+  canv->Print("compareMultiPlot/" + saveas+ ".png");
   canv->Print("compareMultiPlot/" + saveas+ ".pdf"); 
   //delete canv;
   //delete l   ;
@@ -1541,6 +1572,7 @@ void SuperimpVecRatio(vector<TString> files, vector<TString> labels, vector<TStr
   
   
   
+  canv->Print("compareMultiPlot/" + saveas+ ".png"); 
   canv->Print("compareMultiPlot/" + saveas+ ".pdf"); 
   //delete canv;
   //delete l   ;
@@ -1561,7 +1593,7 @@ void compareMultiPlot()
 //  TString dir = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/FromMark_sep29_V00-08-09_json_271036-280385_NoL1T_24p6fb_skim_base_mt2gt200_ZinvV6/";
 //  TString dir = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/FromMark_31p24_oldMC_nov7/";
 //  TString dir = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/FromMark_36p26_v10MC_nov29/";
-  TString dir = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/V00-08-15/";
+  TString dir = "/home/users/mderdzinski/winter2017/clean_master/MT2looper/output/full2016_v18_V2filters_Mar6/";
   TString dir2 = "/Users/giovannizevidellaporta/UCSD/MT2_2016/MT2looperHistograms/V00-08-09_16Dec16/";
 
   
@@ -1941,9 +1973,9 @@ void compareMultiPlot()
   files.push_back( "");       labels.push_back("250 < H_{T} < 450 GeV");          nplots.push_back("");
 
   files.push_back( dir+"zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseVL/h_mt2bins");
-  files.push_back( dir+"purity.root");            labels.push_back("#gamma estimate (Data)");            nplots.push_back("srbaseVL/h_mt2binspredZFailSieieData");
-  files.push_back( dir+"purityRL.root");          labels.push_back("W estimate (Data)");            nplots.push_back("srbaseVL/h_predZ");
-  files.push_back( dir+"zinvFromDY.root");          labels.push_back("DY estimate (Data)");            nplots.push_back("srbaseVL/h_mt2bins");
+  files.push_back( dir+"purity.root");            labels.push_back("#gamma control sample (data)");            nplots.push_back("srbaseVL/h_mt2binspredZFailSieieData");
+  files.push_back( dir+"purityRL.root");          labels.push_back("W control sample (data)");            nplots.push_back("srbaseVL/h_predZ");
+  files.push_back( dir+"zinvFromDY.root");          labels.push_back("Z control sample (data)");            nplots.push_back("srbaseVL/h_mt2bins");
   makeCMSPlot(  files, labels, nplots, "MT2VL_W_GJ_log", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / 100 GeV " , /*xmin*/ 200, /*xmax*/499 , /*rebin*/ -1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
   //makeCMSPlot(  files, labels, nplots, "truthPtVratio", /*xtitle*/ "p_{T}^{V} [GeV]" , /*ytitle*/ "Events / 40 GeV" , /*xmin*/ 0, /*xmax*/1200 , /*rebin*/ 4 , /*logplot*/ 1, /*scalesig*/ -1., /*doRatio*/ 1 );
   
@@ -1952,41 +1984,41 @@ void compareMultiPlot()
   files.push_back( "");       labels.push_back("450 < H_{T} < 575 GeV");          nplots.push_back("");
 
   files.push_back( dir+"zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseL/h_mt2bins");
-  files.push_back( dir+"purity.root");            labels.push_back("#gamma estimate (Data)");            nplots.push_back("srbaseL/h_mt2binspredZFailSieieData");
-  files.push_back( dir+"purityRL.root");          labels.push_back("W estimate (Data)");            nplots.push_back("srbaseL/h_predZ");
-  files.push_back( dir+"zinvFromDY.root");          labels.push_back("DY estimate (Data)");            nplots.push_back("srbaseL/h_mt2bins");
+  files.push_back( dir+"purity.root");            labels.push_back("#gamma control sample (data)");            nplots.push_back("srbaseL/h_mt2binspredZFailSieieData");
+  files.push_back( dir+"purityRL.root");          labels.push_back("W control sample (data)");            nplots.push_back("srbaseL/h_predZ");
+  files.push_back( dir+"zinvFromDY.root");          labels.push_back("Z control sample (data)");            nplots.push_back("srbaseL/h_mt2bins");
   makeCMSPlot(  files, labels, nplots, "MT2L_W_GJ_log", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / 100 GeV " , /*xmin*/ 200, /*xmax*/599 , /*rebin*/ -1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
   //makeCMSPlot(  files, labels, nplots, "truthPtVratio", /*xtitle*/ "p_{T}^{V} [GeV]" , /*ytitle*/ "Events / 40 GeV" , /*xmin*/ 0, /*xmax*/1200 , /*rebin*/ 4 , /*logplot*/ 1, /*scalesig*/ -1., /*doRatio*/ 1 );
   files.clear(); labels.clear(); nplots.clear();
   files.push_back( "");       labels.push_back("575 < H_{T} < 1000 GeV");          nplots.push_back("");
   files.push_back( dir+"zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseM/h_mt2bins");
-  files.push_back( dir+"purity.root");            labels.push_back("#gamma estimate (Data)");            nplots.push_back("srbaseM/h_mt2binspredZFailSieieData");
-  files.push_back( dir+"purityRL.root");          labels.push_back("W estimate (Data)");            nplots.push_back("srbaseM/h_predZ");
-  files.push_back( dir+"zinvFromDY.root");          labels.push_back("DY estimate (Data)");            nplots.push_back("srbaseM/h_mt2bins");
+  files.push_back( dir+"purity.root");            labels.push_back("#gamma control sample (data)");            nplots.push_back("srbaseM/h_mt2binspredZFailSieieData");
+  files.push_back( dir+"purityRL.root");          labels.push_back("W control sample (data)");            nplots.push_back("srbaseM/h_predZ");
+  files.push_back( dir+"zinvFromDY.root");          labels.push_back("Z control sample (data)");            nplots.push_back("srbaseM/h_mt2bins");
   makeCMSPlot(  files, labels, nplots, "MT2M_W_GJ_log", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / 100 GeV " , /*xmin*/ 200, /*xmax*/999 , /*rebin*/ -1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
   //makeCMSPlot(  files, labels, nplots, "truthPtVratio", /*xtitle*/ "p_{T}^{V} [GeV]" , /*ytitle*/ "Events / 40 GeV" , /*xmin*/ 0, /*xmax*/1200 , /*rebin*/ 4 , /*logplot*/ 1, /*scalesig*/ -1., /*doRatio*/ 1 );
   files.clear(); labels.clear(); nplots.clear();
   files.push_back( "");       labels.push_back("1000 < H_{T} < 1500 GeV");          nplots.push_back("");
   files.push_back( dir+"zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseH/h_mt2bins");
-  files.push_back( dir+"purity.root");            labels.push_back("#gamma estimate (Data)");            nplots.push_back("srbaseH/h_mt2binspredZFailSieieData");
-  files.push_back( dir+"purityRL.root");          labels.push_back("W estimate (Data)");            nplots.push_back("srbaseH/h_predZ");
-//  files.push_back( dir+"zinvFromDY.root");          labels.push_back("DY (Data)");            nplots.push_back("srbaseH/h_mt2bins");
-  files.push_back( dir+"zinvFromDY.root");          labels.push_back("DY estimate (Data)");            nplots.push_back("srbaseH/h_mt2bins");
+  files.push_back( dir+"purity.root");            labels.push_back("#gamma control sample (data)");            nplots.push_back("srbaseH/h_mt2binspredZFailSieieData");
+  files.push_back( dir+"purityRL.root");          labels.push_back("W control sample (data)");            nplots.push_back("srbaseH/h_predZ");
+//  files.push_back( dir+"zinvFromDY.root");          labels.push_back("DY (data)");            nplots.push_back("srbaseH/h_mt2bins");
+  files.push_back( dir+"zinvFromDY.root");          labels.push_back("Z control sample (data)");            nplots.push_back("srbaseH/h_mt2bins");
   makeCMSPlot(  files, labels, nplots, "MT2H_W_GJ_log", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / 100 GeV " , /*xmin*/ 200, /*xmax*/1399 , /*rebin*/ -1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
   //makeCMSPlot(  files, labels, nplots, "truthPtVratio", /*xtitle*/ "p_{T}^{V} [GeV]" , /*ytitle*/ "Events / 40 GeV" , /*xmin*/ 0, /*xmax*/1200 , /*rebin*/ 4 , /*logplot*/ 1, /*scalesig*/ -1., /*doRatio*/ 1 );
   files.clear(); labels.clear(); nplots.clear();
   files.push_back( "");       labels.push_back("H_{T} > 1500 GeV");          nplots.push_back("");
   files.push_back( dir+"zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseUH/h_mt2bins");
-  files.push_back( dir+"purity.root");            labels.push_back("#gamma estimate (Data)");            nplots.push_back("srbaseUH/h_mt2binspredZFailSieieData");
-  files.push_back( dir+"purityRL.root");          labels.push_back("W estimate (Data)");            nplots.push_back("srbaseUH/h_predZ");
-  files.push_back( dir+"zinvFromDY.root");          labels.push_back("DY estimate (Data)");            nplots.push_back("srbaseUH/h_mt2bins");
+  files.push_back( dir+"purity.root");            labels.push_back("#gamma control sample (data)");            nplots.push_back("srbaseUH/h_mt2binspredZFailSieieData");
+  files.push_back( dir+"purityRL.root");          labels.push_back("W control sample (data)");            nplots.push_back("srbaseUH/h_predZ");
+  files.push_back( dir+"zinvFromDY.root");          labels.push_back("Z control sample (data)");            nplots.push_back("srbaseUH/h_mt2bins");
   makeCMSPlot(  files, labels, nplots, "MT2UH_W_GJ_log", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / 100 GeV " , /*xmin*/ 200, /*xmax*/1799 , /*rebin*/ -1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
   //makeCMSPlot(  files, labels, nplots, "truthPtVratio", /*xtitle*/ "p_{T}^{V} [GeV]" , /*ytitle*/ "Events / 40 GeV" , /*xmin*/ 0, /*xmax*/1200 , /*rebin*/ 4 , /*logplot*/ 1, /*scalesig*/ -1., /*doRatio*/ 1 );
   files.clear(); labels.clear(); nplots.clear();
   files.push_back( dir+"zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbase/h_mt2bins");
-  files.push_back( dir+"purity.root");            labels.push_back("#gamma estimate (Data)");            nplots.push_back("srbase/h_mt2binspredZFailSieieData");
-  files.push_back( dir+"purityRL.root");          labels.push_back("W estimate (Data)");            nplots.push_back("srbase/h_predZ");
-  files.push_back( dir+"zinvFromDY.root");          labels.push_back("DY estimate (Data)");            nplots.push_back("srbase/h_mt2bins");
+  files.push_back( dir+"purity.root");            labels.push_back("#gamma control sample (data)");            nplots.push_back("srbase/h_mt2binspredZFailSieieData");
+  files.push_back( dir+"purityRL.root");          labels.push_back("W control sample (data)");            nplots.push_back("srbase/h_predZ");
+  files.push_back( dir+"zinvFromDY.root");          labels.push_back("Z control sample (data)");            nplots.push_back("srbase/h_mt2bins");
   makeCMSPlot(  files, labels, nplots, "MT2_W_GJ", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Events / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1 );
   makeCMSPlot(  files, labels, nplots, "MT2_W_GJ_norm", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "AU " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 1, /*doRatio*/ 1 );
   makeCMSPlot(  files, labels, nplots, "MT2_W_GJ_log", /*xtitle*/ "M_{T2} [GeV]" , /*ytitle*/ "Fraction / 100 GeV " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
@@ -1996,8 +2028,8 @@ void compareMultiPlot()
   
   files.clear(); labels.clear(); nplots.clear();
   files.push_back( dir+"zinv_ht.root");           labels.push_back("Z #rightarrow #nu#bar{#nu} (MC)");                 nplots.push_back("srbaseJ/h_mt2bins");
-  files.push_back( dir+"purity.root");            labels.push_back("#gamma estimate (Data)");            nplots.push_back("srbaseJ/h_mt2binspredZFailSieieData");
-  files.push_back( dir+"purityRL.root");          labels.push_back("W estimate (Data)");            nplots.push_back("srbaseJ/h_predZ");
+  files.push_back( dir+"purity.root");            labels.push_back("#gamma control sample (data)");            nplots.push_back("srbaseJ/h_mt2binspredZFailSieieData");
+  files.push_back( dir+"purityRL.root");          labels.push_back("W control sample (data)");            nplots.push_back("srbaseJ/h_predZ");
 //  makeCMSPlot(  files, labels, nplots, "Monojet_W_GJ", /*xtitle*/ "HT [GeV]" , /*ytitle*/ "Events / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 1 );
 //  makeCMSPlot(  files, labels, nplots, "Monojet_W_GJ_norm", /*xtitle*/ "HT [GeV]" , /*ytitle*/ "AU " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 1, /*doRatio*/ 1 );
   makeCMSPlot(  files, labels, nplots, "Monojet_W_GJ_log", /*xtitle*/ "p_{T}(jet1) [GeV]" , /*ytitle*/ "Events / Bin " , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
