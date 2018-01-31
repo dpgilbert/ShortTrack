@@ -177,14 +177,14 @@ def makeTemplate(directory,imt2):
     nbjets_HI_name = directory + "/h_nbjets_HI"
     h_nbjets_LOW = f_sig.Get(nbjets_LOW_name)
     h_nbjets_HI = f_sig.Get(nbjets_HI_name)
-    nbjets_LOW = h_nbjets_LOW.GetBinContent(1)
-    nbjets_HI = h_nbjets_HI.GetBinContent(1)
+    nbjets_LOW = int(h_nbjets_LOW.GetBinContent(1))
+    nbjets_HI = int(h_nbjets_HI.GetBinContent(1))
     njets_LOW_name = directory + "/h_njets_LOW"
     njets_HI_name = directory + "/h_njets_HI"
     h_njets_LOW = f_sig.Get(njets_LOW_name)
     h_njets_HI = f_sig.Get(njets_HI_name)
-    njets_LOW = h_njets_LOW.GetBinContent(1)
-    njets_HI = h_njets_HI.GetBinContent(1)
+    njets_LOW = int(h_njets_LOW.GetBinContent(1))
+    njets_HI = int(h_njets_HI.GetBinContent(1))
 
     # If we're doing a scan over mass points, we need to extract any 2D histogram from the all-inclusive 
     # 3D histogram to read MT2 boundaries.
@@ -195,8 +195,8 @@ def makeTemplate(directory,imt2):
     else:
         h_sig = f_sig.Get(fullhistname)
 
-    mt2_LOW = h_sig.GetBinLowEdge(imt2)
-    mt2_HI = mt2_LOW + h_sig.GetBinWidth(imt2)
+    mt2_LOW = int(h_sig.GetBinLowEdge(imt2))
+    mt2_HI = mt2_LOW + int(h_sig.GetBinWidth(imt2))
     # The uppermost bin actually extends to infinity, which we represent with -1 for now.
     # TODO: Update these hardcoded values to their new values if they should change
     if (mt2_HI == 1800 or mt2_HI == 1500): mt2_HI = -1
@@ -208,20 +208,20 @@ def makeTemplate(directory,imt2):
     if (njets_HI != -1): njets_HI_mod -= 1
 
     ht_str = "HT{0}to{1}".format(str(ht_LOW),str(ht_HI))
-    if (nbjets_HI != nbjets_HI_mod):
+    if (nbjets_LOW != nbjets_HI_mod):
         bjet_str = "b{0}to{1}".format(str(nbjets_LOW),str(nbjets_HI_mod))
     else:
         bjet_str = "b{0}".format(str(nbjets_LOW))
-    if (njets_HI != njets_HI_mod):
+    if (njets_LOW != njets_HI_mod):
         jet_str = "j{0}to{1}".format(str(njets_LOW),str(njets_HI_mod))
     else:
         jet_str = "j{0}".format(str(njets_LOW))
     mt2_str = "m{0}to{1}".format(str(mt2_LOW),str(mt2_HI))
 
-    ht_str.replace("-1","Inf")
-    bjet_str.replace("-1","Inf")
-    jet_str.replace("-1","Inf")
-    mt2_str.replace("-1","Inf")
+    ht_str = ht_str.replace("-1","Inf")
+    bjet_str = bjet_str.replace("-1","Inf")
+    jet_str = jet_str.replace("-1","Inf")
+    mt2_str = mt2_str.replace("-1","Inf")
 
     topologicalR = "{0}_{1}_{2}".format(ht_str,jet_str,bjet_str)
     channel = "{0}_{1}".format(topologicalR,mt2_str)
@@ -235,18 +235,18 @@ def makeTemplate(directory,imt2):
     if (dir_lostlep is not None):
         h_ht_LOW_crsl = f_lostlep.Get(ht_LOW_name)
         h_ht_HI_crsl = f_lostlep.Get(ht_HI_name)
-        ht_LOW_crsl = h_ht_LOW_crsl.GetBinContent(1)
-        ht_HI_crsl = h_ht_HI_crsl.GetBinContent(1)
+        ht_LOW_crsl = int(h_ht_LOW_crsl.GetBinContent(1))
+        ht_HI_crsl = int(h_ht_HI_crsl.GetBinContent(1))
 
         h_nbjets_LOW_crsl = f_lostlep.Get(nbjets_LOW_name)
         h_nbjets_HI_crsl = f_lostlep.Get(nbjets_HI_name)
-        nbjets_LOW_crsl = h_nbjets_LOW_crsl.GetBinContent(1)
-        nbjets_HI_crsl = h_nbjets_HI_crsl.GetBinContent(1)
+        nbjets_LOW_crsl = int(h_nbjets_LOW_crsl.GetBinContent(1))
+        nbjets_HI_crsl = int(h_nbjets_HI_crsl.GetBinContent(1))
 
         h_njets_LOW_crsl = f_lostlep.Get(njets_LOW_name)
         h_njets_HI_crsl = f_lostlep.Get(njets_HI_name)
-        njets_LOW_crsl = h_njets_LOW_crsl.GetBinContent(1)
-        njets_HI_crsl = h_njets_HI_crsl.GetBinContent(1)
+        njets_LOW_crsl = int(h_njets_LOW_crsl.GetBinContent(1))
+        njets_HI_crsl = int(h_njets_HI_crsl.GetBinContent(1))
 
     nbjets_HI_crsl_mod = nbjets_HI_crsl
     njets_HI_crsl_mod = njets_HI_crsl
@@ -263,9 +263,9 @@ def makeTemplate(directory,imt2):
     else:
         jet_str_crsl = "j{0}".format(str(njets_LOW_crsl))
 
-    ht_str_crsl.replace("-1","Inf")
-    bjet_str_crsl.replace("-1","Inf")
-    jet_str_crsl.replace("-1","Inf")
+    ht_str_crsl = ht_str_crsl.replace("-1","Inf")
+    bjet_str_crsl = bjet_str_crsl.replace("-1","Inf")
+    jet_str_crsl = jet_str_crsl.replace("-1","Inf")
 
     if (dir_lostlep is not None):
         h_lostlep = f_lostlep.Get(fullhistname)
@@ -444,7 +444,381 @@ def makeTemplate(directory,imt2):
         if (h_zinvDY_lastbin_hybrid is not None):
             zinvDY_lastbin_hybrid = h_zinvDY_lastbin_hybrid.GetBinContent(1)
 
-    return "template"
+    zllgamma_nj = 1.0
+    zllgamma_nb = 1.0
+    zllgamma_ht = 1.0
+    zllgamma_ht2 = 1.0
+    zllgamma_mt2 = 1.0
+    notFound = ""
+    if (fourNuisancesPerBinZGratio):
+        h_zllgamma_nj = f_zgratio.Get("h_njbinsRatio")
+        h_zllgamma_nb = f_zgratio.Get("h_nbjbinsRatio")
+        h_zllgamma_ht = f_zgratio.Get("h_htbinsRatio")
+        h_zllgamma_ht2 = f_zgratio.Get("h_htbins2Ratio")
+        h_zllgamma_mt2 = f_zgratio.Get("h_mt2binsRatio")
+        if (h_zllgamma_nj is None or h_zllgamma_nb is None or h_zllgamma_ht is None or h_zllgamma_ht2 is None or h_zllgamma_mt2 is None):
+            print "Trying fourNuisancesPerBinZGratio, but could not find inclusive Zll/Gamma ratio plots for nuisance parameters"
+            exit(1)
+        bin_nj = h_zllgamma_nj.FindBin(njets_LOW + 0.5)
+        bin_nb = h_zllgamma_nb.FindBin(nbjets_LOW + 0.5)
+        if (nbjets_LOW >= 3): bin_nb = h_zllgamma_nb.FindBin(nbjets_LOW - 0.5)
+        bin_ht = h_zllgamma_ht.FindBin(ht_LOW + 1)
+        bin_ht2 = h_zllgamma_ht2.FindBin(ht_LOW + 1)
+        bin_mt2 = h_zllgamma_mt2.FindBin(mt2_LOW + 1)
+        zllgamma_nj = 1.0
+        nj_content = h_zllgamma_nj.GetBinContent(bin_nj)
+        if (nj_content > 0):
+            zllgamma_nj = h_zllgamma_nj.GetBinError(bin_nj) / nj_content
+        zllgamma_nb = 1.0
+        nb_content = h_zllgamma_nb.GetBinContent(bin_nb)
+        if (nb_content > 0):
+            zllgamma_nb = h_zllgamma_nb.GetBinError(bin_nb) / nb_content
+        if (nbjets_LOW >= 3): zllgamma_nb *= 2
+        zllgamma_ht = 1.0
+        ht_content = h_zllgamma_ht.GetBinContent(bin_ht)
+        if (ht_content > 0):
+            zllgamma_ht = h_zllgamma_ht.GetBinError(bin_ht) / ht_content
+        zllgamma_ht2 = 1.0
+        ht2_content = h_zllgamma_ht2.GetBinContent(bin_ht2)
+        if (ht2_content > 0):
+            zllgamma_ht2 = h_zllgamma_ht2.GetBinError(bin_ht2) / ht2_content
+        zllgamma_mt2 = 1.0
+        mt2_content = h_zllgamma_mt2.GetBinContent(bin_mt2)
+        if (mt2_content > 0):
+            zllgamma_mt2 = h_zllgamma_mt2.GetBinError(bin_mt2) / mt2_content
+        
+    if (dir_qcd is not None):
+        h_qcd = f_qcd.Get(fullhistname)
+        if (h_qcd is not None):
+            n_qcd = h_qcd.GetBinContent(imt2)
+        h_qcd_cryield = f_qcd.Get(fullhistnameCRyield)
+        if (h_qcd_cryield is not None):
+            n_qcd_cr = round(h_qcd_cryield.GetBinContent(imt2))
+        h_qcd_alpha = f_qcd.Get(fullhistnameAlpha)
+        if (h_qcd_alpha is not None):
+            qcd_alpha = h_qcd_alpha.GetBinContent(imt2)
+            err_qcd_alpha = h_qcd_alpha.GetBinError(imt2)
+        h_qcd_fjrb = f_qcd.Get(fullhistnameFJRB)
+        if (h_qcd_fjrb is not None):
+            err_qcd_fjrb = h_qcd_fjrb.GetBinContent(imt2)
+        h_qcd_fitstat = f_qcd.Get(fullhistnameFitStat)
+        if (h_qcd_fitstat is not None):
+            err_qcd_fitstat = h_qcd_fitstat.GetBinContent(imt2)
+        h_qcd_fitsyst = f_qcd.Get(fullhistnameFitSyst)
+        if (h_qcd_fitsyst is not None):
+            err_qcd_fitsyst = h_qcd_fitsyst.GetBinContent(imt2)
+
+    # Finalize Errors
+    n_syst = 0
+    lostlep_shape = lostlep_shape_ERR
+    lostlep_mcstat = 1.0 + err_lostlep_mcstat
+    lostlep_lepeff = 1.0 + lostlep_alpha_lepeff_ERR
+    lostlep_mtcut = 1.03
+    lostlep_taueff = 1.0 + lostlep_alpha_tau_ERR
+    lostlep_btageff = 1.0 + lostlep_alpha_btagsf_ERR
+    lostlep_jec = 1.02
+    lostlep_renorm = 1.0 + lostlep_alpha_renorm_ERR
+    lostlep_alphaerr = 1.10
+
+    name_lostlep_shape = "llep_shape_{0}_{1}_{2}".format(ht_str_crsl,jet_str_crsl,bjet_str_crsl)
+    name_lostlep_crstat = "llep_CRstat_{0}_{1}_{2}".format(ht_str_crsl,jet_str_crsl,bjet_str_crsl)
+    name_lostlep_alphaerr = "llep_alpha_{0}_{1}_{2}".format(ht_str_crsl,jet_str_crsl,bjet_str_crsl)
+    if (n_mt2bins > 1 and imt2 >= lostlep_lastbin_hybrid):
+        n_syst += 1 # for lostlep shape
+    else:
+        name_lostlep_crstat = "llep_CRstat_{0}".format(channel)
+
+    # nuisances decorrelated across all bins
+    name_lostlep_mcstat = "llep_MCstat_{0}".format(channel)
+    
+    llep_corr_str = ""
+    if (decorrelatedLostlepNuisances):
+        llep_corr_str = "_" + channel
+    # nuisances correlated across all bins unless explicitly decorrelated by above
+    name_lostlep_lepeff = "lep_eff{0}".format(llep_corr_str)
+    name_lostlep_taueff = "llep_taueff{0}".format(llep_corr_str)
+    name_lostlep_btageff = "llep_btageff{0}".format(llep_corr_str)
+    name_lostlep_jec = "jec{0}".format(llep_corr_str)
+    name_lostlep_renorm = "llep_renorm{0}".format(llep_corr_str)
+    name_lostlep_mtcut = "llep_mtcut{0}".format(llep_corr_str)
+
+    if (doSimpleLostlepNuisances):
+        name_lostlep_lepeff = "llep_lepeff_{0}_{1}_{2}".format(ht_str_crsl,jet_str_crsl,bjet_str_crsl)
+        lostlep_lepeff = 1.12
+        if (njets_LOW == 7 and nbjets_LOW >= 3):
+            lostlep_alphaerr = 1.18
+
+    if (n_lostlep_cr > 0.0):
+        if (lostlep_alpha > 3.0):
+            lostlep_alpha = 3.0
+            n_lostlep = n_lostlep_cr * lostlep_alpha
+    if (lostlep_alpha > 0.0):
+        last_lostlep_transfer = lostlep_alpha
+    elif (n_lostlep == 0):
+        lostlep_alpha = 0
+    else: 
+        lostlep_alpha = last_lostlep_transfer
+    if (doSimpleLostlepNuisances):
+        n_syst += 4
+    else:
+        n_syst += 8
+
+    perChannel = channel
+    perTopoRegion = topologicalR
+
+    zinv_suffix = perChannel
+    if (integratedZinvEstimate):
+        zinv_suffix = perTopoRegion
+
+    name_zinv_crstat = "zinv_CRstat_{0}".format(zinv_suffix)
+    name_zinv_alphaerr = "zinv_alphaErr_{0}".format(zinv_suffix)
+    name_zinv_purityerr = "zinv_purity_{0}".format(zinv_suffix)
+    name_zinv_puritysyst = "zinv_puritySyst_{0}".format(zinv_suffix)
+    name_zinv_zgamma = "zinv_ZGratio"
+    if (uncorrelatedZGratio):
+        name_zinv_zgamma += "_{0}".format(channel)
+    name_zinv_zgamma_nj = "zinv_ZGratio_{0}".format(jet_str)
+    name_zinv_zgamma_nb = "zinv_ZGratio_{0}".format(bjet_str)
+    name_zinv_zgamma_ht = "zinv_ZGratio_{0}".format(ht_str)
+    name_zinv_zgamma_mt2 = "zinv_ZGratio_m{0}".format(mt2_LOW)
+    name_zinv_doubleRatioOffset = "zinv_doubleRatioOffset"
+    name_zinv_mcsyst = "zinv_MC_{0}".format(channel)
+    name_zinv_shape = "zinv_shape_{0}".format(perTopoRegion)
+
+    zinv_alpha = 1.0
+    zinv_alphaerr = 1.0 + err_zinv_mcstat
+    zinv_purityerr = 1.0 + err_zinv_purity
+    zinv_puritysyst = 1.10
+    zinv_doubleRatioOffset = 1.11
+    zinv_zgamma = -1
+    zinv_zgamma_nj = 1.0
+    zinv_zgamma_nb = 1.0
+    zinv_zgamma_ht = 1.0
+    zinv_zgamma_mt2 = 1.0
+    zinv_mcsyst = -1
+    zinv_shape = 1.0
+
+    name_zinvDY_alphaErr = "zinvDY_alphaErr_{0}".format(channel)
+    name_zinvDY_purity = "zinvDY_purity_{0}".format(perTopoRegion)
+    name_zinvDY_rsfof = "zinvDY_Rsfof"
+    name_zinvDY_shape = "zinvDY_shape_{0}".format(perTopoRegion)
+    name_zinvDY_crstat = "zinvDY_CRstat_{0}".format(perTopoRegion)
+    if (imt2 < zinvDY_lastbin_hybrid and not usingInclusiveTemplates):
+        name_zinvDY_crstat = "zinvDY_CRstat_{0}".format(channel)
+    zinvDY_shape = 1.0
+    zinvDY_puritystat = 1.0 + err_zinvDY_purity
+    zinvDY_rsfof = 1.0 + (1-zinvDY_purity)*0.15
+    zinvDY_alphaErr = 1.0 + err_zinvDY_mcstat
+    zinvDY_lepeff = 1.05
+    zinvDY_jec = 1.02
+    if (ht_HI == 450):
+        zinvDY_jec = 1.05
+
+    if (n_zinvDY_cr > 0.0):
+        if (zinvDY_alpha > 10.0):
+            zinvDY_alpha = 10.0
+            n_zinvDY = n_zinvDY_cr * zinvDY_alpha
+    if (zinvDY_alpha > 0.0):
+        last_zinvDY_transfer = zinvDY_alpha
+    elif (n_zinvDY == 0):
+        zinvDY_alpha = 0
+    else:
+        zinvDY_alpha = last_zinvDY_transfer
+        
+    if (zinvDY_alpha != n_zinvDY / n_zinvDY_cr and n_zinvDY_cr != 0):
+        zinvDY_alpha = n_zinvDY / n_zinvDY_cr
+
+    n_syst += 6
+
+    last_bin_relerr_zinvDY = 0.4
+    n_extrap_bins_zinvDY = n_mt2bins - zinvDY_lastbin_hybrid
+    if (n_extrap_bins_zinvDY > 0 and imt2 >= zinvDY_lastbin_hybrid):
+        if (imt2 == zinvDY_lastbin_hybrid and n_zinvDY > 0.0):
+            increment = 0.0
+            for ibin in range(zinvDY_lastbin_hybrid+1,h_zinvDY.GetNbinsX()):
+                increment += last_bin_relerr_zinvDY / n_extrap_bins_zinvDY * (ibin - zinvDY_lastbin_hybrid) * h_zinvDY.GetBinContent(ibin)
+            zinvDY_shape = 1.0 - increment / n_zinvDY
+        else:
+            zinvDY_shape = 1.0 + last_bin_relerr_zinvDY / (n_extrap_bins_zinvDY) * (imt2 -  zinvDY_lastbin_hybrid)
+        n_syst += 1
+
+    if (not integratedZinvEstimate and nbjets_LOW >= 2):
+        zinv_mcsyst = 2.0
+        n_syst += 1
+    else:
+        zinv_alpha = zinv_ratio_zg * zinv_purity * 0.92
+        if (f_data):
+            zinv_alpha *= 0.93
+        if (zinv_alpha > 0.5):
+            zinv_alpha = 0.5
+        n_syst += 5
+        if (integratedZinvEstimate and n_mt2bins > 1):
+            if (imt2 == 1 and n_zinv > 0):
+                increment = 0.0
+                for ibin in range(2,h_zinv.GetNbinsX()):
+                    increment += 0.4 / (n_mt2bins - 1) * (ibin - 1) * h_zinv.GetBinContent(ibin)
+                zinv_shape = 1.0 - increment / n_zinv
+            else:
+                zinv_shape = 1.0 + 0.4 / (n_mt2bins - 1) * (imt2 - 1)
+            n_syst += 1
+        if (fourNuisancesPerBinZGratio):
+            zinv_zgamma_nj  =  1.0 + zllgamma_nj     
+            zinv_zgamma_nb  =  1.0 + zllgamma_nb
+            zinv_zgamma_ht  =  1.0 + zllgamma_ht 
+            if (njets_LOW == 1):
+                zinv_zgamma_ht = 1.0 + zllgamma_ht2
+            else:
+                n_syst += 3
+            if (not integratedZinvEstimate):
+                zinv_zgamma_mt2 = 1.0 + zllgamma_mt2
+                n_syst += 1
+        else:
+            zinv_zgamma = 1.20
+            n_syst += 1
+    
+        n_zinv = n_zinv_cr * zinv_alpha
+
+    qcd_crstat = qcd_alpha
+    qcd_alphaerr = 1.0 + (err_qcd_alpha / qcd_alpha)
+    qcd_fjrbsyst = 1.0 + err_qcd_fjrb
+    qcd_fitstat = 1.0 + err_qcd_fitstat
+    qcd_fitsyst = 1.0 + err_qcd_fitsyst
+
+    name_qcd_crstat = "qcd_CRstat_{0}".format(perChannel)
+    name_qcd_alphaerr = "qcd_alphaErr_{0}".format(perChannel)
+    name_qcd_fjrbsyst = "qcd_FJRBsyst_{0}".format(perChannel)
+    name_qcd_fitstat = "qcd_RPHIstat_{0}".format(ht_str)
+    name_qcd_fitsyst = "qcd_RPHIsyst_{0}".format(ht_str)
+
+    if (njets_LOW == 1): n_syst += 2
+    else: n_syst += 4
+
+    if (doZinvFromDY):
+        n_bkg = n_lostlep+n_zinvDY+n_qcd
+    else:
+        n_bkg = n_lostlep_n_zinv+n_qcd
+
+    if (n_bkg < 0.001): n_qcd = 0.01
+
+    if (f_data is not None):
+        h_data = f_data.Get(fullhistname)
+        if (h_data is not None):
+            n_data = h_data.GetBinContent(imt2)
+    else:
+        n_data = n_bkg
+
+    uncorr_zinvDY = n_zinvDY_cr > 0 and n_zinvDY == 0
+    uncorr_lostlep = n_lostlep_cr > 0 and n_lostlep == 0
+    uncorr_qcd = n_qcd_cr > 0 and n_qcd == 0
+    
+    zero_zinvDY = zinvDY_alpha == 0.0 and n_zinvDY_cr == 0.0
+    zero_lostlep = lostlep_alpha == 0.0 and n_lostlep_cr == 0.0
+    zero_qcd = qcd_crstat == 0.0 and n_qcd_cr == 0.0
+
+    # Allow ad hoc modification of counts and alphas by setting scale parameters
+    # Set alphas = 0 to 2.0 (ad hoc) in certain cases
+    scale = 1.0
+    n_zinvDY_towrite = scale * n_zinvDY
+    n_lostlep_towrite = scale * n_lostlep
+    n_qcd_towrite = scale * n_qcd
+    # If alpha is 0 then set it to 2.0 for now for comparison with old cards
+    zinvDY_alpha_towrite = scale * zinvDY_alpha
+    lostlep_alpha_towrite = scale * lostlep_alpha
+    qcd_crstat_towrite = scale * qcd_crstat
+    if (uncorr_zinvDY or zero_zinvDY): zinvDY_alpha_towrite = scale * 2.0
+    if (uncorr_lostlep or zero_lostlep): lostlep_alpha_towrite = scale * 2.0
+    if (uncorr_qcd or zero_qcd): qcd_alpha_towrite = scale * 2.0
+    
+    n_zinvDY_cr_towrite = n_zinvDY_cr
+    if (uncorr_zinvDY):
+        name_zinvDY_crstat += "_" + mt2_str
+        n_zinvDY_cr_towrite = 0
+    n_lostlep_cr_towrite = n_lostlep_cr
+    if (uncorr_lostlep):
+        name_lostlep_crstat += "_" + mt2_str
+        n_lostlep_cr_towrite = 0
+    n_qcd_cr_towrite = n_qcd_cr
+    if (uncorr_qcd):
+        name_qcd_crstat += "_" + mt2_str
+        n_qcd_cr_towrite = 0
+
+    template = "imax 1  number of channels\n"
+    template += "jmax 3  number of backgrounds\n"
+    template += "kmax *\n"
+    template += "------------\n"
+    template += "bin         {0}\n".format(channel)
+    template += "observation {0:.3f}\n".format(n_data)
+    template += "------------\n"
+    template += "bin             {0}   {1}   {2}   {3}\n".format(channel,channel,channel,channel)
+    template += "process          sig       zinv        llep      qcd\n"
+    template += "process           0         1           2         3\n"
+    if (doZinvFromDY):
+        template += "rate            n_sig_cor_recogenaverage    {0:.3f}      {1:.3f}      {2:.3f}\n".format(n_zinvDY_towrite,n_lostlep_towrite,n_qcd_towrite)
+    else:  
+        template += "rate            n_sig_cor_recogenaverage    {0:.3f}      {1:.3f}      {2:.3f}\n".format(n_zinv,n_lostlep,n_qcd)
+    template += "------------"
+
+    if (doDummySignalSyst):
+        template += "name_sig_syst                                lnN   sig_syst    -      -     - \n"
+    else:
+        template += "name_sig_lumi                    lnN    sig_lumi   -    -    - \n"
+        template += "name_sig_pu                    lnN    sig_pu   -    -    - \n"
+        template += "name_sig_mcstat     lnN    sig_mcstat   -    -    - \n"
+        template += "name_sig_genmet                  lnU    sig_genmet   -    -    - \n"
+        template += "name_sig_isr                  lnU    sig_isr   -    -    - \n"
+        template += "name_sig_btagsf_heavy            lnN    sig_btagsf_heavy   -    -    - \n"
+        template += "name_sig_btagsf_light            lnN    sig_btagsf_light   -    -    - \n"
+        if (isSignalWithLeptons):
+            template += "name_sig_lepeff               lnN    sig_lepeff   -    -    - \n"
+
+            
+    # Zinv systs
+    if (doZinvFromDY):
+        template += "{0}        gmN {1:.0f}    -   {2:.5f}   -   - \n".format(name_zinvDY_crstat,n_zinvDY_cr_towrite,zinvDY_alpha_towrite)
+        template += "{0}        lnN    -   {1:.3f}   -   - \n".format(name_zinvDY_alphaErr,zinvDY_alphaErr)
+        template += "{0}        lnN    -   {1:.3f}   -   - \n".format(name_zinvDY_purity,zinvDY_puritystat)        
+        template += "{0}        lnN    -   {1:.3f}   -   - \n".format(name_zinvDY_rsfof,zinvDY_rsfof)
+        if (n_extrap_bins_zinvDY > 0 and imt2 >= zinvDY_lastbin_hybrid):
+            template += "{0}    lnN    -   {1:.3f}   -   - \n".format(name_zinvDY_shape,zinvDY_shape)
+    else:
+        print "Zinv currently only implemented for DY"
+        exit(1)
+    
+    # lostlep systs
+    if (doSimpleLostlepNuisances):
+        template += "{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_lepeff,lostlep_lepeff)
+        template += "{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_alphaerr,lostlep_alphaerr)
+    else:
+        template += "{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_mtcut,lostlep_mtcut)
+        template += "{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_taueff,lostlep_taueff)
+        template += "{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_btageff,lostlep_btageff)
+        if (not doZinvFromDY):
+            print "Zinv currently only implemented for DY"
+            exit(1)
+        template += "{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_renorm,lostlep_renorm)
+    
+    template += "{0}        gmN {1:.0f}    -    -    {2:.5f}     - \n".format(name_lostlep_crstat,n_lostlep_cr_towrite,lostlep_alpha_towrite)
+    template += "{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_mcstat,lostlep_mcstat)
+    if (n_mt2bins > 1 and imt2 >= lostlep_lastbin_hybrid):
+        template += "{0}    lnN    -    -   {1:.3f}     - \n".format(name_lostlep_shape,lostlep_shape)
+    
+    if (doZinvFromDY):
+        template += "{0}        lnN    -    {1:.3f}    {2:.3f}    - \n".format(name_lostlep_jec,zinvDY_jec,lostlep_jec)
+        template += "{0}        lnN    -    {1:.3f}    {2:.3f}    - \n".format(name_lostlep_lepeff,zinvDY_lepeff,lostlep_lepeff)
+    else:
+        print "Zinv currently only implemented for DY"
+        exit(1)
+        
+    # QCD systs
+    template += "{0}        gmN {1:.0f}    -    -    -   {2:.5f}\n".format(name_qcd_crstat,n_qcd_cr_towrite,qcd_crstat_towrite)
+    if (njets_LOW == 1): # Monojet
+        template += "{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_alphaerr,qcd_alphaerr)
+    else:
+        template += "{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fjrbsyst,qcd_fjrbsyst)
+        template += "{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fitstat,qcd_fitstat)
+        template += "{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fitsyst,qcd_fitsyst)
+    
+    return template
 
 def makeCard(tmp,signal,outdir,im1=-1,im2=-1):
     outfile = open("{0}/{1}_{2}_{3}.txt".format(outdir,signal,im1,im2),"w")
