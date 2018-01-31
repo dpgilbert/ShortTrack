@@ -1,7 +1,8 @@
 #!/bin/bash
 
 INDIR=/home/users/dpgilber/MT2AnalysisFinal16/MT2looper/output/full2016/
-OUTDIR=cards_final16
+#OUTDIR=cards_final16
+OUTDIR=cards_debug
 
 ## set to 1 if doing full signal scans (instead of benchmark signal points)
 DOFULLSCAN=1

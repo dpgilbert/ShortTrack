@@ -19,6 +19,7 @@
 #include "TKey.h"
 #include "TBenchmark.h"
 #include "RooHistError.h"
+#include "TError.h"
 
 using namespace std;
 
@@ -87,6 +88,8 @@ double round(double d)
 
 //_______________________________________________________________________________
 int printCard( string dir_str , int mt2bin , string signal, string output_dir, int scanM1 = -1, int scanM2 = -1) {
+
+  if (scanM1 != 1000 || scanM2 != 600) return 0;
 
   // read off yields from h_mt2bins hist in each topological region
   if (verbose) cout<<"Looking at region "<<dir_str<<", mt2 bin "<<mt2bin<<endl;
@@ -609,6 +612,10 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (dir_qcd) {
     TH1D* h_qcd = (TH1D*) f_qcd->Get(fullhistname);
     if (h_qcd != 0) n_qcd = h_qcd->GetBinContent(mt2bin);
+
+    h_qcd->Print("all");
+    cout << "n_qcd = " << n_qcd << endl;
+
     //  if (n_qcd < 0.01) n_qcd = 0.01;
     TH1D* h_qcd_cryield = (TH1D*) f_qcd->Get(fullhistnameCRyield);
     if (h_qcd_cryield != 0) 
@@ -984,6 +991,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     n_qcd_cr_towrite = 0;
   }
 
+  cout << "n_qcd_towrite = " << n_qcd_towrite << endl;
+
 
   ofile <<  "imax 1  number of channels"                                                    << endl;
   ofile <<  "jmax 3  number of backgrounds"                                                 << endl;
@@ -1158,6 +1167,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
 //_______________________________________________________________________________
 void cardMaker(string signal, string input_dir, string output_dir, bool isScan = false, bool doData = true){
+
+  gErrorIgnoreLevel=kError;
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
