@@ -14,7 +14,7 @@ MODEL="T1qqqq"
 
 #the suffix
 #DATE="ETH_Feb2"
-DATE=""
+DATE="Final16"
 
 #directory where cards and points_MODEL.txt can be found
 #INDIR="/home/users/mderdzinski/winter2017/clean_master/scripts/cards_${MODEL}_${DATE}"
