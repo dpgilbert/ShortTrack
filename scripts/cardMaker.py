@@ -267,6 +267,183 @@ def makeTemplate(directory,imt2):
     bjet_str_crsl.replace("-1","Inf")
     jet_str_crsl.replace("-1","Inf")
 
+    if (dir_lostlep is not None):
+        h_lostlep = f_lostlep.Get(fullhistname)
+        if (h_lostlep is not None): n_lostlep = h_lostlep.GetBinContent(imt2)
+        h_lostlep_mcstat = f_lostlep.Get(fullhistnameMCStat)
+        if (h_lostlep_mcstat is not None):
+            mcstat_content = h_lostlep_mcstat.GetBinContent(imt2)
+            if (mcstat_content != 0): 
+                err_lostlep_mcstat = h_lostlep_mcstat.GetBinError(imt2) / mcstat_content       
+        h_lostlep_cryield = f_lostlep.Get(fullhistnameCRyieldDatacard)
+        if (h_lostlep_cryield is not None):
+            n_lostlep_cr = round(h_lostlep_cryield.GetBinContent(imt2))
+        h_lostlep_alpha = f_lostlep.Get(fullhistnameAlpha)
+        if (h_lostlep_alpha is not None):
+            lostlep_alpha = h_lostlep_alpha.GetBinContent(imt2)
+            lostlep_alpha_topological = h_lostlep_alpha.Integral(0,-1)
+        h_lostlep_alpha_lepeff_UP = f_lostlep.Get(fullhistnameAlpha+"_lepeff_UP")
+        if (h_lostlep_alpha_lepeff_UP is not None):
+            lostlep_alpha_lepeff_UP = h_lostlep_alpha_lepeff_UP.Integral(0,-1)
+        h_lostlep_alpha_lepeff_DN = f_lostlep.Get(fullhistnameAlpha+"_lepeff_DN")
+        if (h_lostlep_alpha_lepeff_DN is not None):
+            lostlep_alpha_lepeff_DN = h_lostlep_alpha_lepeff_DN.Integral(0,-1)
+        h_lostlep_alpha_btagsf_heavy_UP = f_lostlep.Get(fullhistnameAlpha+"_btagsf_heavy_UP")
+        if (h_lostlep_alpha_btagsf_heavy_UP is not None):
+            lostlep_alpha_btagsf_heavy_UP = h_lostlep_alpha_btagsf_heavy_UP.Integral(0,-1)
+        h_lostlep_alpha_btagsf_heavy_DN = f_lostlep.Get(fullhistnameAlpha+"_btagsf_heavy_DN")
+        if (h_lostlep_alpha_btagsf_heavy_DN is not None):
+            lostlep_alpha_btagsf_heavy_DN = h_lostlep_alpha_btagsf_heavy_DN.Integral(0,-1)
+        h_lostlep_alpha_btagsf_light_UP = f_lostlep.Get(fullhistnameAlpha+"_btagsf_light_UP")
+        if (h_lostlep_alpha_btagsf_light_UP is not None):
+            lostlep_alpha_btagsf_light_UP = h_lostlep_alpha_btagsf_light_UP.Integral(0,-1)
+        h_lostlep_alpha_btagsf_light_DN = f_lostlep.Get(fullhistnameAlpha+"_btagsf_light_DN")
+        if (h_lostlep_alpha_btagsf_light_DN is not None):
+            lostlep_alpha_btagsf_light_DN = h_lostlep_alpha_btagsf_light_DN.Integral(0,-1)
+        h_lostlep_alpha_tau1p_UP = f_lostlep.Get(fullhistnameAlpha+"_tau1p_UP")
+        if (h_lostlep_alpha_tau1p_UP is not None):
+            lostlep_alpha_tau1p_UP = h_lostlep_alpha_tau1p_UP.Integral(0,-1)
+        h_lostlep_alpha_tau1p_DN = f_lostlep.Get(fullhistnameAlpha+"_tau1p_DN")
+        if (h_lostlep_alpha_tau1p_DN is not None):
+            lostlep_alpha_tau1p_DN = h_lostlep_alpha_tau1p_DN.Integral(0,-1)
+        h_lostlep_alpha_tau3p_UP = f_lostlep.Get(fullhistnameAlpha+"_tau3p_UP")
+        if (h_lostlep_alpha_tau3p_UP is not None):
+            lostlep_alpha_tau3p_UP = h_lostlep_alpha_tau3p_UP.Integral(0,-1)
+        h_lostlep_alpha_tau3p_DN = f_lostlep.Get(fullhistnameAlpha+"_tau3p_DN")
+        if (h_lostlep_alpha_tau3p_DN is not None):
+            lostlep_alpha_tau3p_DN = h_lostlep_alpha_tau3p_DN.Integral(0,-1)
+        h_lostlep_alpha_renorm_UP = f_lostlep.Get(fullhistnameAlpha+"_renorm_UP")
+        if (h_lostlep_alpha_renorm_UP is not None):
+            lostlep_alpha_renorm_UP = h_lostlep_alpha_renorm_UP.Integral(0,-1)
+        h_lostlep_alpha_renorm_DN = f_lostlep.Get(fullhistnameAlpha+"_renorm_DN")
+        if (h_lostlep_alpha_renorm_DN is not None):
+            lostlep_alpha_renorm_DN = h_lostlep_alpha_renorm_DN.Integral(0,-1)
+        h_lostlep_lastbin_hybrid = f_lostlep.Get(fullhistnameLastbinHybrid)
+        if (h_lostlep_lastbin_hybrid is not None):
+            lostlep_lastbin_hybrid = h_lostlep_lastbin_hybrid.GetBinContent(1)
+        h_lostlep_MCExtrap = f_lostlep.Get(fullhistnameMCExtrap)
+        if (h_lostlep_MCExtrap is not None):
+            lostlep_MCExtrap = h_lostlep_MCExtrap.GetBinContent(imt2)
+
+    # lepeff
+    lostlep_alpha_lepeff_ERRup = abs(1.0-lostlep_alpha_lepeff_UP/lostlep_alpha_topological)
+    lostlep_alpha_lepeff_ERRdn = abs(1.0-lostlep_alpha_lepeff_DN/lostlep_alpha_topological)
+    lostlep_alpha_lepeff_ERR = max(lostlep_alpha_lepeff_ERRup, lostlep_alpha_lepeff_ERRdn)
+
+    # btagsf
+    lostlep_alpha_btagsf_heavy_ERRup = abs(1.0-lostlep_alpha_btagsf_heavy_UP/lostlep_alpha_topological)
+    lostlep_alpha_btagsf_heavy_ERRdn = abs(1.0-lostlep_alpha_btagsf_heavy_DN/lostlep_alpha_topological)
+    lostlep_alpha_btagsf_heavy_ERR = max(lostlep_alpha_btagsf_heavy_ERRup, lostlep_alpha_btagsf_heavy_ERRdn)
+    lostlep_alpha_btagsf_light_ERRup = abs(1.0-lostlep_alpha_btagsf_light_UP/lostlep_alpha_topological)
+    lostlep_alpha_btagsf_light_ERRdn = abs(1.0-lostlep_alpha_btagsf_light_DN/lostlep_alpha_topological)
+    lostlep_alpha_btagsf_light_ERR = max(lostlep_alpha_btagsf_light_ERRup, lostlep_alpha_btagsf_light_ERRdn)
+    lostlep_alpha_btagsf_ERR = max(lostlep_alpha_btagsf_heavy_ERR, lostlep_alpha_btagsf_light_ERR)
+
+    # tau
+    lostlep_alpha_tau1p_ERRup = abs(1.0-lostlep_alpha_tau1p_UP/lostlep_alpha_topological)
+    lostlep_alpha_tau1p_ERRdn = abs(1.0-lostlep_alpha_tau1p_DN/lostlep_alpha_topological)
+    lostlep_alpha_tau1p_ERR = max(lostlep_alpha_tau1p_ERRup, lostlep_alpha_tau1p_ERRdn)
+    lostlep_alpha_tau3p_ERRup = abs(1.0-lostlep_alpha_tau3p_UP/lostlep_alpha_topological)
+    lostlep_alpha_tau3p_ERRdn = abs(1.0-lostlep_alpha_tau3p_DN/lostlep_alpha_topological)
+    lostlep_alpha_tau3p_ERR = max(lostlep_alpha_tau3p_ERRup, lostlep_alpha_tau3p_ERRdn)
+    lostlep_alpha_tau_ERR = max(lostlep_alpha_tau1p_ERR, lostlep_alpha_tau3p_ERR)
+
+    # renorm
+    lostlep_alpha_renorm_ERRup = abs(1.0-lostlep_alpha_renorm_UP/lostlep_alpha_topological)
+    lostlep_alpha_renorm_ERRdn = abs(1.0-lostlep_alpha_renorm_DN/lostlep_alpha_topological)
+    lostlep_alpha_renorm_ERR = max(lostlep_alpha_renorm_ERRup, lostlep_alpha_renorm_ERRdn)
+
+    # MC extrapolation (MT2 shape)
+    lostlep_shape_ERR = 0.0
+    if (n_lostlep > 0.0): lostlep_shape_ERR = lostlep_MCExtrap / n_lostlep
+
+    n_mt2bins = 1
+    h_zinv = None
+    if (dir_zinv is not None):
+        h_zinv = f_zinv.Get(fullhistname)
+        if (h_zinv is not None):
+            n_zinv = h_zinv.GetBinContent(imt2)
+            n_mt2bins = h_zinv.GetNbinsX()
+        h_zinv_mcstat = None
+        if (integratedZinvEstimate):
+            h_zinv_mcstat = f_zinv.Get(fullhistnameRatioInt)
+        else:
+            h_zinv_mcstat = f_zinv.Get(fullhistnameRatio)
+        if (h_zinv_mcstat is not None):
+            mcstat_content = h_zinv_mcstat.GetBinContent(imt2)
+            if (mcstat_content != 0):
+                err_zinv_mcstat = h_zinv_mcstat.GetBinError(imt2) / mcstat_content
+                zinv_ratio_zg = mcstat_content
+                last_zinv_ratio = zinv_ratio_zg
+        else:
+            err_zinv_mcstat = 1.0
+            zinv_ratio_zg = last_zinv_ratio
+            
+        # h_gjetyield = f_zinv.Get(fullhistnameCRyield)
+
+    if (dir_purity is not None):
+        h_zinv_cryield = f_purity.Get(fullhistname)
+        if (h_zinv_cryield is not None):
+            if (integratedZinvEstimate):
+                n_zinv_cr = round(h_zinv_cryield.Integral(0,-1))
+            else:
+                n_zinv_cr = round(h_zinv_cryield.GetBinContent(imt2))
+
+        h_zinv_purity = None
+        
+        zinv_purity = 1.0
+        mt2bin_tmp = imt2
+        if (integratedZinvEstimate):
+            h_zinv_purity = f_purity.Get(fullhistnamePurityInt)
+            mt2bin_tmp = 1
+        else:
+            h_zinv_purity = f_purity.Get(fullhistnamePurity)
+
+        if (h_zinv_purity is not None):
+            purity_content = h_zinv_purity.GetBinContent(mt2bin_tmp)
+            if (purity_content != 0):
+                zinv_purity = purity_content
+                err_zinv_purity = h_zinv_purity.GetBinContent(mt2bin_tmp) / purity_content
+
+    # Zinv from DY
+    h_zinvDY = None
+    if (dir_zinvDY is not None):
+        h_zinvDY = f_zinvDY.Get(directory+"/hybridEstimate")
+        purityCard = f_zinvDY.Get(directory+"/purityCard")
+        ratioCard = f_zinvDY.Get(directory+"/ratioCard")
+        h_zinvDY_cryield = f_zinvDY.Get(directory+"/CRyieldCard")
+        if (h_zinvDY is not None):
+            n_mt2bins = h_zinvDY.GetNbinsX()
+            n_zinvDY = h_zinvDY.GetBinContent(imt2)
+        if (ratioCard is not None):
+            ratio_content = ratioCard.GetBinContent(imt2)
+            if (ratio_content != 0):
+                err_zinvDY_mcstat = ratioCard.GetBinError(imt2) / ratio_content
+        if (h_zinvDY_cryield is not None):
+            n_zinvDY_cr = round(h_zinvDY_cryield.GetBinContent(imt2))
+            crYieldFirstBin = -1
+            for ibin in range(1, h_zinvDY_cryield.GetNbinsX()):
+                thiscrYield = round(h_zinvDY_cryield.GetBinContent(ibin))
+                if (ibin == 1): crYieldFirstBin = thiscrYield
+                if (crYieldFirstBin != thiscrYield):
+                    usingInclusiveTemplates = False
+                    break
+        h_zinvDY_alpha = ratioCard.Clone()
+        if (h_zinvDY_alpha is not None):
+            if (purityCard is not None):
+                zinvDY_purity = purityCard.GetBinContent(imt2)
+                h_zinvDY_alpha.Multiply(purityCard)
+                purity_content = purityCard.GetBinContent(imt2)
+                if (purity_content > 0):
+                    err_zinvDY_purity = purityCard.GetBinError(imt2) / purity_content
+                else:
+                    err_zinvDY_purity = 0
+            zinvDY_alpha = h_zinvDY_alpha.GetBinContent(imt2)
+            zinvDY_alpha_topological = h_zinvDY_alpha.Integral(0,-1)
+        h_zinvDY_lastbin_hybrid = f_zinvDY.Get(fullhistnameLastbinHybrid)
+        if (h_zinvDY_lastbin_hybrid is not None):
+            zinvDY_lastbin_hybrid = h_zinvDY_lastbin_hybrid.GetBinContent(1)
+
     return "template"
 
 def makeCard(tmp,signal,outdir,im1=-1,im2=-1):
