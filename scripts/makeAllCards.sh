@@ -16,5 +16,6 @@ declare -a samples=(T1qqqq)
 
 for i in "${samples[@]}"
 do
-  nohup root -b -q "cardMaker.C+(\"$i\",\"${INDIR}\",\"${OUTDIR}\",${DOFULLSCAN})" > make_cards_$i.log 2>&1 &
+  nohup root -b -q "cardMaker.C+(\"$i\",\"${INDIR}\",\"${OUTDIR}\",${DOFULLSCAN})" > make_cards_${i}.log 2>&1 &
+#  root -b -q "cardMaker.C+(\"$i\",\"${INDIR}\",\"${OUTDIR}\",${DOFULLSCAN})"
 done

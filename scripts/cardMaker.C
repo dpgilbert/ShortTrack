@@ -89,8 +89,6 @@ double round(double d)
 //_______________________________________________________________________________
 int printCard( string dir_str , int mt2bin , string signal, string output_dir, int scanM1 = -1, int scanM2 = -1) {
 
-  if (scanM1 != 1000 || scanM2 != 600) return 0;
-
   // read off yields from h_mt2bins hist in each topological region
   if (verbose) cout<<"Looking at region "<<dir_str<<", mt2 bin "<<mt2bin<<endl;
   TString dir = TString(dir_str);
@@ -277,6 +275,12 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   else if (h_sig->Integral(0,-1) == 0) {
     if (verbose) cout<<"No signal found in this region"<<endl;
     if (suppressZeroBins || suppressZeroTRs) return 0;
+  }
+  else if (h_sig->GetBinContent(mt2bin) == 0) {
+    if (verbose) cout<<"No signal found in this bin"<<endl;
+    if (suppressZeroBins) return 0;
+    n_sig = 0;
+    n_sig_TR = h_sig->Integral(0,-1);
   }
   else {
     n_sig = h_sig->GetBinContent(mt2bin);
@@ -544,8 +548,10 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     }
     //get mcstat from alpha histogram
     //has additional uncertainties baked in from Zinvmaker
-    if (ratioCard != 0 && ratioCard->GetBinContent(mt2bin) != 0) 
+    if (ratioCard != 0 && ratioCard->GetBinContent(mt2bin) != 0) {
       err_zinvDY_mcstat = ratioCard->GetBinError(mt2bin)/ratioCard->GetBinContent(mt2bin);
+    }
+
     if (h_zinvDY_cryield != 0) {
       n_zinvDY_cr = round(h_zinvDY_cryield->GetBinContent(mt2bin)); 
       //check if using inclusive templates by looking at content of CRyieldCard
@@ -560,7 +566,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 	}
       }
     }
-    TH1D* h_zinvDY_alpha = (TH1D*) f_zinvDY->Get(dir+"/ratioCard");
+    //    TH1D* h_zinvDY_alpha = (TH1D*) f_zinvDY->Get(dir+"/ratioCard");
+    TH1D* h_zinvDY_alpha = (TH1D*) (ratioCard != 0 ? ratioCard->Clone() : 0);
     if (h_zinvDY_alpha != 0) {
       //multiply in purity histogram to get final alpha
       if (purityCard != 0) {
@@ -612,9 +619,6 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (dir_qcd) {
     TH1D* h_qcd = (TH1D*) f_qcd->Get(fullhistname);
     if (h_qcd != 0) n_qcd = h_qcd->GetBinContent(mt2bin);
-
-    h_qcd->Print("all");
-    cout << "n_qcd = " << n_qcd << endl;
 
     //  if (n_qcd < 0.01) n_qcd = 0.01;
     TH1D* h_qcd_cryield = (TH1D*) f_qcd->Get(fullhistnameCRyield);
@@ -750,6 +754,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double zinvDY_puritystat = 1. + err_zinvDY_purity; // transfer factor purity stat uncertainty
   double zinvDY_rsfof = 1. + (1-zinvDY_purity)*0.15; // transfer factor uncertainty due to R(SF/OF)
   double zinvDY_alphaErr = 1. + err_zinvDY_mcstat; // transfer factor stat uncertainty
+
+  cout << zinvDY_alphaErr << endl;
+
   double zinvDY_lepeff = 1. + 0.05; // lepeff uncertainty
   double zinvDY_jec = (ht_HI == 450) ?  1. + 0.05 : 1. + 0.02; // transfer factor jec uncertainty
 
@@ -918,7 +925,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_sig_pu           = "sig_PUsyst";
   TString name_sig_mcstat       = "sig_MCstat_"+perChannel;
   TString name_sig_genmet       = "sig_gensyst";
-  TString name_sig_isr          = "sig_isrSyst";
+  TString name_sig_isr          = "sig_IsrSyst";
   TString name_sig_btagsf_heavy = "sig_bTagHeavySyst";
   TString name_sig_btagsf_light = "sig_bTagLightSyst";
   TString name_sig_lepeff       = "sig_lepEffSyst";
@@ -990,9 +997,6 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     name_qcd_crstat += "_" + mt2_str;
     n_qcd_cr_towrite = 0;
   }
-
-  cout << "n_qcd_towrite = " << n_qcd_towrite << endl;
-
 
   ofile <<  "imax 1  number of channels"                                                    << endl;
   ofile <<  "jmax 3  number of backgrounds"                                                 << endl;

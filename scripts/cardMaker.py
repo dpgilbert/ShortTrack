@@ -1,6 +1,9 @@
 import ROOT
 import re
+from math import sqrt
 from sys import argv,exit
+
+ROOT.gErrorIgnoreLevel = ROOT.kError
 
 verbose = False
 suppressZeroBins = False
@@ -84,7 +87,9 @@ def makeTemplate(directory,imt2):
     dir_purity = f_purity.Get(directory)
     dir_qcd = f_qcd.Get(directory)
 
-    if (dir_sig is None):
+    # While "X == None" is discouraged in favor of "X is None" by python standards, it is necessary by design in PyROOT.
+    # (See: https://root-forum.cern.ch/t/findobject-returns-a-null-pointer-tobject/8408/4)
+    if (dir_sig == None):
         print "dir {0} does not exist in f_sig. Aborting...".format(directory)
         exit(1)
 
@@ -95,11 +100,6 @@ def makeTemplate(directory,imt2):
     fullhistnameLepeff = "{0}_lepeff_UP".format(fullhistname)
     fullhistnameIsr = "{0}_isr_UP".format(fullhistname)
     fullhistnameScan = "{0}_sigscan".format(fullhistname)
-    fullhistnameScanGenMet = "{0}_sigscan_genmet".format(fullhistname)
-    fullhistnameScanBtagsfHeavy = "{0}_sigscan_btagsf_heavy_UP".format(fullhistname)
-    fullhistnameScanBtagsfLight = "{0}_sigscan_btagsf_light_UP".format(fullhistname)
-    fullhistnameScanLepeff = "{0}_sigscan_lepeff_UP".format(fullhistname)
-    fullhistnameScanIsr = "{0}_sigscan_isr_UP".format(fullhistname)
     fullhistnameStat = "{0}Stat".format(fullhistname)
     fullhistnameMCStat = "{0}MCStat".format(fullhistname)
     fullhistnameCRyield = "{0}CRyield".format(fullhistname)
@@ -117,9 +117,7 @@ def makeTemplate(directory,imt2):
     crsl_directory = directory.replace("sr","crsl")
     fullhistnameCRSL = "{0}/h_mt2bins".format(crsl_directory)
     fullhistnameCRSLGenMet = "{0}/h_mt2bins_genmet".format(crsl_directory)
-    fullhistnameCRSLScan = "{0}_sigscan".format(fullhistnameCRSL)
-    fullhistnameCRSLScanGenMet = "{0}_sigscan_genmet".format(fullhistnameCRSL)
-
+    
     isSignalWithLeptons = signal.find("T1tttt") != -1 or signal.find("T2tt") != -1
     
     n_lostlep = 0.0
@@ -232,7 +230,7 @@ def makeTemplate(directory,imt2):
     nbjets_HI_crsl = 0
     njets_LOW_crsl = 0
     njets_HI_crsl = 0
-    if (dir_lostlep is not None):
+    if (not dir_lostlep == None):
         h_ht_LOW_crsl = f_lostlep.Get(ht_LOW_name)
         h_ht_HI_crsl = f_lostlep.Get(ht_HI_name)
         ht_LOW_crsl = int(h_ht_LOW_crsl.GetBinContent(1))
@@ -254,11 +252,11 @@ def makeTemplate(directory,imt2):
     if (njets_HI_crsl != -1): njets_HI_crsl_mod -= 1
 
     ht_str_crsl = "HT{0}to{1}".format(str(ht_LOW_crsl),str(ht_HI_crsl))
-    if (nbjets_HI_crsl != nbjets_HI_crsl_mod):
+    if (nbjets_LOW_crsl != nbjets_HI_crsl_mod):
         bjet_str_crsl = "b{0}to{1}".format(str(nbjets_LOW_crsl),str(nbjets_HI_crsl_mod))
     else:
         bjet_str_crsl = "b{0}".format(str(nbjets_LOW_crsl))
-    if (njets_HI_crsl != njets_HI_crsl_mod):
+    if (njets_LOW_crsl != njets_HI_crsl_mod):
         jet_str_crsl = "j{0}to{1}".format(str(njets_LOW_crsl),str(njets_HI_crsl_mod))
     else:
         jet_str_crsl = "j{0}".format(str(njets_LOW_crsl))
@@ -267,62 +265,63 @@ def makeTemplate(directory,imt2):
     bjet_str_crsl = bjet_str_crsl.replace("-1","Inf")
     jet_str_crsl = jet_str_crsl.replace("-1","Inf")
 
-    if (dir_lostlep is not None):
+    if (not dir_lostlep == None):
         h_lostlep = f_lostlep.Get(fullhistname)
-        if (h_lostlep is not None): n_lostlep = h_lostlep.GetBinContent(imt2)
+        if (not h_lostlep == None): 
+            n_lostlep = h_lostlep.GetBinContent(imt2)
         h_lostlep_mcstat = f_lostlep.Get(fullhistnameMCStat)
-        if (h_lostlep_mcstat is not None):
+        if (not h_lostlep_mcstat == None):
             mcstat_content = h_lostlep_mcstat.GetBinContent(imt2)
             if (mcstat_content != 0): 
                 err_lostlep_mcstat = h_lostlep_mcstat.GetBinError(imt2) / mcstat_content       
         h_lostlep_cryield = f_lostlep.Get(fullhistnameCRyieldDatacard)
-        if (h_lostlep_cryield is not None):
+        if (not h_lostlep_cryield == None):
             n_lostlep_cr = round(h_lostlep_cryield.GetBinContent(imt2))
         h_lostlep_alpha = f_lostlep.Get(fullhistnameAlpha)
-        if (h_lostlep_alpha is not None):
+        if (not h_lostlep_alpha == None):
             lostlep_alpha = h_lostlep_alpha.GetBinContent(imt2)
             lostlep_alpha_topological = h_lostlep_alpha.Integral(0,-1)
         h_lostlep_alpha_lepeff_UP = f_lostlep.Get(fullhistnameAlpha+"_lepeff_UP")
-        if (h_lostlep_alpha_lepeff_UP is not None):
+        if (not h_lostlep_alpha_lepeff_UP == None):
             lostlep_alpha_lepeff_UP = h_lostlep_alpha_lepeff_UP.Integral(0,-1)
         h_lostlep_alpha_lepeff_DN = f_lostlep.Get(fullhistnameAlpha+"_lepeff_DN")
-        if (h_lostlep_alpha_lepeff_DN is not None):
+        if (not h_lostlep_alpha_lepeff_DN == None):
             lostlep_alpha_lepeff_DN = h_lostlep_alpha_lepeff_DN.Integral(0,-1)
         h_lostlep_alpha_btagsf_heavy_UP = f_lostlep.Get(fullhistnameAlpha+"_btagsf_heavy_UP")
-        if (h_lostlep_alpha_btagsf_heavy_UP is not None):
+        if (not h_lostlep_alpha_btagsf_heavy_UP == None):
             lostlep_alpha_btagsf_heavy_UP = h_lostlep_alpha_btagsf_heavy_UP.Integral(0,-1)
         h_lostlep_alpha_btagsf_heavy_DN = f_lostlep.Get(fullhistnameAlpha+"_btagsf_heavy_DN")
-        if (h_lostlep_alpha_btagsf_heavy_DN is not None):
+        if (not h_lostlep_alpha_btagsf_heavy_DN == None):
             lostlep_alpha_btagsf_heavy_DN = h_lostlep_alpha_btagsf_heavy_DN.Integral(0,-1)
         h_lostlep_alpha_btagsf_light_UP = f_lostlep.Get(fullhistnameAlpha+"_btagsf_light_UP")
-        if (h_lostlep_alpha_btagsf_light_UP is not None):
+        if (not h_lostlep_alpha_btagsf_light_UP == None):
             lostlep_alpha_btagsf_light_UP = h_lostlep_alpha_btagsf_light_UP.Integral(0,-1)
         h_lostlep_alpha_btagsf_light_DN = f_lostlep.Get(fullhistnameAlpha+"_btagsf_light_DN")
-        if (h_lostlep_alpha_btagsf_light_DN is not None):
+        if (not h_lostlep_alpha_btagsf_light_DN == None):
             lostlep_alpha_btagsf_light_DN = h_lostlep_alpha_btagsf_light_DN.Integral(0,-1)
         h_lostlep_alpha_tau1p_UP = f_lostlep.Get(fullhistnameAlpha+"_tau1p_UP")
-        if (h_lostlep_alpha_tau1p_UP is not None):
+        if (not h_lostlep_alpha_tau1p_UP == None):
             lostlep_alpha_tau1p_UP = h_lostlep_alpha_tau1p_UP.Integral(0,-1)
         h_lostlep_alpha_tau1p_DN = f_lostlep.Get(fullhistnameAlpha+"_tau1p_DN")
-        if (h_lostlep_alpha_tau1p_DN is not None):
+        if (not h_lostlep_alpha_tau1p_DN == None):
             lostlep_alpha_tau1p_DN = h_lostlep_alpha_tau1p_DN.Integral(0,-1)
         h_lostlep_alpha_tau3p_UP = f_lostlep.Get(fullhistnameAlpha+"_tau3p_UP")
-        if (h_lostlep_alpha_tau3p_UP is not None):
+        if (not h_lostlep_alpha_tau3p_UP == None):
             lostlep_alpha_tau3p_UP = h_lostlep_alpha_tau3p_UP.Integral(0,-1)
         h_lostlep_alpha_tau3p_DN = f_lostlep.Get(fullhistnameAlpha+"_tau3p_DN")
-        if (h_lostlep_alpha_tau3p_DN is not None):
+        if (not h_lostlep_alpha_tau3p_DN == None):
             lostlep_alpha_tau3p_DN = h_lostlep_alpha_tau3p_DN.Integral(0,-1)
         h_lostlep_alpha_renorm_UP = f_lostlep.Get(fullhistnameAlpha+"_renorm_UP")
-        if (h_lostlep_alpha_renorm_UP is not None):
+        if (not h_lostlep_alpha_renorm_UP == None):
             lostlep_alpha_renorm_UP = h_lostlep_alpha_renorm_UP.Integral(0,-1)
         h_lostlep_alpha_renorm_DN = f_lostlep.Get(fullhistnameAlpha+"_renorm_DN")
-        if (h_lostlep_alpha_renorm_DN is not None):
+        if (not h_lostlep_alpha_renorm_DN == None):
             lostlep_alpha_renorm_DN = h_lostlep_alpha_renorm_DN.Integral(0,-1)
         h_lostlep_lastbin_hybrid = f_lostlep.Get(fullhistnameLastbinHybrid)
-        if (h_lostlep_lastbin_hybrid is not None):
-            lostlep_lastbin_hybrid = h_lostlep_lastbin_hybrid.GetBinContent(1)
+        if (not h_lostlep_lastbin_hybrid == None):
+            lostlep_lastbin_hybrid = int(h_lostlep_lastbin_hybrid.GetBinContent(1))
         h_lostlep_MCExtrap = f_lostlep.Get(fullhistnameMCExtrap)
-        if (h_lostlep_MCExtrap is not None):
+        if (not h_lostlep_MCExtrap == None):
             lostlep_MCExtrap = h_lostlep_MCExtrap.GetBinContent(imt2)
 
     # lepeff
@@ -359,9 +358,9 @@ def makeTemplate(directory,imt2):
 
     n_mt2bins = 1
     h_zinv = None
-    if (dir_zinv is not None):
+    if (not dir_zinv == None):
         h_zinv = f_zinv.Get(fullhistname)
-        if (h_zinv is not None):
+        if (not h_zinv == None):
             n_zinv = h_zinv.GetBinContent(imt2)
             n_mt2bins = h_zinv.GetNbinsX()
         h_zinv_mcstat = None
@@ -369,7 +368,7 @@ def makeTemplate(directory,imt2):
             h_zinv_mcstat = f_zinv.Get(fullhistnameRatioInt)
         else:
             h_zinv_mcstat = f_zinv.Get(fullhistnameRatio)
-        if (h_zinv_mcstat is not None):
+        if (not h_zinv_mcstat == None):
             mcstat_content = h_zinv_mcstat.GetBinContent(imt2)
             if (mcstat_content != 0):
                 err_zinv_mcstat = h_zinv_mcstat.GetBinError(imt2) / mcstat_content
@@ -381,9 +380,9 @@ def makeTemplate(directory,imt2):
             
         # h_gjetyield = f_zinv.Get(fullhistnameCRyield)
 
-    if (dir_purity is not None):
+    if (not dir_purity == None):
         h_zinv_cryield = f_purity.Get(fullhistname)
-        if (h_zinv_cryield is not None):
+        if (not h_zinv_cryield == None):
             if (integratedZinvEstimate):
                 n_zinv_cr = round(h_zinv_cryield.Integral(0,-1))
             else:
@@ -399,7 +398,7 @@ def makeTemplate(directory,imt2):
         else:
             h_zinv_purity = f_purity.Get(fullhistnamePurity)
 
-        if (h_zinv_purity is not None):
+        if (not h_zinv_purity == None):
             purity_content = h_zinv_purity.GetBinContent(mt2bin_tmp)
             if (purity_content != 0):
                 zinv_purity = purity_content
@@ -407,19 +406,19 @@ def makeTemplate(directory,imt2):
 
     # Zinv from DY
     h_zinvDY = None
-    if (dir_zinvDY is not None):
+    if (not dir_zinvDY == None):
         h_zinvDY = f_zinvDY.Get(directory+"/hybridEstimate")
         purityCard = f_zinvDY.Get(directory+"/purityCard")
         ratioCard = f_zinvDY.Get(directory+"/ratioCard")
         h_zinvDY_cryield = f_zinvDY.Get(directory+"/CRyieldCard")
-        if (h_zinvDY is not None):
+        if (not h_zinvDY == None):
             n_mt2bins = h_zinvDY.GetNbinsX()
             n_zinvDY = h_zinvDY.GetBinContent(imt2)
-        if (ratioCard is not None):
+        if (not ratioCard == None):
             ratio_content = ratioCard.GetBinContent(imt2)
             if (ratio_content != 0):
                 err_zinvDY_mcstat = ratioCard.GetBinError(imt2) / ratio_content
-        if (h_zinvDY_cryield is not None):
+        if (not h_zinvDY_cryield == None):
             n_zinvDY_cr = round(h_zinvDY_cryield.GetBinContent(imt2))
             crYieldFirstBin = -1
             for ibin in range(1, h_zinvDY_cryield.GetNbinsX()):
@@ -429,8 +428,8 @@ def makeTemplate(directory,imt2):
                     usingInclusiveTemplates = False
                     break
         h_zinvDY_alpha = ratioCard.Clone()
-        if (h_zinvDY_alpha is not None):
-            if (purityCard is not None):
+        if (not h_zinvDY_alpha == None):
+            if (not purityCard == None):
                 zinvDY_purity = purityCard.GetBinContent(imt2)
                 h_zinvDY_alpha.Multiply(purityCard)
                 purity_content = purityCard.GetBinContent(imt2)
@@ -441,8 +440,8 @@ def makeTemplate(directory,imt2):
             zinvDY_alpha = h_zinvDY_alpha.GetBinContent(imt2)
             zinvDY_alpha_topological = h_zinvDY_alpha.Integral(0,-1)
         h_zinvDY_lastbin_hybrid = f_zinvDY.Get(fullhistnameLastbinHybrid)
-        if (h_zinvDY_lastbin_hybrid is not None):
-            zinvDY_lastbin_hybrid = h_zinvDY_lastbin_hybrid.GetBinContent(1)
+        if (not h_zinvDY_lastbin_hybrid == None):
+            zinvDY_lastbin_hybrid = int(h_zinvDY_lastbin_hybrid.GetBinContent(1))
 
     zllgamma_nj = 1.0
     zllgamma_nb = 1.0
@@ -456,7 +455,7 @@ def makeTemplate(directory,imt2):
         h_zllgamma_ht = f_zgratio.Get("h_htbinsRatio")
         h_zllgamma_ht2 = f_zgratio.Get("h_htbins2Ratio")
         h_zllgamma_mt2 = f_zgratio.Get("h_mt2binsRatio")
-        if (h_zllgamma_nj is None or h_zllgamma_nb is None or h_zllgamma_ht is None or h_zllgamma_ht2 is None or h_zllgamma_mt2 is None):
+        if (h_zllgamma_nj == None or h_zllgamma_nb == None or h_zllgamma_ht == None or h_zllgamma_ht2 == None or h_zllgamma_mt2 == None):
             print "Trying fourNuisancesPerBinZGratio, but could not find inclusive Zll/Gamma ratio plots for nuisance parameters"
             exit(1)
         bin_nj = h_zllgamma_nj.FindBin(njets_LOW + 0.5)
@@ -487,25 +486,25 @@ def makeTemplate(directory,imt2):
         if (mt2_content > 0):
             zllgamma_mt2 = h_zllgamma_mt2.GetBinError(bin_mt2) / mt2_content
         
-    if (dir_qcd is not None):
+    if (not dir_qcd == None):
         h_qcd = f_qcd.Get(fullhistname)
-        if (h_qcd is not None):
+        if (not h_qcd == None):
             n_qcd = h_qcd.GetBinContent(imt2)
         h_qcd_cryield = f_qcd.Get(fullhistnameCRyield)
-        if (h_qcd_cryield is not None):
+        if (not h_qcd_cryield == None):
             n_qcd_cr = round(h_qcd_cryield.GetBinContent(imt2))
         h_qcd_alpha = f_qcd.Get(fullhistnameAlpha)
-        if (h_qcd_alpha is not None):
+        if (not h_qcd_alpha == None):
             qcd_alpha = h_qcd_alpha.GetBinContent(imt2)
             err_qcd_alpha = h_qcd_alpha.GetBinError(imt2)
         h_qcd_fjrb = f_qcd.Get(fullhistnameFJRB)
-        if (h_qcd_fjrb is not None):
+        if (not h_qcd_fjrb == None):
             err_qcd_fjrb = h_qcd_fjrb.GetBinContent(imt2)
         h_qcd_fitstat = f_qcd.Get(fullhistnameFitStat)
-        if (h_qcd_fitstat is not None):
+        if (not h_qcd_fitstat == None):
             err_qcd_fitstat = h_qcd_fitstat.GetBinContent(imt2)
         h_qcd_fitsyst = f_qcd.Get(fullhistnameFitSyst)
-        if (h_qcd_fitsyst is not None):
+        if (not h_qcd_fitsyst == None):
             err_qcd_fitsyst = h_qcd_fitsyst.GetBinContent(imt2)
 
     # Finalize Errors
@@ -609,6 +608,7 @@ def makeTemplate(directory,imt2):
     zinvDY_puritystat = 1.0 + err_zinvDY_purity
     zinvDY_rsfof = 1.0 + (1-zinvDY_purity)*0.15
     zinvDY_alphaErr = 1.0 + err_zinvDY_mcstat
+
     zinvDY_lepeff = 1.05
     zinvDY_jec = 1.02
     if (ht_HI == 450):
@@ -625,8 +625,9 @@ def makeTemplate(directory,imt2):
     else:
         zinvDY_alpha = last_zinvDY_transfer
         
-    if (zinvDY_alpha != n_zinvDY / n_zinvDY_cr and n_zinvDY_cr != 0):
-        zinvDY_alpha = n_zinvDY / n_zinvDY_cr
+    if (n_zinvDY_cr != 0):
+        if (zinvDY_alpha != n_zinvDY / n_zinvDY_cr):
+            zinvDY_alpha = n_zinvDY / n_zinvDY_cr
 
     n_syst += 6
 
@@ -635,7 +636,7 @@ def makeTemplate(directory,imt2):
     if (n_extrap_bins_zinvDY > 0 and imt2 >= zinvDY_lastbin_hybrid):
         if (imt2 == zinvDY_lastbin_hybrid and n_zinvDY > 0.0):
             increment = 0.0
-            for ibin in range(zinvDY_lastbin_hybrid+1,h_zinvDY.GetNbinsX()):
+            for ibin in range(zinvDY_lastbin_hybrid+1,int(h_zinvDY.GetNbinsX())):
                 increment += last_bin_relerr_zinvDY / n_extrap_bins_zinvDY * (ibin - zinvDY_lastbin_hybrid) * h_zinvDY.GetBinContent(ibin)
             zinvDY_shape = 1.0 - increment / n_zinvDY
         else:
@@ -679,7 +680,10 @@ def makeTemplate(directory,imt2):
         n_zinv = n_zinv_cr * zinv_alpha
 
     qcd_crstat = qcd_alpha
-    qcd_alphaerr = 1.0 + (err_qcd_alpha / qcd_alpha)
+    if qcd_alpha > 0:
+        qcd_alphaerr = 1.0 + (err_qcd_alpha / qcd_alpha)
+    else:
+        qcd_alphaerr = 1.0 + (err_qcd_alpha / 2.0)
     qcd_fjrbsyst = 1.0 + err_qcd_fjrb
     qcd_fitstat = 1.0 + err_qcd_fitstat
     qcd_fitsyst = 1.0 + err_qcd_fitsyst
@@ -689,6 +693,13 @@ def makeTemplate(directory,imt2):
     name_qcd_fjrbsyst = "qcd_FJRBsyst_{0}".format(perChannel)
     name_qcd_fitstat = "qcd_RPHIstat_{0}".format(ht_str)
     name_qcd_fitsyst = "qcd_RPHIsyst_{0}".format(ht_str)
+
+    if (doDummySignalSyst):
+        n_syst += 1
+    else:
+        n_syst += 7
+        if (isSignalWithLeptons):
+            n_syst += 1
 
     if (njets_LOW == 1): n_syst += 2
     else: n_syst += 4
@@ -700,20 +711,25 @@ def makeTemplate(directory,imt2):
 
     if (n_bkg < 0.001): n_qcd = 0.01
 
-    if (f_data is not None):
+    if (not f_data == None):
         h_data = f_data.Get(fullhistname)
-        if (h_data is not None):
+        if (not h_data == None):
             n_data = h_data.GetBinContent(imt2)
     else:
         n_data = n_bkg
 
-    uncorr_zinvDY = n_zinvDY_cr > 0 and n_zinvDY == 0
-    uncorr_lostlep = n_lostlep_cr > 0 and n_lostlep == 0
-    uncorr_qcd = n_qcd_cr > 0 and n_qcd == 0
+    # these parameters are printed only to a certain number of figures, so nonzero values at precisions lower
+    # than that need to be considered equivalent to 0
+    n_zero = 1e-3
+    alpha_zero = 1e-5
+
+    uncorr_zinvDY = n_zinvDY_cr >= n_zero and n_zinvDY < n_zero
+    uncorr_lostlep = n_lostlep_cr >= n_zero and n_lostlep < n_zero
+    uncorr_qcd = n_qcd_cr >= n_zero and n_qcd < n_zero
     
-    zero_zinvDY = zinvDY_alpha == 0.0 and n_zinvDY_cr == 0.0
-    zero_lostlep = lostlep_alpha == 0.0 and n_lostlep_cr == 0.0
-    zero_qcd = qcd_crstat == 0.0 and n_qcd_cr == 0.0
+    zero_zinvDY = zinvDY_alpha < alpha_zero and n_zinvDY_cr < n_zero
+    zero_lostlep = lostlep_alpha < alpha_zero and n_lostlep_cr < n_zero
+    zero_qcd = qcd_crstat < alpha_zero and n_qcd_cr < n_zero
 
     # Allow ad hoc modification of counts and alphas by setting scale parameters
     # Set alphas = 0 to 2.0 (ad hoc) in certain cases
@@ -727,7 +743,7 @@ def makeTemplate(directory,imt2):
     qcd_crstat_towrite = scale * qcd_crstat
     if (uncorr_zinvDY or zero_zinvDY): zinvDY_alpha_towrite = scale * 2.0
     if (uncorr_lostlep or zero_lostlep): lostlep_alpha_towrite = scale * 2.0
-    if (uncorr_qcd or zero_qcd): qcd_alpha_towrite = scale * 2.0
+    if (uncorr_qcd or zero_qcd): qcd_crstat_towrite = scale * 2.0
     
     n_zinvDY_cr_towrite = n_zinvDY_cr
     if (uncorr_zinvDY):
@@ -756,7 +772,7 @@ def makeTemplate(directory,imt2):
         template += "rate            n_sig_cor_recogenaverage    {0:.3f}      {1:.3f}      {2:.3f}\n".format(n_zinvDY_towrite,n_lostlep_towrite,n_qcd_towrite)
     else:  
         template += "rate            n_sig_cor_recogenaverage    {0:.3f}      {1:.3f}      {2:.3f}\n".format(n_zinv,n_lostlep,n_qcd)
-    template += "------------"
+    template += "------------\n"
 
     if (doDummySignalSyst):
         template += "name_sig_syst                                lnN   sig_syst    -      -     - \n"
@@ -765,7 +781,7 @@ def makeTemplate(directory,imt2):
         template += "name_sig_pu                    lnN    sig_pu   -    -    - \n"
         template += "name_sig_mcstat     lnN    sig_mcstat   -    -    - \n"
         template += "name_sig_genmet                  lnU    sig_genmet   -    -    - \n"
-        template += "name_sig_isr                  lnU    sig_isr   -    -    - \n"
+        template += "name_sig_isr                  lnN    sig_isr   -    -    - \n"
         template += "name_sig_btagsf_heavy            lnN    sig_btagsf_heavy   -    -    - \n"
         template += "name_sig_btagsf_light            lnN    sig_btagsf_light   -    -    - \n"
         if (isSignalWithLeptons):
@@ -818,10 +834,33 @@ def makeTemplate(directory,imt2):
         template += "{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fitstat,qcd_fitstat)
         template += "{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fitsyst,qcd_fitsyst)
     
-    return template
+    # the template contains background information used for all signal mass points
+    # channel is needed to name the output file
+    # lostlep_alpha and lastbin_hybrid are needed for signal contamination subtraction
+    return template,channel,lostlep_alpha,lostlep_lastbin_hybrid
 
-def makeCard(tmp,signal,outdir,im1=-1,im2=-1):
-    outfile = open("{0}/{1}_{2}_{3}.txt".format(outdir,signal,im1,im2),"w")
+def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,signal,outdir,imt2,im1=-1,im2=-1):
+
+    cardname = "{0}/datacard_{1}_{2}_{3}_{4}.txt".format(outdir,channel,signal,im1,im2)
+
+    fullhistname = "{0}/h_mt2bins".format(directory)
+    fullhistnameGenMet = "{0}_genmet".format(fullhistname)
+    fullhistnameBtagsfHeavy = "{0}_btagsf_heavy_UP".format(fullhistname)
+    fullhistnameBtagsfLight = "{0}_btagsf_light_UP".format(fullhistname)
+    fullhistnameLepeff = "{0}_lepeff_UP".format(fullhistname)
+    fullhistnameIsr = "{0}_isr_UP".format(fullhistname)
+    fullhistnameScan = "{0}_sigscan".format(fullhistname)
+    fullhistnameScanGenMet = "{0}_sigscan_genmet".format(fullhistname)
+    fullhistnameScanBtagsfHeavy = "{0}_sigscan_btagsf_heavy_UP".format(fullhistname)
+    fullhistnameScanBtagsfLight = "{0}_sigscan_btagsf_light_UP".format(fullhistname)
+    fullhistnameScanLepeff = "{0}_sigscan_lepeff_UP".format(fullhistname)
+    fullhistnameScanIsr = "{0}_sigscan_isr_UP".format(fullhistname)
+    crsl_directory = directory.replace("sr","crsl")
+    fullhistnameCRSL = "{0}/h_mt2bins".format(crsl_directory)
+    fullhistnameCRSLScan = "{0}_sigscan".format(fullhistnameCRSL)
+    fullhistnameCRSLScanGenMet = "{0}_sigscan_genmet".format(fullhistnameCRSL)
+
+    isSignalWithLeptons = signal.find("T1tttt") != -1 or signal.find("T2tt") != -1
 
     n_sig = 0.0
     n_sig_cor = 0.0
@@ -840,8 +879,171 @@ def makeCard(tmp,signal,outdir,im1=-1,im2=-1):
     n_sig_isr_UP = 0.0
     err_sig_recogenaverage = 0.0
 
-    tmp.replace("placeholder","real_val")
-    outfile.write(tmp)
+    if (im1 >= 0 and im2 >= 0):
+        h_sigscan = f_sig.Get(fullhistnameScan)
+        if (h_sigscan == None):
+            return False
+        bin1 = h_sigscan.GetYaxis().FindBin(im1)
+        bin2 = h_sigscan.GetZaxis().FindBin(im2)
+        h_sig = h_sigscan.ProjectionX("h_mt2bins_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
+        h_sigscan_genmet = f_sig.Get(fullhistnameScanGenMet)
+        if (not h_sigscan_genmet == None):
+            h_sig_genmet = h_sigscan_genmet.ProjectionX("h_mt2bins_genmet_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
+        h_sigscan_btagsf_heavy_UP = f_sig.Get(fullhistnameScanBtagsfHeavy)
+        if (not h_sigscan_btagsf_heavy_UP == None):
+            h_sig_btagsf_heavy_UP = h_sigscan_btagsf_heavy_UP.ProjectionX("h_mt2bins_btagsf_heavy_UP_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
+        h_sigscan_btagsf_light_UP = f_sig.Get(fullhistnameScanBtagsfLight)
+        if (not h_sigscan_btagsf_light_UP == None):
+            h_sig_btagsf_light_UP = h_sigscan_btagsf_light_UP.ProjectionX("h_mt2bins_btagsf_light_UP_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
+        h_sigscan_lepeff_UP = f_sig.Get(fullhistnameScanLepeff)
+        if (not h_sigscan_lepeff_UP == None):
+            h_sig_lepeff_UP = h_sigscan_lepeff_UP.ProjectionX("h_mt2bins_lepeff_UP_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
+        h_sigscan_isr_UP = f_sig.Get(fullhistnameScanIsr)
+        if (not h_sigscan_isr_UP == None):
+            h_sig_isr_UP = h_sigscan_isr_UP.ProjectionX("h_mt2bins_isr_UP_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
+        h_sig_crsl = None
+        h_sigscan_crsl_genmet = None
+        if (subtractSignalContam):
+            h_sigscan_crsl = f_sig.Get(fullhistnameCRSLScan)
+            h_sigscan_crsl_genmet = f_sig.Get(fullhistnameCRSLScanGenMet)
+            if (not h_sigscan_crsl == None):
+                h_sig_crsl = h_sigscan_crsl.ProjectionX("h_mt2bins_crsl_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
+            if (not h_sigscan_crsl_genmet == None):
+                h_sig_crsl_genmet = h_sigscan_crsl_genmet.ProjectionX("h_mt2bins_genmet_crsl_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
+    else: # single point sample
+        h_sig = f_sig.Get(fullhistname)
+        h_sig_genmet = f_sig.Get(fullhistnameGenMet)
+        h_sig_btagsf_heavy_UP = f_sig.Get(fullhistnameBtagsfHeavy)
+        h_sig_btagsf_light_UP = f_sig.Get(fullhistnameBtagsfLight)
+        h_sig_lepeff_UP = f_sig.Get(fullhistnameLepeff)
+        h_sig_isr_UP = f_sig.Get(fullhistnameIsr)
+        if (subtractSignalContam):
+            h_sig_crsl = f_sig.Get(fullhistnameCRSL)
+            h_sig_crsl_genmet = f_sig.Get(fullhistnameCRSLGenMet)
+    
+    if (h_sig == None):
+        if (suppressZeroBins or suppressZeroTRs):
+            return False
+    elif (h_sig.Integral(0,-1) == 0):
+        if (suppressZeroBins or suppressZeroTRs):
+            return False
+    elif (h_sig.GetBinContent(imt2) == 0):
+        if (suppressZeroBins):
+            return False
+        n_sig = 0
+        n_sig_TR = h_sig.Integral(0,-1)
+    else:
+        n_sig = h_sig.GetBinContent(imt2)
+        n_sig_TR = h_sig.Integral(0,-1)
+        err_sig_mcstat = h_sig.GetBinError(imt2)
+        # part of sig_mcstat calculation; if n_sig is 0, default value is applied
+        err_sig_mcstat_rel = err_sig_mcstat / n_sig
+
+    if (not h_sig_genmet == None):
+        n_sig_genmet = h_sig_genmet.GetBinContent(imt2)
+    if (not h_sig_btagsf_heavy_UP == None):
+        n_sig_btagsf_heavy_UP = h_sig_btagsf_heavy_UP.GetBinContent(imt2)
+    if (not h_sig_btagsf_light_UP == None):
+        n_sig_btagsf_light_UP = h_sig_btagsf_light_UP.GetBinContent(imt2)
+    if (not h_sig_lepeff_UP == None):
+        n_sig_lepeff_UP = h_sig_lepeff_UP.GetBinContent(imt2)
+    if (not h_sig_isr_UP == None):
+        n_sig_isr_UP = h_sig_isr_UP.GetBinContent(imt2)
+
+
+    if (suppressZeroBins and ((n_sig < 0.1) or (n_sig / n_bkg < 0.02))):
+        if (verbose): print "Zero signal, card not printed: {0}\n".format(cardname)
+        return False
+
+    n_sig_recogenaverage = (n_sig_genmet+n_sig) / 2.0
+    # Part of sig_genmet calculation; if n_sig_recogenaverage == 0, default value is used
+    if (n_sig_recogenaverage > 0.0): 
+        err_sig_recogenaverage = (n_sig-n_sig_genmet) / 2.0 / n_sig_recogenaverage
+    n_sig_cor = n_sig
+    n_sig_cor_genmet = n_sig_genmet
+    n_sig_cor_recogenaverage = n_sig_recogenaverage
+    if (subtractSignalContam):
+        if (not h_sig_crsl == None):
+            if (imt2 >= lostlep_lastbin_hybrid):
+                n_sig_crsl = h_sig_crsl.Integral(lostlep_lastbin_hybrid,-1)
+                if (not h_sig_crsl_genmet == None):
+                    n_sig_crsl_genmet = h_sig_crsl_genmet.Integral(lostlep_lastbin_hybrid,-1)
+            else:
+                n_sig_crsl = h_sig_crsl.GetBinContent(imt2)
+                if (not h_sig_crsl_genmet == None):
+                    n_sig_crsl_genmet = h_sig_crsl_genmet.GetBinContent(imt2)
+            n_lostlep_extra = n_sig_crsl * lostlep_alpha
+            n_lostlep_extra_genmet = n_sig_crsl_genmet * lostlep_alpha
+            n_lostlep_extra_recogenaverage = (n_lostlep_extra + n_lostlep_extra_genmet) / 2.0
+            n_sig_cor = max(0.0,n_sig - n_lostlep_extra)
+            n_sig_cor_genmet = max(0.0,n_sig_genmet - n_lostlep_extra_genmet)
+            n_sig_cor_recogenaverage = max(0.0,n_sig_recogenaverage - n_lostlep_extra_recogenaverage)
+            err_sig_recogenaverage = 0.0
+            if (n_sig_cor_recogenaverage > 0.0):
+                err_sig_recogenaverage = abs(n_sig_cor-n_sig_cor_genmet) / 2.0 / n_sig_cor_recogenaverage
+        else:
+            print "Tried to subtract signal contamination but couldn't find h_sig_crsl\n"
+            
+    sig_syst = 1.10
+    sig_lumi = 1.026
+    sig_pu = 1.046
+    sig_mcstat = 1.071
+    sig_genmet = 1.00
+    sig_btagsf_heavy = 1.00
+    sig_btagsf_light = 1.00
+    sig_lepeff = 1.00
+    sig_isr = 1.00
+    if ( n_sig > 0.0 ):
+        sig_mcstat = 1.0 + sqrt(pow(err_sig_mcstat_rel,2) + 0.005)
+        sig_genmet = 1.0 + err_sig_recogenaverage
+        sig_btagsf_heavy = n_sig_btagsf_heavy_UP / n_sig
+        sig_btagsf_light = n_sig_btagsf_light_UP / n_sig
+        sig_lepeff = n_sig_lepeff_UP / n_sig
+        sig_isr = n_sig_isr_UP / n_sig
+
+    name_sig_syst = "sig_syst"
+    name_sig_lumi = "lumi_syst"
+    name_sig_pu = "sig_PUsyst"
+    name_sig_mcstat = "sig_MCstat_"+channel
+    name_sig_genmet = "sig_gensyst"
+    name_sig_isr = "sig_IsrSyst"
+    name_sig_btagsf_heavy = "sig_bTagHeavySyst"
+    name_sig_btagsf_light = "sig_bTagLightSyst"
+    name_sig_lepeff = "sig_lepEffSyst"
+
+    sig_scale = 1.0
+    n_sig_cor_recogenaverage_towrite = sig_scale * n_sig_cor_recogenaverage
+
+    to_print = template
+
+    if (doZinvFromDY): 
+        to_print = to_print.replace("n_sig_cor_recogenaverage","{0:.3f}".format(n_sig_cor_recogenaverage_towrite))
+    else:
+        print "Only ZinvFromDY currently implemented. Aborting..."
+        exit(1)
+
+    if (doDummySignalSyst):
+        to_print = to_print.replace("name_sig_syst",name_sig_syst)
+    else:
+        to_print = to_print.replace("name_sig_lumi",name_sig_lumi)
+        to_print = to_print.replace("sig_lumi","{0:.3f}".format(sig_lumi))
+        to_print = to_print.replace("name_sig_pu",name_sig_pu)
+        to_print = to_print.replace("sig_pu","{0:.3f}".format(sig_pu))
+        to_print = to_print.replace("name_sig_mcstat",name_sig_mcstat)
+        to_print = to_print.replace("sig_mcstat","{0:.3f}".format(sig_mcstat))
+        to_print = to_print.replace("name_sig_genmet",name_sig_genmet)
+        to_print = to_print.replace("sig_genmet","{0:.3f}".format(sig_genmet))
+        to_print = to_print.replace("name_sig_isr",name_sig_isr)
+        to_print = to_print.replace("sig_isr","{0:.3f}".format(sig_isr))
+        to_print = to_print.replace("name_sig_btagsf_heavy",name_sig_btagsf_heavy)
+        to_print = to_print.replace("sig_btagsf_heavy","{0:.3f}".format(sig_btagsf_heavy))
+        to_print = to_print.replace("name_sig_btagsf_light",name_sig_btagsf_light)
+        to_print = to_print.replace("sig_btagsf_light","{0:.3f}".format(sig_btagsf_light))
+        if (isSignalWithLeptons):
+            to_print = to_print.replace("name_sig_lepeff",name_sig_lepeff)
+            to_print = to_print.replace("sig_lepeff","{0:.3f}".format(sig_lepeff))
+    outfile = open(cardname,"w")
+    outfile.write(to_print)
     outfile.close()
     return True
 
@@ -863,7 +1065,7 @@ for key in iterator:
         h_n_mt2bins = f_sig.Get(n_mt2_name)
         n_mt2_bins = int(h_n_mt2bins.GetBinContent(1))
         for imt2 in range(1,n_mt2_bins+1):
-            template = makeTemplate(directory,imt2)
+            template,channel,lostlep_alpha,lostlep_lastbin_hybrid = makeTemplate(directory,imt2) 
             if (doScan):
                 y_binwidth = 25
                 y_max = 1600
@@ -873,11 +1075,11 @@ for key in iterator:
                 for im1 in range(0,2301,25):
                     for im2 in range(0,y_max+1,y_binwidth):
                         if (suppressUHmt2bin and directory.find("UH") != -1 and imt2 == 1): continue
-                        success = makeCard(template,signal,outdir,im1,im2)
+                        success = makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,signal,outdir,imt2,im1,im2)
                         if success:
                             signal_points.append( (im1,im2) )
             else:
-                makeCard(template,signal,outdir)
+                makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,signal,outdir,imt2)
 
     if (doScan):
         points_file = open("{0}/points_{1}.txt".format(outdir,signal),"w")
@@ -893,3 +1095,4 @@ print "------------------------------"
 print "CPU Time:   {0:.1f} s\n".format(bmark.GetCpuTime("benchmark"))
 print "Real Time:  {0:.1f} s\n".format(bmark.GetRealTime("benchmark"))
 print "\n"
+
