@@ -1,3 +1,6 @@
+# Print cards for use with combine. See MT2Analysis/limits/SignalScan.
+# Reimplementation of cardMaker.C.
+
 import ROOT
 import re
 from math import sqrt
@@ -5,23 +8,24 @@ from sys import argv,exit
 
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
-verbose = False
-suppressZeroBins = False
-suppressZeroTRs = True
-doSuperSignalRegions = False
+verbose = False # Print more error messages
+suppressZeroBins = False # Don't print cards for any MT2 bin with 0 signal, even if other bins in its region have nonzero signal
+suppressZeroTRs = True # Don't print cards for any of the MT2 bins in a region with 0 signal in any bin
+doSuperSignalRegions = False # Print cards for super signal regions
 dummy_alpha = 1
-uncorrelatedZGratio = False
+uncorrelatedZGratio = False 
 fourNuisancesPerBinZGratio = True
-integratedZinvEstimate = True
-doDummySignalSyst = False
-subtractSignalContam = True
-doZinvFromDY = True
-decorrelatedLostlepNuisances = False
+integratedZinvEstimate = True # Use MC to distribute counts in low-stats MT2 bins
+doDummySignalSyst = False 
+subtractSignalContam = True # For T1tttt and T2tt, adjust signal counts for signal contribution to CRSL
+doZinvFromDY = True # "False" is not yet fully implemented
+decorrelatedLostlepNuisances = False 
 doSimpleLostlepNuisances = False
-printTable = False
-suppressUHmt2bin = True
+printTable = False # "True" is not yet implemented
+suppressUHmt2bin = True # The first MT2 bin in UH regions has a large QCD contribution; throw out this bin?
 
-last_zinv_ratio = 0.5
+# These are used when an implausible alpha is found for a bin
+last_zinv_ratio = 0.5 
 last_lostlep_transfer = 2.0
 last_zinvDY_transfer = 2.0
 
@@ -42,6 +46,8 @@ if len(argv) > 4:
 bmark = ROOT.TBenchmark()
 bmark.Start("benchmark")
 
+# These are typically in MT2looper/output/some_directory
+# See makeDataDrivenEstimates.sh
 f_lostlep = ROOT.TFile("{0}/lostlepFromCRs.root".format(indir))
 f_zinv = ROOT.TFile("{0}/zinvFromGJ.root".format(indir))
 f_zinvDY = ROOT.TFile("{0}/zinvFromDY.root".format(indir))
@@ -74,11 +80,13 @@ if f_sig.IsZombie():
     exit(1)
 if (doData and f_data.IsZombie()):
     print "data_Run2016.root does not exist\n"
-    print "Perhaps you wanted to set doData = False or forgot to hadd?"
+    print "Perhaps you wanted to set doData = False or forgot to hadd?\n"
     exit(1)
 
+# All signal mass points share the same backgrounds. Assemble the background portion of the 
+# cards once here, then fill in the mass-point-specific signal information later in makeCard.
 def makeTemplate(directory,imt2):
-    if verbose: print "Forming template for region {0}, bin {1}".format(directory,imt2)
+    if verbose: print "Forming template for region {0}, bin {1}\n".format(directory,imt2)
     dir_sig = f_sig.Get(directory)
     dir_lostlep = f_lostlep.Get(directory)
     dir_zinv = f_zinv.Get(directory)
@@ -87,10 +95,10 @@ def makeTemplate(directory,imt2):
     dir_purity = f_purity.Get(directory)
     dir_qcd = f_qcd.Get(directory)
 
-    # While "X == None" is discouraged in favor of "X is None" by python standards, it is necessary by design in PyROOT.
-    # (See: https://root-forum.cern.ch/t/findobject-returns-a-null-pointer-tobject/8408/4)
+    # While "X == None" is discouraged in favor of "X is None" by python standards, this is necessary by design in PyROOT.
+    # See: https://root-forum.cern.ch/t/findobject-returns-a-null-pointer-tobject/8408/4
     if (dir_sig == None):
-        print "dir {0} does not exist in f_sig. Aborting...".format(directory)
+        print "dir {0} does not exist in f_sig. Aborting...\n".format(directory)
         exit(1)
 
     fullhistname = "{0}/h_mt2bins".format(directory)
@@ -184,28 +192,35 @@ def makeTemplate(directory,imt2):
     njets_LOW = int(h_njets_LOW.GetBinContent(1))
     njets_HI = int(h_njets_HI.GetBinContent(1))
 
-    # If we're doing a scan over mass points, we need to extract any 2D histogram from the all-inclusive 
-    # 3D histogram to read MT2 boundaries.
+    # The MT2 edges aren't stored separately in purpose-built TH1s. We need to read those directly from the signal's output histogram.
+
+    # If we're doing a scan over mass points, we need to extract any 1D histogram from the all-inclusive 
+    # 3D histogram (mGlu, mLSP, MT2) to read MT2 boundaries.
     # If we've got only a single mass point, no projection procedure is needed (and attempting it will fail).
     if (doScan):
         h_sigscan = f_sig.Get(fullhistnameScan)
-        h_sig = h_sigscan.ProjectionX("h_sig",0,0,0,0) # bin 0 is guaranteed to exist, so it's suitable as a dummy projection
+        # Bin 0 is guaranteed to exist, so it's suitable as a dummy projection.
+        # Remember, we're not interested in the actual counts, just the bin edges.
+        h_sig = h_sigscan.ProjectionX("h_sig",0,0,0,0) 
     else:
         h_sig = f_sig.Get(fullhistname)
 
+    # Extract the mt2 bin edges from the signal histogram
     mt2_LOW = int(h_sig.GetBinLowEdge(imt2))
     mt2_HI = mt2_LOW + int(h_sig.GetBinWidth(imt2))
     # The uppermost bin actually extends to infinity, which we represent with -1 for now.
     # TODO: Update these hardcoded values to their new values if they should change
     if (mt2_HI == 1800 or mt2_HI == 1500): mt2_HI = -1
 
+    # The upper limit (if it's finite) is exclusive, but the descriptive string is inclusive. *_mod will be used to make strings....
     nbjets_HI_mod = nbjets_HI
     njets_HI_mod = njets_HI
-    # The upper limit (if it's finite) is exclusive, but the descriptive string is inclusive. *_mod will be used to make strings....
     if (nbjets_HI != -1): nbjets_HI_mod -= 1
     if (njets_HI != -1): njets_HI_mod -= 1
 
     ht_str = "HT{0}to{1}".format(str(ht_LOW),str(ht_HI))
+    mt2_str = "m{0}to{1}".format(str(mt2_LOW),str(mt2_HI))
+    # If the inclusive upper limit is not the same as the inclusive lower limit, print XtoY. If they are the same, print only that one value.
     if (nbjets_LOW != nbjets_HI_mod):
         bjet_str = "b{0}to{1}".format(str(nbjets_LOW),str(nbjets_HI_mod))
     else:
@@ -214,8 +229,8 @@ def makeTemplate(directory,imt2):
         jet_str = "j{0}to{1}".format(str(njets_LOW),str(njets_HI_mod))
     else:
         jet_str = "j{0}".format(str(njets_LOW))
-    mt2_str = "m{0}to{1}".format(str(mt2_LOW),str(mt2_HI))
 
+    # We've been representing an upper limit of Infinity as -1 internally. Swap back for our printed description.
     ht_str = ht_str.replace("-1","Inf")
     bjet_str = bjet_str.replace("-1","Inf")
     jet_str = jet_str.replace("-1","Inf")
@@ -224,6 +239,7 @@ def makeTemplate(directory,imt2):
     topologicalR = "{0}_{1}_{2}".format(ht_str,jet_str,bjet_str)
     channel = "{0}_{1}".format(topologicalR,mt2_str)
 
+    # Do the same procedure we just completed for the signal region for the single lepton control region.
     ht_LOW_crsl = 0
     ht_HI_crsl = 0
     nbjets_LOW_crsl = 0
@@ -265,6 +281,13 @@ def makeTemplate(directory,imt2):
     bjet_str_crsl = bjet_str_crsl.replace("-1","Inf")
     jet_str_crsl = jet_str_crsl.replace("-1","Inf")
 
+    # End crsl region description
+
+    ##############
+    # Lost Lepton 
+    ##############
+
+    # If these histograms don't exist, we'll use the default values from above (0s, mostly).
     if (not dir_lostlep == None):
         h_lostlep = f_lostlep.Get(fullhistname)
         if (not h_lostlep == None): 
@@ -324,6 +347,9 @@ def makeTemplate(directory,imt2):
         if (not h_lostlep_MCExtrap == None):
             lostlep_MCExtrap = h_lostlep_MCExtrap.GetBinContent(imt2)
 
+    # At this stage, we've either extracted values for lostlep parameters from histograms, or those histograms didn't exist,
+    # and we're using default values (mostly 0s).
+
     # lepeff
     lostlep_alpha_lepeff_ERRup = abs(1.0-lostlep_alpha_lepeff_UP/lostlep_alpha_topological)
     lostlep_alpha_lepeff_ERRdn = abs(1.0-lostlep_alpha_lepeff_DN/lostlep_alpha_topological)
@@ -356,8 +382,13 @@ def makeTemplate(directory,imt2):
     lostlep_shape_ERR = 0.0
     if (n_lostlep > 0.0): lostlep_shape_ERR = lostlep_MCExtrap / n_lostlep
 
+    ###############
+    # Invisible Z From Gamma+Jets
+    ###############
+
     n_mt2bins = 1
     h_zinv = None
+    # If they exist, pull zinv parameters from histograms. Else, use default values (mostly 0s).
     if (not dir_zinv == None):
         h_zinv = f_zinv.Get(fullhistname)
         if (not h_zinv == None):
@@ -378,8 +409,6 @@ def makeTemplate(directory,imt2):
             err_zinv_mcstat = 1.0
             zinv_ratio_zg = last_zinv_ratio
             
-        # h_gjetyield = f_zinv.Get(fullhistnameCRyield)
-
     if (not dir_purity == None):
         h_zinv_cryield = f_purity.Get(fullhistname)
         if (not h_zinv_cryield == None):
@@ -404,8 +433,13 @@ def makeTemplate(directory,imt2):
                 zinv_purity = purity_content
                 err_zinv_purity = h_zinv_purity.GetBinContent(mt2bin_tmp) / purity_content
 
+    ##############
     # Zinv from DY
+    ##############
+
+    # We've fully transitioned to this Zinv estimate at this point, so I haven't bothered to fully implement zinv from gamma+jets yet...
     h_zinvDY = None
+    # Either pull zinvDY parameters from histograms, or if they don't exist, use default values (mostly 0s)
     if (not dir_zinvDY == None):
         h_zinvDY = f_zinvDY.Get(directory+"/hybridEstimate")
         purityCard = f_zinvDY.Get(directory+"/purityCard")
@@ -427,6 +461,7 @@ def makeTemplate(directory,imt2):
                 if (crYieldFirstBin != thiscrYield):
                     usingInclusiveTemplates = False
                     break
+        # Be sure to Clone here. Creating a second reference to the same hist (ratioCard) and modifying it caused bugs.
         h_zinvDY_alpha = ratioCard.Clone()
         if (not h_zinvDY_alpha == None):
             if (not purityCard == None):
@@ -456,7 +491,7 @@ def makeTemplate(directory,imt2):
         h_zllgamma_ht2 = f_zgratio.Get("h_htbins2Ratio")
         h_zllgamma_mt2 = f_zgratio.Get("h_mt2binsRatio")
         if (h_zllgamma_nj == None or h_zllgamma_nb == None or h_zllgamma_ht == None or h_zllgamma_ht2 == None or h_zllgamma_mt2 == None):
-            print "Trying fourNuisancesPerBinZGratio, but could not find inclusive Zll/Gamma ratio plots for nuisance parameters"
+            print "Trying fourNuisancesPerBinZGratio, but could not find inclusive Zll/Gamma ratio plots for nuisance parameters\n"
             exit(1)
         bin_nj = h_zllgamma_nj.FindBin(njets_LOW + 0.5)
         bin_nb = h_zllgamma_nb.FindBin(nbjets_LOW + 0.5)
@@ -486,6 +521,11 @@ def makeTemplate(directory,imt2):
         if (mt2_content > 0):
             zllgamma_mt2 = h_zllgamma_mt2.GetBinError(bin_mt2) / mt2_content
         
+    #############
+    # QCD 
+    #############
+
+    # Either pull QCD parameters from histograms, or if they don't exist, use default values (mostly 0s)
     if (not dir_qcd == None):
         h_qcd = f_qcd.Get(fullhistname)
         if (not h_qcd == None):
@@ -507,7 +547,10 @@ def makeTemplate(directory,imt2):
         if (not h_qcd_fitsyst == None):
             err_qcd_fitsyst = h_qcd_fitsyst.GetBinContent(imt2)
 
-    # Finalize Errors
+    #################        
+    # Finalize:
+    # All parameters are now extracted. Do the remaining calculations.
+    #################
     n_syst = 0
     lostlep_shape = lostlep_shape_ERR
     lostlep_mcstat = 1.0 + err_lostlep_mcstat
@@ -533,7 +576,7 @@ def makeTemplate(directory,imt2):
     llep_corr_str = ""
     if (decorrelatedLostlepNuisances):
         llep_corr_str = "_" + channel
-    # nuisances correlated across all bins unless explicitly decorrelated by above
+    # nuisances correlated across all bins unless explicitly decorrelated by decorrelatedLostlepNuisances flag
     name_lostlep_lepeff = "lep_eff{0}".format(llep_corr_str)
     name_lostlep_taueff = "llep_taueff{0}".format(llep_corr_str)
     name_lostlep_btageff = "llep_btageff{0}".format(llep_corr_str)
@@ -548,13 +591,17 @@ def makeTemplate(directory,imt2):
             lostlep_alphaerr = 1.18
 
     if (n_lostlep_cr > 0.0):
+        # Hard cap of 3.0 on CR -> SR factor
         if (lostlep_alpha > 3.0):
             lostlep_alpha = 3.0
             n_lostlep = n_lostlep_cr * lostlep_alpha
+    # Update last_lostlep_transfer if this value is a good one.
     if (lostlep_alpha > 0.0):
-        last_lostlep_transfer = lostlep_alpha
+        last_lostlep_transfer = lostlep_alpha 
+    # If the SR lostlep count prediction is 0, set alpha to 0 for now (in case it was somehow negative). We'll adjust this later.
     elif (n_lostlep == 0):
         lostlep_alpha = 0
+    # Something went wrong in this region. Just use the last good value.
     else: 
         lostlep_alpha = last_lostlep_transfer
     if (doSimpleLostlepNuisances):
@@ -718,26 +765,27 @@ def makeTemplate(directory,imt2):
     else:
         n_data = n_bkg
 
-    # these parameters are printed only to a certain number of figures, so nonzero values at precisions lower
-    # than that need to be considered equivalent to 0
+    # We print only to a certain number of figures, so nonzero values at precisions lower than that need to be considered equivalent to 0
     n_zero = 1e-3
     alpha_zero = 1e-5
 
+    # If the number of control region counts is nonzero but the number of predicted counts in the signal region is zero, decorrelate the error.
     uncorr_zinvDY = n_zinvDY_cr >= n_zero and n_zinvDY < n_zero
     uncorr_lostlep = n_lostlep_cr >= n_zero and n_lostlep < n_zero
     uncorr_qcd = n_qcd_cr >= n_zero and n_qcd < n_zero
     
+    # If the control region was empty, alpha will be poorly defined. An alpha small for this reason will underestimate the error.
+    # Adopt a conservative minimum error for alpha in this case.
     zero_zinvDY = zinvDY_alpha < alpha_zero and n_zinvDY_cr < n_zero
     zero_lostlep = lostlep_alpha < alpha_zero and n_lostlep_cr < n_zero
     zero_qcd = qcd_crstat < alpha_zero and n_qcd_cr < n_zero
 
     # Allow ad hoc modification of counts and alphas by setting scale parameters
-    # Set alphas = 0 to 2.0 (ad hoc) in certain cases
     scale = 1.0
     n_zinvDY_towrite = scale * n_zinvDY
     n_lostlep_towrite = scale * n_lostlep
     n_qcd_towrite = scale * n_qcd
-    # If alpha is 0 then set it to 2.0 for now for comparison with old cards
+    # If alpha is 0 for either of the two reasons described above, then set it to 2.0 for now for comparison with old cards
     zinvDY_alpha_towrite = scale * zinvDY_alpha
     lostlep_alpha_towrite = scale * lostlep_alpha
     qcd_crstat_towrite = scale * qcd_crstat
@@ -755,9 +803,11 @@ def makeTemplate(directory,imt2):
         n_lostlep_cr_towrite = 0
     n_qcd_cr_towrite = n_qcd_cr
     if (uncorr_qcd):
-        name_qcd_crstat += "_" + mt2_str
+        name_qcd_crstat += "_" + mt2_str # QCD is already uncorrelated by default. Should we just omit this?
         n_qcd_cr_towrite = 0
 
+    # Assemble background estimate for this signal region. Write in variable names directly for signal quantities, and sub them in later point-by-point
+    # within makeCard.
     template = "imax 1  number of channels\n"
     template += "jmax 3  number of backgrounds\n"
     template += "kmax *\n"
@@ -769,11 +819,15 @@ def makeTemplate(directory,imt2):
     template += "process          sig       zinv        llep      qcd\n"
     template += "process           0         1           2         3\n"
     if (doZinvFromDY):
+        # Include signal placeholder
         template += "rate            n_sig_cor_recogenaverage    {0:.3f}      {1:.3f}      {2:.3f}\n".format(n_zinvDY_towrite,n_lostlep_towrite,n_qcd_towrite)
     else:  
+        print "Zinv currently only fully implemented from DY. Aborting...\n"
+        exit(1)
         template += "rate            n_sig_cor_recogenaverage    {0:.3f}      {1:.3f}      {2:.3f}\n".format(n_zinv,n_lostlep,n_qcd)
     template += "------------\n"
 
+    # Write in signal placeholders
     if (doDummySignalSyst):
         template += "name_sig_syst                                lnN   sig_syst    -      -     - \n"
     else:
@@ -786,7 +840,6 @@ def makeTemplate(directory,imt2):
         template += "name_sig_btagsf_light            lnN    sig_btagsf_light   -    -    - \n"
         if (isSignalWithLeptons):
             template += "name_sig_lepeff               lnN    sig_lepeff   -    -    - \n"
-
             
     # Zinv systs
     if (doZinvFromDY):
@@ -797,7 +850,7 @@ def makeTemplate(directory,imt2):
         if (n_extrap_bins_zinvDY > 0 and imt2 >= zinvDY_lastbin_hybrid):
             template += "{0}    lnN    -   {1:.3f}   -   - \n".format(name_zinvDY_shape,zinvDY_shape)
     else:
-        print "Zinv currently only implemented for DY"
+        print "Zinv currently only implemented for DY\n"
         exit(1)
     
     # lostlep systs
@@ -809,7 +862,7 @@ def makeTemplate(directory,imt2):
         template += "{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_taueff,lostlep_taueff)
         template += "{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_btageff,lostlep_btageff)
         if (not doZinvFromDY):
-            print "Zinv currently only implemented for DY"
+            print "Zinv currently only implemented for DY\n"
             exit(1)
         template += "{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_renorm,lostlep_renorm)
     
@@ -818,11 +871,12 @@ def makeTemplate(directory,imt2):
     if (n_mt2bins > 1 and imt2 >= lostlep_lastbin_hybrid):
         template += "{0}    lnN    -    -   {1:.3f}     - \n".format(name_lostlep_shape,lostlep_shape)
     
+    # jec and lepeff affect both lostlep and zinvFromDY
     if (doZinvFromDY):
         template += "{0}        lnN    -    {1:.3f}    {2:.3f}    - \n".format(name_lostlep_jec,zinvDY_jec,lostlep_jec)
         template += "{0}        lnN    -    {1:.3f}    {2:.3f}    - \n".format(name_lostlep_lepeff,zinvDY_lepeff,lostlep_lepeff)
     else:
-        print "Zinv currently only implemented for DY"
+        print "Zinv currently only implemented for DY\n"
         exit(1)
         
     # QCD systs
@@ -834,9 +888,9 @@ def makeTemplate(directory,imt2):
         template += "{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fitstat,qcd_fitstat)
         template += "{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fitsyst,qcd_fitsyst)
     
-    # the template contains background information used for all signal mass points
-    # channel is needed to name the output file
-    # lostlep_alpha and lastbin_hybrid are needed for signal contamination subtraction
+    # The template contains background information used for all signal mass points.
+    # channel is needed to name the output file produced in makeCard.
+    # lostlep_alpha and lastbin_hybrid are needed for signal contamination subtraction.
     return template,channel,lostlep_alpha,lostlep_lastbin_hybrid
 
 def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,signal,outdir,imt2,im1=-1,im2=-1):
@@ -879,10 +933,11 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
     n_sig_isr_UP = 0.0
     err_sig_recogenaverage = 0.0
 
-    if (im1 >= 0 and im2 >= 0):
+    if (im1 >= 0 and im2 >= 0): # Full scan
         h_sigscan = f_sig.Get(fullhistnameScan)
         if (h_sigscan == None):
-            return False
+            print "Tried to extra ({0},{1}) from the full scan, but no such histogram exists.\n".format(str(im1),str(im2))
+            return False # Can't do a full scan if we can't find h_sigscan
         bin1 = h_sigscan.GetYaxis().FindBin(im1)
         bin2 = h_sigscan.GetZaxis().FindBin(im2)
         h_sig = h_sigscan.ProjectionX("h_mt2bins_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
@@ -983,6 +1038,10 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
                 err_sig_recogenaverage = abs(n_sig_cor-n_sig_cor_genmet) / 2.0 / n_sig_cor_recogenaverage
         else:
             print "Tried to subtract signal contamination but couldn't find h_sig_crsl\n"
+            if (isSignalWithLeptons):
+                print "Did you remember to run sigContamMaker.C? If so, did you pass file.root instead of file_sigcontam.root by mistake?\n"
+            else:
+                print "This signal appears not to contain leptons, so that is not unusual.\n"
             
     sig_syst = 1.10
     sig_lumi = 1.026
@@ -1016,10 +1075,11 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
 
     to_print = template
 
+    # Replace signal placeholders in template with actual values.
     if (doZinvFromDY): 
         to_print = to_print.replace("n_sig_cor_recogenaverage","{0:.3f}".format(n_sig_cor_recogenaverage_towrite))
     else:
-        print "Only ZinvFromDY currently implemented. Aborting..."
+        print "Only ZinvFromDY currently implemented. Aborting...\n"
         exit(1)
 
     if (doDummySignalSyst):
@@ -1047,25 +1107,32 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
     outfile.close()
     return True
 
-signal_points = []
+signal_points = [] # This list of successfully processed mass points is printed to a file and used by limits/SignalScan scripts to process the cards
 iterator = f_sig.GetListOfKeys()
 keep = "sr"
 skip = "srbase"
+# Loop through every directory in the signal file
 for key in iterator:
     directory = key.GetTitle()
-    print directory
+    # If the directory name contains "srbase", skip it
     if directory.find(skip) >= 0: continue
+    # If the directory name contains "sr" but not "srbase", process it
     if directory.find(keep) >= 0:
         sr_number = int(re.findall("\d+",directory)[0]) # Search for the first integer of any length in the directory string
+        # We're either doing super signal regions or we're not; handle appropriately
         if (sr_number < 20 and doSuperSignalRegions): continue
         elif (sr_number >= 20 and not doSuperSignalRegions): continue
         #print "Expected a directory corresponding to a numbered signal region, e.g. sr1VL, but could not find a number in directory {0}, aborting...".format(directory)
         #    exit(1)
+        if verbose: print directory
         n_mt2_name = directory + "/h_n_mt2bins"
         h_n_mt2bins = f_sig.Get(n_mt2_name)
         n_mt2_bins = int(h_n_mt2bins.GetBinContent(1))
+        # Loop over MT2 bins in this signal region
         for imt2 in range(1,n_mt2_bins+1):
+            # Make a template for this bin containing the common background components of the card, with placeholders for signal.
             template,channel,lostlep_alpha,lostlep_lastbin_hybrid = makeTemplate(directory,imt2) 
+            # If we're doing a full scan, loop over mass points and replace placeholders in the template with appropriate signal values for each point.
             if (doScan):
                 y_binwidth = 25
                 y_max = 1600
@@ -1075,12 +1142,15 @@ for key in iterator:
                 for im1 in range(0,2301,25):
                     for im2 in range(0,y_max+1,y_binwidth):
                         if (suppressUHmt2bin and directory.find("UH") != -1 and imt2 == 1): continue
+                        # Replace signal placeholders and print the card
                         success = makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,signal,outdir,imt2,im1,im2)
+                        # If no histograms are found for that mass point, don't add it to the list of processed points
                         if success:
                             signal_points.append( (im1,im2) )
             else:
                 makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,signal,outdir,imt2)
 
+    # Print signal_points to a file
     if (doScan):
         points_file = open("{0}/points_{1}.txt".format(outdir,signal),"w")
         points_file.write("--------------------------------------------\n")
