@@ -8,7 +8,7 @@ from sys import argv,exit
 
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
-verbose = False # Print more error messages
+verbose = True # Print more error messages
 suppressZeroBins = False # Don't print cards for any MT2 bin with 0 signal, even if other bins in its region have nonzero signal
 suppressZeroTRs = True # Don't print cards for any of the MT2 bins in a region with 0 signal in any bin
 doSuperSignalRegions = False # Print cards for super signal regions
@@ -808,86 +808,89 @@ def makeTemplate(directory,imt2):
 
     # Assemble background estimate for this signal region. Write in variable names directly for signal quantities, and sub them in later point-by-point
     # within makeCard.
-    template = "imax 1  number of channels\n"
-    template += "jmax 3  number of backgrounds\n"
-    template += "kmax *\n"
-    template += "------------\n"
-    template += "bin         {0}\n".format(channel)
-    template += "observation {0:.3f}\n".format(n_data)
-    template += "------------\n"
-    template += "bin             {0}   {1}   {2}   {3}\n".format(channel,channel,channel,channel)
-    template += "process          sig       zinv        llep      qcd\n"
-    template += "process           0         1           2         3\n"
+    template_list = []
+    template_list.append("imax 1  number of channels\n")
+    template_list.append("jmax 3  number of backgrounds\n")
+    template_list.append("kmax *\n")
+    template_list.append("------------\n")
+    template_list.append("bin         {0}\n".format(channel))
+    template_list.append("observation {0:.3f}\n".format(n_data))
+    template_list.append("------------\n")
+    template_list.append("bin             {0}   {1}   {2}   {3}\n".format(channel,channel,channel,channel))
+    template_list.append("process          sig       zinv        llep      qcd\n")
+    template_list.append("process           0         1           2         3\n")
     if (doZinvFromDY):
         # Include signal placeholder
-        template += "rate            n_sig_cor_recogenaverage    {0:.3f}      {1:.3f}      {2:.3f}\n".format(n_zinvDY_towrite,n_lostlep_towrite,n_qcd_towrite)
+        template_list.append("rate            n_sig_cor_recogenaverage    {0:.3f}      {1:.3f}      {2:.3f}\n".format(n_zinvDY_towrite,n_lostlep_towrite,n_qcd_towrite))
     else:  
         print "Zinv currently only fully implemented from DY. Aborting...\n"
         exit(1)
-        template += "rate            n_sig_cor_recogenaverage    {0:.3f}      {1:.3f}      {2:.3f}\n".format(n_zinv,n_lostlep,n_qcd)
-    template += "------------\n"
+        template_list.append("rate            n_sig_cor_recogenaverage    {0:.3f}      {1:.3f}      {2:.3f}\n".format(n_zinv,n_lostlep,n_qcd))
+    template_list.append("------------\n")
 
     # Write in signal placeholders
     if (doDummySignalSyst):
-        template += "name_sig_syst                                lnN   sig_syst    -      -     - \n"
+        template_list.append("name_sig_syst                                lnN   sig_syst    -      -     - \n")
     else:
-        template += "name_sig_lumi                    lnN    sig_lumi   -    -    - \n"
-        template += "name_sig_pu                    lnN    sig_pu   -    -    - \n"
-        template += "name_sig_mcstat     lnN    sig_mcstat   -    -    - \n"
-        template += "name_sig_genmet                  lnU    sig_genmet   -    -    - \n"
-        template += "name_sig_isr                  lnN    sig_isr   -    -    - \n"
-        template += "name_sig_btagsf_heavy            lnN    sig_btagsf_heavy   -    -    - \n"
-        template += "name_sig_btagsf_light            lnN    sig_btagsf_light   -    -    - \n"
+        template_list.append("name_sig_lumi                    lnN    sig_lumi   -    -    - \n")
+        template_list.append("name_sig_pu                    lnN    sig_pu   -    -    - \n")
+        template_list.append("name_sig_mcstat     lnN    sig_mcstat   -    -    - \n")
+        template_list.append("name_sig_genmet                  lnU    sig_genmet   -    -    - \n")
+        template_list.append("name_sig_isr                  lnN    sig_isr   -    -    - \n")
+        template_list.append("name_sig_btagsf_heavy            lnN    sig_btagsf_heavy   -    -    - \n")
+        template_list.append("name_sig_btagsf_light            lnN    sig_btagsf_light   -    -    - \n")
         if (isSignalWithLeptons):
-            template += "name_sig_lepeff               lnN    sig_lepeff   -    -    - \n"
+            template_list.append("name_sig_lepeff               lnN    sig_lepeff   -    -    - \n")
             
     # Zinv systs
     if (doZinvFromDY):
-        template += "{0}        gmN {1:.0f}    -   {2:.5f}   -   - \n".format(name_zinvDY_crstat,n_zinvDY_cr_towrite,zinvDY_alpha_towrite)
-        template += "{0}        lnN    -   {1:.3f}   -   - \n".format(name_zinvDY_alphaErr,zinvDY_alphaErr)
-        template += "{0}        lnN    -   {1:.3f}   -   - \n".format(name_zinvDY_purity,zinvDY_puritystat)        
-        template += "{0}        lnN    -   {1:.3f}   -   - \n".format(name_zinvDY_rsfof,zinvDY_rsfof)
+        template_list.append("{0}        gmN {1:.0f}    -   {2:.5f}   -   - \n".format(name_zinvDY_crstat,n_zinvDY_cr_towrite,zinvDY_alpha_towrite))
+        template_list.append("{0}        lnN    -   {1:.3f}   -   - \n".format(name_zinvDY_alphaErr,zinvDY_alphaErr))
+        template_list.append("{0}        lnN    -   {1:.3f}   -   - \n".format(name_zinvDY_purity,zinvDY_puritystat))
+        template_list.append("{0}        lnN    -   {1:.3f}   -   - \n".format(name_zinvDY_rsfof,zinvDY_rsfof))
         if (n_extrap_bins_zinvDY > 0 and imt2 >= zinvDY_lastbin_hybrid):
-            template += "{0}    lnN    -   {1:.3f}   -   - \n".format(name_zinvDY_shape,zinvDY_shape)
+            template_list.append("{0}    lnN    -   {1:.3f}   -   - \n".format(name_zinvDY_shape,zinvDY_shape))
     else:
         print "Zinv currently only implemented for DY\n"
         exit(1)
     
     # lostlep systs
     if (doSimpleLostlepNuisances):
-        template += "{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_lepeff,lostlep_lepeff)
-        template += "{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_alphaerr,lostlep_alphaerr)
+        template_list.append("{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_lepeff,lostlep_lepeff))
+        template_list.append("{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_alphaerr,lostlep_alphaerr))
     else:
-        template += "{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_mtcut,lostlep_mtcut)
-        template += "{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_taueff,lostlep_taueff)
-        template += "{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_btageff,lostlep_btageff)
+        template_list.append("{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_mtcut,lostlep_mtcut))
+        template_list.append("{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_taueff,lostlep_taueff))
+        template_list.append("{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_btageff,lostlep_btageff))
         if (not doZinvFromDY):
             print "Zinv currently only implemented for DY\n"
             exit(1)
-        template += "{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_renorm,lostlep_renorm)
+        template_list.append("{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_renorm,lostlep_renorm))
     
-    template += "{0}        gmN {1:.0f}    -    -    {2:.5f}     - \n".format(name_lostlep_crstat,n_lostlep_cr_towrite,lostlep_alpha_towrite)
-    template += "{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_mcstat,lostlep_mcstat)
+    template_list.append("{0}        gmN {1:.0f}    -    -    {2:.5f}     - \n".format(name_lostlep_crstat,n_lostlep_cr_towrite,lostlep_alpha_towrite))
+    template_list.append("{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_mcstat,lostlep_mcstat))
     if (n_mt2bins > 1 and imt2 >= lostlep_lastbin_hybrid):
-        template += "{0}    lnN    -    -   {1:.3f}     - \n".format(name_lostlep_shape,lostlep_shape)
+        template_list.append("{0}    lnN    -    -   {1:.3f}     - \n".format(name_lostlep_shape,lostlep_shape))
     
     # jec and lepeff affect both lostlep and zinvFromDY
     if (doZinvFromDY):
-        template += "{0}        lnN    -    {1:.3f}    {2:.3f}    - \n".format(name_lostlep_jec,zinvDY_jec,lostlep_jec)
-        template += "{0}        lnN    -    {1:.3f}    {2:.3f}    - \n".format(name_lostlep_lepeff,zinvDY_lepeff,lostlep_lepeff)
+        template_list.append("{0}        lnN    -    {1:.3f}    {2:.3f}    - \n".format(name_lostlep_jec,zinvDY_jec,lostlep_jec))
+        template_list.append("{0}        lnN    -    {1:.3f}    {2:.3f}    - \n".format(name_lostlep_lepeff,zinvDY_lepeff,lostlep_lepeff))
     else:
         print "Zinv currently only implemented for DY\n"
         exit(1)
         
     # QCD systs
-    template += "{0}        gmN {1:.0f}    -    -    -   {2:.5f}\n".format(name_qcd_crstat,n_qcd_cr_towrite,qcd_crstat_towrite)
+    template_list.append("{0}        gmN {1:.0f}    -    -    -   {2:.5f}\n".format(name_qcd_crstat,n_qcd_cr_towrite,qcd_crstat_towrite))
     if (njets_LOW == 1): # Monojet
-        template += "{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_alphaerr,qcd_alphaerr)
+        template_list.append("{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_alphaerr,qcd_alphaerr))
     else:
-        template += "{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fjrbsyst,qcd_fjrbsyst)
-        template += "{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fitstat,qcd_fitstat)
-        template += "{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fitsyst,qcd_fitsyst)
+        template_list.append("{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fjrbsyst,qcd_fjrbsyst))
+        template_list.append("{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fitstat,qcd_fitstat))
+        template_list.append("{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fitsyst,qcd_fitsyst))
     
+    template = "".join(template_list)
+
     # The template contains background information used for all signal mass points.
     # channel is needed to name the output file produced in makeCard.
     # lostlep_alpha and lastbin_hybrid are needed for signal contamination subtraction.
