@@ -26,7 +26,7 @@
 #include "../CORE/Tools/badEventFilter.h"
 
 // header
-#include "MT2Looper.h"
+#include "ShortTrackLooper.h"
 
 //MT2
 #include "../MT2CORE/Plotting/PlotUtilities.h"
@@ -38,6 +38,7 @@ using namespace duplicate_removal;
 using namespace RooFit;
 
 class mt2tree;
+class sttree;
 class SR;
 
 std::string toString(float in){
@@ -54,6 +55,9 @@ int n_m1bins = 93;
 float* m1bins;
 int n_m2bins = 93;
 float* m2bins;
+
+int min_nst = 2;
+int max_nst = -1;
 
 const int n_htbins = 5;
 const float htbins[n_htbins+1] = {250, 450., 575., 1000., 1500., 3000.};
@@ -143,23 +147,38 @@ std::ofstream fqcdlist;
 
 TString stringsample;
 
-MT2Looper::MT2Looper(){
+ShortTrackLooper::ShortTrackLooper(){
 
 }
-MT2Looper::~MT2Looper(){
+ShortTrackLooper::~ShortTrackLooper(){
 
 };
 
-void MT2Looper::SetSignalRegions(){
+void ShortTrackLooper::SetSignalRegions(){
   //SRVec =  getSignalRegionsZurich_jetpt30(); //same as getSignalRegionsZurich(), but with j1pt and j2pt cuts changed to 30 GeV
   //  SRVec =  getSignalRegionsJamboree(); //adds HT 200-450 regions
-  //  SRVec =  getSignalRegions2016(); //adds 2 bins at UH HT, for 3b
+//  SRVec =  getSignalRegions2016(); //adds 2 bins at UH HT, for 3b
+  SRVec = getSignalRegions2017();
   SRVecMonojet = getSignalRegionsMonojet2016(); // first pass of monojet regions
-  SRVec = getSignalRegionsShortTrack();
+
+  // Add Short Track cut to all regions
+  for (unsigned int i = 0; i < SRVec.size(); i++) {
+    SRVec.at(i).SetVar("nst",min_nst,max_nst);
+    SRVec.at(i).SetVarCRSL("nst",min_nst,max_nst);
+    SRVec.at(i).SetVarCRDY("nst",min_nst,max_nst);
+    SRVec.at(i).SetVarCRQCD("nst",min_nst,max_nst);
+  }
+  for (unsigned int i = 0; i < SRVecMonojet.size(); i++) {
+    SRVecMonojet.at(i).SetVar("nst",min_nst,max_nst);
+    SRVecMonojet.at(i).SetVarCRSL("nst",min_nst,max_nst);
+    SRVecMonojet.at(i).SetVarCRDY("nst",min_nst,max_nst);
+    SRVecMonojet.at(i).SetVarCRQCD("nst",min_nst,max_nst);
+  }
 
   //store histograms with cut values for all variables
   for(unsigned int i = 0; i < SRVec.size(); i++){
     std::vector<std::string> vars = SRVec.at(i).GetListOfVariables();
+
     TDirectory * dir = (TDirectory*)outfile_->Get(("sr"+SRVec.at(i).GetName()).c_str());
     if (dir == 0) {
       dir = outfile_->mkdir(("sr"+SRVec.at(i).GetName()).c_str());
@@ -265,6 +284,8 @@ void MT2Looper::SetSignalRegions(){
   SRBase.SetVarCRSL("nlep", 1, 2);
   SRBase.SetVarCRSL("passesHtMet", 1, 2);
   SRBase.SetMT2Bins(n_mt2bins_SRBase, (float*) SRBase_mt2bins);
+  SRBase.SetVar("nst", min_nst,max_nst);
+  SRBase.SetVarCRSL("nst",min_nst,max_nst);
 
   std::vector<std::string> vars = SRBase.GetListOfVariables();
   TDirectory * dir = (TDirectory*)outfile_->Get((SRBase.GetName()).c_str());
@@ -413,6 +434,9 @@ void MT2Looper::SetSignalRegions(){
   SRBaseMonojet.SetVarCRQCD("met", 240, -1);
   SRBaseMonojet.SetVarCRQCD("deltaPhiMin", 0., 0.3);
   SRBaseMonojet.SetVarCRQCD("diffMetMhtOverMet", 0, 0.5);
+  SRBaseMonojet.SetVar("nst",min_nst,max_nst);
+  SRBaseMonojet.SetVarCRSL("nst",min_nst,max_nst);
+  SRBaseMonojet.SetVarCRQCD("nst",min_nst,max_nst);
   float SRBaseMonojet_mt2bins[8] = {250, 300, 400, 500, 600, 800, 1000, 1500};
   SRBaseMonojet.SetMT2Bins(7, SRBaseMonojet_mt2bins);
 
@@ -541,7 +565,7 @@ void MT2Looper::SetSignalRegions(){
 }
 
 
-void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
+void ShortTrackLooper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
@@ -549,7 +573,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   gROOT->cd();
   TString output_name = Form("%s/%s.root",output_dir.c_str(),sample.c_str());
-  cout << "[MT2Looper::loop] creating output file: " << output_name << endl;
+  cout << "[ShortTrackLooper::loop] creating output file: " << output_name << endl;
 
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
@@ -628,7 +652,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     if (sample.find("baby_full") != std::string::npos) scan_name = "T2tt-Spring16";
     else if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
-    else if (sample.find("T5") != std::string::npos) scan_name = "T5qqqqLLChiChi_2016_baby"; 
+    else if (sample.find("T5") != std::string::npos) {
+      scan_name = "T5qqqqLLChiChi_2016_friends";
+      //      scan_name = "T5qqqqLLChiChi_2016_baby"; 
+    }
     else if (sample.find("T6") != std::string::npos) scan_name = sample.substr(0,6);
     if (verbose) cout << "scan_name = " << scan_name << endl;
     if (verbose) cout << Form("../babymaker/data/nsig_weights_%s.root",scan_name.c_str()) << endl;
@@ -700,7 +727,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     else m2bins[i] = i*25.;
   }
   
-  cout << "[MT2Looper::loop] setting up histos" << endl;
+  cout << "[ShortTrackLooper::loop] setting up histos" << endl;
 
   SetSignalRegions();
 
@@ -727,29 +754,34 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   int nDuplicates = 0;
   int nEvents = chain->GetEntries();
   unsigned int nEventsChain = nEvents;
-  cout << "[MT2Looper::loop] running on " << nEventsChain << " events" << endl;
+  cout << "[ShortTrackLooper::loop] running on " << nEventsChain << " events" << endl;
   unsigned int nEventsTotal = 0;
   TObjArray *listOfFiles = chain->GetListOfFiles();
   TIter fileIter(listOfFiles);
   TFile *currentFile = 0;
   while ( (currentFile = (TFile*)fileIter.Next()) ) {
-    cout << "[MT2Looper::loop] running on file: " << currentFile->GetTitle() << endl;
+    cout << "[ShortTrackLooper::loop] running on file: " << currentFile->GetTitle() << endl;
 
     // Get File Content
     TFile f( currentFile->GetTitle() );
-    TTree *tree = (TTree*)f.Get("mt2");
+    TTree *tree_mt2 = (TTree*)f.Get("mt2st");
+    TTree *tree_st = (TTree*)f.Get("st");
     TTreeCache::SetLearnEntries(10);
-    tree->SetCacheSize(128*1024*1024);
+    tree_mt2->SetCacheSize(128*1024*1024);
+    tree_st->SetCacheSize(128*1024*1024);
     //mt2tree t(tree);
     
     // Use this to speed things up when not looking at genParticles
     //tree->SetBranchStatus("genPart_*", 0); 
     if (verbose) cout<<__LINE__<<endl;
 
-    t.Init(tree);
+    tree_st->AddFriend(tree_mt2);
+
+    t.Init(tree_st);
+    t.Init_ST(tree_st);
 
     // Event Loop
-    unsigned int nEventsTree = tree->GetEntriesFast();
+    unsigned int nEventsTree = tree_mt2->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
       //      for( unsigned int event = 0; event < 10000; ++event) {
       
@@ -794,6 +826,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
       if (verbose) cout<<__LINE__<<endl;
 
+      if (verbose) cout << "t.nVert = " << t.nVert << endl;
+
       if (t.nVert == 0) continue;
       if (verbose) cout<<__LINE__<<endl;
 
@@ -806,13 +840,16 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	if (!t.Flag_eeBadScFilter) continue; 
 	if (verbose) cout<<__LINE__<<endl;
       }
-      if (!stringsample.Contains("2015")) { // several filters are not in 2015 MC
+      if (!stringsample.Contains("2015")) { // several filters are not in 2015 MC	
 	if (!t.Flag_goodVertices) continue;
 	if (verbose) cout<<__LINE__<<endl;
-	if (!t.Flag_HBHENoiseFilter) continue;
+	//if (verbose) cout << "HBHENoiseFilter = " << t.Flag_HBHENoiseFilter << endl;
+	//if (!t.Flag_HBHENoiseFilter) continue;
 	if (verbose) cout<<__LINE__<<endl;
-	if (!t.Flag_HBHENoiseIsoFilter) continue;
+	//if (verbose) cout << "HBHENoiseIsoFilter = " << t.Flag_HBHENoiseIsoFilter << endl;
+	//if (!t.Flag_HBHENoiseIsoFilter) continue;
 	if (verbose) cout<<__LINE__<<endl;
+	if (verbose) cout<<"EcalDeadCellTriggerPrimitiveFilter = " <<t.Flag_EcalDeadCellTriggerPrimitiveFilter << endl;
 	if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
 	if (verbose) cout<<__LINE__<<endl;
 	if (!t.Flag_badChargedHadronFilterV2) continue; 
@@ -940,15 +977,17 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (verbose) cout<<__LINE__<<endl;
       // apply relevant weights to MC
       if (!t.isData) {
-	if (sample.find("T5") != std::string::npos)  {
+	if (sample.find("T5qqqqLLChiChi_2016_friends") != std::string::npos) {
+	  evtweight_ = lumi * 1000 * (0.0027613) / 3749.0;
+	  if (verbose) cout << "Initial evtweight_ = " << evtweight_ << endl;
+	}
+	else if (sample.find("T5") != std::string::npos)  {
 	  if (!h_sig_nevents_) cout << "h_sig_nevents_ is null" << endl;
-	  // This is bugged for some reason with T5qqqqLLChiChi_2016_baby.root
-	  // Gives 13748 instead...
 	  int binx = h_sig_nevents_->GetXaxis()->FindBin(t.GenSusyMScan1);
 	  int biny = h_sig_nevents_->GetYaxis()->FindBin(t.GenSusyMScan2);
 	  double nevents = h_sig_nevents_->GetBinContent(binx,biny);
 	  // Mglu = 1800 GeV
-	  evtweight_ = lumi * 1000 * (0.0027613) / 3749.0;
+	  evtweight_ = lumi * 1000 * (0.0027613) / nevents;
 	  if (verbose) cout << "Initial evtweight_ = " << evtweight_ << endl;
 	}
 	else if (isSignal_ && doScanWeights) {
@@ -962,6 +1001,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  if (!ignoreScale1fb) evtweight_ = t.evt_scale1fb * lumi;
 	}
 	if (verbose) cout<<__LINE__<<endl;
+	if (verbose) cout << "weight_btagsf = " << t.weight_btagsf << endl;
 	if (applyBtagSF) {
 	  // remove events with 0 btag weight for now..
 	  if (fabs(t.weight_btagsf) < 0.001) continue;
@@ -1147,7 +1187,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}
 
 	if (!foundlep) {
-	  std::cout << "MT2Looper::Loop: WARNING! didn't find a lowMT candidate when expected: evt: " << t.evt
+	  std::cout << "ShortTrackLooper::Loop: WARNING! didn't find a lowMT candidate when expected: evt: " << t.evt
 		    << ", nMuons10: " << t.nMuons10 << ", nElectrons10: " << t.nElectrons10 
 		    << ", nPFLep5LowMT: " << t.nPFLep5LowMT << ", nLepLowMT: " << t.nLepLowMT << std::endl;
 	}
@@ -1281,10 +1321,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	if (verbose) cout<<__LINE__<<endl;
 
 	fillHistos(SRNoCut.srHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "");
-
+	if (verbose) cout<<__LINE__<<endl;
 	fillHistosSignalRegion("sr");
-
+	if (verbose) cout<<__LINE__<<endl;
 	fillHistosSRBase();
+	if (verbose) cout<<__LINE__<<endl;
 	fillHistosInclusive();
       }
 
@@ -1331,11 +1372,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
     }//end loop on events in a file
   
-    delete tree;
+    delete tree_mt2;
+    delete tree_st;
     f.Close();
   }//end loop on files
   
-  cout << "[MT2Looper::loop] processed " << nEventsTotal << " events" << endl;
+  cout << "[ShortTrackLooper::loop] processed " << nEventsTotal << " events" << endl;
   if ( nEventsChain != nEventsTotal ) {
     std::cout << "ERROR: number of events from files is not equal to total number of events" << std::endl;
   }
@@ -1456,7 +1498,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   return;
 }
 
-void MT2Looper::fillHistosSRBase() {
+void ShortTrackLooper::fillHistosSRBase() {
 
   // trigger requirement on data
   if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
@@ -1474,6 +1516,7 @@ void MT2Looper::fillHistosSRBase() {
   values["j2pt"]        = jet2_pt_;
   values["mt2"]         = mt2_;
   values["passesHtMet"] = ( (ht_ > 250. && met_pt_ > 250.) || (ht_ > 1000. && met_pt_ > 30.) );
+  values["nst"] = t.nshorttracks;
 
   if(SRBase.PassesSelection(values)) {
     fillHistos(SRBase.srHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), SRBase.GetName(), "");
@@ -1493,7 +1536,8 @@ void MT2Looper::fillHistosSRBase() {
     values_monojet["ht"]          = ht_; // ETH uses ht instead of jet1_pt..
     values_monojet["njets"]       = nJet30_;
     values_monojet["met"]         = met_pt_;
-    
+    values_monojet["nst"] = t.nshorttracks;
+
     if(SRBaseMonojet.PassesSelection(values_monojet)) passMonojet = true;
     if (passMonojet) {
       fillHistos(SRBaseMonojet.srHistMap, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.GetMT2Bins(), SRBaseMonojet.GetName(), "");
@@ -1511,7 +1555,7 @@ void MT2Looper::fillHistosSRBase() {
   return;
 }
 
-void MT2Looper::fillHistosInclusive() {
+void ShortTrackLooper::fillHistosInclusive() {
 
   // trigger requirement on data
   if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
@@ -1529,6 +1573,7 @@ void MT2Looper::fillHistosInclusive() {
   values["j2pt"]        = jet2_pt_;
   values["mt2"]         = mt2_;
   values["passesHtMet"] = ( (ht_ > 250. && met_pt_ > 250.) || (ht_ > 1000. && met_pt_ > 30.) );
+  values["nst"] = t.nshorttracks;
 
   for(unsigned int srN = 0; srN < InclusiveRegions.size(); srN++){
     std::map<std::string, float> values_temp = values;
@@ -1546,7 +1591,7 @@ void MT2Looper::fillHistosInclusive() {
   return;
 }
 
-void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::string& suffix) {
+void ShortTrackLooper::fillHistosSignalRegion(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
   if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
@@ -1568,7 +1613,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
   values["ht"]          = ht_;
   values["met"]         = met_pt_;
   //values["passesHtMet"] = ( (ht_ > 250. && met_pt_ > 250.) || (ht_ > 1000. && met_pt_ > 30.) );
-
+  values["nst"] = t.nshorttracks;
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelection(values)){
@@ -1589,6 +1634,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
     values_monojet["nbjets"]      = nBJet20_;
     values_monojet["ht"]          = ht_;
     values_monojet["met"]         = met_pt_;
+    values_monojet["nst"] = t.nshorttracks;
 
     for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
       if(SRVecMonojet.at(srN).PassesSelection(values_monojet)){
@@ -1613,6 +1659,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
     values_genmet["mt2"]         = t.mt2_genmet;
     values_genmet["ht"]          = ht_;
     values_genmet["met"]         = t.met_genPt;
+    values_genmet["nst"] = t.nshorttracks;
 
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(SRVec.at(srN).PassesSelection(values_genmet)){
@@ -1632,6 +1679,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
       values_monojet_genmet["nbjets"]      = nBJet20_;
       values_monojet_genmet["ht"]          = ht_;
       values_monojet_genmet["met"]         = t.met_genPt;
+      values_monojet_genmet["nst"] = t.nshorttracks;
 
       for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
 	if(SRVecMonojet.at(srN).PassesSelection(values_monojet_genmet)){
@@ -1647,7 +1695,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 }
 
 // hists for single lepton control region
-void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suffix) {
+void ShortTrackLooper::fillHistosCRSL(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
   if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
@@ -1666,6 +1714,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   valuesBase["j2pt"]        = jet2_pt_;
   valuesBase["mt2"]         = mt2_;
   valuesBase["passesHtMet"] = ( (ht_ > 250. && met_pt_ > 250.) || (ht_ > 1000. && met_pt_ > 30.) );
+  valuesBase["nst"] = t.nshorttracks;
 
   if (SRBase.PassesSelectionCRSL(valuesBase)) {
     if(prefix=="crsl") fillHistosSingleLepton(SRBase.crslHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbase", suffix);
@@ -1695,6 +1744,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
     valuesInc["mt2"]         = mt2_;
     valuesInc["passesHtMet"] = ( (ht_ > 250. && met_pt_ > 250.) || (ht_ > 1000. && met_pt_ > 30.) );
     valuesInc["nbjets"]         = nBJet20_;
+    valuesInc["nst"] = t.nshorttracks;
     if (CRSL_WJets.PassesSelectionCRSL(valuesInc)) {
       fillHistosSingleLepton(CRSL_WJets.crslHistMap, CRSL_WJets.GetNumberOfMT2Bins(), CRSL_WJets.GetMT2Bins(), CRSL_WJets.GetName().c_str(), suffix);
     }
@@ -1715,6 +1765,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   values["mt2"]         = mt2_;
   values["ht"]          = ht_;
   values["met"]         = met_pt_;
+  values["nst"] = t.nshorttracks;
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelectionCRSL(values)){
@@ -1739,6 +1790,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
     valuesBase_monojet["ht"]          = jet1_pt_; // don't include the lepton
     valuesBase_monojet["njets"]       = nJet30_;
     valuesBase_monojet["met"]         = met_pt_;
+    valuesBase_monojet["nst"] = t.nshorttracks;
 
     if (SRBaseMonojet.PassesSelectionCRSL(valuesBase_monojet)) {
       if(prefix=="crsl") fillHistosSingleLepton(SRBaseMonojet.crslHistMap, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.GetMT2Bins(), "crslbaseJ", suffix);
@@ -1756,6 +1808,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
     values_monojet["nbjets"]      = nBJet20_;
     values_monojet["ht"]          = jet1_pt_; // don't include the lepton 
     values_monojet["met"]         = met_pt_;
+    values_monojet["nst"] = t.nshorttracks;
 
     for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
       if(SRVecMonojet.at(srN).PassesSelectionCRSL(values_monojet)){
@@ -1786,6 +1839,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
     values_genmet["mt2"]         = t.mt2_genmet;
     values_genmet["ht"]          = ht_;
     values_genmet["met"]         = t.met_genPt;
+    values_genmet["nst"] = t.nshorttracks;
 
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(SRVec.at(srN).PassesSelectionCRSL(values_genmet)){
@@ -1806,6 +1860,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
       values_monojet_genmet["nbjets"]      = nBJet20_;
       values_monojet_genmet["ht"]          = jet1_pt_;
       values_monojet_genmet["met"]         = t.met_genPt;
+      values_monojet_genmet["nst"] = t.nshorttracks;
 
       for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
 	if(SRVecMonojet.at(srN).PassesSelectionCRSL(values_monojet_genmet)){
@@ -1822,7 +1877,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
 }
 
 // hists for Gamma+Jets control region
-void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suffix) {
+void ShortTrackLooper::fillHistosCRGJ(const std::string& prefix, const std::string& suffix) {
 
   if (t.ngamma==0) return;
 
@@ -1858,7 +1913,8 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   values["mt2"]         = t.gamma_mt2;
   values["ht"]          = t.gamma_ht;
   values["met"]         = t.gamma_met_pt;
-  
+  values["nst"] = t.nshorttracks;
+
   // Separate list for SRBASE
   std::map<std::string, float> valuesBase;
   valuesBase["deltaPhiMin"] = t.gamma_deltaPhiMin;
@@ -1868,6 +1924,7 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   valuesBase["j2pt"]        = t.gamma_jet2_pt;
   valuesBase["mt2"]         = t.gamma_mt2;
   valuesBase["passesHtMet"] = ( (t.gamma_ht > 250. && t.gamma_met_pt > 250.) || (t.gamma_ht > 1000. && t.gamma_met_pt > 30.) );
+  valuesBase["nst"] = t.nshorttracks;
   bool passBase = SRBase.PassesSelection(valuesBase);
 
   std::map<std::string, float> valuesBase_monojet;
@@ -1877,6 +1934,7 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   valuesBase_monojet["ht"]          = t.gamma_ht; // ETH doesn't cut on jet1_pt here, only ht
   valuesBase_monojet["njets"]       = t.gamma_nJet30;
   valuesBase_monojet["met"]         = t.gamma_met_pt;
+  valuesBase_monojet["nst"] = t.nshorttracks;
 
   bool passBaseJ = SRBaseMonojet.PassesSelection(valuesBase_monojet);
 
@@ -1889,7 +1947,7 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   values_monojet["nbjets"]      = t.gamma_nBJet20;
   values_monojet["ht"]          = t.gamma_ht;
   values_monojet["met"]         = t.gamma_met_pt;
-  
+  values_monojet["nst"] = t.nshorttracks;
 
   //float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
   float iso = t.gamma_chHadIso[0];
@@ -1996,7 +2054,7 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
 }
 
 // hists for Zll control region
-void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suffix) {
+void ShortTrackLooper::fillHistosCRDY(const std::string& prefix, const std::string& suffix) {
 
   if (t.nlep!=2) return;
 
@@ -2018,6 +2076,7 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   values["mt2"]         = t.zll_mt2;
   values["ht"]          = t.zll_ht;
   values["met"]         = t.zll_met_pt;
+  values["nst"] = t.nshorttracks;
 
   // Separate list for SRBASE
   std::map<std::string, float> valuesBase;
@@ -2028,6 +2087,7 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   valuesBase["j2pt"]        = jet2_pt_;
   valuesBase["mt2"]         = t.zll_mt2;
   valuesBase["passesHtMet"] = ( (t.zll_ht > 250. && t.zll_met_pt > 250.) || (t.zll_ht > 1000. && t.zll_met_pt > 30.) );
+  valuesBase["nst"] = t.nshorttracks;
   bool passBase = SRBase.PassesSelection(valuesBase);
 
   std::map<std::string, float> valuesBase_monojet;
@@ -2037,6 +2097,7 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   valuesBase_monojet["ht"]          = t.zll_ht; 
   valuesBase_monojet["njets"]       = nJet30_;
   valuesBase_monojet["met"]         = t.zll_met_pt;
+  valuesBase_monojet["nst"] = t.nshorttracks;
 
   bool passBaseJ = SRBaseMonojet.PassesSelection(valuesBase_monojet) && passMonojetId_;
 
@@ -2049,7 +2110,8 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   values_monojet["nbjets"]      = nBJet20_;
   values_monojet["ht"]          = t.zll_ht;
   values_monojet["met"]         = t.zll_met_pt;
-  
+  values_monojet["nst"] = t.nshorttracks;
+
   if (t.zll_ht > 250) fillHistosDY(SRNoCut.crdyHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), prefix+SRNoCut.GetName(), suffix);
   if(passBase) fillHistosDY(SRBase.crdyHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdybase", suffix);
   if(passBaseJ) {
@@ -2086,7 +2148,7 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
 }
 
 // hists for removed single lepton control region
-void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suffix) {
+void ShortTrackLooper::fillHistosCRRL(const std::string& prefix, const std::string& suffix) {
 
   if (t.nlep!=1) return;
 
@@ -2103,6 +2165,7 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
   values["mt2"]         = t.rl_mt2;
   values["ht"]          = t.rl_ht;
   values["met"]         = t.rl_met_pt;
+  values["nst"] = t.nshorttracks;
 
   // Separate list for SRBASE
   std::map<std::string, float> valuesBase;
@@ -2113,6 +2176,7 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
   valuesBase["j2pt"]        = jet2_pt_;
   valuesBase["mt2"]         = t.rl_mt2;
   valuesBase["passesHtMet"] = ( (t.rl_ht > 250. && t.rl_met_pt > 250.) || (t.rl_ht > 1000. && t.rl_met_pt > 30.) );
+  valuesBase["nst"] = t.nshorttracks;
   bool passBase = SRBase.PassesSelection(valuesBase);
 
   std::map<std::string, float> valuesBase_monojet;
@@ -2122,6 +2186,7 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
   valuesBase_monojet["ht"]          = ht_; // ETH doesn't cut on jet1_pt, only ht
   valuesBase_monojet["njets"]       = nJet30_;
   valuesBase_monojet["met"]         = t.rl_met_pt;
+  valuesBase_monojet["nst"] = t.nshorttracks;
 
   bool passBaseJ = SRBaseMonojet.PassesSelection(valuesBase_monojet);
   
@@ -2134,6 +2199,7 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
   values_monojet["nbjets"]      = nBJet20_;
   values_monojet["ht"]          = t.rl_ht;
   values_monojet["met"]         = t.rl_met_pt;
+  values_monojet["nst"] = t.nshorttracks;
 
   if (t.rl_ht > 250) {
     if(prefix=="crrl")        fillHistosRemovedLepton(SRNoCut.crrlHistMap,   SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), prefix+SRNoCut.GetName(), suffix);
@@ -2192,7 +2258,7 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
 }
 
 // hists for single lepton control region
-void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& suffix) {
+void ShortTrackLooper::fillHistosCRQCD(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data (also require to come from JetHT, HTMHT, or MET PD to match ETH)
   if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
@@ -2212,6 +2278,7 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
   values["mt2"]         = mt2_;
   values["ht"]          = ht_;
   values["met"]         = met_pt_;
+  values["nst"] = t.nshorttracks;
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelectionCRQCD(values)){
@@ -2234,6 +2301,7 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
     values_monojet["nbjets"]      = nBJet20_;
     values_monojet["ht"]          = jet1_pt_; // only count jet1_pt for binning
     values_monojet["met"]         = met_pt_;
+    values_monojet["nst"] = t.nshorttracks;
 
     for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
       if(SRVecMonojet.at(srN).PassesSelectionCRQCD(values_monojet)){
@@ -2252,12 +2320,16 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
   return;
 }
 
-void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
+void ShortTrackLooper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
     dir = outfile_->mkdir(dirname.c_str());
   } 
   dir->cd();
+
+  if (dirname.find("crqcd20") != string::npos) {
+    cout << "fillHistos called on: " << t.evt << endl;
+  }
 
   // workaround for monojet bins
   float mt2_temp = mt2_;
@@ -2330,6 +2402,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
     plot1D("h_J0pt"+s,       jet1_pt_,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
     plot1D("h_J1pt"+s,       jet2_pt_,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
+    plot1D("h_nst"+s, t.nshorttracks, evtweight_, h_1d, ";Short Track Count", 10, 0, 10);
   }
 
   TString directoryname(dirname);
@@ -2506,7 +2579,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   return;
 }
 
-void MT2Looper::fillHistosSingleLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
+void ShortTrackLooper::fillHistosSingleLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
     dir = outfile_->mkdir(dirname.c_str());
@@ -2525,7 +2598,7 @@ void MT2Looper::fillHistosSingleLepton(std::map<std::string, TH1*>& h_1d, int n_
 }
 
 
-void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<std::string, RooDataSet*>& datasets, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
+void ShortTrackLooper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<std::string, RooDataSet*>& datasets, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
     dir = outfile_->mkdir(dirname.c_str());
@@ -2656,7 +2729,7 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
   return;
 }
 
-void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
+void ShortTrackLooper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
     dir = outfile_->mkdir(dirname.c_str());
@@ -2771,11 +2844,10 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
   }
   
   outfile_->cd();
-  //  fillHistos(h_1d, n_mt2bins, mt2bins, dirname, s); // Added to print CRDY sigscan histos
   return;
 }
 
-void MT2Looper::fillHistosRemovedLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
+void ShortTrackLooper::fillHistosRemovedLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
     dir = outfile_->mkdir(dirname.c_str());
@@ -2821,10 +2893,16 @@ void MT2Looper::fillHistosRemovedLepton(std::map<std::string, TH1*>& h_1d, int n
   return;
 }
 
-void MT2Looper::fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
+int totalQCD = 1;
+
+void ShortTrackLooper::fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
   if (print_qcd_event_list && t.isData)
     // if (print_qcd_event_list)    
     fqcdlist << dirname << "\t" << t.run << "\t" << t.lumi << "\t" << t.evt << std::endl;
+
+  if (dirname.find("crqcd20") != string::npos){
+    cout << "evt: " << t.evt << "; fill number: " << totalQCD++ << endl;
+  }
 
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
@@ -2892,11 +2970,10 @@ void MT2Looper::fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, 
   }
 
   outfile_->cd();
-  //  fillHistos(h_1d, n_mt2bins, mt2bins, dirname, s); // Added to print CRQCD sigscan histos
   return;
 }
 
-void MT2Looper::fillLepCorSRfromFile() {
+void ShortTrackLooper::fillLepCorSRfromFile() {
 
   // lepton efficiency variation in signal region: large uncertainty on leptons NOT vetoed
   cor_lepeff_sr_ = 1.;
@@ -2957,7 +3034,7 @@ void MT2Looper::fillLepCorSRfromFile() {
   return;
 }
 
-void MT2Looper::fillLepSFWeightsFromFile() {
+void ShortTrackLooper::fillLepSFWeightsFromFile() {
 
   weight_lepsf_cr_ = 1.;
   weight_lepsf_cr_UP_ = 1.;
@@ -3011,7 +3088,7 @@ void MT2Looper::fillLepSFWeightsFromFile() {
   return;
 }
 
-void MT2Looper::fillHistosGenMET(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
+void ShortTrackLooper::fillHistosGenMET(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
     dir = outfile_->mkdir(dirname.c_str());
@@ -3032,7 +3109,7 @@ void MT2Looper::fillHistosGenMET(std::map<std::string, TH1*>& h_1d, int n_mt2bin
   return;
 }
 
-float MT2Looper::getAverageISRWeight(const int evt_id, const int var) {
+float ShortTrackLooper::getAverageISRWeight(const int evt_id, const int var) {
 
   // madgraph ttsl, from RunIISummer16MiniAODv2
   if (evt_id == 301 || evt_id == 302) {
@@ -3047,7 +3124,7 @@ float MT2Looper::getAverageISRWeight(const int evt_id, const int var) {
     else if (var == -1) return 0.843; // DN
   }
 
-  std::cout << "WARNING: MT2Looper::getAverageISRWeight: didn't recognize either evt_id: " << evt_id
+  std::cout << "WARNING: ShortTrackLooper::getAverageISRWeight: didn't recognize either evt_id: " << evt_id
 	    << " or variation: " << var << std::endl;
   return 1.;
 }

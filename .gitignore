@@ -16,3 +16,5 @@ run*
 process*
 CMSSW_8*/*
 scripts/cards*
+*.eps
+*.png

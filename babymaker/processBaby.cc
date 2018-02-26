@@ -194,7 +194,9 @@ int main(int argc, char **argv) {
 
   std::cout<<"sample is "<<sample<<std::endl;
 
-  bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns") || infile.Contains("Spring16Fast"));
+  //  bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns") || infile.Contains("Spring16Fast") || infile.Contains("Spring16F"));
+
+  bool isFastsim = true;
 
   bool isBadMiniAodV1 = bool(infile.Contains("V07-04-12_miniaodv1_FS"));
   

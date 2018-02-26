@@ -2,7 +2,7 @@
 
 make -j 12 || return $?
 
-OUTDIR=output/full2016
+OUTDIR=output/trialST
 LOGDIR=logs/
 mkdir -p ${OUTDIR}
 mkdir -p ${LOGDIR}
@@ -27,10 +27,10 @@ for SAMPLE in ${Samples[@]}; do
 done
 
 #most recent run2016H and re-reco
-#INDIR=/nfs-6/userdata/mt2/V00-08-18_skim_base_mt2gt200_ZinvV6_JECs/
-#declare -a Samples=(data_Run2016B data_Run2016C data_Run2016D data_Run2016E data_Run2016F data_Run2016G data_Run2016H)
+INDIR=/nfs-6/userdata/mt2/V00-08-18_skim_base_mt2gt200_ZinvV6_JECs/
+declare -a Samples=(data_Run2016B data_Run2016C data_Run2016D data_Run2016E data_Run2016F data_Run2016G data_Run2016H)
 
-#for SAMPLE in ${Samples[@]}; do
-#    echo nice -n 10 ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR}
-#    eval "nohup nice -n 10 ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR} >& ${LOGDIR}/log_${SAMPLE}.txt &"
-#done
+for SAMPLE in ${Samples[@]}; do
+    echo nice -n 10 ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR}
+    eval "nohup nice -n 10 ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR} >& ${LOGDIR}/log_${SAMPLE}.txt &"
+done

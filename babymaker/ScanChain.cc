@@ -479,11 +479,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       }
 
       if (!removePostProcVars) {
-        evt_nEvts = cms3.evt_nEvts();
+	// Edits:
+	//        evt_nEvts = cms3.evt_nEvts();
         evt_scale1fb = cms3.evt_scale1fb();
         evt_xsec = cms3.evt_xsec_incl();
         evt_kfactor = cms3.evt_kfactor();
-        evt_filter = cms3.evt_filt_eff();
+	//        evt_filter = cms3.evt_filt_eff();
       }
       if (!isData) {
         genWeight = cms3.genps_weight();

@@ -6,6 +6,7 @@ import re
 from math import sqrt
 from sys import argv,exit
 
+# Suppresses warnings about TH1::Sumw2
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
 verbose = True # Print more error messages
@@ -125,7 +126,10 @@ def makeTemplate(directory,imt2):
     crsl_directory = directory.replace("sr","crsl")
     fullhistnameCRSL = "{0}/h_mt2bins".format(crsl_directory)
     fullhistnameCRSLGenMet = "{0}/h_mt2bins_genmet".format(crsl_directory)
-    
+    crqcd_directory = directory.replace("sr","crqcd")
+    fullhistnameQCD = "{0}/h_mt2bins".format(crqcd_directory)
+    fullhistnameCRSLGenMet = "{0}/h_mt2bins_genmet".format(crsl_directory)
+
     isSignalWithLeptons = signal.find("T1tttt") != -1 or signal.find("T2tt") != -1
     
     n_lostlep = 0.0
@@ -683,7 +687,7 @@ def makeTemplate(directory,imt2):
     if (n_extrap_bins_zinvDY > 0 and imt2 >= zinvDY_lastbin_hybrid):
         if (imt2 == zinvDY_lastbin_hybrid and n_zinvDY > 0.0):
             increment = 0.0
-            for ibin in range(zinvDY_lastbin_hybrid+1,int(h_zinvDY.GetNbinsX())):
+            for ibin in range(zinvDY_lastbin_hybrid+1,int(h_zinvDY.GetNbinsX()) + 1):
                 increment += last_bin_relerr_zinvDY / n_extrap_bins_zinvDY * (ibin - zinvDY_lastbin_hybrid) * h_zinvDY.GetBinContent(ibin)
             zinvDY_shape = 1.0 - increment / n_zinvDY
         else:
@@ -1041,9 +1045,7 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
                 err_sig_recogenaverage = abs(n_sig_cor-n_sig_cor_genmet) / 2.0 / n_sig_cor_recogenaverage
         else:
             print "Tried to subtract signal contamination but couldn't find h_sig_crsl\n"
-            if (isSignalWithLeptons):
-                print "Did you remember to run sigContamMaker.C? If so, did you pass file.root instead of file_sigcontam.root by mistake?\n"
-            else:
+            if (not isSignalWithLeptons):
                 print "This signal appears not to contain leptons, so that is not unusual.\n"
             
     sig_syst = 1.10
