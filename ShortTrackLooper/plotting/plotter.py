@@ -1,6 +1,3 @@
-# Print cards for use with combine. See MT2Analysis/limits/SignalScan.
-# Reimplementation of cardMaker.C.
-
 import ROOT
 import re
 from math import sqrt
@@ -28,7 +25,7 @@ verbose = True # Print more error messages
 doScan = False
 
 if len(argv) < 6:
-    print "Usage: python ShortTrackContam.py <input directory> <T1qqqq> <T5qqqq incl> <T5qqqq 1> <T5qqqq 2+>"
+    print "Usage: python plotter.py <input directory> <T1qqqq> <T5qqqq incl> <T5qqqq 1> <T5qqqq 2+>"
     exit(1)
 indir = argv[1]
 T1 = argv[2]

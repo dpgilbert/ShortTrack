@@ -1,6 +1,3 @@
-# Print cards for use with combine. See MT2Analysis/limits/SignalScan.
-# Reimplementation of cardMaker.C.
-
 import ROOT
 import re
 from math import sqrt
