@@ -23,6 +23,8 @@ namespace mt2
   std::vector<SR> getSignalRegions2016();
   std::vector<SR> getSignalRegionsLowMET();
   std::vector<SR> getSignalRegionsShortTrack();
+  std::vector<SR> getSignalRegionsShortTrackNoTag();
+  std::vector<SR> getSignalRegionsShortTrack();
 
 } // namespace mt2
 

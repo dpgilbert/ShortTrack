@@ -4150,7 +4150,7 @@ namespace mt2 {
 
   }
 
-  std::vector<SR> getSignalRegionsShortTrackV2(){
+  std::vector<SR> getSignalRegionsShortTrackNoTag(){
 
     std::vector<SR> temp_SR_vec;
     std::vector<SR> SRVec;
