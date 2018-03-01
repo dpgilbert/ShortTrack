@@ -4150,6 +4150,113 @@ namespace mt2 {
 
   }
 
+  std::vector<SR> getSignalRegionsMonojetShortTrack(){
+
+    std::vector<SR> temp_SR_vec;
+    std::vector<SR> SRVec;
+    SR baseSR;
+
+    // define baseline selections commmon to all monojet regions
+    //  ETH doesn't explictly cut on jet1_pt for SR or CRSL, just ht, so we won't either for this iteration
+    float mt2bins_monojet[2] = {0, 1500};
+    //baseSR.SetVar("j1pt", 200, -1);
+    baseSR.SetVar("nlep", 0, 1);
+    baseSR.SetVar("njets", 1, 2);
+    baseSR.SetVar("met", 250, -1);
+    baseSR.SetVar("deltaPhiMin", 0.3, -1);
+    baseSR.SetVar("diffMetMhtOverMet", 0, 0.5);
+    //    baseSR.SetVar("nst",1,-1);
+    //baseSR.SetVarCRSL("j1pt", 200, -1);
+    baseSR.SetVarCRSL("nlep", 1, 2);
+    baseSR.SetVarCRSL("njets", 1, 2);
+    baseSR.SetVarCRSL("met", 250, -1);
+    baseSR.SetVarCRSL("deltaPhiMin", 0.3, -1);
+    baseSR.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
+    //    baseSR.SetVarCRSL("nst",1,-1);
+    baseSR.SetVarCRDY("nlep", 0, 1);
+    baseSR.SetVarCRDY("njets", 1, 2);
+    baseSR.SetVarCRDY("met", 250, -1);
+    baseSR.SetVarCRDY("deltaPhiMin", 0.3, -1);
+    baseSR.SetVarCRDY("diffMetMhtOverMet", 0, 0.5);
+    //    baseSR.SetVarCRDY("nst",1,-1);
+    // QCD region: 2 jets, low deltaPhiMin, pt subleading between 30 and 60 GeV
+    baseSR.SetVarCRQCD("j1pt", 250, -1);
+    baseSR.SetVarCRQCD("j2pt", 30, 60);
+    baseSR.SetVarCRQCD("nlep", 0, 1);
+    baseSR.SetVarCRQCD("njets", 2, 3);
+    baseSR.SetVarCRQCD("met", 250, -1);
+    baseSR.SetVarCRQCD("deltaPhiMin", 0., 0.3);
+    baseSR.SetVarCRQCD("diffMetMhtOverMet", 0, 0.5);
+    //    baseSR.SetVarCRQCD("nst",1,-1);
+    baseSR.SetMT2Bins(1, mt2bins_monojet);
+
+    // fine binning in HT
+    const unsigned int nbins_monojet_0b = 7;
+    float htbins_0b[nbins_monojet_0b+1] = {250, 350, 450, 575, 700, 1000, 1200, -1};
+    float htbins_0b_forplot[nbins_monojet_0b+1] = {250, 350, 450, 575, 700, 1000, 1200, 1500};
+    const unsigned int nbins_monojet_1b = 5;
+    float htbins_1b[nbins_monojet_1b+1] = {250, 350, 450, 575, 700, -1};
+    float htbins_1b_forplot[nbins_monojet_1b+1] = {250, 350, 450, 575, 700, 1500};
+
+    temp_SR_vec.clear();
+    for(unsigned int iSR = 0; iSR < nbins_monojet_0b; iSR++){
+      SR fullSR0b = baseSR;  
+      fullSR0b.SetName(std::to_string(iSR+1) + "J");
+      fullSR0b.SetVar("ht", htbins_0b[iSR], htbins_0b[iSR+1]);
+      fullSR0b.SetVar("nbjets", 0, 1);
+      fullSR0b.SetVarCRSL("ht", htbins_0b[iSR], htbins_0b[iSR+1]);
+      fullSR0b.SetVarCRSL("nbjets", 0, 1);
+      fullSR0b.SetVarCRDY("ht", htbins_0b[iSR], htbins_0b[iSR+1]);
+      fullSR0b.SetVarCRDY("nbjets", 0, 1);
+      fullSR0b.SetVarCRQCD("ht", htbins_0b[iSR], htbins_0b[iSR+1]);
+      fullSR0b.SetVarCRQCD("nbjets", 0, 1);
+      SRVec.push_back(fullSR0b);
+    }
+    for(unsigned int iSR = 0; iSR < nbins_monojet_1b; iSR++){
+      SR fullSR1b = baseSR;  
+      fullSR1b.SetName(std::to_string(iSR+11) + "J");
+      fullSR1b.SetVar("ht", htbins_1b[iSR], htbins_1b[iSR+1]);
+      fullSR1b.SetVar("nbjets", 1, -1);
+      fullSR1b.SetVarCRSL("ht", htbins_1b[iSR], htbins_1b[iSR+1]);
+      fullSR1b.SetVarCRSL("nbjets", 1, -1);
+      fullSR1b.SetVarCRDY("ht", htbins_1b[iSR], htbins_1b[iSR+1]);
+      fullSR1b.SetVarCRDY("nbjets", 1, -1);
+      fullSR1b.SetVarCRQCD("ht", htbins_1b[iSR], htbins_1b[iSR+1]);
+      fullSR1b.SetVarCRQCD("nbjets", 1, -1);
+      SRVec.push_back(fullSR1b);
+    }
+
+    // Also put in some inclusive regions: 0b, 1b
+    SR fullSR0b = baseSR;  
+    fullSR0b.SetName("baseJ0B");
+    fullSR0b.SetVar("nbjets", 0, 1);
+    fullSR0b.SetVarCRSL("nbjets", 0, 1);
+    fullSR0b.SetVarCRDY("nbjets", 0, 1);
+    fullSR0b.SetVarCRQCD("nbjets", 0, 1);
+    fullSR0b.SetVar("ht", 250, -1);
+    fullSR0b.SetVarCRSL("ht", 250, -1);
+    fullSR0b.SetVarCRDY("ht", 250, -1);
+    fullSR0b.SetVarCRQCD("ht", 250, -1);
+    fullSR0b.SetMT2Bins(nbins_monojet_0b, htbins_0b_forplot);
+    SRVec.push_back(fullSR0b);
+
+    SR fullSR1b = baseSR;  
+    fullSR1b.SetName("baseJ1B");
+    fullSR1b.SetVar("nbjets", 1, -1);
+    fullSR1b.SetVarCRSL("nbjets", 1, -1);
+    fullSR1b.SetVarCRDY("nbjets", 1, -1);
+    fullSR1b.SetVarCRQCD("nbjets", 1, -1);
+    fullSR1b.SetVar("ht", 250, -1);
+    fullSR1b.SetVarCRSL("ht", 250, -1);
+    fullSR1b.SetVarCRDY("ht", 250, -1);
+    fullSR1b.SetVarCRQCD("ht", 250, -1);
+    fullSR1b.SetMT2Bins(nbins_monojet_1b, htbins_1b_forplot);
+    SRVec.push_back(fullSR1b);
+
+    return SRVec;
+
+  }  
+
   std::vector<SR> getSignalRegionsShortTrackNoTag(){
 
     std::vector<SR> temp_SR_vec;

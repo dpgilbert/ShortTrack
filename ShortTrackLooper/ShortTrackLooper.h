@@ -72,7 +72,6 @@ class ShortTrackLooper {
  private:
 
   TFile * outfile_;
-  mt2tree t_mt2;
   sttree t;
   float evtweight_;
   int nlepveto_;

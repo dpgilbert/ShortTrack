@@ -56,8 +56,9 @@ float* m1bins;
 int n_m2bins = 93;
 float* m2bins;
 
-int min_nst = 2;
-int max_nst = -1;
+// Adjustable short track range for early studies. Leave as (1,-1) unless changing with good reason.
+const int min_nst = 1;
+const int max_nst = -1;
 
 const int n_htbins = 5;
 const float htbins[n_htbins+1] = {250, 450., 575., 1000., 1500., 3000.};
@@ -158,10 +159,14 @@ void ShortTrackLooper::SetSignalRegions(){
   //SRVec =  getSignalRegionsZurich_jetpt30(); //same as getSignalRegionsZurich(), but with j1pt and j2pt cuts changed to 30 GeV
   //  SRVec =  getSignalRegionsJamboree(); //adds HT 200-450 regions
 //  SRVec =  getSignalRegions2016(); //adds 2 bins at UH HT, for 3b
-  SRVec = getSignalRegions2017();
-  SRVecMonojet = getSignalRegionsMonojet2016(); // first pass of monojet regions
+//  SRVecMonojet = getSignalRegionsMonojet2016(); // first pass of monojet regions
+  SRVec = getSignalRegionsShortTrack();
+  SRVecMonojet = getSignalRegionsMonojetShortTrack();
 
-  // Add Short Track cut to all regions
+  // Add Short Track cut to all regions.
+  // This is a temporary workaround while using the same signal regions for the MT2Looper, which cannot
+  // access the short track variables. Uncomment the relevant nst lines in MT2CORE/sigSelections.cc
+  // and remove these loops when short track trees are available for all samples.
   for (unsigned int i = 0; i < SRVec.size(); i++) {
     SRVec.at(i).SetVar("nst",min_nst,max_nst);
     SRVec.at(i).SetVarCRSL("nst",min_nst,max_nst);
@@ -769,25 +774,30 @@ void ShortTrackLooper::loop(TChain* chain, std::string sample, std::string outpu
     TTreeCache::SetLearnEntries(10);
     tree_mt2->SetCacheSize(128*1024*1024);
     tree_st->SetCacheSize(128*1024*1024);
-    //mt2tree t(tree);
     
     // Use this to speed things up when not looking at genParticles
     //tree->SetBranchStatus("genPart_*", 0); 
     if (verbose) cout<<__LINE__<<endl;
 
+    // sttree is a subtype of mt2tree. mt2tree functions can be called on an sttree, but not the reverse.
+    // This line incorporates branches from tree_mt2 into tree_st.
     tree_st->AddFriend(tree_mt2);
 
-    t.Init(tree_st);
-    t.Init_ST(tree_st);
+    // Our baby tree is an sttree so that we can call both mt2 and st methods mindlessly.
+    t.Init(tree_st); // The Init function from mt2tree, for mt2 branches.
+    t.Init_ST(tree_st); // The Init function from sttree, for st branches.
 
     // Event Loop
-    unsigned int nEventsTree = tree_mt2->GetEntriesFast();
+    unsigned int nEventsTree = tree_mt2->GetEntriesFast(); 
+    // Sanity check:
+    if (nEventsTree != tree_st->GetEntriesFast()) {
+      cout << "st and mt2 trees have different numbers of entries. Aborting..." << endl;
+      return;
+    }
     for( unsigned int event = 0; event < nEventsTree; ++event) {
-      //      for( unsigned int event = 0; event < 10000; ++event) {
       
-      t.GetEntry(event);
-
-      //if (verbose && t.evt!=351710276) continue; 
+      // AddFriend above makes this pull both mt2 and st branches for the same event, assuming the trees were properly (identically) sorted. 
+      t.GetEntry(event); 
 
       //---------------------
       // bookkeeping and progress report

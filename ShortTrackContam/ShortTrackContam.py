@@ -1,3 +1,5 @@
+# Check whether short track signals contaminate MT2 control regions.
+
 import ROOT
 import re
 from math import sqrt
