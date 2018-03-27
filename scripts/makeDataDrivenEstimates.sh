@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INDIR=/home/users/dpgilber/MT2AnalysisFinal16/MT2looper/output/full2016
+INDIR=/home/users/dpgilber/MT2AnalysisFinal16/MT2looper/output/sanity
 
 THISDIR=`pwd`
 

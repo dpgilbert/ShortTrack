@@ -160,13 +160,14 @@ void ShortTrackLooper::SetSignalRegions(){
   //  SRVec =  getSignalRegionsJamboree(); //adds HT 200-450 regions
 //  SRVec =  getSignalRegions2016(); //adds 2 bins at UH HT, for 3b
 //  SRVecMonojet = getSignalRegionsMonojet2016(); // first pass of monojet regions
-  SRVec = getSignalRegionsShortTrack();
+  SRVec = getSignalRegionsShortTrackNoTagInclusive();
   SRVecMonojet = getSignalRegionsMonojetShortTrack();
 
   // Add Short Track cut to all regions.
   // This is a temporary workaround while using the same signal regions for the MT2Looper, which cannot
   // access the short track variables. Uncomment the relevant nst lines in MT2CORE/sigSelections.cc
   // and remove these loops when short track trees are available for all samples.
+  /*
   for (unsigned int i = 0; i < SRVec.size(); i++) {
     SRVec.at(i).SetVar("nst",min_nst,max_nst);
     SRVec.at(i).SetVarCRSL("nst",min_nst,max_nst);
@@ -179,6 +180,7 @@ void ShortTrackLooper::SetSignalRegions(){
     SRVecMonojet.at(i).SetVarCRDY("nst",min_nst,max_nst);
     SRVecMonojet.at(i).SetVarCRQCD("nst",min_nst,max_nst);
   }
+  */
 
   //store histograms with cut values for all variables
   for(unsigned int i = 0; i < SRVec.size(); i++){
@@ -789,13 +791,16 @@ void ShortTrackLooper::loop(TChain* chain, std::string sample, std::string outpu
 
     // Event Loop
     unsigned int nEventsTree = tree_mt2->GetEntriesFast(); 
+    cout << nEventsTree << " events in file " << currentFile->GetTitle() << endl;
     // Sanity check:
     if (nEventsTree != tree_st->GetEntriesFast()) {
-      cout << "st and mt2 trees have different numbers of entries. Aborting..." << endl;
+      cout << "st and mt2 trees have different numbers of entries. This should not be possible if the input file was produced by treefriend.py and never edited. Aborting..." << endl;
       return;
     }
     for( unsigned int event = 0; event < nEventsTree; ++event) {
       
+      cout << "Processing event " << event << endl;
+
       // AddFriend above makes this pull both mt2 and st branches for the same event, assuming the trees were properly (identically) sorted. 
       t.GetEntry(event); 
 
@@ -1004,11 +1009,14 @@ void ShortTrackLooper::loop(TChain* chain, std::string sample, std::string outpu
 	  int binx = h_sig_nevents_->GetXaxis()->FindBin(t.GenSusyMScan1);
 	  int biny = h_sig_nevents_->GetYaxis()->FindBin(t.GenSusyMScan2);
 	  double nevents = h_sig_nevents_->GetBinContent(binx,biny);
-	  evtweight_ = lumi * t.evt_xsec*1000./nevents;
+	  evtweight_ = t.evt_xsec*1000./nevents;
 	  if (verbose) cout << "Initial evtweight_ = " << evtweight_ << endl;
 	  //	  evtweight_ = lumi * t.evt_xsec*t.evt_filter*1000./nevents; // assumes xsec, filter are already filled correctly
 	} else {
-	  if (!ignoreScale1fb) evtweight_ = t.evt_scale1fb * lumi;
+	  // Edit: scale1fb broken due to merging process, plus a lot of failed jobs. Calculate manually from xs.
+	  evtweight_ = 1000 * t.evt_xsec / nEventsTree;
+
+	  //if (!ignoreScale1fb) evtweight_ = t.evt_scale1fb * lumi;
 	}
 	if (verbose) cout<<__LINE__<<endl;
 	if (verbose) cout << "weight_btagsf = " << t.weight_btagsf << endl;
@@ -1382,8 +1390,9 @@ void ShortTrackLooper::loop(TChain* chain, std::string sample, std::string outpu
 
     }//end loop on events in a file
   
-    delete tree_mt2;
+    cout << "About to delete trees for file " << currentFile->GetTitle() << endl;
     delete tree_st;
+    delete tree_mt2;
     f.Close();
   }//end loop on files
   
@@ -2903,16 +2912,10 @@ void ShortTrackLooper::fillHistosRemovedLepton(std::map<std::string, TH1*>& h_1d
   return;
 }
 
-int totalQCD = 1;
-
 void ShortTrackLooper::fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
   if (print_qcd_event_list && t.isData)
     // if (print_qcd_event_list)    
     fqcdlist << dirname << "\t" << t.run << "\t" << t.lumi << "\t" << t.evt << std::endl;
-
-  if (dirname.find("crqcd20") != string::npos){
-    cout << "evt: " << t.evt << "; fill number: " << totalQCD++ << endl;
-  }
 
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {

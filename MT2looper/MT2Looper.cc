@@ -155,7 +155,7 @@ void MT2Looper::SetSignalRegions(){
   //  SRVec =  getSignalRegionsJamboree(); //adds HT 200-450 regions
   //  SRVec =  getSignalRegions2016(); //adds 2 bins at UH HT, for 3b
   SRVecMonojet = getSignalRegionsMonojet2016(); // first pass of monojet regions
-  SRVec = getSignalRegionsShortTrack();
+  SRVec = getSignalRegions2016();
 
   //store histograms with cut values for all variables
   for(unsigned int i = 0; i < SRVec.size(); i++){
@@ -942,13 +942,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (!t.isData) {
 	if (sample.find("T5") != std::string::npos)  {
 	  if (!h_sig_nevents_) cout << "h_sig_nevents_ is null" << endl;
-	  // This is bugged for some reason with T5qqqqLLChiChi_2016_baby.root
-	  // Gives 13748 instead...
 	  int binx = h_sig_nevents_->GetXaxis()->FindBin(t.GenSusyMScan1);
 	  int biny = h_sig_nevents_->GetYaxis()->FindBin(t.GenSusyMScan2);
 	  double nevents = h_sig_nevents_->GetBinContent(binx,biny);
 	  // Mglu = 1800 GeV
-	  evtweight_ = lumi * 1000 * (0.0027613) / 3749.0;
+	  evtweight_ = lumi * t.evt_xsec*1000./nevents;
 	  if (verbose) cout << "Initial evtweight_ = " << evtweight_ << endl;
 	}
 	else if (isSignal_ && doScanWeights) {

@@ -5,6 +5,7 @@ import ROOT
 import re
 from math import sqrt
 from sys import argv,exit
+import os
 
 # Suppresses warnings about TH1::Sumw2
 ROOT.gErrorIgnoreLevel = ROOT.kError
@@ -37,6 +38,8 @@ if len(argv) < 3:
 signal = argv[1]
 indir = argv[2]
 outdir = argv[3]
+if (not os.path.exists(outdir)): os.mkdir(outdir)
+
 doScan = True
 doData = True
 if len(argv) > 4:
@@ -295,61 +298,79 @@ def makeTemplate(directory,imt2):
     if (not dir_lostlep == None):
         h_lostlep = f_lostlep.Get(fullhistname)
         if (not h_lostlep == None): 
-            n_lostlep = h_lostlep.GetBinContent(imt2)
+            n_lostlep = h_lostlep.GetBinContent(imt2)            
+            del h_lostlep
         h_lostlep_mcstat = f_lostlep.Get(fullhistnameMCStat)
         if (not h_lostlep_mcstat == None):
             mcstat_content = h_lostlep_mcstat.GetBinContent(imt2)
             if (mcstat_content != 0): 
                 err_lostlep_mcstat = h_lostlep_mcstat.GetBinError(imt2) / mcstat_content       
+            del h_lostlep_mcstat
         h_lostlep_cryield = f_lostlep.Get(fullhistnameCRyieldDatacard)
         if (not h_lostlep_cryield == None):
             n_lostlep_cr = round(h_lostlep_cryield.GetBinContent(imt2))
+            del h_lostlep_cryield
         h_lostlep_alpha = f_lostlep.Get(fullhistnameAlpha)
         if (not h_lostlep_alpha == None):
             lostlep_alpha = h_lostlep_alpha.GetBinContent(imt2)
             lostlep_alpha_topological = h_lostlep_alpha.Integral(0,-1)
+            del h_lostlep_alpha
         h_lostlep_alpha_lepeff_UP = f_lostlep.Get(fullhistnameAlpha+"_lepeff_UP")
         if (not h_lostlep_alpha_lepeff_UP == None):
             lostlep_alpha_lepeff_UP = h_lostlep_alpha_lepeff_UP.Integral(0,-1)
+            del h_lostlep_alpha_lepeff_UP
         h_lostlep_alpha_lepeff_DN = f_lostlep.Get(fullhistnameAlpha+"_lepeff_DN")
         if (not h_lostlep_alpha_lepeff_DN == None):
             lostlep_alpha_lepeff_DN = h_lostlep_alpha_lepeff_DN.Integral(0,-1)
+            del h_lostlep_alpha_lepeff_DN
         h_lostlep_alpha_btagsf_heavy_UP = f_lostlep.Get(fullhistnameAlpha+"_btagsf_heavy_UP")
         if (not h_lostlep_alpha_btagsf_heavy_UP == None):
             lostlep_alpha_btagsf_heavy_UP = h_lostlep_alpha_btagsf_heavy_UP.Integral(0,-1)
+            del h_lostlep_alpha_btagsf_heavy_UP
         h_lostlep_alpha_btagsf_heavy_DN = f_lostlep.Get(fullhistnameAlpha+"_btagsf_heavy_DN")
         if (not h_lostlep_alpha_btagsf_heavy_DN == None):
             lostlep_alpha_btagsf_heavy_DN = h_lostlep_alpha_btagsf_heavy_DN.Integral(0,-1)
+            del h_lostlep_alpha_btagsf_heavy_DN
         h_lostlep_alpha_btagsf_light_UP = f_lostlep.Get(fullhistnameAlpha+"_btagsf_light_UP")
         if (not h_lostlep_alpha_btagsf_light_UP == None):
             lostlep_alpha_btagsf_light_UP = h_lostlep_alpha_btagsf_light_UP.Integral(0,-1)
+            del h_lostlep_alpha_btagsf_light_UP
         h_lostlep_alpha_btagsf_light_DN = f_lostlep.Get(fullhistnameAlpha+"_btagsf_light_DN")
         if (not h_lostlep_alpha_btagsf_light_DN == None):
             lostlep_alpha_btagsf_light_DN = h_lostlep_alpha_btagsf_light_DN.Integral(0,-1)
+            del h_lostlep_alpha_btagsf_light_DN
         h_lostlep_alpha_tau1p_UP = f_lostlep.Get(fullhistnameAlpha+"_tau1p_UP")
         if (not h_lostlep_alpha_tau1p_UP == None):
             lostlep_alpha_tau1p_UP = h_lostlep_alpha_tau1p_UP.Integral(0,-1)
+            del h_lostlep_alpha_tau1p_UP
         h_lostlep_alpha_tau1p_DN = f_lostlep.Get(fullhistnameAlpha+"_tau1p_DN")
         if (not h_lostlep_alpha_tau1p_DN == None):
             lostlep_alpha_tau1p_DN = h_lostlep_alpha_tau1p_DN.Integral(0,-1)
+            del h_lostlep_alpha_tau1p_DN
         h_lostlep_alpha_tau3p_UP = f_lostlep.Get(fullhistnameAlpha+"_tau3p_UP")
         if (not h_lostlep_alpha_tau3p_UP == None):
             lostlep_alpha_tau3p_UP = h_lostlep_alpha_tau3p_UP.Integral(0,-1)
+            del h_lostlep_alpha_tau3p_UP
         h_lostlep_alpha_tau3p_DN = f_lostlep.Get(fullhistnameAlpha+"_tau3p_DN")
         if (not h_lostlep_alpha_tau3p_DN == None):
             lostlep_alpha_tau3p_DN = h_lostlep_alpha_tau3p_DN.Integral(0,-1)
+            del h_lostlep_alpha_tau3p_DN
         h_lostlep_alpha_renorm_UP = f_lostlep.Get(fullhistnameAlpha+"_renorm_UP")
         if (not h_lostlep_alpha_renorm_UP == None):
             lostlep_alpha_renorm_UP = h_lostlep_alpha_renorm_UP.Integral(0,-1)
+            del h_lostlep_alpha_renorm_UP
         h_lostlep_alpha_renorm_DN = f_lostlep.Get(fullhistnameAlpha+"_renorm_DN")
         if (not h_lostlep_alpha_renorm_DN == None):
             lostlep_alpha_renorm_DN = h_lostlep_alpha_renorm_DN.Integral(0,-1)
+            del h_lostlep_alpha_renorm_DN
         h_lostlep_lastbin_hybrid = f_lostlep.Get(fullhistnameLastbinHybrid)
         if (not h_lostlep_lastbin_hybrid == None):
             lostlep_lastbin_hybrid = int(h_lostlep_lastbin_hybrid.GetBinContent(1))
+            del h_lostlep_lastbin_hybrid
         h_lostlep_MCExtrap = f_lostlep.Get(fullhistnameMCExtrap)
         if (not h_lostlep_MCExtrap == None):
             lostlep_MCExtrap = h_lostlep_MCExtrap.GetBinContent(imt2)
+            del h_lostlep_MCExtrap
 
     # At this stage, we've either extracted values for lostlep parameters from histograms, or those histograms didn't exist,
     # and we're using default values (mostly 0s).
@@ -409,6 +430,7 @@ def makeTemplate(directory,imt2):
                 err_zinv_mcstat = h_zinv_mcstat.GetBinError(imt2) / mcstat_content
                 zinv_ratio_zg = mcstat_content
                 last_zinv_ratio = zinv_ratio_zg
+            del h_zinv_mcstat
         else:
             err_zinv_mcstat = 1.0
             zinv_ratio_zg = last_zinv_ratio
@@ -420,6 +442,7 @@ def makeTemplate(directory,imt2):
                 n_zinv_cr = round(h_zinv_cryield.Integral(0,-1))
             else:
                 n_zinv_cr = round(h_zinv_cryield.GetBinContent(imt2))
+            del h_zinv_cryield
 
         h_zinv_purity = None
         
@@ -436,6 +459,7 @@ def makeTemplate(directory,imt2):
             if (purity_content != 0):
                 zinv_purity = purity_content
                 err_zinv_purity = h_zinv_purity.GetBinContent(mt2bin_tmp) / purity_content
+            del h_zinv_purity
 
     ##############
     # Zinv from DY
@@ -465,9 +489,12 @@ def makeTemplate(directory,imt2):
                 if (crYieldFirstBin != thiscrYield):
                     usingInclusiveTemplates = False
                     break
-        # Be sure to Clone here. Creating a second reference to the same hist (ratioCard) and modifying it caused bugs.
-        h_zinvDY_alpha = ratioCard.Clone()
-        if (not h_zinvDY_alpha == None):
+            del h_zinvDY_cryield
+
+        if (not ratioCard == None):
+            # Be sure to Clone here. Creating a second reference to the same hist (ratioCard) and modifying it caused bugs.
+            h_zinvDY_alpha = ratioCard.Clone()
+            del ratioCard
             if (not purityCard == None):
                 zinvDY_purity = purityCard.GetBinContent(imt2)
                 h_zinvDY_alpha.Multiply(purityCard)
@@ -476,11 +503,14 @@ def makeTemplate(directory,imt2):
                     err_zinvDY_purity = purityCard.GetBinError(imt2) / purity_content
                 else:
                     err_zinvDY_purity = 0
+                del purityCard
             zinvDY_alpha = h_zinvDY_alpha.GetBinContent(imt2)
             zinvDY_alpha_topological = h_zinvDY_alpha.Integral(0,-1)
+            del h_zinvDY_alpha
         h_zinvDY_lastbin_hybrid = f_zinvDY.Get(fullhistnameLastbinHybrid)
         if (not h_zinvDY_lastbin_hybrid == None):
             zinvDY_lastbin_hybrid = int(h_zinvDY_lastbin_hybrid.GetBinContent(1))
+            del h_zinvDY_lastbin_hybrid
 
     zllgamma_nj = 1.0
     zllgamma_nb = 1.0
@@ -525,6 +555,12 @@ def makeTemplate(directory,imt2):
         if (mt2_content > 0):
             zllgamma_mt2 = h_zllgamma_mt2.GetBinError(bin_mt2) / mt2_content
         
+        del h_zllgamma_nj
+        del h_zllgamma_nb
+        del h_zllgamma_ht
+        del h_zllgamma_ht2
+        del h_zllgamma_mt2
+
     #############
     # QCD 
     #############
@@ -534,22 +570,28 @@ def makeTemplate(directory,imt2):
         h_qcd = f_qcd.Get(fullhistname)
         if (not h_qcd == None):
             n_qcd = h_qcd.GetBinContent(imt2)
+            del h_qcd
         h_qcd_cryield = f_qcd.Get(fullhistnameCRyield)
         if (not h_qcd_cryield == None):
             n_qcd_cr = round(h_qcd_cryield.GetBinContent(imt2))
+            del h_qcd_cryield
         h_qcd_alpha = f_qcd.Get(fullhistnameAlpha)
         if (not h_qcd_alpha == None):
             qcd_alpha = h_qcd_alpha.GetBinContent(imt2)
             err_qcd_alpha = h_qcd_alpha.GetBinError(imt2)
+            del h_qcd_alpha
         h_qcd_fjrb = f_qcd.Get(fullhistnameFJRB)
         if (not h_qcd_fjrb == None):
             err_qcd_fjrb = h_qcd_fjrb.GetBinContent(imt2)
+            del h_qcd_fjrb
         h_qcd_fitstat = f_qcd.Get(fullhistnameFitStat)
         if (not h_qcd_fitstat == None):
             err_qcd_fitstat = h_qcd_fitstat.GetBinContent(imt2)
+            del h_qcd_fitstat
         h_qcd_fitsyst = f_qcd.Get(fullhistnameFitSyst)
         if (not h_qcd_fitsyst == None):
             err_qcd_fitsyst = h_qcd_fitsyst.GetBinContent(imt2)
+            del h_qcd_fitsyst
 
     #################        
     # Finalize:
@@ -689,6 +731,7 @@ def makeTemplate(directory,imt2):
             increment = 0.0
             for ibin in range(zinvDY_lastbin_hybrid+1,int(h_zinvDY.GetNbinsX()) + 1):
                 increment += last_bin_relerr_zinvDY / n_extrap_bins_zinvDY * (ibin - zinvDY_lastbin_hybrid) * h_zinvDY.GetBinContent(ibin)
+            del h_zinvDY
             zinvDY_shape = 1.0 - increment / n_zinvDY
         else:
             zinvDY_shape = 1.0 + last_bin_relerr_zinvDY / (n_extrap_bins_zinvDY) * (imt2 -  zinvDY_lastbin_hybrid)
@@ -709,6 +752,7 @@ def makeTemplate(directory,imt2):
                 increment = 0.0
                 for ibin in range(2,h_zinv.GetNbinsX()):
                     increment += 0.4 / (n_mt2bins - 1) * (ibin - 1) * h_zinv.GetBinContent(ibin)
+                del h_zinv
                 zinv_shape = 1.0 - increment / n_zinv
             else:
                 zinv_shape = 1.0 + 0.4 / (n_mt2bins - 1) * (imt2 - 1)
@@ -948,6 +992,7 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
         bin1 = h_sigscan.GetYaxis().FindBin(im1)
         bin2 = h_sigscan.GetZaxis().FindBin(im2)
         h_sig = h_sigscan.ProjectionX("h_mt2bins_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
+        del h_sigscan
         h_sigscan_genmet = f_sig.Get(fullhistnameScanGenMet)
         if (not h_sigscan_genmet == None):
             h_sig_genmet = h_sigscan_genmet.ProjectionX("h_mt2bins_genmet_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
@@ -1000,18 +1045,23 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
         err_sig_mcstat = h_sig.GetBinError(imt2)
         # part of sig_mcstat calculation; if n_sig is 0, default value is applied
         err_sig_mcstat_rel = err_sig_mcstat / n_sig
+    del h_sig
 
     if (not h_sig_genmet == None):
         n_sig_genmet = h_sig_genmet.GetBinContent(imt2)
+        del h_sig_genmet
     if (not h_sig_btagsf_heavy_UP == None):
         n_sig_btagsf_heavy_UP = h_sig_btagsf_heavy_UP.GetBinContent(imt2)
+        del h_sig_btagsf_heavy_UP
     if (not h_sig_btagsf_light_UP == None):
         n_sig_btagsf_light_UP = h_sig_btagsf_light_UP.GetBinContent(imt2)
+        del h_sig_btagsf_light_UP
     if (not h_sig_lepeff_UP == None):
         n_sig_lepeff_UP = h_sig_lepeff_UP.GetBinContent(imt2)
+        del h_sig_lepeff_UP
     if (not h_sig_isr_UP == None):
         n_sig_isr_UP = h_sig_isr_UP.GetBinContent(imt2)
-
+        del h_sig_isr_UP
 
     if (suppressZeroBins and ((n_sig < 0.1) or (n_sig / n_bkg < 0.02))):
         if (verbose): print "Zero signal, card not printed: {0}\n".format(cardname)
@@ -1030,10 +1080,13 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
                 n_sig_crsl = h_sig_crsl.Integral(lostlep_lastbin_hybrid,-1)
                 if (not h_sig_crsl_genmet == None):
                     n_sig_crsl_genmet = h_sig_crsl_genmet.Integral(lostlep_lastbin_hybrid,-1)
+                    del h_sig_crsl_genmet
             else:
                 n_sig_crsl = h_sig_crsl.GetBinContent(imt2)
                 if (not h_sig_crsl_genmet == None):
                     n_sig_crsl_genmet = h_sig_crsl_genmet.GetBinContent(imt2)
+                    del h_sig_crsl_genmet
+            del h_sig_crsl
             n_lostlep_extra = n_sig_crsl * lostlep_alpha
             n_lostlep_extra_genmet = n_sig_crsl_genmet * lostlep_alpha
             n_lostlep_extra_recogenaverage = (n_lostlep_extra + n_lostlep_extra_genmet) / 2.0
@@ -1154,6 +1207,25 @@ for key in iterator:
                             signal_points.append( (im1,im2) )
             else:
                 makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,signal,outdir,imt2)
+
+            # The 'del's throughout this script remove the python interpreter's reference to the object, which would normally cause an object
+            # to be garbage collected. Unfortunately, only TObjects created by constructors are owned by python; all others are owned by ROOT. 
+            # Note that most of the TObjects in this script are created by TFile::Get, not a constructor...
+            # ROOT diligently tracks every one of these guys until the script ends, then goes through and deletes them all one by one, causing
+            # the script to hang for ages when it finishes, instead of letting python release the memory back to the operating system all at once. 
+            # While unnoticeable in a shorter script, this process takes a very long time for this one due to the sheer number of TH1s we access.
+            # There are two solutions. I recommend the first unless memory usage is a problem.
+
+            # 1) Fast, but leaks a lot of memory (O(10GB) by script's end) since it doesn't actually delete the TObjects. Stops ROOT from trying
+            # to delete everything at the end, so the script exits promptly and just releases everything back to the OS when python closes.
+            ROOT.gDirectory.Clear() 
+
+            # 2) Very, very slow, but without the massive memory leaks since the TObjects are actually deleted. This does the same thing as
+            # no solution at all *in terms of total running time*, but spreads the slowness out instead of hanging at the end.
+            # The only purpose of choosing this "solution" vs. no solution at all is preventing the memory leak.
+            # ROOT.gDirectory.DeleteAll() 
+
+            # Note: exactly the same problem applies to cardMaker.C, except replace "python" with "cling", the C++ interpeter used by ROOT macros.
 
     # Print signal_points to a file
     if (doScan):

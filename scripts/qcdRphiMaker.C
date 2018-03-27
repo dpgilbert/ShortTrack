@@ -18,7 +18,7 @@
 
 using namespace std;
 
-const bool verbose = false;
+const bool verbose = true;
 
 //_______________________________________________________________________________
 void ReplaceString(std::string& subject, const std::string& search, const std::string& replace) {

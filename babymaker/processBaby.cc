@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
 
   //  bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns") || infile.Contains("Spring16Fast") || infile.Contains("Spring16F"));
 
-  bool isFastsim = true;
+  bool isFastsim = false;
 
   bool isBadMiniAodV1 = bool(infile.Contains("V07-04-12_miniaodv1_FS"));
   
