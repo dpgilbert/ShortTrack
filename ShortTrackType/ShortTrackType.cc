@@ -59,6 +59,7 @@ int main (int argc, char ** argv) {
     return 2;
   }
 
+  outfile_->cd();
   // Book Histograms
   TH1F h_el_pix("h_el_pix","Electron STs, Pixel Layers",2,2,4);
   TH1F h_el_ext("h_el_ext","Electron STs, Non-Pixel Layers",8,0,8);
@@ -149,10 +150,10 @@ int main (int argc, char ** argv) {
     bool e_match = false;
     for (int i_lep = 0; i_lep < t.ngenLep; i_lep++) {
       if (abs(t.genLep_pdgId[i_lep]) != 11) continue;
-      double lep_eta = t.genLep_eta[i_lep];
-      double lep_phi = t.genLep_phi[i_lep];
+      float lep_eta = t.genLep_eta[i_lep];
+      float lep_phi = t.genLep_phi[i_lep];
       if (sqrt( pow(lep_eta - st_eta,2) + pow(lep_phi - st_phi,2) ) > 0.1 ) continue;
-      double ratio_pt = t.genLep_pt[i_lep] / st_pt;
+      float ratio_pt = t.genLep_pt[i_lep] / st_pt;
       if (ratio_pt < 0.5 || ratio_pt > 2.0) continue;
       h_el_ratio.Fill(ratio_pt,w_);
       // Matched to electron, probably disappearing. Don't have the calorimeter reading needed to confirm but...
@@ -173,8 +174,6 @@ int main (int argc, char ** argv) {
     }
 
   }//end loop on events in a file
-
-  input.Close();
   
   outfile_->cd();
   h_el_pix.Write();
