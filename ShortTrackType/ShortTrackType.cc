@@ -8,6 +8,7 @@
 #include "TLorentzVector.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TTreeCache.h"
 
 #include "../MT2CORE/mt2tree.h"
 #include "../MT2CORE/sttree.h"
@@ -20,11 +21,11 @@ class sttree;
 int main (int argc, char ** argv) {
 
   if (argc < 4) {
-    cout << "Usage: ./ShortTrackType.exe <input file> <sample> <outdir>" << endl;
+    cout << "Usage: ./ShortTrackType.exe <indir> <sample> <outdir>" << endl;
     return 1;
   }
 
-  TFile input( Form("%s/%s_incl_skim.root",argv[1],argv[2]) );
+  TFile input( Form("%s/%s_incl_skim_friend.root",argv[1],argv[2]) );
   
   TString output_name = Form("%s/%s.root",argv[3],argv[2]);
   cout << "[ShortTrackType::loop] creating output file: " << output_name << endl;
@@ -36,7 +37,10 @@ int main (int argc, char ** argv) {
   // Get File Content
   TTree *tree_mt2 = (TTree*)input.Get("mt2st");
   TTree *tree_st = (TTree*)input.Get("st");
-    
+  TTreeCache::SetLearnEntries(10);
+  tree_mt2->SetCacheSize(128*1024*1024);
+  tree_st->SetCacheSize(128*1024*1024);
+
   // sttree is a subtype of mt2tree. mt2tree functions can be called on an sttree, but not the reverse.
   // This line incorporates branches from tree_mt2 into tree_st.
   tree_st->AddFriend(tree_mt2);
@@ -120,6 +124,7 @@ int main (int argc, char ** argv) {
     int st_ext = -1;
     int st_tot = -1;
     for (int i_trk = 0; i_trk < t.ntracks; i_trk++) {
+      cout << "For i_trk = " << i_trk << ": " << t.track_isshort[i_trk] << endl;
       if (t.track_isshort[i_trk]) {
 	st_idx = i_trk;
 	st_phi = t.track_phi[i_trk];
@@ -134,6 +139,12 @@ int main (int argc, char ** argv) {
 
     if (st_idx < 0 || fabs(st_phi) > M_PI || fabs(st_eta) > 2.4 || st_pt < 0 || st_pix < 0 || st_ext < 0 || st_tot < 0) {
       cout << "Something went wrong reading from the short track in event index " << event << endl;
+      cout << "st_idx = " << st_idx << endl;
+      cout << "st_phi = " << st_phi << endl;
+      cout << "st_eta = " << st_eta << endl;
+      cout << "st_pt = " << st_pt << endl;
+      cout << "st_pix = " << st_pix << endl;
+      cout << "st_tot = " << st_tot << endl;
       continue;
     }
 
@@ -151,7 +162,6 @@ int main (int argc, char ** argv) {
       break;
     }
 
-
     if (e_match) {
       h_el_pix.Fill(st_pix,w_);
       h_el_ext.Fill(st_ext,w_);
@@ -164,25 +174,25 @@ int main (int argc, char ** argv) {
       h_fake_etaphi.Fill(st_eta,st_phi,w_);
     }
 
-    }//end loop on events in a file
+  }//end loop on events in a file
   
-    cout << "About to delete trees for file " << input.GetTitle() << endl;
-    delete tree_st;
-    delete tree_mt2;
-    input.Close();
-
-    outfile_->cd();
-    h_el_pix.Write();
-    h_el_ext.Write();
-    h_el_tot.Write();
-    h_el_etaphi.Write();
-    h_el_ratio.Write();
-    h_fake_pix.Write();
-    h_fake_ext.Write();
-    h_fake_tot.Write();
-    h_fake_etaphi.Write();
-    outfile_->Close();
-    
-    return 0;
+  cout << "About to delete trees for file " << input.GetTitle() << endl;
+  delete tree_st;
+  delete tree_mt2;
+  input.Close();
+  
+  outfile_->cd();
+  h_el_pix.Write();
+  h_el_ext.Write();
+  h_el_tot.Write();
+  h_el_etaphi.Write();
+  h_el_ratio.Write();
+  h_fake_pix.Write();
+  h_fake_ext.Write();
+  h_fake_tot.Write();
+  h_fake_etaphi.Write();
+  outfile_->Close();
+  
+  return 0;
 }
 
