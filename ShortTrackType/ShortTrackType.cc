@@ -1,44 +1,44 @@
-// C++
-#include <iostream>
-#include <cmath>
-#include <sstream>
-
-// ROOT
-#include "TMath.h"
-#include "TLorentzVector.h"
-#include "TH1.h"
-#include "TH2.h"
-#include "TTreeCache.h"
-
-#include "../MT2CORE/mt2tree.h"
-#include "../MT2CORE/sttree.h"
+#include "ShortTrackType.h"
 
 using namespace std;
 
 class mt2tree;
 class sttree;
 
-int main (int argc, char ** argv) {
+const int maskHT = 1;
+const int maskMET = 1<<1;
+const int maskDphiDiff = 1<<2;
+const int maskMT2 = 1<<3;
 
-  if (argc < 4) {
-    cout << "Usage: ./ShortTrackType.exe <indir> <sample> <outdir>" << endl;
-    return 1;
-  }
-
-  TFile input( Form("%s/%s_incl_skim_friend.root",argv[1],argv[2]) );
+int ShortTrackType::loop (char * indir, char * sample, char * outdir, char * unskimmed_dir, int selection) {
+  bool doNj = selection > 0;
+  bool doHT = maskHT & selection;
+  bool doMET = maskMET & selection;
+  bool doDphiDiff = maskDphiDiff & selection;
+  bool doMT2 = maskMT2 & selection;
   
-  TString output_name = Form("%s/%s.root",argv[3],argv[2]);
-  cout << "[ShortTrackType::loop] creating output file: " << output_name << endl;
+  TString output_name = Form("%s/%s.root",outdir,sample);
 
-  cout << "[ShortTrackType::loop] running on file: " << input.GetTitle() << endl;
+  TChain* ch_mt2 = new TChain("mt2st");
+  TChain* ch_st = new TChain("st");
+
+  TChain* ch_us = new TChain("mt2st");
+
+  TString infile_name = Form("%s/%s_incl_skim_friend.root",indir,sample);
+  cout << "Skimmed file: " << infile_name.Data() << endl;
+  ch_mt2->Add( infile_name );
+  ch_st->Add( infile_name );
+
+  TString unskimmed_name = Form("%s/%s.root",unskimmed_dir,sample);
+  cout << "Unskimmed file: " << unskimmed_name.Data() << endl;
+  ch_us->Add( unskimmed_name );
 
   // Get File Content
-  TTree *tree_mt2 = (TTree*)input.Get("mt2st");
-  TTree *tree_st = (TTree*)input.Get("st");
-  TTreeCache::SetLearnEntries(10);
-  tree_mt2->SetCacheSize(128*1024*1024);
-  tree_st->SetCacheSize(128*1024*1024);
+  TTree *tree_mt2 = (TTree*)ch_mt2->Clone("mt2st");
+  TTree *tree_st = (TTree*)ch_st->Clone("st");
 
+  const int total_events = ch_us->GetEntries();
+  cout << "Total events in unskimmed file: " << total_events << endl;
   // sttree is a subtype of mt2tree. mt2tree functions can be called on an sttree, but not the reverse.
   // This line incorporates branches from tree_mt2 into tree_st.
   tree_st->AddFriend(tree_mt2);
@@ -52,13 +52,14 @@ int main (int argc, char ** argv) {
   // Event Loop
   // Sanity check:
   const unsigned int nEventsTree = tree_mt2->GetEntries();
-  if (nEventsTree != tree_st->GetEntriesFast()) {
+  if (nEventsTree != tree_st->GetEntries()) {
     cout << "st and mt2 trees have different numbers of entries. This should not be possible if the input file was produced by treefriend.py and never edited. Aborting..." << endl;
     return 2;
   }
 
   // Book Histograms
   TH1::SetDefaultSumw2(true);
+  TH1F h_unskimmed("h_unskimmed","Events in Unskimmed File",1,0,1);
   TH1F h_el_pix("h_el_pix","Electron STs, Pixel Layers",2,2,4);
   TH1F h_el_ext("h_el_ext","Electron STs, Non-Pixel Layers",8,0,8);
   TH1F h_el_tot("h_el_tot","Electron STs, Total Layers",11,0,11);
@@ -69,28 +70,16 @@ int main (int argc, char ** argv) {
   TH2F h_fake_etaphi("h_fake_etaphi","(Mostly) Fake STs, #eta and #phi",12,-2.4,2.4,12,-3.14,3.14);
   TH1F h_el_ratio("h_el_ratio","Gen e / ST p_T Ratio",15,0.5,2.0);
 
+  h_unskimmed.SetBinContent(1,total_events);
+
   for( unsigned int event = 0; event < nEventsTree; ++event) {
     
     // AddFriend above makes this pull both mt2 and st branches for the same event, assuming the trees were properly (identically) sorted. 
     t.GetEntry(event); 
     
-    const float w_ = t.evt_xsec * 1000 / nEventsTree;
-    
-    //---------------------
-    // bookkeeping and progress report
-    //---------------------
-    if (event%10000==0) {
-      ULong64_t i_permille = (int)floor(1000 * event / float(nEventsTree));
-      if (isatty(1)) {
-	printf("\015\033[32m ---> \033[1m\033[31m%4.1f%%"
-	       "\033[0m\033[32m <---\033[0m\015", i_permille/10.);
-	fflush(stdout);
-      }
-      else {
-	cout<<i_permille/10.<<" ";
-	if (event % 100000==0) cout<<endl;
-      }
-    }
+    //    const float w_ = t.evt_xsec * 1000 / nEventsTree;
+    const float w_ = 1.0; // Just count occurences without wrinkle of event weight
+
     //---------------------
     // basic event selection and cleaning
     //---------------------
@@ -110,6 +99,17 @@ int main (int argc, char ** argv) {
 	   << ", met=" << t.met_pt << ", ht=" << t.ht << ", jet_pt=" << t.jet_pt[0] << endl;
       continue;
     }
+
+    if (doNj && t.nJet30 == 0) continue;
+
+    if (doMET) {
+      if (t.ht < 250 || (t.ht < 1000 && t.met_pt < 250) || t.met_pt < 30) continue;
+    }
+    else if (doHT && t.ht < 250) continue;
+
+    if (doDphiDiff && (t.deltaPhiMin < 0.3 || t.diffMetMht / t.met_pt > 0.5) ) continue;
+
+    if (doMT2 && t.mt2 < 200) continue;
     
     // Search for disappearing electron close to track.
     // Else assume track is fake since we don't have non-lep gen particles in babies.
@@ -176,6 +176,7 @@ int main (int argc, char ** argv) {
   cout << "About to write" << endl;
 
   TFile outfile_(output_name,"RECREATE"); 
+  h_unskimmed.Write();
   h_el_pix.Write();
   h_el_ext.Write();
   h_el_tot.Write();
@@ -186,7 +187,26 @@ int main (int argc, char ** argv) {
   h_fake_tot.Write();
   h_fake_etaphi.Write();
   outfile_.Close();
+
+  cout << "Wrote everything" << endl;
   
   return 0;
 }
 
+int main (int argc, char ** argv) {
+
+  if (argc < 6) {
+    cout << "Usage: ./ShortTrackType.exe <indir> <sample> <outdir> <unskimmed_dir>" << endl;
+    return 1;
+  }
+
+  const int selection = strtol(argv[5],NULL,2);
+  cout << selection << endl;
+  ShortTrackType * stt = new ShortTrackType();
+  stt->loop(argv[1],argv[2],argv[3],argv[4],selection);
+  return 0;
+}
+
+ShortTrackType::ShortTrackType() {}
+
+ShortTrackType::~ShortTrackType() {};
