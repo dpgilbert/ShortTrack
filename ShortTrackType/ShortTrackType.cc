@@ -30,8 +30,6 @@ int main (int argc, char ** argv) {
   TString output_name = Form("%s/%s.root",argv[3],argv[2]);
   cout << "[ShortTrackType::loop] creating output file: " << output_name << endl;
 
-  TFile * outfile_ = TFile::Open(output_name.Data(),"RECREATE") ; 
-
   cout << "[ShortTrackType::loop] running on file: " << input.GetTitle() << endl;
 
   // Get File Content
@@ -59,8 +57,8 @@ int main (int argc, char ** argv) {
     return 2;
   }
 
-  outfile_->cd();
   // Book Histograms
+  TH1::SetDefaultSumw2(true);
   TH1F h_el_pix("h_el_pix","Electron STs, Pixel Layers",2,2,4);
   TH1F h_el_ext("h_el_ext","Electron STs, Non-Pixel Layers",8,0,8);
   TH1F h_el_tot("h_el_tot","Electron STs, Total Layers",11,0,11);
@@ -175,7 +173,9 @@ int main (int argc, char ** argv) {
 
   }//end loop on events in a file
   
-  outfile_->cd();
+  cout << "About to write" << endl;
+
+  TFile outfile_(output_name,"RECREATE"); 
   h_el_pix.Write();
   h_el_ext.Write();
   h_el_tot.Write();
@@ -185,7 +185,7 @@ int main (int argc, char ** argv) {
   h_fake_ext.Write();
   h_fake_tot.Write();
   h_fake_etaphi.Write();
-  outfile_->Close();
+  outfile_.Close();
   
   return 0;
 }
