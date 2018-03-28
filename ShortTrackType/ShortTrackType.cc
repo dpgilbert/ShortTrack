@@ -72,8 +72,6 @@ int main (int argc, char ** argv) {
 
   for( unsigned int event = 0; event < nEventsTree; ++event) {
     
-    cout << "Processing event " << event << endl;
-
     // AddFriend above makes this pull both mt2 and st branches for the same event, assuming the trees were properly (identically) sorted. 
     t.GetEntry(event); 
     
@@ -117,14 +115,13 @@ int main (int argc, char ** argv) {
     // Search for disappearing electron close to track.
     // Else assume track is fake since we don't have non-lep gen particles in babies.
     int st_idx = -1;
-    float st_phi = -999;
-    float st_eta = -999;
-    float st_pt = -1;
+    double st_phi = -999;
+    double st_eta = -999;
+    double st_pt = -1;
     int st_pix = -1;
     int st_ext = -1;
     int st_tot = -1;
     for (int i_trk = 0; i_trk < t.ntracks; i_trk++) {
-      cout << "For i_trk = " << i_trk << ": " << t.track_isshort[i_trk] << endl;
       if (t.track_isshort[i_trk]) {
 	st_idx = i_trk;
 	st_phi = t.track_phi[i_trk];
@@ -145,16 +142,17 @@ int main (int argc, char ** argv) {
       cout << "st_pt = " << st_pt << endl;
       cout << "st_pix = " << st_pix << endl;
       cout << "st_tot = " << st_tot << endl;
-      continue;
+      t.Show(event);
+      return 3;
     }
 
     bool e_match = false;
     for (int i_lep = 0; i_lep < t.ngenLep; i_lep++) {
       if (abs(t.genLep_pdgId[i_lep]) != 11) continue;
-      float lep_eta = t.genLep_eta[i_lep];
-      float lep_phi = t.genLep_phi[i_lep];
+      double lep_eta = t.genLep_eta[i_lep];
+      double lep_phi = t.genLep_phi[i_lep];
       if (sqrt( pow(lep_eta - st_eta,2) + pow(lep_phi - st_phi,2) ) > 0.1 ) continue;
-      float ratio_pt = t.genLep_pt[i_lep] / st_pt;
+      double ratio_pt = t.genLep_pt[i_lep] / st_pt;
       if (ratio_pt < 0.5 || ratio_pt > 2.0) continue;
       h_el_ratio.Fill(ratio_pt,w_);
       // Matched to electron, probably disappearing. Don't have the calorimeter reading needed to confirm but...
@@ -175,10 +173,7 @@ int main (int argc, char ** argv) {
     }
 
   }//end loop on events in a file
-  
-  cout << "About to delete trees for file " << input.GetTitle() << endl;
-  delete tree_st;
-  delete tree_mt2;
+
   input.Close();
   
   outfile_->cd();
