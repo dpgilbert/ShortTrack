@@ -36,13 +36,10 @@ indir = "../output_{0}".format(region)
 outdir = argv[2]
 if (not os.path.exists(outdir)): os.mkdir(outdir)
 
-#selection_suffixes = ["incl","HT","HTMET","HTMETDphiDiff","HTMETDphiDiffMT2"]
-#selection_suffixes = ["incl","HT","HTMET","DphiDiff","MT2","Lep","HTLep","LepNj"]
-#selection_suffixes = ["incl","LepNj","HTLep","Lep"]
-selection_suffixes = ["incl","HTLepNj"]
-histnames = ["h_el_pix","h_el_ext","h_el_tot","h_fake_pix","h_fake_ext","h_fake_tot","h_el_etaphi","h_fake_etaphi","h_el_ratio"]
+selection_suffixes = ["incl","HT","HTMET","HTMETDphiDiff","HTMETDphiDiffMT2"]
+histnames = ["h_mu_pix","h_mu_ext","h_mu_tot","h_fake_pix","h_fake_ext","h_fake_tot","h_mu_etaphi","h_fake_etaphi","h_mu_ratio"]
 samples = ["ttsl","ttdl","DY","Wjets","qcd300to500","qcd500to700","qcd700to1000","qcd1000to1500","qcd1500to2000","qcd2000toInf","zinv100to200","zinv200toInf"]
-colors = [ROOT.kBlack,ROOT.kRed,ROOT.kGreen,ROOT.kCyan,ROOT.kMagenta,ROOT.kBlue,ROOT.kOrange,ROOT.kYellow-2]
+colors = [ROOT.kBlack,ROOT.kRed,ROOT.kGreen,ROOT.kCyan,ROOT.kMagenta]
 selection_colors = dict(zip(selection_suffixes,colors))
 
 filedict = {}
@@ -145,44 +142,4 @@ for histname in histnames:
         canvas.SaveAs("{0}/{1}_{2}.png".format(outdir,sample,histname))
         canvas.SetLogy(False)
 
-canvas.SetTicks(1,2)
             
-outfile = ROOT.TFile.Open("{0}.root".format(region),"RECREATE")
-for selection in selection_suffixes:
-    h_ratios = ROOT.TH1F("h_ratios","N_{ST} > 0 Reduction Factor, by Sample",len(samples),0,len(samples))
-    h_ratios_fakes = ROOT.TH1F("h_ratios_fakes","N_{ST} > 0 Reduction Factor (Fakes Only), by Sample",len(samples),0,len(samples))
-    for i in range(len(samples)):
-        sample = samples[i]
-        num = filedict[selection][sample].Get("h_unskimmed").GetBinContent(1)
-        denomfile = filedict[selection][sample]
-        denom1 = denomfile.Get("h_fake_tot").Integral()
-        denom2 = denomfile.Get("h_el_tot").Integral() + denom1
-        bin = i+1
-        toSet = 0
-        if (denom2 > 0): 
-            toSet = num / denom2
-            dsq = denom2 * denom2
-            # Error calculation taken from ROOT: https://root.cern.ch/doc/master/TH1_8cxx_source.html#l02817
-            h_ratios.SetBinError(bin, sqrt(num * dsq + denom2 * num * num) / dsq )
-        h_ratios.SetBinContent(bin,toSet)
-        h_ratios.GetXaxis().SetBinLabel(bin, "{0} ({1})".format( sample,str(int(denom2)) ) )
-        toSet = 0
-        if (denom1 > 0): 
-            toSet = num / denom1
-            dsq = denom1 * denom1
-            h_ratios_fakes.SetBinError(bin, sqrt(num * dsq + denom1 * num * num) / dsq )
-        h_ratios_fakes.SetBinContent(bin,toSet)
-        h_ratios_fakes.GetXaxis().SetBinLabel(bin,"{0} ({1})".format( sample,str(int(denom1)) ) )
-    h_ratios.SetMinimum(0)
-    h_ratios.SetFillColor(ROOT.kBlue)
-    h_ratios.SetLineColor(ROOT.kBlue)
-    h_ratios.Draw()
-    canvas.SaveAs("{0}/factor_{1}.png".format(outdir,selection))
-    h_ratios.Write()
-    h_ratios_fakes.SetMinimum(0)
-    h_ratios_fakes.SetFillColor(ROOT.kRed)
-    h_ratios_fakes.SetLineColor(ROOT.kRed)
-    h_ratios_fakes.Draw()
-    canvas.SaveAs("{0}/factor_fakes_{1}.png".format(outdir,selection))
-    h_ratios_fakes.Write()
-outfile.Close()

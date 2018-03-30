@@ -1,13 +1,10 @@
-#ifndef SHORTTRACKTYPE_H
-#define SHORTTRACKTYPE_H
+#ifndef SHORTTRACKTYPEMU_H
+#define SHORTTRACKTYPEMU_H
 
 // C++
 #include <iostream>
 #include <cmath>
 #include <sstream>
-#include <string>
-#include <stdlib.h>
-#include <vector>
 
 // ROOT
 #include "TMath.h"
@@ -16,16 +13,13 @@
 #include "TH2.h"
 #include "TChain.h"
 
-#include "../CORE/Tools/utils.h"
-
 #include "../MT2CORE/mt2tree.h"
 #include "../MT2CORE/sttree.h"
 
-class ShortTrackType {
+class ShortTrackType_mu {
  public:
-  ShortTrackType();
-  ~ShortTrackType();
-  std::string StringSelection(int selection, int region);
+  ShortTrackType_mu();
+  ~ShortTrackType_mu();
   int loop(char* indir, char* sample, char* unskimmed_dir, int selection, int region);
 };
 
