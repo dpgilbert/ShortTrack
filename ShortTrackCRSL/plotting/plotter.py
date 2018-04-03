@@ -28,12 +28,9 @@ tl.SetMargin(0.1)
 verbose = False # Print more status messages
 #doScan = False # Not implemented
 
-if len(argv) < 3:
-    print "Usage: python plotter.py <indir_suffix (region)> <outdir>"
-    exit(1)
-region = argv[1]
+region = CRSL
 indir = "../output_{0}".format(region)
-outdir = argv[2]
+outdir = pngs_CRSL
 if (not os.path.exists(outdir)): os.mkdir(outdir)
 
 #selection_suffixes = ["incl","HT","HTMET","HTMETDphiDiff","HTMETDphiDiffMT2"]

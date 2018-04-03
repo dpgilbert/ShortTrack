@@ -1,9 +1,13 @@
-#include "ShortTrackType.h"
+#include "ShortTrackCRSL.h"
 
 using namespace std;
 
 class mt2tree;
 class sttree;
+
+const float ht_limit = 100;
+const float mt2_limit = 100;
+const float met_limit = 100;
 
 const int maskHT = 1;
 const int maskMET = 1<<1;
@@ -13,11 +17,6 @@ const int maskLep = 1<<4;
 const int maskNj = 1<<5;
 const int maskEta = 1<<6;
 const int maskNt = 1<<7;
-
-const int SR = 0;
-const int CRQCD = 1;
-const int CRSL = 2;
-const int CRDY = 3;
 
 bool doIncl = false;
 bool doNj = false;
@@ -29,70 +28,7 @@ bool doLep = false;
 bool doEta = false;
 bool doNt = false;
 
-string ShortTrackType::StringSelection(int selection, int region, bool isWjetsIncl) {
-  vector<string> selections;
-  if (doHT && ! doMET) {
-    switch (region) {
-    case SR : 
-    case CRQCD : 
-    case CRSL : selections.push_back("(ht > 250)"); break; 
-    case CRDY : selections.push_back("(zll_ht > 250)"); break;
-    }
-  }
-  if (doMET) {
-    switch (region) {
-    case SR : 
-    case CRQCD : 
-    case CRSL : selections.push_back("( (ht > 250 && met_pt > 250) || (met_pt > 30 && ht > 1000) )"); break; 
-    case CRDY : selections.push_back("( (zll_met_pt > 250) || (zll_met_pt > 30 && zll_ht > 1000) )"); break;
-    }    
-  }
-  if (doDphiDiff) {
-    switch (region) {
-    case SR : 
-    case CRSL : selections.push_back("( deltaPhiMin > 0.3 && diffMetMht / met_pt < 0.5 )"); break;
-    case CRDY : selections.push_back("( zll_deltaPhiMin > 0.3 && zll_diffMetMht / zll_met_pt < 0.5 )"); break;
-    case CRQCD : selections.push_back("( deltaPhiMin < 0.3 && diffMetMht / met_pt < 0.5 )"); break;
-    }
-  }
-  if (doMT2) {
-    switch (region) {
-    case SR :
-    case CRQCD :
-    case CRSL : selections.push_back(" (mt2 > 200) "); break;
-    case CRDY : selections.push_back(" (zll_mt2 > 200) "); break;
-    }
-  }
-  if (doLep) {
-    switch(region) {
-    case SR :
-    case CRQCD : selections.push_back("( nElectrons10 + nMuons10 + nPFLep5LowMT + nPFHad10LowMT == 0)"); break;
-    case CRSL : selections.push_back("( nLepLowMT == 1 )"); break;
-    case CRDY : selections.push_back("( nlep == 2 )"); break;
-    }
-  }
-  if (doNj) {
-    selections.push_back("( nJet30 > 1 )");
-  } else if (!doIncl) {
-    selections.push_back("( nJet30 > 0 )");
-  }
-  if (doNt) {
-    selections.push_back("( ntracks < 6 )");
-  }
-  
-
-  if (isWjetsIncl) selections.push_back("( genStat23_pt > 100 && abs(genStat23_pdgId) == 24 )");
-
-  if (selections.size() == 0) return "";
-  if (selections.size() == 1) return selections.at(0);
-  string toReturn = selections.at(0);
-  for (unsigned int i = 1; i < selections.size(); i++) {
-    toReturn += " && " + selections.at(i);    
-  }
-  return toReturn;
-}
-
-int ShortTrackType::loop (char * indir, char * sample, char * unskimmed_dir, int selection, int region) {
+int ShortTrackCRSL::loop (char * indir, char * sample, int selection) {
   doIncl = selection == 0;
   doHT = maskHT & selection;
   doMET = maskMET & selection;
@@ -116,31 +52,17 @@ int ShortTrackType::loop (char * indir, char * sample, char * unskimmed_dir, int
     if (doNt) outdir += "Nt";
   }
 
-  string output_prefix;
-  switch(region) {
-  case SR : output_prefix = "output_SR"; break;
-  case CRQCD : output_prefix = "output_CRQCD"; break;
-  case CRSL : output_prefix = "output_CRSL"; break;
-  case CRDY : output_prefix = "output_CRDY"; break;
-  }
-  string fulloutdir = output_prefix+"/"+outdir;
-  string mkdir = "mkdir -p " + fulloutdir;
+  string mkdir = "mkdir -p output_CRSL/" + outdir;
   system(mkdir.c_str());
-  TString output_name = Form("%s/%s.root",fulloutdir.c_str(),sample);
+  TString output_name = Form("output_CRSL/%s/%s.root",outdir.c_str(),sample);
 
   TChain* ch_mt2 = new TChain("mt2st");
   TChain* ch_st = new TChain("st");
 
-  TChain* ch_us = new TChain("mt2st");
-
-  TString infile_name = Form("%s/%s_incl_skim_friend.root",indir,sample);
-  cout << "Skimmed file: " << infile_name.Data() << endl;
+  TString infile_name = Form("%s/%s.root",indir,sample);
+  cout << "Input file: " << infile_name.Data() << endl;
   ch_mt2->Add( infile_name );
   ch_st->Add( infile_name );
-
-  TString unskimmed_name = Form("%s/%s.root",unskimmed_dir,sample);
-  cout << "Unskimmed file: " << unskimmed_name.Data() << endl;
-  ch_us->Add( unskimmed_name );
 
   // Get File Content
   TTree *tree_mt2 = (TTree*)ch_mt2->Clone("mt2st");
@@ -150,9 +72,6 @@ int ShortTrackType::loop (char * indir, char * sample, char * unskimmed_dir, int
   string sample_str = sample;
   bool isWjetsIncl = ! wjets_incl.compare(sample_str);
 
-  int total_events = ch_us->GetEntries((this->StringSelection(selection,region,isWjetsIncl)).c_str());
-  cout << "Total events in unskimmed file: " << total_events << endl;
-  cout << "Total events is subject to adjustment if short tracks affect region definition." << endl;
   // sttree is a subtype of mt2tree. mt2tree functions can be called on an sttree, but not the reverse.
   // This line incorporates branches from tree_mt2 into tree_st.
   tree_st->AddFriend(tree_mt2);
@@ -265,6 +184,48 @@ int ShortTrackType::loop (char * indir, char * sample, char * unskimmed_dir, int
       continue;
     }
 
+    if (isWjetsIncl) {
+      bool foundGoodW = false;
+      for (int i = 0; i < t.ngenStat23 && ! foundGoodW; i++) {
+	if (abs(t.genStat23_pdgId[i]) != 24) continue;
+	if (t.genStat23_pt[i] > 100) foundGoodW = true;      
+      }
+      if (!foundGoodW) continue;
+    }
+
+    if (!doIncl && t.nJet30 == 0) continue;
+
+    //    if (doEta && st_eta > 1.4) continue;
+
+    if (doNj && t.nJet30 < 2) continue;
+
+    if (doNt && t.ntracks > 5) continue;
+
+    // Recalculate ht manually to omit leptons
+    float ht = 0;
+    for (int ij = 0; ij < t.njet; ij++) {
+      ht += t.jet_pt[ij];
+    }
+
+    if (doMET) {
+      if ((ht < 1000 && t.met_pt < met_limit) || t.met_pt < 30 || ht < ht_limit ) continue;
+    }
+    else if (doHT && ht < ht_limit) continue;
+
+    if (doDphiDiff && (t.deltaPhiMin < 0.3 || t.diffMetMht / t.met_pt > 0.5) ) continue;
+
+    if (doMT2 && t.mt2 < mt2_limit) continue;
+
+    // In some cases, useful to store the index of a track matched to a lepton
+    int i_lowMT_trk = -1;
+    int i_lowMT_lep = -1;
+    if (doLep && t.nLepLowMT != 1) continue;
+
+    // This event passes all non-short track selections
+    h_unskimmed.Fill(0.5,w_);
+    if (t.nshorttracks == 0) continue;
+
+    // From here on, there's a short track in this event
     // Collect some short track info
     int st_idx = -1;
     double st_phi = -999;
@@ -297,116 +258,39 @@ int ShortTrackType::loop (char * indir, char * sample, char * unskimmed_dir, int
       t.Show(event);
       return 3;
     }
-
-    if (isWjetsIncl) {
-      bool foundGoodW = false;
-      for (int i = 0; i < t.ngenStat23 && ! foundGoodW; i++) {
-	if (abs(t.genStat23_pdgId[i]) != 24) continue;
-	if (t.genStat23_pt[i] > 100) foundGoodW = true;      
+    
+    // Now we need to exclude the event if its short track is the LowMT lepton's track
+    float lmt_phi = -999;
+    float lmt_eta = -999;
+    float met_pt = t.met_pt;
+    float met_phi = t.met_phi;      
+    for (int ilep = 0; ilep < t.nlep; ilep++) {
+      float lep_pt = t.lep_pt[ilep];
+      float lep_phi = t.lep_phi[ilep];
+      float lep_eta = t.lep_eta[ilep];
+      float mt = MT(lep_pt,lep_phi,met_pt,met_phi);
+      if (mt < 100) {
+	// This guy is the LowMT lepton.
+	lmt_phi = lep_phi;
+	lmt_eta = lep_eta;
+	i_lowMT_lep = ilep;
+	break;
       }
-      if (!foundGoodW) continue;
     }
-
-    if (!doIncl && t.nJet30 == 0) continue;
-
-    if (doEta && st_eta > 1.4) continue;
-
-    if (doNj && t.nJet30 < 2) continue;
-
-    if (doNt && t.ntracks > 5) continue;
-
-    if (doMET) {
-      if (region != CRDY && ((t.ht < 1000 && t.met_pt < 250) || t.met_pt < 30 || t.ht < 250) ) continue;
-      // CRDY
-      if (region == CRDY && ((t.zll_ht < 1000 && t.zll_met_pt < 250) || t.zll_met_pt < 30 || t.zll_ht < 250) ) continue;
+    // If the closest track is the short track, don't count this event as a short track event
+    float smallestDR = 10;       
+    for (int itrk = 0; itrk < t.ntracks; itrk++) {
+      float trk_eta = t.track_eta[itrk];
+      float trk_phi = t.track_phi[itrk];
+      float thisDR = DeltaR(lmt_eta,lmt_phi,trk_eta,trk_phi);
+      if (thisDR < smallestDR) {
+	smallestDR = thisDR;
+	i_lowMT_trk = itrk;	      
+      }
     }
-    else if (region != CRDY && doHT && t.ht < 250) continue;
-    else if (region == CRDY && doHT && t.zll_ht < 250) continue;
-
-    // SR and CRSL
-    if (region != CRQCD && region != CRDY && doDphiDiff && (t.deltaPhiMin < 0.3 || t.diffMetMht / t.met_pt > 0.5) ) continue;
-    // CRQCD
-    if (region == CRQCD && doDphiDiff && (t.deltaPhiMin > 0.3 || t.diffMetMht / t.met_pt > 0.5) ) continue;
-    // CRDY
-    if (region == CRDY && doDphiDiff && (t.zll_deltaPhiMin < 0.3 || t.zll_diffMetMht / t.zll_met_pt > 0.5) ) continue;
-
-    // Not CRDY
-    if (region != CRDY && doMT2 && t.mt2 < 200) continue;
-    // CRDY
-    if (region == CRDY && doMT2 && t.zll_mt2 < 200) continue;
-
-    // In some cases, useful to store the index of a track matched to a lepton
-    int i_lowMT_trk = -1;
-    //int i_best_matched_trk1 = -1; 
-    //int i_best_matched_trk2 = -1; 
-    int i_lowMT_lep = -1;
-    // SR
-    if ( (region == SR || region == CRQCD) && doLep && (t.nElectrons10 + t.nMuons10 + t.nPFLep5LowMT + t.nPFHad10LowMT > 0)) continue;
-    // CRSL
-    if (region == CRSL && doLep) {
-      if (t.nLepLowMT != 1) continue;
-      // Now we need to exclude the event if its short track is the LowMT lepton's track
-      float lmt_phi = -999;
-      float lmt_eta = -999;
-      float met_pt = t.met_pt;
-      float met_phi = t.met_phi;      
-      for (int ilep = 0; ilep < t.nlep; ilep++) {
-	float lep_pt = t.lep_pt[ilep];
-	float lep_phi = t.lep_phi[ilep];
-	float lep_eta = t.lep_eta[ilep];
-	float mt = MT(lep_pt,lep_phi,met_pt,met_phi);
-	if (mt < 100) {
-	  // This guy is the LowMT lepton.
-	  lmt_phi = lep_phi;
-	  lmt_eta = lep_eta;
-	  i_lowMT_lep = ilep;
-	  break;
-	}
-      }
-      // If the closest track is the short track, don't count this event as a short track event
-      float smallestDR = 10;       
-      for (int itrk = 0; itrk < t.ntracks; itrk++) {
-	float trk_eta = t.track_eta[itrk];
-	float trk_phi = t.track_phi[itrk];
-	float thisDR = DeltaR(lmt_eta,lmt_phi,trk_eta,trk_phi);
-	if (thisDR < smallestDR) {
-	  smallestDR = thisDR;
-	  i_lowMT_trk = itrk;	      
-	}
-      }
-      if (i_lowMT_trk == st_idx) {
-	cout << "Disqualifed short track: Low MT lepton." << endl;
-	continue; // Best match is the short track, disqualified!
-      }
-
-    }
-    // CRDY
-    if (region == CRDY && doLep) {
-      if (t.nlep != 2) continue;
-      // If short track is associated to lepton, it doesn't count
-      bool matched_st = false;
-      for (int ilep = 0; ilep < t.nlep && ! matched_st; ilep++) {
-	float lep_phi = t.lep_phi[ilep];
-	float lep_eta = t.lep_eta[ilep];
-	float smallestDR = 10; 
-	int i_best_matched_trk = -1;
-	for (int itrk = 0; itrk < t.ntracks; itrk++) {
-	  float trk_eta = t.track_eta[itrk];
-	  float trk_phi = t.track_phi[itrk];
-	  float thisDR = DeltaR(lep_eta,lep_phi,trk_eta,trk_phi);
-	  if (thisDR < smallestDR) {
-	    smallestDR = thisDR;
-	    i_best_matched_trk = itrk;	      
-	  }
-	}
-	matched_st = i_best_matched_trk == st_idx; // Best match is short track, disqualified!
-	//	if (ilep == 0) i_best_matched_trk1 = i_best_matched_trk;
-	//else i_best_matched_trk2 = i_best_matched_trk;
-      }
-      if (matched_st) {
-	cout << "Disqualified short track: lepton" << endl;
-	continue;
-      }
+    if (i_lowMT_trk == st_idx) {
+      cout << "Disqualifed short track: Low MT lepton." << endl;
+      continue; // Best match is the short track, disqualified!
     }
     
     // Search for disappearing electron close to track.
@@ -485,7 +369,7 @@ int ShortTrackType::loop (char * indir, char * sample, char * unskimmed_dir, int
       // So, there is a chance, but not guaranteed, that the lowMT lepton's track is contributing to our 10 GeV track count.
       // Subtract it if so.
       int ntracks = t.ntracks;
-      if (region == CRSL && doLep) {
+      if (doLep) {
 	float trk_eta = t.track_eta[i_lowMT_trk];
 	float trk_phi = t.track_phi[i_lowMT_trk];
 	float lep_eta = t.lep_phi[i_lowMT_lep];
@@ -530,8 +414,6 @@ int ShortTrackType::loop (char * indir, char * sample, char * unskimmed_dir, int
     }
 
   }//end loop on events in a file
-  
-  h_unskimmed.SetBinContent(1,total_events);
 
   cout << "About to write" << endl;
 
@@ -605,20 +487,18 @@ int ShortTrackType::loop (char * indir, char * sample, char * unskimmed_dir, int
 
 int main (int argc, char ** argv) {
 
-  if (argc < 6) {
-    cout << "Usage: ./ShortTrackType.exe <indir> <sample> <unskimmed_dir> <selection> <region>" << endl;
+  if (argc < 4) {
+    cout << "Usage: ./ShortTrackCRSL.exe <indir> <sample> <selection>" << endl;
     return 1;
   }
 
-  const int selection = strtol(argv[4],NULL,2);
-  const int region = atoi(argv[5]);
+  const int selection = strtol(argv[3],NULL,2);
   cout << "selection: " << selection << endl;
-  cout << "region: " << region << endl;
-  ShortTrackType * stt = new ShortTrackType();
-  stt->loop(argv[1],argv[2],argv[3],selection,region);
+  ShortTrackCRSL * stt = new ShortTrackCRSL();
+  stt->loop(argv[1],argv[2],selection);
   return 0;
 }
 
-ShortTrackType::ShortTrackType() {}
+ShortTrackCRSL::ShortTrackCRSL() {}
 
-ShortTrackType::~ShortTrackType() {};
+ShortTrackCRSL::~ShortTrackCRSL() {};

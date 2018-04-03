@@ -1,5 +1,5 @@
-#ifndef SHORTTRACKTYPE_H
-#define SHORTTRACKTYPE_H
+#ifndef SHORTTRACKCRSL_H
+#define SHORTTRACKCRSL_H
 
 // C++
 #include <iostream>
@@ -21,12 +21,11 @@
 #include "../MT2CORE/mt2tree.h"
 #include "../MT2CORE/sttree.h"
 
-class ShortTrackType {
+class ShortTrackCRSL {
  public:
-  ShortTrackType();
-  ~ShortTrackType();
-  std::string StringSelection(int selection, int region, bool isWjetsIncl);
-  int loop(char* indir, char* sample, char* unskimmed_dir, int selection, int region);
+  ShortTrackCRSL();
+  ~ShortTrackCRSL();
+  int loop(char* indir, char* sample, int selection);
 };
 
 #endif
