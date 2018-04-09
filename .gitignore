@@ -12,7 +12,6 @@
 *.root
 *.txt
 nohup*
-run*
 process*
 CMSSW_8*/*
 scripts/cards*
